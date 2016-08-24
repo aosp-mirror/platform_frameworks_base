@@ -8,7 +8,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := \
 	$(call all-java-files-under, src)
 
-LOCAL_STATIC_JAVA_LIBRARIES := core-tests android-common frameworks-core-util-lib
+LOCAL_STATIC_JAVA_LIBRARIES := android-common frameworks-core-util-lib
 LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_PACKAGE_NAME := FrameworksCoreSystemPropertiesTests
 LOCAL_JAVA_LANGUAGE_VERSION := 1.8

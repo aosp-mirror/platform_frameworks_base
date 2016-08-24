@@ -284,6 +284,13 @@ public class WebChromeClient {
      * currently set for that origin. The host application should invoke the
      * specified callback with the desired permission state. See
      * {@link GeolocationPermissions} for details.
+     *
+     * <p>Note that for applications targeting Android N and later SDKs
+     * (API level > {@link android.os.Build.VERSION_CODES#M})
+     * this method is only called for requests originating from secure
+     * origins such as https. On non-secure origins geolocation requests
+     * are automatically denied.</p>
+     *
      * @param origin The origin of the web content attempting to use the
      *               Geolocation API.
      * @param callback The callback to use to set the permission state for the

@@ -139,6 +139,7 @@ public abstract class ChooserTargetService extends Service {
         public void getChooserTargets(ComponentName targetComponentName,
                 IntentFilter matchedFilter, IChooserTargetResult result) throws RemoteException {
             List<ChooserTarget> targets = null;
+            final long id = clearCallingIdentity();
             try {
                 if (DEBUG) {
                     Log.d(TAG, "getChooserTargets calling onGetChooserTargets; "
@@ -146,6 +147,7 @@ public abstract class ChooserTargetService extends Service {
                 }
                 targets = onGetChooserTargets(targetComponentName, matchedFilter);
             } finally {
+                restoreCallingIdentity(id);
                 result.sendResult(targets);
                 if (DEBUG) Log.d(TAG, "Sent results");
             }

@@ -18,10 +18,11 @@ package android.test;
 
 /**
  * More complex interface performance for test cases.
- * 
+ *
  * If you want your test to be used as a performance test, you must
  * implement this interface.
  */
+@Deprecated
 public interface PerformanceTestCase
 {
     /**
@@ -37,27 +38,27 @@ public interface PerformanceTestCase
     }
 
     /**
-     * Set up to begin performance tests.  The 'intermediates' is a
+     * Set up to begin performance tests. The 'intermediates' is a
      * communication channel to send back intermediate performance numbers --
      * if you use it, you will probably want to ensure your test is only
      * executed once by returning 1.  Otherwise, return 0 to allow the test
      * harness to decide the number of iterations.
-     * 
+     *
      * <p>If you return a non-zero iteration count, you should call
      * {@link Intermediates#startTiming intermediates.startTiming} and
      * {@link Intermediates#finishTiming intermediates.endTiming} to report the
      * duration of the test whose performance should actually be measured.
-     * 
+     *
      * @param intermediates Callback for sending intermediate results.
-     * 
+     *
      * @return int Maximum number of iterations to run, or 0 to let the caller
-     *         decide.
+     * decide.
      */
     int startPerformance(Intermediates intermediates);
-    
+
     /**
      * This method is used to determine what modes this test case can run in.
-     * 
+     *
      * @return true if this test case can only be run in performance mode.
      */
     boolean isPerformanceOnly();

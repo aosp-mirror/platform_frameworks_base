@@ -36,7 +36,7 @@ import javax.crypto.Mac;
  * <a href="{@docRoot}training/articles/keystore.html">Android Keystore system</a>. This class
  * specifies authorized uses of the imported key, such as whether user authentication is required
  * for using the key, what operations the key is authorized for (e.g., decryption, but not signing)
- * and with what parameters (e.g., only with a particular padding scheme or digest), the key's and
+ * with what parameters (e.g., only with a particular padding scheme or digest), and the key's
  * validity start and end dates. Key use authorizations expressed in this class apply only to secret
  * keys and private keys -- public keys can be used for any supported operations.
  *
@@ -60,6 +60,16 @@ import javax.crypto.Mac;
  * <p>NOTE: The key material of keys stored in the Android Keystore is not accessible.
  *
  * <p>Instances of this class are immutable.
+ *
+ * <p><h3>Known issues</h3>
+ * A known bug in Android 6.0 (API Level 23) causes user authentication-related authorizations to be
+ * enforced even for public keys. To work around this issue extract the public key material to use
+ * outside of Android Keystore. For example:
+ * <pre> {@code
+ * PublicKey unrestrictedPublicKey =
+ *         KeyFactory.getInstance(publicKey.getAlgorithm()).generatePublic(
+ *                 new X509EncodedKeySpec(publicKey.getEncoded()));
+ * }</pre>
  *
  * <p><h3>Example: AES key for encryption/decryption in GCM mode</h3>
  * This example illustrates how to import an AES key into the Android KeyStore under alias
@@ -111,9 +121,9 @@ import javax.crypto.Mac;
  * <p><h3>Example: EC key pair for signing/verification using ECDSA</h3>
  * This example illustrates how to import an EC key pair into the Android KeyStore under alias
  * {@code key2} with the private key authorized to be used only for signing with SHA-256 or SHA-512
- * digests. The use of public key is unrestricted, thus permitting signature verification using any
- * digests. Both the private and the public key must export their key material via
- * {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509} format respectively.
+ * digests. The use of the public key is unrestricted. Both the private and the public key must
+ * export their key material via {@link Key#getEncoded()} in {@code PKCS#8} and {@code X.509} format
+ * respectively.
  * <pre> {@code
  * PrivateKey privateKey = ...;   // EC private key
  * Certificate[] certChain = ...; // Certificate chain with the first certificate
@@ -141,8 +151,7 @@ import javax.crypto.Mac;
  * This example illustrates how to import an RSA key pair into the Android KeyStore under alias
  * {@code key2} with the private key authorized to be used only for signing using the PKCS#1
  * signature padding scheme with SHA-256 digest and only if the user has been authenticated within
- * the last ten minutes. The use of public key is unrestricted, thus permitting signature
- * verification using any padding schemes and digests, and without user authentication. Both the
+ * the last ten minutes. The use of the public key is unrestricted (see Known Issues). Both the
  * private and the public key must export their key material via {@link Key#getEncoded()} in
  * {@code PKCS#8} and {@code X.509} format respectively.
  * <pre> {@code
@@ -214,6 +223,8 @@ public final class KeyProtection implements ProtectionParameter {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mInvalidatedByBiometricEnrollment;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -226,7 +237,9 @@ public final class KeyProtection implements ProtectionParameter {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
-            int userAuthenticationValidityDurationSeconds) {
+            int userAuthenticationValidityDurationSeconds,
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -240,6 +253,8 @@ public final class KeyProtection implements ProtectionParameter {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
     /**
@@ -392,6 +407,35 @@ public final class KeyProtection implements ProtectionParameter {
     }
 
     /**
+     * Returns {@code true} if the key will be de-authorized when the device is removed from the
+     * user's body.  This option has no effect on keys that don't have an authentication validity
+     * duration, and has no effect if the device lacks an on-body sensor.
+     *
+     * <p>Authorization applies only to secret key and private key operations. Public key operations
+     * are not restricted.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setUserAuthenticationValidWhileOnBody(boolean)
+     */
+    public boolean isUserAuthenticationValidWhileOnBody() {
+        return mUserAuthenticationValidWhileOnBody;
+    }
+
+    /**
+     * Returns {@code true} if the key is irreversibly invalidated when a new fingerprint is
+     * enrolled or all enrolled fingerprints are removed. This has effect only for keys that
+     * require fingerprint user authentication for every use.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setInvalidatedByBiometricEnrollment(boolean)
+     */
+    public boolean isInvalidatedByBiometricEnrollment() {
+        return mInvalidatedByBiometricEnrollment;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -407,6 +451,8 @@ public final class KeyProtection implements ProtectionParameter {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
+        private boolean mUserAuthenticationValidWhileOnBody;
+        private boolean mInvalidatedByBiometricEnrollment = true;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -617,9 +663,10 @@ public final class KeyProtection implements ProtectionParameter {
          * or when the secure lock screen is forcibly reset (e.g., by a Device Administrator).
          * Additionally, if the key requires that user authentication takes place for every use of
          * the key, it is also irreversibly invalidated once a new fingerprint is enrolled or once\
-         * no more fingerprints are enrolled. Attempts to initialize cryptographic operations using
-         * such keys will throw {@link KeyPermanentlyInvalidatedException}.</li>
-         * </ul>
+         * no more fingerprints are enrolled, unless {@link
+         * #setInvalidatedByBiometricEnrollment(boolean)} is used to allow validity after
+         * enrollment. Attempts to initialize cryptographic operations using such keys will throw
+         * {@link KeyPermanentlyInvalidatedException}.</li> </ul>
          *
          * <p>This authorization applies only to secret key and private key operations. Public key
          * operations are not restricted.
@@ -680,6 +727,53 @@ public final class KeyProtection implements ProtectionParameter {
         }
 
         /**
+         * Sets whether the key will remain authorized only until the device is removed from the
+         * user's body up to the limit of the authentication validity period (see
+         * {@link #setUserAuthenticationValidityDurationSeconds} and
+         * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
+         * user's body, the key will be considered unauthorized and the user will need to
+         * re-authenticate to use it. For keys without an authentication validity period this
+         * parameter has no effect.
+         *
+         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
+         * effect; the device will always be considered to be "on-body" and the key will therefore
+         * remain authorized until the validity period ends.
+         *
+         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
+         * will be invalidated when the device is removed from the user's body or when the
+         * authentication validity expires, whichever occurs first.
+         */
+        @NonNull
+        public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
+            mUserAuthenticationValidWhileOnBody = remainsValid;
+            return this;
+        }
+
+        /**
+         * Sets whether this key should be invalidated on fingerprint enrollment.  This
+         * applies only to keys which require user authentication (see {@link
+         * #setUserAuthenticationRequired(boolean)}) and if no positive validity duration has been
+         * set (see {@link #setUserAuthenticationValidityDurationSeconds(int)}, meaning the key is
+         * valid for fingerprint authentication only.
+         *
+         * <p>By default, {@code invalidateKey} is {@code true}, so keys that are valid for
+         * fingerprint authentication only are <em>irreversibly invalidated</em> when a new
+         * fingerprint is enrolled, or when all existing fingerprints are deleted.  That may be
+         * changed by calling this method with {@code invalidateKey} set to {@code false}.
+         *
+         * <p>Invalidating keys on enrollment of a new finger or unenrollment of all fingers
+         * improves security by ensuring that an unauthorized person who obtains the password can't
+         * gain the use of fingerprint-authenticated keys by enrolling their own finger.  However,
+         * invalidating keys makes key-dependent operations impossible, requiring some fallback
+         * procedure to authenticate the user and set up a new key.
+         */
+        @NonNull
+        public Builder setInvalidatedByBiometricEnrollment(boolean invalidateKey) {
+            mInvalidatedByBiometricEnrollment = invalidateKey;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -697,7 +791,9 @@ public final class KeyProtection implements ProtectionParameter {
                     mBlockModes,
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
-                    mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticationValidityDurationSeconds,
+                    mUserAuthenticationValidWhileOnBody,
+                    mInvalidatedByBiometricEnrollment);
         }
     }
 }

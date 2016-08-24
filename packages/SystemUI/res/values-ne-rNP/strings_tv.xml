@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="pip_close" msgid="3480680679023423574">"PIP लाई बन्द गर्नुहोस्"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"पूर्ण स्क्रिन"</string>
+    <string name="pip_play" msgid="674145557658227044">"प्ले गर्नुहोस्"</string>
+    <string name="pip_pause" msgid="8412075640017218862">"रोक्नुहोस्"</string>
+    <string name="pip_hold_home" msgid="340086535668778109">"PIP लाई नियन्त्रण गर्न "<b>"गृह"</b>" कुञ्जीलाई थिचिरहनुहोस्"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"तस्बिरमा तस्बिर"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"तपाईँले अर्को भिडियोलाई प्ले नगरेसम्म यसले तपाईँको भिडियोलाई दृश्यमा राख्दछ। यसलाई नियन्त्रण गर्नका लागि "<b>"HOME"</b>" लाई थिचिरहनुहोस्।"</string>
+    <string name="pip_onboarding_button" msgid="3957426748484904611">"बुझेँ"</string>
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"खारेज गर्नुहोस्"</string>
+  <string-array name="recents_tv_blacklist_array">
+  </string-array>
+</resources>

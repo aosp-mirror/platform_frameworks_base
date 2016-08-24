@@ -26,5 +26,15 @@ public interface InputMethodManagerInternal {
      * Called by the power manager to tell the input method manager whether it
      * should start watching for wake events.
      */
-    public void setInteractive(boolean interactive);
+    void setInteractive(boolean interactive);
+
+    /**
+     * Called by the window manager to let the input method manager rotate the input method.
+     */
+    void switchInputMethod(boolean forwardDirection);
+
+    /**
+     * Hides the current input method, if visible.
+     */
+    void hideCurrentInputMethod();
 }

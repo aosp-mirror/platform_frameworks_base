@@ -24,9 +24,14 @@ public class GLES31 extends GLES30 {
 
     public static final int GL_VERTEX_SHADER_BIT                            = 0x00000001;
     public static final int GL_FRAGMENT_SHADER_BIT                          = 0x00000002;
+    public static final int GL_COMPUTE_SHADER_BIT                           = 0x00000020;
+    public static final int GL_ALL_SHADER_BITS                              = -1; // 0xFFFFFFFF
+
+    public static final int GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT              = 0x00000001;
+    public static final int GL_ELEMENT_ARRAY_BARRIER_BIT                    = 0x00000002;
     public static final int GL_UNIFORM_BARRIER_BIT                          = 0x00000004;
     public static final int GL_TEXTURE_FETCH_BARRIER_BIT                    = 0x00000008;
-    public static final int GL_COMPUTE_SHADER_BIT                           = 0x00000020;
+    public static final int GL_SHADER_IMAGE_ACCESS_BARRIER_BIT              = 0x00000020;
     public static final int GL_COMMAND_BARRIER_BIT                          = 0x00000040;
     public static final int GL_PIXEL_BUFFER_BARRIER_BIT                     = 0x00000080;
     public static final int GL_TEXTURE_UPDATE_BARRIER_BIT                   = 0x00000100;
@@ -35,7 +40,8 @@ public class GLES31 extends GLES30 {
     public static final int GL_TRANSFORM_FEEDBACK_BARRIER_BIT               = 0x00000800;
     public static final int GL_ATOMIC_COUNTER_BARRIER_BIT                   = 0x00001000;
     public static final int GL_SHADER_STORAGE_BARRIER_BIT                   = 0x00002000;
-    public static final int GL_ALL_SHADER_BITS                              = -1; // 0xFFFFFFFF
+    public static final int GL_ALL_BARRIER_BITS                             = -1; // 0xFFFFFFFF
+
 
     public static final int GL_TEXTURE_WIDTH                                = 0x1000;
     public static final int GL_TEXTURE_HEIGHT                               = 0x1001;
@@ -198,7 +204,8 @@ public class GLES31 extends GLES30 {
         _nativeClassInit();
     }
 
-    private GLES31() {}
+    /** @hide */
+    GLES31() {}
     // C function void glDispatchCompute ( GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z )
 
     public static native void glDispatchCompute(

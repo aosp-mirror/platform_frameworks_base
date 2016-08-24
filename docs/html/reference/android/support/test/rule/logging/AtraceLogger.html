@@ -1,0 +1,892 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+  
+    <meta name="top_category" value="develop" />
+    
+    <meta name="subcategory" value="reference" />
+
+    
+      <meta name="book_path" value="/reference/android/support/test/_book.yaml" />
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<title>AtraceLogger</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+  
+  
+  
+
+</div>
+
+
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">AtraceLogger</h1>
+<p>
+<code class="api-signature">
+  public
+  
+  
+  
+  class
+  AtraceLogger
+</code>
+<br>
+
+
+<code class="api-signature">
+  
+    extends Object
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+    
+    <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.test.rule.logging.AtraceLogger
+    </td>
+  </tr>
+  
+
+</table>
+  
+
+    
+
+<br><hr>
+
+
+  <p>Class contains helper methods to dump atrace info asynchronously while running the test case
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/AtraceLogger.html#atraceStart(java.util.Set<java.lang.String>, int, int, java.io.File, java.lang.String)">atraceStart</a>(Set&lt;String&gt; traceCategoriesSet, int atraceBufferSize, int dumpIntervalSecs, File destDirectory, String traceFileName)
+      </code>
+      
+        <p>Method to start atrace and dump the data at regular interval.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/AtraceLogger.html#atraceStop()">atraceStop</a>()
+      </code>
+      
+        <p>Method to stop the atrace and write the atrace data cached in byte array list to file.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        <a href="/reference/android/support/test/rule/logging/AtraceLogger.html">AtraceLogger</a></code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/AtraceLogger.html#getAtraceLoggerInstance(android.app.Instrumentation)">getAtraceLoggerInstance</a>(Instrumentation instrumentation)
+      </code>
+      
+        <p>To make sure only one instance of atrace logger is created.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="methods inhtable">
+<tr><th><h3>Inherited methods</h3></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    java.lang.Object
+  
+</code>
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Object</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      clone()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      equals(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      finalize()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Class&lt;?&gt;</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getClass()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      hashCode()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notify()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notifyAll()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      toString()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0, int arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="atraceStart(java.util.Set<java.lang.String>, int, int, java.io.File, java.lang.String)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">atraceStart</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void atraceStart (Set&lt;String&gt; traceCategoriesSet, 
+                int atraceBufferSize, 
+                int dumpIntervalSecs, 
+                File destDirectory, 
+                String traceFileName)</pre>
+    
+    
+
+    
+  <p>Method to start atrace and dump the data at regular interval.
+ Note : Trace info will not be captured during the dumping if there are multiple
+ dumps between the atraceStart and atraceStop</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>traceCategoriesSet</code></td>
+        <td width="100%">
+          <code>Set</code>:
+          Set of atrace categories (i.e atrace --list_categories)</td>
+      </tr>
+      <tr>
+        <td><code>atraceBufferSize</code></td>
+        <td width="100%">
+          <code>int</code>:
+          Size of the circular buffer in kb</td>
+      </tr>
+      <tr>
+        <td><code>dumpIntervalSecs</code></td>
+        <td width="100%">
+          <code>int</code>:
+          Periodic interval to dump data from circular buffer</td>
+      </tr>
+      <tr>
+        <td><code>destDirectory</code></td>
+        <td width="100%">
+          <code>File</code>:
+          Directory under which atrace logs are stored</td>
+      </tr>
+      <tr>
+        <td><code>traceFileName</code></td>
+        <td width="100%">
+          <code>String</code>:
+          is optional parameter.Atrace files are dumped under destDirectory.
+        traceFileName will be indexed based on number of dumps between atraceStart and
+        atraceStop under destDirectory.
+        If traceFileName is null or empty "atrace" name will be used for indexing the files
+        and stored under destDirectory</td>
+      </tr>
+    </table>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>IOException</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="atraceStop()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">atraceStop</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void atraceStop ()</pre>
+    
+    
+
+    
+  <p>Method to stop the atrace and write the atrace data cached in byte array list to file.</p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code></code></td>
+          <td width="100%">IOException</td>
+        </tr>
+        <tr>
+          <td><code>InterruptedException</code></td>
+          <td width="100%"></td>
+        </tr>
+        <tr>
+          <td><code>IOException</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="getAtraceLoggerInstance(android.app.Instrumentation)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getAtraceLoggerInstance</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+<a href="/reference/android/support/test/rule/logging/AtraceLogger.html">AtraceLogger</a> getAtraceLoggerInstance (Instrumentation instrumentation)</pre>
+    
+    
+
+    
+  <p>To make sure only one instance of atrace logger is created.
+ Note : Supported only for minsdk version 23 and above because of UiAutomation
+ executeShellCommand limitation.</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>instrumentation</code></td>
+        <td width="100%">
+          <code>Instrumentation</code>:
+          Used to execute atrace shell commands</td>
+      </tr>
+    </table>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code><a href="/reference/android/support/test/rule/logging/AtraceLogger.html">AtraceLogger</a></code></td>
+        <td width="100%">instance of the AtraceLogger
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+  
+  <ul data-reference-resources>
+    
+    
+    
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="selected api apilevel-"><a href="/reference/android/support/test/rule/logging/AtraceLogger.html">AtraceLogger</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/EnableTestTracingRule.html">EnableTestTracingRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogBatteryInformationRule.html">LogBatteryInformationRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogDeviceGetPropInfoRule.html">LogDeviceGetPropInfoRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html">LoggingBaseRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogGraphicsStatsRule.html">LogGraphicsStatsRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogLogcatRule.html">LogLogcatRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogNetStatsRule.html">LogNetStatsRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/RuleLoggingUtils.html">RuleLoggingUtils</a></li>
+      </ul>
+    </li>
+    
+    
+    
+  </ul>
+  
+</div>
+
+
+
+</body>
+</html>

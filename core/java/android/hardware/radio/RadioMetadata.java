@@ -95,11 +95,17 @@ public final class RadioMetadata implements Parcelable {
      */
     public static final String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
 
+    /**
+     * The clock.
+     */
+    public static final String METADATA_KEY_CLOCK = "android.hardware.radio.metadata.CLOCK";
+
 
     private static final int METADATA_TYPE_INVALID = -1;
     private static final int METADATA_TYPE_INT = 0;
     private static final int METADATA_TYPE_TEXT = 1;
     private static final int METADATA_TYPE_BITMAP = 2;
+    private static final int METADATA_TYPE_CLOCK = 3;
 
     private static final ArrayMap<String, Integer> METADATA_KEYS_TYPE;
 
@@ -116,6 +122,7 @@ public final class RadioMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_GENRE, METADATA_TYPE_TEXT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_ICON, METADATA_TYPE_BITMAP);
         METADATA_KEYS_TYPE.put(METADATA_KEY_ART, METADATA_TYPE_BITMAP);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_CLOCK, METADATA_TYPE_CLOCK);
     }
 
     // keep in sync with: system/media/radio/include/system/radio_metadata.h
@@ -131,6 +138,7 @@ public final class RadioMetadata implements Parcelable {
     private static final int NATIVE_KEY_GENRE       = 8;
     private static final int NATIVE_KEY_ICON        = 9;
     private static final int NATIVE_KEY_ART         = 10;
+    private static final int NATIVE_KEY_CLOCK       = 11;
 
     private static final SparseArray<String> NATIVE_KEY_MAPPING;
 
@@ -147,6 +155,59 @@ public final class RadioMetadata implements Parcelable {
         NATIVE_KEY_MAPPING.put(NATIVE_KEY_GENRE, METADATA_KEY_GENRE);
         NATIVE_KEY_MAPPING.put(NATIVE_KEY_ICON, METADATA_KEY_ICON);
         NATIVE_KEY_MAPPING.put(NATIVE_KEY_ART, METADATA_KEY_ART);
+        NATIVE_KEY_MAPPING.put(NATIVE_KEY_CLOCK, METADATA_KEY_CLOCK);
+    }
+
+    /**
+     * Provides a Clock that can be used to describe time as provided by the Radio.
+     *
+     * The clock is defined by the seconds since epoch at the UTC + 0 timezone
+     * and timezone offset from UTC + 0 represented in number of minutes.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class Clock implements Parcelable {
+        private final long mUtcEpochSeconds;
+        private final int mTimezoneOffsetMinutes;
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeLong(mUtcEpochSeconds);
+            out.writeInt(mTimezoneOffsetMinutes);
+        }
+
+        public static final Parcelable.Creator<Clock> CREATOR
+                = new Parcelable.Creator<Clock>() {
+            public Clock createFromParcel(Parcel in) {
+                return new Clock(in);
+            }
+
+            public Clock[] newArray(int size) {
+                return new Clock[size];
+            }
+        };
+
+        public Clock(long utcEpochSeconds, int timezoneOffsetMinutes) {
+            mUtcEpochSeconds = utcEpochSeconds;
+            mTimezoneOffsetMinutes = timezoneOffsetMinutes;
+        }
+
+        private Clock(Parcel in) {
+            mUtcEpochSeconds = in.readLong();
+            mTimezoneOffsetMinutes = in.readInt();
+        }
+
+        public long getUtcEpochSeconds() {
+            return mUtcEpochSeconds;
+        }
+
+        public int getTimezoneOffsetMinutes() {
+            return mTimezoneOffsetMinutes;
+        }
     }
 
     private final Bundle mBundle;
@@ -210,6 +271,17 @@ public final class RadioMetadata implements Parcelable {
             Log.w(TAG, "Failed to retrieve a key as Bitmap.", e);
         }
         return bmp;
+    }
+
+    public Clock getClock(String key) {
+        Clock clock = null;
+        try {
+            clock = mBundle.getParcelable(key);
+        } catch (Exception e) {
+            // ignore, value was not a clock.
+            Log.w(TAG, "Failed to retrieve a key as Clock.", e);
+        }
+        return clock;
     }
 
     @Override
@@ -389,6 +461,27 @@ public final class RadioMetadata implements Parcelable {
         }
 
         /**
+         * Put a {@link RadioMetadata.Clock} into the meta data. Custom keys may be used, but if the
+         * METADATA_KEYs defined in this class are used they may only be one of the following:
+         * <ul>
+         * <li>{@link #MEADATA_KEY_CLOCK}</li>
+         * </ul>
+         *
+         * @param utcSecondsSinceEpoch Number of seconds since epoch for UTC + 0 timezone.
+         * @param timezoneOffsetInMinutes Offset of timezone from UTC + 0 in minutes.
+         * @return the same Builder instance.
+         */
+        public Builder putClock(String key, long utcSecondsSinceEpoch, int timezoneOffsetMinutes) {
+            if (!METADATA_KEYS_TYPE.containsKey(key) ||
+                    METADATA_KEYS_TYPE.get(key) != METADATA_TYPE_CLOCK) {
+                throw new IllegalArgumentException("The " + key
+                    + " key cannot be used to put a RadioMetadata.Clock.");
+            }
+            mBundle.putParcelable(key, new Clock(utcSecondsSinceEpoch, timezoneOffsetMinutes));
+            return this;
+        }
+
+        /**
          * Creates a {@link RadioMetadata} instance with the specified fields.
          *
          * @return a new {@link RadioMetadata} object
@@ -445,5 +538,17 @@ public final class RadioMetadata implements Parcelable {
             mBundle.putParcelable(key, bmp);
             return 0;
         }
+    }
+
+    int putClockFromNative(int nativeKey, long utcEpochSeconds, int timezoneOffsetInMinutes) {
+        Log.d(TAG, "putClockFromNative()");
+        String key = getKeyFromNativeKey(nativeKey);
+        if (!METADATA_KEYS_TYPE.containsKey(key) ||
+                METADATA_KEYS_TYPE.get(key) != METADATA_TYPE_CLOCK) {
+              return -1;
+        }
+        mBundle.putParcelable(key, new RadioMetadata.Clock(
+            utcEpochSeconds, timezoneOffsetInMinutes));
+        return 0;
     }
 }

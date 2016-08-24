@@ -1,0 +1,241 @@
+page.title=Support Library Setup
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#download">Downloading the Support Library</a></li>
+      <li><a href="#choosing">Choosing Support Libraries</a></li>
+      <li><a href="#add-library">Adding Support Libraries</a>
+        <ol>
+          <li><a href="#libs-without-res">Adding libraries without resources</a></li>
+          <li><a href="#libs-with-res">Adding libraries with resources</a></li>
+        </ol>
+      </li>
+      <li><a href="#using-apis">Using Support Library APIs</a>
+        <ol>
+          <li><a href="#manifest">Manifest Declaration Changes</a></li>
+        </ol>
+      </li>
+      <li><a href="#samples">Code Samples</a></li>
+    </ol>
+
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}tools/support-library/index.html#revisions">
+        Support Library Revisions</a></li>
+      <li><a href="{@docRoot}tools/support-library/features.html">
+        Support Library Features</a></li>
+    </ol>
+
+  </div>
+</div>
+
+<p>How you setup the Android Support Libraries in your development project depends on what features
+  you want to use and what range of Android platform versions you want to support with your
+  application.</p>
+
+<p>This document guides you through downloading the Support Library package and adding libraries
+  to your development environment.</p>
+
+
+<h2 id="download">Downloading the Support Libraries</h2>
+
+<p>The Android Support Library package is provided as a supplemental download to the Android SDK
+  and is available through the Android
+  <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>. Follow the
+  instructions below to obtain the Support Library files.
+</p>
+
+<p>To download the Support Library through the SDK Manager:</p>
+
+<ol>
+  <li>Start the Android <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
+  <li>In the SDK Manager window, scroll to the end of the <em>Packages</em> list,
+    find the <em>Extras</em> folder and, if necessary, expand to show its contents.</li>
+  <li>Select the <strong>Android Support Library</strong> item.
+    <p class="note">
+      <strong>Note:</strong> If you're developing with Android Studio, select and install the
+      <strong>Android Support Repository</strong> item instead.
+    </p>
+  </li>
+  <li>Click the <strong>Install packages...</strong> button.</li>
+</ol>
+
+<img src="{@docRoot}images/tools/sdk-manager-support-libs.png" width="525" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> The Android SDK Manager with the
+Android Support Library selected.</p>
+
+<p>After downloading, the tool installs the Support Library files to your existing Android SDK
+  directory. The library files are located in the following subdirectory of your SDK:
+  {@code &lt;sdk&gt;/extras/android/support/} directory.</p>
+
+
+<h2 id="choosing">Choosing Support Libraries</h2>
+
+<p>Before adding a Support Library to your application, decide what features you want to include
+  and the lowest Android versions you want to support. For more information on the features
+  provided by the different libraries, see
+  <a href="{@docRoot}tools/support-library/features.html">Support Library Features</a>.</p>
+
+
+<h2 id="add-library">Adding Support Libraries</h2>
+
+<p>In order to use a Support Library, you must modify your application's project's
+  classpath dependencies within your development environment. You must perform this procedure for
+  each Support Library you want to use.</p>
+
+<p>Some Support Libraries contain resources beyond compiled code classes, such as images or XML
+  files. For example, the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> and <a href="{@docRoot}tools/support-library/features.html#v7-gridlayout">v7
+  gridlayout</a> libraries include resources.</p>
+
+<p>If you are not sure if a library contains resources, check the
+  <a href="{@docRoot}tools/support-library/features.html">Support Library Features</a> page.
+  The following sections describe how to add a Support Library with or without resources to your
+  application project. </p>
+
+
+<h3 id="libs-without-res">Adding libraries without resources</h3>
+
+<p>To add a Support Library without resources to your application project:</p>
+
+    <ol>
+      <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
+        using the <a href="#download">SDK Manager</a>.</li>
+      <li>Open the {@code build.gradle} file for your application.</li>
+      <li>Add the support library to the {@code dependencies} section. For example, to add the v4
+        support library, add the following lines:
+<pre>
+dependencies {
+    ...
+    <b>compile "com.android.support:support-v4:18.0.+"</b>
+}
+</pre>
+      </li>
+    </ol>
+
+
+<h3 id="libs-with-res">Adding libraries with resources</h3>
+
+<p>To add a Support Library with resources (such as
+  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> for action bar) to your application project:</p>
+
+    <ol>
+      <li>Make sure you have downloaded the <strong>Android Support Repository</strong>
+        using the <a href="#download">SDK Manager</a>.</li>
+      <li>Open the {@code build.gradle} file for your application.</li>
+      <li>Add the support library feature project identifier to the {@code dependencies} section.
+        For example, to include the {@code appcompat} project add
+        {@code compile "com.android.support:appcompat-v7:18.0.+"} to the dependencies section, as
+        shown in the following example:
+<pre>
+dependencies {
+    ...
+    <b>compile "com.android.support:appcompat-v7:18.0.+"</b>
+}
+</pre>
+      </li>
+    </ol>
+
+
+<h2 id="using-apis">Using Support Library APIs</h2>
+
+<p>Support Library classes that provide support for existing framework APIs typically have the
+  same name as framework class but are located in the <code>android.support</code> class packages,
+  or have a <code>*Compat</code> suffix.</p>
+
+<div class="caution">
+  <p><strong>Caution:</strong> When using classes from the Support Library, be certain you import
+    the class from the appropriate package. For example, when applying the {@code ActionBar}
+    class:</p>
+  <ul>
+    <li>{@code android.support.v7.app.ActionBar} when using the Support Library.</li>
+    <li>{@code android.app.ActionBar} when developing only for API level 11 or higher.</li>
+  </ul>
+</div>
+
+<p class="note">
+  <strong>Note:</strong> After including the Support Library in your application project, we
+  strongly recommend using the
+  <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> tool to prepare your application APK
+  for release. In addition to protecting your source code, the ProGuard tool also removes unused
+  classes from any libraries you include in your application, which keeps the download size of
+  your application as small as possible. For more information, see
+  <a href="{@docRoot}tools/help/proguard.html">ProGuard</a>.
+</p>
+
+<p>Further guidance for using some Support Library features is provided in the Android developer
+  <a href="{@docRoot}training/index.html">training classes</a>,
+  <a href="{@docRoot}guide/components/index.html">guides</a>
+  and samples. For more information about the individual Support Library classes and methods, see
+  the {@link android.support.v4.app android.support} packages in the API reference.
+</p>
+
+
+<h3 id="manifest">Manifest Declaration Changes</h3>
+
+<p>If you are increasing the backward compatibility of your existing application to an earlier
+  version of the Android API with the Support Library, make sure to update your application's
+  manifest. Specifically, you should update the <code>android:minSdkVersion</code>
+  element of the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">
+  <code>&lt;uses-sdk&gt;</code></a> tag in the manifest to the new, lower version number, as
+  shown below:</p>
+
+<pre>
+  &lt;uses-sdk
+      android:minSdkVersion="<b>7</b>"
+      android:targetSdkVersion="17" /&gt;
+</pre>
+
+<p>The manifest setting tells Google Play that your application can be installed on devices with Android
+  2.1 (API level 7) and higher.  </p>
+
+<p>If you are using Gradle build files, the <code>minSdkVersion</code> setting in the build file
+  overrides the manifest settings.  </p>
+
+<pre>
+apply plugin: 'com.android.application'
+
+android {
+    ...
+
+    defaultConfig {
+        minSdkVersion 8
+        ...
+    }
+    ...
+}
+</pre>
+
+<p>In this case, the build file setting tells Google Play that the default build variant of your
+  application can be installed on devices with Android 2.2 (API level 8) and higher. For more
+  information about build variants, see
+  <a href="{@docRoot}studio/build/index.html">Build System Overview</a>. </p>
+
+<p class="note">
+  <strong>Note:</strong> If you are including the v4 support and v7 appcompat libraries in your
+  application, you should specify a minimum SDK version of <code>"7"</code> (and not
+  <code>"4"</code>). The highest support library level you include in your application determines
+  the lowest API version in which it can operate.
+</p>
+
+
+<h2 id="samples">Code Samples</h2>
+
+<p>Each Support Library includes code samples to help you get started using the support
+APIs. The code is included in the download from the SDK Manager and is placed inside the Android
+SDK installation directory, as listed below:</p>
+
+<ul>
+  <li>4v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support4Demos/}</li>
+  <li>7v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support7Demos/}</li>
+  <li>13v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support13Demos/}</li>
+  <li>App Navigation: {@code &lt;sdk&gt;/extras/android/support/samples/SupportAppNavigation/}</li>
+</ul>
+

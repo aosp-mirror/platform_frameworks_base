@@ -96,6 +96,11 @@ public class KeyguardClockPositionAlgorithm {
         mEmptyDragAmount = emptyDragAmount;
     }
 
+    public float getMinStackScrollerPadding(int height, int keyguardStatusHeight) {
+        return mClockYFractionMin * height + keyguardStatusHeight / 2
+                + mClockNotificationsMarginMin;
+    }
+
     public void run(Result result) {
         int y = getClockY() - mKeyguardStatusHeight / 2;
         float clockAdjustment = getClockYExpansionAdjustment();

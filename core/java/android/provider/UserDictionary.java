@@ -28,6 +28,9 @@ import android.text.TextUtils;
  * A provider of user defined words for input methods to use for predictive text input.
  * Applications and input methods may add words into the dictionary. Words can have associated
  * frequency information and locale information.
+ *
+ * <p><strong>NOTE: </strong>Starting on API 23, the user dictionary is only accessible through
+ * IME and spellchecker.
  */
 public class UserDictionary {
 

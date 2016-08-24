@@ -556,7 +556,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     }
 
     // For the rest of the function we will hold this lock, to serialize
-    // looking/creation of Java proxies for native Binder proxies.
+    // looking/creation/destruction of Java proxies for native Binder proxies.
     AutoMutex _l(mProxyLock);
 
     // Someone else's...  do we know about it?
@@ -917,6 +917,12 @@ static void android_os_BinderInternal_disableBackgroundScheduling(JNIEnv* env,
     IPCThreadState::disableBackgroundScheduling(disable ? true : false);
 }
 
+static void android_os_BinderInternal_setMaxThreads(JNIEnv* env,
+        jobject clazz, jint maxThreads)
+{
+    ProcessState::self()->setThreadPoolMaxThreadCount(maxThreads);
+}
+
 static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
 {
     ALOGV("Gc has executed, clearing binder ops");
@@ -930,6 +936,7 @@ static const JNINativeMethod gBinderInternalMethods[] = {
     { "getContextObject", "()Landroid/os/IBinder;", (void*)android_os_BinderInternal_getContextObject },
     { "joinThreadPool", "()V", (void*)android_os_BinderInternal_joinThreadPool },
     { "disableBackgroundScheduling", "(Z)V", (void*)android_os_BinderInternal_disableBackgroundScheduling },
+    { "setMaxThreads", "(I)V", (void*)android_os_BinderInternal_setMaxThreads },
     { "handleGc", "()V", (void*)android_os_BinderInternal_handleGc }
 };
 
@@ -1225,16 +1232,21 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 
 static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
 {
+    // Don't race with construction/initialization
+    AutoMutex _l(mProxyLock);
+
     IBinder* b = (IBinder*)
             env->GetLongField(obj, gBinderProxyOffsets.mObject);
     DeathRecipientList* drl = (DeathRecipientList*)
             env->GetLongField(obj, gBinderProxyOffsets.mOrgue);
 
     LOGDEATH("Destroying BinderProxy %p: binder=%p drl=%p\n", obj, b, drl);
-    env->SetLongField(obj, gBinderProxyOffsets.mObject, 0);
-    env->SetLongField(obj, gBinderProxyOffsets.mOrgue, 0);
-    drl->decStrong((void*)javaObjectForIBinder);
-    b->decStrong((void*)javaObjectForIBinder);
+    if (b != nullptr) {
+        env->SetLongField(obj, gBinderProxyOffsets.mObject, 0);
+        env->SetLongField(obj, gBinderProxyOffsets.mOrgue, 0);
+        drl->decStrong((void*)javaObjectForIBinder);
+        b->decStrong((void*)javaObjectForIBinder);
+    }
 
     IPCThreadState::self()->flushCommands();
 }

@@ -24,9 +24,6 @@
     <!-- keyboardHeight = key_height*4 + key_bottom_gap*3 -->
     <dimen name="password_keyboard_height">48.0mm</dimen>
 
-    <!-- Minimum width of the search view text entry area. -->
-    <dimen name="search_view_text_min_width">192dip</dimen>
-
     <item type="dimen" name="dialog_min_width_major">55%</item>
     <item type="dimen" name="dialog_min_width_minor">80%</item>
 

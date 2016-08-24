@@ -87,6 +87,12 @@ public class LockSettingsStorageTests extends AndroidTestCase {
                 return new File(mStorageDir,
                         super.getLockPasswordFilename(userId).replace('/', '-')).getAbsolutePath();
             }
+
+            @Override
+            String getChildProfileLockFile(int userId) {
+                return new File(mStorageDir,
+                        super.getChildProfileLockFile(userId).replace('/', '-')).getAbsolutePath();
+            }
         };
     }
 
@@ -233,6 +239,27 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         mStorage.clearCache();
         assertArrayEquals("profilepassword".getBytes(), mStorage.readPasswordHash(1).hash);
         assertArrayEquals("profilepassword".getBytes(), mStorage.readPasswordHash(2).hash);
+    }
+
+    public void testLockType_WriteProfileWritesParent() {
+        mStorage.writePasswordHash("parentpassword".getBytes(), 10);
+        mStorage.writePatternHash("12345678".getBytes(), 20);
+
+        assertEquals(2, mStorage.getStoredCredentialType(10));
+        assertEquals(1, mStorage.getStoredCredentialType(20));
+        mStorage.clearCache();
+        assertEquals(2, mStorage.getStoredCredentialType(10));
+        assertEquals(1, mStorage.getStoredCredentialType(20));
+    }
+
+    public void testProfileLock_ReadWriteChildProfileLock() {
+        assertFalse(mStorage.hasChildProfileLock(20));
+        mStorage.writeChildProfileLock(20, "profilepassword".getBytes());
+        assertArrayEquals("profilepassword".getBytes(), mStorage.readChildProfileLock(20));
+        assertTrue(mStorage.hasChildProfileLock(20));
+        mStorage.clearCache();
+        assertArrayEquals("profilepassword".getBytes(), mStorage.readChildProfileLock(20));
+        assertTrue(mStorage.hasChildProfileLock(20));
     }
 
     public void testPassword_WriteParentWritesProfile() {

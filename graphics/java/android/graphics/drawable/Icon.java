@@ -44,6 +44,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * An umbrella container for several serializable graphics representations, including Bitmaps,
@@ -242,13 +243,15 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * Invokes {@link #loadDrawable(Context)} on a background thread
-     * and then runs <code>andThen</code> on the UI thread when finished.
+     * Invokes {@link #loadDrawable(Context)} on a background thread and notifies the <code>
+     * {@link OnDrawableLoadedListener#onDrawableLoaded listener} </code> on the {@code handler}
+     * when finished.
      *
      * @param context {@link Context Context} in which to load the drawable; see
      *                {@link #loadDrawable(Context)}
-     * @param listener a callback to run on the provided
-     * @param handler {@link Handler} on which to run <code>andThen</code>.
+     * @param listener to be {@link OnDrawableLoadedListener#onDrawableLoaded notified} when
+     *                 {@link #loadDrawable(Context)} finished
+     * @param handler {@link Handler} on which to notify the {@code listener}
      */
     public void loadDrawableAsync(Context context, final OnDrawableLoadedListener listener,
             Handler handler) {
@@ -459,6 +462,37 @@ public final class Icon implements Parcelable {
     }
 
     /**
+     * Compares if this icon is constructed from the same resources as another icon.
+     * Note that this is an inexpensive operation and doesn't do deep Bitmap equality comparisons.
+     *
+     * @param otherIcon the other icon
+     * @return whether this icon is the same as the another one
+     * @hide
+     */
+    public boolean sameAs(Icon otherIcon) {
+        if (otherIcon == this) {
+            return true;
+        }
+        if (mType != otherIcon.getType()) {
+            return false;
+        }
+        switch (mType) {
+            case TYPE_BITMAP:
+                return getBitmap() == otherIcon.getBitmap();
+            case TYPE_DATA:
+                return getDataLength() == otherIcon.getDataLength()
+                        && getDataOffset() == otherIcon.getDataOffset()
+                        && getDataBytes() == otherIcon.getDataBytes();
+            case TYPE_RESOURCE:
+                return getResId() == otherIcon.getResId()
+                        && Objects.equals(getResPackage(), otherIcon.getResPackage());
+            case TYPE_URI:
+                return Objects.equals(getUriString(), otherIcon.getUriString());
+        }
+        return false;
+    }
+
+    /**
      * Create an Icon pointing to a drawable resource.
      * @param context The context for the application whose resources should be used to resolve the
      *                given resource ID.
@@ -593,6 +627,11 @@ public final class Icon implements Parcelable {
     public Icon setTintMode(PorterDuff.Mode mode) {
         mTintMode = mode;
         return this;
+    }
+
+    /** @hide */
+    public boolean hasTint() {
+        return (mTintList != null) || (mTintMode != DEFAULT_TINT_MODE);
     }
 
     /**

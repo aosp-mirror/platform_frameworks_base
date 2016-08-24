@@ -532,20 +532,11 @@ ViewCompat.setAccessibilityDelegate(new AccessibilityDelegateCompat() {
 }
 </pre>
 
-<p>In applications targeting Android 4.0 (API Level 14) and higher, you can implement these methods
+<p>You can implement these methods
 directly in your custom view class. For another example of this approach, see the Android
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a> (revision 5 or higher)
 sample {@code AccessibilityDelegateSupportActivity} in
 ({@code <sdk>/extras/android/support/v4/samples/Support4Demos/}).</p>
-
-<p class="note"><strong>Note:</strong> You may find information on implementing accessibility for
-custom views written prior to Android 4.0 that describes the use of the
-{@link android.view.View#dispatchPopulateAccessibilityEvent dispatchPopulateAccessibilityEvent()}
-method for populating AccessibilityEvents. As of the Android 4.0 release, however, the recommended
-approach is to use the
-{@link android.view.View#onPopulateAccessibilityEvent onPopulateAccessibilityEvent()} and
-{@link android.view.View#onInitializeAccessibilityEvent onInitializeAccessibilityEvent()}
-methods.</p>
 
 
 <h3 id="virtual-hierarchy">Providing a customized accessibility context</h3>

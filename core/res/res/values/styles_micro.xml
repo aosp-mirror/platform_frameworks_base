@@ -17,27 +17,27 @@
     <style name="Animation.Micro"/>
 
     <style name="Animation.Micro.Activity" parent="Animation.Material.Activity">
-        <item name="activityOpenEnterAnimation">@anim/slide_in_micro</item>
-        <item name="activityOpenRemoteViewsEnterAnimation">@anim/slide_in_micro</item>
-        <item name="activityOpenExitAnimation">@null</item>
+        <item name="activityOpenEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="activityOpenRemoteViewsEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="activityOpenExitAnimation">@anim/slide_in_exit_micro</item>
         <item name="activityCloseEnterAnimation">@null</item>
         <item name="activityCloseExitAnimation">@anim/slide_out_micro</item>
-        <item name="taskOpenEnterAnimation">@anim/slide_in_micro</item>
-        <item name="taskOpenExitAnimation">@null</item>
+        <item name="taskOpenEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="taskOpenExitAnimation">@anim/slide_in_exit_micro</item>
         <item name="taskCloseEnterAnimation">@null</item>
         <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
-        <item name="taskToFrontEnterAnimation">@anim/slide_in_micro</item>
-        <item name="taskToFrontExitAnimation">@null</item>
+        <item name="taskToFrontEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="taskToFrontExitAnimation">@anim/slide_in_exit_micro</item>
         <item name="taskToBackEnterAnimation">@null</item>
         <item name="taskToBackExitAnimation">@anim/slide_out_micro</item>
         <item name="wallpaperOpenEnterAnimation">@null</item>
         <item name="wallpaperOpenExitAnimation">@anim/slide_out_micro</item>
-        <item name="wallpaperCloseEnterAnimation">@anim/slide_in_micro</item>
-        <item name="wallpaperCloseExitAnimation">@null</item>
+        <item name="wallpaperCloseEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="wallpaperCloseExitAnimation">@anim/slide_in_exit_micro</item>
         <item name="wallpaperIntraOpenEnterAnimation">@null</item>
         <item name="wallpaperIntraOpenExitAnimation">@anim/slide_out_micro</item>
-        <item name="wallpaperIntraCloseEnterAnimation">@anim/slide_in_micro</item>
-        <item name="wallpaperIntraCloseExitAnimation">@null</item>
+        <item name="wallpaperIntraCloseEnterAnimation">@anim/slide_in_enter_micro</item>
+        <item name="wallpaperIntraCloseExitAnimation">@anim/slide_in_exit_micro</item>
     </style>
 
     <style name="AlertDialog.Micro" parent="AlertDialog.Material.Light">

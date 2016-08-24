@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.ContentProvider;
@@ -39,6 +40,7 @@ import android.util.Log;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.internal.util.Predicate;
+
 import com.google.android.collect.Sets;
 
 import libcore.io.IoUtils;
@@ -84,6 +86,8 @@ public class RecentsProvider extends ContentProvider {
         public static final String AUTHORITY = "authority";
         public static final String ROOT_ID = Root.COLUMN_ROOT_ID;
         public static final String DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID;
+
+        @Deprecated  // mode is tracked in local preferences now...by root only
         public static final String MODE = "mode";
         public static final String SORT_ORDER = "sortOrder";
     }
@@ -92,6 +96,7 @@ public class RecentsProvider extends ContentProvider {
         public static final String PACKAGE_NAME = "package_name";
         public static final String STACK = "stack";
         public static final String TIMESTAMP = "timestamp";
+        // Indicates handler was an external app, like photos.
         public static final String EXTERNAL = "external";
     }
 
@@ -334,7 +339,7 @@ public class RecentsProvider extends ContentProvider {
                 if (predicate.apply(authority)) {
                     db.delete(TABLE_STATE, StateColumns.AUTHORITY + "=?", new String[] {
                             authority });
-                    Log.d(TAG, "Purged state for " + authority);
+                    if (DEBUG) Log.d(TAG, "Purged state for " + authority);
                 }
             }
         } finally {

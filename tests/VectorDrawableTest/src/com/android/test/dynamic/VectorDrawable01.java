@@ -18,7 +18,12 @@ import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridLayout;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -54,6 +59,23 @@ public class VectorDrawable01 extends Activity {
         container.setColumnCount(5);
         container.setBackgroundColor(0xFF888888);
         final Button []bArray = new Button[icon.length];
+
+        CheckBox toggle = new CheckBox(this);
+        toggle.setText("Toggle");
+        toggle.setChecked(true);
+        toggle.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ViewGroup vg = (ViewGroup) buttonView.getParent();
+                for (int i = 0, count = vg.getChildCount(); i < count; i++) {
+                    View child = vg.getChildAt(i);
+                    if (child != buttonView) {
+                        child.setEnabled(isChecked);
+                    }
+                }
+            }
+        });
+        container.addView(toggle);
 
         for (int i = 0; i < icon.length; i++) {
             Button button = new Button(this);

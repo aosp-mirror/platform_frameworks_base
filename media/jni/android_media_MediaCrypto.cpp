@@ -25,8 +25,9 @@
 #include "JNIHelp.h"
 
 #include <binder/IServiceManager.h>
+#include <cutils/properties.h>
 #include <media/ICrypto.h>
-#include <media/IMediaPlayerService.h>
+#include <media/IMediaDrmService.h>
 #include <media/stagefright/foundation/ADebug.h>
 
 namespace android {
@@ -62,18 +63,13 @@ JCrypto::~JCrypto() {
 sp<ICrypto> JCrypto::MakeCrypto() {
     sp<IServiceManager> sm = defaultServiceManager();
 
-    sp<IBinder> binder =
-        sm->getService(String16("media.player"));
-
-    sp<IMediaPlayerService> service =
-        interface_cast<IMediaPlayerService>(binder);
-
+    sp<IBinder> binder = sm->getService(String16("media.drm"));
+    sp<IMediaDrmService> service = interface_cast<IMediaDrmService>(binder);
     if (service == NULL) {
         return NULL;
     }
 
     sp<ICrypto> crypto = service->makeCrypto();
-
     if (crypto == NULL || (crypto->initCheck() != OK && crypto->initCheck() != NO_INIT)) {
         return NULL;
     }

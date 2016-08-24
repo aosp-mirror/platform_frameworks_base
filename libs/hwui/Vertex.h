@@ -37,7 +37,6 @@ struct Vertex {
      */
     static float GeometryFudgeFactor() { return 0.0656f; }
 
-
     float x, y;
 
     static inline void set(Vertex* vertex, float x, float y) {

@@ -1,9 +1,11 @@
 page.title=示例
-page.image=images/cards/samples-new_2x.png
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
 @jd:body
 
 <p>
-  以下是 M 开发者预览版的代码示例。要在 Android Studio 中下载示例，请选择<b>文件 &gt; 导入示例</b>菜单选项。
+  以下是 Android N 的代码示例。要在 Android Studio 中下载示例，请选择 <b>File &gt; Import Samples</b> 菜单项。
+
 
 </p>
 
@@ -13,58 +15,71 @@ page.image=images/cards/samples-new_2x.png
 </p>
 
 
-<h3 id="RuntimePermissions">运行时权限</h3>
-
+<h3 id="mw">多窗口 Playground</h3>
+<img src="{@docRoot}preview/images/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
 <p>
- Android M 改变了系统权限运行的方式。系统会在运行时（而不是安装期间）要求用户批准权限请求。
-此示例显示了如何请求这些权限。
+  此示例演示如何在您的应用中充分利用多窗口用户界面。
 
 </p>
-
-<p><a href="https://github.com/googlesamples/android-RuntimePermissions">在 GitHub 中获取</a></p>
-
-<h3 id="ConfirmCredentials">确认凭据</h3>
-
 <p>
- 此示例演示了在您的应用中如何使用设备凭据作为身份验证方法。
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+在 GitHub 中获取</a>
 </p>
 
-<p><a href="https://github.com/googlesamples/android-ConfirmCredential">在 GitHub 中获取</a>
-</p>
-
-<h3 id="FingerprintDialog">指纹对话框</h3>
-
+<div style="clear: both;"></div>
+<h3 id="an">活动通知</h3>
+<img src="{@docRoot}preview/images/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
- 此示例演示了在您的应用中如何识别已注册的指纹以验证用户的身份。
+  这是一个已存在的示例，其显示一个使用 NotificationCompat 发送通知的简单服务。该服务将来自用户的每个未读会话以不同的通知形式发送。
+
 
 </p>
-
-<p><a href="https://github.com/googlesamples/android-FingerprintDialog">在 GitHub 中获取</a></p>
-
-<h3 id="AutomaticBackup">自动备份应用</h3>
-
 <p>
- Android M 引入了自动备份应用设置功能。此示例演示如何向应用添加筛选规则，以管理设置备份。
+  此示例已更新，以充分利用 Android N 中提供的新的通知功能。
 
 </p>
-
-<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">在 GitHub 中获取</a></p>
-
-<h3 id="CameraRaw">相机 2 RAW</h3>
-
 <p>
-  演示如何使用 <code>Camera2</code> API 捕获 RAW 相机缓冲区并将其另存为 <code>DNG</code> 文件。
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">在 GitHub 中获取</a>
 
 </p>
 
-<p><a href="https://github.com/googlesamples/android-Camera2Raw">在 GitHub 中获取</a></p>
-
-<h3 id="ActiveNotification">活动通知</h3>
-
+<div style="clear: both;"></div>
+<h3 id="ms">消息传递服务</h3>
+<img src="{@docRoot}preview/images/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
 <p>
-  此示例演示 <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
- 如何让您了解应用当前显示的通知数量。
+  这是一个已存在的示例，其演示如何使用 NotificationManager 指示应用当前显示的通知数量。
+
+
+</p>
+<p>
+  此示例已更新，以充分利用 Android N 中提供的新的通知功能。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">在 GitHub 中获取</a>
 
 </p>
 
-<p><a href="https://github.com/googlesamples/android-ActiveNotifications">在 GitHub 中获取</a></p>
+<div style="clear: both;"></div>
+<h3 id="fbe">直接启动</h3>
+<img src="{@docRoot}preview/images/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  此示例显示如何在设备加密的存储（启动设备后始终可用）中存储和访问数据。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">在 GitHub 中获取</a>
+
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">作用域目录访问</h3>
+<img src="{@docRoot}preview/images/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  此示例演示如何从特定目录读取和写入数据，同时需要较少的权限。
+
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">在 GitHub 中获取</a>
+
+</p>

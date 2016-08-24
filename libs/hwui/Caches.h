@@ -17,15 +17,11 @@
 #ifndef ANDROID_HWUI_CACHES_H
 #define ANDROID_HWUI_CACHES_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
-
 #include "AssetAtlas.h"
 #include "Dither.h"
 #include "Extensions.h"
 #include "FboCache.h"
+#include "GammaFontRenderer.h"
 #include "GradientCache.h"
 #include "LayerCache.h"
 #include "PatchCache.h"
@@ -47,17 +43,15 @@
 #include <GLES3/gl3.h>
 
 #include <utils/KeyedVector.h>
-#include <utils/Singleton.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include <SkPath.h>
 
+#include <vector>
+
 namespace android {
 namespace uirenderer {
-
-class GammaFontRenderer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Caches
@@ -87,16 +81,18 @@ private:
     static Caches* sInstance;
 
 public:
-    enum FlushMode {
-        kFlushMode_Layers = 0,
-        kFlushMode_Moderate,
-        kFlushMode_Full
+    enum class FlushMode {
+        Layers = 0,
+        Moderate,
+        Full
     };
 
     /**
      * Initialize caches.
      */
     bool init();
+
+    bool isInitialized() { return mInitialized; }
 
     /**
      * Flush the cache.
@@ -107,7 +103,7 @@ public:
 
     /**
      * Destroys all resources associated with this cache. This should
-     * be called after a flush(kFlushMode_Full).
+     * be called after a flush(FlushMode::Full).
      */
     void terminate();
 
@@ -128,10 +124,6 @@ public:
      */
     void deleteLayerDeferred(Layer* layer);
 
-
-    void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard);
-    void endTiling();
-
     /**
      * Returns the mesh used to draw regions. Calling this method will
      * bind a VBO of type GL_ELEMENT_ARRAY_BUFFER that contains the
@@ -144,10 +136,6 @@ public:
      */
     void dumpMemoryUsage();
     void dumpMemoryUsage(String8& log);
-
-    bool hasRegisteredFunctors();
-    void registerFunctors(uint32_t functorCount);
-    void unregisterFunctors(uint32_t functorCount);
 
     // Misc
     GLint maxTextureSize;
@@ -168,7 +156,7 @@ public:
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
 
-    GammaFontRenderer* fontRenderer;
+    GammaFontRenderer fontRenderer;
 
     TaskManager tasks;
 
@@ -190,8 +178,6 @@ public:
     TextureState& textureState() { return *mTextureState; }
 
 private:
-
-    void initFont();
     void initExtensions();
     void initConstraints();
     void initStaticProperties();
@@ -206,11 +192,9 @@ private:
     std::unique_ptr<TextureVertex[]> mRegionMesh;
 
     mutable Mutex mGarbageLock;
-    Vector<Layer*> mLayerGarbage;
+    std::vector<Layer*> mLayerGarbage;
 
     bool mInitialized;
-
-    uint32_t mFunctorsCount;
 
     // TODO: move below to RenderState
     PixelBufferState* mPixelBufferState = nullptr;

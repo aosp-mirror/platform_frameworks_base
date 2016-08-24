@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<device-owner package="com.android.frameworks.servicestests" />
+<profile-owner package="com.android.frameworks.servicestests" name="0" userId="10" component="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin2" />
+<profile-owner package="com.android.frameworks.servicestests" name="0" userId="11" component="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin3" />

@@ -16,9 +16,8 @@
 
 package com.android.server;
 
+import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.MemoryFile;
@@ -52,20 +51,19 @@ import java.util.ArrayList;
  * 2) ASHMEM_SIZE (for scratch space used during dumping)
  * 3) ASHMEM_SIZE * HISTORY_SIZE
  *
- * Currently ASHMEM_SIZE is 256 bytes and HISTORY_SIZE is 20. Assuming
- * the system then also has 10 active rendering processes in the worst case
- * this would end up using under 14KiB (12KiB for the buffers, plus some overhead
- * for userId, pid, package name, and a couple other objects)
+ * This is currently under 20KiB total memory in the worst case of
+ * 20 processes in history + 10 unique active processes.
  *
  *  @hide */
 public class GraphicsStatsService extends IGraphicsStats.Stub {
     public static final String GRAPHICS_STATS_SERVICE = "graphicsstats";
 
     private static final String TAG = "GraphicsStatsService";
-    private static final int ASHMEM_SIZE = 256;
+    private static final int ASHMEM_SIZE = 464;
     private static final int HISTORY_SIZE = 20;
 
     private final Context mContext;
+    private final AppOpsManager mAppOps;
     private final Object mLock = new Object();
     private ArrayList<ActiveBuffer> mActive = new ArrayList<>();
     private HistoricalData[] mHistoricalLog = new HistoricalData[HISTORY_SIZE];
@@ -74,15 +72,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     public GraphicsStatsService(Context context) {
         mContext = context;
-    }
-
-    private boolean isValid(int uid, String packageName) {
-        try {
-            PackageInfo info = mContext.getPackageManager().getPackageInfo(packageName, 0);
-            return info.applicationInfo.uid == uid;
-        } catch (NameNotFoundException e) {
-        }
-        return false;
+        mAppOps = context.getSystemService(AppOpsManager.class);
     }
 
     @Override
@@ -93,9 +83,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         ParcelFileDescriptor pfd = null;
         long callingIdentity = Binder.clearCallingIdentity();
         try {
-            if (!isValid(uid, packageName)) {
-                throw new RemoteException("Invalid package name");
-            }
+            mAppOps.checkPackage(uid, packageName);
             synchronized (mLock) {
                 pfd = requestBufferForProcessLocked(token, uid, pid, packageName);
             }

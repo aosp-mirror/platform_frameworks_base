@@ -28,6 +28,7 @@
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
+#include "VectorDrawable.h"
 
 #include <algorithm>
 
@@ -64,7 +65,9 @@ public:
     static void operator delete(void* ptr) { LOG_ALWAYS_FATAL("delete not supported"); }
     static void* operator new(size_t size) = delete; /** PURPOSELY OMITTED **/
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
+        // FIXME: Quick hack to keep old pipeline working, delete this when
+        // we no longer need to support HWUI_NEWOPS := false
+        return allocator.alloc<char>(size);
     }
 
     enum OpLogFlag {
@@ -139,7 +142,7 @@ public:
      * reducing which operations are tagged as mergeable.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) {
         for (unsigned int i = 0; i < ops.size(); i++) {
             renderer.restoreDisplayState(*(ops[i].state), true);
             ops[i].op->applyDraw(renderer, dirty);
@@ -171,10 +174,6 @@ public:
     // TODO: better refine localbounds usage
     void setQuickRejected(bool quickRejected) { mQuickRejected = quickRejected; }
     bool getQuickRejected() { return mQuickRejected; }
-
-    inline int getPaintAlpha() const {
-        return OpenGLRenderer::getAlphaDirect(mPaint);
-    }
 
     virtual bool hasTextShadow() const {
         return false;
@@ -213,7 +212,7 @@ protected:
 
         if (state.mAlpha != 1.0f) return false;
 
-        SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
+        SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(mPaint);
         return (mode == SkXfermode::kSrcOver_Mode ||
                 mode == SkXfermode::kSrc_Mode);
 
@@ -249,8 +248,8 @@ public:
 
     virtual bool getLocalBounds(Rect& localBounds) override {
         localBounds.set(mLocalBounds);
-        OpenGLRenderer::TextShadow textShadow;
-        if (OpenGLRenderer::getTextShadow(mPaint, &textShadow)) {
+        PaintUtils::TextShadow textShadow;
+        if (PaintUtils::getTextShadow(mPaint, &textShadow)) {
             Rect shadow(mLocalBounds);
             shadow.translate(textShadow.dx, textShadow.dx);
             shadow.outset(textShadow.radius);
@@ -372,8 +371,8 @@ public:
 
 private:
     bool isSaveLayerAlpha() const {
-        SkXfermode::Mode mode = OpenGLRenderer::getXfermodeDirect(mPaint);
-        int alpha = OpenGLRenderer::getAlphaDirect(mPaint);
+        SkXfermode::Mode mode = PaintUtils::getXfermodeDirect(mPaint);
+        int alpha = PaintUtils::getAlphaDirect(mPaint);
         return alpha < 255 && mode == SkXfermode::kSrcOver_Mode;
     }
 
@@ -472,7 +471,9 @@ public:
             : mMatrix(matrix) {}
 
     virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
-        renderer.setMatrix(mMatrix);
+        // Setting a matrix on a Canvas isn't equivalent to setting a total matrix on the scene.
+        // Set a canvas-relative matrix on the renderer instead.
+        renderer.setLocalMatrix(mMatrix);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
@@ -484,25 +485,6 @@ public:
     }
 
     virtual const char* name() override { return "SetMatrix"; }
-
-private:
-    const SkMatrix mMatrix;
-};
-
-class SetLocalMatrixOp : public StateOp {
-public:
-    explicit SetLocalMatrixOp(const SkMatrix& matrix)
-            : mMatrix(matrix) {}
-
-    virtual void applyState(OpenGLRenderer& renderer, int saveCount) const override {
-        renderer.setLocalMatrix(mMatrix);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("SetLocalMatrix " SK_MATRIX_STRING, SK_MATRIX_ARGS(&mMatrix));
-    }
-
-    virtual const char* name() override { return "SetLocalMatrix"; }
 
 private:
     const SkMatrix mMatrix;
@@ -633,7 +615,7 @@ public:
     AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
         if (!mEntryValid) {
             mEntryValid = true;
-            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap->pixelRef());
         }
         return mEntry;
     }
@@ -648,7 +630,7 @@ public:
      * the current layer, if any.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         const DeferredDisplayState& firstState = *(ops[0].state);
         renderer.restoreDisplayState(firstState, true); // restore all but the clip
 
@@ -708,7 +690,7 @@ public:
         // TODO: support clipped bitmaps by handling them in SET_TEXTURE
         deferInfo.mergeable = state.mMatrix.isSimple() && state.mMatrix.positiveScale() &&
                 !state.mClipSideFlags &&
-                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
+                PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode &&
                 (mBitmap->colorType() != kAlpha_8_SkColorType);
     }
 
@@ -798,7 +780,7 @@ public:
     AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
         if (!mEntryValid) {
             mEntryValid = true;
-            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap->pixelRef());
         }
         return mEntry;
     }
@@ -819,7 +801,7 @@ public:
      * is also responsible for dirtying the current layer, if any.
      */
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         const DeferredDisplayState& firstState = *(ops[0].state);
         renderer.restoreDisplayState(firstState, true); // restore all but the clip
 
@@ -912,7 +894,7 @@ public:
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
         deferInfo.mergeId = getAtlasEntry(renderer) ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
         deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
-                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+                PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
         deferInfo.opaqueOverBounds = isOpaqueOverBounds(state) && mBitmap->isOpaque();
     }
 
@@ -1126,6 +1108,30 @@ private:
     float* mRadius;
 };
 
+class DrawVectorDrawableOp : public DrawOp {
+public:
+    DrawVectorDrawableOp(VectorDrawableRoot* tree, const SkRect& bounds)
+            : DrawOp(nullptr), mTree(tree), mDst(bounds) {}
+
+    virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
+        const SkBitmap& bitmap = mTree->getBitmapUpdateIfDirty();
+        SkPaint* paint = mTree->getPaint();
+        renderer.drawBitmap(&bitmap, Rect(0, 0, bitmap.width(), bitmap.height()),
+                mDst, paint);
+    }
+
+    virtual void output(int level, uint32_t logFlags) const override {
+        OP_LOG("Draw Vector Drawable %p", mTree);
+    }
+
+    virtual const char* name() override { return "DrawVectorDrawable"; }
+
+private:
+    VectorDrawableRoot* mTree;
+    SkRect mDst;
+
+};
+
 class DrawOvalOp : public DrawStrokableOp {
 public:
     DrawOvalOp(float left, float top, float right, float bottom, const SkPaint* paint)
@@ -1250,7 +1256,7 @@ public:
 
 class DrawSomeTextOp : public DrawOp {
 public:
-    DrawSomeTextOp(const char* text, int bytesCount, int count, const SkPaint* paint)
+    DrawSomeTextOp(const glyph_t* text, int bytesCount, int count, const SkPaint* paint)
             : DrawOp(paint), mText(text), mBytesCount(bytesCount), mCount(count) {};
 
     virtual void output(int level, uint32_t logFlags) const override {
@@ -1258,12 +1264,12 @@ public:
     }
 
     virtual bool hasTextShadow() const override {
-        return OpenGLRenderer::hasTextShadow(mPaint);
+        return PaintUtils::hasTextShadow(mPaint);
     }
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) override {
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer.getFontRenderer();
         fontRenderer.precache(mPaint, mText, mCount, SkMatrix::I());
 
         deferInfo.batchId = mPaint->getColor() == SK_ColorBLACK ?
@@ -1272,14 +1278,14 @@ public:
     }
 
 protected:
-    const char* mText;
+    const glyph_t* mText;
     int mBytesCount;
     int mCount;
 };
 
 class DrawTextOnPathOp : public DrawSomeTextOp {
 public:
-    DrawTextOnPathOp(const char* text, int bytesCount, int count,
+    DrawTextOnPathOp(const glyph_t* text, int bytesCount, int count,
             const SkPath* path, float hOffset, float vOffset, const SkPaint* paint)
             : DrawSomeTextOp(text, bytesCount, count, paint),
             mPath(path), mHOffset(hOffset), mVOffset(vOffset) {
@@ -1299,27 +1305,9 @@ private:
     float mVOffset;
 };
 
-class DrawPosTextOp : public DrawSomeTextOp {
-public:
-    DrawPosTextOp(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint)
-            : DrawSomeTextOp(text, bytesCount, count, paint), mPositions(positions) {
-        /* TODO: inherit from DrawBounded and init mLocalBounds */
-    }
-
-    virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawPosText(mText, mBytesCount, mCount, mPositions, mPaint);
-    }
-
-    virtual const char* name() override { return "DrawPosText"; }
-
-private:
-    const float* mPositions;
-};
-
 class DrawTextOp : public DrawStrokableOp {
 public:
-    DrawTextOp(const char* text, int bytesCount, int count, float x, float y,
+    DrawTextOp(const glyph_t* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds)
             : DrawStrokableOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
@@ -1328,7 +1316,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) override {
-        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer->getFontRenderer(mPaint);
+        FontRenderer& fontRenderer = renderer.getCaches().fontRenderer.getFontRenderer();
         SkMatrix transform;
         renderer.findBestFontTransform(state.mMatrix, &transform);
         if (mPrecacheTransform != transform) {
@@ -1347,7 +1335,7 @@ public:
 
         deferInfo.mergeable = state.mMatrix.isPureTranslate()
                 && !hasDecorations
-                && OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
+                && PaintUtils::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
     }
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
@@ -1358,7 +1346,7 @@ public:
     }
 
     virtual void multiDraw(OpenGLRenderer& renderer, Rect& dirty,
-            const Vector<OpStatePair>& ops, const Rect& bounds) override {
+            const std::vector<OpStatePair>& ops, const Rect& bounds) override {
         for (unsigned int i = 0; i < ops.size(); i++) {
             const DeferredDisplayState& state = *(ops[i].state);
             DrawOpMode drawOpMode = (i == ops.size() - 1) ? DrawOpMode::kFlush : DrawOpMode::kDefer;
@@ -1380,7 +1368,7 @@ public:
     virtual const char* name() override { return "DrawText"; }
 
 private:
-    const char* mText;
+    const glyph_t* mText;
     int mBytesCount;
     int mCount;
     float mX;
@@ -1417,26 +1405,31 @@ private:
 
 class DrawRenderNodeOp : public DrawBoundedOp {
     friend class RenderNode; // grant RenderNode access to info of child
-    friend class DisplayListData; // grant DisplayListData access to info of child
+    friend class DisplayList; // grant DisplayList access to info of child
+    friend class DisplayListCanvas;
+    friend class TestUtils;
 public:
     DrawRenderNodeOp(RenderNode* renderNode, const mat4& transformFromParent, bool clipIsSimple)
-            : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
-            , mRenderNode(renderNode)
+            : DrawBoundedOp(0, 0,
+                    renderNode->stagingProperties().getWidth(),
+                    renderNode->stagingProperties().getHeight(),
+                    nullptr)
+            , renderNode(renderNode)
             , mRecordedWithPotentialStencilClip(!clipIsSimple || !transformFromParent.isSimple())
-            , mTransformFromParent(transformFromParent)
-            , mSkipInOrderDraw(false) {}
+            , localMatrix(transformFromParent)
+            , skipInOrderDraw(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
-            mRenderNode->defer(deferStruct, level + 1);
+        if (renderNode->isRenderable() && !skipInOrderDraw) {
+            renderNode->defer(deferStruct, level + 1);
         }
     }
 
     virtual void replay(ReplayStateStruct& replayStruct, int saveCount, int level,
             bool useQuickReject) override {
-        if (mRenderNode->isRenderable() && !mSkipInOrderDraw) {
-            mRenderNode->replay(replayStruct, level + 1);
+        if (renderNode->isRenderable() && !skipInOrderDraw) {
+            renderNode->replay(replayStruct, level + 1);
         }
     }
 
@@ -1445,18 +1438,16 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw RenderNode %p %s", mRenderNode, mRenderNode->getName());
-        if (mRenderNode && (logFlags & kOpLogFlag_Recurse)) {
-            mRenderNode->output(level + 1);
+        OP_LOG("Draw RenderNode %p %s", renderNode, renderNode->getName());
+        if (renderNode && (logFlags & kOpLogFlag_Recurse)) {
+            renderNode->output(level + 1);
         }
     }
 
     virtual const char* name() override { return "DrawRenderNode"; }
 
-    RenderNode* renderNode() { return mRenderNode; }
-
 private:
-    RenderNode* mRenderNode;
+    RenderNode* renderNode;
 
     /**
      * This RenderNode was drawn into a DisplayList with the canvas in a state that will likely
@@ -1478,7 +1469,7 @@ private:
     /**
      * Records transform vs parent, used for computing total transform without rerunning DL contents
      */
-    const mat4 mTransformFromParent;
+    const mat4 localMatrix;
 
     /**
      * Holds the transformation between the projection surface ViewGroup and this RenderNode
@@ -1488,8 +1479,8 @@ private:
      *
      * Note: doesn't include transformation within the RenderNode, or its properties.
      */
-    mat4 mTransformFromCompositingAncestor;
-    bool mSkipInOrderDraw;
+    mat4 transformFromCompositingAncestor;
+    bool skipInOrderDraw;
 };
 
 /**
@@ -1541,23 +1532,21 @@ private:
 
 class DrawLayerOp : public DrawOp {
 public:
-    DrawLayerOp(Layer* layer, float x, float y)
-            : DrawOp(nullptr), mLayer(layer), mX(x), mY(y) {}
+    DrawLayerOp(Layer* layer)
+            : DrawOp(nullptr), mLayer(layer) {}
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawLayer(mLayer, mX, mY);
+        renderer.drawLayer(mLayer);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw Layer %p at %f %f", mLayer, mX, mY);
+        OP_LOG("Draw Layer %p", mLayer);
     }
 
     virtual const char* name() override { return "DrawLayer"; }
 
 private:
     Layer* mLayer;
-    float mX;
-    float mY;
 };
 
 }; // namespace uirenderer

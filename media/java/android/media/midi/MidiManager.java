@@ -186,8 +186,7 @@ public final class MidiManager {
         try {
             mService.registerListener(mToken, deviceListener);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerDeviceListener");
-            return;
+            throw e.rethrowFromSystemServer();
         }
         mDeviceListeners.put(callback, deviceListener);
     }
@@ -203,7 +202,7 @@ public final class MidiManager {
             try {
                 mService.unregisterListener(mToken, deviceListener);
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException in unregisterDeviceListener");
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -217,8 +216,7 @@ public final class MidiManager {
         try {
            return mService.getDevices();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getDevices");
-            return new MidiDeviceInfo[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -267,7 +265,7 @@ public final class MidiManager {
         try {
             mService.openDevice(mToken, deviceInfo, callback);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openDevice");
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -306,7 +304,7 @@ public final class MidiManager {
         try {
             mService.openBluetoothDevice(mToken, bluetoothDevice, callback);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openDevice");
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -326,8 +324,7 @@ public final class MidiManager {
             }
             return server;
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in createVirtualDevice");
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 }

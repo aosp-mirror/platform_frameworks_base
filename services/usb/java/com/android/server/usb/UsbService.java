@@ -119,7 +119,7 @@ public class UsbService extends IUsbManager.Stub {
             mPortManager = new UsbPortManager(context);
         }
 
-        setCurrentUser(UserHandle.USER_OWNER);
+        setCurrentUser(UserHandle.USER_SYSTEM);
 
         final IntentFilter filter = new IntentFilter();
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);

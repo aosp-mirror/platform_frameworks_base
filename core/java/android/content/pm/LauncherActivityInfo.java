@@ -39,9 +39,7 @@ public class LauncherActivityInfo {
 
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
-    private ResolveInfo mResolveInfo;
     private UserHandle mUser;
-    private long mFirstInstallTime;
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
@@ -50,14 +48,11 @@ public class LauncherActivityInfo {
      * @param info ResolveInfo from which to create the LauncherActivityInfo.
      * @param user The UserHandle of the profile to which this activity belongs.
      */
-    LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user,
-            long firstInstallTime) {
+    LauncherActivityInfo(Context context, ActivityInfo info, UserHandle user) {
         this(context);
-        mResolveInfo = info;
-        mActivityInfo = info.activityInfo;
-        mComponentName = LauncherApps.getComponentName(info);
+        mActivityInfo = info;
+        mComponentName =  new ComponentName(info.packageName, info.name);
         mUser = user;
-        mFirstInstallTime = firstInstallTime;
     }
 
     LauncherActivityInfo(Context context) {
@@ -94,7 +89,7 @@ public class LauncherActivityInfo {
      * @return The label for the activity.
      */
     public CharSequence getLabel() {
-        return mResolveInfo.loadLabel(mPm);
+        return mActivityInfo.loadLabel(mPm);
     }
 
     /**
@@ -106,53 +101,22 @@ public class LauncherActivityInfo {
      * @return The drawable associated with the activity.
      */
     public Drawable getIcon(int density) {
-        final int iconRes = mResolveInfo.getIconResource();
-        Drawable icon = getDrawableForDensity(iconRes, density);
-        // Get the default density icon
-        if (icon == null) {
-            icon = mResolveInfo.loadIcon(mPm);
-        }
-        return icon;
-    }
-
-    /**
-     * Returns the icon for this activity, without any badging for the profile.
-     * This function can get the icon no matter the icon needs to be badged or not.
-     * @param density The preferred density of the icon, zero for default density. Use
-     * density DPI values from {@link DisplayMetrics}.
-     * @see #getBadgedIcon(int)
-     * @see DisplayMetrics
-     * @return The drawable associated with the activity.
-     */
-    private Drawable getOriginalIcon(int density) {
-        final int iconRes = mResolveInfo.getIconResourceInternal();
-        Drawable icon = getDrawableForDensity(iconRes, density);
-        // Get the default density icon
-        if (icon == null) {
-            icon = mResolveInfo.loadIcon(mPm);
-        }
-        return icon;
-    }
-
-    /**
-     * Returns the drawable for this activity, without any badging for the profile.
-     * @param resource id of the drawable.
-     * @param density The preferred density of the icon, zero for default density. Use
-     * density DPI values from {@link DisplayMetrics}.
-     * @see DisplayMetrics
-     * @return The drawable associated with the resource id.
-     */
-    private Drawable getDrawableForDensity(int iconRes, int density) {
+        final int iconRes = mActivityInfo.getIconResource();
+        Drawable icon = null;
         // Get the preferred density icon from the app's resources
         if (density != 0 && iconRes != 0) {
             try {
                 final Resources resources
                         = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
-                return resources.getDrawableForDensity(iconRes, density);
+                icon = resources.getDrawableForDensity(iconRes, density);
             } catch (NameNotFoundException | Resources.NotFoundException exc) {
             }
         }
-        return null;
+        // Get the default density icon
+        if (icon == null) {
+            icon = mActivityInfo.loadIcon(mPm);
+        }
+        return icon;
     }
 
     /**
@@ -179,7 +143,13 @@ public class LauncherActivityInfo {
      * @return The time of installation of the package, in milliseconds.
      */
     public long getFirstInstallTime() {
-        return mFirstInstallTime;
+        try {
+            return mPm.getPackageInfo(mActivityInfo.packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES).firstInstallTime;
+        } catch (NameNotFoundException nnfe) {
+            // Sorry, can't find package
+            return 0;
+        }
     }
 
     /**
@@ -198,7 +168,7 @@ public class LauncherActivityInfo {
      * @return A badged icon for the activity.
      */
     public Drawable getBadgedIcon(int density) {
-        Drawable originalIcon = getOriginalIcon(density);
+        Drawable originalIcon = getIcon(density);
 
         if (originalIcon instanceof BitmapDrawable) {
             return mPm.getUserBadgedIcon(originalIcon, mUser);

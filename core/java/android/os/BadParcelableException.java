@@ -15,11 +15,15 @@
  */
 
 package android.os;
+
 import android.util.AndroidRuntimeException;
 
 /**
- * The object you are calling has died, because its hosting process
- * no longer exists.
+ * Exception thrown when a {@link Parcelable} is malformed or otherwise invalid.
+ * <p>
+ * This is typically encountered when a custom {@link Parcelable} object is
+ * passed to another process that doesn't have the same {@link Parcelable} class
+ * in its {@link ClassLoader}.
  */
 public class BadParcelableException extends AndroidRuntimeException {
     public BadParcelableException(String msg) {

@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -186,7 +187,6 @@ public class MenuBuilder implements Menu {
     public MenuBuilder(Context context) {
         mContext = context;
         mResources = context.getResources();
-        
         mItems = new ArrayList<MenuItemImpl>();
         
         mVisibleItems = new ArrayList<MenuItemImpl>();
@@ -791,7 +791,7 @@ public class MenuBuilder implements Menu {
         }
         
         if ((flags & FLAG_ALWAYS_PERFORM_CLOSE) != 0) {
-            close(true);
+            close(true /* closeAllMenus */);
         }
         
         return handled;
@@ -907,10 +907,10 @@ public class MenuBuilder implements Menu {
         final boolean providerHasSubMenu = provider != null && provider.hasSubMenu();
         if (itemImpl.hasCollapsibleActionView()) {
             invoked |= itemImpl.expandActionView();
-            if (invoked) close(true);
+            if (invoked) {
+                close(true /* closeAllMenus */);
+            }
         } else if (itemImpl.hasSubMenu() || providerHasSubMenu) {
-            close(false);
-
             if (!itemImpl.hasSubMenu()) {
                 itemImpl.setSubMenu(new SubMenuBuilder(getContext(), this, itemImpl));
             }
@@ -920,10 +920,12 @@ public class MenuBuilder implements Menu {
                 provider.onPrepareSubMenu(subMenu);
             }
             invoked |= dispatchSubMenuSelected(subMenu, preferredPresenter);
-            if (!invoked) close(true);
+            if (!invoked) {
+                close(true /* closeAllMenus */);
+            }
         } else {
             if ((flags & FLAG_PERFORM_NO_CLOSE) == 0) {
-                close(true);
+                close(true /* closeAllMenus */);
             }
         }
         
@@ -931,15 +933,14 @@ public class MenuBuilder implements Menu {
     }
     
     /**
-     * Closes the visible menu.
-     * 
-     * @param allMenusAreClosing Whether the menus are completely closing (true),
-     *            or whether there is another menu coming in this menu's place
-     *            (false). For example, if the menu is closing because a
-     *            sub menu is about to be shown, <var>allMenusAreClosing</var>
-     *            is false.
+     * Closes the menu.
+     *
+     * @param closeAllMenus {@code true} if all displayed menus and submenus
+     *                      should be completely closed (as when a menu item is
+     *                      selected) or {@code false} if only this menu should
+     *                      be closed
      */
-    public final void close(boolean allMenusAreClosing) {
+    public final void close(boolean closeAllMenus) {
         if (mIsClosing) return;
 
         mIsClosing = true;
@@ -948,7 +949,7 @@ public class MenuBuilder implements Menu {
             if (presenter == null) {
                 mPresenters.remove(ref);
             } else {
-                presenter.onCloseMenu(this, allMenusAreClosing);
+                presenter.onCloseMenu(this, closeAllMenus);
             }
         }
         mIsClosing = false;
@@ -956,7 +957,7 @@ public class MenuBuilder implements Menu {
 
     /** {@inheritDoc} */
     public void close() {
-        close(true);
+        close(true /* closeAllMenus */);
     }
 
     /**
@@ -1019,23 +1020,24 @@ public class MenuBuilder implements Menu {
         mIsActionItemsStale = true;
         onItemsChanged(true);
     }
-    
+
+    @NonNull
     public ArrayList<MenuItemImpl> getVisibleItems() {
         if (!mIsVisibleItemsStale) return mVisibleItems;
-        
+
         // Refresh the visible items
         mVisibleItems.clear();
-        
+
         final int itemsSize = mItems.size(); 
         MenuItemImpl item;
         for (int i = 0; i < itemsSize; i++) {
             item = mItems.get(i);
             if (item.isVisible()) mVisibleItems.add(item);
         }
-        
+
         mIsVisibleItemsStale = false;
         mIsActionItemsStale = true;
-        
+
         return mVisibleItems;
     }
 

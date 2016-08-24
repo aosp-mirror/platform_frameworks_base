@@ -36,22 +36,97 @@ import java.lang.reflect.Array;
         mSpanData = EmptyArray.INT;
 
         if (source instanceof Spanned) {
-            Spanned sp = (Spanned) source;
-            Object[] spans = sp.getSpans(start, end, Object.class);
-
-            for (int i = 0; i < spans.length; i++) {
-                int st = sp.getSpanStart(spans[i]);
-                int en = sp.getSpanEnd(spans[i]);
-                int fl = sp.getSpanFlags(spans[i]);
-
-                if (st < start)
-                    st = start;
-                if (en > end)
-                    en = end;
-
-                setSpan(spans[i], st - start, en - start, fl);
+            if (source instanceof SpannableStringInternal) {
+                copySpans((SpannableStringInternal) source, start, end);
+            } else {
+                copySpans((Spanned) source, start, end);
             }
         }
+    }
+
+    /**
+     * Copies another {@link Spanned} object's spans between [start, end] into this object.
+     *
+     * @param src Source object to copy from.
+     * @param start Start index in the source object.
+     * @param end End index in the source object.
+     */
+    private final void copySpans(Spanned src, int start, int end) {
+        Object[] spans = src.getSpans(start, end, Object.class);
+
+        for (int i = 0; i < spans.length; i++) {
+            int st = src.getSpanStart(spans[i]);
+            int en = src.getSpanEnd(spans[i]);
+            int fl = src.getSpanFlags(spans[i]);
+
+            if (st < start)
+                st = start;
+            if (en > end)
+                en = end;
+
+            setSpan(spans[i], st - start, en - start, fl);
+        }
+    }
+
+    /**
+     * Copies a {@link SpannableStringInternal} object's spans between [start, end] into this
+     * object.
+     *
+     * @param src Source object to copy from.
+     * @param start Start index in the source object.
+     * @param end End index in the source object.
+     */
+    private final void copySpans(SpannableStringInternal src, int start, int end) {
+        if (start == 0 && end == src.length()) {
+            mSpans = ArrayUtils.newUnpaddedObjectArray(src.mSpans.length);
+            mSpanData = new int[src.mSpanData.length];
+            mSpanCount = src.mSpanCount;
+            System.arraycopy(src.mSpans, 0, mSpans, 0, src.mSpans.length);
+            System.arraycopy(src.mSpanData, 0, mSpanData, 0, mSpanData.length);
+        } else {
+            int count = 0;
+            int[] srcData = src.mSpanData;
+            int limit = src.mSpanCount;
+            for (int i = 0; i < limit; i++) {
+                int spanStart = srcData[i * COLUMNS + START];
+                int spanEnd = srcData[i * COLUMNS + END];
+                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+                count++;
+            }
+
+            if (count == 0) return;
+
+            Object[] srcSpans = src.mSpans;
+            mSpanCount = count;
+            mSpans = ArrayUtils.newUnpaddedObjectArray(mSpanCount);
+            mSpanData = new int[mSpanCount * COLUMNS];
+            for (int i = 0, j = 0; i < limit; i++) {
+                int spanStart = srcData[i * COLUMNS + START];
+                int spanEnd = srcData[i * COLUMNS + END];
+                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+                if (spanStart < start) spanStart = start;
+                if (spanEnd > end) spanEnd = end;
+
+                mSpans[j] = srcSpans[i];
+                mSpanData[j * COLUMNS + START] = spanStart - start;
+                mSpanData[j * COLUMNS + END] = spanEnd - start;
+                mSpanData[j * COLUMNS + FLAGS] = srcData[i * COLUMNS + FLAGS];
+                j++;
+            }
+        }
+    }
+
+    /**
+     * Checks if [spanStart, spanEnd] interval is excluded from [start, end].
+     *
+     * @return True if excluded, false if included.
+     */
+    private final boolean isOutOfCopyRange(int start, int end, int spanStart, int spanEnd) {
+        if (spanStart > end || spanEnd < start) return true;
+        if (spanStart != spanEnd && start != end) {
+            if (spanStart == end || spanEnd == start) return true;
+        }
+        return false;
     }
 
     public final int length() {
@@ -234,7 +309,7 @@ import java.lang.reflect.Array;
             }
 
             // verify span class as late as possible, since it is expensive
-            if (kind != null && !kind.isInstance(spans[i])) {
+            if (kind != null && kind != Object.class && !kind.isInstance(spans[i])) {
                 continue;
             }
 

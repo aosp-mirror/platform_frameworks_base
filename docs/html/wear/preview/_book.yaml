@@ -1,0 +1,32 @@
+toc:
+- title: Wear Developer Preview
+  path: /wear/preview/index.html
+
+- title: Program Overview
+  path: /wear/preview/program.html
+
+- title: API Overview
+  path: /wear/preview/api-overview.html
+  section:
+  - title: Notification Improvements
+    path: /wear/preview/features/notifications.html
+  - title: Input Method Framework
+    path: /wear/preview/features/ime.html
+  - title: Complications
+    path: /wear/preview/features/complications.html
+  - title: Navigation and Actions
+    path: /wear/preview/features/ui-nav-actions.html
+  - title: Bridging for Notifications
+    path: /wear/preview/features/bridger.html
+
+- title: Get Started
+  path: /wear/preview/start.html
+
+- title: Download and Test
+  path: /wear/preview/downloads.html
+
+- title: License Agreement
+  path: /wear/preview/license.html
+
+- title: Support and Release Notes
+  path: /wear/preview/support.html

@@ -17,10 +17,6 @@
 package android.content;
 
 import android.app.ActivityManagerNative;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IIntentSender;
-import android.content.IIntentReceiver;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -191,7 +187,8 @@ public class IntentSender implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = mTarget.send(code, intent, resolvedType,
+            int res = ActivityManagerNative.getDefault().sendIntentSender(mTarget,
+                    code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,

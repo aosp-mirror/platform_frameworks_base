@@ -23,10 +23,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.test.suitebuilder.annotation.LargeTest;
-
 import com.google.mockwebserver.MockResponse;
 
 import java.io.File;
+import java.util.concurrent.TimeoutException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -77,7 +77,11 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         request.setTitle(DEFAULT_FILENAME);
 
         long dlRequest = mDownloadManager.enqueue(request);
-        waitForDownloadOrTimeout(dlRequest);
+        try {
+            waitForDownloadOrTimeout(dlRequest);
+        } catch (TimeoutException ex) {
+            // it is expected to timeout as download never finishes
+        }
 
         Cursor cursor = getCursor(dlRequest);
         try {
@@ -112,7 +116,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         verifyDownload(dlRequest, blobData);
         mDownloadManager.remove(dlRequest);
     }
-    
+
     /**
      * Helper to verify a standard single-file download from the mock server, and clean up after
      * verification
@@ -133,9 +137,7 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
 
             verifyFileSize(pfd, fileSize);
             verifyFileContents(pfd, fileData);
-            int colIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
-            String fileName = cursor.getString(colIndex);
-            assertTrue(fileName.startsWith(CACHE_DIR));
+            assertTrue(new File(CACHE_DIR + "/" + DEFAULT_FILENAME).exists());
         } finally {
             pfd.close();
             cursor.close();
@@ -159,7 +161,6 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
 
             Uri localUri = Uri.fromFile(existentFile);
             request.setDestinationUri(localUri);
-
             long dlRequest = mDownloadManager.enqueue(request);
 
             // wait for the download to complete
@@ -283,20 +284,30 @@ public class DownloadManagerFunctionalTest extends DownloadManagerBaseTest {
         Uri uri = getServerUri(DEFAULT_FILENAME);
         enqueueResponse(buildResponse(HTTP_PARTIAL_CONTENT));
 
-        doErrorTest(uri, DownloadManager.ERROR_UNHANDLED_HTTP_CODE);
+        doErrorTest(uri, DownloadManager.ERROR_CANNOT_RESUME);
     }
 
     /**
      * Tests the download failure error from an unhandled HTTP status code
      */
     @LargeTest
-    public void testErrorHttpDataError_invalidRedirect() throws Exception {
+    public void testRelativeRedirect() throws Exception {
         Uri uri = getServerUri(DEFAULT_FILENAME);
         final MockResponse resp = buildResponse(HTTP_REDIRECT);
-        resp.setHeader("Location", "://blah.blah.blah.com");
+        resp.setHeader("Location", ":" + uri.getSchemeSpecificPart());
         enqueueResponse(resp);
 
-        doErrorTest(uri, DownloadManager.ERROR_HTTP_DATA_ERROR);
+        byte[] blobData = generateData(DEFAULT_FILE_SIZE, DataType.TEXT);
+        enqueueResponse(buildResponse(HTTP_OK, blobData));
+
+        Request request = new Request(uri);
+        request.setTitle(DEFAULT_FILENAME);
+
+        long dlRequest = mDownloadManager.enqueue(request);
+        waitForDownloadOrTimeout(dlRequest);
+
+        verifyAndCleanupSingleFileDownload(dlRequest, blobData);
+        assertEquals(1, mReceiver.numDownloadsCompleted());
     }
 
     /**

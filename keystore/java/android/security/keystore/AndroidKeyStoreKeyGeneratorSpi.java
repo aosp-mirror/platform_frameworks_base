@@ -233,7 +233,9 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 // not set up).
                 KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
                         spec.isUserAuthenticationRequired(),
-                        spec.getUserAuthenticationValidityDurationSeconds());
+                        spec.getUserAuthenticationValidityDurationSeconds(),
+                        spec.isUserAuthenticationValidWhileOnBody(),
+                        spec.isInvalidatedByBiometricEnrollment());
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -271,7 +273,9 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
         KeymasterUtils.addUserAuthArgs(args,
                 spec.isUserAuthenticationRequired(),
-                spec.getUserAuthenticationValidityDurationSeconds());
+                spec.getUserAuthenticationValidityDurationSeconds(),
+                spec.isUserAuthenticationValidWhileOnBody(),
+                spec.isInvalidatedByBiometricEnrollment());
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,
@@ -297,11 +301,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         KeyCharacteristics resultingKeyCharacteristics = new KeyCharacteristics();
         boolean success = false;
         try {
-            Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+            Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias(), spec.getUid());
             int errorCode = mKeyStore.generateKey(
                     keyAliasInKeystore,
                     args,
                     additionalEntropy,
+                    spec.getUid(),
                     flags,
                     resultingKeyCharacteristics);
             if (errorCode != KeyStore.NO_ERROR) {
@@ -315,12 +320,14 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
             } catch (IllegalArgumentException e) {
                 throw new ProviderException("Failed to obtain JCA secret key algorithm name", e);
             }
-            SecretKey result = new AndroidKeyStoreSecretKey(keyAliasInKeystore, keyAlgorithmJCA);
+            SecretKey result = new AndroidKeyStoreSecretKey(
+                    keyAliasInKeystore, spec.getUid(), keyAlgorithmJCA);
             success = true;
             return result;
         } finally {
             if (!success) {
-                Credentials.deleteAllTypesForAlias(mKeyStore, spec.getKeystoreAlias());
+                Credentials.deleteAllTypesForAlias(
+                        mKeyStore, spec.getKeystoreAlias(), spec.getUid());
             }
         }
     }

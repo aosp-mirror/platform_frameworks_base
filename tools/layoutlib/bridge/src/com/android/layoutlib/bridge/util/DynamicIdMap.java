@@ -27,8 +27,8 @@ import java.util.Map;
 
 public class DynamicIdMap {
 
-    private final Map<Pair<ResourceType, String>, Integer> mDynamicIds = new HashMap<Pair<ResourceType, String>, Integer>();
-    private final SparseArray<Pair<ResourceType, String>> mRevDynamicIds = new SparseArray<Pair<ResourceType, String>>();
+    private final Map<Pair<ResourceType, String>, Integer> mDynamicIds = new HashMap<>();
+    private final SparseArray<Pair<ResourceType, String>> mRevDynamicIds = new SparseArray<>();
     private int mDynamicSeed;
 
     public DynamicIdMap(int seed) {

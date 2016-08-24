@@ -89,7 +89,12 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             return true;
         }
         if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-            int number = keyCode - KeyEvent.KEYCODE_0 ;
+            int number = keyCode - KeyEvent.KEYCODE_0;
+            performNumberClick(number);
+            return true;
+        }
+        if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+            int number = keyCode - KeyEvent.KEYCODE_NUMPAD_0;
             performNumberClick(number);
             return true;
         }
@@ -103,8 +108,14 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
                 return R.string.kg_prompt_reason_restart_pin;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_pin;
-            default:
+            case PROMPT_REASON_DEVICE_ADMIN:
+                return R.string.kg_prompt_reason_device_admin;
+            case PROMPT_REASON_USER_REQUEST:
+                return R.string.kg_prompt_reason_user_request;
+            case PROMPT_REASON_NONE:
                 return 0;
+            default:
+                return R.string.kg_prompt_reason_timeout_pin;
         }
     }
 
@@ -148,8 +159,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected void resetPasswordText(boolean animate) {
-        mPasswordEntry.reset(animate);
+    protected void resetPasswordText(boolean animate, boolean announce) {
+        mPasswordEntry.reset(animate, announce);
     }
 
     @Override
@@ -203,7 +214,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             public boolean onLongClick(View v) {
                 // check for time-based lockouts
                 if (mPasswordEntry.isEnabled()) {
-                    resetPasswordText(true /* animate */);
+                    resetPasswordText(true /* animate */, true /* announce */);
                 }
                 doHapticKeyClick();
                 return true;
@@ -228,8 +239,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            onKeyDown(keyCode, event);
-            return true;
+            return onKeyDown(keyCode, event);
         }
         return false;
     }

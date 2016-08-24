@@ -150,7 +150,13 @@ class ActivityTransitionState {
     }
 
     public void setEnterActivityOptions(Activity activity, ActivityOptions options) {
-        if (activity.getWindow().hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        final Window window = activity.getWindow();
+        if (window == null) {
+            return;
+        }
+        // ensure Decor View has been created so that the window features are activated
+        window.getDecorView();
+        if (window.hasFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
                 && options != null && mEnterActivityOptions == null
                 && mEnterTransitionCoordinator == null
                 && options.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
@@ -200,7 +206,7 @@ class ActivityTransitionState {
     }
 
     private void startEnter() {
-        if (mEnterActivityOptions.isReturning()) {
+        if (mEnterTransitionCoordinator.isReturning()) {
             if (mExitingToView != null) {
                 mEnterTransitionCoordinator.viewInstancesReady(mExitingFrom, mExitingTo,
                         mExitingToView);
@@ -230,8 +236,24 @@ class ActivityTransitionState {
         }
     }
 
-    public void onResume() {
-        restoreExitedViews();
+    public void onResume(Activity activity, boolean isTopOfTask) {
+        // After orientation change, the onResume can come in before the top Activity has
+        // left, so if the Activity is not top, wait a second for the top Activity to exit.
+        if (isTopOfTask || mEnterTransitionCoordinator == null) {
+            restoreExitedViews();
+            restoreReenteringViews();
+        } else {
+            activity.mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mEnterTransitionCoordinator == null ||
+                            mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
+                        restoreExitedViews();
+                        restoreReenteringViews();
+                    }
+                }
+            }, 1000);
+        }
     }
 
     public void clear() {
@@ -252,8 +274,17 @@ class ActivityTransitionState {
         }
     }
 
+    private void restoreReenteringViews() {
+        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning()) {
+            mEnterTransitionCoordinator.forceViewsToAppear();
+            mExitingFrom = null;
+            mExitingTo = null;
+            mExitingToView = null;
+        }
+    }
+
     public boolean startExitBackTransition(final Activity activity) {
-        if (mEnteringNames == null) {
+        if (mEnteringNames == null || mCalledExitCoordinator != null) {
             return false;
         } else {
             if (!mHasExited) {

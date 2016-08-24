@@ -1,0 +1,257 @@
+page.title=Accessibility Testing Checklist
+page.tags=testing,accessibility
+
+trainingnavtop=true
+startpage=true
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+  <h2>Checklist sections</h2>
+  <ol>
+    <li><a href="#goals">Testing Goals</a></li>
+    <li><a href="#requirements">Testing Requirements</a></li>
+    <li><a href="#recommendations">Testing Recommendations</a></li>
+    <li><a href="#special-cases">Special Cases and Considerations</a></li>
+    <li><a href="#how-to">Testing Accessibility Features</a>
+      <ol>
+        <li><a href="#test-audibles">Testing audible feedback</a></li>
+        <li><a href="#test-navigation">Testing focus navigation</a></li>
+        <li><a href="#test-gestures">Testing gesture navigation</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>You should also read</h2>
+    <ol>
+      <li>
+        <a href="{@docRoot}guide/topics/ui/accessibility/checklist.html">
+        Accessibility Developer Checklist</a>
+      </li>
+      <li>
+        <a href="{@docRoot}design/patterns/accessibility.html">
+        Android Design: Accessibility</a>
+      </li>
+      <li>
+        <a href="{@docRoot}guide/topics/ui/accessibility/apps.html">
+        Making Applications Accessible</a>
+      </li>
+    </ol>
+  </div>
+</div>
+<p>
+  Testing is an important part of making your application accessible to users with varying
+  abilities. Following <a href="{@docRoot}design/patterns/accessibility.html">design</a> and
+  <a href="{@docRoot}guide/topics/ui/accessibility/checklist.html">development</a> guidelines for
+  accessibility are important steps toward that goal, but testing for accessibility can uncover
+  problems with user interaction that are not obvious during design and development.</p>
+
+<p>This accessibility testing checklist guides you through the important aspects of
+  accessibility testing, including overall goals, required testing steps, recommended testing and
+  special considerations. This document also discusses how to enable accessibility features on
+  Android devices for testing purposes.</p>
+
+
+<h2 id="goals">Testing Goals</h2>
+
+<p>Your accessibility testing should have the following, high level goals:</p>
+
+<ul>
+  <li>Set up and use the application without sighted assistance</li>
+  <li>All task workflows in the application can be easily navigated using directional controls and
+    provide clear and appropriate feedback</li>
+</ul>
+
+
+<h2 id="requirements">Testing Requirements</h2>
+
+<p>The following tests must be completed in order to ensure a minimum level of application
+  accessibility.</p>
+
+<ol>
+  <li><strong>Directional controls:</strong> Verify that the application can be operated
+    without the use of a touch screen. Attempt to use only directional controls to accomplish the
+    primary tasks in the application. Use the keyboard and directional-pad (D-Pad) controls in the
+    Android <a href="{@docRoot}tools/devices/emulator.html">Emulator</a> or use
+    <a href="http://support.google.com/nexus/bin/answer.py?hl=en&answer=2700718">gesture
+    navigation</a> on devices with Android 4.1 (API Level 16) or higher.
+    <p class="note"><strong>Note:</strong> Keyboards and D-pads provide different navigation paths
+    than accessibility gestures. While gestures allow users to focus on nearly any on-screen
+    content, keyboard and D-pad navigation only allow focus on input fields and buttons.</p>
+    </li>
+  <li><strong>TalkBack audio prompts:</strong> Verify that user interface controls that provide
+    information (graphics or text) or allow user action have clear and accurate audio descriptions
+    when <a href="#testing-talkback">TalkBack is enabled</a> and controls are focused. Use
+    directional controls to move focus between application layout elements.</li>
+  <li><strong>Explore by Touch prompts:</strong> Verify that user interface controls that
+    provide information (graphics or text) or allow user action have appropriate audio descriptions
+    when <a href="#testing-ebt">Explore by Touch is enabled</a>. There should be no
+    regions where contents or controls do not provide an audio description.</li>
+  <li><strong>Touchable control sizes:</strong> All controls where a user can select or take an
+    action must be a minimum of 48 dp (approximately 9mm) in length and width, as recommended by
+    <a href="{@docRoot}design/patterns/accessibility.html">Android Design</a>.</li>
+  <li><strong>Gestures work with TalkBack enabled:</strong> Verify that app-specific gestures,
+    such as zooming images, scrolling lists, swiping between pages or navigating carousel controls
+    continue to work when <a href="#testing-talkback">TalkBack is enabled</a>. If these gestures do
+    not function, then an alternative interface for these actions must be provided.</li>
+  <li><strong>No audio-only feedback:</strong> Audio feedback must always have a secondary
+    feedback mechanism to support users who are deaf or hard of hearing, for example: A sound alert
+    for the arrival of a message should also be accompanied by a system
+    {@link android.app.Notification}, haptic feedback (if available) or another visual alert.</li>
+</ol>
+
+
+<h2 id="recommendations">Testing Recommendations</h2>
+
+<p>The following tests are recommended for ensuring the accessibility of your application. If you
+  do not test these items, it may impact the overall accessibility and quality of your
+  application.</p>
+
+<ol>
+  <li><strong>Repetitive audio prompting:</strong> Check that closely related controls (such as
+    items with multiple components in a list) do not simply repeat the same audio prompt. For
+    example, in a contacts list that contains a contact picture, written name and title, the prompts
+    should not simply repeat “Bob Smith” for each item.</li>
+  <li><strong>Audio prompt overloading or underloading:</strong> Check that closely related
+    controls provide an appropriate level of audio information that enables users to understand and
+    act on a screen element. Too little or too much prompting can make it difficult to understand
+    and use a control.</li>
+</ol>
+
+
+<h2 id="special-cases">Special Cases and Considerations</h2>
+
+<p>The following list describes specific situations that should be tested to ensure an
+  accessible app. Some, none or all of the cases described here may apply to your application. Be
+  sure to review this list to find out if these special cases apply and take appropriate action.</p>
+
+<ol>
+  <li><strong>Review developer special cases and considerations:</strong> Review the list of
+    <a href="{@docRoot}guide/topics/ui/accessibility/checklist.html#special-cases">special cases</a>
+     for accessibility development and test your application for the cases that apply.</li>
+  <li><strong>Prompts for controls that change function:</strong> Buttons or other controls
+    that change function due to application context or workflow must provide audio prompts
+    appropriate to their current function. For example, a button that changes function from play
+    video to pause video should provide an audio prompt which is appropriate to its current state.</li>
+  <li><strong>Video playback and captioning:</strong> If the application provides video
+    playback, verify that it supports captioning and subtitles to assist users who are deaf or hard
+    of hearing. The video playback controls must clearly indicate if captioning is available for a
+    video and provide a clear way of enabling captions.</li>
+</ol>
+
+
+<h2 id="how-to">Testing Accessibility Features</h2>
+
+<p>Testing of accessibility features such as TalkBack, Explore by Touch and accessibility Gestures
+requires setup of your testing device. This section describes how to enable these features for
+accessibility testing.</p>
+
+
+<h3 id="test-audibles">Testing audible feedback</h3>
+
+<p>Audible accessibility feedback features on Android devices provide audio prompts that speaks
+  the screen content as you move around an application. By enabling these features on an Android
+  device, you can test the experience of users with blindness or low-vision using your application.
+</p>
+
+<p>Audible feedback for users on Android is typically provided by TalkBack accessibility service and
+the Explore by Touch system feature. The TalkBack accessibility service comes preinstalled on most
+Android devices and can also be downloaded for free from
+<a href="https://play.google.com/store/apps/details?id=com.google.android.marvin.talkback">Google
+Play</a>.
+</p>
+
+<h4 id="testing-talkback">Testing with TalkBack</h4>
+
+<p>The <em>TalkBack</em> accessibility service works by speaking the contents of user interface
+controls as the user moves focus onto controls. This service should be enabled as part of testing
+focus navigation and audible prompts.</p>
+
+<p>To enable the TalkBack accessibility service:</p>
+<ol>
+  <li>Launch the <strong>Settings</strong> application.</li>
+  <li>Navigate to the <strong>Accessibility</strong> category and select it.</li>
+  <li>Select <strong>Accessibility</strong> to enable it.</li>
+  <li>Select <strong>TalkBack</strong> to enable it.</li>
+</ol>
+
+<p class="note">
+  <strong>Note:</strong> While TalkBack is the most available Android accessibility service for
+  users with disabilities, other accessibility services are available and may be installed by users.
+</p>
+
+<p>For more information about using TalkBack, see
+<a href="https://support.google.com/accessibility/android/topic/3529932">TalkBack</a>.</p>
+
+<h4 id="testing-ebt">Testing with Explore by Touch</h4>
+
+<p>The <em>Explore by Touch</em> system feature is available on devices running Android 4.0 and
+  later, and works by enabling a special accessibility mode that allows users to drag a finger
+  around the interface of an application and hear the contents of the screen spoken. This feature
+  does not require screen elements to be focused using an directional controller, but listens for
+  hover events over user interface controls.
+</p>
+
+<p>To enable Explore by Touch:</p>
+<ol>
+  <li>Launch the <strong>Settings</strong> application.</li>
+  <li>Navigate to the <strong>Accessibility</strong> category and select it.</li>
+  <li>Select the <strong>TalkBack</strong> to enable it.
+      <p class="note"><strong>Note:</strong> On Android 4.1 (API Level 16) and higher, the system
+      provides a popup message to enable Explore by Touch. On older versions, you must follow the
+      step below.</p>
+  </li>
+  <li>Return to the <strong>Accessibility</strong> category and select <strong>Explore by
+Touch</strong> to enable it.
+    <p class="note"><strong>Note:</strong> You must turn on TalkBack <em>first</em>, otherwise this
+option is not available.</p>
+  </li>
+</ol>
+
+<p>For more information about using the Explore by Touch features, see
+<a href="https://support.google.com/accessibility/android/answer/6006598">Touch Exploration</a>.</p>
+
+<h3 id="test-navigation">Testing focus navigation</h3>
+
+<p>Focus navigation is the use of directional controls to navigate between the individual user
+  interface elements of an application in order to operate it. Users with limited vision or limited
+  manual dexterity often use this mode of navigation instead of touch navigation. As part of
+  accessibility testing, you should verify that your application can be operated using only
+  directional controls.</p>
+
+<p>You can test navigation of your application using only focus controls, even if your test devices
+  does not have a directional controller. The <a href="{@docRoot}tools/help/emulator.html">Android
+  Emulator</a> provides a simulated directional controller that you can use to test navigation. You
+  can also use a software-based directional controller, such as the one provided by the
+  <a href="https://play.google.com/store/apps/details?id=com.googlecode.eyesfree.inputmethod.latin"
+  >Eyes-Free Keyboard</a> to simulate use of a D-pad on a test device that does not have a physical
+  D-pad.</p>
+
+
+<h3 id="test-gestures">Testing gesture navigation</h3>
+
+<p>Gesture navigation is an accessibility navigation mode that allows users to navigate Android
+  devices and applications using specific
+  <a href="https://support.google.com/accessibility/android/answer/6006598">gestures</a>. This
+  navigation mode is available on Android 4.1 (API Level 16) and higher.</p>
+
+<p class="note"><strong>Note:</strong> Accessibility gestures provide a different navigation path
+than keyboards and D-pads. While gestures allow users to focus on nearly any on-screen
+content, keyboard and D-pad navigation only allow focus on input fields and buttons.</p>
+
+<p>To enable gesture navigation:</p>
+<ul>
+  <li>Enable both TalkBack and the Explore by Touch feature as described in the
+    <a href="#testing-ebt">Testing with Explore by Touch</a>. When <em>both</em> of these
+    features are enabled, accessibility gestures are automatically enabled.</li>
+  <li>You can change gesture settings using <strong>Settings &gt; Accessibility &gt; TalkBack &gt;
+    Settings &gt; Manage shortcut gestures</strong>.
+</ul>
+
+<p>For more information about using Explore by Touch accessibility gestures, see
+<a href="https://support.google.com/accessibility/android/answer/6006598">Touch Exploration</a>.</p>
+
+<p class="note">
+  <strong>Note:</strong> Accessibility services other than TalkBack may map accessibility gestures
+  to different user actions. If gestures are not producing the expected actions during testing, try
+  disabling other accessibility services before proceeding.</p>

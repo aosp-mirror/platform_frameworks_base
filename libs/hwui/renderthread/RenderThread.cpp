@@ -25,12 +25,11 @@
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <sys/resource.h>
+#include <utils/Condition.h>
 #include <utils/Log.h>
+#include <utils/Mutex.h>
 
 namespace android {
-using namespace uirenderer::renderthread;
-ANDROID_SINGLETON_STATIC_INSTANCE(RenderThread);
-
 namespace uirenderer {
 namespace renderthread {
 
@@ -136,7 +135,22 @@ public:
     }
 };
 
-RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
+static bool gHasRenderThreadInstance = false;
+
+bool RenderThread::hasInstance() {
+    return gHasRenderThreadInstance;
+}
+
+RenderThread& RenderThread::getInstance() {
+    // This is a pointer because otherwise __cxa_finalize
+    // will try to delete it like a Good Citizen but that causes us to crash
+    // because we don't want to delete the RenderThread normally.
+    static RenderThread* sInstance = new RenderThread();
+    gHasRenderThreadInstance = true;
+    return *sInstance;
+}
+
+RenderThread::RenderThread() : Thread(true)
         , mNextWakeup(LLONG_MAX)
         , mDisplayEventReceiver(nullptr)
         , mVsyncRequested(false)
@@ -310,6 +324,19 @@ void RenderThread::queue(RenderTask* task) {
         mNextWakeup = 0;
         mLooper->wake();
     }
+}
+
+void RenderThread::queueAndWait(RenderTask* task) {
+    // These need to be local to the thread to avoid the Condition
+    // signaling the wrong thread. The easiest way to achieve that is to just
+    // make this on the stack, although that has a slight cost to it
+    Mutex mutex;
+    Condition condition;
+    SignalingRenderTask syncTask(task, &mutex, &condition);
+
+    AutoMutex _lock(mutex);
+    queue(&syncTask);
+    condition.wait(mutex);
 }
 
 void RenderThread::queueAtFront(RenderTask* task) {

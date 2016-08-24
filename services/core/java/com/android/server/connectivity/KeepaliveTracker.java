@@ -60,7 +60,7 @@ import static android.net.NetworkAgent.EVENT_PACKET_KEEPALIVE;
 public class KeepaliveTracker {
 
     private static final String TAG = "KeepaliveTracker";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     public static final String PERMISSION = android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD;
 

@@ -16,17 +16,12 @@
 #ifndef RENDERNODE_H
 #define RENDERNODE_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <SkCamera.h>
 #include <SkMatrix.h>
 
 #include <utils/LinearAllocator.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
@@ -34,9 +29,11 @@
 
 #include "AnimatorManager.h"
 #include "Debug.h"
-#include "Matrix.h"
 #include "DisplayList.h"
+#include "Matrix.h"
 #include "RenderProperties.h"
+
+#include <vector>
 
 class SkBitmap;
 class SkPaint;
@@ -46,33 +43,52 @@ class SkRegion;
 namespace android {
 namespace uirenderer {
 
-class DisplayListOp;
+class CanvasState;
 class DisplayListCanvas;
+class DisplayListOp;
 class OpenGLRenderer;
 class Rect;
-class Layer;
 class SkiaShader;
 
+#if HWUI_NEW_OPS
+class FrameBuilder;
+class OffscreenBuffer;
+struct RenderNodeOp;
+typedef OffscreenBuffer layer_t;
+typedef RenderNodeOp renderNodeOp_t;
+#else
+class Layer;
+typedef Layer layer_t;
+typedef DrawRenderNodeOp renderNodeOp_t;
+#endif
+
 class ClipRectOp;
+class DrawRenderNodeOp;
 class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
-class DrawRenderNodeOp;
 class TreeInfo;
+class TreeObserver;
+
+namespace proto {
+class RenderNode;
+}
 
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
  * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
- * functionality is split between DisplayListCanvas (which manages the recording), DisplayListData
+ * functionality is split between DisplayListCanvas (which manages the recording), DisplayList
  * (which holds the actual data), and DisplayList (which holds properties and performs playback onto
  * a renderer).
  *
- * Note that DisplayListData is swapped out from beneath an individual DisplayList when a view's
- * recorded stream of canvas operations is refreshed. The DisplayList (and its properties) stay
+ * Note that DisplayList is swapped out from beneath an individual RenderNode when a view's
+ * recorded stream of canvas operations is refreshed. The RenderNode (and its properties) stay
  * attached.
  */
 class RenderNode : public VirtualLightRefBase {
+friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
+friend class FrameBuilder;
 public:
     enum DirtyPropertyMask {
         GENERIC         = 1 << 1,
@@ -99,25 +115,29 @@ public:
         kReplayFlag_ClipChildren = 0x1
     };
 
-    static void outputLogBuffer(int fd);
     void debugDumpLayers(const char* prefix);
 
-    ANDROID_API void setStagingDisplayList(DisplayListData* newData);
+    ANDROID_API void setStagingDisplayList(DisplayList* newData, TreeObserver* observer);
 
     void computeOrdering();
 
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
 
+#if HWUI_NEW_OPS
+    ANDROID_API void output(uint32_t level = 0, const char* label = "Root");
+#else
     ANDROID_API void output(uint32_t level = 1);
+#endif
     ANDROID_API int getDebugSize();
+    void copyTo(proto::RenderNode* node);
 
     bool isRenderable() const {
-        return mDisplayListData && !mDisplayListData->isEmpty();
+        return mDisplayList && !mDisplayList->isEmpty();
     }
 
     bool hasProjectionReceiver() const {
-        return mDisplayListData && mDisplayListData->projectionReceiveIndex >= 0;
+        return mDisplayList && mDisplayList->projectionReceiveIndex >= 0;
     }
 
     const char* getName() const {
@@ -133,6 +153,14 @@ public:
                 mName.setTo(name);
             }
         }
+    }
+
+    VirtualLightRefBase* getUserContext() const {
+        return mUserContext.get();
+    }
+
+    void setUserContext(VirtualLightRefBase* context) {
+        mUserContext = context;
     }
 
     bool isPropertyFieldDirty(DirtyPropertyMask field) const {
@@ -159,56 +187,106 @@ public:
         return mStagingProperties;
     }
 
-    int getWidth() {
+    int getWidth() const {
         return properties().getWidth();
     }
 
-    int getHeight() {
+    int getHeight() const {
         return properties().getHeight();
     }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
-    void destroyHardwareResources();
+    void destroyHardwareResources(TreeObserver* observer, TreeInfo* info = nullptr);
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
+
+    // This can only happen during pushStaging()
+    void onAnimatorTargetChanged(BaseRenderNodeAnimator* animator) {
+        mAnimatorManager.onAnimatorTargetChanged(animator);
+    }
 
     AnimatorManager& animators() { return mAnimatorManager; }
 
     void applyViewPropertyTransforms(mat4& matrix, bool true3dTransform = false) const;
 
+    bool nothingToDraw() const {
+        const Outline& outline = properties().getOutline();
+        return mDisplayList == nullptr
+                || properties().getAlpha() <= 0
+                || (outline.getShouldClip() && outline.isEmpty())
+                || properties().getScaleX() == 0
+                || properties().getScaleY() == 0;
+    }
+
+    const DisplayList* getDisplayList() const {
+        return mDisplayList;
+    }
+#if HWUI_NEW_OPS
+    OffscreenBuffer* getLayer() const { return mLayer; }
+    OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
+#endif
+
+    // Note: The position callbacks are relying on the listener using
+    // the frameNumber to appropriately batch/synchronize these transactions.
+    // There is no other filtering/batching to ensure that only the "final"
+    // state called once per frame.
+    class ANDROID_API PositionListener {
+    public:
+        virtual ~PositionListener() {}
+        // Called when the RenderNode's position changes
+        virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) = 0;
+        // Called when the RenderNode no longer has a position. As in, it's
+        // no longer being drawn.
+        // Note, tree info might be null
+        virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
+    };
+
+    // Note this is not thread safe, this needs to be called
+    // before the RenderNode is used for drawing.
+    // RenderNode takes ownership of the pointer
+    ANDROID_API void setPositionListener(PositionListener* listener) {
+        mPositionListener.reset(listener);
+    }
+
+    // This is only modified in MODE_FULL, so it can be safely accessed
+    // on the UI thread.
+    ANDROID_API bool hasParents() {
+        return mParentCount;
+    }
+
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
-    static size_t findNonNegativeIndex(const Vector<ZDrawRenderNodeOpPair>& nodes) {
+    static size_t findNonNegativeIndex(const std::vector<ZDrawRenderNodeOpPair>& nodes) {
         for (size_t i = 0; i < nodes.size(); i++) {
             if (nodes[i].key >= 0.0f) return i;
         }
         return nodes.size();
     }
 
-    enum ChildrenSelectMode {
-        kNegativeZChildren,
-        kPositiveZChildren
+    enum class ChildrenSelectMode {
+        NegativeZChildren,
+        PositiveZChildren
     };
 
-    void computeOrderingImpl(DrawRenderNodeOp* opState,
-            const SkPath* outlineOfProjectionSurface,
-            Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+    void computeOrderingImpl(renderNodeOp_t* opState,
+            std::vector<renderNodeOp_t*>* compositedChildrenOfProjectionSurface,
             const mat4* transformFromProjectionSurface);
 
     template <class T>
     inline void setViewProperties(OpenGLRenderer& renderer, T& handler);
 
-    void buildZSortedChildList(const DisplayListData::Chunk& chunk,
-            Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
+    void buildZSortedChildList(const DisplayList::Chunk& chunk,
+            std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes);
 
     template<class T>
     inline void issueDrawShadowOperation(const Matrix4& transformFromParent, T& handler);
 
     template <class T>
     inline void issueOperationsOf3dChildren(ChildrenSelectMode mode,
-            const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+            const Matrix4& initialTransform, const std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
             OpenGLRenderer& renderer, T& handler);
 
     template <class T>
@@ -235,51 +313,60 @@ private:
         const char* mText;
     };
 
+
+    void syncProperties();
+    void syncDisplayList(TreeInfo* info);
+
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree);
+    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree);
+#if !HWUI_NEW_OPS
     void applyLayerPropertiesToLayer(TreeInfo& info);
+#endif
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void deleteDisplayListData();
+    void deleteDisplayList(TreeObserver* observer, TreeInfo* info = nullptr);
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
-    void decParentRefCount();
+    void decParentRefCount(TreeObserver* observer, TreeInfo* info = nullptr);
 
     String8 mName;
+    sp<VirtualLightRefBase> mUserContext;
 
     uint32_t mDirtyPropertyFields;
     RenderProperties mProperties;
     RenderProperties mStagingProperties;
 
-    bool mNeedsDisplayListDataSync;
-    // WARNING: Do not delete this directly, you must go through deleteDisplayListData()!
-    DisplayListData* mDisplayListData;
-    DisplayListData* mStagingDisplayListData;
+    bool mNeedsDisplayListSync;
+    // WARNING: Do not delete this directly, you must go through deleteDisplayList()!
+    DisplayList* mDisplayList;
+    DisplayList* mStagingDisplayList;
 
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
 
     // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
     // being in ~RenderNode() which may happen on any thread.
-    Layer* mLayer;
+    layer_t* mLayer = nullptr;
 
     /**
      * Draw time state - these properties are only set and used during rendering
      */
 
     // for projection surfaces, contains a list of all children items
-    Vector<DrawRenderNodeOp*> mProjectedNodes;
+    std::vector<renderNodeOp_t*> mProjectedNodes;
 
     // How many references our parent(s) have to us. Typically this should alternate
     // between 2 and 1 (when a staging push happens we inc first then dec)
     // When this hits 0 we are no longer in the tree, so any hardware resources
     // (specifically Layers) should be released.
     // This is *NOT* thread-safe, and should therefore only be tracking
-    // mDisplayListData, not mStagingDisplayListData.
+    // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
+
+    std::unique_ptr<PositionListener> mPositionListener;
 }; // class RenderNode
 
 } /* namespace uirenderer */

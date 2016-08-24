@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.SystemApi;
 import android.media.AudioAttributes;
 import android.os.Parcel;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,21 +42,34 @@ import java.util.Objects;
 @SystemApi
 public class AudioMixingRule {
 
-    private AudioMixingRule(int mixType, ArrayList<AttributeMatchCriterion> criteria) {
+    private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria) {
         mCriteria = criteria;
         mTargetMixType = mixType;
     }
 
     /**
      * A rule requiring the usage information of the {@link AudioAttributes} to match.
+     * This mixing rule can be added with {@link Builder#addRule(AudioAttributes, int)} or
+     * {@link Builder#addMixRule(int, Object)} where the Object parameter is an instance of
+     * {@link AudioAttributes}.
      */
     @SystemApi
     public static final int RULE_MATCH_ATTRIBUTE_USAGE = 0x1;
     /**
      * A rule requiring the capture preset information of the {@link AudioAttributes} to match.
+     * This mixing rule can be added with {@link Builder#addRule(AudioAttributes, int)} or
+     * {@link Builder#addMixRule(int, Object)} where the Object parameter is an instance of
+     * {@link AudioAttributes}.
      */
     @SystemApi
     public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 0x1 << 1;
+    /**
+     * A rule requiring the UID of the audio stream to match that specified.
+     * This mixing rule can be added with {@link Builder#addMixRule(int, Object)} where the Object
+     * parameter is an instance of {@link java.lang.Integer}.
+     */
+    @SystemApi
+    public static final int RULE_MATCH_UID = 0x1 << 2;
 
     private final static int RULE_EXCLUSION_MASK = 0x8000;
     /**
@@ -70,37 +84,61 @@ public class AudioMixingRule {
      */
     public static final int RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET =
             RULE_EXCLUSION_MASK | RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET;
+    /**
+     * @hide
+     * A rule requiring the UID information to differ.
+     */
+    public static final int RULE_EXCLUDE_UID =
+            RULE_EXCLUSION_MASK | RULE_MATCH_UID;
 
-    static final class AttributeMatchCriterion {
-        AudioAttributes mAttr;
-        int mRule;
+    static final class AudioMixMatchCriterion {
+        final AudioAttributes mAttr;
+        final int mIntProp;
+        final int mRule;
 
         /** input parameters must be valid */
-        AttributeMatchCriterion(AudioAttributes attributes, int rule) {
+        AudioMixMatchCriterion(AudioAttributes attributes, int rule) {
             mAttr = attributes;
+            mIntProp = Integer.MIN_VALUE;
+            mRule = rule;
+        }
+        /** input parameters must be valid */
+        AudioMixMatchCriterion(Integer intProp, int rule) {
+            mAttr = null;
+            mIntProp = intProp.intValue();
             mRule = rule;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mAttr, mRule);
+            return Objects.hash(mAttr, mIntProp, mRule);
         }
 
         void writeToParcel(Parcel dest) {
             dest.writeInt(mRule);
-            if ((mRule == RULE_MATCH_ATTRIBUTE_USAGE) || (mRule == RULE_EXCLUDE_ATTRIBUTE_USAGE)) {
+            final int match_rule = mRule & ~RULE_EXCLUSION_MASK;
+            switch (match_rule) {
+            case RULE_MATCH_ATTRIBUTE_USAGE:
                 dest.writeInt(mAttr.getUsage());
-            } else {
-                // capture preset rule
+                break;
+            case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                 dest.writeInt(mAttr.getCapturePreset());
+                break;
+            case RULE_MATCH_UID:
+                dest.writeInt(mIntProp);
+                break;
+            default:
+                Log.e("AudioMixMatchCriterion", "Unknown match rule" + match_rule
+                        + " when writing to Parcel");
+                dest.writeInt(-1);
             }
         }
     }
 
     private final int mTargetMixType;
     int getTargetMixType() { return mTargetMixType; }
-    private final ArrayList<AttributeMatchCriterion> mCriteria;
-    ArrayList<AttributeMatchCriterion> getCriteria() { return mCriteria; }
+    private final ArrayList<AudioMixMatchCriterion> mCriteria;
+    ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
 
     @Override
     public int hashCode() {
@@ -108,7 +146,19 @@ public class AudioMixingRule {
     }
 
     private static boolean isValidSystemApiRule(int rule) {
-        switch(rule) {
+        // API rules only expose the RULE_MATCH_* rules
+        switch (rule) {
+            case RULE_MATCH_ATTRIBUTE_USAGE:
+            case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+            case RULE_MATCH_UID:
+                return true;
+            default:
+                return false;
+        }
+    }
+    private static boolean isValidAttributesSystemApiRule(int rule) {
+        // API rules only expose the RULE_MATCH_* rules
+        switch (rule) {
             case RULE_MATCH_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                 return true;
@@ -117,12 +167,12 @@ public class AudioMixingRule {
         }
     }
 
-    private static boolean isValidIntRule(int rule) {
-        switch(rule) {
+    private static boolean isValidRule(int rule) {
+        final int match_rule = rule & ~RULE_EXCLUSION_MASK;
+        switch (match_rule) {
             case RULE_MATCH_ATTRIBUTE_USAGE:
-            case RULE_EXCLUDE_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-            case RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET:
+            case RULE_MATCH_UID:
                 return true;
             default:
                 return false;
@@ -130,8 +180,24 @@ public class AudioMixingRule {
     }
 
     private static boolean isPlayerRule(int rule) {
-        return ((rule == RULE_MATCH_ATTRIBUTE_USAGE)
-                || (rule == RULE_EXCLUDE_ATTRIBUTE_USAGE));
+        final int match_rule = rule & ~RULE_EXCLUSION_MASK;
+        switch (match_rule) {
+        case RULE_MATCH_ATTRIBUTE_USAGE:
+        case RULE_MATCH_UID:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private static boolean isAudioAttributeRule(int match_rule) {
+        switch(match_rule) {
+            case RULE_MATCH_ATTRIBUTE_USAGE:
+            case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -139,7 +205,7 @@ public class AudioMixingRule {
      */
     @SystemApi
     public static class Builder {
-        private ArrayList<AttributeMatchCriterion> mCriteria;
+        private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
 
         /**
@@ -147,7 +213,7 @@ public class AudioMixingRule {
          */
         @SystemApi
         public Builder() {
-            mCriteria = new ArrayList<AttributeMatchCriterion>();
+            mCriteria = new ArrayList<AudioMixMatchCriterion>();
         }
 
         /**
@@ -158,14 +224,15 @@ public class AudioMixingRule {
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET}.
          * @return the same Builder instance.
          * @throws IllegalArgumentException
+         * @see {@link #excludeRule(AudioAttributes, int)}
          */
         @SystemApi
         public Builder addRule(AudioAttributes attrToMatch, int rule)
                 throws IllegalArgumentException {
-            if (!isValidSystemApiRule(rule)) {
+            if (!isValidAttributesSystemApiRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);
             }
-            return addRuleInt(attrToMatch, rule);
+            return checkAddRuleObjInternal(rule, attrToMatch);
         }
 
         /**
@@ -186,104 +253,221 @@ public class AudioMixingRule {
          *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET}.
          * @return the same Builder instance.
          * @throws IllegalArgumentException
+         * @see {@link #addRule(AudioAttributes, int)}
          */
         @SystemApi
         public Builder excludeRule(AudioAttributes attrToMatch, int rule)
                 throws IllegalArgumentException {
+            if (!isValidAttributesSystemApiRule(rule)) {
+                throw new IllegalArgumentException("Illegal rule value " + rule);
+            }
+            return checkAddRuleObjInternal(rule | RULE_EXCLUSION_MASK, attrToMatch);
+        }
+
+        /**
+         * Add a rule for the selection of which streams are mixed together.
+         * The rule defines what the matching will be made on. It also determines the type of the
+         * property to match against.
+         * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
+         *     {@link AudioMixingRule#RULE_MATCH_UID}.
+         * @param property see the definition of each rule for the type to use (either an
+         *     {@link AudioAttributes} or an {@link java.lang.Integer}).
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         * @see {@link #excludeMixRule(int, Object)}
+         */
+        @SystemApi
+        public Builder addMixRule(int rule, Object property) throws IllegalArgumentException {
             if (!isValidSystemApiRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);
             }
-            return addRuleInt(attrToMatch, rule | RULE_EXCLUSION_MASK);
+            return checkAddRuleObjInternal(rule, property);
+        }
+
+        /**
+         * Add a rule by exclusion for the selection of which streams are mixed together.
+         * <br>For instance the following code
+         * <br><pre>
+         * AudioAttributes mediaAttr = new AudioAttributes.Builder()
+         *         .setUsage(AudioAttributes.USAGE_MEDIA)
+         *         .build();
+         * AudioMixingRule noMediaRule = new AudioMixingRule.Builder()
+         *         .addMixRule(AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE, mediaAttr)
+         *         .excludeMixRule(AudioMixingRule.RULE_MATCH_UID, new Integer(uidToExclude)
+         *         .build();
+         * </pre>
+         * <br>will create a rule which maps to usage USAGE_MEDIA, but excludes any stream
+         * coming from the specified UID.
+         * @param rule one of {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
+         *     {@link AudioMixingRule#RULE_MATCH_UID}.
+         * @param property see the definition of each rule for the type to use (either an
+         *     {@link AudioAttributes} or an {@link java.lang.Integer}).
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        @SystemApi
+        public Builder excludeMixRule(int rule, Object property) throws IllegalArgumentException {
+            if (!isValidSystemApiRule(rule)) {
+                throw new IllegalArgumentException("Illegal rule value " + rule);
+            }
+            return checkAddRuleObjInternal(rule | RULE_EXCLUSION_MASK, property);
         }
 
         /**
          * Add or exclude a rule for the selection of which streams are mixed together.
-         * @param attrToMatch a non-null AudioAttributes instance for which a contradictory
-         *     rule hasn't been set yet.
-         * @param rule one of {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_USAGE},
-         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
-         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
-         *     {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET}.
+         * Does error checking on the parameters.
+         * @param rule
+         * @param property
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        Builder addRuleInt(AudioAttributes attrToMatch, int rule)
+        private Builder checkAddRuleObjInternal(int rule, Object property)
                 throws IllegalArgumentException {
-            if (attrToMatch == null) {
-                throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+            if (property == null) {
+                throw new IllegalArgumentException("Illegal null argument for mixing rule");
             }
-            if (!isValidIntRule(rule)) {
+            if (!isValidRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);
-            } else {
-                // as rules are added to the Builder, we verify they are consistent with the type
-                // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
-                if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
-                    if (isPlayerRule(rule)) {
-                        mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
-                    } else {
-                        mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
-                    }
-                } else if (((mTargetMixType == AudioMix.MIX_TYPE_PLAYERS) && !isPlayerRule(rule))
-                        || ((mTargetMixType == AudioMix.MIX_TYPE_RECORDERS) && isPlayerRule(rule)))
-                {
-                    throw new IllegalArgumentException("Incompatible rule for mix");
+            }
+            final int match_rule = rule & ~RULE_EXCLUSION_MASK;
+            if (isAudioAttributeRule(match_rule)) {
+                if (!(property instanceof AudioAttributes)) {
+                    throw new IllegalArgumentException("Invalid AudioAttributes argument");
                 }
+                return addRuleInternal((AudioAttributes) property, null, rule);
+            } else {
+                // implies integer match rule
+                if (!(property instanceof Integer)) {
+                    throw new IllegalArgumentException("Invalid Integer argument");
+                }
+                return addRuleInternal(null, (Integer) property, rule);
+            }
+        }
+
+        /**
+         * Add or exclude a rule on AudioAttributes or integer property for the selection of which
+         * streams are mixed together.
+         * No rule-to-parameter type check, all done in {@link #checkAddRuleObjInternal(int, Object)}.
+         * Exceptions are thrown only when incompatible rules are added.
+         * @param attrToMatch a non-null AudioAttributes instance for which a contradictory
+         *     rule hasn't been set yet, null if not used.
+         * @param intProp an integer property to match or exclude, null if not used.
+         * @param rule one of {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_USAGE},
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_USAGE},
+         *     {@link AudioMixingRule#RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET} or
+         *     {@link AudioMixingRule#RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET},
+         *     {@link AudioMixingRule#RULE_MATCH_UID}, {@link AudioMixingRule#RULE_EXCLUDE_UID}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        private Builder addRuleInternal(AudioAttributes attrToMatch, Integer intProp, int rule)
+                throws IllegalArgumentException {
+            // as rules are added to the Builder, we verify they are consistent with the type
+            // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
+            if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
+                if (isPlayerRule(rule)) {
+                    mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
+                } else {
+                    mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
+                }
+            } else if (((mTargetMixType == AudioMix.MIX_TYPE_PLAYERS) && !isPlayerRule(rule))
+                    || ((mTargetMixType == AudioMix.MIX_TYPE_RECORDERS) && isPlayerRule(rule)))
+            {
+                throw new IllegalArgumentException("Incompatible rule for mix");
             }
             synchronized (mCriteria) {
-                Iterator<AttributeMatchCriterion> crIterator = mCriteria.iterator();
+                Iterator<AudioMixMatchCriterion> crIterator = mCriteria.iterator();
+                final int match_rule = rule & ~RULE_EXCLUSION_MASK;
                 while (crIterator.hasNext()) {
-                    final AttributeMatchCriterion criterion = crIterator.next();
-                    if ((rule == RULE_MATCH_ATTRIBUTE_USAGE)
-                            || (rule == RULE_EXCLUDE_ATTRIBUTE_USAGE)) {
-                        // "usage"-based rule
-                        if (criterion.mAttr.getUsage() == attrToMatch.getUsage()) {
-                            if (criterion.mRule == rule) {
-                                // rule already exists, we're done
-                                return this;
-                            } else {
-                                // criterion already exists with a another rule, it is incompatible
-                                throw new IllegalArgumentException("Contradictory rule exists for "
-                                        + attrToMatch);
+                    final AudioMixMatchCriterion criterion = crIterator.next();
+                    switch (match_rule) {
+                        case RULE_MATCH_ATTRIBUTE_USAGE:
+                            // "usage"-based rule
+                            if (criterion.mAttr.getUsage() == attrToMatch.getUsage()) {
+                                if (criterion.mRule == rule) {
+                                    // rule already exists, we're done
+                                    return this;
+                                } else {
+                                    // criterion already exists with a another rule,
+                                    // it is incompatible
+                                    throw new IllegalArgumentException("Contradictory rule exists"
+                                            + " for " + attrToMatch);
+                                }
                             }
-                        }
-                    } else if ((rule == RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET)
-                            || (rule == RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET)) {
-                        // "capture preset"-base rule
-                        if (criterion.mAttr.getCapturePreset() == attrToMatch.getCapturePreset()) {
-                            if (criterion.mRule == rule) {
-                             // rule already exists, we're done
-                                return this;
-                            } else {
-                                // criterion already exists with a another rule, it is incompatible
-                                throw new IllegalArgumentException("Contradictory rule exists for "
-                                        + attrToMatch);
+                            break;
+                        case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                            // "capture preset"-base rule
+                            if (criterion.mAttr.getCapturePreset() == attrToMatch.getCapturePreset()) {
+                                if (criterion.mRule == rule) {
+                                    // rule already exists, we're done
+                                    return this;
+                                } else {
+                                    // criterion already exists with a another rule,
+                                    // it is incompatible
+                                    throw new IllegalArgumentException("Contradictory rule exists"
+                                            + " for " + attrToMatch);
+                                }
                             }
-                        }
+                            break;
+                        case RULE_MATCH_UID:
+                            // "usage"-based rule
+                            if (criterion.mIntProp == intProp.intValue()) {
+                                if (criterion.mRule == rule) {
+                                    // rule already exists, we're done
+                                    return this;
+                                } else {
+                                    // criterion already exists with a another rule,
+                                    // it is incompatible
+                                    throw new IllegalArgumentException("Contradictory rule exists"
+                                            + " for UID " + intProp);
+                                }
+                            }
+                            break;
                     }
                 }
                 // rule didn't exist, add it
-                mCriteria.add(new AttributeMatchCriterion(attrToMatch, rule));
+                switch (match_rule) {
+                    case RULE_MATCH_ATTRIBUTE_USAGE:
+                    case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                        mCriteria.add(new AudioMixMatchCriterion(attrToMatch, rule));
+                        break;
+                    case RULE_MATCH_UID:
+                        mCriteria.add(new AudioMixMatchCriterion(intProp, rule));
+                        break;
+                    default:
+                        throw new IllegalStateException("Unreachable code in addRuleInternal()");
+                }
             }
             return this;
         }
 
         Builder addRuleFromParcel(Parcel in) throws IllegalArgumentException {
-            int rule = in.readInt();
-            AudioAttributes attr;
-            if ((rule == RULE_MATCH_ATTRIBUTE_USAGE) || (rule == RULE_EXCLUDE_ATTRIBUTE_USAGE)) {
-                int usage = in.readInt();
-                attr = new AudioAttributes.Builder()
-                        .setUsage(usage).build();
-            } else if ((rule == RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET)
-                    || (rule == RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET)) {
-                int preset = in.readInt();
-                attr = new AudioAttributes.Builder()
-                        .setInternalCapturePreset(preset).build();
-            } else {
-                in.readInt(); // assume there was in int value to read as for now they come in pair
-                throw new IllegalArgumentException("Illegal rule value " + rule + " in parcel");
+            final int rule = in.readInt();
+            final int match_rule = rule & ~RULE_EXCLUSION_MASK;
+            AudioAttributes attr = null;
+            Integer intProp = null;
+            switch (match_rule) {
+                case RULE_MATCH_ATTRIBUTE_USAGE:
+                    int usage = in.readInt();
+                    attr = new AudioAttributes.Builder()
+                            .setUsage(usage).build();
+                    break;
+                case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                    int preset = in.readInt();
+                    attr = new AudioAttributes.Builder()
+                            .setInternalCapturePreset(preset).build();
+                    break;
+                case RULE_MATCH_UID:
+                    intProp = new Integer(in.readInt());
+                    break;
+                default:
+                    // assume there was in int value to read as for now they come in pair
+                    in.readInt();
+                    throw new IllegalArgumentException("Illegal rule value " + rule + " in parcel");
             }
-            return addRuleInt(attr, rule);
+            return addRuleInternal(attr, intProp, rule);
         }
 
         /**

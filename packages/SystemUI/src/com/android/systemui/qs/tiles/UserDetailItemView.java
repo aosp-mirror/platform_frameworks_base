@@ -16,11 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import com.android.internal.util.ArrayUtils;
-import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.UserAvatarView;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -34,6 +29,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.settingslib.drawable.UserIconDrawable;
+import com.android.systemui.FontSizeUtils;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.UserAvatarView;
+
 /**
  * Displays one user in the {@link UserDetailView} view.
  */
@@ -43,6 +44,7 @@ public class UserDetailItemView extends LinearLayout {
     private TextView mName;
     private Typeface mRegularTypeface;
     private Typeface mActivatedTypeface;
+    private View mRestrictedPadlock;
 
     public UserDetailItemView(Context context) {
         this(context, null);
@@ -59,6 +61,7 @@ public class UserDetailItemView extends LinearLayout {
     public UserDetailItemView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.UserDetailItemView, defStyleAttr, defStyleRes);
         final int N = a.getIndexCount();
@@ -85,14 +88,29 @@ public class UserDetailItemView extends LinearLayout {
         return (UserDetailItemView) convertView;
     }
 
-    public void bind(String name, Bitmap picture) {
+    public void bind(String name, Bitmap picture, int userId) {
         mName.setText(name);
-        mAvatar.setBitmap(picture);
+        mAvatar.setAvatarWithBadge(picture, userId);
     }
 
-    public void bind(String name, Drawable picture) {
+    public void bind(String name, Drawable picture, int userId) {
         mName.setText(name);
-        mAvatar.setDrawable(picture);
+        mAvatar.setDrawableWithBadge(picture, userId);
+    }
+
+    public void setAvatarEnabled(boolean enabled) {
+        mAvatar.setEnabled(enabled);
+    }
+
+    public void setDisabledByAdmin(boolean disabled) {
+        mRestrictedPadlock.setVisibility(disabled ? View.VISIBLE : View.GONE);
+        mName.setEnabled(!disabled);
+        mAvatar.setEnabled(!disabled);
+    }
+
+    public void setEnabled(boolean enabled) {
+        mName.setEnabled(enabled);
+        mAvatar.setEnabled(enabled);
     }
 
     @Override
@@ -106,6 +124,7 @@ public class UserDetailItemView extends LinearLayout {
             mActivatedTypeface = mName.getTypeface();
         }
         updateTypeface();
+        mRestrictedPadlock = findViewById(R.id.restricted_padlock);
     }
 
     @Override

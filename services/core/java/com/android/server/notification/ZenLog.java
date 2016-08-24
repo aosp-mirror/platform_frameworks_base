@@ -31,6 +31,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class ZenLog {
     private static final String TAG = "ZenLog";
@@ -126,10 +127,11 @@ public class ZenLog {
         append(TYPE_DISABLE_EFFECTS, record.getKey() + "," + reason);
     }
 
-    public static void traceEffectsSuppressorChanged(ComponentName oldSuppressor,
-            ComponentName newSuppressor) {
-        append(TYPE_SUPPRESSOR_CHANGED, componentToString(oldSuppressor) + "->"
-            + componentToString(newSuppressor));
+    public static void traceEffectsSuppressorChanged(List<ComponentName> oldSuppressors,
+            List<ComponentName> newSuppressors, long suppressedEffects) {
+        append(TYPE_SUPPRESSOR_CHANGED, "suppressed effects:" + suppressedEffects + ","
+                + componentListToString(oldSuppressors) + "->"
+                + componentListToString(newSuppressors));
     }
 
     public static void traceListenerHintsChanged(int oldHints, int newHints, int listenerCount) {
@@ -191,6 +193,19 @@ public class ZenLog {
 
     private static String componentToString(ComponentName component) {
         return component != null ? component.toShortString() : null;
+    }
+
+    private static String componentListToString(List<ComponentName> components) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < components.size(); ++i) {
+            if (i > 0) {
+                stringBuilder.append(", ");
+            }
+            stringBuilder.append(componentToString(components.get(i)));
+        }
+
+        return stringBuilder.toString();
     }
 
     private static void append(int type, String msg) {

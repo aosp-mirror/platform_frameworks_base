@@ -28,6 +28,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
@@ -152,13 +154,8 @@ public class CheckedTextView extends TextView implements Checkable {
             return;
         }
 
-        mCheckMarkResource = resId;
-
-        Drawable d = null;
-        if (mCheckMarkResource != 0) {
-            d = getContext().getDrawable(mCheckMarkResource);
-        }
-        setCheckMarkDrawable(d);
+        final Drawable d = resId != 0 ? getContext().getDrawable(resId) : null;
+        setCheckMarkDrawableInternal(d, resId);
     }
 
     /**
@@ -172,25 +169,36 @@ public class CheckedTextView extends TextView implements Checkable {
      * @see #setCheckMarkDrawable(int)
      * @see #getCheckMarkDrawable()
      */
-    public void setCheckMarkDrawable(Drawable d) {
+    public void setCheckMarkDrawable(@Nullable Drawable d) {
+        setCheckMarkDrawableInternal(d, 0);
+    }
+
+    private void setCheckMarkDrawableInternal(@Nullable Drawable d, @DrawableRes int resId) {
         if (mCheckMarkDrawable != null) {
             mCheckMarkDrawable.setCallback(null);
             unscheduleDrawable(mCheckMarkDrawable);
         }
+
         mNeedRequestlayout = (d != mCheckMarkDrawable);
+
         if (d != null) {
             d.setCallback(this);
             d.setVisible(getVisibility() == VISIBLE, false);
             d.setState(CHECKED_STATE_SET);
-            setMinHeight(d.getIntrinsicHeight());
 
+            // Record the intrinsic dimensions when in "checked" state.
+            setMinHeight(d.getIntrinsicHeight());
             mCheckMarkWidth = d.getIntrinsicWidth();
+
             d.setState(getDrawableState());
-            applyCheckMarkTint();
         } else {
             mCheckMarkWidth = 0;
         }
+
         mCheckMarkDrawable = d;
+        mCheckMarkResource = resId;
+
+        applyCheckMarkTint();
 
         // Do padding resolution. This will call internalSetPadding() and do a
         // requestLayout() if needed.
@@ -303,7 +311,7 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return who == mCheckMarkDrawable || super.verifyDrawable(who);
     }
 
@@ -422,14 +430,11 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        
-        if (mCheckMarkDrawable != null) {
-            int[] myDrawableState = getDrawableState();
-            
-            // Set the state of the Drawable
-            mCheckMarkDrawable.setState(myDrawableState);
-            
-            invalidate();
+
+        final Drawable checkMarkDrawable = mCheckMarkDrawable;
+        if (checkMarkDrawable != null && checkMarkDrawable.isStateful()
+                && checkMarkDrawable.setState(getDrawableState())) {
+            invalidateDrawable(checkMarkDrawable);
         }
     }
 
@@ -445,6 +450,68 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     public CharSequence getAccessibilityClassName() {
         return CheckedTextView.class.getName();
+    }
+
+    static class SavedState extends BaseSavedState {
+        boolean checked;
+
+        /**
+         * Constructor called from {@link CheckedTextView#onSaveInstanceState()}
+         */
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        /**
+         * Constructor called from {@link #CREATOR}
+         */
+        private SavedState(Parcel in) {
+            super(in);
+            checked = (Boolean)in.readValue(null);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeValue(checked);
+        }
+
+        @Override
+        public String toString() {
+            return "CheckedTextView.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " checked=" + checked + "}";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState ss = new SavedState(superState);
+
+        ss.checked = isChecked();
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+        setChecked(ss.checked);
+        requestLayout();
     }
 
     /** @hide */

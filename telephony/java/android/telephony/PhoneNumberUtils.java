@@ -1857,9 +1857,6 @@ public class PhoneNumberUtils
         // to the list.
         number = extractNetworkPortionAlt(number);
 
-        Rlog.d(LOG_TAG, "subId:" + subId + ", defaultCountryIso:" +
-                ((defaultCountryIso == null) ? "NULL" : defaultCountryIso));
-
         String emergencyNumbers = "";
         int slotId = SubscriptionManager.getSlotId(subId);
 
@@ -1869,7 +1866,8 @@ public class PhoneNumberUtils
 
         emergencyNumbers = SystemProperties.get(ecclist, "");
 
-        Rlog.d(LOG_TAG, "slotId:" + slotId + ", emergencyNumbers: " +  emergencyNumbers);
+        Rlog.d(LOG_TAG, "slotId:" + slotId + " subId:" + subId + " country:"
+                + defaultCountryIso + " emergencyNumbers: " +  emergencyNumbers);
 
         if (TextUtils.isEmpty(emergencyNumbers)) {
             // then read-only ecclist property since old RIL only uses this
@@ -2082,7 +2080,7 @@ public class PhoneNumberUtils
      * to read the VM number.
      */
     public static boolean isVoiceMailNumber(String number) {
-        return isVoiceMailNumber(SubscriptionManager.getDefaultSubId(), number);
+        return isVoiceMailNumber(SubscriptionManager.getDefaultSubscriptionId(), number);
     }
 
     /**
@@ -2354,7 +2352,7 @@ public class PhoneNumberUtils
                         tempDialStr = postDialStr.substring(dialableIndex);
                     } else {
                         // Non-dialable character such as P/W should not be at the end of
-                        // the dial string after P/W processing in CdmaConnection.java
+                        // the dial string after P/W processing in GsmCdmaConnection.java
                         // Set the postDialStr to "" to break out of the loop
                         if (dialableIndex < 0) {
                             postDialStr = "";
@@ -2977,7 +2975,7 @@ public class PhoneNumberUtils
      * Returns Default voice subscription Id.
      */
     private static int getDefaultVoiceSubId() {
-        return SubscriptionManager.getDefaultVoiceSubId();
+        return SubscriptionManager.getDefaultVoiceSubscriptionId();
     }
     //==== End of utility methods used only in compareStrictly() =====
 }

@@ -25,7 +25,11 @@ import java.lang.reflect.Modifier;
  * This is common code used to support Activity test cases.  For more useful classes, please see
  * {@link android.test.ActivityUnitTestCase} and
  * {@link android.test.ActivityInstrumentationTestCase}.
+ *
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public abstract class ActivityTestCase extends InstrumentationTestCase {
 
     /**

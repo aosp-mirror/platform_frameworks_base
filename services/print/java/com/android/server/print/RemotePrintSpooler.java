@@ -16,10 +16,15 @@
 
 package com.android.server.print;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -32,16 +37,19 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
+import android.print.PrintManager;
+import android.print.PrinterId;
+import android.printservice.PrintService;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
+
+import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-
-import libcore.io.IoUtils;
 
 /**
  * This represents the remote print spooler as a local object to the
@@ -69,6 +77,15 @@ final class RemotePrintSpooler {
 
     private final SetPrintJobTagCaller mSetPrintJobTagCaller = new SetPrintJobTagCaller();
 
+    private final OnCustomPrinterIconLoadedCaller mCustomPrinterIconLoadedCaller =
+            new OnCustomPrinterIconLoadedCaller();
+
+    private final ClearCustomPrinterIconCacheCaller mClearCustomPrinterIconCache =
+            new ClearCustomPrinterIconCacheCaller();
+
+    private final GetCustomPrinterIconCaller mGetCustomPrinterIconCaller =
+            new GetCustomPrinterIconCaller();
+
     private final ServiceConnection mServiceConnection = new MyServiceConnection();
 
     private final Context mContext;
@@ -80,6 +97,8 @@ final class RemotePrintSpooler {
     private final Intent mIntent;
 
     private final PrintSpoolerCallbacks mCallbacks;
+
+    private boolean mIsLowPriority;
 
     private IPrintSpooler mRemoteInstance;
 
@@ -93,15 +112,40 @@ final class RemotePrintSpooler {
         public void onPrintJobStateChanged(PrintJobInfo printJob);
     }
 
-    public RemotePrintSpooler(Context context, int userId,
+    public RemotePrintSpooler(Context context, int userId, boolean lowPriority,
             PrintSpoolerCallbacks callbacks) {
         mContext = context;
         mUserHandle = new UserHandle(userId);
         mCallbacks = callbacks;
+        mIsLowPriority = lowPriority;
         mClient = new PrintSpoolerClient(this);
         mIntent = new Intent();
-        mIntent.setComponent(new ComponentName("com.android.printspooler",
-                "com.android.printspooler.model.PrintSpoolerService"));
+        mIntent.setComponent(new ComponentName(PrintManager.PRINT_SPOOLER_PACKAGE_NAME,
+                PrintManager.PRINT_SPOOLER_PACKAGE_NAME + ".model.PrintSpoolerService"));
+    }
+
+    public void increasePriority() {
+        if (mIsLowPriority) {
+            mIsLowPriority = false;
+
+            synchronized (mLock) {
+                throwIfDestroyedLocked();
+
+                while (!mCanUnbind) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException e) {
+                        Slog.e(LOG_TAG, "Interrupted while waiting for operation to complete");
+                    }
+                }
+
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Unbinding as previous binding was low priority");
+                }
+
+                unbindLocked();
+            }
+        }
     }
 
     public final List<PrintJobInfo> getPrintJobInfos(ComponentName componentName, int state,
@@ -229,6 +273,180 @@ final class RemotePrintSpooler {
         return false;
     }
 
+    /**
+     * Set progress of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param progress The new progress
+     */
+    public final void setProgress(@NonNull PrintJobId printJobId,
+            @FloatRange(from=0.0, to=1.0) float progress) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setProgress(printJobId, progress);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting progress.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setProgress()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Set status of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param status The new status
+     */
+    public final void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setStatus(printJobId, status);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting status.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setStatus()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Set status of a print job.
+     *
+     * @param printJobId The print job to update
+     * @param status The new status as a string resource
+     * @param appPackageName The app package name the string res belongs to
+     */
+    public final void setStatus(@NonNull PrintJobId printJobId, @StringRes int status,
+            @NonNull CharSequence appPackageName) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().setStatusRes(printJobId, status, appPackageName);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error setting status.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setStatus()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Handle that a custom icon for a printer was loaded.
+     *
+     * @param printerId the id of the printer the icon belongs to
+     * @param icon the icon that was loaded
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public final void onCustomPrinterIconLoaded(@NonNull PrinterId printerId,
+            @Nullable Icon icon) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            mCustomPrinterIconLoadedCaller.onCustomPrinterIconLoaded(getRemoteInstanceLazy(),
+                    printerId, icon);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error loading new custom printer icon.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier() + "] onCustomPrinterIconLoaded()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public final @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            return mGetCustomPrinterIconCaller.getCustomPrinterIcon(getRemoteInstanceLazy(),
+                    printerId);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error getting custom printer icon.", re);
+            return null;
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier() + "] getCustomPrinterIcon()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Clear the custom printer icon cache
+     */
+    public void clearCustomPrinterIconCache() {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            mClearCustomPrinterIconCache.clearCustomPrinterIconCache(getRemoteInstanceLazy());
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error clearing custom printer icon cache.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "[user: " + mUserHandle.getIdentifier()
+                                + "] clearCustomPrinterIconCache()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
     public final boolean setPrintJobTag(PrintJobId printJobId, String tag) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
@@ -271,6 +489,33 @@ final class RemotePrintSpooler {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
                         + "] setPrintJobCancelling()");
+            }
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
+    /**
+     * Remove all approved {@link PrintService print services} that are not in the given set.
+     *
+     * @param servicesToKeep The {@link ComponentName names } of the services to keep
+     */
+    public final void pruneApprovedPrintServices(List<ComponentName> servicesToKeep) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        try {
+            getRemoteInstanceLazy().pruneApprovedPrintServices(servicesToKeep);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error pruning approved print services.", re);
+        } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
+                        + "] pruneApprovedPrintServices()");
             }
             synchronized (mLock) {
                 mCanUnbind = true;
@@ -361,11 +606,18 @@ final class RemotePrintSpooler {
             return;
         }
         if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] bindLocked()");
+            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] bindLocked() " +
+                    (mIsLowPriority ? "low priority" : ""));
         }
 
-        mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE, mUserHandle);
+        int flags;
+        if (mIsLowPriority) {
+            flags = Context.BIND_AUTO_CREATE;
+        } else {
+            flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
+        }
+
+        mContext.bindServiceAsUser(mIntent, mServiceConnection, flags, mUserHandle);
 
         final long startMillis = SystemClock.uptimeMillis();
         while (true) {
@@ -545,6 +797,69 @@ final class RemotePrintSpooler {
         }
     }
 
+    private static final class OnCustomPrinterIconLoadedCaller extends TimedRemoteCaller<Void> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public OnCustomPrinterIconLoadedCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void onCustomPrinterIconCached(int sequence) {
+                    onRemoteMethodResult(null, sequence);
+                }
+            };
+        }
+
+        public Void onCustomPrinterIconLoaded(IPrintSpooler target, PrinterId printerId,
+                Icon icon) throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.onCustomPrinterIconLoaded(printerId, icon, mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
+    private static final class ClearCustomPrinterIconCacheCaller extends TimedRemoteCaller<Void> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public ClearCustomPrinterIconCacheCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void customPrinterIconCacheCleared(int sequence) {
+                    onRemoteMethodResult(null, sequence);
+                }
+            };
+        }
+
+        public Void clearCustomPrinterIconCache(IPrintSpooler target)
+                throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.clearCustomPrinterIconCache(mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
+    private static final class GetCustomPrinterIconCaller extends TimedRemoteCaller<Icon> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public GetCustomPrinterIconCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void onGetCustomPrinterIconResult(Icon icon, int sequence) {
+                    onRemoteMethodResult(icon, sequence);
+                }
+            };
+        }
+
+        public Icon getCustomPrinterIcon(IPrintSpooler target, PrinterId printerId)
+                throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.getCustomPrinterIcon(printerId, mCallback, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
     private static abstract class BasePrintSpoolerServiceCallbacks
             extends IPrintSpoolerCallbacks.Stub {
         @Override
@@ -569,6 +884,21 @@ final class RemotePrintSpooler {
 
         @Override
         public void onSetPrintJobTagResult(boolean success, int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void onCustomPrinterIconCached(int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void onGetCustomPrinterIconResult(@Nullable Icon icon, int sequence) {
+            /* do nothing */
+        }
+
+        @Override
+        public void customPrinterIconCacheCleared(int sequence) {
             /* do nothing */
         }
     }

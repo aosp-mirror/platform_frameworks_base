@@ -6,10 +6,49 @@ package android.app {
 
 }
 
+package android.app.admin {
+
+  public class DevicePolicyManager {
+    method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
+    method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
+  }
+
+}
+
+package android.content {
+
+  public abstract class Context {
+    method public deprecated android.content.Context createCredentialEncryptedStorageContext();
+    method public deprecated android.content.Context createDeviceEncryptedStorageContext();
+    method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
+    method public deprecated boolean isCredentialEncryptedStorage();
+    method public deprecated boolean isDeviceEncryptedStorage();
+    method public deprecated boolean migrateDatabaseFrom(android.content.Context, java.lang.String);
+    method public deprecated boolean migrateSharedPreferencesFrom(android.content.Context, java.lang.String);
+  }
+
+}
+
 package android.content.pm {
+
+  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public deprecated java.lang.String credentialEncryptedDataDir;
+    field public deprecated java.lang.String deviceEncryptedDataDir;
+  }
+
+  public class ComponentInfo extends android.content.pm.PackageItemInfo {
+    field public deprecated boolean encryptionAware;
+  }
 
   public class PackageInfo implements android.os.Parcelable {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
+  }
+
+  public abstract class PackageManager {
+    field public static final deprecated int MATCH_ENCRYPTION_AWARE = 524288; // 0x80000
+    field public static final deprecated int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = 786432; // 0xc0000
+    field public static final deprecated int MATCH_ENCRYPTION_UNAWARE = 262144; // 0x40000
   }
 
 }
@@ -24,10 +63,127 @@ package android.database {
 
 }
 
+package android.graphics {
+
+  public deprecated class AvoidXfermode extends android.graphics.Xfermode {
+    ctor public AvoidXfermode(int, int, android.graphics.AvoidXfermode.Mode);
+  }
+
+  public static final class AvoidXfermode.Mode extends java.lang.Enum {
+    method public static android.graphics.AvoidXfermode.Mode valueOf(java.lang.String);
+    method public static final android.graphics.AvoidXfermode.Mode[] values();
+    enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
+    enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
+  }
+
+  public deprecated class PixelXorXfermode extends android.graphics.Xfermode {
+    ctor public PixelXorXfermode(int);
+  }
+
+}
+
+package android.location {
+
+  public final class GnssMeasurement implements android.os.Parcelable {
+    field public static final int MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
+  }
+
+  public final class GnssMeasurementsEvent implements android.os.Parcelable {
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public final class GnssNavigationMessageEvent implements android.os.Parcelable {
+    ctor public GnssNavigationMessageEvent(android.location.GnssNavigationMessage);
+    method public int describeContents();
+    method public android.location.GnssNavigationMessage getNavigationMessage();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessageEvent> CREATOR;
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
+    field public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public static abstract class GnssNavigationMessageEvent.Callback {
+    ctor public GnssNavigationMessageEvent.Callback();
+    method public void onGnssNavigationMessageReceived(android.location.GnssNavigationMessageEvent);
+    method public void onStatusChanged(int);
+  }
+
+  public abstract interface GnssNmeaListener {
+    method public abstract void onNmeaReceived(long, java.lang.String);
+  }
+
+  public final class GnssStatus {
+    method public int getNumSatellites();
+    method public boolean hasAlmanac(int);
+    method public boolean hasEphemeris(int);
+  }
+
+  public abstract class GnssStatusCallback {
+    ctor public GnssStatusCallback();
+    method public void onFirstFix(int);
+    method public void onSatelliteStatusChanged(android.location.GnssStatus);
+    method public void onStarted();
+    method public void onStopped();
+  }
+
+  public class LocationManager {
+    method public boolean addNmeaListener(android.location.GnssNmeaListener);
+    method public boolean addNmeaListener(android.location.GnssNmeaListener, android.os.Handler);
+    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
+    method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback, android.os.Handler);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback, android.os.Handler);
+    method public void removeNmeaListener(android.location.GnssNmeaListener);
+    method public void unregisterGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
+    method public void unregisterGnssStatusCallback(android.location.GnssStatusCallback);
+  }
+
+}
+
 package android.media {
 
-  public class AudioFormat {
+  public final class AudioFormat implements android.os.Parcelable {
     ctor public AudioFormat();
+  }
+
+}
+
+package android.media.tv {
+
+  public final class TvInputManager {
+    method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
+  }
+
+  public class TvView extends android.view.ViewGroup {
+    method public void requestUnblockContent(android.media.tv.TvContentRating);
+  }
+
+}
+
+package android.mtp {
+
+  public final class MtpConstants {
+    field public static final int EVENT_CANCEL_TRANSACTION = 16385; // 0x4001
+    field public static final int EVENT_CAPTURE_COMPLETE = 16397; // 0x400d
+    field public static final int EVENT_DEVICE_INFO_CHANGED = 16392; // 0x4008
+    field public static final int EVENT_DEVICE_PROP_CHANGED = 16390; // 0x4006
+    field public static final int EVENT_DEVICE_RESET = 16395; // 0x400b
+    field public static final int EVENT_OBJECT_ADDED = 16386; // 0x4002
+    field public static final int EVENT_OBJECT_INFO_CHANGED = 16391; // 0x4007
+    field public static final int EVENT_OBJECT_PROP_CHANGED = 51201; // 0xc801
+    field public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 51202; // 0xc802
+    field public static final int EVENT_OBJECT_REFERENCES_CHANGED = 51203; // 0xc803
+    field public static final int EVENT_OBJECT_REMOVED = 16387; // 0x4003
+    field public static final int EVENT_REQUEST_OBJECT_TRANSFER = 16393; // 0x4009
+    field public static final int EVENT_STORAGE_INFO_CHANGED = 16396; // 0x400c
+    field public static final int EVENT_STORE_ADDED = 16388; // 0x4004
+    field public static final int EVENT_STORE_FULL = 16394; // 0x400a
+    field public static final int EVENT_STORE_REMOVED = 16389; // 0x4005
+    field public static final int EVENT_UNDEFINED = 16384; // 0x4000
+    field public static final int EVENT_UNREPORTED_STATUS = 16398; // 0x400e
   }
 
 }
@@ -60,6 +216,28 @@ package android.os {
     method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
     method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndLocked();
+    method public deprecated boolean isUserRunningAndLocked(android.os.UserHandle);
+    method public deprecated boolean isUserRunningAndUnlocked();
+    method public deprecated boolean isUserRunningAndUnlocked(android.os.UserHandle);
+  }
+
+}
+
+package android.os.storage {
+
+  public class StorageManager {
+    method public android.os.storage.StorageVolume getPrimaryVolume();
+    method public android.os.storage.StorageVolume[] getVolumeList();
+  }
+
+}
+
+package android.preference {
+
+  public class PreferenceManager {
+    method public deprecated void setStorageCredentialEncrypted();
+    method public deprecated void setStorageDeviceEncrypted();
   }
 
 }
@@ -176,6 +354,10 @@ package android.provider {
     field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
   }
 
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final deprecated java.lang.String CONTACT_METADATA_SYNC = "contact_metadata_sync";
+  }
+
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
@@ -186,6 +368,19 @@ package android.provider {
     field public static final java.lang.String[] VOLUME_SETTINGS;
     field public static final java.lang.String VOLUME_SYSTEM = "volume_system";
     field public static final java.lang.String VOLUME_VOICE = "volume_voice";
+  }
+
+  public static final class Telephony.Sms.Intents {
+    field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
+}
+
+package android.test.mock {
+
+  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
+    method public deprecated java.lang.String getDefaultBrowserPackageName(int);
+    method public deprecated boolean setDefaultBrowserPackageName(java.lang.String, int);
   }
 
 }
@@ -238,11 +433,28 @@ package android.view {
 
 }
 
+package android.webkit {
+
+  public class WebViewClient {
+    method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);
+  }
+
+}
+
 package android.widget {
 
   public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
+  }
+
+}
+
+package com.android.internal {
+
+  public static final class R.styleable {
+    field public static final int AndroidManifestLayout_minimalHeight = 6; // 0x6
+    field public static final int AndroidManifestLayout_minimalWidth = 5; // 0x5
   }
 
 }

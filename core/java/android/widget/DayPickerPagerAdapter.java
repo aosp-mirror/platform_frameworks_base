@@ -25,13 +25,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleMonthView.OnDayClickListener;
-
-import java.util.Calendar;
 
 /**
  * An adapter for a list of {@link android.widget.SimpleMonthView} items.
@@ -148,18 +147,22 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     void setCalendarTextColor(ColorStateList calendarTextColor) {
         mCalendarTextColor = calendarTextColor;
+        notifyDataSetChanged();
     }
 
     void setDaySelectorColor(ColorStateList selectorColor) {
         mDaySelectorColor = selectorColor;
+        notifyDataSetChanged();
     }
 
     void setMonthTextAppearance(int resId) {
         mMonthTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     void setDayOfWeekTextAppearance(int resId) {
         mDayOfWeekTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     int getDayOfWeekTextAppearance() {
@@ -168,6 +171,7 @@ class DayPickerPagerAdapter extends PagerAdapter {
 
     void setDayTextAppearance(int resId) {
         mDayTextAppearance = resId;
+        notifyDataSetChanged();
     }
 
     int getDayTextAppearance() {
@@ -282,9 +286,17 @@ class DayPickerPagerAdapter extends PagerAdapter {
     public CharSequence getPageTitle(int position) {
         final SimpleMonthView v = mItems.get(position).calendar;
         if (v != null) {
-            return v.getTitle();
+            return v.getMonthYearLabel();
         }
         return null;
+    }
+
+    SimpleMonthView getView(Object object) {
+        if (object == null) {
+            return null;
+        }
+        final ViewHolder holder = (ViewHolder) object;
+        return holder.calendar;
     }
 
     private final OnDayClickListener mOnDayClickListener = new OnDayClickListener() {

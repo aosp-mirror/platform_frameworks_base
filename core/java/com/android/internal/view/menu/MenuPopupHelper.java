@@ -16,106 +16,116 @@
 
 package com.android.internal.view.menu;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.os.Parcelable;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
-import android.widget.ListAdapter;
-import android.widget.ListPopupWindow;
-import android.widget.PopupWindow;
+import com.android.internal.view.menu.MenuPresenter.Callback;
 
-import java.util.ArrayList;
+import android.annotation.AttrRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
+import android.content.Context;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.PopupWindow.OnDismissListener;
 
 /**
  * Presents a menu as a small, simple popup anchored to another view.
- * @hide
  */
-public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
-        ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener,
-        View.OnAttachStateChangeListener, MenuPresenter {
-    static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
+public class MenuPopupHelper implements MenuHelper {
+    private static final int TOUCH_EPICENTER_SIZE_DP = 48;
 
     private final Context mContext;
-    private final LayoutInflater mInflater;
+
+    // Immutable cached popup menu properties.
     private final MenuBuilder mMenu;
-    private final MenuAdapter mAdapter;
     private final boolean mOverflowOnly;
-    private final int mPopupMaxWidth;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
 
+    // Mutable cached popup menu properties.
     private View mAnchorView;
-    private ListPopupWindow mPopup;
-    private ViewTreeObserver mTreeObserver;
+    private int mDropDownGravity = Gravity.START;
+    private boolean mForceShowIcon;
     private Callback mPresenterCallback;
 
-    boolean mForceShowIcon;
+    private MenuPopup mPopup;
+    private OnDismissListener mOnDismissListener;
 
-    private ViewGroup mMeasureParent;
-
-    /** Whether the cached content width value is valid. */
-    private boolean mHasContentWidth;
-
-    /** Cached content width from {@link #measureContentWidth}. */
-    private int mContentWidth;
-
-    private int mDropDownGravity = Gravity.NO_GRAVITY;
-
-    public MenuPopupHelper(Context context, MenuBuilder menu) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu) {
         this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView) {
         this(context, menu, anchorView, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
-            boolean overflowOnly, int popupStyleAttr) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView,
+            boolean overflowOnly, @AttrRes int popupStyleAttr) {
         this(context, menu, anchorView, overflowOnly, popupStyleAttr, 0);
     }
 
-    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
-            boolean overflowOnly, int popupStyleAttr, int popupStyleRes) {
+    public MenuPopupHelper(@NonNull Context context, @NonNull MenuBuilder menu,
+            @NonNull View anchorView, boolean overflowOnly, @AttrRes int popupStyleAttr,
+            @StyleRes int popupStyleRes) {
         mContext = context;
-        mInflater = LayoutInflater.from(context);
         mMenu = menu;
-        mAdapter = new MenuAdapter(mMenu);
+        mAnchorView = anchorView;
         mOverflowOnly = overflowOnly;
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
-
-        final Resources res = context.getResources();
-        mPopupMaxWidth = Math.max(res.getDisplayMetrics().widthPixels / 2,
-                res.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
-
-        mAnchorView = anchorView;
-
-        // Present the menu using our context, not the menu builder's context.
-        menu.addMenuPresenter(this, context);
     }
 
-    public void setAnchorView(View anchor) {
+    public void setOnDismissListener(@Nullable OnDismissListener listener) {
+        mOnDismissListener = listener;
+    }
+
+    /**
+      * Sets the view to which the popup window is anchored.
+      * <p>
+      * Changes take effect on the next call to show().
+      *
+      * @param anchor the view to which the popup window should be anchored
+      */
+    public void setAnchorView(@NonNull View anchor) {
         mAnchorView = anchor;
     }
 
-    public void setForceShowIcon(boolean forceShow) {
-        mForceShowIcon = forceShow;
+    /**
+     * Sets whether the popup menu's adapter is forced to show icons in the
+     * menu item views.
+     * <p>
+     * Changes take effect on the next call to show().
+     *
+     * @param forceShowIcon {@code true} to force icons to be shown, or
+     *                  {@code false} for icons to be optionally shown
+     */
+    public void setForceShowIcon(boolean forceShowIcon) {
+        mForceShowIcon = forceShowIcon;
+        if (mPopup != null) {
+            mPopup.setForceShowIcon(forceShowIcon);
+        }
     }
 
+    /**
+      * Sets the alignment of the popup window relative to the anchor view.
+      * <p>
+      * Changes take effect on the next call to show().
+      *
+      * @param gravity alignment of the popup relative to the anchor
+      */
     public void setGravity(int gravity) {
         mDropDownGravity = gravity;
     }
 
+    /**
+     * @return alignment of the popup relative to the anchor
+     */
     public int getGravity() {
         return mDropDownGravity;
     }
@@ -126,68 +136,170 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
     }
 
-    public ListPopupWindow getPopup() {
+    public void show(int x, int y) {
+        if (!tryShow(x, y)) {
+            throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
+        }
+    }
+
+    @NonNull
+    public MenuPopup getPopup() {
+        if (mPopup == null) {
+            mPopup = createPopup();
+        }
         return mPopup;
     }
 
     /**
-     * Attempts to show the popup anchored to the view specified by
-     * {@link #setAnchorView(View)}.
+     * Attempts to show the popup anchored to the view specified by {@link #setAnchorView(View)}.
      *
-     * @return {@code true} if the popup was shown or was already showing prior
-     *         to calling this method, {@code false} otherwise
+     * @return {@code true} if the popup was shown or was already showing prior to calling this
+     *         method, {@code false} otherwise
      */
     public boolean tryShow() {
         if (isShowing()) {
             return true;
         }
 
-        mPopup = new ListPopupWindow(mContext, null, mPopupStyleAttr, mPopupStyleRes);
-        mPopup.setOnDismissListener(this);
-        mPopup.setOnItemClickListener(this);
-        mPopup.setAdapter(mAdapter);
-        mPopup.setModal(true);
-
-        final View anchor = mAnchorView;
-        if (anchor != null) {
-            final boolean addGlobalListener = mTreeObserver == null;
-            mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
-            if (addGlobalListener) mTreeObserver.addOnGlobalLayoutListener(this);
-            anchor.addOnAttachStateChangeListener(this);
-            mPopup.setAnchorView(anchor);
-            mPopup.setDropDownGravity(mDropDownGravity);
-        } else {
+        if (mAnchorView == null) {
             return false;
         }
 
-        if (!mHasContentWidth) {
-            mContentWidth = measureContentWidth();
-            mHasContentWidth = true;
-        }
-
-        mPopup.setContentWidth(mContentWidth);
-        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-        mPopup.show();
-        mPopup.getListView().setOnKeyListener(this);
+        showPopup(0, 0, false, false);
         return true;
     }
 
+    /**
+     * Shows the popup menu and makes a best-effort to anchor it to the
+     * specified (x,y) coordinate relative to the anchor view.
+     * <p>
+     * Additionally, the popup's transition epicenter (see
+     * {@link android.widget.PopupWindow#setEpicenterBounds(Rect)} will be
+     * centered on the specified coordinate, rather than using the bounds of
+     * the anchor view.
+     * <p>
+     * If the popup's resolved gravity is {@link Gravity#LEFT}, this will
+     * display the popup with its top-left corner at (x,y) relative to the
+     * anchor view. If the resolved gravity is {@link Gravity#RIGHT}, the
+     * popup's top-right corner will be at (x,y).
+     * <p>
+     * If the popup cannot be displayed fully on-screen, this method will
+     * attempt to scroll the anchor view's ancestors and/or offset the popup
+     * such that it may be displayed fully on-screen.
+     *
+     * @param x x coordinate relative to the anchor view
+     * @param y y coordinate relative to the anchor view
+     * @return {@code true} if the popup was shown or was already showing prior
+     *         to calling this method, {@code false} otherwise
+     */
+    public boolean tryShow(int x, int y) {
+        if (isShowing()) {
+            return true;
+        }
+
+        if (mAnchorView == null) {
+            return false;
+        }
+
+        showPopup(x, y, true, true);
+        return true;
+    }
+
+    /**
+     * Creates the popup and assigns cached properties.
+     *
+     * @return an initialized popup
+     */
+    @NonNull
+    private MenuPopup createPopup() {
+        final WindowManager windowManager = (WindowManager) mContext.getSystemService(
+            Context.WINDOW_SERVICE);
+        final Display display = windowManager.getDefaultDisplay();
+        final Point displaySize = new Point();
+        display.getRealSize(displaySize);
+
+        final int smallestWidth = Math.min(displaySize.x, displaySize.y);
+        final int minSmallestWidthCascading = mContext.getResources().getDimensionPixelSize(
+            com.android.internal.R.dimen.cascading_menus_min_smallest_width);
+        final boolean enableCascadingSubmenus = smallestWidth >= minSmallestWidthCascading;
+
+        final MenuPopup popup;
+        if (enableCascadingSubmenus) {
+            popup = new CascadingMenuPopup(mContext, mAnchorView, mPopupStyleAttr,
+                    mPopupStyleRes, mOverflowOnly);
+        } else {
+            popup = new StandardMenuPopup(mContext, mMenu, mAnchorView, mPopupStyleAttr,
+                    mPopupStyleRes, mOverflowOnly);
+        }
+
+        // Assign immutable properties.
+        popup.addMenu(mMenu);
+        popup.setOnDismissListener(mInternalOnDismissListener);
+
+        // Assign mutable properties. These may be reassigned later.
+        popup.setAnchorView(mAnchorView);
+        popup.setCallback(mPresenterCallback);
+        popup.setForceShowIcon(mForceShowIcon);
+        popup.setGravity(mDropDownGravity);
+
+        return popup;
+    }
+
+    private void showPopup(int xOffset, int yOffset, boolean useOffsets, boolean showTitle) {
+        final MenuPopup popup = getPopup();
+        popup.setShowTitle(showTitle);
+
+        if (useOffsets) {
+            // If the resolved drop-down gravity is RIGHT, the popup's right
+            // edge will be aligned with the anchor view. Adjust by the anchor
+            // width such that the top-right corner is at the X offset.
+            final int hgrav = Gravity.getAbsoluteGravity(mDropDownGravity,
+                    mAnchorView.getLayoutDirection()) & Gravity.HORIZONTAL_GRAVITY_MASK;
+            if (hgrav == Gravity.RIGHT) {
+                xOffset -= mAnchorView.getWidth();
+            }
+
+            popup.setHorizontalOffset(xOffset);
+            popup.setVerticalOffset(yOffset);
+
+            // Set the transition epicenter to be roughly finger (or mouse
+            // cursor) sized and centered around the offset position. This
+            // will give the appearance that the window is emerging from
+            // the touch point.
+            final float density = mContext.getResources().getDisplayMetrics().density;
+            final int halfSize = (int) (TOUCH_EPICENTER_SIZE_DP * density / 2);
+            final Rect epicenter = new Rect(xOffset - halfSize, yOffset - halfSize,
+                    xOffset + halfSize, yOffset + halfSize);
+            popup.setEpicenterBounds(epicenter);
+        }
+
+        popup.show();
+    }
+
+    /**
+     * Dismisses the popup, if showing.
+     */
+    @Override
     public void dismiss() {
         if (isShowing()) {
             mPopup.dismiss();
         }
     }
 
-    @Override
-    public void onDismiss() {
+    /**
+     * Called after the popup has been dismissed.
+     * <p>
+     * <strong>Note:</strong> Subclasses should call the super implementation
+     * last to ensure that any necessary tear down has occurred before the
+     * listener specified by {@link #setOnDismissListener(OnDismissListener)}
+     * is called.
+     */
+    protected void onDismiss() {
         mPopup = null;
-        mMenu.close();
-        if (mTreeObserver != null) {
-            if (!mTreeObserver.isAlive()) mTreeObserver = mAnchorView.getViewTreeObserver();
-            mTreeObserver.removeGlobalOnLayoutListener(this);
-            mTreeObserver = null;
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
         }
-        mAnchorView.removeOnAttachStateChangeListener(this);
     }
 
     public boolean isShowing() {
@@ -195,236 +307,20 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        MenuAdapter adapter = mAdapter;
-        adapter.mAdapterMenu.performItemAction(adapter.getItem(position), 0);
-    }
-
-    @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU) {
-            dismiss();
-            return true;
-        }
-        return false;
-    }
-
-    private int measureContentWidth() {
-        // Menus don't tend to be long, so this is more sane than it looks.
-        int maxWidth = 0;
-        View itemView = null;
-        int itemType = 0;
-
-        final ListAdapter adapter = mAdapter;
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        final int count = adapter.getCount();
-        for (int i = 0; i < count; i++) {
-            final int positionType = adapter.getItemViewType(i);
-            if (positionType != itemType) {
-                itemType = positionType;
-                itemView = null;
-            }
-
-            if (mMeasureParent == null) {
-                mMeasureParent = new FrameLayout(mContext);
-            }
-
-            itemView = adapter.getView(i, itemView, mMeasureParent);
-            itemView.measure(widthMeasureSpec, heightMeasureSpec);
-
-            final int itemWidth = itemView.getMeasuredWidth();
-            if (itemWidth >= mPopupMaxWidth) {
-                return mPopupMaxWidth;
-            } else if (itemWidth > maxWidth) {
-                maxWidth = itemWidth;
-            }
-        }
-
-        return maxWidth;
-    }
-
-    @Override
-    public void onGlobalLayout() {
-        if (isShowing()) {
-            final View anchor = mAnchorView;
-            if (anchor == null || !anchor.isShown()) {
-                dismiss();
-            } else if (isShowing()) {
-                // Recompute window size and position
-                mPopup.show();
-            }
-        }
-    }
-
-    @Override
-    public void onViewAttachedToWindow(View v) {
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(View v) {
-        if (mTreeObserver != null) {
-            if (!mTreeObserver.isAlive()) mTreeObserver = v.getViewTreeObserver();
-            mTreeObserver.removeGlobalOnLayoutListener(this);
-        }
-        v.removeOnAttachStateChangeListener(this);
-    }
-
-    @Override
-    public void initForMenu(Context context, MenuBuilder menu) {
-        // Don't need to do anything; we added as a presenter in the constructor.
-    }
-
-    @Override
-    public MenuView getMenuView(ViewGroup root) {
-        throw new UnsupportedOperationException("MenuPopupHelpers manage their own views");
-    }
-
-    @Override
-    public void updateMenuView(boolean cleared) {
-        mHasContentWidth = false;
-
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    public void setCallback(Callback cb) {
+    public void setPresenterCallback(@Nullable MenuPresenter.Callback cb) {
         mPresenterCallback = cb;
-    }
-
-    @Override
-    public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
-        if (subMenu.hasVisibleItems()) {
-            MenuPopupHelper subPopup = new MenuPopupHelper(mContext, subMenu, mAnchorView);
-            subPopup.setCallback(mPresenterCallback);
-
-            boolean preserveIconSpacing = false;
-            final int count = subMenu.size();
-            for (int i = 0; i < count; i++) {
-                MenuItem childItem = subMenu.getItem(i);
-                if (childItem.isVisible() && childItem.getIcon() != null) {
-                    preserveIconSpacing = true;
-                    break;
-                }
-            }
-            subPopup.setForceShowIcon(preserveIconSpacing);
-
-            if (subPopup.tryShow()) {
-                if (mPresenterCallback != null) {
-                    mPresenterCallback.onOpenSubMenu(subMenu);
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
-        // Only care about the (sub)menu we're presenting.
-        if (menu != mMenu) return;
-
-        dismiss();
-        if (mPresenterCallback != null) {
-            mPresenterCallback.onCloseMenu(menu, allMenusAreClosing);
+        if (mPopup != null) {
+            mPopup.setCallback(cb);
         }
     }
 
-    @Override
-    public boolean flagActionItems() {
-        return false;
-    }
-
-    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
-        return false;
-    }
-
-    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
-        return false;
-    }
-
-    @Override
-    public int getId() {
-        return 0;
-    }
-
-    @Override
-    public Parcelable onSaveInstanceState() {
-        return null;
-    }
-
-    @Override
-    public void onRestoreInstanceState(Parcelable state) {
-    }
-
-    private class MenuAdapter extends BaseAdapter {
-        private MenuBuilder mAdapterMenu;
-        private int mExpandedIndex = -1;
-
-        public MenuAdapter(MenuBuilder menu) {
-            mAdapterMenu = menu;
-            findExpandedIndex();
-        }
-
-        public int getCount() {
-            ArrayList<MenuItemImpl> items = mOverflowOnly ?
-                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
-            if (mExpandedIndex < 0) {
-                return items.size();
-            }
-            return items.size() - 1;
-        }
-
-        public MenuItemImpl getItem(int position) {
-            ArrayList<MenuItemImpl> items = mOverflowOnly ?
-                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
-            if (mExpandedIndex >= 0 && position >= mExpandedIndex) {
-                position++;
-            }
-            return items.get(position);
-        }
-
-        public long getItemId(int position) {
-            // Since a menu item's ID is optional, we'll use the position as an
-            // ID for the item in the AdapterView
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = mInflater.inflate(ITEM_LAYOUT, parent, false);
-            }
-
-            MenuView.ItemView itemView = (MenuView.ItemView) convertView;
-            if (mForceShowIcon) {
-                ((ListMenuItemView) convertView).setForceShowIcon(true);
-            }
-            itemView.initialize(getItem(position), 0);
-            return convertView;
-        }
-
-        void findExpandedIndex() {
-            final MenuItemImpl expandedItem = mMenu.getExpandedItem();
-            if (expandedItem != null) {
-                final ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
-                final int count = items.size();
-                for (int i = 0; i < count; i++) {
-                    final MenuItemImpl item = items.get(i);
-                    if (item == expandedItem) {
-                        mExpandedIndex = i;
-                        return;
-                    }
-                }
-            }
-            mExpandedIndex = -1;
-        }
-
+    /**
+     * Listener used to proxy dismiss callbacks to the helper's owner.
+     */
+    private final OnDismissListener mInternalOnDismissListener = new OnDismissListener() {
         @Override
-        public void notifyDataSetChanged() {
-            findExpandedIndex();
-            super.notifyDataSetChanged();
+        public void onDismiss() {
+            MenuPopupHelper.this.onDismiss();
         }
-    }
+    };
 }

@@ -50,7 +50,6 @@ import java.util.Map;
  * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
  * </div>
  */
-
 public class MockContentResolver extends ContentResolver {
     Map<String, ContentProvider> mProviders;
 

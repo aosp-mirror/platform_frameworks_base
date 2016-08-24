@@ -27,6 +27,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.ref.WeakReference;
+
 /**
  * <p>Entry point for the callback from the {@link android.app.job.JobScheduler}.</p>
  * <p>This is the base class that handles asynchronous requests that were previously scheduled. You
@@ -46,10 +48,10 @@ public abstract class JobService extends Service {
      * Job services must be protected with this permission:
      *
      * <pre class="prettyprint">
-     *     <service android:name="MyJobService"
-     *              android:permission="android.permission.BIND_JOB_SERVICE" >
+     *     &#60;service android:name="MyJobService"
+     *              android:permission="android.permission.BIND_JOB_SERVICE" &#62;
      *         ...
-     *     </service>
+     *     &#60;/service&#62;
      * </pre>
      *
      * <p>If a job service is declared in the manifest but not protected with this
@@ -62,15 +64,15 @@ public abstract class JobService extends Service {
      * Identifier for a message that will result in a call to
      * {@link #onStartJob(android.app.job.JobParameters)}.
      */
-    private final int MSG_EXECUTE_JOB = 0;
+    private static final int MSG_EXECUTE_JOB = 0;
     /**
      * Message that will result in a call to {@link #onStopJob(android.app.job.JobParameters)}.
      */
-    private final int MSG_STOP_JOB = 1;
+    private static final int MSG_STOP_JOB = 1;
     /**
      * Message that the client has completed execution of this job.
      */
-    private final int MSG_JOB_FINISHED = 2;
+    private static final int MSG_JOB_FINISHED = 2;
 
     /** Lock object for {@link #mHandler}. */
     private final Object mHandlerLock = new Object();
@@ -82,21 +84,36 @@ public abstract class JobService extends Service {
     @GuardedBy("mHandlerLock")
     JobHandler mHandler;
 
-    /** Binder for this service. */
-    IJobService mBinder = new IJobService.Stub() {
-        @Override
-        public void startJob(JobParameters jobParams) {
-            ensureHandler();
-            Message m = Message.obtain(mHandler, MSG_EXECUTE_JOB, jobParams);
-            m.sendToTarget();
+    static final class JobInterface extends IJobService.Stub {
+        final WeakReference<JobService> mService;
+
+        JobInterface(JobService service) {
+            mService = new WeakReference<>(service);
         }
+
         @Override
-        public void stopJob(JobParameters jobParams) {
-            ensureHandler();
-            Message m = Message.obtain(mHandler, MSG_STOP_JOB, jobParams);
-            m.sendToTarget();
+        public void startJob(JobParameters jobParams) throws RemoteException {
+            JobService service = mService.get();
+            if (service != null) {
+                service.ensureHandler();
+                Message m = Message.obtain(service.mHandler, MSG_EXECUTE_JOB, jobParams);
+                m.sendToTarget();
+            }
         }
-    };
+
+        @Override
+        public void stopJob(JobParameters jobParams) throws RemoteException {
+            JobService service = mService.get();
+            if (service != null) {
+                service.ensureHandler();
+                Message m = Message.obtain(service.mHandler, MSG_STOP_JOB, jobParams);
+                m.sendToTarget();
+            }
+
+        }
+    }
+
+    IJobService mBinder;
 
     /** @hide */
     void ensureHandler() {
@@ -194,6 +211,9 @@ public abstract class JobService extends Service {
 
     /** @hide */
     public final IBinder onBind(Intent intent) {
+        if (mBinder == null) {
+            mBinder = new JobInterface(this);
+        }
         return mBinder.asBinder();
     }
 

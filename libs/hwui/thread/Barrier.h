@@ -33,11 +33,6 @@ public:
         mCondition.signal(mType);
     }
 
-    void close() {
-        Mutex::Autolock l(mLock);
-        mOpened = false;
-    }
-
     void wait() const {
         Mutex::Autolock l(mLock);
         while (!mOpened) {

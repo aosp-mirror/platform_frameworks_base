@@ -1,0 +1,74 @@
+page.title=Giới thiệu về Android
+
+@jd:body
+
+
+<div class="sidebox" style="width:220px"><!-- width to match col-4 below -->
+<p>Để tìm hiểu về cách các ứng dụng hoạt động, hãy bắt đầu với phần
+<a href="{@docRoot}guide/components/fundamentals.html">Đại cương về Ứng dụng</a>.</p>
+<p>Để bắt đầu ngay với việc viết mã, hãy đọc phần <a href="{@docRoot}training/basics/firstapp/index.html">Xây dựng Ứng dụng Đầu tiên của Bạn</a>.</p>
+</div>
+
+<p>Android cung cấp một khuôn khổ ứng dụng phong phú cho phép bạn xây dựng các ứng dụng và trò chơi mới
+cho các thiết bị di động trong môi trường ngôn ngữ Java. Tài liệu được liệt kê trong vùng điều hướng
+bên trái sẽ cung cấp chi tiết về cách xây dựng ứng dụng bằng cách sử dụng các API khác nhau của Android.</p>
+
+<p>Nếu bạn mới làm quen với việc phát triển Android, quan trọng là bạn phải hiểu
+những khái niệm cơ bản sau về khuôn khổ ứng dụng Android:</p>
+
+
+<div class="landing-banner">
+
+<div class="col-6">
+
+<h4>Các ứng dụng cung cấp nhiều điểm nhập</h4>
+
+<p>Các ứng dụng Android được tích hợp như một sự kết hợp giữa các thành phần khác nhau có thể được gọi ra
+riêng. Ví dụ, một <em>hoạt động</em> riêng lẻ cung cấp một màn hình
+duy nhất cho một giao diện người dùng, và một <em>dịch vụ</em> chạy ngầm thực hiện độc lập
+công việc.</p>
+
+<p>Từ một thành phần, bạn có thể khởi động một thành phần khác bằng cách sử dụng một <em>ý định</em>. Thậm chí bạn có thể bắt đầu
+một thành phần trong một ứng dụng khác, chẳng hạn như một hoạt động trong một ứng dụng bản đồ để hiển thị một địa chỉ. Mô hình này
+cung cấp nhiều điểm nhập cho một ứng dụng duy nhất và cho phép bất kỳ ứng dụng nào xử lý như "mặc định"
+của một người dùng đối với một hành động mà các ứng dụng khác có thể gọi ra.</p>
+
+
+<p><b>Tìm hiểu thêm:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/components/fundamentals.html">Đại cương về Ứng dụng</a>
+<li><a href="{@docRoot}guide/components/intents-filters.html">Ý định và Bộ lọc Ý định</a>
+<li><a href="{@docRoot}guide/components/activities.html">Hoạt động</a>
+</ul>
+
+</div>
+
+
+<div class="col-6">
+
+<h4>Các ứng dụng sẽ thích ứng theo các thiết bị khác nhau</h4>
+
+<p>Android cung cấp một khuôn khổ ứng dụng thích ứng cho phép bạn cung cấp các tài nguyên duy nhất
+cho các cấu hình thiết bị khác nhau. Ví dụ, bạn có thể tạo các tệp bố trí
+XML khác nhau cho các kích cỡ màn hình khác nhau và hệ thống
+sẽ xác định bố trí nào sẽ áp dụng dựa trên kích cỡ màn hình hiện tại của thiết bị.</p>
+
+<p>Bạn có thể truy vấn về sự sẵn có của các tính năng trên thiết bị vào thời gian chạy nếu bất kỳ tính năng nào của ứng dụng
+yêu cầu phần cứng cụ thể, chẳng hạn như máy ảnh. Nếu cần, bạn cũng có thể khai báo các tính năng mà ứng dụng của mình yêu cầu
+vì vậy, những chợ ứng dụng như Google Play Store không cho phép cài đặt trên những thiết bị không hỗ trợ
+tính năng đó.</p>
+
+
+<p><b>Tìm hiểu thêm:</b></p>
+<ul class="nolist">
+<li><a href="{@docRoot}guide/practices/compatibility.html">Tính tương thích của Thiết bị</a>
+<li><a href="{@docRoot}guide/topics/resources/overview.html">Tổng quan về Tài nguyên</a>
+<li><a href="{@docRoot}guide/topics/ui/overview.html">Tổng quan về Giao diện Người dùng</a>
+</ul>
+
+</div>
+
+</div><!-- end landing-banner -->
+
+
+

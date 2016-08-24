@@ -60,8 +60,8 @@ public final class ConsumerIrManager {
         try {
             return mService.hasIrEmitter();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -84,7 +84,7 @@ public final class ConsumerIrManager {
         try {
             mService.transmit(mPackageName, carrierFrequency, pattern);
         } catch (RemoteException e) {
-            Log.w(TAG, "failed to transmit.", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -149,8 +149,7 @@ public final class ConsumerIrManager {
             }
             return range;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
-
 }

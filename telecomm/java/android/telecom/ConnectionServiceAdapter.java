@@ -196,6 +196,15 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    void setConnectionProperties(String callId, int properties) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setConnectionProperties(callId, properties);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     /**
      * Indicates whether or not the specified call is currently conferenced into the specified
      * conference call.
@@ -398,16 +407,105 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
-     * Sets extras associated with a connection.
+     * Adds some extras associated with a {@code Connection}.
      *
      * @param callId The unique ID of the call.
-     * @param extras The extras to associate with this call.
+     * @param extras The extras to add.
      */
-    void setExtras(String callId, Bundle extras) {
-        Log.v(this, "setExtras: %s", extras);
+    void putExtras(String callId, Bundle extras) {
+        Log.v(this, "putExtras: %s", callId);
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setExtras(callId, extras);
+                adapter.putExtras(callId, extras);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Adds an extra associated with a {@code Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    void putExtra(String callId, String key, boolean value) {
+        Log.v(this, "putExtra: %s %s=%b", callId, key, value);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean(key, value);
+                adapter.putExtras(callId, bundle);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Adds an extra associated with a {@code Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    void putExtra(String callId, String key, int value) {
+        Log.v(this, "putExtra: %s %s=%d", callId, key, value);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putInt(key, value);
+                adapter.putExtras(callId, bundle);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Adds an extra associated with a {@code Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param key The extra key.
+     * @param value The extra value.
+     */
+    void putExtra(String callId, String key, String value) {
+        Log.v(this, "putExtra: %s %s=%s", callId, key, value);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putString(key, value);
+                adapter.putExtras(callId, bundle);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Removes extras associated with a {@code Connection}.
+     *  @param callId The unique ID of the call.
+     * @param keys The extra keys to remove.
+     */
+    void removeExtras(String callId, List<String> keys) {
+        Log.v(this, "removeExtras: %s %s", callId, keys);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.removeExtras(callId, keys);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Informs Telecom of a connection level event.
+     *
+     * @param callId The unique ID of the call.
+     * @param event The event.
+     * @param extras Extras associated with the event.
+     */
+    void onConnectionEvent(String callId, String event, Bundle extras) {
+        Log.v(this, "onConnectionEvent: %s", event);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.onConnectionEvent(callId, event, extras);
             } catch (RemoteException ignored) {
             }
         }

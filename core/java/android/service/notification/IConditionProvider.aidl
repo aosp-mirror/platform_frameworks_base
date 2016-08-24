@@ -22,7 +22,6 @@ import android.service.notification.Condition;
 /** @hide */
 oneway interface IConditionProvider {
     void onConnected();
-    void onRequestConditions(int relevance);
     void onSubscribe(in Uri conditionId);
     void onUnsubscribe(in Uri conditionId);
 }

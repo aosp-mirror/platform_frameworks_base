@@ -25,7 +25,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.persistentdata.IPersistentDataBlockService;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -71,6 +73,9 @@ public class PersistentDataBlockService extends SystemService {
     private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
     public static final int DIGEST_SIZE_BYTES = 32;
     private static final String OEM_UNLOCK_PROP = "sys.oem_unlock_allowed";
+    private static final String FLASH_LOCK_PROP = "ro.boot.flash.locked";
+    private static final String FLASH_LOCK_LOCKED = "1";
+    private static final String FLASH_LOCK_UNLOCKED = "0";
 
     private final Context mContext;
     private final String mDataBlockFile;
@@ -84,7 +89,7 @@ public class PersistentDataBlockService extends SystemService {
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mBlockDeviceSize = -1; // Load lazily
-        mAllowedUid = getAllowedUid(UserHandle.USER_OWNER);
+        mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
     }
 
     private int getAllowedUid(int userHandle) {
@@ -93,7 +98,8 @@ public class PersistentDataBlockService extends SystemService {
         PackageManager pm = mContext.getPackageManager();
         int allowedUid = -1;
         try {
-            allowedUid = pm.getPackageUid(allowedPackage, userHandle);
+            allowedUid = pm.getPackageUidAsUser(allowedPackage,
+                    PackageManager.MATCH_SYSTEM_ONLY, userHandle);
         } catch (PackageManager.NameNotFoundException e) {
             // not expected
             Slog.e(TAG, "not able to find package " + allowedPackage, e);
@@ -119,10 +125,20 @@ public class PersistentDataBlockService extends SystemService {
         SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
     }
 
-    private void enforceOemUnlockPermission() {
+    private void enforceOemUnlockReadPermission() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.READ_OEM_UNLOCK_STATE)
+                == PackageManager.PERMISSION_DENIED
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.OEM_UNLOCK_STATE)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException("Can't access OEM unlock state. Requires "
+                    + "READ_OEM_UNLOCK_STATE or OEM_UNLOCK_STATE permission.");
+        }
+    }
+
+    private void enforceOemUnlockWritePermission() {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.OEM_UNLOCK_STATE,
-                "Can't access OEM unlock state");
+                "Can't modify OEM unlock state");
     }
 
     private void enforceUid(int callingUid) {
@@ -131,9 +147,12 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
-    private void enforceIsOwner() {
-        if (!Binder.getCallingUserHandle().isOwner()) {
-            throw new SecurityException("Only the Owner is allowed to change OEM unlock state");
+    private void enforceIsAdmin() {
+        final int userId = UserHandle.getCallingUserId();
+        final boolean isAdmin = UserManager.get(mContext).isUserAdmin(userId);
+        if (!isAdmin) {
+            throw new SecurityException(
+                    "Only the Admin user is allowed to change OEM unlock state");
         }
     }
     private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
@@ -416,7 +435,7 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public void wipe() {
-            enforceOemUnlockPermission();
+            enforceOemUnlockWritePermission();
 
             synchronized (mLock) {
                 int ret = nativeWipe(mDataBlockFile);
@@ -433,8 +452,8 @@ public class PersistentDataBlockService extends SystemService {
             if (ActivityManager.isUserAMonkey()) {
                 return;
             }
-            enforceOemUnlockPermission();
-            enforceIsOwner();
+            enforceOemUnlockWritePermission();
+            enforceIsAdmin();
 
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);
@@ -444,8 +463,22 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public boolean getOemUnlockEnabled() {
-            enforceOemUnlockPermission();
+            enforceOemUnlockReadPermission();
             return doGetOemUnlockEnabled();
+        }
+
+        @Override
+        public int getFlashLockState() {
+            enforceOemUnlockReadPermission();
+            String locked = SystemProperties.get(FLASH_LOCK_PROP);
+            switch (locked) {
+                case FLASH_LOCK_LOCKED:
+                    return PersistentDataBlockManager.FLASH_LOCK_LOCKED;
+                case FLASH_LOCK_UNLOCKED:
+                    return PersistentDataBlockManager.FLASH_LOCK_UNLOCKED;
+                default:
+                    return PersistentDataBlockManager.FLASH_LOCK_UNKNOWN;
+            }
         }
 
         @Override

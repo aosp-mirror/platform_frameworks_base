@@ -387,7 +387,7 @@ public class CallerInfoAsyncQuery {
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
             OnQueryCompleteListener listener, Object cookie) {
 
-        int subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubscriptionId();
         return startQuery(token, context, number, listener, cookie, subId);
     }
 

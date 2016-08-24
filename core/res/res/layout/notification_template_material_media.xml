@@ -15,40 +15,51 @@
   ~ limitations under the License
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
     android:id="@+id/status_bar_latest_event_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:orientation="horizontal"
+    android:layout_height="wrap_content"
     android:background="#00000000"
     android:tag="media"
     >
-    <include layout="@layout/notification_template_icon_group"
-        android:layout_width="@dimen/notification_large_icon_width"
-        android:layout_height="@dimen/notification_large_icon_height"
-        android:layout_weight="0"
-        />
+    <include layout="@layout/notification_template_header"
+        android:layout_width="fill_parent"
+        android:layout_height="53dp" />
     <LinearLayout
+        android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="fill_vertical"
-        android:minHeight="@dimen/notification_large_icon_height"
-        android:orientation="vertical"
-        >
-        <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_part_line2" />
-        <include layout="@layout/notification_template_part_line3" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/media_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="6dp"
-        android:layout_gravity="center_vertical|end"
         android:orientation="horizontal"
-        android:layoutDirection="ltr"
+        android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:layout_marginTop="@dimen/notification_content_margin_top"
+        android:tag="media"
         >
-        <!-- media buttons will be added here -->
+        <LinearLayout
+            android:id="@+id/notification_content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_vertical"
+            android:layout_weight="1"
+            android:minHeight="@dimen/notification_min_content_height"
+            android:paddingBottom="@dimen/notification_content_margin_bottom"
+            android:orientation="vertical"
+            >
+            <include layout="@layout/notification_template_part_line1"/>
+            <include layout="@layout/notification_template_text"/>
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/media_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="12dp"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal"
+            >
+            <!-- media buttons will be added here -->
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    <include layout="@layout/notification_template_right_icon" />
+</FrameLayout>

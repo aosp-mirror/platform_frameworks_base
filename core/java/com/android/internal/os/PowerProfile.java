@@ -51,7 +51,7 @@ public class PowerProfile {
      * Power consumption when CPU is awake (when a wake lock is held).  This
      * should be 0 on devices that can go into full CPU power collapse even
      * when a wake lock is held.  Otherwise, this is the power consumption in
-     * addition to POWERR_CPU_IDLE due to a wake lock being held but with no
+     * addition to POWER_CPU_IDLE due to a wake lock being held but with no
      * CPU activity.
      */
     public static final String POWER_CPU_AWAKE = "cpu.awake";
@@ -85,6 +85,7 @@ public class PowerProfile {
     public static final String POWER_WIFI_CONTROLLER_IDLE = "wifi.controller.idle";
     public static final String POWER_WIFI_CONTROLLER_RX = "wifi.controller.rx";
     public static final String POWER_WIFI_CONTROLLER_TX = "wifi.controller.tx";
+    public static final String POWER_WIFI_CONTROLLER_TX_LEVELS = "wifi.controller.tx_levels";
     public static final String POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE = "wifi.controller.voltage";
 
     public static final String POWER_BLUETOOTH_CONTROLLER_IDLE = "bluetooth.controller.idle";
@@ -93,6 +94,12 @@ public class PowerProfile {
     public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
             "bluetooth.controller.voltage";
 
+    public static final String POWER_MODEM_CONTROLLER_IDLE = "modem.controller.idle";
+    public static final String POWER_MODEM_CONTROLLER_RX = "modem.controller.rx";
+    public static final String POWER_MODEM_CONTROLLER_TX = "modem.controller.tx";
+    public static final String POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE =
+            "modem.controller.voltage";
+
     /**
      * Power consumption when GPS is on.
      */
@@ -100,17 +107,23 @@ public class PowerProfile {
 
     /**
      * Power consumption when Bluetooth driver is on.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_ON = "bluetooth.on";
 
     /**
      * Power consumption when Bluetooth driver is transmitting/receiving.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_ACTIVE = "bluetooth.active";
 
     /**
      * Power consumption when Bluetooth driver gets an AT command.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
 
@@ -275,9 +288,15 @@ public class PowerProfile {
         };
 
         for (int i = 0; i < configResIds.length; i++) {
+            String key = configResIdKeys[i];
+            // if we already have some of these parameters in power_profile.xml, ignore the
+            // value in config.xml
+            if ((sPowerMap.containsKey(key) && (Double) sPowerMap.get(key) > 0)) {
+                continue;
+            }
             int value = resources.getInteger(configResIds[i]);
             if (value > 0) {
-                sPowerMap.put(configResIdKeys[i], (double) value);
+                sPowerMap.put(key, (double) value);
             }
         }
     }

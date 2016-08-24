@@ -1,0 +1,140 @@
+page.title=Testing Your Service
+page.tags=testing, service
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+
+  <ul>
+    <li>Android 2.2 (API level 8) or higher</li>
+    <li><a href="{@docRoot}tools/testing-support-library/index.html">
+      Android Testing Support Library</a></li>
+    <li><a href="{@docRoot}tools/studio/index.html">Android Studio 1.4.1 or higher</a>.</li>
+  </ul>
+
+  <h2>This lesson teaches you to</h2>
+
+  <ol>
+    <li><a href="#setup">Set Up Your Testing Environment</a></li>
+    <li><a href="#build">Create an Integrated Test for Services</a></li>
+    <li><a href="#run">Run Integration Tests for Services</a></li>
+  </ol>
+
+  <h2>You should also read</h2>
+  <ul>
+      <li><a href="{@docRoot}guide/components/services.html">Services</a></li>
+  </ul>
+
+  <h2>Try it out</h2>
+
+  <ul>
+    <li>
+<a href="https://github.com/googlesamples/android-testing/tree/master/integration/ServiceTestRuleSample"
+class="external-link">Service Test Code Samples</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+If you are implementing a local {@link android.app.Service} as a component of
+your app, you should test the {@link android.app.Service} to ensure that it doesn't behave in an
+unexpected way. You can create
+<a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html">
+instrumented unit tests</a> to verify that the behavior in the {@link android.app.Service}
+is correct; for example, the service stores and returns valid data values and performs
+data operations correctly.
+</p>
+
+<p>
+The <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>
+provides an API for testing your {@link android.app.Service} objects in isolation.
+The
+<a href="{@docRoot}reference/android/support/test/rule/ServiceTestRule.html">ServiceTestRule</a>
+class is a JUnit 4 rule that starts your service before your unit test methods
+run, and shuts down the service after tests complete. By using this test rule, you ensure that the
+connection to the service is always established before your test method runs. To
+learn more about JUnit 4 rules, see the <a href="https://github.com/junit-team/junit/wiki/Rules"
+class="external-link">JUnit documentation</a>.
+</p>
+
+<p style="note">
+<strong>Note</strong>: The
+<a href="{@docRoot}reference/android/support/test/rule/ServiceTestRule.html">ServiceTestRule</a>
+class does not support testing of {@link android.app.IntentService} objects.
+If you need to test a {@link android.app.IntentService} object, you should encapsulate the logic
+in a separate class and create a corresponding unit test instead.
+</p>
+
+<h2 id="setup">Set Up Your Testing Environment</h2>
+<p>Before building your integration test for the service, make sure to configure your project for
+  instrumented tests, as described in
+<a href="{@docRoot}training/testing/start/index.html#config-instrumented-tests">
+Getting Started with Testing</a>.</p>
+
+<h2 id="build">Create an Integration Test for Services</h2>
+<p>Your integration test should be written as a JUnit 4 test class. To learn more about creating
+JUnit 4 test classes and using JUnit 4 assertion methods, see
+<a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#build">
+Create an Instrumented Unit Test Class</a>.</p>
+
+<p>To create an integration test for your service, add the {@code &#64;RunWith(AndroidJUnit4.class)}
+annotation at the beginning of your test class definition. You also need to specify the
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+{@code AndroidJUnitRunner}</a> class that the Android Testing Support Library provides as your
+default test runner. This step is described in more detail in
+<a href="{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html#run">
+Run Instrumented Unit Tests</a>.</p>
+
+<p>Next, create a
+<a href="{@docRoot}reference/android/support/test/rule/ServiceTestRule.html">ServiceTestRule</a>
+instance in your test by using the {@code &#64;Rule} annotation.</p>
+
+<pre>
+&#64;Rule
+public final ServiceTestRule mServiceRule = new ServiceTestRule();
+</pre>
+
+<p>The following example shows how you might implement an integration test for a service.
+The test method {@code testWithBoundService} verifies that the app binds successfully to a
+local service and that the service interface behaves correctly.</p>
+
+<pre>
+&#64;Test
+public void testWithBoundService() throws TimeoutException {
+    // Create the service Intent.
+    Intent serviceIntent =
+            new Intent(InstrumentationRegistry.getTargetContext(),
+                LocalService.class);
+
+    // Data can be passed to the service via the Intent.
+    serviceIntent.putExtra(LocalService.SEED_KEY, 42L);
+
+    // Bind the service and grab a reference to the binder.
+    IBinder binder = mServiceRule.bindService(serviceIntent);
+
+    // Get the reference to the service, or you can call
+    // public methods on the binder directly.
+    LocalService service =
+            ((LocalService.LocalBinder) binder).getService();
+
+    // Verify that the service is working correctly.
+    assertThat(service.getRandomInt(), is(any(Integer.class)));
+}
+</pre>
+
+<h2 id="run">Run Integration Tests for Services</h2>
+<p>
+You can run integration tests from <a href="{@docRoot}studio/index.html">Android Studio</a> or
+from the command-line. Make sure to specify
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+  {@code AndroidJUnitRunner}</a> as the default instrumentation runner in your project.
+</p>
+<p>
+To run the integration test for your service, follow the steps for running instrumented tests
+described in <a href="{@docRoot}training/testing/start/index.html#run-instrumented-tests">
+Getting Started with Testing</a>.
+</p>

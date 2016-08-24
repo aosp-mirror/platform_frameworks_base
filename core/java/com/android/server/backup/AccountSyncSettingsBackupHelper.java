@@ -16,10 +16,6 @@
 
 package com.android.server.backup;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.backup.BackupDataInputStream;
@@ -28,14 +24,21 @@ import android.app.backup.BackupHelper;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SyncAdapterType;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -73,6 +76,8 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
     private static final String KEY_AUTHORITY_NAME = "name";
     private static final String KEY_AUTHORITY_SYNC_STATE = "syncState";
     private static final String KEY_AUTHORITY_SYNC_ENABLED = "syncEnabled";
+    private static final String STASH_FILE = Environment.getDataDirectory()
+            + "/backup/unadded_account_syncsettings.json";
 
     private Context mContext;
     private AccountManager mAccountManager;
@@ -203,9 +208,8 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
             }
         } catch (EOFException eof) {
             // Initial state may be empty.
-        } finally {
-            dataInput.close();
         }
+        // We explicitly don't close 'dataInput' because we must not close the backing fd.
         return oldMd5Checksum;
     }
 
@@ -219,7 +223,10 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
 
         dataOutput.writeInt(STATE_VERSION);
         dataOutput.write(md5Checksum);
-        dataOutput.close();
+
+        // We explicitly don't close 'dataOutput' because we must not close the backing fd.
+        // The FileOutputStream will not close it implicitly.
+
     }
 
     private byte[] generateMd5Checksum(byte[] data) throws NoSuchAlgorithmException {
@@ -254,33 +261,91 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
             }
 
             try {
-                HashSet<Account> currentAccounts = getAccountsHashSet();
-                for (int i = 0; i < accountJSONArray.length(); i++) {
-                    JSONObject accountJSON = (JSONObject) accountJSONArray.get(i);
-                    String accountName = accountJSON.getString(KEY_ACCOUNT_NAME);
-                    String accountType = accountJSON.getString(KEY_ACCOUNT_TYPE);
-
-                    Account account = new Account(accountName, accountType);
-
-                    // Check if the account already exists. Accounts that don't exist on the device
-                    // yet won't be restored.
-                    if (currentAccounts.contains(account)) {
-                        restoreExistingAccountSyncSettingsFromJSON(accountJSON);
-                    } else {
-                        // TODO:
-                        // Stash the data to a file that the SyncManager can read from to restore
-                        // settings at a later date.
-                    }
-                }
+                restoreFromJsonArray(accountJSONArray);
             } finally {
                 // Set the master sync preference to the value from the backup set.
                 ContentResolver.setMasterSyncAutomatically(masterSyncEnabled);
             }
-
             Log.i(TAG, "Restore successful.");
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Couldn't restore account sync settings\n" + e);
         }
+    }
+
+    private void restoreFromJsonArray(JSONArray accountJSONArray)
+            throws JSONException {
+        HashSet<Account> currentAccounts = getAccounts();
+        JSONArray unaddedAccountsJSONArray = new JSONArray();
+        for (int i = 0; i < accountJSONArray.length(); i++) {
+            JSONObject accountJSON = (JSONObject) accountJSONArray.get(i);
+            String accountName = accountJSON.getString(KEY_ACCOUNT_NAME);
+            String accountType = accountJSON.getString(KEY_ACCOUNT_TYPE);
+
+            Account account = null;
+            try {
+                account = new Account(accountName, accountType);
+            } catch (IllegalArgumentException iae) {
+                continue;
+            }
+
+            // Check if the account already exists. Accounts that don't exist on the device
+            // yet won't be restored.
+            if (currentAccounts.contains(account)) {
+                if (DEBUG) Log.i(TAG, "Restoring Sync Settings for" + accountName);
+                restoreExistingAccountSyncSettingsFromJSON(accountJSON);
+            } else {
+                unaddedAccountsJSONArray.put(accountJSON);
+            }
+        }
+
+        if (unaddedAccountsJSONArray.length() > 0) {
+            try (FileOutputStream fOutput = new FileOutputStream(STASH_FILE)) {
+                String jsonString = unaddedAccountsJSONArray.toString();
+                DataOutputStream out = new DataOutputStream(fOutput);
+                out.writeUTF(jsonString);
+            } catch (IOException ioe) {
+                // Error in writing to stash file
+                Log.e(TAG, "unable to write the sync settings to the stash file", ioe);
+            }
+        } else {
+            File stashFile = new File(STASH_FILE);
+            if (stashFile.exists()) stashFile.delete();
+        }
+    }
+
+    /**
+     * Restore SyncSettings for all existing accounts from a stashed backup-set
+     */
+    private void accountAddedInternal() {
+        String jsonString;
+
+        try (FileInputStream fIn = new FileInputStream(new File(STASH_FILE))) {
+            DataInputStream in = new DataInputStream(fIn);
+            jsonString = in.readUTF();
+        } catch (FileNotFoundException fnfe) {
+            // This is expected to happen when there is no accounts info stashed
+            if (DEBUG) Log.d(TAG, "unable to find the stash file", fnfe);
+            return;
+        } catch (IOException ioe) {
+            if (DEBUG) Log.d(TAG, "could not read sync settings from stash file", ioe);
+            return;
+        }
+
+        try {
+            JSONArray unaddedAccountsJSONArray = new JSONArray(jsonString);
+            restoreFromJsonArray(unaddedAccountsJSONArray);
+        } catch (JSONException jse) {
+            // Malformed jsonString
+            Log.e(TAG, "there was an error with the stashed sync settings", jse);
+        }
+    }
+
+    /**
+     * Restore SyncSettings for all existing accounts from a stashed backup-set
+     */
+    public static void accountAdded(Context context) {
+        AccountSyncSettingsBackupHelper helper = new AccountSyncSettingsBackupHelper(context);
+        helper.accountAddedInternal();
     }
 
     /**
@@ -288,7 +353,7 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
      *
      * @return Accounts in a HashSet.
      */
-    private HashSet<Account> getAccountsHashSet() {
+    private HashSet<Account> getAccounts() {
         Account[] accounts = mAccountManager.getAccounts();
         HashSet<Account> accountHashSet = new HashSet<Account>();
         for (Account account : accounts) {

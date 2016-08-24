@@ -228,22 +228,23 @@ public class VolumeUI extends SystemUI {
             }
             final Intent intent =  new Intent(Receiver.DISABLE)
                     .putExtra(Receiver.EXTRA_COMPONENT, component);
+            Notification.Builder builder = new Notification.Builder(mContext)
+                    .setSmallIcon(R.drawable.ic_volume_media)
+                    .setWhen(0)
+                    .setShowWhen(false)
+                    .setOngoing(true)
+                    .setContentTitle(mContext.getString(
+                            R.string.volumeui_notification_title, getAppLabel(component)))
+                    .setContentText(mContext.getString(R.string.volumeui_notification_text))
+                    .setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setPriority(Notification.PRIORITY_MIN)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setColor(mContext.getColor(
+                            com.android.internal.R.color.system_notification_accent_color));
+            overrideNotificationAppName(mContext, builder);
             mNotificationManager.notify(R.id.notification_volumeui,
-                    new Notification.Builder(mContext)
-                            .setSmallIcon(R.drawable.ic_volume_media)
-                            .setWhen(0)
-                            .setShowWhen(false)
-                            .setOngoing(true)
-                            .setContentTitle(mContext.getString(
-                                    R.string.volumeui_notification_title, getAppLabel(component)))
-                            .setContentText(mContext.getString(R.string.volumeui_notification_text))
-                            .setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT))
-                            .setPriority(Notification.PRIORITY_MIN)
-                            .setVisibility(Notification.VISIBILITY_PUBLIC)
-                            .setColor(mContext.getColor(
-                                    com.android.internal.R.color.system_notification_accent_color))
-                            .build());
+                    builder.build());
         }
     }
 }

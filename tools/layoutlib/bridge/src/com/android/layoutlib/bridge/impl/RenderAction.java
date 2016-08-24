@@ -36,7 +36,6 @@ import android.util.DisplayMetrics;
 import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodManager_Accessor;
-import android.widget.SimpleMonthView_Delegate;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -123,14 +122,13 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getAssets(), mParams.getLayoutlibCallback(), getConfiguration(),
+                mParams.getAssets(), mParams.getLayoutlibCallback(), getConfiguration(mParams),
                 mParams.getTargetSdkVersion(), mParams.isRtlSupported());
 
         setUp();
 
         return SUCCESS.createResult();
     }
-
 
     /**
      * Prepares the scene for action.
@@ -278,7 +276,6 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             mContext.getRenderResources().setLogger(null);
         }
         ParserFactory.setParserFactory(null);
-        SimpleMonthView_Delegate.clearCache();
     }
 
     public static BridgeContext getCurrentContext() {
@@ -322,10 +319,11 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         }
     }
 
-    private Configuration getConfiguration() {
+    // VisibleForTesting
+    public static Configuration getConfiguration(RenderParams params) {
         Configuration config = new Configuration();
 
-        HardwareConfig hardwareConfig = mParams.getHardwareConfig();
+        HardwareConfig hardwareConfig = params.getHardwareConfig();
 
         ScreenSize screenSize = hardwareConfig.getScreenSize();
         if (screenSize != null) {
@@ -382,25 +380,19 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             config.orientation = Configuration.ORIENTATION_UNDEFINED;
         }
 
-        try {
-            ScreenRound roundness = hardwareConfig.getScreenRoundness();
-            if (roundness != null) {
-                switch (roundness) {
-                    case ROUND:
-                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
-                        break;
-                    case NOTROUND:
-                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
-                }
-            } else {
-                config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
+        ScreenRound roundness = hardwareConfig.getScreenRoundness();
+        if (roundness != null) {
+            switch (roundness) {
+                case ROUND:
+                    config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+                    break;
+                case NOTROUND:
+                    config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
             }
-        } catch (NoSuchMethodError ignored) {
-            // getScreenRoundness was added in later stages of API 15. So, it's not present on some
-            // preview releases of API 15.
-            // TODO: Remove the try catch around Oct 2015.
+        } else {
+            config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
         }
-        String locale = getParams().getLocale();
+        String locale = params.getLocale();
         if (locale != null && !locale.isEmpty()) config.locale = new Locale(locale);
 
         // TODO: fill in more config info.

@@ -93,6 +93,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Material.Widget.PopupMenu.Header</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Material.Button</item>
@@ -220,7 +221,9 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
         <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Material.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.Material.TextSuggestionsPopupWindow</item>
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item_material</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container_material</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Material.TextSuggestionHighlight</item>
         <item name="textCursorDrawable">@drawable/text_cursor_material</item>
 
         <!-- Widget styles -->
@@ -238,6 +241,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Material.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Material.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Material.ImageWell</item>
+        <item name="listMenuViewStyle">@style/Widget.Material.ListMenuView</item>
         <item name="listViewStyle">@style/Widget.Material.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Material.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Material.PopupWindow</item>
@@ -282,6 +286,7 @@ please see themes_device_defaults.xml.
         <item name="stackViewStyle">@style/Widget.Material.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">@style/Widget.Material.ContextPopupMenu</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
@@ -371,7 +376,7 @@ please see themes_device_defaults.xml.
         <item name="datePickerStyle">@style/Widget.Material.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="datePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.DatePicker</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
@@ -448,6 +453,7 @@ please see themes_device_defaults.xml.
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Material.Widget.PopupMenu.Small</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Material.Widget.PopupMenu.Header</item>
 
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Material.Light.Button</item>
@@ -576,8 +582,12 @@ please see themes_device_defaults.xml.
         <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
         <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Material.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.Material.Light.TextSuggestionsPopupWindow</item>
         <item name="textCursorDrawable">@drawable/text_cursor_material</item>
+
+        <!-- Suggestion window attributes -->
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item_material</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container_material</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Material.TextSuggestionHighlight</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.Material.Light.AbsListView</item>
@@ -594,6 +604,7 @@ please see themes_device_defaults.xml.
         <item name="gridViewStyle">@style/Widget.Material.Light.GridView</item>
         <item name="imageButtonStyle">@style/Widget.Material.Light.ImageButton</item>
         <item name="imageWellStyle">@style/Widget.Material.Light.ImageWell</item>
+        <item name="listMenuViewStyle">@style/Widget.Material.ListMenuView</item>
         <item name="listViewStyle">@style/Widget.Material.Light.ListView</item>
         <item name="listViewWhiteStyle">@style/Widget.Material.Light.ListView.White</item>
         <item name="popupWindowStyle">@style/Widget.Material.Light.PopupWindow</item>
@@ -638,6 +649,7 @@ please see themes_device_defaults.xml.
         <item name="stackViewStyle">@style/Widget.Material.Light.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.Light.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
+        <item name="contextPopupMenuStyle">@style/Widget.Material.ContextPopupMenu</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@style/Preference.Material.PreferenceScreen</item>
@@ -727,7 +739,7 @@ please see themes_device_defaults.xml.
         <item name="datePickerStyle">@style/Widget.Material.Light.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="datePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.DatePicker</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
@@ -878,6 +890,16 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@null</item>
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+
+        <item name="windowFixedWidthMajor">@null</item>
+        <item name="windowFixedWidthMinor">@null</item>
+        <item name="windowFixedHeightMajor">@null</item>
+        <item name="windowFixedHeightMinor">@null</item>
+    </style>
+
+    <!-- Theme overlay that overrides window properties to display as a date picker dialog. -->
+    <style name="ThemeOverlay.Material.Dialog.DatePicker">
+        <item name="alertDialogStyle">@style/DatePickerDialog.Material</item>
     </style>
 
     <style name="ThemeOverlay.Material.Dialog.Alert">
@@ -1295,6 +1317,7 @@ please see themes_device_defaults.xml.
         <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
         <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
     </style>
+
     <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
@@ -1318,6 +1341,7 @@ please see themes_device_defaults.xml.
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
     </style>
+
     <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>

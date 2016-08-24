@@ -22,10 +22,6 @@
     <dimen name="thumbnail_width">360dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
     <dimen name="thumbnail_height">360dp</dimen>
-    <!-- The maximum number of action buttons that should be permitted within
-         an action bar/action mode. This will be used to determine how many
-         showAsAction="ifRoom" items can fit. "always" items can override this. -->
-    <integer name="max_action_buttons">5</integer>
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">56dip</dimen>
     <!-- Vertical padding around action bar icons. -->
@@ -88,7 +84,7 @@
     <!-- Size of the generic status lines keyguard's status view  -->
     <dimen name="kg_status_line_font_size">16sp</dimen>
 
-    <!-- Top margin for the clock view --> 
+    <!-- Top margin for the clock view -->
     <dimen name="kg_clock_top_margin">0dp</dimen>
 
     <!-- Size of margin on the right of keyguard's status view -->

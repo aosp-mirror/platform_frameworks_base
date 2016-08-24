@@ -391,7 +391,7 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
                 connection.mThread->shutdown();
             }
             connection.mThread = new BufferProducerThread(mDevice, deviceId, &stream);
-            connection.mThread->run();
+            connection.mThread->run("BufferProducerThread");
         }
     }
     connection.mSurface = surface;
@@ -414,12 +414,9 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
         return NO_ERROR;
     }
     if (Surface::isValid(connection.mSurface)) {
-        connection.mSurface.clear();
-    }
-    if (connection.mSurface != NULL) {
         connection.mSurface->setSidebandStream(NULL);
-        connection.mSurface.clear();
     }
+    connection.mSurface.clear();
     if (connection.mThread != NULL) {
         connection.mThread->shutdown();
         connection.mThread.clear();
@@ -616,6 +613,9 @@ static int nativeAddOrUpdateStream(JNIEnv* env, jclass clazz,
         return BAD_VALUE;
     }
     sp<Surface> surface(android_view_Surface_getSurface(env, jsurface));
+    if (!Surface::isValid(surface)) {
+        return BAD_VALUE;
+    }
     return tvInputHal->addOrUpdateStream(deviceId, streamId, surface);
 }
 

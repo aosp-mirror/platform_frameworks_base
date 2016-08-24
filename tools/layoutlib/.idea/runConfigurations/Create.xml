@@ -2,8 +2,8 @@
   <configuration default="false" name="Create" type="Application" factoryName="Application" singleton="true">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="com.android.tools.layoutlib.create.Main" />
-    <option name="VM_PARAMETERS" value="" />
-    <option name="PROGRAM_PARAMETERS" value="out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar out/target/common/obj/JAVA_LIBRARIES/core-libart_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/icu4j-icudata-jarjar_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/icu4j-icutzdata-jarjar_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/javalib.jar" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <option name="PROGRAM_PARAMETERS" value="out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar out/target/common/obj/JAVA_LIBRARIES/core-libart_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar out/host/common/obj/JAVA_LIBRARIES/icu4j-icudata-host-jarjar_intermediates/classes-jarjar.jar out/host/common/obj/JAVA_LIBRARIES/icu4j-icutzdata-host-jarjar_intermediates/classes-jarjar.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/classes.jar out/target/common/obj/JAVA_LIBRARIES/ext_intermediates/javalib.jar" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/../../../../" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" value="" />

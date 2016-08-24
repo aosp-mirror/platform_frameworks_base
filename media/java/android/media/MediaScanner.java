@@ -16,15 +16,11 @@
 
 package android.media;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.IContentProvider;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.drm.DrmManagerClient;
@@ -52,6 +48,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
 
+import dalvik.system.CloseGuard;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -63,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Internal service helper that no-one should use directly.
@@ -109,8 +112,7 @@ import java.util.Locale;
  *
  * {@hide}
  */
-public class MediaScanner
-{
+public class MediaScanner implements AutoCloseable {
     static {
         System.loadLibrary("media_jni");
         native_init();
@@ -304,21 +306,23 @@ public class MediaScanner
     };
 
     private long mNativeContext;
-    private Context mContext;
-    private String mPackageName;
-    private IContentProvider mMediaProvider;
-    private Uri mAudioUri;
-    private Uri mVideoUri;
-    private Uri mImagesUri;
-    private Uri mThumbsUri;
-    private Uri mPlaylistsUri;
-    private Uri mFilesUri;
-    private Uri mFilesUriNoNotify;
-    private boolean mProcessPlaylists, mProcessGenres;
+    private final Context mContext;
+    private final String mPackageName;
+    private final String mVolumeName;
+    private final ContentProviderClient mMediaProvider;
+    private final Uri mAudioUri;
+    private final Uri mVideoUri;
+    private final Uri mImagesUri;
+    private final Uri mThumbsUri;
+    private final Uri mPlaylistsUri;
+    private final Uri mFilesUri;
+    private final Uri mFilesUriNoNotify;
+    private final boolean mProcessPlaylists;
+    private final boolean mProcessGenres;
     private int mMtpObjectHandle;
 
-    private final String mExternalStoragePath;
-    private final boolean mExternalIsEmulated;
+    private final AtomicBoolean mClosed = new AtomicBoolean();
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /** whether to use bulk inserts or individual inserts for each item */
     private static final boolean ENABLE_BULK_INSERTS = true;
@@ -344,10 +348,6 @@ public class MediaScanner
      * to get the full system property.
      */
     private static final String DEFAULT_RINGTONE_PROPERTY_PREFIX = "ro.config.";
-
-    // set to true if file path comparisons should be case insensitive.
-    // this should be set when scanning files on a case insensitive file system.
-    private boolean mCaseInsensitivePaths;
 
     private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
@@ -378,26 +378,59 @@ public class MediaScanner
         int bestmatchlevel;
     }
 
-    private ArrayList<PlaylistEntry> mPlaylistEntries = new ArrayList<PlaylistEntry>();
+    private final ArrayList<PlaylistEntry> mPlaylistEntries = new ArrayList<>();
+    private final ArrayList<FileEntry> mPlayLists = new ArrayList<>();
 
     private MediaInserter mMediaInserter;
 
-    private ArrayList<FileEntry> mPlayLists;
-
     private DrmManagerClient mDrmManagerClient = null;
 
-    public MediaScanner(Context c) {
+    public MediaScanner(Context c, String volumeName) {
         native_setup();
         mContext = c;
         mPackageName = c.getPackageName();
+        mVolumeName = volumeName;
+
         mBitmapOptions.inSampleSize = 1;
         mBitmapOptions.inJustDecodeBounds = true;
 
         setDefaultRingtoneFileNames();
 
-        mExternalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mExternalIsEmulated = Environment.isExternalStorageEmulated();
-        //mClient.testGenreNameConverter();
+        mMediaProvider = mContext.getContentResolver()
+                .acquireContentProviderClient(MediaStore.AUTHORITY);
+
+        mAudioUri = Audio.Media.getContentUri(volumeName);
+        mVideoUri = Video.Media.getContentUri(volumeName);
+        mImagesUri = Images.Media.getContentUri(volumeName);
+        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
+        mFilesUri = Files.getContentUri(volumeName);
+        mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
+
+        if (!volumeName.equals("internal")) {
+            // we only support playlists on external media
+            mProcessPlaylists = true;
+            mProcessGenres = true;
+            mPlaylistsUri = Playlists.getContentUri(volumeName);
+        } else {
+            mProcessPlaylists = false;
+            mProcessGenres = false;
+            mPlaylistsUri = null;
+        }
+
+        final Locale locale = mContext.getResources().getConfiguration().locale;
+        if (locale != null) {
+            String language = locale.getLanguage();
+            String country = locale.getCountry();
+            if (language != null) {
+                if (country != null) {
+                    setLocale(language + "_" + country);
+                } else {
+                    setLocale(language);
+                }
+            }
+        }
+
+        mCloseGuard.open("close");
     }
 
     private void setDefaultRingtoneFileNames() {
@@ -866,7 +899,8 @@ public class MediaScanner
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
-            } else if (mFileType == MediaFile.FILE_TYPE_JPEG && !mNoMedia) {
+            } else if ((mFileType == MediaFile.FILE_TYPE_JPEG
+                    || MediaFile.isRawImageFileType(mFileType)) && !mNoMedia) {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);
@@ -971,7 +1005,7 @@ public class MediaScanner
                     if (inserter != null) {
                         inserter.flushAll();
                     }
-                    result = mMediaProvider.insert(mPackageName, tableUri, values);
+                    result = mMediaProvider.insert(tableUri, values);
                 } else if (entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
                     inserter.insertwithPriority(tableUri, values);
                 } else {
@@ -1003,18 +1037,18 @@ public class MediaScanner
                     }
                     values.put(FileColumns.MEDIA_TYPE, mediaType);
                 }
-                mMediaProvider.update(mPackageName, result, values, null, null);
+                mMediaProvider.update(result, values, null, null);
             }
 
             if(needToSetSettings) {
                 if (notifications) {
-                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
                 } else if (ringtones) {
-                    setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
                 } else if (alarms) {
-                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
+                    setRingtoneIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
                 }
             }
@@ -1029,18 +1063,18 @@ public class MediaScanner
                     pathFilenameStart + filenameLength == path.length();
         }
 
-        private void setSettingIfNotSet(String settingName, Uri uri, long rowId) {
-
-            if(wasSettingAlreadySet(settingName)) {
+        private void setRingtoneIfNotSet(String settingName, Uri uri, long rowId) {
+            if (wasRingtoneAlreadySet(settingName)) {
                 return;
             }
 
             ContentResolver cr = mContext.getContentResolver();
             String existingSettingValue = Settings.System.getString(cr, settingName);
             if (TextUtils.isEmpty(existingSettingValue)) {
-                // Set the setting to the given URI
-                Settings.System.putString(cr, settingName,
-                        ContentUris.withAppendedId(uri, rowId).toString());
+                final Uri settingUri = Settings.System.getUriFor(settingName);
+                final Uri ringtoneUri = ContentUris.withAppendedId(uri, rowId);
+                RingtoneManager.setActualDefaultRingtoneUri(mContext,
+                        RingtoneManager.getDefaultType(settingUri), ringtoneUri);
             }
             Settings.System.putInt(cr, settingSetIndicatorName(settingName), 1);
         }
@@ -1073,7 +1107,7 @@ public class MediaScanner
         return base + "_set";
     }
 
-    private boolean wasSettingAlreadySet(String name) {
+    private boolean wasRingtoneAlreadySet(String name) {
         ContentResolver cr = mContext.getContentResolver();
         String indicatorName = settingSetIndicatorName(name);
         try {
@@ -1088,11 +1122,7 @@ public class MediaScanner
         String where = null;
         String[] selectionArgs = null;
 
-        if (mPlayLists == null) {
-            mPlayLists = new ArrayList<FileEntry>();
-        } else {
-            mPlayLists.clear();
-        }
+        mPlayLists.clear();
 
         if (filePath != null) {
             // query for only one file
@@ -1104,9 +1134,9 @@ public class MediaScanner
             selectionArgs = new String[] { "" };
         }
 
-        mDefaultRingtoneSet = wasSettingAlreadySet(Settings.System.RINGTONE);
-        mDefaultNotificationSet = wasSettingAlreadySet(Settings.System.NOTIFICATION_SOUND);
-        mDefaultAlarmSet = wasSettingAlreadySet(Settings.System.ALARM_ALERT);
+        mDefaultRingtoneSet = wasRingtoneAlreadySet(Settings.System.RINGTONE);
+        mDefaultNotificationSet = wasRingtoneAlreadySet(Settings.System.NOTIFICATION_SOUND);
+        mDefaultAlarmSet = wasRingtoneAlreadySet(Settings.System.ALARM_ALERT);
 
         // Tell the provider to not delete the file.
         // If the file is truly gone the delete is unnecessary, and we want to avoid
@@ -1114,8 +1144,7 @@ public class MediaScanner
         // filesystem is mounted and unmounted while the scanner is running).
         Uri.Builder builder = mFilesUri.buildUpon();
         builder.appendQueryParameter(MediaStore.PARAM_DELETE_DATA, "false");
-        MediaBulkDeleter deleter = new MediaBulkDeleter(mMediaProvider, mPackageName,
-                builder.build());
+        MediaBulkDeleter deleter = new MediaBulkDeleter(mMediaProvider, builder.build());
 
         // Build the list of files from the content provider
         try {
@@ -1133,7 +1162,7 @@ public class MediaScanner
                         c.close();
                         c = null;
                     }
-                    c = mMediaProvider.query(mPackageName, limitUri, FILES_PRESCAN_PROJECTION,
+                    c = mMediaProvider.query(limitUri, FILES_PRESCAN_PROJECTION,
                             where, selectionArgs, MediaStore.Files.FileColumns._ID, null);
                     if (c == null) {
                         break;
@@ -1173,8 +1202,7 @@ public class MediaScanner
                                     if (path.toLowerCase(Locale.US).endsWith("/.nomedia")) {
                                         deleter.flush();
                                         String parent = new File(path).getParent();
-                                        mMediaProvider.call(mPackageName, MediaStore.UNHIDE_CALL,
-                                                parent, null);
+                                        mMediaProvider.call(MediaStore.UNHIDE_CALL, parent, null);
                                     }
                                 }
                             }
@@ -1192,7 +1220,7 @@ public class MediaScanner
 
         // compute original size of images
         mOriginalCount = 0;
-        c = mMediaProvider.query(mPackageName, mImagesUri, ID_PROJECTION, null, null, null, null);
+        c = mMediaProvider.query(mImagesUri, ID_PROJECTION, null, null, null, null);
         if (c != null) {
             mOriginalCount = c.getCount();
             c.close();
@@ -1224,7 +1252,6 @@ public class MediaScanner
 
         try {
             c = mMediaProvider.query(
-                    mPackageName,
                     mThumbsUri,
                     new String [] { "_data" },
                     null,
@@ -1260,13 +1287,11 @@ public class MediaScanner
     static class MediaBulkDeleter {
         StringBuilder whereClause = new StringBuilder();
         ArrayList<String> whereArgs = new ArrayList<String>(100);
-        final IContentProvider mProvider;
-        final String mPackageName;
+        final ContentProviderClient mProvider;
         final Uri mBaseUri;
 
-        public MediaBulkDeleter(IContentProvider provider, String packageName, Uri baseUri) {
+        public MediaBulkDeleter(ContentProviderClient provider, Uri baseUri) {
             mProvider = provider;
-            mPackageName = packageName;
             mBaseUri = baseUri;
         }
 
@@ -1285,7 +1310,7 @@ public class MediaScanner
             if (size > 0) {
                 String [] foo = new String [size];
                 foo = whereArgs.toArray(foo);
-                int numrows = mProvider.delete(mPackageName, mBaseUri,
+                int numrows = mProvider.delete(mBaseUri,
                         MediaStore.MediaColumns._ID + " IN (" +
                         whereClause.toString() + ")", foo);
                 //Log.i("@@@@@@@@@", "rows deleted: " + numrows);
@@ -1306,48 +1331,26 @@ public class MediaScanner
             pruneDeadThumbnailFiles();
 
         // allow GC to clean up
-        mPlayLists = null;
-        mMediaProvider = null;
+        mPlayLists.clear();
     }
 
     private void releaseResources() {
         // release the DrmManagerClient resources
         if (mDrmManagerClient != null) {
-            mDrmManagerClient.release();
+            mDrmManagerClient.close();
             mDrmManagerClient = null;
         }
     }
 
-    private void initialize(String volumeName) {
-        mMediaProvider = mContext.getContentResolver().acquireProvider("media");
-
-        mAudioUri = Audio.Media.getContentUri(volumeName);
-        mVideoUri = Video.Media.getContentUri(volumeName);
-        mImagesUri = Images.Media.getContentUri(volumeName);
-        mThumbsUri = Images.Thumbnails.getContentUri(volumeName);
-        mFilesUri = Files.getContentUri(volumeName);
-        mFilesUriNoNotify = mFilesUri.buildUpon().appendQueryParameter("nonotify", "1").build();
-
-        if (!volumeName.equals("internal")) {
-            // we only support playlists on external media
-            mProcessPlaylists = true;
-            mProcessGenres = true;
-            mPlaylistsUri = Playlists.getContentUri(volumeName);
-
-            mCaseInsensitivePaths = true;
-        }
-    }
-
-    public void scanDirectories(String[] directories, String volumeName) {
+    public void scanDirectories(String[] directories) {
         try {
             long start = System.currentTimeMillis();
-            initialize(volumeName);
             prescan(null, true);
             long prescan = System.currentTimeMillis();
 
             if (ENABLE_BULK_INSERTS) {
                 // create MediaInserter for bulk inserts
-                mMediaInserter = new MediaInserter(mMediaProvider, mPackageName, 500);
+                mMediaInserter = new MediaInserter(mMediaProvider, 500);
             }
 
             for (int i = 0; i < directories.length; i++) {
@@ -1384,9 +1387,8 @@ public class MediaScanner
     }
 
     // this function is used to scan a single file
-    public Uri scanSingleFile(String path, String volumeName, String mimeType) {
+    public Uri scanSingleFile(String path, String mimeType) {
         try {
-            initialize(volumeName);
             prescan(path, true);
 
             File file = new File(path);
@@ -1499,8 +1501,7 @@ public class MediaScanner
         return isNoMediaFile(path);
     }
 
-    public void scanMtpFile(String path, String volumeName, int objectHandle, int format) {
-        initialize(volumeName);
+    public void scanMtpFile(String path, int objectHandle, int format) {
         MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
         int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
         File file = new File(path);
@@ -1516,7 +1517,7 @@ public class MediaScanner
             values.put(Files.FileColumns.DATE_MODIFIED, lastModifiedSeconds);
             try {
                 String[] whereArgs = new String[] {  Integer.toString(objectHandle) };
-                mMediaProvider.update(mPackageName, Files.getMtpObjectsUri(volumeName), values,
+                mMediaProvider.update(Files.getMtpObjectsUri(mVolumeName), values,
                         "_id=?", whereArgs);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in scanMtpFile", e);
@@ -1533,7 +1534,7 @@ public class MediaScanner
 
                 FileEntry entry = makeEntryFor(path);
                 if (entry != null) {
-                    fileList = mMediaProvider.query(mPackageName, mFilesUri,
+                    fileList = mMediaProvider.query(mFilesUri,
                             FILES_PRESCAN_PROJECTION, null, null, null, null);
                     processPlayList(entry, fileList);
                 }
@@ -1564,7 +1565,7 @@ public class MediaScanner
         try {
             where = Files.FileColumns.DATA + "=?";
             selectionArgs = new String[] { path };
-            c = mMediaProvider.query(mPackageName, mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
+            c = mMediaProvider.query(mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
             if (c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
@@ -1676,7 +1677,7 @@ public class MediaScanner
                     values.clear();
                     values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, Integer.valueOf(index));
                     values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, Long.valueOf(entry.bestmatchid));
-                    mMediaProvider.insert(mPackageName, playlistUri, values);
+                    mMediaProvider.insert(playlistUri, values);
                     index++;
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException in MediaScanner.processCachedPlaylist()", e);
@@ -1841,16 +1842,16 @@ public class MediaScanner
 
         if (rowId == 0) {
             values.put(MediaStore.Audio.Playlists.DATA, path);
-            uri = mMediaProvider.insert(mPackageName, mPlaylistsUri, values);
+            uri = mMediaProvider.insert(mPlaylistsUri, values);
             rowId = ContentUris.parseId(uri);
             membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
         } else {
             uri = ContentUris.withAppendedId(mPlaylistsUri, rowId);
-            mMediaProvider.update(mPackageName, uri, values, null, null);
+            mMediaProvider.update(uri, values, null, null);
 
             // delete members of existing playlist
             membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
-            mMediaProvider.delete(mPackageName, membersUri, null, null);
+            mMediaProvider.delete(membersUri, null, null);
         }
 
         String playListDirectory = path.substring(0, lastSlash + 1);
@@ -1872,7 +1873,7 @@ public class MediaScanner
         try {
             // use the files uri and projection because we need the format column,
             // but restrict the query to just audio files
-            fileList = mMediaProvider.query(mPackageName, mFilesUri, FILES_PRESCAN_PROJECTION,
+            fileList = mMediaProvider.query(mFilesUri, FILES_PRESCAN_PROJECTION,
                     "media_type=2", null, null, null);
             while (iterator.hasNext()) {
                 FileEntry entry = iterator.next();
@@ -1891,7 +1892,7 @@ public class MediaScanner
 
     private native void processDirectory(String path, MediaScannerClient client);
     private native void processFile(String path, String mimeType, MediaScannerClient client);
-    public native void setLocale(String locale);
+    private native void setLocale(String locale);
 
     public native byte[] extractAlbumArt(FileDescriptor fd);
 
@@ -1899,19 +1900,22 @@ public class MediaScanner
     private native final void native_setup();
     private native final void native_finalize();
 
-    /**
-     * Releases resources associated with this MediaScanner object.
-     * It is considered good practice to call this method when
-     * one is done using the MediaScanner object. After this method
-     * is called, the MediaScanner object can no longer be used.
-     */
-    public void release() {
-        native_finalize();
+    @Override
+    public void close() {
+        mCloseGuard.close();
+        if (mClosed.compareAndSet(false, true)) {
+            mMediaProvider.close();
+            native_finalize();
+        }
     }
 
     @Override
-    protected void finalize() {
-        mContext.getContentResolver().releaseProvider(mMediaProvider);
-        native_finalize();
+    protected void finalize() throws Throwable {
+        try {
+            mCloseGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
+        }
     }
 }

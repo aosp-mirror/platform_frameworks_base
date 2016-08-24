@@ -28,6 +28,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.SurfaceControl;
@@ -35,6 +36,7 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+
 import libcore.io.IoUtils;
 
 import java.io.FileOutputStream;
@@ -76,7 +78,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private int mOwningUid;
 
-    public void connect(IAccessibilityServiceClient client) {
+    @Override
+    public void connect(IAccessibilityServiceClient client, int flags) {
         if (client == null) {
             throw new IllegalArgumentException("Client cannot be null!");
         }
@@ -86,7 +89,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 throw new IllegalStateException("Already connected.");
             }
             mOwningUid = Binder.getCallingUid();
-            registerUiTestAutomationServiceLocked(client);
+            registerUiTestAutomationServiceLocked(client, flags);
             storeRotationStateLocked();
         }
     }
@@ -167,9 +170,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+        int callingUserId = UserHandle.getCallingUserId();
         final long identity = Binder.clearCallingIdentity();
         try {
-            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            IBinder token = mAccessibilityManager.getWindowToken(windowId, callingUserId);
             if (token == null) {
                 return false;
             }
@@ -186,9 +190,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+        int callingUserId = UserHandle.getCallingUserId();
         final long identity = Binder.clearCallingIdentity();
         try {
-            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            IBinder token = mAccessibilityManager.getWindowToken(windowId, callingUserId);
             if (token == null) {
                 return null;
             }
@@ -319,14 +324,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
-    private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client) {
+    private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client,
+            int flags) {
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
-        AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+        final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
         info.flags |= AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-                | AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+                | AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS
+                | AccessibilityServiceInfo.FLAG_FORCE_DIRECT_BOOT_AWARE;
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
@@ -334,7 +341,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
-            manager.registerUiTestAutomationService(mToken, client, info);
+            manager.registerUiTestAutomationService(mToken, client, info, flags);
             mClient = client;
         } catch (RemoteException re) {
             throw new IllegalStateException("Error while registering UiTestAutomationService.", re);

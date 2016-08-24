@@ -964,22 +964,101 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>This camera device has only limited capabilities.</p>
+     * <p>This camera device does not have enough capabilities to qualify as a <code>FULL</code> device or
+     * better.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> and <code>LIMITED</code> tables in the
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * <p>All <code>LIMITED</code> devices support the <code>BACKWARDS_COMPATIBLE</code> capability, indicating basic
+     * support for color image capture. The only exception is that the device may
+     * alternatively support only the <code>DEPTH_OUTPUT</code> capability, if it can only output depth
+     * measurements and not color images.</p>
+     * <p><code>LIMITED</code> devices and above require the use of {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}
+     * to lock exposure metering (and calculate flash power, for cameras with flash) before
+     * capturing a high-quality still image.</p>
+     * <p>A <code>LIMITED</code> device that only lists the <code>BACKWARDS_COMPATIBLE</code> capability is only
+     * required to support full-automatic operation and post-processing (<code>OFF</code> is not
+     * supported for {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}, {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}, or
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode})</p>
+     * <p>Additional capabilities may optionally be supported by a <code>LIMITED</code>-level device, and
+     * can be checked for in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
 
     /**
      * <p>This camera device is capable of supporting advanced imaging applications.</p>
+     * <p>The stream configurations listed in the <code>FULL</code>, <code>LEGACY</code> and <code>LIMITED</code> tables in the
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession} documentation are guaranteed to be supported.</p>
+     * <p>A <code>FULL</code> device will support below capabilities:</p>
+     * <ul>
+     * <li><code>BURST_CAPTURE</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   <code>BURST_CAPTURE</code>)</li>
+     * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
+     * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains <code>MANUAL_SENSOR</code>)</li>
+     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   <code>MANUAL_POST_PROCESSING</code>)</li>
+     * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
+     * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
+     * </ul>
+     * <p>Note:
+     * Pre-API level 23, FULL devices also supported arbitrary cropping region
+     * ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>== FREEFORM</code>); this requirement was relaxed in API level
+     * 23, and <code>FULL</code> devices may only support <code>CENTERED</code> cropping.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
+     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
+     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
 
     /**
      * <p>This camera device is running in backward compatibility mode.</p>
+     * <p>Only the stream configurations listed in the <code>LEGACY</code> table in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
+     * documentation are supported.</p>
+     * <p>A <code>LEGACY</code> device does not support per-frame control, manual sensor control, manual
+     * post-processing, arbitrary cropping regions, and has relaxed performance constraints.
+     * No additional capabilities beyond <code>BACKWARD_COMPATIBLE</code> will ever be listed by a
+     * <code>LEGACY</code> device in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>In addition, the {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} is not functional on <code>LEGACY</code>
+     * devices. Instead, every request that includes a JPEG-format output target is treated
+     * as triggering a still capture, internally executing a precapture trigger.  This may
+     * fire the flash for flash power metering during precapture, and then fire the flash
+     * for the final capture, if a flash is available on the device and the AE mode is set to
+     * enable the flash.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2;
+
+    /**
+     * <p>This camera device is capable of YUV reprocessing and RAW data capture, in addition to
+     * FULL-level capabilities.</p>
+     * <p>The stream configurations listed in the <code>LEVEL_3</code>, <code>RAW</code>, <code>FULL</code>, <code>LEGACY</code> and
+     * <code>LIMITED</code> tables in the {@link android.hardware.camera2.CameraDevice#createCaptureSession createCaptureSession}
+     * documentation are guaranteed to be supported.</p>
+     * <p>The following additional capabilities are guaranteed to be supported:</p>
+     * <ul>
+     * <li><code>YUV_REPROCESSING</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   <code>YUV_REPROCESSING</code>)</li>
+     * <li><code>RAW</code> capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   <code>RAW</code>)</li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_3 = 3;
 
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
@@ -1946,11 +2025,20 @@ public abstract class CameraMetadata<TKey> {
      * produced in response to a capture request submitted
      * while in HDR mode.</p>
      * <p>Since substantial post-processing is generally needed to
-     * produce an HDR image, only YUV and JPEG outputs are
-     * supported for LIMITED/FULL device HDR captures, and only
-     * JPEG outputs are supported for LEGACY HDR
-     * captures. Using a RAW output for HDR capture is not
+     * produce an HDR image, only YUV, PRIVATE, and JPEG
+     * outputs are supported for LIMITED/FULL device HDR
+     * captures, and only JPEG outputs are supported for LEGACY
+     * HDR captures. Using a RAW output for HDR capture is not
      * supported.</p>
+     * <p>Some devices may also support always-on HDR, which
+     * applies HDR processing at full frame rate.  For these
+     * devices, intents other than STILL_CAPTURE will also
+     * produce an HDR output with no frame rate impact compared
+     * to normal operation, though the quality may be lower
+     * than for STILL_CAPTURE intents.</p>
+     * <p>If SCENE_MODE_HDR is used with unsupported output types
+     * or capture intents, the images captured will be as if
+     * the SCENE_MODE was not enabled at all.</p>
      *
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_SCENE_MODE
@@ -1990,6 +2078,24 @@ public abstract class CameraMetadata<TKey> {
      * @hide
      */
     public static final int CONTROL_SCENE_MODE_FACE_PRIORITY_LOW_LIGHT = 19;
+
+    /**
+     * <p>Scene mode values within the range of
+     * <code>[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]</code> are reserved for device specific
+     * customized scene modes.</p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_DEVICE_CUSTOM_START = 100;
+
+    /**
+     * <p>Scene mode values within the range of
+     * <code>[DEVICE_CUSTOM_START, DEVICE_CUSTOM_END]</code> are reserved for device specific
+     * customized scene modes.</p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_DEVICE_CUSTOM_END = 127;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE

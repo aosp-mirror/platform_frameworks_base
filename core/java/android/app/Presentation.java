@@ -310,7 +310,7 @@ public class Presentation extends Dialog {
         final WindowManagerImpl outerWindowManager =
                 (WindowManagerImpl)outerContext.getSystemService(Context.WINDOW_SERVICE);
         final WindowManagerImpl displayWindowManager =
-                outerWindowManager.createPresentationWindowManager(display);
+                outerWindowManager.createPresentationWindowManager(displayContext);
         return new ContextThemeWrapper(displayContext, theme) {
             @Override
             public Object getSystemService(String name) {

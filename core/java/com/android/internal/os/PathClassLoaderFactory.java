@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.os.Trace;
+
 import dalvik.system.PathClassLoader;
 
 /**
@@ -40,11 +42,13 @@ public class PathClassLoaderFactory {
                                                     boolean isNamespaceShared) {
         PathClassLoader pathClassloader = new PathClassLoader(dexPath, librarySearchPath, parent);
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "createClassloaderNamespace");
         String errorMessage = createClassloaderNamespace(pathClassloader,
                                                          targetSdkVersion,
                                                          librarySearchPath,
                                                          libraryPermittedPath,
                                                          isNamespaceShared);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         if (errorMessage != null) {
             throw new UnsatisfiedLinkError("Unable to create namespace for the classloader " +

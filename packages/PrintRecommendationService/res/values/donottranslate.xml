@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="app_label">Print Service Recommendation Service</string>
+
+    <!-- HP / Mopria plugin -->
+    <string-array name="known_print_vendor_info_for_mopria" translatable="false">
+        <item>org.mopria.printplugin</item>
+        <item>WFDS</item>
+        <!-- no specific mDNS values to list -->
+    </string-array>
+
+    <string-array name="known_print_vendor_info_for_hp" translatable="false">
+        <item>com.hp.android.printservice</item>
+        <item>HP</item>
+        <!-- HP has used these values in mDNS records over the years -->
+        <item>HP</item>
+        <item>Hewlett-Packard</item>
+        <item>Hewlett Packard</item>
+    </string-array>
+
+    <!-- Samsung plugin -->
+    <string-array name="known_print_vendor_info_for_samsung" translatable="false">
+        <item>com.sec.app.samsungprintservice</item>
+        <item>Samsung Electronics</item>
+        <item>Samsung</item>
+    </string-array>
+
+    <!-- Xerox plugin -->
+    <string-array name="known_print_vendor_info_for_xerox" translatable="false">
+        <item>com.xerox.printservice</item>
+        <item>Xerox</item>
+        <item>Xerox</item>
+    </string-array>
+
+    <array name="known_print_plugin_vendors" translatable="false">
+        <item>@array/known_print_vendor_info_for_mopria</item>
+        <item>@array/known_print_vendor_info_for_hp</item>
+        <item>@array/known_print_vendor_info_for_samsung</item>
+    </array>
+</resources>

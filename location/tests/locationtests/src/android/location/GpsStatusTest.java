@@ -40,7 +40,7 @@ public class GpsStatusTest extends TestCase {
     private GpsStatus mStatus;
     private int mCount;
     private int[] mPrns;
-    private float[] mSnrs;
+    private float[] mCn0s;
     private float[] mElevations;
     private float[] mAzimuth;
     private int mEphemerisMask;
@@ -179,7 +179,7 @@ public class GpsStatusTest extends TestCase {
 
     private void verifySatellites(GpsStatus status) {
         verifySatelliteCount(status, mCount);
-        verifySatellites(status, mCount, mPrns, mSnrs, mElevations, mAzimuth, mEphemerisMask,
+        verifySatellites(status, mCount, mPrns, mCn0s, mElevations, mAzimuth, mEphemerisMask,
                 mAlmanacMask, mUsedInFixMask);
     }
 
@@ -187,7 +187,7 @@ public class GpsStatusTest extends TestCase {
             GpsStatus status,
             int count,
             int[] prns,
-            float[] snrs,
+            float[] cn0s,
             float[] elevations,
             float[] azimuth,
             int ephemerisMask,
@@ -197,7 +197,7 @@ public class GpsStatusTest extends TestCase {
             int prn = prns[i];
             GpsSatellite satellite = getSatellite(status, prn);
             assertNotNull(getSatelliteAssertInfo(i, prn, "non-null"), satellite);
-            assertEquals(getSatelliteAssertInfo(i, prn, "Snr"), snrs[i], satellite.getSnr());
+            assertEquals(getSatelliteAssertInfo(i, prn, "Snr"), cn0s[i], satellite.getSnr());
             assertEquals(
                     getSatelliteAssertInfo(i, prn, "Elevation"),
                     elevations[i],
@@ -247,7 +247,7 @@ public class GpsStatusTest extends TestCase {
     }
 
     private void setSatellites(GpsStatus status) throws Exception {
-        set(status, mCount, mPrns, mSnrs, mElevations, mAzimuth, mEphemerisMask, mAlmanacMask,
+        set(status, mCount, mPrns, mCn0s, mElevations, mAzimuth, mEphemerisMask, mAlmanacMask,
                 mUsedInFixMask);
     }
 
@@ -255,7 +255,7 @@ public class GpsStatusTest extends TestCase {
             GpsStatus status,
             int count,
             int[] prns,
-            float[] snrs,
+            float[] cn0s,
             float[] elevations,
             float[] azimuth,
             int ephemerisMask,
@@ -279,7 +279,7 @@ public class GpsStatusTest extends TestCase {
                 status,
                 count,
                 prns,
-                snrs,
+                cn0s,
                 elevations,
                 azimuth,
                 ephemerisMask,
@@ -333,7 +333,7 @@ public class GpsStatusTest extends TestCase {
         if (!reusePrns) {
             mPrns = generateIntArray(count);
         }
-        mSnrs = generateFloatArray(count);
+        mCn0s = generateFloatArray(count);
         mElevations = generateFloatArray(count);
         mAzimuth = generateFloatArray(count);
         mEphemerisMask = generateMask(mPrns);

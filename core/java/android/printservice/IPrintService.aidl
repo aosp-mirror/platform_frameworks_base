@@ -10,7 +10,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific languagÿe governing permissions and
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -35,6 +35,15 @@ oneway interface IPrintService {
     void stopPrinterDiscovery();
     void validatePrinters(in List<PrinterId> printerIds);
     void startPrinterStateTracking(in PrinterId printerId);
+
+    /**
+     * Request the custom icon for a printer.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    void requestCustomPrinterIcon(in PrinterId printerId);
+
     void stopPrinterStateTracking(in PrinterId printerId);
     void destroyPrinterDiscoverySession();
 }

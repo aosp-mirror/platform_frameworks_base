@@ -168,7 +168,7 @@ class RippleForeground extends RippleComponent {
         }
 
         final int duration = (int)
-                (1000 * Math.sqrt(mTargetRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensity) + 0.5);
+                (1000 * Math.sqrt(mTargetRadius / WAVE_TOUCH_DOWN_ACCELERATION * mDensityScale) + 0.5);
 
         final ObjectAnimator tweenRadius = ObjectAnimator.ofFloat(this, TWEEN_RADIUS, 1);
         tweenRadius.setAutoCancel(true);
@@ -204,7 +204,7 @@ class RippleForeground extends RippleComponent {
     private int getRadiusExitDuration() {
         final float remainingRadius = mTargetRadius - getCurrentRadius();
         return (int) (1000 * Math.sqrt(remainingRadius / (WAVE_TOUCH_UP_ACCELERATION
-                + WAVE_TOUCH_DOWN_ACCELERATION) * mDensity) + 0.5);
+                + WAVE_TOUCH_DOWN_ACCELERATION) * mDensityScale) + 0.5);
     }
 
     private float getCurrentRadius() {

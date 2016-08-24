@@ -1,0 +1,168 @@
+page.title=互換性の維持
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>このレッスンでの学習内容</h2>
+<ol>
+  <li><a href="#Theme">別のスタイルを定義する</a></li>
+  <li><a href="#Layouts">別のレイアウトを提供する</a></li>
+  <li><a href="#SupportLib">サポート ライブラリを使用する</a></li>
+  <li><a href="#CheckVersion">システム バージョンを確認する</a></li>
+</ol>
+<h2>関連ドキュメント</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">マテリアル デザインの仕様</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android でのマテリアル デザイン</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>マテリアル テーマやカスタムのアクティビティ遷移など、マテリアル デザインの一部の機能は Android5.0（API レベル21）以降のみで利用できます。
+ただし、マテリアル デザインをサポートし、以前のバージョンの Android を実行している端末と互換性がある端末でこれらの機能が実行されている場合は、機能を使用できるようにアプリを設計することが可能です。
+
+</p>
+
+
+<h2 id="Theme">別のスタイルを定義する</h2>
+
+<p>マテリアル テーマをサポートしている端末ではマテリアル テーマを使用するようにアプリを構成できますが、同時に次のようにして以前のバージョンの Android を実行する端末向けに以前のテーマに戻すことができます。
+</p>
+
+<ol>
+<li>
+<code>res/values/styles.xml</code> で、以前のテーマ（Holo など）から継承するテーマを定義します。</li>
+<li>
+<code>res/values-v21/styles.xml</code> で、マテリアル テーマから継承するテーマを上記と同じ名前で定義します。</li>
+<li>マニフェスト ファイルでこのテーマをアプリのテーマとして設定します。</li>
+</ol>
+
+<p class="note"><strong>注:</strong> この方法で別のテーマを用意せずマテリアル テーマだけを使う場合、そのアプリは 5.0 よりも前のバージョンの Android では実行できません。
+
+
+</p>
+
+
+<h2 id="Layouts">別のレイアウトを提供する</h2>
+
+<p>マテリアル デザインのガイドラインに沿って設計したレイアウトでも、Android 5.0（API レベル 21）で導入された新しい XML 属性を一切使用していない場合は、以前のバージョンの Android でも問題なく表示されます。
+
+新しい XML 属性を使用している場合は、別のレイアウトを用意できます。以前のバージョンの Android でアプリが表示される方法をカスタマイズする目的で別のレイアウトを用意することも可能です。
+</p>
+
+<p>Android 5.0（API レベル 21）向けのレイアウト ファイルを <code>res/layout-v21/</code> に作成し、以前のバージョンの Android 向けの別のレイアウト ファイルを
+<code>res/layout/</code> に作成します。
+たとえば、<code>res/layout/my_activity.xml</code> は <code>res/layout-v21/my_activity.xml</code> の代替レイアウトになります。
+</p>
+
+<p>コードの重複を避けるには、<code>res/values/</code> でスタイルを定義して <code>res/values-v21/</code> で新しい API 用にスタイルを修正します。それからスタイル継承を用いて、基本スタイルを <code>res/values/</code> で定義して、そのスタイルを <code>res/values-v21/</code> で継承します。
+
+</p>
+
+
+<h2 id="SupportLib">サポート ライブラリを使用する</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">v7 サポート ライブラリ</a> r21 以降には、次のマテリアル デザイン機能が含まれています。
+</p>
+
+<ul>
+<li><code>Theme.AppCompat</code> テーマのいずれかを適用した場合の、システム ウィジェット用の<a href="{@docRoot}training/material/theme.html">マテリアル デザインのスタイル</a>。
+</li>
+<li><code>Theme.AppCompat</code> テーマの<a href="{@docRoot}training/material/theme.html#ColorPalette">カラーパレット テーマ属性</a>。
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#RecyclerView">データ コレクションを表示する</a> {@link android.support.v7.widget.RecyclerView} ウィジェット。
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#CardView">カードを作成する</a> {@link android.support.v7.widget.CardView} ウィジェット。</li>
+<li><a href="{@docRoot}training/material/drawables.html#ColorExtract">画像から代表色を抽出する</a> {@link android.support.v7.graphics.Palette} クラス。
+</li>
+</ul>
+
+<h3>システム ウィジェット</h3>
+
+<p><code>Theme.AppCompat</code> テーマでは、次のウィジェット向けにマテリアル デザインのスタイルが提供されています。</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>カラーパレット</h3>
+
+<p>Android v7 サポート ライブラリでマテリアル デザインのスタイルを入手し、カラーパレットをカスタマイズするには、次のように <code>Theme.AppCompat</code> テーマのいずれかを適用します。
+</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>リストとカード</h3>
+
+<p>{@link android.support.v7.widget.RecyclerView} ウィジェットや {@link
+android.support.v7.widget.CardView} ウィジェットは Android v7 サポート ライブラリを通じて以前のバージョンの Android でも使用できますが、次のような制限があります。
+</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView} は、付加的なパディングを使い、プログラムでシャドウを実装するものになります。
+</li>
+<li>{@link android.support.v7.widget.CardView} によって、丸い角と交差する子ビューがクリップされることはありません。
+</li>
+</ul>
+
+
+<h3>依存関係</h3>
+
+<p>5.0（API レベル 21）より前のバージョンの Android でこれらの機能を使用するには、Android v7 サポート ライブラリを <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依存関係</a>としてプロジェクトに含めます。
+</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">システム バージョンを確認する</h2>
+
+<p>次の機能は、Android 5.0（API レベル 21）以降でのみ使用できます。</p>
+
+<ul>
+<li>アクティビティ遷移</li>
+<li>タッチ フィードバック</li>
+<li>出現アニメーション</li>
+<li>経路ベースのアニメーション</li>
+<li>ベクター型ドローアブル</li>
+<li>ドローアブルによる着色</li>
+</ul>
+
+<p>以前のバージョンの Android との互換性を維持するには、上記の機能に対する API を起動する前に、システム {@link
+android.os.Build.VERSION#SDK_INT version} を実行時に確認します。
+</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>注: </strong>アプリがサポートする Android のバージョンを指定するには、マニフェスト ファイルで <code>android:minSdkVersion</code> 属性と <code>android:targetSdkVersion</code>
+属性を使用します。
+Android 5.0 でマテリアル デザインの機能を使用するには、<code>android:targetSdkVersion</code> 属性を <code>21</code> に設定します。
+詳細については、<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt; API ガイド</a>をご覧ください。
+
+</p>

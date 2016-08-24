@@ -15,6 +15,7 @@ Copyright (C) 2014 The Android Open Source Project
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="24dp"
+        android:autoMirrored="true"
         android:height="24dp"
         android:viewportWidth="48.0"
         android:viewportHeight="48.0">

@@ -37,7 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ExceptionUtils;
-import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -47,7 +46,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -301,7 +299,7 @@ public class PackageInstaller {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -321,7 +319,7 @@ public class PackageInstaller {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -337,7 +335,7 @@ public class PackageInstaller {
         try {
             mInstaller.updateSessionAppIcon(sessionId, appIcon);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -353,7 +351,7 @@ public class PackageInstaller {
             final String val = (appLabel != null) ? appLabel.toString() : null;
             mInstaller.updateSessionAppLabel(sessionId, val);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -370,7 +368,7 @@ public class PackageInstaller {
         try {
             mInstaller.abandonSession(sessionId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -385,7 +383,7 @@ public class PackageInstaller {
         try {
             return mInstaller.getSessionInfo(sessionId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -393,17 +391,10 @@ public class PackageInstaller {
      * Return list of all known install sessions, regardless of the installer.
      */
     public @NonNull List<SessionInfo> getAllSessions() {
-        final ApplicationInfo info = mContext.getApplicationInfo();
-        if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400110) {
-            Log.d(TAG, "Ignoring callback request from old prebuilt");
-            return Collections.EMPTY_LIST;
-        }
-
         try {
             return mInstaller.getAllSessions(mUserId).getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -414,7 +405,7 @@ public class PackageInstaller {
         try {
             return mInstaller.getMySessions(mInstallerPackageName, mUserId).getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -427,7 +418,7 @@ public class PackageInstaller {
         try {
             mInstaller.uninstall(packageName, mInstallerPackageName, 0, statusReceiver, mUserId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -436,7 +427,7 @@ public class PackageInstaller {
         try {
             mInstaller.setPermissionsResult(sessionId, accepted);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -597,21 +588,13 @@ public class PackageInstaller {
      *            calling thread.
      */
     public void registerSessionCallback(@NonNull SessionCallback callback, @NonNull Handler handler) {
-        // TODO: remove this temporary guard once we have new prebuilts
-        final ApplicationInfo info = mContext.getApplicationInfo();
-        if ("com.google.android.googlequicksearchbox".equals(info.packageName)
-                && info.versionCode <= 300400110) {
-            Log.d(TAG, "Ignoring callback request from old prebuilt");
-            return;
-        }
-
         synchronized (mDelegates) {
             final SessionCallbackDelegate delegate = new SessionCallbackDelegate(callback,
                     handler.getLooper());
             try {
                 mInstaller.registerCallback(delegate, mUserId);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
             mDelegates.add(delegate);
         }
@@ -634,7 +617,7 @@ public class PackageInstaller {
                     try {
                         mInstaller.unregisterCallback(delegate);
                     } catch (RemoteException e) {
-                        throw e.rethrowAsRuntimeException();
+                        throw e.rethrowFromSystemServer();
                     }
                     i.remove();
                 }
@@ -681,7 +664,7 @@ public class PackageInstaller {
             try {
                 mSession.setClientProgress(progress);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -690,7 +673,7 @@ public class PackageInstaller {
             try {
                 mSession.addClientProgress(progress);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -734,7 +717,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -767,7 +750,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -790,7 +773,28 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes a split.
+         * <p>
+         * Split removals occur prior to adding new APKs. If upgrading a feature
+         * split, it is not expected nor desirable to remove the split prior to
+         * upgrading.
+         * <p>
+         * When split removal is bundled with new APKs, the packageName must be
+         * identical.
+         */
+        public void removeSplit(@NonNull String splitName) throws IOException {
+            try {
+                mSession.removeSplit(splitName);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -810,7 +814,7 @@ public class PackageInstaller {
             try {
                 mSession.commit(statusReceiver);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -823,7 +827,7 @@ public class PackageInstaller {
             try {
                 mSession.close();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -837,7 +841,7 @@ public class PackageInstaller {
             try {
                 mSession.abandon();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -979,8 +983,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Optionally set the URI where this package was downloaded from. Used for
-         * verification purposes.
+         * Optionally set the URI where this package was downloaded from. This is
+         * informational and may be used as a signal for anti-malware purposes.
          *
          * @see Intent#EXTRA_ORIGINATING_URI
          */
@@ -989,7 +993,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the UID that initiated package installation. Used for verification purposes.
+         * Sets the UID that initiated package installation. This is informational
+         * and may be used as a signal for anti-malware purposes.
          *
          * @see PackageManager#EXTRA_VERIFICATION_INSTALLER_UID
          */
@@ -998,8 +1003,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Optionally set the URI that referred you to install this package. Used
-         * for verification purposes.
+         * Optionally set the URI that referred you to install this package. This is
+         * informational and may be used as a signal for anti-malware purposes.
          *
          * @see Intent#EXTRA_REFERRER
          */
@@ -1031,6 +1036,16 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        @SystemApi
+        public void setAllowDowngrade(boolean allowDowngrade) {
+            if (allowDowngrade) {
+                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            }
+        }
+
+        /** {@hide} */
         public void setInstallFlagsExternal() {
             installFlags |= PackageManager.INSTALL_EXTERNAL;
             installFlags &= ~PackageManager.INSTALL_INTERNAL;
@@ -1039,6 +1054,16 @@ public class PackageInstaller {
         /** {@hide} */
         public void setInstallFlagsForcePermissionPrompt() {
             installFlags |= PackageManager.INSTALL_FORCE_PERMISSION_PROMPT;
+        }
+
+        /** {@hide} */
+        @SystemApi
+        public void setDontKillApp(boolean dontKillApp) {
+            if (dontKillApp) {
+                installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_DONT_KILL_APP;
+            }
         }
 
         /** {@hide} */

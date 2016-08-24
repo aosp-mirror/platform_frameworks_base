@@ -1,0 +1,291 @@
+fullpage=true
+page.title=Android Instant Apps
+page.viewport_width=970
+meta.tags="instant apps, getstarted, sdk, appquality, landing"
+section.landing=true
+header.hide=1
+carousel=1
+tabbedList=1
+excludeFromSuggestions=true
+@jd:body
+
+<!-- Hero section -->
+<section class="dac-expand dac-hero dac-section-light">
+<div class="wrap">
+  <div class="dac-hero-content">
+    <div style="margin-bottom:40px">
+      <h1>
+        Android Instant Apps
+      </h1>
+
+      <p class="sub-head">
+        Native Android apps, without the installation
+      </p>
+
+      <p class="dac-hero-description">
+        An evolution in app sharing and discovery, Android Instant Apps enables
+        Android apps to run instantly, without requiring installation. Instant
+        Apps lets you experience what you love about apps&#8212fast and beautiful
+        user interfaces, high performance, and great capabilities&#8212with just a
+        tap.
+      </p>
+
+      <p class="dac-hero-description">
+        Request early access to the Instant Apps documentation today.
+      </p>
+
+      <p style="margin-top:24px">
+        <a class="landing-button green download-bundle-button" href=
+        "https://docs.google.com/a/google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
+        target="_blank">I'M INTERESTED IN ANDROID INSTANT APPS<br></a>
+        <a class="dac-hero-cta dev-bytes"
+          href="https://www.youtube.com/watch?v=cosqlfqrpFA">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Watch a video about Instant Apps
+        </a>
+      </p>
+    </div>
+
+  </div> <!-- end cols dac-hero-content -->
+</div> <!-- end .wrap -->
+</section>
+
+<!-- Second section -->
+
+<div class="wrap sub-section">
+<div class="cols dac-hero-content">
+  <div class="col-1of2 dac-hero-figure">
+    <img src="/images/topic/instant-apps/instant-apps-section-2.png">
+  </div>
+<div class="col-1of2">
+<div class="dac-hero-tag"></div>
+
+  <h2 id="section-2" class="norule">Run Android Apps Without Installation</h2>
+  <p class="dac-hero-description">
+    Android Instant Apps lets you experience beautiful and immersive
+    apps, with material design and smooth animations, without installing them
+    on your device.
+  </p>
+
+</div>
+</div>
+</div>
+
+<!-- Third section -->
+
+<div class="wrap sub-section">
+
+  <h2 id="section-3" class="norule">Access Apps From Anywhere</h2>
+
+  <p>
+    Get people to your flagship Android experience from links that would
+    otherwise open your mobile web page &mdash; like
+    search, social media, messaging, and other deep links &mdash; without them
+    needing to stop and install your app first.
+  </p>
+
+  <div class="cols" style="margin-top:1em;">
+    <div class="col-4of12 gif-container">
+      <img class="partner-gifs"
+        src="/images/topic/instant-apps/s3-BandH-static.png"
+        data-stat="/images/topic/instant-apps/s3-BandH-static.png"
+        data-anim="/images/topic/instant-apps/s3-BandH-animated.gif">
+      <p class="figure-caption">
+        <em>B&amp;H Photo<br/>
+            (via Google Search)</em>
+      </p>
+    </div>
+
+    <div class="col-4of12 gif-container">
+      <img class="partner-gifs"
+        src="/images/topic/instant-apps/s3-BuzzFeed-static.png"
+        data-stat="/images/topic/instant-apps/s3-BuzzFeed-static.png"
+        data-anim="/images/topic/instant-apps/s3-BuzzFeed-animated.gif">
+      <p class="figure-caption">
+        <em>BuzzfeedVideo<br/>
+            (via a shared link)</em>
+      </p>
+    </div>
+
+    <div class="col-4of12 gif-container">
+      <img class="partner-gifs"
+        src="/images/topic/instant-apps/s3-ParkandPay-static.png"
+        data-stat="/images/topic/instant-apps/s3-ParkandPay-static.png"
+        data-anim="/images/topic/instant-apps/s3-ParkandPay-animated.gif">
+      <p class="figure-caption">
+        <em>Park and Pay<br/>
+            (via NFC)</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Fourth section -->
+
+<div class="wrap sub-section">
+<div class="cols dac-hero-content">
+  <div class="col-1of2 dac-hero-figure">
+    <img src="/images/topic/instant-apps/instant-apps-section-4.png">
+  </div>
+<div class="col-1of2">
+<div class="dac-hero-tag"></div>
+
+  <h2 id="section-4" class="norule">Built On Google Play Services</h2>
+  <p class="dac-hero-description">
+    Take advantage of Google Play services features &mdash; like location,
+    identity,
+    payments, and Firebase &mdash; which are built right in for a seamless user
+    experience.
+  </p>
+
+</div>
+</div>
+</div>
+
+<!-- Fifth section -->
+
+<div class="wrap sub-section">
+<div class="cols dac-hero-content">
+  <div class="col-1of2 col-push-1of2 dac-hero-figure">
+    <img src="/images/topic/instant-apps/instant-apps-section-5.png">
+  </div>
+<div class="col-1of2 col-pull-1of2">
+<div class="dac-hero-tag"></div>
+  <h2 id="section-5" class="norule">Works On Most Android Devices</h2>
+
+  <p class="dac-hero-description">
+    Android Instant Apps can work on Android devices running Android 4.1+
+    (API Level 16) or higher with Google Play services.
+  </p>
+
+</div>
+</div>
+</div>
+
+<!-- Sixth section -->
+
+<div class="wrap sub-section">
+<div class="cols dac-hero-content">
+  <div class="col-1of2 dac-hero-figure">
+    <img src="/images/topic/instant-apps/upgrade-your-app-2x.png">
+  </div>
+<div class="col-1of2">
+<div class="dac-hero-tag"></div>
+
+  <h2 id="section-6" class="norule">Upgrade Your Existing App</h2>
+  <p class="dac-hero-description">
+    Android Instant Apps functionality is an upgrade to your existing Android
+    app, not a new, separate app. It's the same Android APIs, the same
+    project, the same source code.  It can take less than a day to get
+    up and running for some developers, though the effort involved varies,
+    depending on how your app is structured. You modularize your app,
+    and Google Play downloads only the parts that are needed, on the fly.
+  </p>
+
+</div>
+</div>
+</div>
+
+<!-- Seventh section -->
+
+<div class="wrap sub-section" id="section-7">
+  <h2 id="sign-up-docs" class="dac-section-title norule" style="margin-bottom: 0px;">
+    Sign up for access to Android Instant Apps documentation
+  </h2>
+
+  <p class="dac-section-subtitle" style="margin-top:0px">
+    We’ll let you know if you’re selected for early access
+    to Android Instant
+    Apps.
+  </p>
+
+  <p class="dac-section-subtitle">
+    <a class="landing-button green download-bundle-button"
+      href="https://docs.google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
+      target="_blank">
+      I'M INTERESTED IN ANDROID INSTANT APPS<br>
+    </a>
+  </p>
+
+  <p  class="dac-section-subtitle" style="margin-top:24px">
+    Check out our <a href="faqs.html">frequently asked questions</a> to find out
+    more about Android Instant Apps.
+  </p>
+</div>
+
+<style>
+
+  /* Sub-heading styling */
+  .sub-head {
+    font-size: 28px;
+    line-height: 125%;
+  }
+
+  /* Background color for hero module. */
+  .dac-section-light {
+    background: #B0BEC5;
+  }
+
+  /* Increase top margin for sections */
+  .sub-section {
+    margin-top: 2em;
+  }
+
+  a.dev-bytes {
+   padding-top: 1em;
+   padding-left: 1em;
+  }
+
+  #section-3, #sign-up-docs {
+    margin-top: 0px;
+    border-top: 0px;
+  }
+
+  /* GIF section styling */
+  .figure-caption {
+    text-align: center;
+  }
+
+  .partner-gifs {
+    width: 80%;
+    height: auto;
+  }
+
+  .gif-container {
+     text-align: center;
+  }
+
+</style>
+
+<script>
+
+(function () {
+
+  function onMouseEnter(evt) {
+    if (evt.target.dataset && evt.target.dataset.anim) {
+      swap(evt.target, {
+        newStr: evt.target.dataset.anim
+      });
+    }
+  }
+
+  function onMouseOut(evt) {
+    if (evt.target.dataset && evt.target.dataset.stat) {
+      swap(evt.target, {
+        newStr: evt.target.dataset.stat
+      });
+    }
+  }
+
+  function swap(target, options) {
+    if (options && options.newStr) {
+      $(target).attr("src", options.newStr);
+    }
+  }
+
+  $(".partner-gifs").mouseenter(onMouseEnter);
+  $(".partner-gifs").mouseout(onMouseOut);
+
+})();
+
+</script>

@@ -161,5 +161,16 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+
+        <!-- WebView -->
+        <activity
+                android:name=".ScrollableWebViewActivity"
+                android:label="WebView/Scrollable WebView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
     </application>
 </manifest>

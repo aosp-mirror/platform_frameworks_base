@@ -1,0 +1,2893 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+  
+    <meta name="top_category" value="develop" />
+    
+    <meta name="subcategory" value="reference" />
+
+    
+      <meta name="book_path" value="/reference/android/support/test/_book.yaml" />
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<title>JankTestBase</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+  
+  
+  
+
+</div>
+
+
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+  
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+  &#124; <a href="#promethods">Protected Methods</a>
+  
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">JankTestBase</h1>
+<p>
+<code class="api-signature">
+  public
+  
+  
+  
+  class
+  JankTestBase
+</code>
+<br>
+
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+    extends InstrumentationTestCase
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+    
+    <td colspan="5" class="jd-inheritance-class-cell">java.lang.Object
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="4" class="jd-inheritance-class-cell">junit.framework.Assert
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="3" class="jd-inheritance-class-cell">junit.framework.TestCase
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="2" class="jd-inheritance-class-cell">android.test.InstrumentationTestCase
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.test.jank.JankTestBase
+    </td>
+  </tr>
+  
+
+</table>
+  
+
+    
+
+<br><hr>
+
+
+  <p>Base test class for measuring Jank.
+
+ This test class automatically monitors jank while executing each test method. Each test method is
+ executed several times in a loop, according to the 'iterations' command line parameter.
+
+ To perform additional setup / tear down steps for each iteration, subclasses can optionally
+ override <code><a href="/reference/android/support/test/jank/JankTestBase.html#beforeLoop()">beforeLoop()</a></code> and <code><a href="/reference/android/support/test/jank/JankTestBase.html#afterLoop()">afterLoop()</a></code> methods.
+
+ Test methods must be configured with the <code><a href="/reference/android/support/test/jank/JankTest.html">JankTest</a></code> annotation. At minimum, the type of
+ jank to measure and the number of expected frames must be specified.
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="responsive constructors">
+<tr><th colspan="2"><h3>Public constructors</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#JankTestBase()">JankTestBase</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#afterLoop()">afterLoop</a>()
+      </code>
+      
+        <p>Called after each iteration of the test method.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#afterTest(android.os.Bundle)">afterTest</a>(Bundle metrics)
+      </code>
+      
+        <p>Called once after all iterations have completed.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#beforeLoop()">beforeLoop</a>()
+      </code>
+      
+        <p>Called before each iteration of the test method.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#beforeTest()">beforeTest</a>()
+      </code>
+      
+        <p>Called once before executing a test method.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#getCurrentIteration()">getCurrentIteration</a>()
+      </code>
+      
+        <p>Return the index of the currently executing iteration.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="reponsive methods">
+<tr><th colspan="2"><h3>Protected methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        <a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#createMonitorFactory()">createMonitorFactory</a>()
+      </code>
+      
+        <p>Creates an <code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code> instance that should be used to construct
+ <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>(s) for the test methods in this class.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Bundle</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#getArguments()">getArguments</a>()
+      </code>
+      
+        <p>Returns a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> containing the command line parameters.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        <a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#getMonitorFactory()">getMonitorFactory</a>()
+      </code>
+      
+        <p>Returns the <code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code> instance that should be used to construct applicable
+ <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>(s) for a given test method.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        List&lt;<a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a>&gt;</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#getMonitors(java.lang.reflect.Method)">getMonitors</a>(Method method)
+      </code>
+      
+        <p>Returns the list of <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>s that should be applied to the given <code>method</code>.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/JankTestBase.html#runTest()">runTest</a>()
+      </code>
+      
+        <p>
+
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="methods inhtable">
+<tr><th><h3>Inherited methods</h3></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.test.InstrumentationTestCase" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-android.test.InstrumentationTestCase-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    android.test.InstrumentationTestCase
+  
+</code>
+<div id="inherited-methods-android.test.InstrumentationTestCase">
+  <div id="inherited-methods-android.test.InstrumentationTestCase-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.test.InstrumentationTestCase-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Instrumentation</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getInstrumentation()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      injectInsrumentation(Instrumentation arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      injectInstrumentation(Instrumentation arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        &lt;T&nbsp;extends&nbsp;Activity&gt;
+        T</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      launchActivity(String arg0, Class&lt;T&gt; arg1, Bundle arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        &lt;T&nbsp;extends&nbsp;Activity&gt;
+        T</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      launchActivityWithIntent(String arg0, Class&lt;T&gt; arg1, Intent arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      runTest()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      runTestOnUiThread(Runnable arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      sendKeys(String arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      sendKeys(int... arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      sendRepeatedKeys(int... arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      tearDown()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-junit.framework.TestCase" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-junit.framework.TestCase-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    junit.framework.TestCase
+  
+</code>
+<div id="inherited-methods-junit.framework.TestCase">
+  <div id="inherited-methods-junit.framework.TestCase-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-junit.framework.TestCase-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      countTestCases()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        TestResult</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      createResult()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getName()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        TestResult</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      run()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      run(TestResult arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      runBare()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      runTest()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      setName(String arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      setUp()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      tearDown()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      toString()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-junit.framework.Assert" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-junit.framework.Assert-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    junit.framework.Assert
+  
+</code>
+<div id="inherited-methods-junit.framework.Assert">
+  <div id="inherited-methods-junit.framework.Assert-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-junit.framework.Assert-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(boolean arg0, boolean arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, long arg1, long arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(short arg0, short arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, String arg1, String arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, int arg1, int arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(Object arg0, Object arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, boolean arg1, boolean arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, String arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, short arg1, short arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(char arg0, char arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(byte arg0, byte arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(double arg0, double arg1, double arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, char arg1, char arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(float arg0, float arg1, float arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, double arg1, double arg2, double arg3)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, byte arg1, byte arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(String arg0, float arg1, float arg2, float arg3)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(long arg0, long arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertEquals(int arg0, int arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertFalse(String arg0, boolean arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertFalse(boolean arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNotNull(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNotNull(String arg0, Object arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNotSame(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNotSame(Object arg0, Object arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNull(String arg0, Object arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertNull(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertSame(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertSame(Object arg0, Object arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertTrue(String arg0, boolean arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      assertTrue(boolean arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      fail(String arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      fail()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      failNotEquals(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      failNotSame(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      failSame(String arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        static
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      format(String arg0, Object arg1, Object arg2)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    java.lang.Object
+  
+</code>
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Object</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      clone()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      equals(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      finalize()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Class&lt;?&gt;</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getClass()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      hashCode()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notify()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notifyAll()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      toString()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0, int arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-junit.framework.Test" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-junit.framework.Test-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+interface
+<code>
+  
+    junit.framework.Test
+  
+</code>
+<div id="inherited-methods-junit.framework.Test">
+  <div id="inherited-methods-junit.framework.Test-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-junit.framework.Test-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      countTestCases()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      run(TestResult arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2 class="api-section">Public constructors</h2>
+
+
+
+<A NAME="JankTestBase()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">JankTestBase</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+JankTestBase ()</pre>
+    
+    
+
+    
+  <p></p>
+
+</div>
+
+
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="afterLoop()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">afterLoop</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void afterLoop ()</pre>
+    
+    
+
+    
+  <p>Called after each iteration of the test method. </p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Exception</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="afterTest(android.os.Bundle)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">afterTest</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void afterTest (Bundle metrics)</pre>
+    
+    
+
+    
+  <p>Called once after all iterations have completed.
+ <p>Note: default implementation reports the aggregated jank metrics via
+ <code><a href="/reference/android/app/Instrumentation.html#sendStatus(int, android.os.Bundle)">sendStatus(int, Bundle)</a></code></p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>metrics</code></td>
+        <td width="100%">
+          <code>Bundle</code>:
+          the aggregated jank metrics after looped execution
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="beforeLoop()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">beforeLoop</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void beforeLoop ()</pre>
+    
+    
+
+    
+  <p>Called before each iteration of the test method. </p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Exception</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="beforeTest()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">beforeTest</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void beforeTest ()</pre>
+    
+    
+
+    
+  <p>Called once before executing a test method. </p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Exception</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="getCurrentIteration()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getCurrentIteration</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+int getCurrentIteration ()</pre>
+    
+    
+
+    
+  <p>Return the index of the currently executing iteration. </p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>int</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+<h2 class="api-section">Protected methods</h2>
+
+
+
+<A NAME="createMonitorFactory()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">createMonitorFactory</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+<a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a> createMonitorFactory ()</pre>
+    
+    
+
+    
+  <p>Creates an <code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code> instance that should be used to construct
+ <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>(s) for the test methods in this class.
+</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="getArguments()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getArguments</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+Bundle getArguments ()</pre>
+    
+    
+
+    
+  <p>Returns a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> containing the command line parameters. </p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>Bundle</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="getMonitorFactory()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getMonitorFactory</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+<a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a> getMonitorFactory ()</pre>
+    
+    
+
+    
+  <p>Returns the <code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code> instance that should be used to construct applicable
+ <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>(s) for a given test method.
+</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="getMonitors(java.lang.reflect.Method)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getMonitors</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+List&lt;<a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a>&gt; getMonitors (Method method)</pre>
+    
+    
+
+    
+  <p>Returns the list of <code><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></code>s that should be applied to the given <code>method</code>.
+</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>method</code></td>
+        <td width="100%">
+          <code>Method</code>
+          <!-- no parameter comment --></td>
+      </tr>
+    </table>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>List&lt;<a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a>&gt;</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="runTest()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">runTest</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void runTest ()</pre>
+    
+    
+
+    
+  <p>
+</p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Throwable</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+  
+  <ul data-reference-resources>
+    
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/GfxMonitor.html">GfxMonitor</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/JankTest.html">JankTest</a></li>
+      </ul>
+    </li>
+    
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></li>
+      </ul>
+    </li>
+    
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="selected api apilevel-"><a href="/reference/android/support/test/jank/JankTestBase.html">JankTestBase</a></li>
+      </ul>
+    </li>
+    
+    
+    
+  </ul>
+  
+</div>
+
+
+
+</body>
+</html>

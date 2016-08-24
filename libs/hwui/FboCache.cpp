@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <stdlib.h>
 
 #include "Debug.h"
@@ -29,15 +27,8 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-FboCache::FboCache(): mMaxSize(DEFAULT_FBO_CACHE_SIZE) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_FBO_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting fbo cache size to %s", property);
-        mMaxSize = atoi(property);
-    } else {
-        INIT_LOGD("  Using default fbo cache size of %d", DEFAULT_FBO_CACHE_SIZE);
-    }
-}
+FboCache::FboCache()
+        : mMaxSize(Properties::fboCacheSize) {}
 
 FboCache::~FboCache() {
     clear();

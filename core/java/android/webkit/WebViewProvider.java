@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.content.res.Configuration;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -27,8 +28,10 @@ import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -333,6 +336,8 @@ public interface WebViewProvider {
 
         public InputConnection onCreateInputConnection(EditorInfo outAttrs);
 
+        public boolean onDragEvent(DragEvent event);
+
         public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event);
 
         public boolean onKeyDown(int keyCode, KeyEvent event);
@@ -380,6 +385,12 @@ public interface WebViewProvider {
         public void onStartTemporaryDetach();
 
         public void onFinishTemporaryDetach();
+
+        public void onActivityResult(int requestCode, int resultCode, Intent data);
+
+        public Handler getHandler(Handler originalHandler);
+
+        public View findFocus(View originalFocusedView);
     }
 
     interface ScrollDelegate {

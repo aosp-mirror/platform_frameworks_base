@@ -19,6 +19,7 @@ package android.os;
 import android.util.Log;
 import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
+import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -69,16 +70,70 @@ public class Binder implements IBinder {
     private static final boolean CHECK_PARCEL_SIZE = false;
     static final String TAG = "Binder";
 
+    /** @hide */
+    public static boolean LOG_RUNTIME_EXCEPTION = false; // DO NOT SUBMIT WITH TRUE
+
     /**
      * Control whether dump() calls are allowed.
      */
     private static String sDumpDisabled = null;
 
+    /**
+     * Global transaction tracker instance for this process.
+     */
+    private static TransactionTracker sTransactionTracker = null;
+
+    // Transaction tracking code.
+
+    /**
+     * Flag indicating whether we should be tracing transact calls.
+     *
+     */
+    private static boolean sTracingEnabled = false;
+
+    /**
+     * Enable Binder IPC tracing.
+     *
+     * @hide
+     */
+    public static void  enableTracing() {
+        sTracingEnabled = true;
+    };
+
+    /**
+     * Disable Binder IPC tracing.
+     *
+     * @hide
+     */
+    public static void  disableTracing() {
+        sTracingEnabled = false;
+    }
+
+    /**
+     * Check if binder transaction tracing is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTracingEnabled() {
+        return sTracingEnabled;
+    }
+
+    /**
+     * Get the binder transaction tracker for this process.
+     *
+     * @hide
+     */
+    public synchronized static TransactionTracker getTransactionTracker() {
+        if (sTransactionTracker == null)
+            sTransactionTracker = new TransactionTracker();
+        return sTransactionTracker;
+    }
+
     /* mObject is used by native code, do not remove or rename */
     private long mObject;
     private IInterface mOwner;
     private String mDescriptor;
-    
+
     /**
      * Return the ID of the process that sent you the current transaction
      * that is being processed.  This pid can be used with higher-level
@@ -106,7 +161,7 @@ public class Binder implements IBinder {
      * incoming transaction, then its own UserHandle is returned.
      */
     public static final UserHandle getCallingUserHandle() {
-        return new UserHandle(UserHandle.getUserId(getCallingUid()));
+        return UserHandle.of(UserHandle.getUserId(getCallingUid()));
     }
 
     /**
@@ -291,11 +346,7 @@ public class Binder implements IBinder {
                 try {
                     dump(fd.getFileDescriptor(), args);
                 } finally {
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                        // swallowed, not propagated back to the caller
-                    }
+                    IoUtils.closeQuietly(fd);
                 }
             }
             // Write the StrictMode header.
@@ -303,6 +354,31 @@ public class Binder implements IBinder {
                 reply.writeNoException();
             } else {
                 StrictMode.clearGatheredViolations();
+            }
+            return true;
+        } else if (code == SHELL_COMMAND_TRANSACTION) {
+            ParcelFileDescriptor in = data.readFileDescriptor();
+            ParcelFileDescriptor out = data.readFileDescriptor();
+            ParcelFileDescriptor err = data.readFileDescriptor();
+            String[] args = data.readStringArray();
+            ResultReceiver resultReceiver = ResultReceiver.CREATOR.createFromParcel(data);
+            try {
+                if (out != null) {
+                    shellCommand(in != null ? in.getFileDescriptor() : null,
+                            out.getFileDescriptor(),
+                            err != null ? err.getFileDescriptor() : out.getFileDescriptor(),
+                            args, resultReceiver);
+                }
+            } finally {
+                IoUtils.closeQuietly(in);
+                IoUtils.closeQuietly(out);
+                IoUtils.closeQuietly(err);
+                // Write the StrictMode header.
+                if (reply != null) {
+                    reply.writeNoException();
+                } else {
+                    StrictMode.clearGatheredViolations();
+                }
             }
             return true;
         }
@@ -317,33 +393,37 @@ public class Binder implements IBinder {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
         try {
-            final String disabled;
-            synchronized (Binder.class) {
-                disabled = sDumpDisabled;
-            }
-            if (disabled == null) {
-                try {
-                    dump(fd, pw, args);
-                } catch (SecurityException e) {
-                    pw.println("Security exception: " + e.getMessage());
-                    throw e;
-                } catch (Throwable e) {
-                    // Unlike usual calls, in this case if an exception gets thrown
-                    // back to us we want to print it back in to the dump data, since
-                    // that is where the caller expects all interesting information to
-                    // go.
-                    pw.println();
-                    pw.println("Exception occurred while dumping:");
-                    e.printStackTrace(pw);
-                }
-            } else {
-                pw.println(sDumpDisabled);
-            }
+            doDump(fd, pw, args);
         } finally {
             pw.flush();
         }
     }
-    
+
+    void doDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        final String disabled;
+        synchronized (Binder.class) {
+            disabled = sDumpDisabled;
+        }
+        if (disabled == null) {
+            try {
+                dump(fd, pw, args);
+            } catch (SecurityException e) {
+                pw.println("Security exception: " + e.getMessage());
+                throw e;
+            } catch (Throwable e) {
+                // Unlike usual calls, in this case if an exception gets thrown
+                // back to us we want to print it back in to the dump data, since
+                // that is where the caller expects all interesting information to
+                // go.
+                pw.println();
+                pw.println("Exception occurred while dumping:");
+                e.printStackTrace(pw);
+            }
+        } else {
+            pw.println(sDumpDisabled);
+        }
+    }
+
     /**
      * Like {@link #dump(FileDescriptor, String[])}, but ensures the target
      * executes asynchronously.
@@ -375,12 +455,44 @@ public class Binder implements IBinder {
     }
 
     /**
+     * @param in The raw file descriptor that an input data stream can be read from.
+     * @param out The raw file descriptor that normal command messages should be written to.
+     * @param err The raw file descriptor that command error messages should be written to.
+     * @param args Command-line arguments.
+     * @param resultReceiver Called when the command has finished executing, with the result code.
+     * @throws RemoteException
+     * @hide
+     */
+    public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        onShellCommand(in, out, err, args, resultReceiver);
+    }
+
+    /**
+     * Handle a call to {@link #shellCommand}.  The default implementation simply prints
+     * an error message.  Override and replace with your own.
+     * <p class="caution">Note: no permission checking is done before calling this method; you must
+     * apply any security checks as appropriate for the command being executed.
+     * Consider using {@link ShellCommand} to help in the implementation.</p>
+     * @hide
+     */
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        FileOutputStream fout = new FileOutputStream(err != null ? err : out);
+        PrintWriter pw = new FastPrintWriter(fout);
+        pw.println("No shell command implementation.");
+        pw.flush();
+        resultReceiver.send(0, null);
+    }
+
+    /**
      * Default implementation rewinds the parcels and calls onTransact.  On
      * the remote side, transact calls into the binder to do the IPC.
      */
     public final boolean transact(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException {
         if (false) Log.v("Binder", "Transact: " + code + " to " + this);
+
         if (data != null) {
             data.setDataPosition(0);
         }
@@ -451,17 +563,16 @@ public class Binder implements IBinder {
         // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         try {
             res = onTransact(code, data, reply, flags);
-        } catch (RemoteException e) {
-            if ((flags & FLAG_ONEWAY) != 0) {
-                Log.w(TAG, "Binder call failed.", e);
-            } else {
-                reply.setDataPosition(0);
-                reply.writeException(e);
-            }
-            res = true;
-        } catch (RuntimeException e) {
-            if ((flags & FLAG_ONEWAY) != 0) {
+        } catch (RemoteException|RuntimeException e) {
+            if (LOG_RUNTIME_EXCEPTION) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+            }
+            if ((flags & FLAG_ONEWAY) != 0) {
+                if (e instanceof RemoteException) {
+                    Log.w(TAG, "Binder call failed.", e);
+                } else {
+                    Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+                }
             } else {
                 reply.setDataPosition(0);
                 reply.writeException(e);
@@ -500,6 +611,7 @@ final class BinderProxy implements IBinder {
 
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
+        if (Binder.isTracingEnabled()) { Binder.getTransactionTracker().addTrace(); }
         return transactNative(code, data, reply, flags);
     }
 
@@ -531,6 +643,24 @@ final class BinderProxy implements IBinder {
         data.writeStringArray(args);
         try {
             transact(DUMP_TRANSACTION, data, reply, FLAG_ONEWAY);
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public void shellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeFileDescriptor(in);
+        data.writeFileDescriptor(out);
+        data.writeFileDescriptor(err);
+        data.writeStringArray(args);
+        resultReceiver.writeToParcel(data, 0);
+        try {
+            transact(SHELL_COMMAND_TRANSACTION, data, reply, 0);
+            reply.readException();
         } finally {
             data.recycle();
             reply.recycle();

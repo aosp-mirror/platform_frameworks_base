@@ -7,6 +7,7 @@ LOCAL_CFLAGS += -U__APPLE__
 LOCAL_CFLAGS += -Wno-unused-parameter
 LOCAL_CFLAGS += -Wno-non-virtual-dtor
 LOCAL_CFLAGS += -Wno-maybe-uninitialized -Wno-parentheses
+LOCAL_CFLAGS += -DHWUI_NEW_OPS
 LOCAL_CPPFLAGS += -Wno-conversion-null
 
 ifeq ($(TARGET_ARCH), arm)
@@ -32,7 +33,10 @@ LOCAL_SRC_FILES:= \
     com_android_internal_content_NativeLibraryHelper.cpp \
     com_google_android_gles_jni_EGLImpl.cpp \
     com_google_android_gles_jni_GLImpl.cpp.arm \
+    android_app_Activity.cpp \
+    android_app_ApplicationLoaders.cpp \
     android_app_NativeActivity.cpp \
+    android_app_admin_SecurityLog.cpp \
     android_opengl_EGL14.cpp \
     android_opengl_EGLExt.cpp \
     android_opengl_GLES10.cpp \
@@ -43,12 +47,14 @@ LOCAL_SRC_FILES:= \
     android_opengl_GLES30.cpp \
     android_opengl_GLES31.cpp \
     android_opengl_GLES31Ext.cpp \
+    android_opengl_GLES32.cpp \
     android_database_CursorWindow.cpp \
     android_database_SQLiteCommon.cpp \
     android_database_SQLiteConnection.cpp \
     android_database_SQLiteGlobal.cpp \
     android_database_SQLiteDebug.cpp \
-    android_emoji_EmojiFactory.cpp \
+    android_graphics_drawable_AnimatedVectorDrawable.cpp \
+    android_graphics_drawable_VectorDrawable.cpp \
     android_view_DisplayEventReceiver.cpp \
     android_view_DisplayListCanvas.cpp \
     android_view_GraphicBuffer.cpp \
@@ -89,15 +95,15 @@ LOCAL_SRC_FILES:= \
     android_util_AssetManager.cpp \
     android_util_Binder.cpp \
     android_util_EventLog.cpp \
+    android_util_MemoryIntArray.cpp \
     android_util_Log.cpp \
+    android_util_PathParser.cpp \
     android_util_Process.cpp \
     android_util_StringBlock.cpp \
     android_util_XmlBlock.cpp \
     android_util_jar_StrictJarFile.cpp \
     android_graphics_Canvas.cpp \
     android_graphics_Picture.cpp \
-    android/graphics/AutoDecodeCancel.cpp \
-    android/graphics/AvoidXfermode.cpp \
     android/graphics/Bitmap.cpp \
     android/graphics/BitmapFactory.cpp \
     android/graphics/Camera.cpp \
@@ -111,14 +117,10 @@ LOCAL_SRC_FILES:= \
     android/graphics/Interpolator.cpp \
     android/graphics/MaskFilter.cpp \
     android/graphics/Matrix.cpp \
-    android/graphics/MinikinSkia.cpp \
-    android/graphics/MinikinUtils.cpp \
     android/graphics/Movie.cpp \
     android/graphics/NinePatch.cpp \
-    android/graphics/NinePatchImpl.cpp \
     android/graphics/NinePatchPeeker.cpp \
     android/graphics/Paint.cpp \
-    android/graphics/PaintImpl.cpp \
     android/graphics/Path.cpp \
     android/graphics/PathMeasure.cpp \
     android/graphics/PathEffect.cpp \
@@ -130,7 +132,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/Shader.cpp \
     android/graphics/SurfaceTexture.cpp \
     android/graphics/Typeface.cpp \
-    android/graphics/TypefaceImpl.cpp \
     android/graphics/Utils.cpp \
     android/graphics/Xfermode.cpp \
     android/graphics/YuvToJpegEncoder.cpp \
@@ -156,6 +157,7 @@ LOCAL_SRC_FILES:= \
     android_hardware_UsbDevice.cpp \
     android_hardware_UsbDeviceConnection.cpp \
     android_hardware_UsbRequest.cpp \
+    android_hardware_location_ContextHubService.cpp \
     android_hardware_location_ActivityRecognitionHardware.cpp \
     android_util_FileObserver.cpp \
     android/opengl/poly_clip.cpp.arm \
@@ -182,17 +184,20 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/android/graphics \
     $(LOCAL_PATH)/../../libs/hwui \
     $(LOCAL_PATH)/../../../native/opengl/libs \
+    $(LOCAL_PATH)/../../../native/vulkan/include \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
-    $(TOP)/frameworks/av/include \
     $(TOP)/frameworks/base/media/jni \
+    $(TOP)/system/core/base/include \
+    $(TOP)/system/core/include \
     $(TOP)/system/media/camera/include \
     $(TOP)/system/netd/include \
     external/pdfium/core/include/fpdfapi \
-    external/pdfium/core/include/fpdfdoc \
     external/pdfium/fpdfsdk/include \
     external/pdfium/public \
+    external/pdfium \
+    external/skia/include/private \
     external/skia/src/core \
     external/skia/src/effects \
     external/skia/src/images \
@@ -200,9 +205,7 @@ LOCAL_C_INCLUDES += \
     external/sqlite/android \
     external/expat/lib \
     external/tremor/Tremor \
-    external/jpeg \
     external/harfbuzz_ng/src \
-    frameworks/opt/emoji \
     libcore/include \
     $(call include-path-for, audio-utils) \
     frameworks/minikin/include \
@@ -230,6 +233,7 @@ LOCAL_SHARED_LIBRARIES := \
     libEGL \
     libGLESv1_CM \
     libGLESv2 \
+    libvulkan \
     libETC1 \
     libhardware \
     libhardware_legacy \

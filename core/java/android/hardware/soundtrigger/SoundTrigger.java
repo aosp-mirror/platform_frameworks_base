@@ -195,6 +195,12 @@ public class SoundTrigger {
         /** Keyphrase sound model */
         public static final int TYPE_KEYPHRASE = 0;
 
+        /**
+         * A generic sound model. Use this type only for non-keyphrase sound models such as
+         * ones that match a particular sound pattern.
+         */
+        public static final int TYPE_GENERIC_SOUND = 1;
+
         /** Unique sound model identifier */
         public final UUID uuid;
 
@@ -458,6 +464,63 @@ public class SoundTrigger {
         }
     }
 
+
+    /*****************************************************************************
+     * A GenericSoundModel is a specialized {@link SoundModel} for non-voice sound
+     * patterns.
+     ****************************************************************************/
+    public static class GenericSoundModel extends SoundModel implements Parcelable {
+
+        public static final Parcelable.Creator<GenericSoundModel> CREATOR
+                = new Parcelable.Creator<GenericSoundModel>() {
+            public GenericSoundModel createFromParcel(Parcel in) {
+                return GenericSoundModel.fromParcel(in);
+            }
+
+            public GenericSoundModel[] newArray(int size) {
+                return new GenericSoundModel[size];
+            }
+        };
+
+        public GenericSoundModel(UUID uuid, UUID vendorUuid, byte[] data) {
+            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private static GenericSoundModel fromParcel(Parcel in) {
+            UUID uuid = UUID.fromString(in.readString());
+            UUID vendorUuid = null;
+            int length = in.readInt();
+            if (length >= 0) {
+                vendorUuid = UUID.fromString(in.readString());
+            }
+            byte[] data = in.readBlob();
+            return new GenericSoundModel(uuid, vendorUuid, data);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(uuid.toString());
+            if (vendorUuid == null) {
+                dest.writeInt(-1);
+            } else {
+                dest.writeInt(vendorUuid.toString().length());
+                dest.writeString(vendorUuid.toString());
+            }
+            dest.writeBlob(data);
+        }
+
+        @Override
+        public String toString() {
+            return "GenericSoundModel [uuid=" + uuid + ", vendorUuid=" + vendorUuid
+                    + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
+        }
+    }
+
     /**
      *  Modes for key phrase recognition
      */
@@ -532,7 +595,7 @@ public class SoundTrigger {
             }
         };
 
-        private static RecognitionEvent fromParcel(Parcel in) {
+        protected static RecognitionEvent fromParcel(Parcel in) {
             int status = in.readInt();
             int soundModelHandle = in.readInt();
             boolean captureAvailable = in.readByte() == 1;
@@ -626,12 +689,19 @@ public class SoundTrigger {
                 return false;
             if (triggerInData != other.triggerInData)
                 return false;
-            if (captureFormat.getSampleRate() != other.captureFormat.getSampleRate())
-                return false;
-            if (captureFormat.getEncoding() != other.captureFormat.getEncoding())
-                return false;
-            if (captureFormat.getChannelMask() != other.captureFormat.getChannelMask())
-                return false;
+            if (captureFormat == null) {
+                if (other.captureFormat != null)
+                    return false;
+            } else {
+                if (other.captureFormat == null)
+                    return false;
+                if (captureFormat.getSampleRate() != other.captureFormat.getSampleRate())
+                    return false;
+                if (captureFormat.getEncoding() != other.captureFormat.getEncoding())
+                    return false;
+                if (captureFormat.getChannelMask() != other.captureFormat.getChannelMask())
+                    return false;
+            }
             return true;
         }
 
@@ -917,7 +987,7 @@ public class SoundTrigger {
         public static final Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
             public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
-                return KeyphraseRecognitionEvent.fromParcel(in);
+                return KeyphraseRecognitionEvent.fromParcelForKeyphrase(in);
             }
 
             public KeyphraseRecognitionEvent[] newArray(int size) {
@@ -925,7 +995,7 @@ public class SoundTrigger {
             }
         };
 
-        private static KeyphraseRecognitionEvent fromParcel(Parcel in) {
+        private static KeyphraseRecognitionEvent fromParcelForKeyphrase(Parcel in) {
             int status = in.readInt();
             int soundModelHandle = in.readInt();
             boolean captureAvailable = in.readByte() == 1;
@@ -939,10 +1009,10 @@ public class SoundTrigger {
                 int encoding = in.readInt();
                 int channelMask = in.readInt();
                 captureFormat = (new AudioFormat.Builder())
-                        .setChannelMask(channelMask)
-                        .setEncoding(encoding)
-                        .setSampleRate(sampleRate)
-                        .build();
+                    .setChannelMask(channelMask)
+                    .setEncoding(encoding)
+                    .setSampleRate(sampleRate)
+                    .build();
             }
             byte[] data = in.readBlob();
             KeyphraseRecognitionExtra[] keyphraseExtras =
@@ -1015,6 +1085,55 @@ public class SoundTrigger {
                     + ((captureFormat == null) ? "" :
                         (", channelMask=" + captureFormat.getChannelMask()))
                     + ", data=" + (data == null ? 0 : data.length) + "]";
+        }
+    }
+
+    /**
+     * Sub-class of RecognitionEvent specifically for sound-trigger based sound
+     * models(non-keyphrase). Currently does not contain any additional fields.
+     */
+    public static class GenericRecognitionEvent extends RecognitionEvent {
+        public GenericRecognitionEvent(int status, int soundModelHandle,
+                boolean captureAvailable, int captureSession, int captureDelayMs,
+                int capturePreambleMs, boolean triggerInData, AudioFormat captureFormat,
+                byte[] data) {
+            super(status, soundModelHandle, captureAvailable, captureSession,
+                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
+                    data);
+        }
+
+        public static final Parcelable.Creator<GenericRecognitionEvent> CREATOR
+                = new Parcelable.Creator<GenericRecognitionEvent>() {
+            public GenericRecognitionEvent createFromParcel(Parcel in) {
+                return GenericRecognitionEvent.fromParcelForGeneric(in);
+            }
+
+            public GenericRecognitionEvent[] newArray(int size) {
+                return new GenericRecognitionEvent[size];
+            }
+        };
+
+        private static GenericRecognitionEvent fromParcelForGeneric(Parcel in) {
+            RecognitionEvent event = RecognitionEvent.fromParcel(in);
+            return new GenericRecognitionEvent(event.status, event.soundModelHandle,
+                    event.captureAvailable, event.captureSession, event.captureDelayMs,
+                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass()) return false;
+            RecognitionEvent other = (RecognitionEvent) obj;
+            return super.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return "GenericRecognitionEvent ::" + super.toString();
         }
     }
 
@@ -1118,7 +1237,7 @@ public class SoundTrigger {
     public static final int SERVICE_STATE_DISABLED = 1;
 
     /**
-     * Returns a list of descriptors for all harware modules loaded.
+     * Returns a list of descriptors for all hardware modules loaded.
      * @param modules A ModuleProperties array where the list will be returned.
      * @return - {@link #STATUS_OK} in case of success
      *         - {@link #STATUS_ERROR} in case of unspecified error

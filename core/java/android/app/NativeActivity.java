@@ -124,8 +124,8 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         String libname = "main";
         String funcname = "ANativeActivity_onCreate";
         ActivityInfo ai;
-        
-        mIMM = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        mIMM = getSystemService(InputMethodManager.class);
 
         getWindow().takeSurface(this);
         getWindow().takeInputQueue(this);

@@ -16,47 +16,44 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="RecentsStyle" parent="@android:style/Theme.DeviceDefault.Wallpaper.NoTitleBar">
-        <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
-    </style>
-
-    <style name="RecentsTheme" parent="@android:style/Theme.Material.Light">
+    <style name="RecentsTheme" parent="@android:style/Theme.Material">
         <!-- NoTitle -->
         <item name="android:windowNoTitle">true</item>
         <!-- Misc -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <item name="android:ambientShadowAlpha">0.35</item>
     </style>
 
 
-    <!-- Alternate Recents theme -->
+    <!-- Recents theme -->
     <style name="RecentsTheme.Wallpaper">
-        <!-- Wallpaper -->
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowDisablePreview">true</item>
     </style>
 
-    <!-- Performance optimized alternate Recents theme (no wallpaper) -->
+    <!-- Performance optimized Recents theme (no wallpaper) -->
     <style name="RecentsTheme.NoWallpaper">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 
-    <!-- Animations for a non-full-screen window or activity. -->
-    <style name="Animation.RecentsActivity" parent="@android:style/Animation.Activity">
-        <item name="android:activityOpenEnterAnimation">@anim/recents_launch_from_launcher_enter</item>
-        <item name="android:activityOpenExitAnimation">@anim/recents_launch_from_launcher_exit</item>
-        <item name="android:taskOpenEnterAnimation">@anim/recents_launch_from_launcher_enter</item>
-        <item name="android:taskOpenExitAnimation">@anim/recents_launch_from_launcher_exit</item>
-        <item name="android:taskToFrontEnterAnimation">@anim/recents_launch_from_launcher_enter</item>
-        <item name="android:taskToFrontExitAnimation">@anim/recents_launch_from_launcher_exit</item>
-        <item name="android:wallpaperOpenEnterAnimation">@anim/recents_launch_from_launcher_enter</item>
-        <item name="android:wallpaperOpenExitAnimation">@anim/recents_launch_from_launcher_exit</item>
-        <item name="android:wallpaperIntraOpenEnterAnimation">@anim/wallpaper_recents_launch_from_launcher_enter</item>
-        <item name="android:wallpaperIntraOpenExitAnimation">@anim/wallpaper_recents_launch_from_launcher_exit</item>
+    <!-- Theme used for the activity that shows when the system forced an app to be resizable -->
+    <style name="ForcedResizableTheme" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@drawable/forced_resizable_background</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.ForcedResizable</item>
+    </style>
+
+    <style name="Animation.ForcedResizable" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@anim/forced_resizable_enter</item>
+
+        <!-- If the target stack doesn't have focus, we do a task to front animation. -->
+        <item name="android:taskToFrontEnterAnimation">@anim/forced_resizable_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/forced_resizable_exit</item>
     </style>
 
     <style name="TextAppearance.StatusBar.HeadsUp"
@@ -187,6 +184,11 @@
         <item name="android:textColor">@color/data_usage_secondary</item>
     </style>
 
+    <style name="TextAppearance.QS.TileLabel">
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -220,9 +222,8 @@
         <item name="android:colorControlActivated">@color/system_accent_color</item>
     </style>
 
-    <style name="systemui_theme_light" parent="@android:style/Theme.DeviceDefault.Light">
-        <item name="android:colorPrimary">@color/system_primary_color</item>
-        <item name="android:colorControlActivated">@color/system_accent_color</item>
+    <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
+        <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>
 
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
@@ -234,14 +235,16 @@
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
-        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:background">@drawable/qs_btn_borderless_rect</item>
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="TextAppearance.Material.Notification.Parenthetical"
-           parent="@*android:style/TextAppearance.Material.Notification">
-        <item name="android:textStyle">italic</item>
-        <item name="android:textColor">#60000000</item>
+    <style name="TextAppearance.Material.Notification.HeaderTitle"
+        parent="@*android:style/TextAppearance.Material.Notification.Info">
+    </style>
+
+    <style name="TextAppearance.Material.Notification.HybridNotificationDivider"
+        parent="@*android:style/TextAppearance.Material.Notification">
     </style>
 
     <style name="SearchPanelCircle">
@@ -298,6 +301,72 @@
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>
+    </style>
+
+    <style name="DockedDividerBackground">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">10dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="DockedDividerMinimizedShadow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">8dp</item>
+    </style>
+
+    <style name="DockedDividerHandle">
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_width">96dp</item>
+        <item name="android:layout_height">48dp</item>
+    </style>
+
+    <style name="TunerSettings" parent="@android:style/Theme.Material.Settings">
+        <item name="android:windowActionBar">false</item>
+        <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
+    </style>
+
+    <style name="TunerPreferenceTheme" parent="@android:style/Theme.Material.Settings">
+        <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">roboto-regular</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Header">
+        <item name="android:alpha">.38</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Secondary">
+        <item name="android:alpha">.54</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Primary">
+        <item name="android:alpha">.87</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Radio">
+        <item name="android:alpha">.87</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@*android:color/material_deep_teal_500</item>
+    </style>
+
+    <style name="ThemeOverlay.SwitchBar" parent="@android:style/ThemeOverlay">
+        <item name="android:colorAccent">@color/switch_accent_color</item>
+    </style>
+
+    <style name="edit_theme" parent="@android:style/Theme.Material">
+        <item name="android:colorBackground">@color/qs_edit_overflow_bg</item>
     </style>
 
 </resources>

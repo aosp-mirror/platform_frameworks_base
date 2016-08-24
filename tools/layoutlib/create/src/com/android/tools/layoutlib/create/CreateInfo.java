@@ -144,11 +144,8 @@ public final class CreateInfo implements ICreateInfo {
             InjectMethodRunnable.class,
             InjectMethodRunnables.class,
             /* Java package classes */
-            AutoCloseable.class,
-            Objects.class,
             IntegralToString.class,
             UnsafeByteSequence.class,
-            Charsets.class,
             System_Delegate.class,
             LinkedHashMap_Delegate.class,
         };
@@ -158,6 +155,32 @@ public final class CreateInfo implements ICreateInfo {
      */
     public final static String[] DELEGATE_METHODS = new String[] {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
+        "android.content.res.Resources#getAnimation",
+        "android.content.res.Resources#getBoolean",
+        "android.content.res.Resources#getColor",
+        "android.content.res.Resources#getColorStateList",
+        "android.content.res.Resources#getDimension",
+        "android.content.res.Resources#getDimensionPixelOffset",
+        "android.content.res.Resources#getDimensionPixelSize",
+        "android.content.res.Resources#getDrawable",
+        "android.content.res.Resources#getIntArray",
+        "android.content.res.Resources#getInteger",
+        "android.content.res.Resources#getLayout",
+        "android.content.res.Resources#getResourceEntryName",
+        "android.content.res.Resources#getResourceName",
+        "android.content.res.Resources#getResourcePackageName",
+        "android.content.res.Resources#getResourceTypeName",
+        "android.content.res.Resources#getString",
+        "android.content.res.Resources#getStringArray",
+        "android.content.res.Resources#getText",
+        "android.content.res.Resources#getTextArray",
+        "android.content.res.Resources#getValue",
+        "android.content.res.Resources#getXml",
+        "android.content.res.Resources#loadXmlResourceParser",
+        "android.content.res.Resources#obtainAttributes",
+        "android.content.res.Resources#obtainTypedArray",
+        "android.content.res.Resources#openRawResource",
+        "android.content.res.Resources#openRawResourceFd",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
         "android.content.res.Resources$Theme#resolveAttributes",
@@ -166,17 +189,24 @@ public final class CreateInfo implements ICreateInfo {
         "android.content.res.TypedArray#getValueAt",
         "android.content.res.TypedArray#obtain",
         "android.graphics.BitmapFactory#finishDecode",
+        "android.graphics.BitmapFactory#setDensityFromOptions",
+        "android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT#useLastSeenTarget",
         "android.graphics.drawable.GradientDrawable#buildRing",
+        "android.graphics.FontFamily#addFont",
         "android.graphics.Typeface#getSystemFontConfigLocation",
+        "android.graphics.Typeface#makeFamilyFromParsed",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
         "android.preference.Preference#getView",
         "android.text.format.DateFormat#is24HourFormat",
         "android.text.Hyphenator#getSystemHyphenatorLocation",
         "android.util.Xml#newPullParser",
+        "android.view.Choreographer#getInstance",
         "android.view.Choreographer#getRefreshRate",
+        "android.view.Choreographer#scheduleVsyncLocked",
         "android.view.Display#updateDisplayInfoLocked",
         "android.view.Display#getWindowManager",
+        "android.view.HandlerActionQueue#postDelayed",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#getWindowToken",
@@ -185,14 +215,34 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.WindowManagerGlobal#getWindowManagerService",
         "android.view.inputmethod.InputMethodManager#getInstance",
         "android.view.MenuInflater#registerMenu",
+        "android.view.RenderNode#getMatrix",
         "android.view.RenderNode#nCreate",
         "android.view.RenderNode#nDestroyRenderNode",
         "android.view.RenderNode#nSetElevation",
         "android.view.RenderNode#nGetElevation",
+        "android.view.RenderNode#nSetTranslationX",
+        "android.view.RenderNode#nGetTranslationX",
+        "android.view.RenderNode#nSetTranslationY",
+        "android.view.RenderNode#nGetTranslationY",
+        "android.view.RenderNode#nSetTranslationZ",
+        "android.view.RenderNode#nGetTranslationZ",
+        "android.view.RenderNode#nSetRotation",
+        "android.view.RenderNode#nGetRotation",
+        "android.view.RenderNode#nSetLeft",
+        "android.view.RenderNode#nSetTop",
+        "android.view.RenderNode#nSetRight",
+        "android.view.RenderNode#nSetBottom",
+        "android.view.RenderNode#nSetLeftTopRightBottom",
+        "android.view.RenderNode#nSetPivotX",
+        "android.view.RenderNode#nGetPivotX",
+        "android.view.RenderNode#nSetPivotY",
+        "android.view.RenderNode#nGetPivotY",
+        "android.view.RenderNode#nSetScaleX",
+        "android.view.RenderNode#nGetScaleX",
+        "android.view.RenderNode#nSetScaleY",
+        "android.view.RenderNode#nGetScaleY",
+        "android.view.RenderNode#nIsPivotExplicitlySet",
         "android.view.ViewGroup#drawChild",
-        "android.widget.SimpleMonthView#getTitle",
-        "android.widget.SimpleMonthView#getDayOfWeekLabel",
-        "android.widget.TimePickerClockDelegate#getAmOrPmKeyCode",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
@@ -200,6 +250,7 @@ public final class CreateInfo implements ICreateInfo {
         "libcore.io.MemoryMappedFile#mmapRO",
         "libcore.io.MemoryMappedFile#close",
         "libcore.io.MemoryMappedFile#bigEndianIterator",
+        "libcore.util.NativeAllocationRegistry#applyFreeFunction",
     };
 
     /**
@@ -207,7 +258,6 @@ public final class CreateInfo implements ICreateInfo {
      */
     public final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.animation.PropertyValuesHolder",
-        "android.graphics.AvoidXfermode",
         "android.graphics.Bitmap",
         "android.graphics.BitmapFactory",
         "android.graphics.BitmapShader",
@@ -235,7 +285,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.PathDashPathEffect",
         "android.graphics.PathEffect",
         "android.graphics.PathMeasure",
-        "android.graphics.PixelXorXfermode",
         "android.graphics.PorterDuffColorFilter",
         "android.graphics.PorterDuffXfermode",
         "android.graphics.RadialGradient",
@@ -246,11 +295,16 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
+        "android.graphics.drawable.AnimatedVectorDrawable",
+        "android.graphics.drawable.VectorDrawable",
         "android.os.SystemClock",
         "android.os.SystemProperties",
         "android.text.AndroidBidi",
         "android.text.StaticLayout",
+        "android.util.PathParser",
         "android.view.Display",
+        "com.android.internal.util.VirtualRefBasePtr",
+        "com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
         "libcore.icu.ICU",
     };
 
@@ -282,12 +336,13 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] JAVA_PKG_CLASSES =
         new String[] {
-            "java.lang.AutoCloseable",                         "com.android.tools.layoutlib.java.AutoCloseable",
-            "java.util.Objects",                               "com.android.tools.layoutlib.java.Objects",
-            "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
+            "java.nio.charset.Charsets",                       "java.nio.charset.StandardCharsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
-            "java.nio.charset.StandardCharsets",               "com.android.tools.layoutlib.java.Charsets",
+            // Use android.icu.text versions of DateFormat and SimpleDateFormat since the
+            // original ones do not match the Android implementation
+            "java.text.DateFormat",                            "android.icu.text.DateFormat",
+            "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat",
         };
 
     private final static String[] EXCLUDED_CLASSES =
@@ -296,10 +351,13 @@ public final class CreateInfo implements ICreateInfo {
             "org.kxml2.io.KXmlParser"
         };
 
+    /**
+     * List of fields for which we will update the visibility to be public. This is sometimes
+     * needed when access from the delegate classes is needed.
+     */
     private final static String[] PROMOTED_FIELDS = new String[] {
-        "android.widget.SimpleMonthView#mTitle",
-        "android.widget.SimpleMonthView#mCalendar",
-        "android.widget.SimpleMonthView#mDayOfWeekLabelCalendar"
+        "android.graphics.drawable.VectorDrawable#mVectorState",
+        "android.view.Choreographer#mLastFrameTimeNanos"
     };
 
     /**

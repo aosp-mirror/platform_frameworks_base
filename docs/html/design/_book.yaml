@@ -1,0 +1,143 @@
+toc:
+- title: Creative Vision
+  path: /design/get-started/creative-vision.html
+  section:
+  - title: Design Principles
+    path: /design/get-started/principles.html
+    path_attributes:
+    - name: es-lang
+      value: Principios de diseño para Android
+    - name: ja-lang
+      value: Android デザイン指針
+    - name: ko-lang
+      value: Android 디자인 원칙
+    - name: pt-br-lang
+      value: Princípios de projeto para Android
+    - name: ru-lang
+      value: Принципы проектирования Android
+    - name: zh-cn-lang
+      value: Android 设计原则
+    - name: zh-tw-lang
+      value: Android 設計原則
+  - title: New in Android
+    path: /design/patterns/new.html
+
+- title: Material for Android
+  path: /design/material/index.html
+  path_attributes:
+  - name: ja-lang
+    value: マテリアル デザイン
+  - name: ko-lang
+    value: 머티어리얼 디자인
+  - name: zh-cn-lang
+    value: 材料设计
+  - name: zh-tw-lang
+    value: 材料設計
+
+- title: Devices
+  path: /design/devices.html
+  section:
+  - title: Phones & Tablets
+    path: /design/handhelds/index.html
+  - title: Wear
+    path: /design/wear/index.html
+    section:
+    - title: Creative Vision
+      path: /design/wear/creative-vision.html
+    - title: Design Principles
+      path: /design/wear/principles.html
+    - title: App Structure
+      path: /design/wear/structure.html
+    - title: Context Awareness
+      path: /design/wear/context.html
+    - title: UI Patterns
+      path: /design/wear/patterns.html
+    - title: Style
+      path: /design/wear/style.html
+    - title: Watch Faces
+      path: /design/wear/watchfaces.html
+  - title: TV
+    path: /design/tv/index.html
+    section:
+    - title: Creative Vision
+      path: /design/tv/principles.html
+    - title: UI Patterns
+      path: /design/tv/patterns.html
+    - title: Style
+      path: /design/tv/style.html
+  - title: Auto
+    path: /design/auto/index.html
+
+- title: Pure Android
+  path: /design/patterns/index.html
+  section:
+  - title: Devices and Displays
+    path: /design/style/devices-displays.html
+  - title: Navigation
+    path: /design/patterns/navigation.html
+    path_attributes:
+    - name: es-lang
+      value: Navegación con los botones Back y Up
+    - name: ja-lang
+      value: Back と Up を使用したナビゲーション
+    - name: ko-lang
+      value: 뒤로 및 위로 탐색 기능이 포함된 탐색
+    - name: pt-br-lang
+      value: Navegação com Voltar e Para cima
+    - name: ru-lang
+      value: Навигация с помощью кнопок "Назад" и "Вверх"
+    - name: zh-cn-lang
+      value: 使用返回和向上导航
+    - name: zh-tw-lang
+      value: 使用 [返回] 及 [上一層] 導覽
+  - title: Notifications
+    path: /design/patterns/notifications.html
+    path_attributes:
+    - name: es-lang
+      value: Notificaciones
+    - name: ja-lang
+      value: 通知
+    - name: ko-lang
+      value: 알림
+    - name: pt-br-lang
+      value: Notificações
+    - name: ru-lang
+      value: Уведомления
+    - name: zh-cn-lang
+      value: 通知
+    - name: zh-tw-lang
+      value: 通知
+  - title: Widgets
+    path: /design/patterns/widgets.html
+  - title: Swipe Views
+    path: /design/patterns/swipe-views.html
+  - title: Full Screen
+    path: /design/patterns/fullscreen.html
+  - title: Confirming & Acknowledging
+    path: /design/patterns/confirming-acknowledging.html
+    path_attributes:
+    - name: es-lang
+      value: Confirmación y reconocimiento
+    - name: ja-lang
+      value: 確認と通知
+    - name: ko-lang
+      value: 확인 및 승인하기
+    - name: pt-br-lang
+      value: Confirmação e reconhecimento
+    - name: ru-lang
+      value: Подтверждение и уведомление
+    - name: zh-cn-lang
+      value: 确认和确知
+    - name: zh-tw-lang
+      value: 確認及確認完成
+  - title: Pure Android
+    path: /design/patterns/pure-android.html
+  - title: Compatibility
+    path: /design/patterns/compatibility.html
+  - title: Accessibility
+    path: /design/patterns/accessibility.html
+  - title: Help
+    path: /design/patterns/help.html
+
+- title: Downloads
+  path: /design/downloads/index.html

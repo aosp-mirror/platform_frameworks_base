@@ -14,6 +14,7 @@ import android.os.Parcelable;
  */
 public class AssistContent implements Parcelable {
     private boolean mIsAppProvidedIntent = false;
+    private boolean mIsAppProvidedWebUri = false;
     private Intent mIntent;
     private String mStructuredData;
     private ClipData mClipData;
@@ -34,12 +35,14 @@ public class AssistContent implements Parcelable {
      */
     public void setDefaultIntent(Intent intent) {
         mIntent = intent;
-        setWebUri(null);
+        mIsAppProvidedIntent = false;
+        mIsAppProvidedWebUri = false;
+        mUri = null;
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri uri = intent.getData();
             if (uri != null) {
                 if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
-                    setWebUri(uri);
+                    mUri = uri;
                 }
             }
         }
@@ -116,6 +119,7 @@ public class AssistContent implements Parcelable {
      * leave the null and only report the local intent and clip data.
      */
     public void setWebUri(Uri uri) {
+        mIsAppProvidedWebUri = true;
         mUri = uri;
     }
 
@@ -125,6 +129,16 @@ public class AssistContent implements Parcelable {
      */
     public Uri getWebUri() {
         return mUri;
+    }
+
+    /**
+     * Returns whether or not the current {@link #getWebUri} was explicitly provided in
+     * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}. If not,
+     * the Intent was automatically set based on
+     * {@link android.app.Activity#getIntent Activity.getIntent}.
+     */
+    public boolean isAppProvidedWebUri() {
+        return mIsAppProvidedWebUri;
     }
 
     /**
@@ -149,6 +163,7 @@ public class AssistContent implements Parcelable {
         }
         mIsAppProvidedIntent = in.readInt() == 1;
         mExtras = in.readBundle();
+        mIsAppProvidedWebUri = in.readInt() == 1;
     }
 
     void writeToParcelInternal(Parcel dest, int flags) {
@@ -178,6 +193,7 @@ public class AssistContent implements Parcelable {
         }
         dest.writeInt(mIsAppProvidedIntent ? 1 : 0);
         dest.writeBundle(mExtras);
+        dest.writeInt(mIsAppProvidedWebUri ? 1 : 0);
     }
 
     @Override

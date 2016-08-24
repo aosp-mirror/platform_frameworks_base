@@ -24,10 +24,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.DataUsageGraph;
-import com.android.systemui.statusbar.policy.NetworkController;
 
 import java.text.DecimalFormat;
 
@@ -60,7 +60,7 @@ public class DataUsageDetailView extends LinearLayout {
                 R.dimen.qs_data_usage_text_size);
     }
 
-    public void bind(NetworkController.MobileDataController.DataUsageInfo info) {
+    public void bind(DataUsageController.DataUsageInfo info) {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;

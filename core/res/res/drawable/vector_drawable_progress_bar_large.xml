@@ -16,22 +16,22 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:height="76dp"
         android:width="76dp"
-        android:viewportHeight="48"
-        android:viewportWidth="48"
+        android:viewportHeight="76"
+        android:viewportWidth="76"
         android:tint="?attr/colorControlActivated">
 
     <group
         android:name="root"
-        android:translateX="24.0"
-        android:translateY="24.0" >
+        android:translateX="38.0"
+        android:translateY="38.0" >
         <path
             android:name="progressBar"
             android:fillColor="#00000000"
-            android:pathData="M0, 0 m 0, -19 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
+            android:pathData="M0, 0 m 0, -29 a 29,29 0 1,1 0,58 a 29,29 0 1,1 0,-58"
             android:strokeColor="@color/white"
             android:strokeLineCap="square"
             android:strokeLineJoin="miter"
-            android:strokeWidth="4"
+            android:strokeWidth="6"
             android:trimPathEnd="0"
             android:trimPathOffset="0"
             android:trimPathStart="0" />

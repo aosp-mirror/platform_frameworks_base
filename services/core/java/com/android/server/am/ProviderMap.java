@@ -211,7 +211,7 @@ public final class ProviderMap {
             boolean doit, boolean evenPersistent, int userId,
             ArrayList<ContentProviderRecord> result) {
         boolean didSomething = false;
-        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_OWNER) {
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_SYSTEM) {
             didSomething = collectPackageProvidersLocked(packageName, filterByClasses,
                     doit, evenPersistent, mSingletonByClass, result);
         }

@@ -107,11 +107,6 @@ public class CountdownConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public void onRequestConditions(int relevance) {
-        // by convention
-    }
-
-    @Override
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         mTime = ZenModeConfig.tryParseCountdownConditionId(conditionId);

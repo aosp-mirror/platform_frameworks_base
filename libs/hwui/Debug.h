@@ -17,11 +17,18 @@
 #ifndef ANDROID_HWUI_DEBUG_H
 #define ANDROID_HWUI_DEBUG_H
 
-// Turn on to check for OpenGL errors on each frame
-#define DEBUG_OPENGL 1
+#define DEBUG_LEVEL_HIGH 3
+#define DEBUG_LEVEL_MODERATE 2
+#define DEBUG_LEVEL_LOW 1
+#define DEBUG_LEVEL_NONE 0
 
-// Turn on to display informations about the GPU
-#define DEBUG_EXTENSIONS 0
+// Turn on to check for OpenGL errors on each frame
+// Note DEBUG_LEVEL_HIGH for DEBUG_OPENGL is only setable by enabling
+// HWUI_ENABLE_OPENGL_VALIDATION when building HWUI. Similarly if
+// HWUI_ENABLE_OPENGL_VALIDATION is set then this is always DEBUG_LEVEL_HIGH
+#ifndef DEBUG_OPENGL
+#define DEBUG_OPENGL DEBUG_LEVEL_LOW
+#endif
 
 // Turn on to enable initialization information
 #define DEBUG_INIT 0

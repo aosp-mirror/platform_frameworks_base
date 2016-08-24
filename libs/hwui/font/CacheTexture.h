@@ -23,7 +23,7 @@
 #include "Vertex.h"
 
 #include <GLES3/gl3.h>
-#include <SkScalerContext.h>
+#include <SkGlyph.h>
 #include <utils/Log.h>
 
 
@@ -92,11 +92,11 @@ public:
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
     inline uint16_t getWidth() const {
-        return mTexture.width;
+        return mWidth;
     }
 
     inline uint16_t getHeight() const {
-        return mTexture.height;
+        return mHeight;
     }
 
     inline GLenum getFormat() const {
@@ -122,7 +122,7 @@ public:
 
     GLuint getTextureId() {
         allocatePixelBuffer();
-        return mTexture.id;
+        return mTexture.id();
     }
 
     inline bool isDirty() const {
@@ -183,6 +183,7 @@ private:
 
     PixelBuffer* mPixelBuffer = nullptr;
     Texture mTexture;
+    uint32_t mWidth, mHeight;
     GLenum mFormat;
     bool mLinearFiltering = false;
     bool mDirty = false;

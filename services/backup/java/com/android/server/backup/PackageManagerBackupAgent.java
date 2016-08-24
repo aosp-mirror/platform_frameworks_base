@@ -205,7 +205,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         PackageManager.GET_SIGNATURES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
                 homeVersion = homeInfo.versionCode;
-                homeSigHashes = hashSignatureArray(homeInfo.signatures);
+                homeSigHashes = BackupUtils.hashSignatureArray(homeInfo.signatures);
             } catch (NameNotFoundException e) {
                 Slog.w(TAG, "Can't access preferred home info");
                 // proceed as though there were no preferred home set
@@ -222,7 +222,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
             final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
                     || !Objects.equals(home, mStoredHomeComponent)
                     || (home != null
-                        && !BackupManagerService.signaturesMatch(mStoredHomeSigHashes, homeInfo));
+                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo));
             if (needHomeBackup) {
                 if (DEBUG) {
                     Slog.i(TAG, "Home preference changed; backing up new state " + home);
@@ -309,7 +309,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     outputBuffer.reset();
                     outputBufferStream.writeInt(info.versionCode);
                     writeSignatureHashArray(outputBufferStream,
-                            hashSignatureArray(info.signatures));
+                            BackupUtils.hashSignatureArray(info.signatures));
 
                     if (DEBUG) {
                         Slog.v(TAG, "+ writing metadata for " + packName
@@ -432,18 +432,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mRestoredSignatures = sigMap;
     }
 
-    private static ArrayList<byte[]> hashSignatureArray(Signature[] sigs) {
-        if (sigs == null) {
-            return null;
-        }
-
-        ArrayList<byte[]> hashes = new ArrayList<byte[]>(sigs.length);
-        for (Signature s : sigs) {
-            hashes.add(BackupManagerService.hashSignature(s));
-        }
-        return hashes;
-    }
-
     private static void writeSignatureHashArray(DataOutputStream out, ArrayList<byte[]> hashes)
             throws IOException {
         // the number of entries in the array
@@ -492,13 +480,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
             }
 
             if (nonHashFound) {
-                ArrayList<byte[]> hashes =
-                        new ArrayList<byte[]>(sigs.size());
-                for (int i = 0; i < sigs.size(); i++) {
-                    Signature s = new Signature(sigs.get(i));
-                    hashes.add(BackupManagerService.hashSignature(s));
-                }
-                sigs = hashes;
+                // Replace with the hashes.
+                sigs = BackupUtils.hashSignatureArray(sigs);
             }
 
             return sigs;

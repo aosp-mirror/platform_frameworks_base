@@ -36,7 +36,11 @@ import java.util.Set;
  * This is a class which delegates to the given context, but performs database
  * and file operations with a renamed database/file name (prefixes default
  * names with a given prefix).
+ *
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class RenamingDelegatingContext extends ContextWrapper {
 
     private Context mFileContext;
@@ -168,7 +172,7 @@ public class RenamingDelegatingContext extends ContextWrapper {
             return false;
         }
     }
-    
+
     @Override
     public File getDatabasePath(String name) {
         return mFileContext.getDatabasePath(renamedFileName(name));
@@ -216,7 +220,7 @@ public class RenamingDelegatingContext extends ContextWrapper {
     public String[] fileList() {
         return mFileNames.toArray(new String[]{});
     }
-    
+
     /**
      * In order to support calls to getCacheDir(), we create a temp cache dir (inside the real
      * one) and return it instead.  This code is basically getCacheDir(), except it uses the real
@@ -241,21 +245,4 @@ public class RenamingDelegatingContext extends ContextWrapper {
         }
         return mCacheDir;
     }
-
-
-//    /**
-//     * Given an array of files returns only those whose names indicate that they belong to this
-//     * context.
-//     * @param allFiles the original list of files
-//     * @return the pruned list of files
-//     */
-//    private String[] prunedFileList(String[] allFiles) {
-//        List<String> files = Lists.newArrayList();
-//        for (String file : allFiles) {
-//            if (file.startsWith(mFilePrefix)) {
-//                files.add(file);
-//            }
-//        }
-//        return files.toArray(new String[]{});
-//    }
 }

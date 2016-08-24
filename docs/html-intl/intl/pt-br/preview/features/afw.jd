@@ -1,0 +1,552 @@
+page.title=Atualizações no Android for Work
+page.metaDescription=Novas APIs do Android for Work e novos recursos do Android N.
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Neste documento</h2>
+      <ol>
+        <li><a href="#qr">Provisionamento de código QR
+</a></li>
+
+        <li><a href="#sec-challenge">Desafio de segurança de perfil de trabalho
+</a></li>
+
+        <li><a href="#suspend">Desativar acesso a aplicativos
+</a></li>
+
+        <li><a href="#toggle-work">Alternar modo de trabalho
+</a></li>
+
+        <li><a href="#always-on-vpn">Always-On VPN
+</a></li>
+
+        <li><a href="#contacts">Integração de contatos com perfil de trabalho
+</a></li>
+
+        <li><a href="#remote-reboot">Reinicialização remota
+</a></li>
+
+        <li><a href="#disable-roaming">Desativação de roaming de dados
+</a></li>
+
+        <li><a href="#process-logging">Registro do processo empresarial
+</a></li>
+
+        <li><a href="#bug-reports">Relatórios de erros remotos
+</a></li>
+
+        <li><a href="#remove-cert">Remoção de certificado do cliente
+</a></li>
+
+        <li><a href="#grant-cert-on-install">Concessão de acesso a certificado do cliente
+na instalação</a></li>
+
+        <li><a href="#ui-policy">Transparência da política de IU do sistema
+</a></li>
+
+        <li><a href="#restrictions-mgmt">Melhorias no gerenciamento de restrições de aplicativos
+</a></li>
+
+        <li><a href="#location-off">Interruptor para desativar localidade
+</a></li>
+
+        <li><a href="#custom-provisioning">Provisionamento personalizado
+</a></li>
+
+        <li><a href="#multi-wifi-ca">Diversos certificados de CA para Wi-Fi
+</a></li>
+
+        <li><a href="#custom-lock">Mensagem de tela de bloqueio personalizada
+</a></li>
+
+        <li><a href="#work-connectionservice">Perfil de trabalho ConnectionService
+</a></li>
+
+        <li><a href="#lock-wp">Bloqueio de plano de fundo
+</a></li>
+
+        <li><a href="#lock-user-icon">Bloqueio de ícone de usuário
+</a></li>
+
+        <li><a href="#health-monitoring">Monitoramento da saúde do dispositivo
+</a></li>
+
+      </ol>
+
+    <h2>Veja também</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência
+do N Preview SDK</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>Este documento descreve os novos recursos do Android for Work oferecidos no
+Android N.</p>
+
+<h2 id="qr">Provisionamento de código QR</h2>
+
+<p>
+  O Android for Work agora é compatível com o uso de códigos QR para fornecimento de dispositivos
+de responsabilidade corporativa. Este assistente de configuração permite a digitalização de um código QR para fornecer
+ao dispositivo.
+</p>
+
+<h2 id="sec-challenge">Desafio de segurança de perfil de trabalho</h2>
+
+<p>
+  Donos de perfis podem exigir que os usuários especifiquem um desafio de segurança para aplicativos
+em execução no perfil de trabalho. O sistema mostra o desafio de segurança quando o
+usuário tenta abrir qualquer aplicativo de trabalho. Se o usuário preencher corretamente o
+ desafio de segurança, o sistema desbloqueará e, se necessário, descriptografará o 
+perfil de trabalho.
+</p>
+
+<p>
+  Se um dono de perfil enviar uma intenção {@link
+ android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD}, o
+ sistema solicitará que o usuário defina um desafio de segurança. O dono de perfil também
+ pode enviar uma intenção <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> para
+ solicitar que o usuário defina um bloqueio de dispositivo.
+</p>
+
+<p>
+  Os donos de perfil podem escolher políticas de senha diferentes
+ das políticas de outros dispositivos para o desafio de trabalho. Por exemplo, o
+ tamanho mínimo da resposta do desafio no dispositivo pode ser diferente do tamanho
+ exigido para outras senhas. Os donos de perfis definem as
+políticas do desafio por meio dos métodos {@link android.app.admin.DevicePolicyManager}
+usuais, como {@link
+android.app.admin.DevicePolicyManager#setPasswordQuality
+setPasswordQuality()} e {@link
+android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+setPasswordMinimumLength()}. O dono de perfil também pode definir o bloqueio de dispositivo
+usando a instância de {@link android.app.admin.DevicePolicyManager} retornada
+pelo novo método <code>DevicePolicyManager.getParentProfileInstance()</code>
+. Além disso, donos de perfil podem personalizar a tela de credenciais do 
+desafio de trabalho usando os novos métodos <code>setOrganizationColor()</code> e
+ <code>setOrganizationName()</code> da classe {@link android.app.admin.DevicePolicyManager}
+.
+</p>
+
+<p>
+  Para obter detalhes sobre os novos métodos e constantes, consulte a 
+página de referência <code>DevicePolicyManager</code> na <a href="{@docRoot}preview/setup-sdk.html#docs-dl">referência do N Preview SDK</a>.
+</p>
+
+<h2 id="suspend">Desativar acesso a aplicativos</h2>
+
+<p>
+  Donos de dispositivos e perfis podem suspender temporariamente o acesso a pacotes
+ chamando o novo método <code>DevicePolicyManager.setPackagesSuspended()</code>
+. Os donos podem usar o mesmo método para reativar esses pacotes.
+</p>
+
+<p>
+  Enquanto está suspenso, um pacote não consegue iniciar atividades, as notificações
+ são suspensas e a entrada do aplicativo na <a href="{@docRoot}guide/components/recents.html">tela de visão geral</a> é ocultada.
+  Os pacotes suspensos não são exibidos na <a href="{@docRoot}guide/components/recents.html">tela de visão geral</a> e não
+ podem mostrar caixas de diálogo (incluindo avisos e snackbars). Também não conseguem reproduzir 
+ áudio nem vibrar o dispositivo.
+</p>
+
+<p>
+  A tela de início pode aplicar uma IU destacada ao aplicativos suspensos para mostrar que
+ não estão disponíveis. Podem, por exemplo, exibir o ícone do aplicativo
+ em cinza. A tela de início pode descobrir se um aplicativo está suspenso chamando o novo método
+ <code>DevicePolicyManager.getPackageSuspended()</code>.
+</p>
+
+<h2 id="toggle-work">Alternar modo de trabalho</h2>
+
+<p>
+  Em dispositivos com dois perfis, o usuário pode ativar ou desativar o modo de trabalho. Quando o modo de trabalho
+ é desativado, o perfil gerenciado é encerrado temporariamente. Os aplicativos,
+ a sincronização em segundo plano e as notificações do perfil de trabalho são desativados, inclusive
+ o aplicativo do dono do perfil. Quando o modo de trabalho está desativado, o sistema
+ exibe um ícone de status persistente para lembrar ao usuário que não é possível iniciar aplicativos
+de trabalho. A tela de início indica que os aplicativos e widgets de trabalho não podem
+ ser acessados.
+</p>
+
+<h2 id="always-on-vpn">Always-On VPN</h2>
+
+<p>
+  Os donos de dispositivo e perfil podem exigir que os aplicativos de trabalho se conectem sempre 
+por meio de uma VPN especificada. Se os donos definirem este requisito, o
+ dispositivo iniciará a VPN automaticamente na inicialização.
+</p>
+
+<p>
+  Os donos podem exigir o uso de uma VPN chamando o novo 
+método <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code>. Para descobrir
+ se o dono definiu um requisito de VPN, chame o novo
+ método <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code>.
+</p>
+
+<p>
+  Como o sistema pode vincular os serviços de VPN diretamente sem interação com aplicativos,
+ os clientes de VPN precisam processar novos pontos de entrada para a Always-on VPN. Como antes, você
+ pode encontrar serviços ativos usando um filtro de intenção que corresponda à ação
+ {@link android.net.VpnService android.net.VpnService}.
+</p>
+
+<p>
+  Os usuários podem configurar manualmente um cliente de VPN always-on que implemente {@link
+android.net.VpnService} usando a tela <strong>Settings &gt; More &gt;
+ VPN</strong>.
+</p>
+
+<h2 id="contacts">Integração de contatos com perfil de trabalho</h2>
+
+<p>
+  Os donos de perfil podem permitir pesquisa local e busca no diretório de contatos de trabalho
+ do usuário principal. Por exemplo, um usuário pode acessar os diretórios de contatos
+ pessoais e de trabalho no telefone ou no aplicativo de contatos particular (se
+ permitido pelo administrador do perfil).
+</p>
+
+<p>
+  Desenvolvedores que se valem do Provedor de Contatos podem usar a Enterprise Contacts API
+ para acessar as entradas do diretório do perfil de trabalho do usuário principal se permitido
+ pela política:
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  Donos de perfis podem controlar a visibilidade de contatos de trabalho no usuário
+ principal usando os seguintes novos métodos:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">Reinicialização remota</h2>
+
+<p>
+  Donos de dispositivos podem reinicializá-los remotamente. Em alguns casos, dispositivos implementados
+ dentro de compartimentos em locais públicos podem impedir o acesso ao botão liga/desliga. Se um
+ dispositivo precisar de reinicialização, os administradores poderão fazer isso usando o novo
+ método <code>DevicePolicyManager.reboot()</code>.
+</p>
+
+<h2 id="disable-roaming">Desativação de roaming de dados</h2>
+
+<p>
+  Os donos de dispositivos podem desativar o roaming de dados usando a nova restrição de usuário <code>DISALLOW_DATA_ROAMING</code> do {@link
+android.os.UserManager}.
+</p>
+
+<h2 id="process-logging">Registro do processo empresarial</h2>
+
+<p>
+  Donos de dispositivos podem monitorá-los remotamente
+ para identificar atividades suspeitas, incluindo inicialização de aplicativos, atividade adb e desbloqueios de tela. Registros de processo
+ não exigem consentimento do usuário. Para recuperar os registros, os donos de dispositivos precisam ativar
+o registro no dispositivo usando <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>.
+</p>
+
+<p>
+  As mudanças na API incluem:
+</p>
+
+<ul>
+
+  <li>
+    A nova classe <code>android.app.admin.SecurityLog</code> e seus
+ métodos
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">Relatórios de erros remotos</h2>
+
+<p>
+  Donos de dispositivos podem acionar e recuperar remotamente um relatório de erros que contém um
+ arquivo de despejo, o que permite a investigação forense de um incidente
+ conhecido ou um dispositivo danificado. Devido à natureza detalhada do relatório de erros,
+ ele só é gerado com o consentimento do usuário.
+</p>
+
+<p>
+  O Android N inclui as seguintes adições de API para dar suporte a este recurso. Para 
+obter detalhes, consulte a <a href="{@docRoot}preview/setup-sdk.html#docs-dl"> Referência do N
+ Preview SDK</a>.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">Remoção de certificado do cliente</h2>
+
+<p>
+  Agora, donos de perfis e dispositivos podem remover certificados de cliente que foram 
+instalados por meio do {@link android.app.admin.DevicePolicyManager#installKeyPair
+ installKeyPair()} chamando o novo método
+ <code>DevicePolicyManager.removeKeyPair()</code>.
+</p>
+
+<h2 id="grant-cert-on-install">Concessão de acesso a certificado do cliente
+na instalação</h2>
+
+<p>
+  Se um dono de perfil ou dispositivo conceder a um aplicativo de terceiros a capacidade de
+ gerenciar certificados, o próprio aplicativo poderá conceder acesso a certificados que
+ tenha instalado sem qualquer intervenção do dono.
+</p>
+
+<p>
+  A API existente para gerenciamento de certificados foi expandida para incluir:
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">Transparência da política de IU do sistema</h2>
+
+<p>
+  Políticas que afetem a experiência do usuário ou restrinjam Settings são
+ totalmente divulgadas e os donos de perfis e dispositivos podem atribuir a
+ política ao departamento de TI da empresa. Além de incluir uma mensagem consistente de "Ação
+ não permitida” em Settings, os administradores de TI podem definir uma
+ mensagem de suporte específica para a organização nas configurações do dispositivo com os seguintes
+ novos métodos {@link android.app.admin.DevicePolicyManager}:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="restrictions-mgmt">Melhorias no gerenciamento de restrições de aplicativos</h2>
+
+<p>
+  O dono do dispositivo ou perfil pode habilitar outro aplicativo para gerenciar restrições de aplicativo
+ por meio do novo
+ método <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
+. O aplicativo indicado pode verificar se a permissão foi 
+concedida chamando
+ <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>.
+</p>
+
+<p>
+  Um aplicativo indicado para gerenciar restrições de aplicativos pode chamar {@link
+ android.app.admin.DevicePolicyManager#setApplicationRestrictions
+setApplicationRestrictions()} e {@link
+android.app.admin.DevicePolicyManager#getApplicationRestrictions
+getApplicationRestrictions()} para quaisquer pacotes dentro daquele usuário ou perfil.
+</p>
+
+<h2 id="location-off">Interruptor para desativar localidade</h2>
+
+<p>
+  Os usuários podem desativar as permissões de localidade para aplicativos de trabalho sem deixar de
+ acessar informações de localidade em seus aplicativos pessoais. Um interruptor de acesso de localidade 
+ em separado em Location Settings permite que o usuário impeça atualizações de localização ou
+ consultas de última localidade em aplicativos executados no perfil de trabalho.
+</p>
+
+<p>
+  O interruptor de desligamento de localidade em nível superior desativa o acesso à localidade para o
+ perfil principal e o perfil gerenciado.
+</p>
+
+<h2 id="custom-provisioning">Provisionamento personalizado</h2>
+
+<p>
+  Um aplicativo pode personalizar os fluxos de provisionamento do dono do perfil e do dispositivo
+ com cores e logos corporativos.
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    Personaliza a cor do fluxo.
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    Personaliza o fluxo com um logo corporativo.
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">Diversos certificados de CA para Wi-Fi</h2>
+
+<p>
+  Donos de dispositivos e perfis podem definir vários certificados de CA para uma determinada
+ configuração de Wi-Fi. Quando redes Wi-Fi corporativas têm CA separadas para
+ pontos de acesso separados com o mesmo SSID, os administradores de TI podem incluir todas as
+ CA correspondentes na configuração de Wi-Fi usando o novo método
+ <code>setCaCertificates()</code>.
+</p>
+
+<p>
+  As APIs adicionadas foram:
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">Mensagem de tela de bloqueio personalizada</h2>
+
+<p>
+  Donos de dispositivos podem fornecer informações a ser exibidas na tela de bloqueio.
+  Essas informações têm prioridade sobre a mensagem do usuário na tela de bloqueio (se houver uma
+ definida). Os novos métodos {@link android.app.admin.DevicePolicyManager} são:
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">Perfil de trabalho ConnectionService</h2>
+
+<p>
+  Os donos de perfil podem especificar um aplicativo de telefone de trabalho que usa um
+ {@link android.telecom.ConnectionService} específico para trabalho para o back-end de
+ chamada (contas de chamada). O telefone de trabalho só mantém um registro de chamadas de trabalho
+ e baseia-se apenas em contatos de trabalho. Os usuários têm uma experiência consistente
+ de IU em chamada em qualquer aplicativo de ligação. As chamadas recebidas pelas contas de trabalho
+ são distintas das chamadas recebidas pelas
+contas pessoais.
+</p>
+
+<p>
+  O telefone deve verificar o novo sinalizador
+ <code>android.telecom.Call.PROPERTY_WORK_CALL</code> para determinar se a chamada
+ é de trabalho. Se for de trabalho, o telefone deverá indicar o fato
+ adicionando um distintivo de trabalho, por exemplo.
+</p>
+
+<h2 id="lock-wp">Bloqueio de plano de fundo</h2>
+
+<p>
+  Uma nova restrição de usuário (<code>DISALLOW_SET_WALLPAPER</code>) impede que
+ o usuário altere o plano de fundo. O dono do dispositivo ou perfil ainda pode
+ alterar o plano de fundo, mas só consegue mudar o plano de fundo
+ do usuário ou perfil que controla. Por exemplo, um dono de perfil não consegue mudar o
+plano de fundo do usuário pai, mas o dono de um perfil principal e
+ o dono do dispositivo conseguem. Um dono de perfil ou dispositivo que queira alterar o
+ plano de fundo precisa verificar se o usuário ou perfil que gerencia tem um
+ plano de fundo ({@link android.app.WallpaperManager#isWallpaperSupported
+ isWallpaperSupported()}) e se possui permissão para alterá-lo (com o
+ novo método <code>WallpaperManager.isWallpaperSettingAllowed()</code>)
+</p>
+
+<h2 id="lock-user-icon">Bloqueio de ícone de usuário</h2>
+
+<p>
+  Uma nova restrição de usuário (<code>DISALLOW_SET_USER_ICON</code>) impede que
+ o usuário altere o ícone de usuário. O dono do dispositivo ou perfil
+ ainda pode alterar o ícone. No entanto, um dono de perfil só consegue alterar o
+ ícone de usuário do perfil que controla.
+</p>
+
+<h2 id="health-monitoring">Monitoramento da saúde do dispositivo</h2>
+
+<p>
+  Um dono de perfil ou dispositivo pode usar a nova interface
+ <code>HardwarePropertiesManager</code> para recuperar informações importantes
+ sobre a integridade do dispositivo, como temperatura da CPU ou da GPU e uso de CPU. A nova
+ interface de monitoramento é especialmente útil para monitorar dispositivos não assistidos
+ executados em uma localidade remota.
+</p>

@@ -16,8 +16,6 @@
 
 package com.android.systemui.assist;
 
-import com.android.systemui.R;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -34,6 +32,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
+
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 
 /**
  * Visually discloses that contextual data was provided to an assistant.
@@ -120,13 +121,11 @@ public class AssistDisclosure {
                     R.interpolator.assist_disclosure_trace));
             mAlphaInAnimator = ValueAnimator.ofInt(0, 255).setDuration(ALPHA_IN_ANIMATION_DURATION);
             mAlphaInAnimator.addUpdateListener(this);
-            mAlphaInAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                    android.R.interpolator.fast_out_slow_in));
+            mAlphaInAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             mAlphaOutAnimator = ValueAnimator.ofInt(255, 0).setDuration(
                     ALPHA_OUT_ANIMATION_DURATION);
             mAlphaOutAnimator.addUpdateListener(this);
-            mAlphaOutAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                    android.R.interpolator.fast_out_linear_in));
+            mAlphaOutAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
             mAnimator = new AnimatorSet();
             mAnimator.play(mAlphaInAnimator).with(mTracingAnimator);
             mAnimator.play(mAlphaInAnimator).before(mAlphaOutAnimator);

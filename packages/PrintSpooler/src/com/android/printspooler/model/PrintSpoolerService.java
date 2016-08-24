@@ -16,10 +16,15 @@
 
 package com.android.printspooler.model;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -50,6 +55,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.printspooler.R;
+import com.android.printspooler.util.ApprovedPrintServices;
 
 import libcore.io.IoUtils;
 
@@ -67,6 +73,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for exposing some of the {@link PrintSpooler} functionality to
@@ -104,6 +111,9 @@ public final class PrintSpoolerService extends Service {
 
     private NotificationController mNotificationController;
 
+    /** Cache for custom printer icons loaded from the print service */
+    private CustomPrinterIconCache mCustomIconCache;
+
     public static PrintSpoolerService peekInstance() {
         synchronized (sLock) {
             return sInstance;
@@ -118,6 +128,7 @@ public final class PrintSpoolerService extends Service {
 
         mPersistanceManager = new PersistenceManager();
         mNotificationController = new NotificationController(PrintSpoolerService.this);
+        mCustomIconCache = new CustomPrinterIconCache(getCacheDir());
 
         synchronized (mLock) {
             mPersistanceManager.readStateLocked();
@@ -130,16 +141,21 @@ public final class PrintSpoolerService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return new PrintSpooler();
     }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (mLock) {
-            String prefix = (args.length > 0) ? args[0] : "";
-            String tab = "  ";
+        String prefix = (args.length > 0) ? args[0] : "";
+        String tab = "  ";
 
+        synchronized (mLock) {
             pw.append(prefix).append("print jobs:").println();
             final int printJobCount = mPrintJobs.size();
             for (int i = 0; i < printJobCount; i++) {
@@ -158,6 +174,14 @@ public final class PrintSpoolerService extends Service {
                         pw.append(prefix).append(tab).append(file.getName()).println();
                     }
                 }
+            }
+        }
+
+        pw.append(prefix).append("approved print services:").println();
+        Set<String> approvedPrintServices = (new ApprovedPrintServices(this)).getApprovedServices();
+        if (approvedPrintServices != null) {
+            for (String approvedService : approvedPrintServices) {
+                pw.append(prefix).append(tab).append(approvedService).println();
             }
         }
     }
@@ -473,6 +497,20 @@ public final class PrintSpoolerService extends Service {
         }
     }
 
+    /**
+     * Notify all interested parties that a print job has been updated.
+     *
+     * @param printJob The updated print job.
+     */
+    private void notifyPrintJobUpdated(PrintJobInfo printJob) {
+        Message message = mHandlerCaller.obtainMessageO(
+                HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
+                printJob);
+        mHandlerCaller.executeOrSendMessage(message);
+
+        mNotificationController.onUpdateNotifications(mPrintJobs);
+    }
+
     public boolean setPrintJobState(PrintJobId printJobId, int state, String error) {
         boolean success = false;
 
@@ -487,7 +525,7 @@ public final class PrintSpoolerService extends Service {
                 success = true;
 
                 printJob.setState(state);
-                printJob.setStateReason(error);
+                printJob.setStatus(error);
                 printJob.setCancelling(false);
 
                 if (DEBUG_PRINT_JOB_LIFECYCLE) {
@@ -525,16 +563,62 @@ public final class PrintSpoolerService extends Service {
                     notifyOnAllPrintJobsHandled();
                 }
 
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINT_JOB_STATE_CHANGED,
-                        printJob);
-                mHandlerCaller.executeOrSendMessage(message);
-
-                mNotificationController.onUpdateNotifications(mPrintJobs);
+                notifyPrintJobUpdated(printJob);
             }
         }
 
         return success;
+    }
+
+    /**
+     * Set the progress for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param progress the new progress
+     */
+    public void setProgress(@NonNull PrintJobId printJobId,
+            @FloatRange(from=0.0, to=1.0) float progress) {
+        synchronized (mLock) {
+            getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY).setProgress(progress);
+
+            mNotificationController.onUpdateNotifications(mPrintJobs);
+        }
+    }
+
+    /**
+     * Set the status for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param status the new status
+     */
+    public void setStatus(@NonNull PrintJobId printJobId, @Nullable CharSequence status) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
+
+            if (printJob != null) {
+                printJob.setStatus(status);
+                notifyPrintJobUpdated(printJob);
+            }
+        }
+    }
+
+    /**
+     * Set the status for a print job.
+     *
+     * @param printJobId ID of the print job to update
+     * @param status the new status as a string resource
+     * @param appPackageName app package the resource belongs to
+     */
+    public void setStatus(@NonNull PrintJobId printJobId, @StringRes int status,
+            @Nullable CharSequence appPackageName) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
+
+            if (printJob != null) {
+                printJob.setStatus(status, appPackageName);
+                notifyPrintJobUpdated(printJob);
+            }
+        }
     }
 
     public boolean hasActivePrintJobsLocked() {
@@ -661,6 +745,37 @@ public final class PrintSpoolerService extends Service {
         }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
+    /**
+     * Handle that a custom icon for a printer was loaded.
+     *
+     * @param printerId the id of the printer the icon belongs to
+     * @param icon the icon that was loaded
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon) {
+        mCustomIconCache.onCustomPrinterIconLoaded(printerId, icon);
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public Icon getCustomPrinterIcon(PrinterId printerId) {
+        return mCustomIconCache.getIcon(printerId);
+    }
+
+    /**
+     * Clear the custom printer icon cache.
+     */
+    public void clearCustomPrinterIconCache() {
+        mCustomIconCache.clear();
+    }
+
     private final class PersistenceManager {
         private static final String PERSIST_FILE_NAME = "print_spooler_state.xml";
 
@@ -683,6 +798,8 @@ public final class PrintSpoolerService extends Service {
         private static final String ATTR_COPIES = "copies";
         private static final String ATTR_PRINTER_NAME = "printerName";
         private static final String ATTR_STATE_REASON = "stateReason";
+        private static final String ATTR_STATUS = "status";
+        private static final String ATTR_PROGRESS = "progress";
         private static final String ATTR_CANCELLING = "cancelling";
 
         private static final String TAG_ADVANCED_OPTIONS = "advancedOptions";
@@ -791,12 +908,18 @@ public final class PrintSpoolerService extends Service {
                     if (!TextUtils.isEmpty(printerName)) {
                         serializer.attribute(null, ATTR_PRINTER_NAME, printerName);
                     }
-                    String stateReason = printJob.getStateReason();
-                    if (!TextUtils.isEmpty(stateReason)) {
-                        serializer.attribute(null, ATTR_STATE_REASON, stateReason);
-                    }
                     serializer.attribute(null, ATTR_CANCELLING, String.valueOf(
                             printJob.isCancelling()));
+
+                    float progress = printJob.getProgress();
+                    if (progress != Float.NaN) {
+                        serializer.attribute(null, ATTR_PROGRESS, String.valueOf(progress));
+                    }
+
+                    CharSequence status = printJob.getStatus(getPackageManager());
+                    if (!TextUtils.isEmpty(status)) {
+                        serializer.attribute(null, ATTR_STATUS, status.toString());
+                    }
 
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
@@ -950,7 +1073,9 @@ public final class PrintSpoolerService extends Service {
             try {
                 in = mStatePersistFile.openRead();
             } catch (FileNotFoundException e) {
-                Log.i(LOG_TAG, "No existing print spooler state.");
+                if (DEBUG_PERSISTENCE) {
+                    Log.d(LOG_TAG, "No existing print spooler state.");
+                }
                 return;
             }
             try {
@@ -1015,8 +1140,25 @@ public final class PrintSpoolerService extends Service {
             printJob.setCopies(Integer.parseInt(copies));
             String printerName = parser.getAttributeValue(null, ATTR_PRINTER_NAME);
             printJob.setPrinterName(printerName);
+
+            String progressString = parser.getAttributeValue(null, ATTR_PROGRESS);
+            if (progressString != null) {
+                float progress = Float.parseFloat(progressString);
+
+                if (progress != -1) {
+                    printJob.setProgress(progress);
+                }
+            }
+
+            CharSequence status = parser.getAttributeValue(null, ATTR_STATUS);
+            printJob.setStatus(status);
+
+            // stateReason is deprecated, but might be used by old print jobs
             String stateReason = parser.getAttributeValue(null, ATTR_STATE_REASON);
-            printJob.setStateReason(stateReason);
+            if (stateReason != null) {
+                printJob.setStatus(stateReason);
+            }
+
             String cancelling = parser.getAttributeValue(null, ATTR_CANCELLING);
             printJob.setCancelling(!TextUtils.isEmpty(cancelling)
                     ? Boolean.parseBoolean(cancelling) : false);
@@ -1195,7 +1337,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         private void expect(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
+                throws XmlPullParserException {
             if (!accept(parser, type, tag)) {
                 throw new XmlPullParserException("Exepected event: " + type
                         + " and tag: " + tag + " but got event: " + parser.getEventType()
@@ -1212,7 +1354,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         private boolean accept(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
+                throws XmlPullParserException {
             if (parser.getEventType() != type) {
                 return false;
             }
@@ -1307,8 +1449,66 @@ public final class PrintSpoolerService extends Service {
             PrintSpoolerService.this.setPrintJobCancelling(printJobId, cancelling);
         }
 
+        @Override
+        public void pruneApprovedPrintServices(List<ComponentName> servicesToKeep) {
+            (new ApprovedPrintServices(PrintSpoolerService.this))
+                    .pruneApprovedServices(servicesToKeep);
+        }
+
+        @Override
+        public void setProgress(@NonNull PrintJobId printJobId,
+                @FloatRange(from=0.0, to=1.0) float progress) throws RemoteException {
+            PrintSpoolerService.this.setProgress(printJobId, progress);
+        }
+
+        @Override
+        public void setStatus(@NonNull PrintJobId printJobId,
+                @Nullable CharSequence status) throws RemoteException {
+            PrintSpoolerService.this.setStatus(printJobId, status);
+        }
+
+        @Override
+        public void setStatusRes(@NonNull PrintJobId printJobId, @StringRes int status,
+                @NonNull CharSequence appPackageName) throws RemoteException {
+            PrintSpoolerService.this.setStatus(printJobId, status, appPackageName);
+        }
+
+
         public PrintSpoolerService getService() {
             return PrintSpoolerService.this;
         }
+
+        @Override
+        public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon,
+                IPrintSpoolerCallbacks callbacks, int sequence)
+                throws RemoteException {
+            try {
+                PrintSpoolerService.this.onCustomPrinterIconLoaded(printerId, icon);
+            } finally {
+                callbacks.onCustomPrinterIconCached(sequence);
+            }
+        }
+
+        @Override
+        public void getCustomPrinterIcon(PrinterId printerId, IPrintSpoolerCallbacks callbacks,
+                int sequence) throws RemoteException {
+            Icon icon = null;
+            try {
+                icon = PrintSpoolerService.this.getCustomPrinterIcon(printerId);
+            } finally {
+                callbacks.onGetCustomPrinterIconResult(icon, sequence);
+            }
+        }
+
+        @Override
+        public void clearCustomPrinterIconCache(IPrintSpoolerCallbacks callbacks,
+                int sequence) throws RemoteException {
+            try {
+                PrintSpoolerService.this.clearCustomPrinterIconCache();
+            } finally {
+                callbacks.customPrinterIconCacheCleared(sequence);
+            }
+        }
+
     }
 }

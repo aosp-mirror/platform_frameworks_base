@@ -33,16 +33,18 @@ namespace uirenderer {
 
 BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         : mTarget(nullptr)
+        , mStagingTarget(nullptr)
         , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
-        , mStagingPlayState(NOT_STARTED)
-        , mPlayState(NOT_STARTED)
+        , mStagingPlayState(PlayState::NotStarted)
+        , mPlayState(PlayState::NotStarted)
         , mHasStartValue(false)
         , mStartTime(0)
         , mDuration(300)
         , mStartDelay(0)
-        , mMayRunAsync(true) {
+        , mMayRunAsync(true)
+        , mPlayTime(0) {
 }
 
 BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
@@ -50,7 +52,7 @@ BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
 
 void BaseRenderNodeAnimator::checkMutable() {
     // Should be impossible to hit as the Java-side also has guards for this
-    LOG_ALWAYS_FATAL_IF(mStagingPlayState != NOT_STARTED,
+    LOG_ALWAYS_FATAL_IF(mStagingPlayState != PlayState::NotStarted,
             "Animator has already been started!");
 }
 
@@ -81,23 +83,133 @@ void BaseRenderNodeAnimator::setStartDelay(nsecs_t startDelay) {
 }
 
 void BaseRenderNodeAnimator::attach(RenderNode* target) {
-    mTarget = target;
+    mStagingTarget = target;
     onAttached();
 }
 
+void BaseRenderNodeAnimator::start() {
+    mStagingPlayState = PlayState::Running;
+    mStagingRequests.push_back(Request::Start);
+    onStagingPlayStateChanged();
+}
+
+void BaseRenderNodeAnimator::cancel() {
+    mStagingPlayState = PlayState::Finished;
+    mStagingRequests.push_back(Request::Cancel);
+    onStagingPlayStateChanged();
+}
+
+void BaseRenderNodeAnimator::reset() {
+    mStagingPlayState = PlayState::Finished;
+    mStagingRequests.push_back(Request::Reset);
+    onStagingPlayStateChanged();
+}
+
+void BaseRenderNodeAnimator::reverse() {
+    mStagingPlayState = PlayState::Reversing;
+    mStagingRequests.push_back(Request::Reverse);
+    onStagingPlayStateChanged();
+}
+
+void BaseRenderNodeAnimator::end() {
+    mStagingPlayState = PlayState::Finished;
+    mStagingRequests.push_back(Request::End);
+    onStagingPlayStateChanged();
+}
+
+void BaseRenderNodeAnimator::resolveStagingRequest(Request request) {
+    switch (request) {
+    case Request::Start:
+        mPlayTime = (mPlayState == PlayState::Running || mPlayState == PlayState::Reversing) ?
+                        mPlayTime : 0;
+        mPlayState = PlayState::Running;
+        break;
+    case Request::Reverse:
+        mPlayTime = (mPlayState == PlayState::Running || mPlayState == PlayState::Reversing) ?
+                        mPlayTime : mDuration;
+        mPlayState = PlayState::Reversing;
+        break;
+    case Request::Reset:
+        mPlayTime = 0;
+        mPlayState = PlayState::Finished;
+        break;
+    case Request::Cancel:
+        mPlayState = PlayState::Finished;
+        break;
+    case Request::End:
+        mPlayTime = mPlayState == PlayState::Reversing ? 0 : mDuration;
+        mPlayState = PlayState::Finished;
+        break;
+    default:
+        LOG_ALWAYS_FATAL("Invalid staging request: %d", static_cast<int>(request));
+    };
+}
+
 void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
+    if (mStagingTarget) {
+        RenderNode* oldTarget = mTarget;
+        mTarget = mStagingTarget;
+        mStagingTarget = nullptr;
+        if (oldTarget && oldTarget != mTarget) {
+            oldTarget->onAnimatorTargetChanged(this);
+        }
+    }
+
     if (!mHasStartValue) {
         doSetStartValue(getValue(mTarget));
     }
-    if (mStagingPlayState > mPlayState) {
-        mPlayState = mStagingPlayState;
-        // Oh boy, we're starting! Man the battle stations!
-        if (mPlayState == RUNNING) {
-            transitionToRunning(context);
-        } else if (mPlayState == FINISHED) {
+
+    if (!mStagingRequests.empty()) {
+        // No interpolator was set, use the default
+        if (mPlayState == PlayState::NotStarted && !mInterpolator) {
+            mInterpolator.reset(Interpolator::createDefaultInterpolator());
+        }
+        // Keep track of the play state and play time before they are changed when
+        // staging requests are resolved.
+        nsecs_t currentPlayTime = mPlayTime;
+        PlayState prevFramePlayState = mPlayState;
+
+        // Resolve staging requests one by one.
+        for (Request request : mStagingRequests) {
+            resolveStagingRequest(request);
+        }
+        mStagingRequests.clear();
+
+        if (mStagingPlayState == PlayState::Finished) {
+            // Set the staging play time and end the animation
+            updatePlayTime(mPlayTime);
             callOnFinishedListener(context);
+        } else if (mStagingPlayState == PlayState::Running
+                || mStagingPlayState == PlayState::Reversing) {
+            bool changed = currentPlayTime != mPlayTime || prevFramePlayState != mStagingPlayState;
+            if (prevFramePlayState != mStagingPlayState) {
+                transitionToRunning(context);
+            }
+            if (changed) {
+                // Now we need to seek to the stagingPlayTime (i.e. the animation progress that was
+                // requested from UI thread). It is achieved by modifying mStartTime, such that
+                // current time - mStartTime = stagingPlayTime (or mDuration -stagingPlayTime in the
+                // case of reversing)
+                nsecs_t currentFrameTime = context.frameTimeMs();
+                if (mPlayState == PlayState::Reversing) {
+                    // Reverse is not supported for animations with a start delay, so here we
+                    // assume no start delay.
+                    mStartTime = currentFrameTime  - (mDuration - mPlayTime);
+                } else {
+                    // Animation should play forward
+                    if (mPlayTime == 0) {
+                        // If the request is to start from the beginning, include start delay.
+                        mStartTime = currentFrameTime + mStartDelay;
+                    } else {
+                        // If the request is to seek to a non-zero play time, then we skip start
+                        // delay.
+                        mStartTime = currentFrameTime - mPlayTime;
+                    }
+                }
+            }
         }
     }
+    onPushStaging();
 }
 
 void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
@@ -114,55 +226,57 @@ void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
         // Set to 0 so that the animate() basically instantly finishes
         mStartTime = 0;
     }
-    // No interpolator was set, use the default
-    if (!mInterpolator) {
-        mInterpolator.reset(Interpolator::createDefaultInterpolator());
-    }
-    if (mDuration < 0 || mDuration > 50000) {
+    if (mDuration < 0) {
         ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);
     }
 }
 
 bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
-    if (mPlayState < RUNNING) {
+    if (mPlayState < PlayState::Running) {
         return false;
     }
-    if (mPlayState == FINISHED) {
+    if (mPlayState == PlayState::Finished) {
         return true;
     }
 
+    // This should be set before setValue() so animators can query this time when setValue
+    // is called.
+    nsecs_t currentPlayTime = context.frameTimeMs() - mStartTime;
+    bool finished = updatePlayTime(currentPlayTime);
+    if (finished && mPlayState != PlayState::Finished) {
+        mPlayState = PlayState::Finished;
+        callOnFinishedListener(context);
+    }
+    return finished;
+}
+
+bool BaseRenderNodeAnimator::updatePlayTime(nsecs_t playTime) {
+    mPlayTime = mPlayState == PlayState::Reversing ? mDuration - playTime : playTime;
+    onPlayTimeChanged(mPlayTime);
     // If BaseRenderNodeAnimator is handling the delay (not typical), then
     // because the staging properties reflect the final value, we always need
     // to call setValue even if the animation isn't yet running or is still
     // being delayed as we need to override the staging value
-    if (mStartTime > context.frameTimeMs()) {
+    if (playTime < 0) {
         setValue(mTarget, mFromValue);
         return false;
     }
 
     float fraction = 1.0f;
-    if (mPlayState == RUNNING && mDuration > 0) {
-        fraction = (float)(context.frameTimeMs() - mStartTime) / mDuration;
+    if ((mPlayState == PlayState::Running || mPlayState == PlayState::Reversing) && mDuration > 0) {
+        fraction = mPlayTime / (float) mDuration;
     }
-    if (fraction >= 1.0f) {
-        fraction = 1.0f;
-        mPlayState = FINISHED;
-    }
+    fraction = MathUtils::clamp(fraction, 0.0f, 1.0f);
 
     fraction = mInterpolator->interpolate(fraction);
     setValue(mTarget, mFromValue + (mDeltaValue * fraction));
 
-    if (mPlayState == FINISHED) {
-        callOnFinishedListener(context);
-        return true;
-    }
-
-    return false;
+    return playTime >= mDuration;
 }
 
 void BaseRenderNodeAnimator::forceEndNow(AnimationContext& context) {
-    if (mPlayState < FINISHED) {
-        mPlayState = FINISHED;
+    if (mPlayState < PlayState::Finished) {
+        mPlayState = PlayState::Finished;
         callOnFinishedListener(context);
     }
 }
@@ -206,18 +320,36 @@ RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property, float fi
 
 void RenderPropertyAnimator::onAttached() {
     if (!mHasStartValue
-            && mTarget->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
-        setStartValue((mTarget->stagingProperties().*mPropertyAccess->getter)());
+            && mStagingTarget->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
+        setStartValue((mStagingTarget->stagingProperties().*mPropertyAccess->getter)());
     }
 }
 
 void RenderPropertyAnimator::onStagingPlayStateChanged() {
-    if (mStagingPlayState == RUNNING) {
-        (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
-    } else if (mStagingPlayState == FINISHED) {
+    if (mStagingPlayState == PlayState::Running) {
+        if (mStagingTarget) {
+            (mStagingTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
+        } else {
+            // In the case of start delay where stagingTarget has been sync'ed over and null'ed
+            // we delay the properties update to push staging.
+            mShouldUpdateStagingProperties = true;
+        }
+    } else if (mStagingPlayState == PlayState::Finished) {
         // We're being canceled, so make sure that whatever values the UI thread
         // is observing for us is pushed over
+        mShouldSyncPropertyFields = true;
+    }
+}
+
+void RenderPropertyAnimator::onPushStaging() {
+    if (mShouldUpdateStagingProperties) {
+        (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
+        mShouldUpdateStagingProperties = false;
+    }
+
+    if (mShouldSyncPropertyFields) {
         mTarget->setPropertyFieldsDirty(dirtyMask());
+        mShouldSyncPropertyFields = false;
     }
 }
 

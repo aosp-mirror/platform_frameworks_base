@@ -76,7 +76,12 @@ public final class SettingsCmd {
                         // --user specified more than once; invalid
                         break;
                     }
-                    mUser = Integer.parseInt(nextArg());
+                    arg = nextArg();
+                    if ("current".equals(arg) || "cur".equals(arg)) {
+                        mUser = UserHandle.USER_CURRENT;
+                    } else {
+                        mUser = Integer.parseInt(arg);
+                    }
                 } else if (mVerb == CommandVerb.UNSPECIFIED) {
                     if ("get".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.GET;
@@ -129,17 +134,19 @@ public final class SettingsCmd {
         }
 
         if (valid) {
-            if (mUser < 0) {
-                mUser = UserHandle.USER_OWNER;
-            }
-
             try {
                 IActivityManager activityManager = ActivityManagerNative.getDefault();
+                if (mUser == UserHandle.USER_CURRENT) {
+                    mUser = activityManager.getCurrentUser().id;
+                }
+                if (mUser < 0) {
+                    mUser = UserHandle.USER_SYSTEM;
+                }
                 IContentProvider provider = null;
                 IBinder token = new Binder();
                 try {
                     ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                            "settings", UserHandle.USER_OWNER, token);
+                            "settings", UserHandle.USER_SYSTEM, token);
                     if (holder == null) {
                         throw new IllegalStateException("Could not find settings provider");
                     }
@@ -286,12 +293,13 @@ public final class SettingsCmd {
     }
 
     private static void printUsage() {
-        System.err.println("usage:  settings [--user NUM] get namespace key");
-        System.err.println("        settings [--user NUM] put namespace key value");
-        System.err.println("        settings [--user NUM] delete namespace key");
-        System.err.println("        settings [--user NUM] list namespace");
+        System.err.println("usage:  settings [--user <USER_ID> | current] get namespace key");
+        System.err.println("        settings [--user <USER_ID> | current] put namespace key value");
+        System.err.println("        settings [--user <USER_ID> | current] delete namespace key");
+        System.err.println("        settings [--user <USER_ID> | current] list namespace");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
-        System.err.println("If '--user NUM' is not given, the operations are performed on the owner user.");
+        System.err.println("If '--user <USER_ID> | current' is not given, the operations are "
+                + "performed on the system user.");
     }
 
     public static String resolveCallingPackage() {

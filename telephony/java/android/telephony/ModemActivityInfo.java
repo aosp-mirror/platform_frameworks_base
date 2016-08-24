@@ -48,7 +48,9 @@ public class ModemActivityInfo implements Parcelable {
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
-        System.arraycopy(txTimeMs, 0, mTxTimeMs, 0, Math.min(txTimeMs.length, TX_POWER_LEVELS));
+        if (txTimeMs != null) {
+            System.arraycopy(txTimeMs, 0, mTxTimeMs, 0, Math.min(txTimeMs.length, TX_POWER_LEVELS));
+        }
         mRxTimeMs = rxTimeMs;
         mEnergyUsed = energyUsed;
     }
@@ -58,6 +60,7 @@ public class ModemActivityInfo implements Parcelable {
         return "ModemActivityInfo{"
             + " mTimestamp=" + mTimestamp
             + " mSleepTimeMs=" + mSleepTimeMs
+            + " mIdleTimeMs=" + mIdleTimeMs
             + " mTxTimeMs[]=" + Arrays.toString(mTxTimeMs)
             + " mRxTimeMs=" + mRxTimeMs
             + " mEnergyUsed=" + mEnergyUsed
@@ -148,12 +151,24 @@ public class ModemActivityInfo implements Parcelable {
      * @return if the record is valid
      */
     public boolean isValid() {
-        int totalTxTimeMs = 0;
-        int txTime [] = getTxTimeMillis();
-        for (int i = 0; i < TX_POWER_LEVELS; i++) {
-            totalTxTimeMs += txTime[i];
+        for (int txVal : getTxTimeMillis()) {
+            if(txVal < 0) {
+                return false;
+            }
         }
-        return ((getIdleTimeMillis() != 0) || (totalTxTimeMs != 0)
-                || (getSleepTimeMillis() != 0) || (getIdleTimeMillis() != 0));
+
+        return ((getIdleTimeMillis() >= 0) && (getSleepTimeMillis() >= 0)
+                && (getRxTimeMillis() >= 0) && (getEnergyUsed() >= 0) && !isEmpty());
+    }
+
+    private boolean isEmpty() {
+        for (int txVal : getTxTimeMillis()) {
+            if(txVal != 0) {
+                return false;
+            }
+        }
+
+        return ((getIdleTimeMillis() == 0) && (getSleepTimeMillis() == 0)
+                && (getRxTimeMillis() == 0) && (getEnergyUsed() == 0));
     }
 }

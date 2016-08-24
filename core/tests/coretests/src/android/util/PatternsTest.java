@@ -16,13 +16,16 @@
 package android.util;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Patterns;
+import android.test.suitebuilder.annotation.Suppress;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
 public class PatternsTest extends TestCase {
+
+    // Tests for Patterns.TOP_LEVEL_DOMAIN
 
     @SmallTest
     public void testTldPattern() throws Exception {
@@ -39,7 +42,7 @@ public class PatternsTest extends TestCase {
         t = Patterns.TOP_LEVEL_DOMAIN.matcher("xn--0zwm56d").matches();
         assertTrue("Missed valid TLD", t);
 
-        // One of the new top level internationalized domain.
+        // One of the new top level unicode domain.
         t = Patterns.TOP_LEVEL_DOMAIN.matcher("\uD55C\uAD6D").matches();
         assertTrue("Missed valid TLD", t);
 
@@ -53,57 +56,400 @@ public class PatternsTest extends TestCase {
         assertFalse("Matched invalid TLD!", t);
     }
 
+    // Tests for Patterns.IANA_TOP_LEVEL_DOMAINS
+
     @SmallTest
-    public void testUrlPattern() throws Exception {
-        boolean t;
-
-        t = Patterns.WEB_URL.matcher("http://www.google.com").matches();
-        assertTrue("Valid URL", t);
-
-        // Google in one of the new top level domain.
-        t = Patterns.WEB_URL.matcher("http://www.google.me").matches();
-        assertTrue("Valid URL", t);
-        t = Patterns.WEB_URL.matcher("google.me").matches();
-        assertTrue("Valid URL", t);
-
-        // Test url in Chinese: http://xn--fsqu00a.xn--0zwm56d
-        t = Patterns.WEB_URL.matcher("http://xn--fsqu00a.xn--0zwm56d").matches();
-        assertTrue("Valid URL", t);
-        t = Patterns.WEB_URL.matcher("xn--fsqu00a.xn--0zwm56d").matches();
-        assertTrue("Valid URL", t);
-
-        // Url for testing top level Arabic country code domain in Punycode:
-        //   http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx
-        t = Patterns.WEB_URL.matcher("http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx").matches();
-        assertTrue("Valid URL", t);
-        t = Patterns.WEB_URL.matcher("xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx").matches();
-        assertTrue("Valid URL", t);
-
-        // Internationalized URL.
-        t = Patterns.WEB_URL.matcher("http://\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
-        assertTrue("Valid URL", t);
-        t = Patterns.WEB_URL.matcher("\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
-        assertTrue("Valid URL", t);
-        // URL with international TLD.
-        t = Patterns.WEB_URL.matcher("\uB3C4\uBA54\uC778.\uD55C\uAD6D").matches();
-        assertTrue("Valid URL", t);
-
-        t = Patterns.WEB_URL.matcher("http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
-            "top-five-moments-from-eric-schmidt\u2019s-talk-in-abu-dhabi/").matches();
-        assertTrue("Valid URL", t);
-
-        t = Patterns.WEB_URL.matcher("ftp://www.example.com").matches();
-        assertFalse("Matched invalid protocol", t);
-
-        t = Patterns.WEB_URL.matcher("http://www.example.com:8080").matches();
-        assertTrue("Didn't match valid URL with port", t);
-
-        t = Patterns.WEB_URL.matcher("http://www.example.com:8080/?foo=bar").matches();
-        assertTrue("Didn't match valid URL with port and query args", t);
-
-        t = Patterns.WEB_URL.matcher("http://www.example.com:8080/~user/?foo=bar").matches();
-        assertTrue("Didn't match valid URL with ~", t);
+    public void testIanaTopLevelDomains_matchesValidTld() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertTrue("Should match 'com'", pattern.matcher("com").matches());
     }
+
+    @SmallTest
+    public void testIanaTopLevelDomains_matchesValidNewTld() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertTrue("Should match 'me'", pattern.matcher("me").matches());
+    }
+
+    @SmallTest
+    public void testIanaTopLevelDomains_matchesPunycodeTld() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertTrue("Should match Punycode TLD", pattern.matcher("xn--qxam").matches());
+    }
+
+    @SmallTest
+    public void testIanaTopLevelDomains_matchesIriTLD() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertTrue("Should match IRI TLD", pattern.matcher("\uD55C\uAD6D").matches());
+    }
+
+    @SmallTest
+    public void testIanaTopLevelDomains_doesNotMatchWrongTld() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertFalse("Should not match 'mem'", pattern.matcher("mem").matches());
+    }
+
+    @SmallTest
+    public void testIanaTopLevelDomains_doesNotMatchWrongPunycodeTld() throws Exception {
+        Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
+        assertFalse("Should not match invalid Punycode TLD", pattern.matcher("xn").matches());
+    }
+
+    // Tests for Patterns.WEB_URL
+
+    @SmallTest
+    public void testWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
+        String url = "http://www.android.com";
+        assertTrue("Should match URL with scheme and hostname",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesValidUrlWithSchemeHostnameAndNewTld() throws Exception {
+        String url = "http://www.android.me";
+        assertTrue("Should match URL with scheme, hostname and new TLD",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesValidUrlWithHostnameAndNewTld() throws Exception {
+        String url = "android.me";
+        assertTrue("Should match URL with hostname and new TLD",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesChinesePunycodeUrlWithProtocol() throws Exception {
+        String url = "http://xn--fsqu00a.xn--0zwm56d";
+        assertTrue("Should match Chinese Punycode URL with protocol",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesChinesePunycodeUrlWithoutProtocol() throws Exception {
+        String url = "xn--fsqu00a.xn--0zwm56d";
+        assertTrue("Should match Chinese Punycode URL without protocol",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+
+    @SmallTest
+    public void testWebUrl_matchesArabicPunycodeUrlWithProtocol() throws Exception {
+        String url = "http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
+        assertTrue("Should match arabic Punycode URL with protocol",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesArabicPunycodeUrlWithoutProtocol() throws Exception {
+        String url = "xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
+        assertTrue("Should match Arabic Punycode URL without protocol",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithUnicodeDomainNameWithProtocol() throws Exception {
+        String url = "http://\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match URL with Unicode domain name",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithUnicodeDomainNameWithoutProtocol() throws Exception {
+        String url = "\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match URL without protocol and with Unicode domain name",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithUnicodeTld() throws Exception {
+        String url = "\uB3C4\uBA54\uC778.\uD55C\uAD6D";
+        assertTrue("Should match URL with Unicode TLD",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithUnicodePath() throws Exception {
+        String url = "http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
+                "top-five-moments-from-eric-schmidt\u2019s-talk-in-abu-dhabi/";
+        assertTrue("Should match URL with Unicode path",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_doesNotMatchValidUrlWithInvalidProtocol() throws Exception {
+        String url = "ftp://www.example.com";
+        assertFalse("Should not match URL with invalid protocol",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesValidUrlWithPort() throws Exception {
+        String url = "http://www.example.com:8080";
+        assertTrue("Should match URL with port", Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithPortAndQuery() throws Exception {
+        String url = "http://www.example.com:8080/?foo=bar";
+        assertTrue("Should match URL with port and query",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesUrlWithTilde() throws Exception {
+        String url = "http://www.example.com:8080/~user/?foo=bar";
+        assertTrue("Should match URL with tilde", Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testWebUrl_matchesProtocolCaseInsensitive() throws Exception {
+        String url = "hTtP://android.com";
+        assertTrue("Protocol matching should be case insensitive",
+                Patterns.WEB_URL.matcher(url).matches());
+    }
+
+    // Tests for Patterns.AUTOLINK_WEB_URL
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
+        String url = "http://www.android.com";
+        assertTrue("Should match URL with scheme and hostname",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesValidUrlWithSchemeHostnameAndNewTld() throws Exception {
+        String url = "http://www.android.me";
+        assertTrue("Should match URL with scheme, hostname and new TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesValidUrlWithHostnameAndNewTld() throws Exception {
+        String url = "android.me";
+        assertTrue("Should match URL with hostname and new TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+
+        url = "android.camera";
+        assertTrue("Should match URL with hostname and new TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesChinesePunycodeUrlWithProtocol() throws Exception {
+        String url = "http://xn--fsqu00a.xn--0zwm56d";
+        assertTrue("Should match Chinese Punycode URL with protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesChinesePunycodeUrlWithoutProtocol() throws Exception {
+        String url = "xn--fsqu00a.xn--0zwm56d";
+        assertTrue("Should match Chinese Punycode URL without protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesArabicPunycodeUrlWithProtocol() throws Exception {
+        String url = "http://xn--4gbrim.xn--rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
+        assertTrue("Should match Arabic Punycode URL with protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesArabicPunycodeUrlWithoutProtocol() throws Exception {
+        String url = "xn--4gbrim.xn--rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
+        assertTrue("Should match Arabic Punycode URL without protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchPunycodeTldThatStartsWithDash() throws Exception {
+        String url = "http://xn--fsqu00a.-xn--0zwm56d";
+        assertFalse("Should not match Punycode TLD that starts with dash",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchPunycodeTldThatEndsWithDash() throws Exception {
+        String url = "http://xn--fsqu00a.xn--0zwm56d-";
+        assertFalse("Should not match Punycode TLD that ends with dash",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlWithUnicodeDomainName() throws Exception {
+        String url = "http://\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match URL with Unicode domain name",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+
+        url = "\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("hould match URL without protocol and with Unicode domain name",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlWithUnicodeTld() throws Exception {
+        String url = "\uB3C4\uBA54\uC778.\uD55C\uAD6D";
+        assertTrue("Should match URL with Unicode TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlWithUnicodePath() throws Exception {
+        String url = "http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
+                "top-five-moments-from-eric-schmidt\u2019s-talk-in-abu-dhabi/";
+        assertTrue("Should match URL with Unicode path",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchValidUrlWithInvalidProtocol() throws Exception {
+        String url = "ftp://www.example.com";
+        assertFalse("Should not match URL with invalid protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesValidUrlWithPort() throws Exception {
+        String url = "http://www.example.com:8080";
+        assertTrue("Should match URL with port",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlWithPortAndQuery() throws Exception {
+        String url = "http://www.example.com:8080/?foo=bar";
+        assertTrue("Should match URL with port and query",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlWithTilde() throws Exception {
+        String url = "http://www.example.com:8080/~user/?foo=bar";
+        assertTrue("Should match URL with tilde",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesProtocolCaseInsensitive() throws Exception {
+        String url = "hTtP://android.com";
+        assertTrue("Protocol matching should be case insensitive",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesUrlStartingWithHttpAndDoesNotHaveTld() throws Exception {
+        String url = "http://android/#notld///a/n/d/r/o/i/d&p1=1&p2=2";
+        assertTrue("Should match URL without a TLD and starting with http ",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchUrlsWithoutProtocolAndWithUnknownTld()
+            throws Exception {
+        String url = "thank.you";
+        assertFalse("Should not match URL that does not start with a protocol and " +
+                "does not contain a known TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchUrlWithInvalidRequestParameter() throws Exception {
+        String url = "http://android.com?p=value";
+        assertFalse("Should not match URL with invalid request parameter",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotPartiallyMatchUnknownProtocol() throws Exception {
+        String url = "ftp://foo.bar/baz";
+        assertFalse("Should not partially match URL with unknown protocol",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).find());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesValidUrlWithEmoji() throws Exception {
+        String url = "Thank\u263A.com";
+        assertTrue("Should match URL with emoji",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchUrlsWithEmojiWithoutProtocolAndWithoutKnownTld()
+            throws Exception {
+        String url = "Thank\u263A.you";
+        assertFalse("Should not match URLs containing emoji and with unknown TLD",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchEmailAddress()
+            throws Exception {
+        String url = "android@android.com";
+        assertFalse("Should not match email address",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesDomainNameWithSurrogatePairs() throws Exception {
+        String url = "android\uD83C\uDF38.com";
+        assertTrue("Should match domain name with Unicode surrogate pairs",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesTldWithSurrogatePairs() throws Exception {
+        String url = "http://android.\uD83C\uDF38com";
+        assertTrue("Should match TLD with Unicode surrogate pairs",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_matchesPathWithSurrogatePairs() throws Exception {
+        String url = "http://android.com/path-with-\uD83C\uDF38?v=\uD83C\uDF38";
+        assertTrue("Should match path and query with Unicode surrogate pairs",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchUrlWithExcludedSurrogate() throws Exception {
+        String url = "http://android\uD83F\uDFFE.com";
+        assertFalse("Should not match URL with excluded Unicode surrogate pair",
+                Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+    }
+
+    @SmallTest
+    public void testAutoLinkWebUrl_doesNotMatchUnicodeSpaces() throws Exception {
+        String part1 = "http://and";
+        String part2 = "roid";
+        String[] emptySpaces = new String[]{
+                "\u00A0", // no-break space
+                "\u2000", // en quad
+                "\u2001", // em quad
+                "\u2002", // en space
+                "\u2003", // em space
+                "\u2004", // three-per-em space
+                "\u2005", // four-per-em space
+                "\u2006", // six-per-em space
+                "\u2007", // figure space
+                "\u2008", // punctuation space
+                "\u2009", // thin space
+                "\u200A", // hair space
+                "\u2028", // line separator
+                "\u2029", // paragraph separator
+                "\u202F", // narrow no-break space
+                "\u3000" // ideographic space
+        };
+
+        for (String emptySpace : emptySpaces) {
+            String url = part1 + emptySpace + part2;
+            assertFalse("Should not match empty space - code:" + emptySpace.codePointAt(0),
+                    Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
+        }
+    }
+
+    // Tests for Patterns.IP_ADDRESS
 
     @SmallTest
     public void testIpPattern() throws Exception {
@@ -116,31 +462,303 @@ public class PatternsTest extends TestCase {
         assertFalse("Invalid IP", t);
     }
 
+    // Tests for Patterns.DOMAIN_NAME
+
     @SmallTest
-    public void testDomainPattern() throws Exception {
-        boolean t;
-
-        t = Patterns.DOMAIN_NAME.matcher("mail.example.com").matches();
-        assertTrue("Valid domain", t);
-
-        t = Patterns.DOMAIN_NAME.matcher("google.me").matches();
-        assertTrue("Valid domain", t);
-
-        // Internationalized domains.
-        t = Patterns.DOMAIN_NAME.matcher("\uD604\uAE08\uC601\uC218\uC99D.kr").matches();
-        assertTrue("Valid domain", t);
-
-        t = Patterns.DOMAIN_NAME.matcher("__+&42.xer").matches();
-        assertFalse("Invalid domain", t);
-
-        // Obsolete domain .yu
-        t = Patterns.DOMAIN_NAME.matcher("test.yu").matches();
-        assertFalse("Obsolete country code top level domain", t);
-
-        // Testing top level Arabic country code domain in Punycode:
-        t = Patterns.DOMAIN_NAME.matcher("xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c").matches();
-        assertTrue("Valid domain", t);
+    public void testDomain_matchesPunycodeTld() throws Exception {
+        String domain = "xn--fsqu00a.xn--0zwm56d";
+        assertTrue("Should match domain name in Punycode",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
+
+    @SmallTest
+    public void testDomain_doesNotMatchPunycodeThatStartsWithDash() throws Exception {
+        String domain = "xn--fsqu00a.-xn--0zwm56d";
+        assertFalse("Should not match Punycode TLD that starts with a dash",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_doesNotMatchPunycodeThatEndsWithDash() throws Exception {
+        String domain = "xn--fsqu00a.xn--0zwm56d-";
+        assertFalse("Should not match Punycode TLD that ends with a dash",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_doesNotMatchPunycodeLongerThanAllowed() throws Exception {
+        String tld = "xn--";
+        for(int i=0; i<=6; i++) {
+            tld += "0123456789";
+        }
+        String domain = "xn--fsqu00a." + tld;
+        assertFalse("Should not match Punycode TLD that is longer than 63 chars",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_matchesObsoleteTld() throws Exception {
+        String domain = "test.yu";
+        assertTrue("Should match domain names with obsolete TLD",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_matchesWithSubDomain() throws Exception {
+        String domain = "mail.example.com";
+        assertTrue("Should match domain names with subdomains",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_matchesWithoutSubDomain() throws Exception {
+        String domain = "android.me";
+        assertTrue("Should match domain names without subdomains",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_matchesUnicodeDomainNames() throws Exception {
+        String domain = "\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match unicodedomain names",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_doesNotMatchInvalidDomain() throws Exception {
+        String domain = "__+&42.xer";
+        assertFalse("Should not match invalid domain name",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    @SmallTest
+    public void testDomain_matchesPunycodeArabicDomainName() throws Exception {
+        String domain = "xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c";
+        assertTrue("Should match Punycode Arabic domain name",
+                Patterns.DOMAIN_NAME.matcher(domain).matches());
+    }
+
+    // Tests for Patterns.AUTOLINK_EMAIL_ADDRESS
+
+    public void testAutoLinkEmailAddress_matchesShortValidEmail() throws Exception {
+        String email = "a@a.co";
+        assertTrue("Should match short valid email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesRegularEmail() throws Exception {
+        String email = "email@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesEmailWithMultipleSubdomains() throws Exception {
+        String email = "email@e.somelongdomainnameforandroid.abc.uk";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDot() throws Exception {
+        String email = "e.mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithPlus() throws Exception {
+        String email = "e+mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithUnderscore() throws Exception {
+        String email = "e_mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDash() throws Exception {
+        String email = "e-mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithApostrophe() throws Exception {
+        String email = "e'mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDigits() throws Exception {
+        String email = "123@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeLocalPart() throws Exception {
+        String email = "\uD604\uAE08\uC601\uC218\uC99D@android.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithEmoji() throws Exception {
+        String email = "smiley\u263A@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithSurrogatePairs() throws Exception {
+        String email = "\uD83C\uDF38@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithDash() throws Exception {
+        String email = "email@an-droid.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeDomain() throws Exception {
+        String email = "email@\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeLocalPartAndDomain() throws Exception {
+        String email = "\uD604\uAE08\uC601\uC218\uC99D@\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithEmoji() throws Exception {
+        String email = "smiley@\u263Aandroid.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithSurrogatePairs() throws Exception {
+        String email = "email@\uD83C\uDF38android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartAndDomainWithSurrogatePairs()
+            throws Exception {
+        String email = "\uD83C\uDF38@\uD83C\uDF38android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchStringWithoutAtSign() throws Exception {
+        String email = "android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchPlainString() throws Exception {
+        String email = "email";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchStringWithMultipleAtSigns() throws Exception {
+        String email = "email@android@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithoutTld() throws Exception {
+        String email = "email@android";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchLocalPartEndingWithDot() throws Exception {
+        String email = "email.@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchLocalPartStartingWithDot() throws Exception {
+        String email = ".email@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchDomainStartingWithDash() throws Exception {
+        String email = "email@-android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchDomainWithConsecutiveDots() throws Exception {
+        String email = "email@android..com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithIpAsDomain() throws Exception {
+        String email = "email@127.0.0.1";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithInvalidTld() throws Exception {
+        String email = "email@android.c";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartUpTo64Chars() throws Exception {
+        String localPart = "";
+        for (int i = 0; i < 64; i++) {
+            localPart += "a";
+        }
+        String email = localPart + "@android.com";
+
+        assertTrue("Should match local part of length: " + localPart.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        email = localPart + "a@android.com";
+        assertFalse("Should not match local part of length: " + localPart.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesSubdomainUpTo63Chars() throws Exception {
+        String subdomain = "";
+        for (int i = 0; i < 63; i++) {
+            subdomain += "a";
+        }
+        String email = "email@" + subdomain + ".com";
+
+        assertTrue("Should match subdomain of length: " + subdomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        subdomain += "a";
+        email = "email@" + subdomain + ".com";
+        assertFalse("Should not match local part of length: " + subdomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainUpTo255Chars() throws Exception {
+        String longDomain = "";
+        while (longDomain.length() <= 250) {
+            longDomain += "d.";
+        }
+        longDomain += "com";
+        assertEquals(255, longDomain.length());
+        String email = "a@" + longDomain;
+
+        assertTrue("Should match domain of length: " + longDomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        email = email + "m";
+        assertEquals(258, email.length());
+        assertFalse("Should not match domain of length: " + longDomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    // Tests for Patterns.PHONE
 
     @SmallTest
     public void testPhonePattern() throws Exception {

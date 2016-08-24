@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
@@ -49,6 +50,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -100,6 +102,23 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * the assistant.
      */
     public static final int SHOW_SOURCE_APPLICATION = 1<<3;
+
+    /**
+     * Flag for use with {@link #onShow}: indicates that an Activity has invoked the voice
+     * interaction service for a local interaction using
+     * {@link Activity#startLocalVoiceInteraction(Bundle)}.
+     */
+    public static final int SHOW_SOURCE_ACTIVITY = 1<<4;
+
+    // Keys for Bundle values
+    /** @hide */
+    public static final String KEY_DATA = "data";
+    /** @hide */
+    public static final String KEY_STRUCTURE = "structure";
+    /** @hide */
+    public static final String KEY_CONTENT = "content";
+    /** @hide */
+    public static final String KEY_RECEIVER_EXTRAS = "receiverExtras";
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
@@ -220,7 +239,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
         @Override
         public void handleAssist(final Bundle data, final AssistStructure structure,
-                final AssistContent content) {
+                final AssistContent content, final int index, final int count) {
             // We want to pre-warm the AssistStructure before handing it off to the main
             // thread.  We also want to do this on a separate thread, so that if the app
             // is for some reason slow (due to slow filling in of async children in the
@@ -238,8 +257,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                             failure = e;
                         }
                     }
-                    mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOO(MSG_HANDLE_ASSIST,
-                            data, failure == null ? structure : null, failure, content));
+                    mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOOII(MSG_HANDLE_ASSIST,
+                            data, failure == null ? structure : null, failure, content,
+                            index, count));
                 }
             };
             retriever.start();
@@ -822,9 +842,16 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 case MSG_HANDLE_ASSIST:
                     args = (SomeArgs)msg.obj;
                     if (DEBUG) Log.d(TAG, "onHandleAssist: data=" + args.arg1
-                            + " structure=" + args.arg2 + " content=" + args.arg3);
-                    doOnHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
-                            (Throwable) args.arg3, (AssistContent) args.arg4);
+                            + " structure=" + args.arg2 + " content=" + args.arg3
+                            + " activityIndex=" + args.argi5 + " activityCount=" + args.argi6);
+                    if (args.argi5 == 0) {
+                        doOnHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
+                                (Throwable) args.arg3, (AssistContent) args.arg4);
+                    } else {
+                        doOnHandleAssistSecondary((Bundle) args.arg1, (AssistStructure) args.arg2,
+                                (Throwable) args.arg3, (AssistContent) args.arg4,
+                                args.argi5, args.argi6);
+                    }
                     break;
                 case MSG_HANDLE_SCREENSHOT:
                     if (DEBUG) Log.d(TAG, "onHandleScreenshot: " + msg.obj);
@@ -1161,7 +1188,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startVoiceActivity(mToken, intent,
                     intent.resolveType(mContext.getContentResolver()));
             Instrumentation.checkStartActivityResult(res, intent);
@@ -1311,6 +1338,14 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         onHandleAssist(data, structure, content);
     }
 
+    void doOnHandleAssistSecondary(Bundle data, AssistStructure structure, Throwable failure,
+            AssistContent content, int index, int count) {
+        if (failure != null) {
+            onAssistStructureFailure(failure);
+        }
+        onHandleAssistSecondary(data, structure, content, index, count);
+    }
+
     /**
      * Called when there has been a failure transferring the {@link AssistStructure} to
      * the assistant.  This may happen, for example, if the data is too large and results
@@ -1344,6 +1379,45 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      */
     public void onHandleAssist(@Nullable Bundle data, @Nullable AssistStructure structure,
             @Nullable AssistContent content) {
+    }
+
+    /**
+     * Called to receive data from other applications that the user was or is interacting with,
+     * that are currently on the screen in a multi-window display environment, not including the
+     * currently focused activity. This could be
+     * a free-form window, a picture-in-picture window, or another window in a split-screen display.
+     * <p>
+     * This method is very similar to
+     * {@link #onHandleAssist} except that it is called
+     * for additional non-focused activities along with an index and count that indicates
+     * which additional activity the data is for. {@code index} will be between 1 and
+     * {@code count}-1 and this method is called once for each additional window, in no particular
+     * order. The {@code count} indicates how many windows to expect assist data for, including the
+     * top focused activity, which continues to be returned via {@link #onHandleAssist}.
+     * <p>
+     * To be responsive to assist requests, process assist data as soon as it is received,
+     * without waiting for all queued activities to return assist data.
+     *
+     * @param data Arbitrary data supplied by the app through
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
+     * May be null if assist data has been disabled by the user or device policy.
+     * @param structure If available, the structure definition of all windows currently
+     * displayed by the app.  May be null if assist data has been disabled by the user
+     * or device policy; will be an empty stub if the application has disabled assist
+     * by marking its window as secure.
+     * @param content Additional content data supplied by the app through
+     * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
+     * May be null if assist data has been disabled by the user or device policy; will
+     * not be automatically filled in with data from the app if the app has marked its
+     * window as secure.
+     * @param index the index of the additional activity that this data
+     *        is for.
+     * @param count the total number of additional activities for which the assist data is being
+     *        returned, including the focused activity that is returned via
+     *        {@link #onHandleAssist}.
+     */
+    public void onHandleAssistSecondary(@Nullable Bundle data, @Nullable AssistStructure structure,
+            @Nullable AssistContent content, int index, int count) {
     }
 
     /**

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include <SkCanvas.h>
-
 #include "CanvasState.h"
+#include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 
 namespace android {
@@ -28,38 +27,86 @@ CanvasState::CanvasState(CanvasStateClient& renderer)
         , mWidth(-1)
         , mHeight(-1)
         , mSaveCount(1)
-        , mFirstSnapshot(new Snapshot)
         , mCanvas(renderer)
-        , mSnapshot(mFirstSnapshot) {
-
+        , mSnapshot(&mFirstSnapshot) {
 }
 
 CanvasState::~CanvasState() {
+    // First call freeSnapshot on all but mFirstSnapshot
+    // to invoke all the dtors
+    freeAllSnapshots();
 
+    // Now actually release the memory
+    while (mSnapshotPool) {
+        void* temp = mSnapshotPool;
+        mSnapshotPool = mSnapshotPool->previous;
+        free(temp);
+    }
 }
 
-void CanvasState::initializeSaveStack(float clipLeft, float clipTop,
+void CanvasState::initializeRecordingSaveStack(int viewportWidth, int viewportHeight) {
+    if (mWidth != viewportWidth || mHeight != viewportHeight) {
+        mWidth = viewportWidth;
+        mHeight = viewportHeight;
+        mFirstSnapshot.initializeViewport(viewportWidth, viewportHeight);
+        mCanvas.onViewportInitialized();
+    }
+
+    freeAllSnapshots();
+    mSnapshot = allocSnapshot(&mFirstSnapshot, SaveFlags::MatrixClip);
+    mSnapshot->setRelativeLightCenter(Vector3());
+    mSaveCount = 1;
+}
+
+void CanvasState::initializeSaveStack(
+        int viewportWidth, int viewportHeight,
+        float clipLeft, float clipTop,
         float clipRight, float clipBottom, const Vector3& lightCenter) {
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    if (mWidth != viewportWidth || mHeight != viewportHeight) {
+        mWidth = viewportWidth;
+        mHeight = viewportHeight;
+        mFirstSnapshot.initializeViewport(viewportWidth, viewportHeight);
+        mCanvas.onViewportInitialized();
+    }
+
+    freeAllSnapshots();
+    mSnapshot = allocSnapshot(&mFirstSnapshot, SaveFlags::MatrixClip);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
     mSnapshot->fbo = mCanvas.getTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);
     mSaveCount = 1;
 }
 
-void CanvasState::setViewport(int width, int height) {
-    mWidth = width;
-    mHeight = height;
-    mFirstSnapshot->initializeViewport(width, height);
-    mCanvas.onViewportInitialized();
+Snapshot* CanvasState::allocSnapshot(Snapshot* previous, int savecount) {
+    void* memory;
+    if (mSnapshotPool) {
+        memory = mSnapshotPool;
+        mSnapshotPool = mSnapshotPool->previous;
+        mSnapshotPoolCount--;
+    } else {
+        memory = malloc(sizeof(Snapshot));
+    }
+    return new (memory) Snapshot(previous, savecount);
+}
 
-    // create a temporary 1st snapshot, so old snapshots are released,
-    // and viewport can be queried safely.
-    // TODO: remove, combine viewport + save stack initialization
-    mSnapshot = new Snapshot(mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-    mSaveCount = 1;
+void CanvasState::freeSnapshot(Snapshot* snapshot) {
+    snapshot->~Snapshot();
+    // Arbitrary number, just don't let this grown unbounded
+    if (mSnapshotPoolCount > 10) {
+        free((void*) snapshot);
+    } else {
+        snapshot->previous = mSnapshotPool;
+        mSnapshotPool = snapshot;
+        mSnapshotPoolCount++;
+    }
+}
+
+void CanvasState::freeAllSnapshots() {
+    while (mSnapshot != &mFirstSnapshot) {
+        Snapshot* temp = mSnapshot;
+        mSnapshot = mSnapshot->previous;
+        freeSnapshot(temp);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,7 +120,7 @@ void CanvasState::setViewport(int width, int height) {
  * stack, and ensures restoreToCount() doesn't call back into subclass overrides.
  */
 int CanvasState::saveSnapshot(int flags) {
-    mSnapshot = new Snapshot(mSnapshot, flags);
+    mSnapshot = allocSnapshot(mSnapshot, flags);
     return mSaveCount++;
 }
 
@@ -85,14 +132,16 @@ int CanvasState::save(int flags) {
  * Guaranteed to restore without side-effects.
  */
 void CanvasState::restoreSnapshot() {
-    sp<Snapshot> toRemove = mSnapshot;
-    sp<Snapshot> toRestore = mSnapshot->previous;
+    Snapshot* toRemove = mSnapshot;
+    Snapshot* toRestore = mSnapshot->previous;
 
     mSaveCount--;
     mSnapshot = toRestore;
 
     // subclass handles restore implementation
     mCanvas.onSnapshotRestored(*toRemove, *toRestore);
+
+    freeSnapshot(toRemove);
 }
 
 void CanvasState::restore() {
@@ -138,7 +187,7 @@ void CanvasState::setMatrix(const SkMatrix& matrix) {
 }
 
 void CanvasState::setMatrix(const Matrix4& matrix) {
-    mSnapshot->transform->load(matrix);
+    *(mSnapshot->transform) = matrix;
 }
 
 void CanvasState::concatMatrix(const SkMatrix& matrix) {
@@ -155,17 +204,20 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
+    mSnapshot->clip(Rect(left, top, right, bottom), op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clipPath(*path, op);
+    mSnapshot->clipPath(*path, op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
-    mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
+    mSnapshot->clipRegionTransformed(*region, op);
+    mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }
 
@@ -219,7 +271,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
     currentTransform()->mapRect(r);
     r.snapGeometryToPixelBoundaries(snapOut);
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(currentRenderTargetClip());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;
@@ -247,7 +299,7 @@ bool CanvasState::quickRejectConservative(float left, float top,
     currentTransform()->mapRect(r);
     r.roundOut(); // rounded out to be conservative
 
-    Rect clipRect(currentClipRect());
+    Rect clipRect(currentRenderTargetClip());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;

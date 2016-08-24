@@ -47,17 +47,18 @@ class GlopBuilder {
 public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
 
+    GlopBuilder& setMeshTexturedIndexedVbo(GLuint vbo, GLsizei elementCount);
     GlopBuilder& setMeshUnitQuad();
     GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper);
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
-    GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
+    GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer);
     GlopBuilder& setMeshIndexedQuads(Vertex* vertexData, int quadCount);
-    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: use indexed quads
+    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: delete
     GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
     GlopBuilder& setMeshPatchQuads(const Patch& patch);
 
-    GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
+    GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale, bool shadowInterp = false); // TODO: avoid boolean with default
     GlopBuilder& setFillTexturePaint(Texture& texture, const int textureFillFlags,
             const SkPaint* paint, float alphaScale);
     GlopBuilder& setFillPathTexturePaint(PathTexture& texture,
@@ -69,11 +70,15 @@ public:
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
             float alpha, SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage);
     GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
+    // TODO: Texture should probably know and own its target.
+    // setFillLayer() forces it to GL_TEXTURE which isn't always correct.
+    // Similarly setFillLayer normally forces its own wrap & filter mode
+    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);
 
     GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
-        setTransform(snapshot.getOrthoMatrix(), *snapshot.transform, transformFlags);
-        return *this;
+        return setTransform(*snapshot.transform, transformFlags);
     }
+    GlopBuilder& setTransform(const Matrix4& canvas, const int transformFlags);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
@@ -94,16 +99,20 @@ public:
             return setModelViewOffsetRect(offsetX, offsetY, source);
         }
     }
+    GlopBuilder& setModelViewIdentityEmptyBounds() {
+        // pass empty rect since not needed for damage / snap
+        return setModelViewOffsetRect(0, 0, Rect());
+    }
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 
     void build();
+
+    static void dump(const Glop& glop);
 private:
     void setFill(int color, float alphaScale,
             SkXfermode::Mode mode, Blend::ModeOrderSwap modeUsage,
             const SkShader* shader, const SkColorFilter* colorFilter);
-    void setTransform(const Matrix4& ortho, const Matrix4& canvas,
-            const int transformFlags);
 
     enum StageFlags {
         kInitialStage = 0,

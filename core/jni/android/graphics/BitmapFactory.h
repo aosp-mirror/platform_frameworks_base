@@ -2,6 +2,7 @@
 #define _ANDROID_GRAPHICS_BITMAP_FACTORY_H_
 
 #include "GraphicsJNI.h"
+#include "SkEncodedFormat.h"
 
 extern jclass gOptions_class;
 extern jfieldID gOptions_justBoundsFieldID;
@@ -19,7 +20,7 @@ extern jfieldID gOptions_mimeFieldID;
 extern jfieldID gOptions_mCancelID;
 extern jfieldID gOptions_bitmapFieldID;
 
-jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format);
+jstring encodedFormatToString(JNIEnv* env, SkEncodedFormat format);
 
 jobject decodeBitmap(JNIEnv* env, void* data, size_t size);
 

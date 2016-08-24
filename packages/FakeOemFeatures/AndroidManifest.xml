@@ -11,7 +11,9 @@
         android:allowClearUserData="false"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
-        android:label="Fake OEM Features">
+        android:label="Fake OEM Features"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
         <service android:name=".FakeCoreService" android:process=":core"
                 android:label="Fake OEM Core Service" />

@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -59,8 +60,37 @@ public class ClipDescription implements Parcelable {
      */
     public static final String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
 
+    /**
+     * The name of the extra used to define a component name when copying/dragging
+     * an app icon from Launcher.
+     * <p>
+     * Type: String
+     * </p>
+     * <p>
+     * Use {@link ComponentName#unflattenFromString(String)}
+     * and {@link ComponentName#flattenToString()} to convert the extra value
+     * to/from {@link ComponentName}.
+     * </p>
+     * @hide
+     */
+    public static final String EXTRA_TARGET_COMPONENT_NAME =
+            "android.content.extra.TARGET_COMPONENT_NAME";
+
+    /**
+     * The name of the extra used to define a user serial number when copying/dragging
+     * an app icon from Launcher.
+     * <p>
+     * Type: long
+     * </p>
+     * @hide
+     */
+    public static final String EXTRA_USER_SERIAL_NUMBER =
+            "android.content.extra.USER_SERIAL_NUMBER";
+
+
     final CharSequence mLabel;
     final String[] mMimeTypes;
+    private PersistableBundle mExtras;
 
     /**
      * Create a new clip.
@@ -173,6 +203,27 @@ public class ClipDescription implements Parcelable {
         return mMimeTypes[index];
     }
 
+    /**
+     * Retrieve extended data from the clip description.
+     *
+     * @return the bundle containing extended data previously set with
+     * {@link #setExtras(PersistableBundle)}, or null if no extras have been set.
+     *
+     * @see #setExtras(PersistableBundle)
+     */
+    public PersistableBundle getExtras() {
+        return mExtras;
+    }
+
+    /**
+     * Add extended data to the clip description.
+     *
+     * @see #getExtras()
+     */
+    public void setExtras(PersistableBundle extras) {
+        mExtras = new PersistableBundle(extras);
+    }
+
     /** @hide */
     public void validate() {
         if (mMimeTypes == null) {
@@ -211,6 +262,13 @@ public class ClipDescription implements Parcelable {
             b.append(mLabel);
             b.append('"');
         }
+        if (mExtras != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append(mExtras.toString());
+        }
         return !first;
     }
 
@@ -236,11 +294,13 @@ public class ClipDescription implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         TextUtils.writeToParcel(mLabel, dest, flags);
         dest.writeStringArray(mMimeTypes);
+        dest.writePersistableBundle(mExtras);
     }
 
     ClipDescription(Parcel in) {
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mMimeTypes = in.createStringArray();
+        mExtras = in.readPersistableBundle();
     }
 
     public static final Parcelable.Creator<ClipDescription> CREATOR =

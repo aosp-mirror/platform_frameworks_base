@@ -16,14 +16,19 @@
 
 package android.print;
 
+import android.content.ComponentName;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
 import android.print.PrintJobId;
 import android.print.IPrintJobStateChangeListener;
+import android.print.IPrintServicesChangeListener;
+import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
+import android.printservice.recommendation.RecommendationInfo;
 import android.printservice.PrintServiceInfo;
 
 /**
@@ -44,8 +49,77 @@ interface IPrintManager {
     void removePrintJobStateChangeListener(in IPrintJobStateChangeListener listener,
             int userId);
 
-    List<PrintServiceInfo> getInstalledPrintServices(int userId);
-    List<PrintServiceInfo> getEnabledPrintServices(int userId);
+    /**
+     * Listen for changes to the installed and enabled print services.
+     *
+     * @param listener the listener to add
+     * @param userId the id of the user listening
+     *
+     * @see android.print.PrintManager#getPrintServices(int, String)
+     */
+    void addPrintServicesChangeListener(in IPrintServicesChangeListener listener,
+            int userId);
+
+    /**
+     * Stop listening for changes to the installed and enabled print services.
+     *
+     * @param listener the listener to remove
+     * @param userId the id of the user requesting the removal
+     *
+     * @see android.print.PrintManager#getPrintServices(int, String)
+     */
+    void removePrintServicesChangeListener(in IPrintServicesChangeListener listener,
+            int userId);
+
+    /**
+     * Get the print services.
+     *
+     * @param selectionFlags flags selecting which services to get
+     * @param userId the id of the user requesting the services
+     *
+     * @return the list of selected print services.
+     */
+    List<PrintServiceInfo> getPrintServices(int selectionFlags, int userId);
+
+    /**
+     * Enable or disable a print service.
+     *
+     * @param service The service to enabled or disable
+     * @param isEnabled whether the service should be enabled or disabled
+     * @param userId the id of the user requesting the services
+     */
+    void setPrintServiceEnabled(in ComponentName service, boolean isEnabled, int userId);
+
+    /**
+     * Listen for changes to the print service recommendations.
+     *
+     * @param listener the listener to add
+     * @param userId the id of the user listening
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
+     */
+    void addPrintServiceRecommendationsChangeListener(in IRecommendationsChangeListener listener,
+            int userId);
+
+    /**
+     * Stop listening for changes to the print service recommendations.
+     *
+     * @param listener the listener to remove
+     * @param userId the id of the user requesting the removal
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
+     */
+    void removePrintServiceRecommendationsChangeListener(in IRecommendationsChangeListener listener,
+            int userId);
+
+    /**
+     * Get the print service recommendations.
+     *
+     * @param userId the id of the user requesting the recommendations
+     *
+     * @return the list of selected print services.
+     */
+    List<RecommendationInfo> getPrintServiceRecommendations(int userId);
 
     void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);
     void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,
@@ -53,6 +127,19 @@ interface IPrintManager {
     void stopPrinterDiscovery(in IPrinterDiscoveryObserver observer, int userId);
     void validatePrinters(in List<PrinterId> printerIds, int userId);
     void startPrinterStateTracking(in PrinterId printerId, int userId);
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @param userId the id of the user requesting the printer
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    Icon getCustomPrinterIcon(in PrinterId printerId, int userId);
+
     void stopPrinterStateTracking(in PrinterId printerId, int userId);
     void destroyPrinterDiscoverySession(in IPrinterDiscoveryObserver observer,
             int userId);

@@ -25,11 +25,13 @@ import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.Bundle;
+import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.StatusBarNotification;
+import android.app.AutomaticZenRule;
 import android.service.notification.ZenModeConfig;
 
 /** {@hide} */
@@ -45,15 +47,15 @@ interface INotificationManager
 
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
+    boolean areNotificationsEnabled(String pkg);
 
-    void setPackagePriority(String pkg, int uid, int priority);
-    int getPackagePriority(String pkg, int uid);
-
-    void setPackagePeekable(String pkg, int uid, boolean peekable);
-    boolean getPackagePeekable(String pkg, int uid);
-
-    void setPackageVisibilityOverride(String pkg, int uid, int visibility);
-    int getPackageVisibilityOverride(String pkg, int uid);
+    void setVisibilityOverride(String pkg, int uid, int visibility);
+    int getVisibilityOverride(String pkg, int uid);
+    void setPriority(String pkg, int uid, int priority);
+    int getPriority(String pkg, int uid);
+    void setImportance(String pkg, int uid, int importance);
+    int getImportance(String pkg, int uid);
+    int getPackageImportance(String pkg);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
@@ -66,6 +68,9 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
+    void requestBindListener(in ComponentName component);
+    void requestUnbindListener(in INotificationListener token);
+
     void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
@@ -76,22 +81,30 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
+    void applyAdjustmentFromRankerService(in INotificationListener token, in Adjustment adjustment);
+    void applyAdjustmentsFromRankerService(in INotificationListener token, in List<Adjustment> adjustments);
+
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
     boolean isSystemConditionProviderEnabled(String path);
 
     int getZenMode();
     ZenModeConfig getZenModeConfig();
-    boolean setZenModeConfig(in ZenModeConfig config, String reason);
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
-    oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
     boolean isNotificationPolicyAccessGranted(String pkg);
     NotificationManager.Policy getNotificationPolicy(String pkg);
     void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
     String[] getPackagesRequestingNotificationPolicyAccess();
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
+    AutomaticZenRule getAutomaticZenRule(String id);
+    List<ZenModeConfig.ZenRule> getZenRules();
+    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);
+    boolean removeAutomaticZenRule(String id);
+    boolean removeAutomaticZenRules(String packageName);
+    int getRuleInstanceCount(in ComponentName owner);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);

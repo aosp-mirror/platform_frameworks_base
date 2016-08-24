@@ -30,16 +30,28 @@ import com.android.internal.R;
  * orientation when it can't fit its child views horizontally.
  */
 public class ButtonBarLayout extends LinearLayout {
+    /** Minimum screen height required for button stacking. */
+    private static final int ALLOW_STACKING_MIN_HEIGHT_DP = 320;
+
+    /** Amount of the second button to "peek" above the fold when stacked. */
+    private static final int PEEK_BUTTON_DP = 16;
+
     /** Whether the current configuration allows stacking. */
     private boolean mAllowStacking;
 
     private int mLastWidthSize = -1;
 
+    private int mMinimumHeight = 0;
+
     public ButtonBarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        final boolean allowStackingDefault =
+                context.getResources().getConfiguration().screenHeightDp
+                        >= ALLOW_STACKING_MIN_HEIGHT_DP;
         final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ButtonBarLayout);
-        mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking, false);
+        mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking,
+                allowStackingDefault);
         ta.recycle();
     }
 
@@ -97,6 +109,44 @@ public class ButtonBarLayout extends LinearLayout {
         if (needsRemeasure) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
+
+        // Compute minimum height such that, when stacked, some portion of the
+        // second button is visible.
+        int minHeight = 0;
+        final int firstVisible = getNextVisibleChildIndex(0);
+        if (firstVisible >= 0) {
+            final View firstButton = getChildAt(firstVisible);
+            final LayoutParams firstParams = (LayoutParams) firstButton.getLayoutParams();
+            minHeight += getPaddingTop() + firstButton.getMeasuredHeight()
+                    + firstParams.topMargin + firstParams.bottomMargin;
+            if (isStacked()) {
+                final int secondVisible = getNextVisibleChildIndex(firstVisible + 1);
+                if (secondVisible >= 0) {
+                    minHeight += getChildAt(secondVisible).getPaddingTop()
+                            + PEEK_BUTTON_DP * getResources().getDisplayMetrics().density;
+                }
+            } else {
+                minHeight += getPaddingBottom();
+            }
+        }
+
+        if (getMinimumHeight() != minHeight) {
+            setMinimumHeight(minHeight);
+        }
+    }
+
+    private int getNextVisibleChildIndex(int index) {
+        for (int i = index, count = getChildCount(); i < count; i++) {
+            if (getChildAt(i).getVisibility() == View.VISIBLE) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int getMinimumHeight() {
+        return Math.max(mMinimumHeight, super.getMinimumHeight());
     }
 
     private void setStacked(boolean stacked) {

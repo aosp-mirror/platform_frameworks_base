@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    <!-- Dimens for recents card in the recents view on tv -->
+    <dimen name="recents_tv_card_width">240dip</dimen>
+    <dimen name="recents_tv_screenshot_height">135dip</dimen>
+    <dimen name="recents_tv_card_extra_badge_size">20dip</dimen>
+    <dimen name="recents_tv_banner_width">130dip</dimen>
+    <dimen name="recents_tv_banner_height">72dip</dimen>
+    <dimen name="recents_tv_fallback_icon_width">40dip</dimen>
+    <dimen name="recents_tv_fallback_icon_height">40dip</dimen>
+    <dimen name="recents_tv_banner_margin_top">16dip</dimen>
+    <dimen name="recents_tv_icon_padding_bottom">8dip</dimen>
+    <dimen name="recents_tv_text_padding_start">12dip</dimen>
+    <dimen name="recents_tv_text_padding_bottom">12dip</dimen>
+    <dimen name="recents_tv_card_corner_radius">2dip</dimen>
+
+    <!-- Padding for grid view in recents view on tv -->
+    <dimen name="recents_tv_gird_row_top_margin">215dip</dimen>
+    <dimen name="recents_tv_grid_max_row_height">268dip</dimen>
+    <dimen name="recents_tv_gird_card_spacing">8dip</dimen>
+    <dimen name="recents_tv_gird_focused_card_delta">44dip</dimen>
+
+    <!-- Values for focus animation -->
+    <dimen name="recents_tv_unselected_item_z">6dp</dimen>
+    <dimen name="recents_tv_selected_item_z_delta">10dp</dimen>
+
+    <!-- Values for text on recents cards on tv -->
+    <dimen name="recents_tv_title_text_size">12sp</dimen>
+
+    <!-- Values for card dismiss state -->
+    <dimen name="recents_tv_dismiss_shift_down">48dip</dimen>
+    <dimen name="recents_tv_dismiss_top_margin">356dip</dimen>
+    <dimen name="recents_tv_dismiss_icon_size">19dip</dimen>
+    <dimen name="recents_tv_dismiss_icon_top_margin">38dip</dimen>
+    <dimen name="recents_tv_dismiss_icon_bottom_margin">1dip</dimen>
+    <dimen name="recents_tv_dismiss_text_size">12sp</dimen>
+
+    <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
+    <dimen name="tv_pip_bounds_space">3dp</dimen>
+
+    <!-- Values for entering Recents and exiting Recents -->
+    <dimen name="recents_tv_home_recents_shift">125dip</dimen>
+</resources>

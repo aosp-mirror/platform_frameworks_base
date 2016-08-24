@@ -56,8 +56,8 @@
     <string name="badPin" msgid="9015277645546710014">"‏رمز PIN القديم الذي كتبته غير صحيح."</string>
     <string name="badPuk" msgid="5487257647081132201">"‏رمز PUK الذي كتبته غير صحيح."</string>
     <string name="mismatchPin" msgid="609379054496863419">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
-    <string name="invalidPin" msgid="3850018445187475377">"اكتب رقم تعريف شخصيًا مكونًا من 4 إلى ثمانية أعداد."</string>
-    <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من 8 أرقام أو أكثر."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"ادخل رقم تعريف شخصي مكون من ٤ إلى ٨ أرقام."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من ٨ أرقام أو أكثر."</string>
     <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
@@ -92,7 +92,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد الافتراضي لمعرف المتصل هو غير مقيّد. الاتصال التالي: غير مقيّد"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرف المتصل."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"تم تغيير الدخول المقيّد"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"خدمة البيانات محظورة."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"خدمة الطوارئ محظورة."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"الخدمة الصوتية محظورة."</string>
@@ -129,11 +128,15 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"البحث عن خدمة"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"‏الاتصال عبر Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
+    <item msgid="2254967670088539682">"‏لإجراء مكالمات وإرسال رسائل عبر Wi-Fi، اطلب من مشغّل شبكة الجوّال أولاً إعداد هذا الجهاز، ثم شغّل الاتصال عبر Wi-Fi مرة أخرى من خلال الإعدادات."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="6177300162212449033">"التسجيل لدى مشغّل شبكة الجوّال"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"‏%s جارٍ الاتصال عبر Wi-Fi"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مُفضّلة"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"شبكة الجوّال مُفضّلة"</string>
@@ -169,7 +172,14 @@
     <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"سعة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"قد تكون الشبكة مراقبة"</string>
+    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
+      <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
+      <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
+      <item quantity="few">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="many">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="other">تم تثبيت شهادات المرجع المصدق</item>
+      <item quantity="one">تم تثبيت شهادة المرجع المصدق</item>
+    </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"بواسطة جهة خارجية غير معلومة"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"بواسطة مشرف الملف الشخصي للعمل"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"بواسطة <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -215,6 +225,18 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"تقرير الأخطاء"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"إعداد تقرير بالأخطاء"</string>
     <string name="bugreport_message" msgid="398447048750350456">"سيجمع هذا معلومات حول حالة جهازك الحالي لإرسالها كرسالة إلكترونية، ولكنه سيستغرق وقتًا قليلاً من بدء عرض تقرير بالأخطاء. وحتى يكون جاهزًا للإرسال، الرجاء الانتظار."</string>
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"تقرير تفاعلي"</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"يمكنك استخدام هذا الخيار في معظم الأحيان، حيث يتيح لك إمكانية تتبع مستوى تقدم التقرير والحصول على مزيد من المعلومات حول المشكلة وتسجيل لقطات شاشة. وقد يتم إغفال بعض الأقسام الأقل استخدامًا والتي تستغرق وقتًا طويلاً أثناء إعداد التقرير."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"تقرير كامل"</string>
+    <string name="bugreport_option_full_summary" msgid="7210859858969115745">"يمكنك استخدام هذا الخيار للحصول على حد أدنى من تدخل النظام عند توقف استجابة الجهاز أو عند بطئها الشديد أو عند الحاجة إلى جميع أقسام التقرير. ولا يسمح لك هذا الخيار بالحصول على مزيد من التفاصيل أو تسجيل لقطات شاشة إضافية."</string>
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="zero">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
+      <item quantity="two">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانيتين (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="few">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثوانٍ.</item>
+      <item quantity="many">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
+      <item quantity="other">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
+      <item quantity="one">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_0">%d</xliff:g> ثانية.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"وضع صامت"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"الصوت متوقف"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"الصوت قيد التشغيل"</string>
@@ -226,10 +248,12 @@
     <string name="global_action_voice_assist" msgid="7751191495200504480">"المساعد الصوتي"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"قفل الآن"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"المحتويات مخفية"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"تم إخفاء المحتويات بواسطة السياسة"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
-    <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"عمل"</string>
+    <string name="user_owner_label" msgid="1119010402169916617">"التبديل إلى الشخصي"</string>
+    <string name="managed_profile_label" msgid="5289992269827577857">"التبديل إلى العمل"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع"</string>
@@ -251,11 +275,15 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"استرداد محتوى النافذة"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"فحص محتوى نافذة يتم التفاعل معها."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"تشغيل الاستكشاف باللمس"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"سيتم نطق العناصر التي تم لمسها بصوت عال ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"سيتم نطق العناصر التي تم النقر عليها بصوت عال ويمكن استكشاف الشاشة باستخدام الإيماءات."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"تشغيل إمكانية الدخول المحسّن عبر الويب"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"قد يتم تثبيت النصوص البرمجية لتسهيل الدخول إلى المحتوى."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ملاحظة النص الذي تكتبه"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"يتضمن بيانات شخصية مثل أرقام بطاقات الائتمان وكلمات المرور."</string>
+    <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"التحكم في تكبير الشاشة"</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"يمكنك التحكم في مستوى التكبير/التصغير للشاشة وتحديد الموضع."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"تنفيذ إيماءات"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"يمكن النقر والتمرير بسرعة والتصغير وتنفيذ إيماءات أخرى."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"تعطيل شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"للسماح للتطبيق بتعطيل شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"العمل كشريط للحالة"</string>
@@ -354,8 +382,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"للسماح للتطبيق بالتقاط صور ومقاطع فيديو من خلال الكاميرا. ويتيح هذا الإذن للتطبيق استخدام الكاميرا في أي وقت وبدون موافقة منك."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"التحكم في الضوء الوامض"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"للسماح للتطبيق بالتحكم في الضوء الوامض."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"للسماح للتطبيق بطلب أرقام هاتفية بدون تدخل منك. وقد يؤدي ذلك إلى تحمل رسوم غير متوقعة أو إجراء مكالمات غير متوقعة. ومن الجدير بالذكر أن ذلك لا يتيح للتطبيق الاتصال بأرقام الطوارئ. وقد تؤدي التطبيقات الضارة إلى تحملك تكاليف مالية من خلال إجراء مكالمات بدون موافقة منك."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
@@ -648,13 +674,13 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"‏اكتب رمز PUK ورمز رمز PIN الجديد"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"‏رمز PUK"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"‏رمز رمز PIN الجديد"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"المس لكتابة كلمة المرور"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"انقر لكتابة كلمة المرور"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"اكتب كلمة المرور لإلغاء التأمين"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"‏اكتب رمز PIN لإلغاء التأمين"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"‏رمز PIN غير صحيح."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"لإلغاء التأمين، اضغط على \"القائمة\" ثم على 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"رقم الطوارئ"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"لا تتوفر خدمة"</string>
+    <string name="lockscreen_carrier_default" msgid="6169005837238288522">"لا خدمة"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"الشاشة مؤمّنة."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"اضغط على \"القائمة\" لإلغاء التأمين أو إجراء اتصال بالطوارئ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"اضغط على \"القائمة\" لإلغاء التأمين."</string>
@@ -686,15 +712,15 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"‏شريحة SIM مؤمّنة."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة.\n\nالرجاء إعادة المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏لديك <xliff:g id="NUMBER_0">%d</xliff:g> من محاولات رسم نقش إلغاء القفل غير الصحيحة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، سيُطلب منك إلغاء قفل التلفزيون من خلال تسجيل الدخول إلى Google.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"لديك <xliff:g id="NUMBER_0">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية وستفقد جميع بيانات المستخدم."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة.\n\nالرجاء إعادة المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"‏لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"‏لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"‏لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات رسم نقش إلغاء القفل غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، سيُطلب منك إلغاء قفل التلفزيون من خلال تسجيل الدخول إلى Google.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"‏لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام معلومات تسجيل الدخول إلى Google.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية وستفقد جميع بيانات المستخدم."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، ستتم إعادة تعيين الهاتف إلى الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"لقد حاولت إلغاء تأمين الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الجهاز اللوحي إلى الإعدادات الافتراضية للمصنع."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"لقد حاولت إلغاء تأمين الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات بشكل غير صحيح. سيتم الآن إعادة تعيين الهاتف إلى الإعدادات الافتراضية للمصنع."</string>
@@ -746,8 +772,6 @@
     <string name="granularity_label_word" msgid="7075570328374918660">"كلمة"</string>
     <string name="granularity_label_link" msgid="5815508880782488267">"رابط"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"سطر"</string>
-    <string name="hour_ampm" msgid="4584338083529355982">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm" msgid="2083465992940444366">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"أخفق اختبار المصنع"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"‏إجراء FACTORY_TEST غير متاح سوى للحزم المثبتة في /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"‏لم يتم العثور على أية حزمة توفر إجراء FACTORY_TEST."</string>
@@ -862,6 +886,135 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> من الساعات</item>
       <item quantity="one">ساعة واحدة</item>
     </plurals>
+    <string name="now_string_shortest" msgid="8912796667087856402">"الآن"</string>
+    <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">ساعتان (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+    </plurals>
+    <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
+      <item quantity="two">يومان <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>يوم</item>
+    </plurals>
+    <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> عام</item>
+      <item quantity="two">عامان <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>عام</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>عام</item>
+    </plurals>
+    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two">في دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">في ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g>ساعة</item>
+    </plurals>
+    <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
+      <item quantity="two">في يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
+    <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> عام</item>
+      <item quantity="two">في عامين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
+      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>عام</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> عام</item>
+    </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two">قبل دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">قبل ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="two">قبل يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="two">قبل سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two">خلال دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">خلال ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="two">خلال يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="two">خلال سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -877,10 +1030,13 @@
     <string name="cut" msgid="3092569408438626261">"قص"</string>
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"اللصق كنص عادي"</string>
     <string name="replace" msgid="5781686059063148930">"استبدال..."</string>
     <string name="delete" msgid="6098684844021697789">"حذف"</string>
     <string name="copyUrl" msgid="2538211579596067402">"‏نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"تحديد نص"</string>
+    <string name="undo" msgid="7905788502491742328">"تراجع"</string>
+    <string name="redo" msgid="7759464876566803888">"إعادة"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"تحديد النص"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"إضافة إلى القاموس"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
@@ -888,9 +1044,9 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ 250 ميغابايت وأعد التشغيل."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ۲۵۰ ميغابايت وأعد التشغيل."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل"</string>
-    <string name="app_running_notification_text" msgid="4653586947747330058">"المس للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
+    <string name="app_running_notification_text" msgid="1197581823314971177">"انقر للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
     <string name="ok" msgid="5970060430562524910">"موافق"</string>
     <string name="cancel" msgid="6442560571259935130">"إلغاء"</string>
     <string name="yes" msgid="5362982303337969312">"موافق"</string>
@@ -901,28 +1057,46 @@
     <string name="capital_off" msgid="6815870386972805832">"إيقاف"</string>
     <string name="whichApplication" msgid="4533185947064773386">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"‏إكمال الإجراء باستخدام %1$s"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"إكمال الإجراء"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"فتح باستخدام"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏فتح باستخدام %1$s"</string>
+    <string name="whichViewApplicationLabel" msgid="2666774233008808473">"فتح"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"تعديل باستخدام"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"‏تعديل باستخدام %1$s"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"تعديل"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"مشاركة مع"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"‏مشاركة مع %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"مشاركة"</string>
+    <string name="whichSendToApplication" msgid="8272422260066642057">"إرسال باستخدام"</string>
+    <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"‏إرسال باستخدام %1$s"</string>
+    <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"إرسال"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"تحديد تطبيق صفحة رئيسية"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏استخدام %1$s كصفحة رئيسية"</string>
+    <string name="whichHomeApplicationLabel" msgid="809529747002918649">"التقاط صورة"</string>
+    <string name="whichImageCaptureApplication" msgid="3680261417470652882">"التقاط صورة باستخدام"</string>
+    <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"‏التقاط صورة باستخدام %1$s"</string>
+    <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"التقاط صورة"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"الاستخدام بشكل افتراضي لهذا الإجراء."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"استخدام تطبيق آخر"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"‏يمكنك محو الإعدادات الافتراضية في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"اختيار إجراء"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏اختيار أحد التطبيقات لجهاز USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ليست هناك تطبيقات يمكنها تنفيذ هذا الإجراء."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"للأسف، توقف <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"للأسف، توقفت العملية <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
+    <string name="aerr_application" msgid="250320989337856518">"توقف <xliff:g id="APPLICATION">%1$s</xliff:g> عن العمل"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"توقفت <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"فتح التطبيق مرة أخرى"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"إرسال تعليقات"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"إغلاق"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"التعطيل حتى إعادة تشغيل الجهاز"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"انتظار"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"إغلاق التطبيق"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> لا يستجيب.\n\nهل تريد إغلاقه؟"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"النشاط <xliff:g id="ACTIVITY">%1$s</xliff:g> لا يستجيب.\n\nهل تريد إغلاقه؟"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> لا يستجيب. هل تريد إغلاقه؟"</string>
-    <string name="anr_process" msgid="6513209874880517125">"العملية <xliff:g id="PROCESS">%1$s</xliff:g> لا تستجيب.\n\nهل تريد إغلاقها؟"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_process" msgid="6156880875555921105">"العملية <xliff:g id="PROCESS">%1$s</xliff:g> لا تستجيب"</string>
     <string name="force_close" msgid="8346072094521265605">"موافق"</string>
     <string name="report" msgid="4060218260984795706">"إرسال تقرير"</string>
     <string name="wait" msgid="7147118217226317732">"انتظار"</string>
@@ -933,17 +1107,21 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"تدرج"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"الإظهار دائمًا"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"‏يمكنك إعادة تمكين هذا في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> غير متوافق مع الإعداد الحالي لحجم شاشة العرض وربما يعمل بطريقة غير متوقعة."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"العرض دائمًا"</string>
     <string name="smv_application" msgid="3307209192155442829">"‏انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="5120397012047462446">"‏انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏جارٍ ترقية Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏جارٍ تشغيل Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين السعة التخزينية."</string>
+    <string name="android_upgrading_notification_title" msgid="1619393112444671028">"‏جارٍ ترقية Android"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"قد لا تعمل بعض التطبيقات بشكل مناسب إلا بعد انتهاء الترقية"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"جارٍ إعادة التشغيل."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
-    <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"المس لتبديل التطبيق"</string>
+    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"انقر للتبديل إلى التطبيق"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"تبديل التطبيقات؟"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"يوجد تطبيق آخر قيد التشغيل فعلاً ويجب إيقافه حتى تتمكن من بدء تطبيق جديد."</string>
     <string name="old_app_action" msgid="493129172238566282">"عودة إلى <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -951,7 +1129,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"بدء <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"إيقاف التطبيق القديم بدون الحفظ."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"لقد تجاوزت <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة."</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"تم نسخ الذاكرة، المس للمشاركة."</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"تم نسخ الذاكرة، انقر للمشاركة."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"هل تريد مشاركة نَسْخ الذاكرة؟"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"تجاوزت عملية <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة المخصص لها وقدره <xliff:g id="SIZE">%2$s</xliff:g>، ويتوفر نَسْخ للذاكرة لمشاركته مع مطور برامج العملية ولكن توخ الحذر حيث قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية يملك التطبيق حق الوصول إليها."</string>
     <string name="sendText" msgid="5209874571959469142">"اختيار إجراء للنص"</string>
@@ -995,7 +1173,7 @@
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
-    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"المس لعرض الخيارات"</string>
+    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"هل تريد السماح بالاتصال؟"</string>
@@ -1005,7 +1183,7 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"‏ابدأ Wi-Fi Direct. يؤدي هذا إلى إيقاف عميل/نقطة اتصال Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"‏تعذر بدء Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"‏تم تشغيل اتصال Wi-Fi المباشر"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"المس للحصول على الإعدادات"</string>
+    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"انقر للحصول على الإعدادات."</string>
     <string name="accept" msgid="1645267259272829559">"قبول"</string>
     <string name="decline" msgid="2112225451706137894">"رفض"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"تم إرسال الدعوة"</string>
@@ -1037,6 +1215,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"‏تمت إضافة شريحة SIM"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"أعد تشغيل جهازك للدخول إلى شبكة الجوّال."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"إعادة التشغيل"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"‏لتشغيل شريحة SIM الجديدة بشكل سليم، يجب تثبيت تطبيق من مشغّل شبكة الجوّال وفتحه."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"الحصول على التطبيق"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ليس الآن"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏تم إدخال شريحة SIM جديدة."</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"انقر لإعداده."</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تعيين الوقت"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تعيين التاريخ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تعيين"</string>
@@ -1045,40 +1228,27 @@
     <string name="perms_description_app" msgid="5139836143293299417">"يقدمه <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"لا أذونات مطلوبة"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"قد يكلفك هذا مالاً."</string>
-    <string name="usb_storage_activity_title" msgid="4465055157209648641">"‏تخزين USB كبير السعة"</string>
-    <string name="usb_storage_title" msgid="5901459041398751495">"‏USB متصل"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"‏لقد اتصلت بجهاز الكمبيوتر من خلال USB. المس الزر أدناه إذا كنت تريد نسخ الملفات بين جهاز الكمبيوتر ووحدة تخزين USB في Android."</string>
-    <string name="usb_storage_message" product="default" msgid="805351000446037811">"‏لقد اتصلت بجهاز الكمبيوتر من خلال USB. المس الزر أدناه إذا كنت تريد نسخ الملفات بين جهاز الكمبيوتر وبطاقة SD لـ Android."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"‏تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3017045217365540658">"‏حدثت مشكلة أثناء استخدام وحدة تخزين USB لتخزين كبير السعة عبر USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="2876018512716970313">"‏حدثت مشكلة أثناء استخدام بطاقة SD لتخزين كبير السعة عبر USB."</string>
-    <string name="usb_storage_notification_title" msgid="8175892554757216525">"‏USB متصل"</string>
-    <string name="usb_storage_notification_message" msgid="939822783828183763">"المس لنسخ الملفات إلى/من جهاز الكمبيوتر."</string>
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"‏إيقاف تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="1656852098555623822">"‏المس لإيقاف وحدة تخزين USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"‏سعة USB التخزينية المستخدمة"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="4264025280777219521">"‏قبل إيقاف وحدة تخزين USB، الغ تحميل (\"أخرج\") وحدة تخزين USB لـ Android من الكمبيوتر."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="8043969782460613114">"‏قبل إيقاف وحدة تخزين USB، الغ تحميل (\"أخرج\") بطاقة SD لـ Android من الكمبيوتر."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"‏إيقاف تشغيل سعة تخزين USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="1970374898263063836">"‏حدثت مشكلة أثناء إيقاف وحدة تخزين USB. تحقق من إلغاء تحميل مضيف USB، ثم أعد المحاولة."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"‏تشغيل سعة تخزين USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"‏إذا تم تشغيل وحدة تخزين USB، فستتوقف بعض التطبيقات التي تستخدمها وربما تصبح غير متاحة إلى أن يتم إيقاف وحدة تخزين USB."</string>
-    <string name="dlg_error_title" msgid="7323658469626514207">"‏لم تتم عملية USB بنجاح"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"موافق"</string>
-    <string name="usb_charging_notification_title" msgid="4004114449249406402">"‏USB للشحن"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"‏يتم استخدام الاتصال عبر USB لشحن هذا الجهاز"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"‏يتم استخدام الاتصال عبر USB لإمداد الجهاز المتصل بالطاقة"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"‏USB لنقل الملفات"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"‏USB لنقل الصور"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"‏USB لـ MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏الاتصال بجهاز USB ملحق"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
+    <string name="usb_notification_message" msgid="3370903770828407960">"انقر للحصول على المزيد من الخيارات."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"‏انقر لتعطيل تصحيح أخطاء USB."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"جارٍ الحصول على تقرير الخطأ…"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"هل تريد مشاركة تقرير الخطأ؟"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"جارٍ مشاركة تقرير الخطأ…"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"طلب مشرف تكنولوجيا المعلومات الحصول على تقرير خطأ للمساعدة في تحرِّي مشكلة هذا الجهاز وإصلاحها؛ ويمكن أن تتم مشاركة التطبيقات والبيانات."</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"مشاركة"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"رفض"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"اختيار لوحات المفاتيح"</string>
-    <string name="show_ime" msgid="9157568568695230830">"إظهار طريقة الإدخال"</string>
-    <string name="hardware" msgid="7517821086888990278">"أجهزة"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"تحديد تخطيط لوحة مفاتيح"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"المس لتحديد تخطيط لوحة مفاتيح."</string>
+    <string name="show_ime" msgid="2506087537466597099">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
+    <string name="hardware" msgid="194658061510127999">"إظهار لوحة المفاتيح الظاهرية"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"تهيئة لوحة المفاتيح الفعلية"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"العناصر المرشحة"</u></string>
@@ -1087,9 +1257,9 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"تم اكتشاف <xliff:g id="NAME">%s</xliff:g> جديدة"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"لنقل الصور والوسائط"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"أصاب <xliff:g id="NAME">%s</xliff:g> التلف"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> تالف. المس لإصلاحه."</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> تالف. انقر لإصلاحه."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> غير متوافق"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذه. المس للإعداد بتنسيق متوافق."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"هذا الجهاز غير متوافق مع <xliff:g id="NAME">%s</xliff:g> هذا. انقر للإعداد بتنسيق متوافق."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"تمت إزالة <xliff:g id="NAME">%s</xliff:g> بشكل غير متوقع"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"إلغاء تحميل <xliff:g id="NAME">%s</xliff:g> قبل الإزالة لتجنب فقد البيانات"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"تمت إزالة <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1125,7 +1295,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"للسماح لأحد التطبيقات بقراءة جلسات التثبيت. ويسمح لك هذا بالاطلاع على تفاصيل بشأن عمليات تثبيت الحزم النشطة."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"طلب حزم التثبيت"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"للسماح لتطبيق ما بطلب تثبيت الحزم."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"المس مرتين للتحكم في التكبير/التصغير"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"اضغط مرتين للتحكم في التكبير/التصغير"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"تعذرت إضافة أداة."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"تنفيذ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"بحث"</string>
@@ -1151,23 +1321,25 @@
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
+    <string name="vr_listener_binding_label" msgid="4316591939343607306">"مستمع واقع افتراضي"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"موفر الحالة"</string>
+    <string name="notification_ranker_binding_label" msgid="774540592299064747">"خدمة ترتيب أهمية الإشعارات"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏تم تنشيط الشبكة الظاهرية الخاصة (VPN)"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏تم تنشيط VPN بواسطة <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="3011306607126450322">"المس لإدارة الشبكة."</string>
-    <string name="vpn_text_long" msgid="6407351006249174473">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. المس لإدارة الشبكة."</string>
+    <string name="vpn_text" msgid="1610714069627824309">"انقر لإدارة الشبكة."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. انقر لإدارة الشبكة."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏جارٍ الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏تم الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطأ بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
-    <string name="vpn_lockdown_config" msgid="6415899150671537970">"المس للتهيئة"</string>
+    <string name="vpn_lockdown_config" msgid="4655589351146766608">"انقر للتهيئة."</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
     <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
     <string name="submit" msgid="1602335572089911941">"إرسال"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"تم تمكين وضع السيارة"</string>
-    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"المس لإنهاء وضع السيارة."</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"انقر للخروج من وضع السيارة."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"النطاق أو نقطة الاتصال نشطة"</string>
-    <string name="tethered_notification_message" msgid="6857031760103062982">"المس للإعداد."</string>
+    <string name="tethered_notification_message" msgid="2113628520792055377">"انقر للإعداد."</string>
     <string name="back_button_label" msgid="2300470004503343439">"رجوع"</string>
     <string name="next_button_label" msgid="1080555104677992408">"التالي"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"تخطٍ"</string>
@@ -1204,7 +1376,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"إضافة حساب"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"زيادة"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"تقليل"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> المس مع الاستمرار."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> المس مع الاستمرار."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"مرر لأعلى للزيادة ولأسفل للتقليل."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"زيادة الدقائق"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"تقليل الدقائق"</string>
@@ -1240,14 +1412,15 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"وحدة تخزين داخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"السعة التخزينية المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"‏محرك أقراص USB من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"‏وحدة تخزين USB"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"تعديل"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"تحذير استخدام البيانات"</string>
-    <string name="data_usage_warning_body" msgid="2814673551471969954">"المس لعرض الاستخدام والإعدادات."</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"انقر لعرض الاستخدام والإعدادات."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"‏تم بلوغ حد بيانات اتصال 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"‏تم بلوغ حد بيانات اتصال 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"تم بلوغ حد بيانات الجوّال"</string>
@@ -1259,7 +1432,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"‏تم تجاوز حد بيانات شبكة Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> فوق الحد المعين."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"تم تقييد بيانات الخلفية"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"المس لإزالة التقييد."</string>
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"انقر لإزالة القيد."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="454239480274921032">"إصدار لـ:"</string>
@@ -1277,7 +1450,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"عرض الكل"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"اختيار نشاط"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"مشاركة مع"</string>
-    <string name="list_delimeter" msgid="3975117572185494152">"، "</string>
     <string name="sending" msgid="3245653681008218030">"جارٍ الإرسال..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"تشغيل المتصفح؟"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"هل تريد قبول المكالمة؟"</string>
@@ -1323,8 +1495,8 @@
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"‏تأكيد رمز رمز PIN المراد"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"‏رمز PIN غير صحيح."</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"‏اكتب رمز PIN المكون من 4 إلى 8 أرقام."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"‏يجب أن يتكون رمز PUK من 8 أرقام."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"‏يجب أن يتكون رمز PUK من ۸ أرقام."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل شريحة SIM نهائيًا."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"‏لا يتطابق رمزا رمز PIN"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"محاولات النقش كثيرة جدًا"</string>
@@ -1335,18 +1507,18 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"اسم مستخدم غير صحيح أو كلمة مرور غير صالحة."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"‏هل نسيت اسم المستخدم أو كلمة المرور؟\nانتقل إلى "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"جارٍ فحص الحساب…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"لديك <xliff:g id="NUMBER_0">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية وستفقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"لديك <xliff:g id="NUMBER_0">%1$d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية وستفقد جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"لديك <xliff:g id="NUMBER">%d</xliff:g> من محاولات إلغاء قفل التلفزيون غير الصحيحة. ستتم الآن إعادة ضبط التلفزيون على إعدادات المصنع الافتراضية."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"لقد رسمت نقش إلغاء القفل بشكل غير صحيح عدد <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة، سيُطلب منك إلغاء قفل التلفزيون باستخدام حساب بريد إلكتروني.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"لقد رسمت نقش إلغاء القفل بشكل غير صحيح عدد <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة، سيُطلب منك إلغاء قفل التلفزيون باستخدام حساب بريد إلكتروني.\n\n يمكنك إعادة التجربة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"إزالة"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
@@ -1355,6 +1527,7 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"تم إلغاء تسهيل الدخول."</string>
     <string name="user_switched" msgid="3768006783166984410">"المستخدم الحالي <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"جارٍ التبديل إلى <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"جارٍ الخروج <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"المالك"</string>
     <string name="error_message_title" msgid="4510373083082500195">"خطأ"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"لا يسمح المشرف بإجراء هذا التغيير"</string>
@@ -1457,7 +1630,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"‏تأكيد رمز PIN الجديد"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"إنشاء رقم تعريف شخصي لتعديل القيود"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"أرقام التعريف الشخصية لا تتطابق، أعد المحاولة."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏رمز PIN أقصر مما يلزم، يجب ألا يقل عن 4 أرقام. "</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"رقم التعريف الشخصي أقصر مما يلزم، يجب ألا يقل عن ٤ أرقام. "</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="zero">حاول مرة أخرى خلال أقل من ثانية <xliff:g id="COUNT">%d</xliff:g></item>
       <item quantity="two">حاول مرة أخرى خلال ثانيتين (<xliff:g id="COUNT">%d</xliff:g>)</item>
@@ -1479,8 +1652,7 @@
     <string name="select_year" msgid="7952052866994196170">"تحديد العام"</string>
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"رجوع\" و\"نظرة عامة\" في آن واحد مع الاستمرار."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"لإلغاء تثبيت هذه الشاشة، يمكنك لمس \"نظرة عامة\" مع الاستمرار."</string>
+    <string name="lock_to_app_toast" msgid="1420543809500606964">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زر الرجوع مع الاستمرار."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"التطبيق مقيد: ولا يسمح بإلغاء التقييد على هذا الجهاز."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"تم إلغاء تثبيت الشاشة"</string>
@@ -1491,6 +1663,9 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفر البطارية في تقليل أداء الجهاز ويفرض قيدًا على الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية. قد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم تفتحها.\n\nيتم إيقاف موفر البطارية تلقائيًا أثناء شحن الجهاز."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
+    <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="zero">‏لمدة أقل من دقيقة (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="two">‏لمدة دقيقتين (%1$d) (حتى <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1576,11 +1751,16 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏يتم تعديل طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏يتم تعديل طلب SS إلى طلب SS الجديد."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"الملف الشخصي للعمل"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"زر \"توسيع\""</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"تبديل التوسيع"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"إغلاق التجاوز"</string>
+    <string name="maximize_button_text" msgid="7543285286182446254">"تكبير"</string>
+    <string name="close_button_text" msgid="3937902162644062866">"إغلاق"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="zero">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
       <item quantity="two">تم تحديد عنصرين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
@@ -1589,4 +1769,33 @@
       <item quantity="other">تم تحديد <xliff:g id="COUNT_1">%1$d</xliff:g> من العناصر</item>
       <item quantity="one">تم تحديد <xliff:g id="COUNT_0">%1$d</xliff:g> عنصر</item>
     </plurals>
+    <string name="importance_from_user" msgid="7318955817386549931">"لقد عيَّنت أهمية هذه الإشعارات."</string>
+    <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"وضع العمل معطَّل"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"السماح باستخدام الملف الشخصي للعمل، بما في ذلك التطبيقات ومزامنة الخلفية والميزات ذات الصلة."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"لديك رسائل جديدة"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ربما تكون بعض الوظائف مُقيّدة."</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"انقر لإلغاء القفل."</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"تم قفل بيانات المستخدم."</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"تم قفل الملف الشخصي للعمل."</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"انقر لإلغاء قفل الملف الشخصي للعمل"</string>
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"تم الاتصال بـ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"انقر لعرض الملفات"</string>
+    <string name="pin_target" msgid="3052256031352291362">"تثبيت"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"إزالة تثبيت"</string>
+    <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="audit_safemode_notification" msgid="6416076898350685856">"يمكنك إعادة تعيين بيانات المصنع لاستخدام هذا الجهاز بدون قيود"</string>
+    <string name="audit_safemode_notification_details" msgid="1860601176690176413">"المس للتعرف على مزيد من المعلومات."</string>
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"تم تعطيل <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

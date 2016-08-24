@@ -25,6 +25,9 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -65,6 +68,13 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         setUserSwitcherController(qsPanel.getHost().getUserSwitcherController());
     }
 
+    public boolean hasMultipleUsers() {
+        if (mUserListener == null) {
+            return false;
+        }
+        return mUserListener.getCount() != 0;
+    }
+
     public void setUserSwitcherController(UserSwitcherController userSwitcherController) {
         mUserSwitcherController = userSwitcherController;
         registerListener();
@@ -81,7 +91,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     private void registerListener() {
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager) && mUserListener == null) {
+        if (mUserManager.isUserSwitcherEnabled() && mUserListener == null) {
 
             final UserSwitcherController controller = mUserSwitcherController;
             if (controller != null) {
@@ -103,7 +113,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)) {
+        if (mUserManager.isUserSwitcherEnabled()) {
             if (mKeyguardMode) {
                 if (mKeyguardUserSwitcher != null) {
                     mKeyguardUserSwitcher.show(true /* animate */);
@@ -137,35 +147,34 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     private void refreshContentDescription() {
         String currentUser = null;
-        if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)
+        if (mUserManager.isUserSwitcherEnabled()
                 && mUserSwitcherController != null) {
             currentUser = mUserSwitcherController.getCurrentUserName(mContext);
         }
 
         String text = null;
-        if (isClickable()) {
-            if (UserSwitcherController.isUserSwitcherAvailable(mUserManager)) {
-                if (TextUtils.isEmpty(currentUser)) {
-                    text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
-                } else {
-                    text = mContext.getString(
-                            R.string.accessibility_multi_user_switch_switcher_with_current,
-                            currentUser);
-                }
-            } else {
-                text = mContext.getString(R.string.accessibility_multi_user_switch_quick_contact);
-            }
-        } else {
-            if (!TextUtils.isEmpty(currentUser)) {
-                text = mContext.getString(
-                        R.string.accessibility_multi_user_switch_inactive,
-                        currentUser);
-            }
+
+        if (!TextUtils.isEmpty(currentUser)) {
+            text = mContext.getString(
+                    R.string.accessibility_quick_settings_user,
+                    currentUser);
         }
 
         if (!TextUtils.equals(getContentDescription(), text)) {
             setContentDescription(text);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(Button.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(Button.class.getName());
     }
 
     @Override

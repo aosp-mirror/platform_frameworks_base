@@ -43,22 +43,22 @@ static struct {
     jfieldID y;
 } gPointClassInfo;
 
-static Mutex sLock;
-
-static int sUnmatchedInitRequestCount = 0;
+// See PdfEditor.cpp
+extern Mutex sPdfiumLock;
+extern int sUnmatchedPdfiumInitRequestCount;
 
 static void initializeLibraryIfNeeded() {
-    Mutex::Autolock _l(sLock);
-    if (sUnmatchedInitRequestCount == 0) {
+    Mutex::Autolock _l(sPdfiumLock);
+    if (sUnmatchedPdfiumInitRequestCount == 0) {
         FPDF_InitLibrary();
     }
-    sUnmatchedInitRequestCount++;
+    sUnmatchedPdfiumInitRequestCount++;
 }
 
 static void destroyLibraryIfNeeded() {
-    Mutex::Autolock _l(sLock);
-    sUnmatchedInitRequestCount--;
-    if (sUnmatchedInitRequestCount == 0) {
+    Mutex::Autolock _l(sPdfiumLock);
+    sUnmatchedPdfiumInitRequestCount--;
+    if (sUnmatchedPdfiumInitRequestCount == 0) {
        FPDF_DestroyLibrary();
     }
 }
@@ -205,11 +205,10 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     clip.bottom = destBottom;
     fxgeDevice->SetClip_Rect(&clip);
 
-    CPDF_RenderContext* pageContext = new CPDF_RenderContext;
+    CPDF_RenderContext* pageContext = new CPDF_RenderContext(pPage);
     pContext->m_pContext = pageContext;
-    pageContext->Create(pPage);
 
-    CFX_AffineMatrix matrix;
+    CFX_Matrix matrix;
     if (!transform) {
         pPage->GetDisplayMatrix(matrix, destLeft, destTop, destRight - destLeft,
                 destBottom - destTop, 0);
@@ -232,8 +231,8 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     }
     pageContext->AppendObjectList(pPage, &matrix);
 
-    pContext->m_pRenderer = new CPDF_ProgressiveRenderer;
-    pContext->m_pRenderer->Start(pageContext, fxgeDevice, renderOptions, NULL);
+    pContext->m_pRenderer = new CPDF_ProgressiveRenderer(pageContext, fxgeDevice, renderOptions);
+    pContext->m_pRenderer->Start(NULL);
 
     fxgeDevice->RestoreState();
 

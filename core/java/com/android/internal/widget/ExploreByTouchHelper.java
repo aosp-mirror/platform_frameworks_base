@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.IntArray;
-import android.view.accessibility.*;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
@@ -49,6 +48,9 @@ import android.view.accessibility.AccessibilityNodeProvider;
 public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     /** Virtual node identifier value for invalid nodes. */
     public static final int INVALID_ID = Integer.MIN_VALUE;
+
+    /** Virtual node identifier value for the host view's node. */
+    public static final int HOST_ID = View.NO_ID;
 
     /** Default class name used for virtual views. */
     private static final String DEFAULT_CLASS_NAME = View.class.getName();
@@ -195,7 +197,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      * parent view.
      */
     public void invalidateRoot() {
-        invalidateVirtualView(View.NO_ID);
+        invalidateVirtualView(HOST_ID, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
     }
 
     /**
@@ -205,10 +207,43 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      * You <b>must</b> call this method after changing any of the properties set
      * in {@link #onPopulateNodeForVirtualView}.
      *
-     * @param virtualViewId The virtual view id to invalidate.
+     * @param virtualViewId The virtual view id to invalidate, or
+     *                      {@link #HOST_ID} to invalidate the root view.
+     * @see #invalidateVirtualView(int, int)
      */
     public void invalidateVirtualView(int virtualViewId) {
-        sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        invalidateVirtualView(virtualViewId,
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+    }
+
+    /**
+     * Notifies the accessibility framework that the properties of a particular
+     * item have changed.
+     * <p>
+     * You <b>must</b> call this method after changing any of the properties set
+     * in {@link #onPopulateNodeForVirtualView}.
+     *
+     * @param virtualViewId The virtual view id to invalidate, or
+     *                      {@link #HOST_ID} to invalidate the root view.
+     * @param changeTypes The bit mask of change types. May be {@code 0} for the
+     *                    default (undefined) change type or one or more of:
+     *         <ul>
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
+     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *         </ul>
+     */
+    public void invalidateVirtualView(int virtualViewId, int changeTypes) {
+        if (virtualViewId != INVALID_ID && mManager.isEnabled()) {
+            final ViewParent parent = mView.getParent();
+            if (parent != null) {
+                final AccessibilityEvent event = createEvent(virtualViewId,
+                        AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                event.setContentChangeTypes(changeTypes);
+                parent.requestSendAccessibilityEvent(mView, event);
+            }
+        }
     }
 
     /**
@@ -245,7 +280,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
 
     /**
      * Constructs and returns an {@link AccessibilityEvent} for the specified
-     * virtual view id, which includes the host view ({@link View#NO_ID}).
+     * virtual view id, which includes the host view ({@link #HOST_ID}).
      *
      * @param virtualViewId The virtual view id for the item for which to
      *            construct an event.
@@ -255,7 +290,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityEvent createEvent(int virtualViewId, int eventType) {
         switch (virtualViewId) {
-            case View.NO_ID:
+            case HOST_ID:
                 return createEventForHost(eventType);
             default:
                 return createEventForChild(virtualViewId, eventType);
@@ -271,7 +306,11 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityEvent createEventForHost(int eventType) {
         final AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-        onInitializeAccessibilityEvent(mView, event);
+        mView.onInitializeAccessibilityEvent(event);
+
+        // Allow the client to populate the event.
+        onPopulateEventForHost(event);
+
         return event;
     }
 
@@ -309,7 +348,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     /**
      * Constructs and returns an {@link android.view.accessibility.AccessibilityNodeInfo} for the
      * specified virtual view id, which includes the host view
-     * ({@link View#NO_ID}).
+     * ({@link #HOST_ID}).
      *
      * @param virtualViewId The virtual view id for the item for which to
      *            construct a node.
@@ -318,7 +357,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityNodeInfo createNode(int virtualViewId) {
         switch (virtualViewId) {
-            case View.NO_ID:
+            case HOST_ID:
                 return createNodeForHost();
             default:
                 return createNodeForChild(virtualViewId);
@@ -333,7 +372,11 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     private AccessibilityNodeInfo createNodeForHost() {
         final AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain(mView);
-        onInitializeAccessibilityNodeInfo(mView, node);
+        mView.onInitializeAccessibilityNodeInfo(node);
+        final int realNodeCount = node.getChildCount();
+
+        // Allow the client to populate the host node.
+        onPopulateNodeForHost(node);
 
         // Add the virtual descendants.
         if (mTempArray == null) {
@@ -343,6 +386,9 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
         }
         final IntArray virtualViewIds = mTempArray;
         getVisibleVirtualViews(virtualViewIds);
+        if (realNodeCount > 0 && virtualViewIds.size() > 0) {
+            throw new RuntimeException("Views cannot have both real and virtual children");
+        }
 
         final int N = virtualViewIds.size();
         for (int i = 0; i < N; i++) {
@@ -457,7 +503,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
 
     private boolean performAction(int virtualViewId, int action, Bundle arguments) {
         switch (virtualViewId) {
-            case View.NO_ID:
+            case HOST_ID:
                 return performActionForHost(action, arguments);
             default:
                 return performActionForChild(virtualViewId, action, arguments);
@@ -465,7 +511,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
     }
 
     private boolean performActionForHost(int action, Bundle arguments) {
-        return performAccessibilityAction(mView, action, arguments);
+        return mView.performAccessibilityAction(action, arguments);
     }
 
     private boolean performActionForChild(int virtualViewId, int action, Bundle arguments) {
@@ -646,7 +692,7 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      * <li>package name, set to the package of the host view's
      * {@link Context}, see {@link AccessibilityEvent#setPackageName}
      * <li>event source, set to the host view and virtual view identifier,
-     * see {@link AccessibilityRecord#setSource(View, int)}
+     * see {@link android.view.accessibility.AccessibilityRecord#setSource(View, int)}
      * </ul>
      *
      * @param virtualViewId The virtual view id for the item for which to
@@ -655,6 +701,18 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     protected abstract void onPopulateEventForVirtualView(
             int virtualViewId, AccessibilityEvent event);
+
+    /**
+     * Populates an {@link AccessibilityEvent} with information about the host
+     * view.
+     * <p>
+     * The default implementation is a no-op.
+     *
+     * @param event the event to populate with information about the host view
+     */
+    protected void onPopulateEventForHost(AccessibilityEvent event) {
+        // Default implementation is no-op.
+    }
 
     /**
      * Populates an {@link AccessibilityNodeInfo} with information
@@ -713,6 +771,18 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      */
     protected abstract void onPopulateNodeForVirtualView(
             int virtualViewId, AccessibilityNodeInfo node);
+
+    /**
+     * Populates an {@link AccessibilityNodeInfo} with information about the
+     * host view.
+     * <p>
+     * The default implementation is a no-op.
+     *
+     * @param node the node to populate with information about the host view
+     */
+    protected void onPopulateNodeForHost(AccessibilityNodeInfo node) {
+        // Default implementation is no-op.
+    }
 
     /**
      * Performs the specified accessibility action on the item associated

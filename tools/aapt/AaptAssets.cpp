@@ -235,7 +235,7 @@ bool AaptLocaleValue::initFromFilterString(const String8& str) {
          setRegion(part2.string());
      } else if (part2.length() == 4 && isAlpha(part2)) {
          setScript(part2.string());
-     } else if (part2.length() >= 5 && part2.length() <= 8) {
+     } else if (part2.length() >= 4 && part2.length() <= 8) {
          setVariant(part2.string());
      } else {
          valid = false;
@@ -250,7 +250,7 @@ bool AaptLocaleValue::initFromFilterString(const String8& str) {
      if (((part3.length() == 2 && isAlpha(part3)) ||
          (part3.length() == 3 && isNumber(part3))) && script[0]) {
          setRegion(part3.string());
-     } else if (part3.length() >= 5 && part3.length() <= 8) {
+     } else if (part3.length() >= 4 && part3.length() <= 8) {
          setVariant(part3.string());
      } else {
          valid = false;
@@ -261,7 +261,7 @@ bool AaptLocaleValue::initFromFilterString(const String8& str) {
      }
 
      const String8& part4 = parts[3];
-     if (part4.length() >= 5 && part4.length() <= 8) {
+     if (part4.length() >= 4 && part4.length() <= 8) {
          setVariant(part4.string());
      } else {
          valid = false;
@@ -280,7 +280,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
 
     String8 part = parts[currentIndex];
     if (part[0] == 'b' && part[1] == '+') {
-        // This is a "modified" BCP-47 language tag. Same semantics as BCP-47 tags,
+        // This is a "modified" BCP 47 language tag. Same semantics as BCP 47 tags,
         // except that the separator is "+" and not "-".
         Vector<String8> subtags = AaptUtil::splitAndLowerCase(part, '+');
         subtags.removeItemsAt(0);
@@ -296,8 +296,11 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
                     setRegion(subtags[1]);
                     break;
                 case 4:
-                    setScript(subtags[1]);
-                    break;
+                    if (isAlpha(subtags[1])) {
+                        setScript(subtags[1]);
+                        break;
+                    }
+                    // This is not alphabetical, so we fall through to variant
                 case 5:
                 case 6:
                 case 7:
@@ -305,7 +308,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
                     setVariant(subtags[1]);
                     break;
                 default:
-                    fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name %s\n",
+                    fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name %s\n",
                             part.string());
                     return -1;
             }
@@ -322,13 +325,13 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
                 setRegion(subtags[1]);
                 hasRegion = true;
             } else {
-                fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name %s\n", part.string());
+                fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name %s\n", part.string());
                 return -1;
             }
 
             // The third tag can either be a region code (if the second tag was
             // a script), else a variant code.
-            if (subtags[2].size() > 4) {
+            if (subtags[2].size() >= 4) {
                 setVariant(subtags[2]);
             } else {
                 setRegion(subtags[2]);
@@ -339,7 +342,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
             setRegion(subtags[2]);
             setVariant(subtags[3]);
         } else {
-            fprintf(stderr, "ERROR: Invalid BCP-47 tag in directory name: %s\n", part.string());
+            fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name: %s\n", part.string());
             return -1;
         }
 
@@ -370,7 +373,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
 void AaptLocaleValue::initFromResTable(const ResTable_config& config) {
     config.unpackLanguage(language);
     config.unpackRegion(region);
-    if (config.localeScript[0]) {
+    if (config.localeScript[0] && !config.localeScriptWasComputed) {
         memcpy(script, config.localeScript, sizeof(config.localeScript));
     }
 

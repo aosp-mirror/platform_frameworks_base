@@ -43,6 +43,8 @@ final class AccessibilityCache {
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
+    private boolean mIsAllWindowsCached;
+
     private final SparseArray<AccessibilityWindowInfo> mWindowCache =
             new SparseArray<>();
 
@@ -51,6 +53,24 @@ final class AccessibilityCache {
 
     private final SparseArray<AccessibilityWindowInfo> mTempWindowArray =
             new SparseArray<>();
+
+    public void setWindows(List<AccessibilityWindowInfo> windows) {
+        synchronized (mLock) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Set windows");
+            }
+            clearWindowCache();
+            if (windows == null) {
+                return;
+            }
+            final int windowCount = windows.size();
+            for (int i = 0; i < windowCount; i++) {
+                final AccessibilityWindowInfo window = windows.get(i);
+                addWindow(window);
+            }
+            mIsAllWindowsCached = true;
+        }
+    }
 
     public void addWindow(AccessibilityWindowInfo window) {
         synchronized (mLock) {
@@ -186,6 +206,10 @@ final class AccessibilityCache {
 
     public List<AccessibilityWindowInfo> getWindows() {
         synchronized (mLock) {
+            if (!mIsAllWindowsCached) {
+                return null;
+            }
+
             final int windowCount = mWindowCache.size();
             if (windowCount > 0) {
                 // Careful to return the windows in a decreasing layer order.
@@ -197,8 +221,11 @@ final class AccessibilityCache {
                     sortedWindows.put(window.getLayer(), window);
                 }
 
-                List<AccessibilityWindowInfo> windows = new ArrayList<>(windowCount);
-                for (int i = windowCount - 1; i >= 0; i--) {
+                // It's possible in transient conditions for two windows to share the same
+                // layer, which results in sortedWindows being smaller than mWindowCache
+                final int sortedWindowCount = sortedWindows.size();
+                List<AccessibilityWindowInfo> windows = new ArrayList<>(sortedWindowCount);
+                for (int i = sortedWindowCount - 1; i >= 0; i--) {
                     AccessibilityWindowInfo window = sortedWindows.valueAt(i);
                     windows.add(AccessibilityWindowInfo.obtain(window));
                     sortedWindows.removeAt(i);
@@ -280,12 +307,7 @@ final class AccessibilityCache {
             if (DEBUG) {
                 Log.i(LOG_TAG, "clear()");
             }
-            final int windowCount = mWindowCache.size();
-            for (int i = windowCount - 1; i >= 0; i--) {
-                AccessibilityWindowInfo window = mWindowCache.valueAt(i);
-                window.recycle();
-                mWindowCache.removeAt(i);
-            }
+            clearWindowCache();
             final int nodesForWindowCount = mNodeCache.size();
             for (int i = 0; i < nodesForWindowCount; i++) {
                 final int windowId = mNodeCache.keyAt(i);
@@ -295,6 +317,16 @@ final class AccessibilityCache {
             mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
             mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
         }
+    }
+
+    private void clearWindowCache() {
+        final int windowCount = mWindowCache.size();
+        for (int i = windowCount - 1; i >= 0; i--) {
+            AccessibilityWindowInfo window = mWindowCache.valueAt(i);
+            window.recycle();
+            mWindowCache.removeAt(i);
+        }
+        mIsAllWindowsCached = false;
     }
 
     private void clearNodesForWindowLocked(int windowId) {

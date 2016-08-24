@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "BigBuffer.h"
-#include "StringPiece.h"
 #include "StringPool.h"
-#include "Util.h"
+#include "util/BigBuffer.h"
+#include "util/StringPiece.h"
+#include "util/Util.h"
 
 #include <algorithm>
 #include <androidfw/ResourceTypes.h>
@@ -219,7 +219,7 @@ void StringPool::prune() {
     auto indexIter = std::begin(mIndexedStrings);
     while (indexIter != iterEnd) {
         if (indexIter->second->ref <= 0) {
-            mIndexedStrings.erase(indexIter++);
+            indexIter = mIndexedStrings.erase(indexIter);
         } else {
             ++indexIter;
         }
@@ -241,6 +241,12 @@ void StringPool::prune() {
     // a deleted string from the StyleEntry.
     mStrings.erase(endIter2, std::end(mStrings));
     mStyles.erase(endIter3, std::end(mStyles));
+
+    // Reassign the indices.
+    const size_t len = mStrings.size();
+    for (size_t index = 0; index < len; index++) {
+        mStrings[index]->index = index;
+    }
 }
 
 void StringPool::sort(const std::function<bool(const Entry&, const Entry&)>& cmp) {
@@ -336,7 +342,14 @@ bool StringPool::flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
 
             // Encode the actual UTF16 string length.
             data = encodeLength(data, entry->value.size());
-            strncpy16(data, entry->value.data(), entry->value.size());
+            const size_t byteLength = entry->value.size() * sizeof(char16_t);
+
+            // NOTE: For some reason, strncpy16(data, entry->value.data(), entry->value.size())
+            // truncates the string.
+            memcpy(data, entry->value.data(), byteLength);
+
+            // The null-terminating character is already here due to the block of data being set
+            // to 0s on allocation.
         }
     }
 

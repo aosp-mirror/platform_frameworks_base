@@ -16,10 +16,13 @@
 
 package android.net;
 
+import android.net.DataUsageRequest;
 import android.net.INetworkStatsSession;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.os.IBinder;
+import android.os.Messenger;
 
 /** {@hide} */
 interface INetworkStatsService {
@@ -56,5 +59,12 @@ interface INetworkStatsService {
 
     /** Advise persistance threshold; may be overridden internally. */
     void advisePersistThreshold(long thresholdBytes);
+
+    /** Registers a callback on data usage. */
+    DataUsageRequest registerUsageCallback(String callingPackage,
+            in DataUsageRequest request, in Messenger messenger, in IBinder binder);
+
+    /** Unregisters a callback on data usage. */
+    void unregisterUsageRequest(in DataUsageRequest request);
 
 }

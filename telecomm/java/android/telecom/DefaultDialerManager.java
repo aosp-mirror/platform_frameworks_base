@@ -21,6 +21,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -150,12 +151,13 @@ public class DefaultDialerManager {
      *
      * @hide
      **/
-    public static List<String> getInstalledDialerApplications(Context context) {
+    public static List<String> getInstalledDialerApplications(Context context, int userId) {
         PackageManager packageManager = context.getPackageManager();
 
         // Get the list of apps registered for the DIAL intent with empty scheme
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent, 0);
+        List<ResolveInfo> resolveInfoList =
+                packageManager.queryIntentActivitiesAsUser(intent, 0, userId);
 
         List<String> packageNames = new ArrayList<>();
 
@@ -169,6 +171,10 @@ public class DefaultDialerManager {
         final Intent dialIntentWithTelScheme = new Intent(Intent.ACTION_DIAL);
         dialIntentWithTelScheme.setData(Uri.fromParts(PhoneAccount.SCHEME_TEL, "", null));
         return filterByIntent(context, packageNames, dialIntentWithTelScheme);
+    }
+
+    public static List<String> getInstalledDialerApplications(Context context) {
+        return getInstalledDialerApplications(context, Process.myUserHandle().getIdentifier());
     }
 
     /**
@@ -207,8 +213,8 @@ public class DefaultDialerManager {
         }
 
         final List<String> result = new ArrayList<>();
-        final List<ResolveInfo> resolveInfoList =
-                context.getPackageManager().queryIntentActivities(intent, 0);
+        final List<ResolveInfo> resolveInfoList = context.getPackageManager()
+                .queryIntentActivities(intent, 0);
         final int length = resolveInfoList.size();
         for (int i = 0; i < length; i++) {
             final ActivityInfo info = resolveInfoList.get(i).activityInfo;

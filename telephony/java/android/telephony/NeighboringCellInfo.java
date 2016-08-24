@@ -135,8 +135,8 @@ public class NeighboringCellInfo implements Parcelable
                 mNetworkType = radioType;
                 // check if 0xFFFFFFFF for UNKNOWN_CID
                 if (!location.equalsIgnoreCase("FFFFFFFF")) {
-                    mCid = Integer.valueOf(location.substring(4), 16);
-                    mLac = Integer.valueOf(location.substring(0, 4), 16);
+                    mCid = Integer.parseInt(location.substring(4), 16);
+                    mLac = Integer.parseInt(location.substring(0, 4), 16);
                 }
                 break;
             case NETWORK_TYPE_UMTS:
@@ -144,7 +144,7 @@ public class NeighboringCellInfo implements Parcelable
             case NETWORK_TYPE_HSUPA:
             case NETWORK_TYPE_HSPA:
                 mNetworkType = radioType;
-                mPsc = Integer.valueOf(location, 16);
+                mPsc = Integer.parseInt(location, 16);
                 break;
             }
         } catch (NumberFormatException e) {

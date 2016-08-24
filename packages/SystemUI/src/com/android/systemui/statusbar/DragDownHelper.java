@@ -24,11 +24,12 @@ import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingManager;
 
 /**
  * A utility class to enable the downward swipe on the lockscreen to go to the full shade and expand
@@ -52,19 +53,18 @@ public class DragDownHelper implements Gefingerpoken {
     private final int[] mTemp2 = new int[2];
     private boolean mDraggedFarEnough;
     private ExpandableView mStartingChild;
-    private Interpolator mInterpolator;
     private float mLastHeight;
+    private FalsingManager mFalsingManager;
 
     public DragDownHelper(Context context, View host, ExpandHelper.Callback callback,
             DragDownCallback dragDownCallback) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
-        mInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
         mHost = host;
+        mFalsingManager = FalsingManager.getInstance(context);
     }
 
     @Override
@@ -84,6 +84,7 @@ public class DragDownHelper implements Gefingerpoken {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
+                    mFalsingManager.onNotificatonStartDraggingDown();
                     mDraggingDown = true;
                     captureStartingChild(mInitialTouchX, mInitialTouchY);
                     mInitialTouchY = y;
@@ -116,20 +117,22 @@ public class DragDownHelper implements Gefingerpoken {
                 if (mLastHeight > mMinDragDistance) {
                     if (!mDraggedFarEnough) {
                         mDraggedFarEnough = true;
-                        mDragDownCallback.onThresholdReached();
+                        mDragDownCallback.onCrossedThreshold(true);
                     }
                 } else {
                     if (mDraggedFarEnough) {
                         mDraggedFarEnough = false;
-                        mDragDownCallback.onDragDownReset();
+                        mDragDownCallback.onCrossedThreshold(false);
                     }
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (mDraggedFarEnough && mDragDownCallback.onDraggedDown(mStartingChild,
+                if (!isFalseTouch() && mDragDownCallback.onDraggedDown(mStartingChild,
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
                         mDragDownCallback.setEmptyDragAmount(0f);
+                    } else {
+                        mCallback.setUserLockedChild(mStartingChild, false);
                     }
                     mDraggingDown = false;
                 } else {
@@ -142,6 +145,10 @@ public class DragDownHelper implements Gefingerpoken {
                 return false;
         }
         return false;
+    }
+
+    private boolean isFalseTouch() {
+        return mFalsingManager.isFalseTouch() || !mDraggedFarEnough;
     }
 
     private void captureStartingChild(float x, float y) {
@@ -162,21 +169,24 @@ public class DragDownHelper implements Gefingerpoken {
                 ? RUBBERBAND_FACTOR_EXPANDABLE
                 : RUBBERBAND_FACTOR_STATIC;
         float rubberband = heightDelta * rubberbandFactor;
-        if (expandable && (rubberband + child.getMinHeight()) > child.getMaxContentHeight()) {
-            float overshoot = (rubberband + child.getMinHeight()) - child.getMaxContentHeight();
+        if (expandable
+                && (rubberband + child.getCollapsedHeight()) > child.getMaxContentHeight()) {
+            float overshoot =
+                    (rubberband + child.getCollapsedHeight()) - child.getMaxContentHeight();
             overshoot *= (1 - RUBBERBAND_FACTOR_STATIC);
             rubberband -= overshoot;
         }
-        child.setContentHeight((int) (child.getMinHeight() + rubberband));
+        child.setActualHeight((int) (child.getCollapsedHeight() + rubberband));
     }
 
     private void cancelExpansion(final ExpandableView child) {
-        if (child.getContentHeight() == child.getMinHeight()) {
+        if (child.getActualHeight() == child.getCollapsedHeight()) {
+            mCallback.setUserLockedChild(child, false);
             return;
         }
-        ObjectAnimator anim = ObjectAnimator.ofInt(child, "contentHeight",
-                child.getContentHeight(), child.getMinHeight());
-        anim.setInterpolator(mInterpolator);
+        ObjectAnimator anim = ObjectAnimator.ofInt(child, "actualHeight",
+                child.getActualHeight(), child.getCollapsedHeight());
+        anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -189,7 +199,7 @@ public class DragDownHelper implements Gefingerpoken {
 
     private void cancelExpansion() {
         ValueAnimator anim = ValueAnimator.ofFloat(mLastHeight, 0);
-        anim.setInterpolator(mInterpolator);
+        anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -201,6 +211,7 @@ public class DragDownHelper implements Gefingerpoken {
     }
 
     private void stopDragging() {
+        mFalsingManager.onNotificatonStopDraggingDown();
         if (mStartingChild != null) {
             cancelExpansion(mStartingChild);
         } else {
@@ -224,7 +235,12 @@ public class DragDownHelper implements Gefingerpoken {
          */
         boolean onDraggedDown(View startingChild, int dragLengthY);
         void onDragDownReset();
-        void onThresholdReached();
+
+        /**
+         * The user has dragged either above or below the threshold
+         * @param above whether he dragged above it
+         */
+        void onCrossedThreshold(boolean above);
         void onTouchSlopExceeded();
         void setEmptyDragAmount(float amount);
     }

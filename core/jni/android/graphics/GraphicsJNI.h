@@ -3,21 +3,23 @@
 
 #include "Bitmap.h"
 #include "SkBitmap.h"
+#include "SkBRDAllocator.h"
+#include "SkCodec.h"
 #include "SkDevice.h"
 #include "SkPixelRef.h"
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
-#include <Canvas.h>
 #include <jni.h>
+#include <hwui/Canvas.h>
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
 
 namespace android {
 class Paint;
-struct TypefaceImpl;
+struct Typeface;
 }
 
 class GraphicsJNI {
@@ -123,7 +125,7 @@ public:
  *  ensure that the allocated buffer is properly accounted for with a
  *  reference in the heap (or a JNI global reference).
  */
-class JavaPixelAllocator : public SkBitmap::Allocator {
+class JavaPixelAllocator : public SkBRDAllocator {
 public:
     JavaPixelAllocator(JNIEnv* env);
     ~JavaPixelAllocator();
@@ -139,9 +141,76 @@ public:
         return result;
     };
 
+    /**
+     *  Indicates that this allocator allocates zero initialized
+     *  memory.
+     */
+    SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kYes_ZeroInitialized; }
+
 private:
     JavaVM* mJavaVM;
     android::Bitmap* mStorage = nullptr;
+};
+
+/**
+ *  Allocator to handle reusing bitmaps for BitmapRegionDecoder.
+ *
+ *  The BitmapRegionDecoder documentation states that, if it is
+ *  provided, the recycled bitmap will always be reused, clipping
+ *  the decoded output to fit in the recycled bitmap if necessary.
+ *  This allocator implements that behavior.
+ *
+ *  Skia's SkBitmapRegionDecoder expects the memory that
+ *  is allocated to be large enough to decode the entire region
+ *  that is requested.  It will decode directly into the memory
+ *  that is provided.
+ *
+ *  FIXME: BUG:25465958
+ *  If the recycled bitmap is not large enough for the decode
+ *  requested, meaning that a clip is required, we will allocate
+ *  enough memory for Skia to perform the decode, and then copy
+ *  from the decoded output into the recycled bitmap.
+ *
+ *  If the recycled bitmap is large enough for the decode requested,
+ *  we will provide that memory for Skia to decode directly into.
+ *
+ *  This allocator should only be used for a single allocation.
+ *  After we reuse the recycledBitmap once, it is dangerous to
+ *  reuse it again, given that it still may be in use from our
+ *  first allocation.
+ */
+class RecyclingClippingPixelAllocator : public SkBRDAllocator {
+public:
+
+    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
+            size_t recycledBytes);
+
+    ~RecyclingClippingPixelAllocator();
+
+    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
+
+    /**
+     *  Must be called!
+     *
+     *  In the event that the recycled bitmap is not large enough for
+     *  the allocation requested, we will allocate memory on the heap
+     *  instead.  As a final step, once we are done using this memory,
+     *  we will copy the contents of the heap memory into the recycled
+     *  bitmap's memory, clipping as necessary.
+     */
+    void copyIfNecessary();
+
+    /**
+     *  Indicates that this allocator does not allocate zero initialized
+     *  memory.
+     */
+    SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kNo_ZeroInitialized; }
+
+private:
+    android::Bitmap* mRecycledBitmap;
+    const size_t     mRecycledBytes;
+    SkBitmap*        mSkiaBitmap;
+    bool             mNeedsCopy;
 };
 
 class AshmemPixelAllocator : public SkBitmap::Allocator {

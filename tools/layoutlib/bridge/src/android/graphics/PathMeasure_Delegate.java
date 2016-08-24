@@ -19,10 +19,12 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.util.CachedPathIteratorFactory;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import com.android.layoutlib.bridge.util.CachedPathIteratorFactory.CachedPathIterator;
+
 import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 
 /**
  * Delegate implementing the native methods of {@link android.graphics.PathMeasure}
@@ -38,35 +40,30 @@ import java.awt.geom.Point2D;
  * @see DelegateManager
  */
 public final class PathMeasure_Delegate {
+
     // ---- delegate manager ----
     private static final DelegateManager<PathMeasure_Delegate> sManager =
             new DelegateManager<PathMeasure_Delegate>(PathMeasure_Delegate.class);
 
     // ---- delegate data ----
-    // This governs how accurate the approximation of the Path is.
-    private static final float PRECISION = 0.002f;
+    private CachedPathIteratorFactory mOriginalPathIterator;
 
-    /**
-     * Array containing the path points components. There are three components for each point:
-     * <ul>
-     *     <li>Fraction along the length of the path that the point resides</li>
-     *     <li>The x coordinate of the point</li>
-     *     <li>The y coordinate of the point</li>
-     * </ul>
-     */
-    private float mPathPoints[];
     private long mNativePath;
+
 
     private PathMeasure_Delegate(long native_path, boolean forceClosed) {
         mNativePath = native_path;
-        if (forceClosed && mNativePath != 0) {
-            // Copy the path and call close
-            mNativePath = Path_Delegate.init2(native_path);
-            Path_Delegate.native_close(mNativePath);
-        }
+        if (native_path != 0) {
+            if (forceClosed) {
+                // Copy the path and call close
+                native_path = Path_Delegate.init2(native_path);
+                Path_Delegate.native_close(native_path);
+            }
 
-        mPathPoints =
-                mNativePath != 0 ? Path_Delegate.native_approximate(mNativePath, PRECISION) : null;
+            Path_Delegate pathDelegate = Path_Delegate.getDelegate(native_path);
+            mOriginalPathIterator = new CachedPathIteratorFactory(pathDelegate.getJavaShape()
+                    .getPathIterator(null));
+        }
     }
 
     @LayoutlibDelegate
@@ -108,13 +105,19 @@ public final class PathMeasure_Delegate {
         PathMeasure_Delegate pathMeasure = sManager.getDelegate(native_instance);
         assert pathMeasure != null;
 
-        if (forceClosed && native_path != 0) {
-            // Copy the path and call close
-            native_path = Path_Delegate.init2(native_path);
-            Path_Delegate.native_close(native_path);
+        if (native_path != 0) {
+            if (forceClosed) {
+                // Copy the path and call close
+                native_path = Path_Delegate.init2(native_path);
+                Path_Delegate.native_close(native_path);
+            }
+
+            Path_Delegate pathDelegate = Path_Delegate.getDelegate(native_path);
+            pathMeasure.mOriginalPathIterator = new CachedPathIteratorFactory(pathDelegate.getJavaShape()
+                    .getPathIterator(null));
         }
+
         pathMeasure.mNativePath = native_path;
-        pathMeasure.mPathPoints = Path_Delegate.native_approximate(native_path, PRECISION);
     }
 
     @LayoutlibDelegate
@@ -122,21 +125,11 @@ public final class PathMeasure_Delegate {
         PathMeasure_Delegate pathMeasure = sManager.getDelegate(native_instance);
         assert pathMeasure != null;
 
-        if (pathMeasure.mPathPoints == null) {
+        if (pathMeasure.mOriginalPathIterator == null) {
             return 0;
         }
 
-        float length = 0;
-        int nPoints = pathMeasure.mPathPoints.length / 3;
-        for (int i = 1; i < nPoints; i++) {
-            length += Point2D.distance(
-                    pathMeasure.mPathPoints[(i - 1) * 3 + 1],
-                    pathMeasure.mPathPoints[(i - 1) * 3 + 2],
-                    pathMeasure.mPathPoints[i*3 + 1],
-                    pathMeasure.mPathPoints[i*3 + 2]);
-        }
-
-        return length;
+        return pathMeasure.mOriginalPathIterator.iterator().getTotalLength();
     }
 
     @LayoutlibDelegate
@@ -149,13 +142,10 @@ public final class PathMeasure_Delegate {
             return false;
         }
 
-        PathIterator pathIterator = path.getJavaShape().getPathIterator(null);
-
         int type = 0;
         float segment[] = new float[6];
-        while (!pathIterator.isDone()) {
-            type = pathIterator.currentSegment(segment);
-            pathIterator.next();
+        for (PathIterator pi = path.getJavaShape().getPathIterator(null); !pi.isDone(); pi.next()) {
+            type = pi.currentSegment(segment);
         }
 
         // A path is a closed path if the last element is SEG_CLOSE
@@ -176,33 +166,56 @@ public final class PathMeasure_Delegate {
         PathMeasure_Delegate pathMeasure = sManager.getDelegate(native_instance);
         assert pathMeasure != null;
 
-        if (pathMeasure.mPathPoints == null) {
-            return false;
-        }
-
-        float accLength = 0;
+        CachedPathIterator iterator = pathMeasure.mOriginalPathIterator.iterator();
+        float accLength = startD;
         boolean isZeroLength = true; // Whether the output has zero length or not
-        int nPoints = pathMeasure.mPathPoints.length / 3;
-        for (int i = 0; i < nPoints; i++) {
-            float x = pathMeasure.mPathPoints[i * 3 + 1];
-            float y = pathMeasure.mPathPoints[i * 3 + 2];
-            if (accLength >= startD && accLength <= stopD) {
+        float[] points = new float[6];
+
+        iterator.jumpToSegment(accLength);
+        while (!iterator.isDone() && (stopD - accLength > 0.1f)) {
+            int type = iterator.currentSegment(points, stopD - accLength);
+
+            if (accLength - iterator.getCurrentSegmentLength() <= stopD) {
                 if (startWithMoveTo) {
                     startWithMoveTo = false;
-                    Path_Delegate.native_moveTo(native_dst_path, x, y);
-                } else {
-                    isZeroLength = false;
-                    Path_Delegate.native_lineTo(native_dst_path, x, y);
+
+                    // If this segment is a MOVETO, then we just use that one. If not, then we issue
+                    // a first moveto
+                    if (type != PathIterator.SEG_MOVETO) {
+                        float[] lastPoint = new float[2];
+                        iterator.getCurrentSegmentEnd(lastPoint);
+                        Path_Delegate.native_moveTo(native_dst_path, lastPoint[0], lastPoint[1]);
+                    }
+                }
+
+                isZeroLength = isZeroLength && iterator.getCurrentSegmentLength() > 0;
+                switch (type) {
+                    case PathIterator.SEG_MOVETO:
+                        Path_Delegate.native_moveTo(native_dst_path, points[0], points[1]);
+                        break;
+                    case PathIterator.SEG_LINETO:
+                        Path_Delegate.native_lineTo(native_dst_path, points[0], points[1]);
+                        break;
+                    case PathIterator.SEG_CLOSE:
+                        Path_Delegate.native_close(native_dst_path);
+                        break;
+                    case PathIterator.SEG_CUBICTO:
+                        Path_Delegate.native_cubicTo(native_dst_path, points[0], points[1],
+                                points[2], points[3],
+                                points[4], points[5]);
+                        break;
+                    case PathIterator.SEG_QUADTO:
+                        Path_Delegate.native_quadTo(native_dst_path, points[0], points[1],
+                                points[2],
+                                points[3]);
+                        break;
+                    default:
+                        assert false;
                 }
             }
 
-            if (i > 0) {
-                accLength += Point2D.distance(
-                        pathMeasure.mPathPoints[(i - 1) * 3 + 1],
-                        pathMeasure.mPathPoints[(i - 1) * 3 + 2],
-                        pathMeasure.mPathPoints[i * 3 + 1],
-                        pathMeasure.mPathPoints[i * 3 + 2]);
-            }
+            accLength += iterator.getCurrentSegmentLength();
+            iterator.next();
         }
 
         return !isZeroLength;

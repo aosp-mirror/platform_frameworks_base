@@ -1,0 +1,4 @@
+mmm -j8 frameworks/base/libs/hwui &&
+adb push $ANDROID_PRODUCT_OUT/data/nativetest/hwui_unit_tests/hwui_unit_tests \
+    /data/nativetest/hwui_unit_tests/hwui_unit_tests &&
+adb shell /data/nativetest/hwui_unit_tests/hwui_unit_tests

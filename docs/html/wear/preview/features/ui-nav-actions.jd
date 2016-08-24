@@ -1,0 +1,192 @@
+page.title=Wear Navigation and Actions
+meta.tags="wear", "wear-preview", "navigation", "action"
+page.tags="wear"
+page.image=/wear/preview/images/card_drawer.png
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#create a drawer">Create a Drawer Layout</a></li>
+      <li><a href="#initialize">Initialize the Drawer List</a></li>
+      <li><a href="#creating">Create a Custom View Drawer</a></li>
+      <li><a href="#listen to events">Listen for Drawer Events</a></li>
+      <li><a href=#peeking">Peeking Drawers</a></li>
+    </ol>
+
+   <h2>You should also read</h2>
+   <ul>
+   <li><a href="http://www.google.com/design/spec-wear/components/navigation-drawer.html">
+   Navigation Drawer Design</a> </li>
+   <li>
+   <a href="http://www.google.com/design/spec-wear/components/action-drawer.html">
+   Action Drawer Design</a>
+   </ul>
+
+  <h2>See Also</h2>
+  <ol>
+  <li>
+  <a href="https://github.com/googlesamples/android-WearDrawers">Sample app with
+  navigation and action drawers</a>
+  </li>
+  </ol>
+
+</div>
+</div>
+<p>As part of the <a href="http://www.google.com/design/spec-wear">Material Design</a>
+ for Android Wear, Wear 2.0 adds interactive navigation and action drawers. 
+ The navigation drawer appears at the top of the screen and lets users jump to 
+ different views within
+the app, similar to the navigation drawer on a phone. The action drawer appears
+at the bottom of the screen and provides context-specific actions for the user,
+similar to the action bar on a phone. These drawers are accessible when the user
+swipes from the top or bottom of the screen, and they peek when users scroll in
+the opposite direction. </p>
+<div class="cols">
+<div class="col-2of6">
+  <img src="{@docRoot}wear/preview/images/nav_drawer.gif" alt="" style="padding:.5em">
+  <p class="img-caption">
+      <strong>Figure 1.</strong> Navigation and Action Drawers.
+    </p>
+</div>
+<div class="col-2of6">
+  <img src="{@docRoot}wear/preview/images/action_drawer.gif" alt="" style="padding:.5em;"">
+</div>
+</div>
+<div class="cols">
+
+<p>This lesson describes how to implement action and navigation drawers in your
+app using the {@code WearableDrawerLayout} APIs.
+</p>
+
+<h2 id="create a drawer">Create a Drawer Layout</h2>
+To add an action or a navigation drawer, declare your user interface with a
+<code>WearableDrawerLayout</code> object as the root view of your layout.  Inside
+ the <code>WearableDrawerLayout</code>, add one view that contains the main content
+  for the screen (your primary layout when the drawer is hidden) and additional
+  child views that contain the contents of the drawer.</h2>
+<p>For example, the following layout uses a <code>WearableDrawerLayout</code> with
+ three child views: a <code>FrameLayout</code> to contain the main content, a
+ navigation drawer, and an action drawer.</p>
+
+<pre>
+&lt;android.support.wearable.view.drawer.WearableDrawerLayout
+    android:id="@+id/drawer_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:deviceIds="wear">
+
+    &lt;FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/content_frame"/>
+
+    &lt;android.support.wearable.view.drawer.WearableNavigationDrawer
+        android:id="@+id/top_navigation_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    &lt;android.support.wearable.view.drawer.WearableActionDrawer
+        android:id="@+id/bottom_action_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+&lt;/android.support.wearable.view.drawer.WearableDrawerLayout>
+
+</pre>
+<h2 id="initialize">Initialize the Drawer List</h2>
+<p>One of the first things you need to do in your activity is to initialize the
+drawers list of items. You should implement {@code WearableNavigationDrawerAdapter}
+to populate the navigation drawer contents. To populate the action drawer with
+a list of actions, inflate an XML file into the Menu (via MenuInflater).</p>
+
+<p>The following code snippet shows how to initialize the contents of your drawers:
+</p>
+<pre>
+public class MainActivity extends  WearableActivity implements
+WearableActionDrawer.OnMenuItemClickListener{
+    private WearableDrawerLayout mwearableDrawerLayout;
+    private WearableNavigationDrawer mWearableNavigationDrawer;
+    private WearableActionDrawer mWearableActionDrawer;
+    
+    ...
+    
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        ......
+        
+        
+        // Main Wearable Drawer Layout that wraps all content
+        mWearableDrawerLayout = (WearableDrawerLayout) findViewById(R.id.drawer_layout);
+        
+        // Top Navigation Drawer
+        mWearableNavigationDrawer = (WearableNavigationDrawer) findViewById(R.id.top_navigation_drawer);
+        mWearableNavigationDrawer.setAdapter(new YourImplementationNavigationAdapter(this));
+
+        // Peeks Navigation drawer on the top.
+        mWearableDrawerLayout.peekDrawer(Gravity.TOP);
+        
+        // Bottom Action Drawer
+        mWearableActionDrawer = (WearableActionDrawer) findViewById(R.id.bottom_action_drawer);
+
+        // Populate Action Drawer Menu
+        Menu menu = mWearableActionDrawer.getMenu();
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_drawer_menu, menu);
+        mWearableActionDrawer.setOnMenuItemClickListener(this);
+
+        // Peeks action drawer on the bottom.
+        mWearableDrawerLayout.peekDrawer(Gravity.BOTTOM);
+    }
+}
+
+</pre>
+<h2 id="creating">Create a Custom View Drawer</h2>
+
+<p>To use custom views in drawers,  add  <code>WearableDrawerView</code> to  the
+<code>WearableDrawerLayout</code>. To set the contents of the drawer, call <code>
+<a href="https://x20web.corp.google.com/~psoulos/docs/reference/android/support/wearable/view/drawer/WearableDrawerView.html#setDrawerContent(android.view.View)">setDrawerContent(View)</a></code>
+ instead of manually adding the view to the hierarchy. You must also specify the
+  drawer position with the <code>android:layout_gravity</code> attribute. </p>
+<p> The following example specifies a top drawer:</p>
+<pre>
+&lt;android.support.wearable.view.drawer.WearableDrawerLayout&gt;
+    &lt;FrameLayout 
+    android:id=”@+id/content” /&gt;
+
+    &lt;WearableDrawerView
+        android:layout_width=”match_parent”
+        andndroid:layout_height=”match_parent”
+        android:layout_gravity=”top”&gt;
+        &lt;FrameLayout 
+            android:id=”@+id/top_drawer_content” /&gt;
+    &lt;/WearableDrawerView&gt;
+&lt;/android.support.wearable.view.drawer.WearableDrawerView&gt;
+
+</pre>
+
+<h2 id="listen to events">Listen for Drawer Events</h2>
+<p>To listen for drawer events, call {@code setDrawerStateCallback()}on your
+{@code WearableDrawerLayout} and pass it an implementation of
+{@code WearableDrawerLayout.DrawerStateCallback}. This interface provides callbacks
+ for drawer events such as <code>onDrawerOpened()</code>,
+ <code>onDrawerClosed(),</code> and <code>onDrawerStatechanged()</code>.</p>
+
+<h2 id="peeking">Peeking Drawers</h2>
+<p>To  set the drawers to temporarily appear, call  <code>peekDrawer()</code> on
+your {@code WearableDrawerLayout} and pass it the {@code Gravity} of the drawer.
+ This feature is especially useful because it allows immediate access to the
+ alternate drawer views or actions associated with it. </p>
+
+<pre>{@code mWearableDrawerLayout.peekDrawer</code>(<code>Gravity.BOTTOM);}</pre>
+
+<p>You can also call {@code setPeekContent()} on your drawer to display a custom
+ view when the drawer is peeking.</p>

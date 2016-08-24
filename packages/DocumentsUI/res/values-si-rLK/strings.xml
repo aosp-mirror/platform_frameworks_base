@@ -17,28 +17,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"ලේඛන"</string>
+    <string name="downloads_label" msgid="959113951084633612">"බාගැනීම්"</string>
     <string name="title_open" msgid="4353228937663917801">"විවෘත වන්නේ"</string>
     <string name="title_save" msgid="2433679664882857999">"සුරකින්නේ"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"ෆෝල්ඩරයක් සාදන්න"</string>
+    <string name="menu_create_dir" msgid="2547620241173881754">"නව ෆෝල්ඩරය"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ජාල පෙනුම"</string>
     <string name="menu_list" msgid="7279285939892417279">"ලැයිස්තු පෙනුම"</string>
     <string name="menu_sort" msgid="7677740407158414452">"අනුපිළිවෙලට සකසා ඇත්තේ"</string>
     <string name="menu_search" msgid="3816712084502856974">"සෙවීම"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"සැකසීම්"</string>
+    <string name="menu_settings" msgid="8239065133341597825">"ගබඩා සැකසීම්"</string>
     <string name="menu_open" msgid="432922957274920903">"විවෘත කරන්න"</string>
     <string name="menu_save" msgid="2394743337684426338">"සුරකින්න"</string>
     <string name="menu_share" msgid="3075149983979628146">"බෙදාගන්න"</string>
     <string name="menu_delete" msgid="8138799623850614177">"මකන්න"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"සියල්ල තෝරන්න"</string>
     <string name="menu_copy" msgid="3612326052677229148">"වෙත පිටපත් කරන්න..."</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"අභ්‍යන්තර ආචයනය පෙන්වන්න"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD කාඩ් පත පෙන්වන්න"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"අභ්‍යන්තර ආචයනය සඟවන්න"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD කාඩ් පත සඟවන්න"</string>
+    <string name="menu_move" msgid="1828090633118079817">"වෙත ගෙනයන්න..."</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"නව කවුළුව"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"පිටපත් කරන්න"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"අලවන්න"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"අභ්‍යන්තර ආචයනය පෙන්වන්න"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"අභ්‍යන්තර ආචයනය සඟවන්න"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ගොනු ප්‍රමණය පෙන්වන්න"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ගොනු ප්‍රමණය සඟවන්න"</string>
     <string name="button_select" msgid="527196987259139214">"තෝරන්න"</string>
     <string name="button_copy" msgid="8706475544635021302">"පිටපත් කිරීම"</string>
+    <string name="button_move" msgid="2202666023104202232">"ගෙන යන්න"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"ඉවතලන්න"</string>
+    <string name="button_retry" msgid="4392027584153752797">"නැවත උත්සාහ කරන්න"</string>
     <string name="sort_name" msgid="9183560467917256779">"නමින්"</string>
     <string name="sort_date" msgid="586080032956151448">"වෙනස් කරන ලද දිනයෙන්"</string>
     <string name="sort_size" msgid="3350681319735474741">"ප්‍රමාණය මගින්"</string>
@@ -46,7 +52,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"මුල් සඟවන්න"</string>
     <string name="save_error" msgid="6167009778003223664">"ලේඛනය සුරැකීමට අපොහොසත් විය"</string>
     <string name="create_error" msgid="3735649141335444215">"ෆෝල්ඩරය සැදීම අසාර්ථක විය"</string>
-    <string name="query_error" msgid="1222448261663503501">"ලේඛන විමසුම අසාර්ථක විය"</string>
+    <string name="query_error" msgid="5999895349602476581">"මේ මොහොතේ අන්තර්ගතය පූරණය කිරීමට නොහැකිය"</string>
     <string name="root_recent" msgid="4470053704320518133">"මෑත"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ඉතිරියි"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ආචයන සේවා"</string>
@@ -54,21 +60,84 @@
     <string name="root_type_device" msgid="7121342474653483538">"උපාංග"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"තවත් යෙදුම්"</string>
     <string name="empty" msgid="7858882803708117596">"අයිතම නැත"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ගොනුව විවෘත කළ නොහැක"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s හි තරඟ නැත"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"ගොනුව විවෘත කළ නොහැකිය"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"සමහර ලේඛන මැකීමට නොහැකි විය"</string>
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ගොනු පිටපත් කරමින්"</string>
+    <string name="move_notification_title" msgid="6193835179777284805">"ගොනු ගෙන යාම"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"ගොනු මකමින්"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ඉතිරියි"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
     </plurals>
-    <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
-      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යමින්.</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යමින්.</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"විස්තර බැලීමට ස්පර්ශ කරන්න"</string>
-    <string name="retry" msgid="7564024179122207376">"නැවත උත්සාහ කරන්න"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකමින්.</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මකමින්.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"අස් කරන්න"</string>
+    <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
+    <string name="move_preparing" msgid="2772219441375531410">"ගෙන යාම සඳහා පිළියෙළ කරමින් ..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"මැකීම සඳහා සූදානම් කරමින්..."</string>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් පිටපත් කළ නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් පිටපත් කළ නොහැකි විය</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් ගෙන යාමට නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් ගෙන යාමට නොහැකි විය</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"විස්තර බැලීමට තට්ටු කරන්න"</string>
+    <string name="close" msgid="3043722427445528732">"වසන්න"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"මෙම ගොනු ගෙන නොයන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"මෙම ගොනු නොමකන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"මෙම ගොනු වෙනත් ආකෘතියකට පරිවර්තනය කරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>
+      <item quantity="other">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"මෙම ස්ථානය තුළ තෝරාගත් ගොනු ඇලවිය නොහැක."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"යළි නම් කරන්න"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ලේඛනය යළි නම් කිරීම අසාර්ථක විය"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"සමහර ගොනු පරිවර්තනය කරන ලදී"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> හට <xliff:g id="STORAGE"><i>^3</i></xliff:g> මත <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> නාමාවලිය වෙත ප්‍රවේශය දෙන්නද?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"<xliff:g id="APPNAME"><b>^1</b></xliff:g> ප්‍රවේශය <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> නාමාවලිය වෙත ලබා දෙන්නද?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"<xliff:g id="STORAGE"><i>^2</i></xliff:g> හි, ඡායාරූප සහ වීඩියෝ ඇතුළුව, ඔබේ දත්තවලට <xliff:g id="APPNAME"><b>^1</b></xliff:g> හට ප්‍රවේශය ලබා දෙන්නද?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"නැවත අසන්න එපා"</string>
+    <string name="allow" msgid="7225948811296386551">"අවසර දෙන්න"</string>
+    <string name="deny" msgid="2081879885755434506">"ප්‍රතික්ෂේප කරන්න"</string>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>ක් තෝරන ලදී</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>ක් තෝරන ලදී</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="one">අයිතම <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">අයිතම <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"\"<xliff:g id="NAME">%1$s</xliff:g>\" මකන්නද?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"\"<xliff:g id="NAME">%1$s</xliff:g>\" ෆෝල්ඩරය හා එහි අන්තර්ගත මකන්නද?"</string>
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් මකන්නද?</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් මකන්නද?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="one">ෆෝල්ඩර <xliff:g id="COUNT_1">%1$d</xliff:g> ක් හා එහි අන්තර්ගත මකන්නද?</item>
+      <item quantity="other">ෆෝල්ඩර <xliff:g id="COUNT_1">%1$d</xliff:g> ක් හා එහි අන්තර්ගත මකන්නද?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="one">අයිතම <xliff:g id="COUNT_1">%1$d</xliff:g> ක් මකන්නද?</item>
+      <item quantity="other">අයිතම <xliff:g id="COUNT_1">%1$d</xliff:g> ක් මකන්නද?</item>
+    </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"කනගාටුයි, ඔබට වරකට අයිතම 100ක් පමණක් තෝරා ගැනීමට හැකිය"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"අයිතම 100ක් පමණක් තෝරා ගැනීමට හැකි විය"</string>
 </resources>

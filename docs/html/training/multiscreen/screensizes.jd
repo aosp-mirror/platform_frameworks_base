@@ -56,9 +56,8 @@ next.link=screendensities.html
 you should use <code>"wrap_content"</code> and <code>"match_parent"</code> for the width
 and height of some view components. If you use <code>"wrap_content"</code>, the width
 or height of the view is set to the minimum size necessary to fit the content
-within that view, while <code>"match_parent"</code> (also known as
-<code>"fill_parent"</code> before API level 8) makes the component expand to match the size of its
-parent view.</p>
+within that view, while <code>"match_parent"</code> makes the component expand to match the size of
+its parent view.</p>
 
 <p>By using the <code>"wrap_content"</code> and <code>"match_parent"</code> size values instead of
 hard-coded sizes, your views either use only the space required for that

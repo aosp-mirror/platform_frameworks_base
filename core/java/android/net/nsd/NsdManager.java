@@ -619,7 +619,9 @@ public final class NsdManager {
     public void setEnabled(boolean enabled) {
         try {
             mService.setEnabled(enabled);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -632,7 +634,7 @@ public final class NsdManager {
         try {
             return mService.getMessenger();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 }

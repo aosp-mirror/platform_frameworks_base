@@ -16,46 +16,98 @@
 
 package android.service.notification;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Condition information from condition providers.
- *
- * @hide
+ * The current condition of an {@link android.app.AutomaticZenRule}, provided by the
+ * {@link ConditionProviderService} that owns the rule. Used to tell the system to enter Do Not
+ * Disturb mode and request that the system exit Do Not Disturb mode.
  */
-@SystemApi
-public class Condition implements Parcelable {
+public final class Condition implements Parcelable {
 
+    @SystemApi
     public static final String SCHEME = "condition";
 
+    /** @hide */
+    @IntDef({STATE_FALSE, STATE_TRUE, STATE_TRUE, STATE_ERROR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {}
+
+    /**
+     * Indicates that Do Not Disturb should be turned off. Note that all Conditions from all
+     * {@link ConditionProviderService} providers must be off for Do Not Disturb to be turned off on
+     * the device.
+     */
     public static final int STATE_FALSE = 0;
+    /**
+     * Indicates that Do Not Disturb should be turned on.
+     */
     public static final int STATE_TRUE = 1;
+
+    @SystemApi
     public static final int STATE_UNKNOWN = 2;
+    @SystemApi
     public static final int STATE_ERROR = 3;
 
+    @SystemApi
     public static final int FLAG_RELEVANT_NOW = 1 << 0;
+    @SystemApi
     public static final int FLAG_RELEVANT_ALWAYS = 1 << 1;
 
+    /**
+     * The URI representing the rule being updated.
+     * See {@link android.app.AutomaticZenRule#getConditionId()}.
+     */
     public final Uri id;
-    public final String summary;
-    public final String line1;
-    public final String line2;
-    public final int icon;
-    public final int state;
-    public final int flags;
 
+    /**
+     * A summary of what the rule encoded in {@link #id} means when it is enabled. User visible
+     * if the state of the condition is {@link #STATE_TRUE}.
+     */
+    public final String summary;
+
+    @SystemApi
+    public final String line1;
+    @SystemApi
+    public final String line2;
+
+    /**
+     * The state of this condition. {@link #STATE_TRUE} will enable Do Not Disturb mode.
+     * {@link #STATE_FALSE} will turn Do Not Disturb off for this rule. Note that Do Not Disturb
+     * might still be enabled globally if other conditions are in a {@link #STATE_TRUE} state.
+     */
+    @State
+    public final int state;
+
+    @SystemApi
+    public final int flags;
+    @SystemApi
+    public final int icon;
+
+    /**
+     * An object representing the current state of a {@link android.app.AutomaticZenRule}.
+     * @param id the {@link android.app.AutomaticZenRule#getConditionId()} of the zen rule
+     * @param summary a user visible description of the rule state.
+     */
+    public Condition(Uri id, String summary, int state) {
+        this(id, summary, "", "", -1, state, FLAG_RELEVANT_ALWAYS);
+    }
+
+    @SystemApi
     public Condition(Uri id, String summary, String line1, String line2, int icon,
             int state, int flags) {
         if (id == null) throw new IllegalArgumentException("id is required");
         if (summary == null) throw new IllegalArgumentException("summary is required");
-        if (line1 == null) throw new IllegalArgumentException("line1 is required");
-        if (line2 == null) throw new IllegalArgumentException("line2 is required");
         if (!isValidState(state)) throw new IllegalArgumentException("state is invalid: " + state);
         this.id = id;
         this.summary = summary;
@@ -66,7 +118,7 @@ public class Condition implements Parcelable {
         this.flags = flags;
     }
 
-    private Condition(Parcel source) {
+    public Condition(Parcel source) {
         this((Uri)source.readParcelable(Condition.class.getClassLoader()),
                 source.readString(),
                 source.readString(),
@@ -104,6 +156,7 @@ public class Condition implements Parcelable {
             .append(']').toString();
     }
 
+    @SystemApi
     public static String stateToString(int state) {
         if (state == STATE_FALSE) return "STATE_FALSE";
         if (state == STATE_TRUE) return "STATE_TRUE";
@@ -112,6 +165,7 @@ public class Condition implements Parcelable {
         throw new IllegalArgumentException("state is invalid: " + state);
     }
 
+    @SystemApi
     public static String relevanceToString(int flags) {
         final boolean now = (flags & FLAG_RELEVANT_NOW) != 0;
         final boolean always = (flags & FLAG_RELEVANT_ALWAYS) != 0;
@@ -144,6 +198,7 @@ public class Condition implements Parcelable {
         return 0;
     }
 
+    @SystemApi
     public Condition copy() {
         final Parcel parcel = Parcel.obtain();
         try {
@@ -155,10 +210,14 @@ public class Condition implements Parcelable {
         }
     }
 
+    @SystemApi
     public static Uri.Builder newId(Context context) {
-        return new Uri.Builder().scheme(SCHEME).authority(context.getPackageName());
+        return new Uri.Builder()
+                .scheme(Condition.SCHEME)
+                .authority(context.getPackageName());
     }
 
+    @SystemApi
     public static boolean isValidId(Uri id, String pkg) {
         return id != null && SCHEME.equals(id.getScheme()) && pkg.equals(id.getAuthority());
     }

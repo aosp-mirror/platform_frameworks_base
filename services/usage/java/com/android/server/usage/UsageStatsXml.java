@@ -87,7 +87,7 @@ public class UsageStatsXml {
         }
     }
 
-    private static void read(InputStream in, IntervalStats statsOut) throws IOException {
+    static void read(InputStream in, IntervalStats statsOut) throws IOException {
         XmlPullParser parser = Xml.newPullParser();
         try {
             parser.setInput(in, "utf-8");
@@ -113,7 +113,7 @@ public class UsageStatsXml {
         }
     }
 
-    private static void write(OutputStream out, IntervalStats stats) throws IOException {
+    static void write(OutputStream out, IntervalStats stats) throws IOException {
         FastXmlSerializer xml = new FastXmlSerializer();
         xml.setOutput(out, "utf-8");
         xml.startDocument("utf-8", true);

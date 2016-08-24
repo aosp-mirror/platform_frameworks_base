@@ -60,20 +60,19 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     // Buffer objects
     ///////////////////////////////////////////////////////////////////////////////
-    /**
-     * Binds the VBO used to render simple textured quads.
-     */
-    bool bindMeshBuffer();
 
     /**
      * Binds the specified VBO if needed. If buffer == 0, binds default simple textured quad.
      */
-    bool bindMeshBuffer(GLuint buffer);
+    void bindMeshBuffer(GLuint buffer);
 
     /**
-     * Unbinds the VBO used to render simple textured quads.
+     * Unbinds the current VBO if active.
      */
-    bool unbindMeshBuffer();
+    void unbindMeshBuffer();
+
+    void genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size, const void* data, GLenum usage);
+    void deleteMeshBuffer(GLuint);
 
     ///////////////////////////////////////////////////////////////////////////////
     // Vertices
@@ -82,21 +81,20 @@ public:
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindPositionVertexPointer(bool force, const GLvoid* vertices,
+    void bindPositionVertexPointer(const GLvoid* vertices,
             GLsizei stride = kTextureVertexStride);
 
     /**
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindTexCoordsVertexPointer(bool force, const GLvoid* vertices,
+    void bindTexCoordsVertexPointer(const GLvoid* vertices,
             GLsizei stride = kTextureVertexStride);
 
     /**
      * Resets the vertex pointers.
      */
     void resetVertexPointers();
-    void resetTexCoordsVertexPointer();
 
     void enableTexCoordsVertexArray();
     void disableTexCoordsVertexArray();
@@ -104,12 +102,8 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     // Indices
     ///////////////////////////////////////////////////////////////////////////////
-    /**
-     * Binds a global indices buffer that can draw up to
-     * gMaxNumberOfQuads quads.
-     */
-    bool bindQuadIndicesBuffer();
-    bool unbindIndicesBuffer();
+    void bindIndicesBuffer(const GLuint buffer);
+    void unbindIndicesBuffer();
 
     ///////////////////////////////////////////////////////////////////////////////
     // Getters - for use in Glop building
@@ -118,8 +112,6 @@ public:
     GLuint getQuadListIBO() { return mQuadListIndices; }
 private:
     MeshState();
-    bool bindMeshBufferInternal(const GLuint buffer);
-    bool bindIndicesBufferInternal(const GLuint buffer);
 
     GLuint mUnitQuadBuffer;
 

@@ -17,13 +17,13 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
-import android.app.backup.RestoreSession;
-import android.app.backup.IBackupManager;
-import android.app.backup.IRestoreSession;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Pair;
 
 /**
  * The interface through which an application interacts with the Android backup service to
@@ -58,6 +58,75 @@ import android.util.Log;
  */
 public class BackupManager {
     private static final String TAG = "BackupManager";
+
+    // BackupObserver status codes
+    /**
+     * Indicates that backup succeeded.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int SUCCESS = 0;
+
+    /**
+     * Indicates that backup is either not enabled at all or
+     * backup for the package was rejected by backup service
+     * or backup transport,
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_BACKUP_NOT_ALLOWED = -2001;
+
+    /**
+     * The requested app is not installed on the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_PACKAGE_NOT_FOUND = -2002;
+
+    /**
+     * The transport for some reason was not in a good state and
+     * aborted the entire backup request. This is a transient
+     * failure and should not be retried immediately.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_ABORTED = BackupTransport.TRANSPORT_ERROR;
+
+    /**
+     * Returned when the transport was unable to process the
+     * backup request for a given package, for example if the
+     * transport hit a transient network failure. The remaining
+     * packages provided to {@link #requestBackup(String[], BackupObserver)}
+     * will still be attempted.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_PACKAGE_REJECTED =
+            BackupTransport.TRANSPORT_PACKAGE_REJECTED;
+
+    /**
+     * Returned when the transport reject the attempt to backup because
+     * backup data size exceeded current quota limit for this package.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_QUOTA_EXCEEDED =
+            BackupTransport.TRANSPORT_QUOTA_EXCEEDED;
+
+    /**
+     * The {@link BackupAgent} for the requested package failed for some reason
+     * and didn't provide appropriate backup data.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_AGENT_FAILURE = BackupTransport.AGENT_ERROR;
 
     private Context mContext;
     private static IBackupManager sService;
@@ -364,5 +433,119 @@ public class BackupManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Ask the framework whether this app is eligible for backup.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packageName The name of the package.
+     * @return Whether this app is eligible for backup.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isAppEligibleForBackup(String packageName) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.isAppEligibleForBackup(packageName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "isAppEligibleForBackup(pkg) couldn't connect");
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Request an immediate backup, providing an observer to which results of the backup operation
+     * will be published. The Android backup system will decide for each package whether it will
+     * be full app data backup or key/value-pair-based backup.
+     *
+     * <p>If this method returns {@link BackupManager#SUCCESS}, the OS will attempt to backup all
+     * provided packages using the remote transport.
+     *
+     * @param packages List of package names to backup.
+     * @param observer The {@link BackupObserver} to receive callbacks during the backup
+     * operation. Could be {@code null}.
+     * @return {@link BackupManager#SUCCESS} on success; nonzero on error.
+     * @exception  IllegalArgumentException on null or empty {@code packages} param.
+     *
+     * @hide
+     */
+    @SystemApi
+    public int requestBackup(String[] packages, BackupObserver observer) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                BackupObserverWrapper observerWrapper = observer == null
+                        ? null
+                        : new BackupObserverWrapper(mContext, observer);
+                return sService.requestBackup(packages, observerWrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "requestBackup() couldn't connect");
+            }
+        }
+        return -1;
+    }
+
+    /*
+     * We wrap incoming binder calls with a private class implementation that
+     * redirects them into main-thread actions.  This serializes the backup
+     * progress callbacks nicely within the usual main-thread lifecycle pattern.
+     */
+    @SystemApi
+    private class BackupObserverWrapper extends IBackupObserver.Stub {
+        final Handler mHandler;
+        final BackupObserver mObserver;
+
+        static final int MSG_UPDATE = 1;
+        static final int MSG_RESULT = 2;
+        static final int MSG_FINISHED = 3;
+
+        BackupObserverWrapper(Context context, BackupObserver observer) {
+            mHandler = new Handler(context.getMainLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case MSG_UPDATE:
+                            Pair<String, BackupProgress> obj =
+                                (Pair<String, BackupProgress>) msg.obj;
+                            mObserver.onUpdate(obj.first, obj.second);
+                            break;
+                        case MSG_RESULT:
+                            mObserver.onResult((String)msg.obj, msg.arg1);
+                            break;
+                        case MSG_FINISHED:
+                            mObserver.backupFinished(msg.arg1);
+                            break;
+                        default:
+                            Log.w(TAG, "Unknown message: " + msg);
+                            break;
+                    }
+                }
+            };
+            mObserver = observer;
+        }
+
+        // Binder calls into this object just enqueue on the main-thread handler
+        @Override
+        public void onUpdate(String currentPackage, BackupProgress backupProgress) {
+            mHandler.sendMessage(
+                mHandler.obtainMessage(MSG_UPDATE, Pair.create(currentPackage, backupProgress)));
+        }
+
+        @Override
+        public void onResult(String currentPackage, int status) {
+            mHandler.sendMessage(
+                mHandler.obtainMessage(MSG_RESULT, status, 0, currentPackage));
+        }
+
+        @Override
+        public void backupFinished(int status) {
+            mHandler.sendMessage(
+                mHandler.obtainMessage(MSG_FINISHED, status, 0));
+        }
     }
 }

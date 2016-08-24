@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -27,10 +28,26 @@ import android.view.KeyEvent;
  * cursor, committing text to the text box, and sending raw key events
  * to the application.
  *
- * <p>Applications should never directly implement this interface, but
- * instead subclass from {@link BaseInputConnection}. This will ensure
- * that the application does not break when new methods are added to
- * the interface.</p>
+ * <p>Starting from API Level {@link android.os.Build.VERSION_CODES#N},
+ * the system can deal with the situation where the application directly
+ * implements this class but one or more of the following methods are
+ * not implemented.</p>
+ * <ul>
+ *     <li>{@link #getSelectedText(int)}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#GINGERBREAD}.</li>
+ *     <li>{@link #setComposingRegion(int, int)}, which was introduced
+ *     in {@link android.os.Build.VERSION_CODES#GINGERBREAD}.</li>
+ *     <li>{@link #commitCorrection(CorrectionInfo)}, which was introduced
+ *     in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.</li>
+ *     <li>{@link #requestCursorUpdates(int)}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#LOLLIPOP}.</li>
+ *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}}, which
+ *     was introduced in {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #getHandler()}}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #closeConnection()}}, which was introduced in
+ *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ * </ul>
  *
  * <h3>Implementing an IME or an editor</h3>
  * <p>Text input is the result of the synergy of two essential components:
@@ -223,7 +240,9 @@ public interface InputConnection {
      * @param flags Supplies additional options controlling how the text is
      * returned. May be either 0 or {@link #GET_TEXT_WITH_STYLES}.
      * @return the text that is currently selected, if any, or null if
-     * no text is selected.
+     * no text is selected. In {@link android.os.Build.VERSION_CODES#N} and
+     * later, returns false when the target application does not implement
+     * this method.
      */
     public CharSequence getSelectedText(int flags);
 
@@ -335,14 +354,45 @@ public interface InputConnection {
      * but be careful to wait until the batch edit is over if one is
      * in progress.</p>
      *
-     * @param beforeLength The number of characters to be deleted before the
-     *        current cursor position.
-     * @param afterLength The number of characters to be deleted after the
-     *        current cursor position.
-     * @return true on success, false if the input connection is no longer
-     * valid.
+     * @param beforeLength The number of characters before the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @return true on success, false if the input connection is no longer valid.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength);
+
+    /**
+     * A variant of {@link #deleteSurroundingText(int, int)}. Major differences are:
+     *
+     * <ul>
+     *     <li>The lengths are supplied in code points, not in Java chars or in glyphs.</>
+     *     <li>This method does nothing if there are one or more invalid surrogate pairs in the
+     *     requested range.</li>
+     * </ul>
+     *
+     * <p><strong>Editor authors:</strong> In addition to the requirement in
+     * {@link #deleteSurroundingText(int, int)}, make sure to do nothing when one ore more invalid
+     * surrogate pairs are found in the requested range.</p>
+     *
+     * @see #deleteSurroundingText(int, int)
+     *
+     * @param beforeLength The number of characters before the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @return true on success, false if the input connection is no longer valid.  Returns
+     * {@code false} when the target application does not implement this method.
+     */
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
 
     /**
      * Replace the currently composing text with the given text, and
@@ -430,7 +480,8 @@ public interface InputConnection {
      * @param start the position in the text at which the composing region begins
      * @param end the position in the text at which the composing region ends
      * @return true on success, false if the input connection is no longer
-     * valid.
+     * valid. In {@link android.os.Build.VERSION_CODES#N} and later, false is returned when the
+     * target application does not implement this method.
      */
     public boolean setComposingRegion(int start, int end);
 
@@ -542,6 +593,8 @@ public interface InputConnection {
      *
      * @param correctionInfo Detailed information about the correction.
      * @return true on success, false if the input connection is no longer valid.
+     * In {@link android.os.Build.VERSION_CODES#N} and later, returns false
+     * when the target application does not implement this method.
      */
     public boolean commitCorrection(CorrectionInfo correctionInfo);
 
@@ -754,6 +807,33 @@ public interface InputConnection {
      * @return {@code true} if the request is scheduled. {@code false} to indicate that when the
      * application will not call
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
+     * In {@link android.os.Build.VERSION_CODES#N} and later, returns {@code false} also when the
+     * target application does not implement this method.
      */
     public boolean requestCursorUpdates(int cursorUpdateMode);
+
+    /**
+     * Called by the {@link InputMethodManager} to enable application developers to specify a
+     * dedicated {@link Handler} on which incoming IPC method calls from input methods will be
+     * dispatched.
+     *
+     * <p>Note: This does nothing when called from input methods.</p>
+     *
+     * @return {@code null} to use the default {@link Handler}.
+     */
+    public Handler getHandler();
+
+    /**
+     * Called by the system up to only once to notify that the system is about to invalidate
+     * connection between the input method and the application.
+     *
+     * <p><strong>Editor authors</strong>: You can clear all the nested batch edit right now and
+     * you no longer need to handle subsequent callbacks on this connection, including
+     * {@link #beginBatchEdit()}}.  Note that although the system tries to call this method whenever
+     * possible, there may be a chance that this method is not called in some exceptional
+     * situations.</p>
+     *
+     * <p>Note: This does nothing when called from input methods.</p>
+     */
+    public void closeConnection();
 }

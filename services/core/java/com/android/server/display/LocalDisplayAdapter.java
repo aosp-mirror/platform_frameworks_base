@@ -17,12 +17,12 @@
 package com.android.server.display;
 
 import android.content.res.Resources;
-import android.os.Build;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -31,7 +31,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
@@ -159,6 +158,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mDefaultColorTransformId;
         private int mActiveColorTransformId;
         private boolean mActiveColorTransformInvalid;
+        private Display.HdrCapabilities mHdrCapabilities;
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
@@ -173,6 +173,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             } else {
                 mBacklight = null;
             }
+            mHdrCapabilities = SurfaceControl.getHdrCapabilities(displayToken);
         }
 
         public boolean updatePhysicalDisplayInfoLocked(
@@ -372,6 +373,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 for (int i = 0; i < mSupportedColorTransforms.size(); i++) {
                     mInfo.supportedColorTransforms[i] = mSupportedColorTransforms.valueAt(i);
                 }
+                mInfo.hdrCapabilities = mHdrCapabilities;
                 mInfo.appVsyncOffsetNanos = phys.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = phys.presentationDeadlineNanos;
                 mInfo.state = mState;
@@ -384,14 +386,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
                 }
 
+                final Resources res = getContext().getResources();
                 if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
-                    final Resources res = getContext().getResources();
                     mInfo.name = res.getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
                     mInfo.flags |= DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY
                             | DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
                     if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
-                            || (Build.HARDWARE.contains("goldfish")
+                            || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
@@ -418,6 +420,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     // to follow the built-in display.
                     if (SystemProperties.getBoolean("persist.demo.hdmirotates", false)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+                    }
+
+                    if (!res.getBoolean(
+                                com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
                 }
             }

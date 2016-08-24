@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.mtp"
+          android:sharedUserId="android.media">
+    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-permission android:name="android.permission.MANAGE_USB" />
+    <application android:label="@string/app_label">
+        <provider
+            android:name=".MtpDocumentsProvider"
+            android:authorities="com.android.mtp.documents"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <service android:name=".MtpDocumentsService" />
+
+        <activity android:name=".ReceiverActivity"
+                  android:label="@string/downloads_app_label"
+                  android:icon="@mipmap/ic_launcher_download"
+                  android:theme="@android:style/Theme.NoDisplay"
+                  android:screenOrientation="locked"
+                  android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                       android:resource="@xml/device_filter" />
+        </activity>
+
+        <receiver android:name=".UsbIntentReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                       android:resource="@xml/device_filter" />
+        </receiver>
+    </application>
+</manifest>

@@ -683,7 +683,7 @@ public class StaticLayout extends Layout {
                 // interface.
                 int leftLen = mLeftIndents == null ? 0 : mLeftIndents.length;
                 int rightLen = mRightIndents == null ? 0 : mRightIndents.length;
-                int indentsLen = Math.max(1, Math.min(leftLen, rightLen) - mLineCount);
+                int indentsLen = Math.max(1, Math.max(leftLen, rightLen) - mLineCount);
                 int[] indents = new int[indentsLen];
                 for (int i = 0; i < indentsLen; i++) {
                     int leftMargin = mLeftIndents == null ? 0 :
@@ -754,15 +754,21 @@ public class StaticLayout extends Layout {
                                 && ellipsize != TextUtils.TruncateAt.MARQUEE));
             if (remainingLineCount > 0 && remainingLineCount < breakCount &&
                     ellipsisMayBeApplied) {
-                // Treat the last line and overflowed lines as a single line.
-                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
                 // Calculate width and flag.
                 float width = 0;
                 int flag = 0;
                 for (int i = remainingLineCount - 1; i < breakCount; i++) {
-                    width += lineWidths[i];
+                    if (i == breakCount - 1) {
+                        width += lineWidths[i];
+                    } else {
+                        for (int j = (i == 0 ? 0 : breaks[i - 1]); j < breaks[i]; j++) {
+                            width += widths[j];
+                        }
+                    }
                     flag |= flags[i] & TAB_MASK;
                 }
+                // Treat the last line and overflowed lines as a single line.
+                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
                 lineWidths[remainingLineCount - 1] = width;
                 flags[remainingLineCount - 1] = flag;
 
@@ -1132,22 +1138,12 @@ public class StaticLayout extends Layout {
 
     @Override
     public int getLineTop(int line) {
-        int top = mLines[mColumns * line + TOP];
-        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount &&
-                line != mLineCount) {
-            top += getBottomPadding();
-        }
-        return top;
+        return mLines[mColumns * line + TOP];
     }
 
     @Override
     public int getLineDescent(int line) {
-        int descent = mLines[mColumns * line + DESCENT];
-        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount - 1 && // -1 intended
-                line != mLineCount) {
-            descent += getBottomPadding();
-        }
-        return descent;
+        return mLines[mColumns * line + DESCENT];
     }
 
     @Override
@@ -1312,7 +1308,7 @@ public class StaticLayout extends Layout {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];
         public float[] widths = new float[INITIAL_SIZE];
-        public int[] flags = new int[INITIAL_SIZE]; // hasTabOrEmoji
+        public int[] flags = new int[INITIAL_SIZE]; // hasTab
         // breaks, widths, and flags should all have the same length
     }
 

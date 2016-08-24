@@ -1,0 +1,168 @@
+page.title=維持相容性
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>本課程示範</h2>
+<ol>
+  <li><a href="#Theme">定義替代樣式</a></li>
+  <li><a href="#Layouts">提供替代版面配置</a></li>
+  <li><a href="#SupportLib">使用支援程式庫</a></li>
+  <li><a href="#CheckVersion">檢查系統版本</a></li>
+</ol>
+<h2>您也應該閱讀</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">材料設計規格</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android 上的材料設計</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>某些材料設計功能如材料設計風格和自訂操作行為轉換等，只能在 Android 5.0 (API 級別 21) 及以上版本中使用。
+然而，您還是可以將應用程式設計為在支援材料設計的裝置上執行時才使用這些功能，並仍然與執行舊版 Android 的裝置相容。
+
+</p>
+
+
+<h2 id="Theme">定義替代樣式</h2>
+
+<p>您可以設定應用程式在支援材料設計風格的裝置上執行時才予以使用，在執行舊版 Android 的裝置上執行時則轉換成舊版的設計風格：
+</p>
+
+<ol>
+<li>在 <code>res/values/styles.xml</code> 中定義繼承自舊版設計風格 (例如 Holo) 的設計風格。
+</li>
+<li>在 <code>res/values-v21/styles.xml</code> 中定義與材料設計風格相同名稱的設計風格。
+</li>
+<li>在宣示說明檔案中將此設計風格設定為應用程式的設計風格。</li>
+</ol>
+
+<p class="note"><strong>注意</strong>：若您的應用程式使用材料設計風格，但卻未以此方式提供替代設計風格，您的應用程式將無法在 Android 5.0 之前的版本上執行。
+
+
+</p>
+
+
+<h2 id="Layouts">提供替代版面配置</h2>
+
+<p>若您根據材料設計指南所設計的版面配置並未使用任何 Android 5.0 (API 級別 21) 中推出的全新 XML 屬性，則這些版面配置就可以在舊版 Android 上運作。
+
+或者，您也可以提供替代的版面配置。您也可提供替代的版面配置以自訂應用程式在舊版 Android 上如何顯示。
+</p>
+
+<p>在 <code>res/layout-v21/</code> 內建立 Android 5.0 (API 級別 21) 的版面配置檔案，並在 <code>res/layout/</code> 內建立舊版 Android 的替代版面配置檔案。例如，<code>res/layout/my_activity.xml</code> 是 <code>res/layout-v21/my_activity.xml</code> 的替代版面配置。
+
+
+</p>
+
+<p>為了避免程式碼重複，請在 <code>res/values/</code> 內定義您的樣式，在 <code>res/values-v21/</code> 中針對新的 API 修改樣式，再使用樣式繼承，在 <code>res/values/</code> 中定義基礎樣式，然後從 <code>res/values-v21/</code> 中的樣式繼承。
+
+</p>
+
+
+<h2 id="SupportLib">使用支援程式庫</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">v7 支援程式庫</a> r21 以及更新版本包含下列材料設計功能：
+</p>
+
+<ul>
+<li>當您套用其中一個 <code>Theme.AppCompat</code> 設計風格時，某些系統小工具的<a href="{@docRoot}training/material/theme.html">材料設計樣式</a>。
+</li>
+<li>在 <code>Theme.AppCompat</code> 設計風格中的<a href="{@docRoot}training/material/theme.html#ColorPalette">色板設計風格屬性</a>。
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#RecyclerView">顯示資料集合</a>的 {@link android.support.v7.widget.RecyclerView} 小工具。
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#CardView">建立卡片</a>的 {@link android.support.v7.widget.CardView} 小工具。</li>
+<li><a href="{@docRoot}training/material/drawables.html#ColorExtract">從影像提取顯著顏色</a>的 {@link android.support.v7.graphics.Palette} 類別。
+</li>
+</ul>
+
+<h3>系統小工具</h3>
+
+<p><code>Theme.AppCompat</code> 設計風格提供下列小工具的材料設計樣式：</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>色板</h3>
+
+<p>如果要取得材料設計樣式並使用 Android v7 支援程式庫自訂色板，請套用其中一個 <code>Theme.AppCompat</code> 設計風格：
+</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>清單和卡片</h3>
+
+<p>在舊版 Android 中，透過 Android v7 支援程式庫可以使用 {@link android.support.v7.widget.RecyclerView} 和 {@link
+android.support.v7.widget.CardView} 小工具，但有下列限制：
+</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView} 只能使用額外的填補方式，有計畫地實作陰影。
+</li>
+<li>{@link android.support.v7.widget.CardView} 不會裁剪與圓形邊角重疊的下方視圖。
+</li>
+</ul>
+
+
+<h3>相依性</h3>
+
+<p>如果要在 Android 5.0 (API 級別 21) 以前的版本中使用這些功能，請在您的專案中包含 Android v7 支援程式庫做為 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 相依性</a>：
+</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">檢查系統版本</h2>
+
+<p>下列功能只能在 Android 5.0 (API 級別 21) 以及更新版本中使用：</p>
+
+<ul>
+<li>操作行為轉換</li>
+<li>輕觸回饋</li>
+<li>顯示動畫</li>
+<li>路徑型動畫</li>
+<li>矢量可繪</li>
+<li>繪製著色</li>
+</ul>
+
+<p>如要維持與舊版 Android 的相容性，在呼叫這些功能的 API 之前，請先在執行期間檢查系統 {@link
+android.os.Build.VERSION#SDK_INT version}：
+</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>如果要指定應用程式支援的 Android 版本，請在您的宣示說明檔案中使用 <code>android:minSdkVersion</code> 和 <code>android:targetSdkVersion</code> 屬性。
+
+如果要在 Android 5.0 中使用材料設計功能，請將 <code>android:targetSdkVersion</code> 屬性設定為 <code>21</code>。
+如需詳細資訊，請參閱 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt; API 指南</a>。
+
+</p>

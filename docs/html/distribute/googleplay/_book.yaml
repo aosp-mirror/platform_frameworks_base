@@ -1,0 +1,151 @@
+toc:
+- title: The Google Play Opportunity
+  path: /distribute/googleplay/about.html
+  path_attributes:
+  - name: es-lang
+    value: La oportunidad de Google Play
+  - name: ja-lang
+    value: Google Play の可能性
+  - name: ko-lang
+    value: Google Play 활용 기회
+  - name: pt-br-lang
+    value: A oportunidade do Google Play
+  - name: ru-lang
+    value: Возможности Google Play
+  - name: zh-cn-lang
+    value: Google Play 蕴藏的机会
+  - name: zh-tw-lang
+    value: Google Play商機
+
+- title: Get Started with Publishing
+  path: /distribute/googleplay/start.html
+  path_attributes:
+  - name: es-lang
+    value: Comienza a publicar
+  - name: ja-lang
+    value: アプリを公開する
+  - name: ko-lang
+    value: 게시 시작하기
+  - name: pt-br-lang
+    value: Introdução à publicação
+  - name: ru-lang
+    value: Первые шаги в публикациях
+  - name: zh-cn-lang
+    value: 开始发布
+  - name: zh-tw-lang
+    value: 開始發行
+
+- title: Developer Console
+  path: /distribute/googleplay/developer-console.html
+  path_attributes:
+  - name: es-lang
+    value: Consola para desarrolladores
+  - name: ja-lang
+    value: デベロッパー コンソール
+  - name: ko-lang
+    value: 개발자 콘솔
+  - name: pt-br-lang
+    value: Console do Desenvolvedor
+  - name: ru-lang
+    value: Консоль разработчика
+  - name: zh-cn-lang
+    value: 开发者控制台
+
+- title: Distribute to Android Wear
+  path: /distribute/googleplay/wear.html
+  path_attributes:
+  - name: es-lang
+    value: Distribución para Android Wear
+  - name: ja-lang
+    value: Android Wear への配布
+  - name: ko-lang
+    value: Android Wear에 배포
+  - name: pt-br-lang
+    value: Distribuindo para Android Wear
+  - name: ru-lang
+    value: Распространение приложений Android Wear
+  - name: zh-cn-lang
+    value: 分发到 Android Wear
+  - name: zh-tw-lang
+    value: 散佈至 Android Wear
+
+- title: Distribute to Android TV
+  path: /distribute/googleplay/tv.html
+  path_attributes:
+  - name: es-lang
+    value: Distribución para Android TV
+  - name: ja-lang
+    value: Android TV への配布
+  - name: ko-lang
+    value: Android TV에 배포
+  - name: pt-br-lang
+    value: Distribuindo para Android TV
+  - name: ru-lang
+    value: Распространение приложений в Android TV
+  - name: zh-cn-lang
+    value: 分发到 Android TV
+  - name: zh-tw-lang
+    value: 散佈至 Android 電視
+
+- title: Distribute to Android Auto
+  path: /distribute/googleplay/auto.html
+  path_attributes:
+  - name: es-lang
+    value: Distribución para Android Auto
+  - name: ja-lang
+    value: Android Auto への配布
+  - name: ko-lang
+    value: Android Auto에 배포
+  - name: pt-br-lang
+    value: Distribuindo para o Android Auto
+  - name: ru-lang
+    value: Распространение приложений для Android Auto
+  - name: zh-cn-lang
+    value: 分发到 Android Auto
+  - name: zh-tw-lang
+    value: 散佈至 Android Auto
+
+- title: Designed for Families
+  path: /distribute/googleplay/families/about.html
+  path_attributes:
+  - name: es-lang
+    value: Diseñado para la familia
+  - name: ru-lang
+    value: Для всей семьи
+  - name: zh-cn-lang
+    value: 为家庭设计
+
+- title: Google Play for Work
+  path: /distribute/googleplay/work/about.html
+
+- title: Google Play for Education
+  path: /distribute/googleplay/edu/about.html
+  section:
+  - title: Publish Apps
+    path: /distribute/googleplay/edu/start.html
+  - title: Video Resources
+    path: /distribute/googleplay/edu/videos.html
+
+- title: Stream Your Content with Cast
+  path: /distribute/googleplay/cast.html
+
+- title: Build VR with Cardboard
+  path: /distribute/googleplay/cardboard.html
+
+- title: Find Success on Google Play
+  path: /distribute/googleplay/guide.html
+  path_attributes:
+  - name: es-lang
+    value: Cómo tener éxito en Google Play
+  - name: ja-lang
+    value: Google Play で成功を手にする
+  - name: ko-lang
+    value: Google Play에서 성공 모색
+  - name: pt-br-lang
+    value: Obtendo sucesso no Google Play
+  - name: ru-lang
+    value: Найдите свой путь к успеху в Google Play
+  - name: zh-cn-lang
+    value: 在 Google Play 上取得成功
+  - name: zh-tw-lang
+    value: 在 Google Play 上尋找成功

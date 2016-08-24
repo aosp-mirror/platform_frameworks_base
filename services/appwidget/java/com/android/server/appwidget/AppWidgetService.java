@@ -44,4 +44,19 @@ public class AppWidgetService extends SystemService {
             mImpl.setSafeMode(isSafeMode());
         }
     }
+
+    @Override
+    public void onUnlockUser(int userHandle) {
+        mImpl.onUserUnlocked(userHandle);
+    }
+
+    @Override
+    public void onStopUser(int userHandle) {
+        mImpl.onUserStopped(userHandle);
+    }
+
+    @Override
+    public void onSwitchUser(int userHandle) {
+        mImpl.reloadWidgetsMaskedStateForGroup(userHandle);
+    }
 }

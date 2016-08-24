@@ -16,4 +16,4 @@
 
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@*android:drawable/ic_print"
-    android:tint="@color/promoted_action_background_color" />
+    android:tint="?android:attr/colorAccent" />

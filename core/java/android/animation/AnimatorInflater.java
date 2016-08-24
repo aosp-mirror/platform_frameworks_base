@@ -16,7 +16,10 @@
 package android.animation;
 
 import android.annotation.AnimatorRes;
+import android.annotation.AnyRes;
+import android.annotation.NonNull;
 import android.content.Context;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConfigurationBoundResourceCache;
 import android.content.res.ConstantState;
 import android.content.res.Resources;
@@ -108,7 +111,7 @@ public class AnimatorInflater {
             float pathErrorScale) throws NotFoundException {
         final ConfigurationBoundResourceCache<Animator> animatorCache = resources
                 .getAnimatorCache();
-        Animator animator = animatorCache.getInstance(id, theme);
+        Animator animator = animatorCache.getInstance(id, resources, theme);
         if (animator != null) {
             if (DBG_ANIMATOR_INFLATER) {
                 Log.d(TAG, "loaded animator from cache, " + resources.getResourceName(id));
@@ -157,7 +160,7 @@ public class AnimatorInflater {
         final ConfigurationBoundResourceCache<StateListAnimator> cache = resources
                 .getStateListAnimatorCache();
         final Theme theme = context.getTheme();
-        StateListAnimator animator = cache.getInstance(id, theme);
+        StateListAnimator animator = cache.getInstance(id, resources, theme);
         if (animator != null) {
             return animator;
         }
@@ -250,50 +253,19 @@ public class AnimatorInflater {
     /**
      * PathDataEvaluator is used to interpolate between two paths which are
      * represented in the same format but different control points' values.
-     * The path is represented as an array of PathDataNode here, which is
-     * fundamentally an array of floating point numbers.
+     * The path is represented as verbs and points for each of the verbs.
      */
-    private static class PathDataEvaluator implements TypeEvaluator<PathParser.PathDataNode[]> {
-        private PathParser.PathDataNode[] mNodeArray;
-
-        /**
-         * Create a PathParser.PathDataNode[] that does not reuse the animated value.
-         * Care must be taken when using this option because on every evaluation
-         * a new <code>PathParser.PathDataNode[]</code> will be allocated.
-         */
-        private PathDataEvaluator() {}
-
-        /**
-         * Create a PathDataEvaluator that reuses <code>nodeArray</code> for every evaluate() call.
-         * Caution must be taken to ensure that the value returned from
-         * {@link android.animation.ValueAnimator#getAnimatedValue()} is not cached, modified, or
-         * used across threads. The value will be modified on each <code>evaluate()</code> call.
-         *
-         * @param nodeArray The array to modify and return from <code>evaluate</code>.
-         */
-        public PathDataEvaluator(PathParser.PathDataNode[] nodeArray) {
-            mNodeArray = nodeArray;
-        }
+    private static class PathDataEvaluator implements TypeEvaluator<PathParser.PathData> {
+        private final PathParser.PathData mPathData = new PathParser.PathData();
 
         @Override
-        public PathParser.PathDataNode[] evaluate(float fraction,
-                PathParser.PathDataNode[] startPathData,
-                PathParser.PathDataNode[] endPathData) {
-            if (!PathParser.canMorph(startPathData, endPathData)) {
+        public PathParser.PathData evaluate(float fraction, PathParser.PathData startPathData,
+                    PathParser.PathData endPathData) {
+            if (!PathParser.interpolatePathData(mPathData, startPathData, endPathData, fraction)) {
                 throw new IllegalArgumentException("Can't interpolate between"
                         + " two incompatible pathData");
             }
-
-            if (mNodeArray == null || !PathParser.canMorph(mNodeArray, startPathData)) {
-                mNodeArray = PathParser.deepCopyNodes(startPathData);
-            }
-
-            for (int i = 0; i < startPathData.length; i++) {
-                mNodeArray[i].interpolatePathDataNode(startPathData[i],
-                        endPathData[i], fraction);
-            }
-
-            return mNodeArray;
+            return mPathData;
         }
     }
 
@@ -323,13 +295,14 @@ public class AnimatorInflater {
         if (valueType == VALUE_TYPE_PATH) {
             String fromString = styledAttributes.getString(valueFromId);
             String toString = styledAttributes.getString(valueToId);
-            PathParser.PathDataNode[] nodesFrom = PathParser.createNodesFromPathData(fromString);
-            PathParser.PathDataNode[] nodesTo = PathParser.createNodesFromPathData(toString);
+            PathParser.PathData nodesFrom = fromString == null
+                    ? null : new PathParser.PathData(fromString);
+            PathParser.PathData nodesTo = toString == null
+                    ? null : new PathParser.PathData(toString);
 
             if (nodesFrom != null || nodesTo != null) {
                 if (nodesFrom != null) {
-                    TypeEvaluator evaluator =
-                            new PathDataEvaluator(PathParser.deepCopyNodes(nodesFrom));
+                    TypeEvaluator evaluator = new PathDataEvaluator();
                     if (nodesTo != null) {
                         if (!PathParser.canMorph(nodesFrom, nodesTo)) {
                             throw new InflateException(" Can't morph from " + fromString + " to " +
@@ -342,8 +315,7 @@ public class AnimatorInflater {
                                 (Object) nodesFrom);
                     }
                 } else if (nodesTo != null) {
-                    TypeEvaluator evaluator =
-                            new PathDataEvaluator(PathParser.deepCopyNodes(nodesTo));
+                    TypeEvaluator evaluator = new PathDataEvaluator();
                     returnValue = PropertyValuesHolder.ofObject(propertyName, evaluator,
                             (Object) nodesTo);
                 }
@@ -484,23 +456,25 @@ public class AnimatorInflater {
         TypeEvaluator evaluator = null;
         String fromString = arrayAnimator.getString(R.styleable.Animator_valueFrom);
         String toString = arrayAnimator.getString(R.styleable.Animator_valueTo);
-        PathParser.PathDataNode[] nodesFrom = PathParser.createNodesFromPathData(fromString);
-        PathParser.PathDataNode[] nodesTo = PathParser.createNodesFromPathData(toString);
+        PathParser.PathData pathDataFrom = fromString == null
+                ? null : new PathParser.PathData(fromString);
+        PathParser.PathData pathDataTo = toString == null
+                ? null : new PathParser.PathData(toString);
 
-        if (nodesFrom != null) {
-            if (nodesTo != null) {
-                anim.setObjectValues(nodesFrom, nodesTo);
-                if (!PathParser.canMorph(nodesFrom, nodesTo)) {
+        if (pathDataFrom != null) {
+            if (pathDataTo != null) {
+                anim.setObjectValues(pathDataFrom, pathDataTo);
+                if (!PathParser.canMorph(pathDataFrom, pathDataTo)) {
                     throw new InflateException(arrayAnimator.getPositionDescription()
                             + " Can't morph from " + fromString + " to " + toString);
                 }
             } else {
-                anim.setObjectValues((Object)nodesFrom);
+                anim.setObjectValues((Object)pathDataFrom);
             }
-            evaluator = new PathDataEvaluator(PathParser.deepCopyNodes(nodesFrom));
-        } else if (nodesTo != null) {
-            anim.setObjectValues((Object)nodesTo);
-            evaluator = new PathDataEvaluator(PathParser.deepCopyNodes(nodesTo));
+            evaluator = new PathDataEvaluator();
+        } else if (pathDataTo != null) {
+            anim.setObjectValues((Object)pathDataTo);
+            evaluator = new PathDataEvaluator();
         }
 
         if (DBG_ANIMATOR_INFLATER && evaluator != null) {
@@ -1091,7 +1065,7 @@ public class AnimatorInflater {
         return anim;
     }
 
-    private static int getChangingConfigs(Resources resources, int id) {
+    private static @Config int getChangingConfigs(@NonNull Resources resources, @AnyRes int id) {
         synchronized (sTmpTypedValue) {
             resources.getValue(id, sTmpTypedValue, true);
             return sTmpTypedValue.changingConfigurations;

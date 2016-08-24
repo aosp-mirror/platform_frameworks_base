@@ -26,7 +26,13 @@ import java.lang.annotation.ElementType;
  * test methods. When the annotation is present, the test method is re-executed if
  * the test fails. The total number of executions is specified by the tolerance and
  * defaults to 1.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/filters/FlakyTest.html">
+ * FlakyTest</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FlakyTest {

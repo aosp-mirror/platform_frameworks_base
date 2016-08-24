@@ -61,7 +61,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
             IBinder token = new Binder();
             try {
                 ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                        providerName, UserHandle.USER_OWNER, token);
+                        providerName, UserHandle.USER_SYSTEM, token);
                 if (holder == null) {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }

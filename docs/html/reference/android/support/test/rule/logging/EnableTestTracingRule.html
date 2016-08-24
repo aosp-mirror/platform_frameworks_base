@@ -1,0 +1,1276 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+  
+    <meta name="top_category" value="develop" />
+    
+    <meta name="subcategory" value="reference" />
+
+    
+      <meta name="book_path" value="/reference/android/support/test/_book.yaml" />
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<title>EnableTestTracingRule</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+  
+  
+  
+
+</div>
+
+
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+  
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">EnableTestTracingRule</h1>
+<p>
+<code class="api-signature">
+  public
+  
+  
+  
+  class
+  EnableTestTracingRule
+</code>
+<br>
+
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+    extends <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html">LoggingBaseRule</a>
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+    
+    <td colspan="4" class="jd-inheritance-class-cell">java.lang.Object
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="3" class="jd-inheritance-class-cell">org.junit.rules.ExternalResource
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html">android.support.test.rule.logging.LoggingBaseRule</a>
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;</td>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.test.rule.logging.EnableTestTracingRule
+    </td>
+  </tr>
+  
+
+</table>
+  
+
+    
+
+<br><hr>
+
+
+  <p>When applied to a test class this <code><a href="/reference/org/junit/rules/TestRule.html">TestRule</a></code> calls
+ <code>Trace.beginSection()</code> before test method execution. The TestRule then calls
+ <code>Trace.endSection()</code> after test method execution. The TestRule enables Systrace/Atrace
+ output to have discrete information about when/which test methods were run (which helps during
+ performance test debugging).
+ <p/>
+ If the API level is less than 18 (Jelly Bean) this rule will do nothing since <code>Trace</code> isn't
+ supported.
+ <p/>
+ Usage:
+ <code>
+ \@Rule
+ public EnableTestTracingRule mEnableTestTracing = new EnableTestTracingRule();
+ <code>
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="responsive constructors">
+<tr><th colspan="2"><h3>Public constructors</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/EnableTestTracingRule.html#EnableTestTracingRule()">EnableTestTracingRule</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/EnableTestTracingRule.html#afterTest()">afterTest</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/EnableTestTracingRule.html#beforeTest()">beforeTest</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="methods inhtable">
+<tr><th><h3>Inherited methods</h3></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.support.test.rule.logging.LoggingBaseRule" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-android.support.test.rule.logging.LoggingBaseRule-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html">android.support.test.rule.logging.LoggingBaseRule</a>
+  
+</code>
+<div id="inherited-methods-android.support.test.rule.logging.LoggingBaseRule">
+  <div id="inherited-methods-android.support.test.rule.logging.LoggingBaseRule-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.support.test.rule.logging.LoggingBaseRule-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#after()">after</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Statement</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#apply(org.junit.runners.model.Statement, org.junit.runner.Description)">apply</a>(Statement base, Description description)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#before()">before</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getLogFileName()">getLogFileName</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        File</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getLogFileOutputDirectory()">getLogFileOutputDirectory</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getPackageNameUnderTest()">getPackageNameUnderTest</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getTestClass()">getTestClass</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getTestName()">getTestName</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#getTestRunNumber()">getTestRunNumber</a>()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html#setTestRunNumber(int)">setTestRunNumber</a>(int testRunNumber)
+      </code>
+      
+        <p>Indicate to the <code>Rule</code> that this is the <code>testRunNumber</code>th time the test method
+ is being called in a test instrumentation.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-org.junit.rules.ExternalResource" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-org.junit.rules.ExternalResource-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    org.junit.rules.ExternalResource
+  
+</code>
+<div id="inherited-methods-org.junit.rules.ExternalResource">
+  <div id="inherited-methods-org.junit.rules.ExternalResource-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-org.junit.rules.ExternalResource-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      after()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Statement</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      apply(Statement arg0, Description arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      before()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    java.lang.Object
+  
+</code>
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Object</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      clone()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      equals(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      finalize()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Class&lt;?&gt;</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getClass()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      hashCode()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notify()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notifyAll()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      toString()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0, int arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-org.junit.rules.TestRule" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-org.junit.rules.TestRule-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+interface
+<code>
+  
+    org.junit.rules.TestRule
+  
+</code>
+<div id="inherited-methods-org.junit.rules.TestRule">
+  <div id="inherited-methods-org.junit.rules.TestRule-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-org.junit.rules.TestRule-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        Statement</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      apply(Statement arg0, Description arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2 class="api-section">Public constructors</h2>
+
+
+
+<A NAME="EnableTestTracingRule()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">EnableTestTracingRule</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+EnableTestTracingRule ()</pre>
+    
+    
+
+    
+  <p></p>
+
+</div>
+
+
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="afterTest()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">afterTest</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void afterTest ()</pre>
+    
+    
+
+    
+  <p></p>
+
+</div>
+
+
+<A NAME="beforeTest()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">beforeTest</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void beforeTest ()</pre>
+    
+    
+
+    
+  <p></p>
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+  
+  <ul data-reference-resources>
+    
+    
+    
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/AtraceLogger.html">AtraceLogger</a></li>
+          <li class="selected api apilevel-"><a href="/reference/android/support/test/rule/logging/EnableTestTracingRule.html">EnableTestTracingRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogBatteryInformationRule.html">LogBatteryInformationRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogDeviceGetPropInfoRule.html">LogDeviceGetPropInfoRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LoggingBaseRule.html">LoggingBaseRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogGraphicsStatsRule.html">LogGraphicsStatsRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogLogcatRule.html">LogLogcatRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/LogNetStatsRule.html">LogNetStatsRule</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/rule/logging/RuleLoggingUtils.html">RuleLoggingUtils</a></li>
+      </ul>
+    </li>
+    
+    
+    
+  </ul>
+  
+</div>
+
+
+
+</body>
+</html>

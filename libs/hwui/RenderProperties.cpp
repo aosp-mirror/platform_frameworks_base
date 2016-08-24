@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "RenderProperties.h"
 
 #include <utils/Trace.h>
 
-#include <SkCanvas.h>
 #include <SkColorFilter.h>
 #include <SkMatrix.h>
 #include <SkPath.h>
@@ -28,6 +25,7 @@
 
 #include "Matrix.h"
 #include "OpenGLRenderer.h"
+#include "hwui/Canvas.h"
 #include "utils/MathUtils.h"
 
 namespace android {
@@ -54,11 +52,8 @@ bool LayerProperties::setColorFilter(SkColorFilter* filter) {
 
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
     bool changed = false;
-    SkXfermode::Mode mode;
-    int alpha;
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
-    changed |= setAlpha(static_cast<uint8_t>(alpha));
-    changed |= setXferMode(mode);
+    changed |= setAlpha(static_cast<uint8_t>(PaintUtils::getAlphaDirect(paint)));
+    changed |= setXferMode(PaintUtils::getXfermodeDirect(paint));
     changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }
@@ -70,23 +65,6 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     setXferMode(other.xferMode());
     setColorFilter(other.colorFilter());
     return *this;
-}
-
-RenderProperties::PrimitiveFields::PrimitiveFields()
-        : mClippingFlags(CLIP_TO_BOUNDS)
-        , mProjectBackwards(false)
-        , mProjectionReceiver(false)
-        , mAlpha(1)
-        , mHasOverlappingRendering(true)
-        , mElevation(0)
-        , mTranslationX(0), mTranslationY(0), mTranslationZ(0)
-        , mRotation(0), mRotationX(0), mRotationY(0)
-        , mScaleX(1), mScaleY(1)
-        , mPivotX(0), mPivotY(0)
-        , mLeft(0), mTop(0), mRight(0), mBottom(0)
-        , mWidth(0), mHeight(0)
-        , mPivotExplicitlySet(false)
-        , mMatrixOrPivotDirty(false) {
 }
 
 RenderProperties::ComputedFields::ComputedFields()
@@ -124,22 +102,23 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
 
 void RenderProperties::debugOutputProperties(const int level) const {
     if (mPrimitiveFields.mLeft != 0 || mPrimitiveFields.mTop != 0) {
-        ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mPrimitiveFields.mLeft, mPrimitiveFields.mTop);
+        ALOGD("%*s(Translate (left, top) %d, %d)", level * 2, "",
+                mPrimitiveFields.mLeft, mPrimitiveFields.mTop);
     }
     if (mStaticMatrix) {
-        ALOGD("%*sConcatMatrix (static) %p: " SK_MATRIX_STRING,
+        ALOGD("%*s(ConcatMatrix (static) %p: " SK_MATRIX_STRING ")",
                 level * 2, "", mStaticMatrix, SK_MATRIX_ARGS(mStaticMatrix));
     }
     if (mAnimationMatrix) {
-        ALOGD("%*sConcatMatrix (animation) %p: " SK_MATRIX_STRING,
+        ALOGD("%*s(ConcatMatrix (animation) %p: " SK_MATRIX_STRING ")",
                 level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
     }
     if (hasTransformMatrix()) {
         if (isTransformTranslateOnly()) {
-            ALOGD("%*sTranslate %.2f, %.2f, %.2f",
+            ALOGD("%*s(Translate %.2f, %.2f, %.2f)",
                     level * 2, "", getTranslationX(), getTranslationY(), getZ());
         } else {
-            ALOGD("%*sConcatMatrix %p: " SK_MATRIX_STRING,
+            ALOGD("%*s(ConcatMatrix %p: " SK_MATRIX_STRING ")",
                     level * 2, "", mComputedFields.mTransformMatrix, SK_MATRIX_ARGS(mComputedFields.mTransformMatrix));
         }
     }
@@ -154,7 +133,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
 
         if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
             // simply scale rendering content's alpha
-            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
+            ALOGD("%*s(ScaleAlpha %.2f)", level * 2, "", mPrimitiveFields.mAlpha);
         } else {
             // savelayeralpha to create an offscreen buffer to apply alpha
             Rect layerBounds(0, 0, getWidth(), getHeight());
@@ -162,20 +141,36 @@ void RenderProperties::debugOutputProperties(const int level) const {
                 getClippingRectForFlags(clipFlags, &layerBounds);
                 clipFlags = 0; // all clipping done by savelayer
             }
-            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
+            ALOGD("%*s(SaveLayerAlpha %d, %d, %d, %d, %d, 0x%x)", level * 2, "",
                     (int)layerBounds.left, (int)layerBounds.top,
                     (int)layerBounds.right, (int)layerBounds.bottom,
                     (int)(mPrimitiveFields.mAlpha * 255),
-                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+                    SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
         }
-
-
     }
+
     if (clipFlags) {
         Rect clipRect;
         getClippingRectForFlags(clipFlags, &clipRect);
-        ALOGD("%*sClipRect %d, %d, %d, %d", level * 2, "",
+        ALOGD("%*s(ClipRect %d, %d, %d, %d)", level * 2, "",
                 (int)clipRect.left, (int)clipRect.top, (int)clipRect.right, (int)clipRect.bottom);
+    }
+
+    if (getRevealClip().willClip()) {
+        Rect bounds;
+        getRevealClip().getBounds(&bounds);
+        ALOGD("%*s(Clip to reveal clip with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
+                RECT_ARGS(bounds));
+    }
+
+    auto& outline = mPrimitiveFields.mOutline;
+    if (outline.getShouldClip()) {
+        if (outline.isEmpty()) {
+            ALOGD("%*s(Clip to empty outline)", level * 2, "");
+        } else if (outline.willClip()) {
+            ALOGD("%*s(Clip to outline with bounds %.2f %.2f %.2f %.2f)", level * 2, "",
+                    RECT_ARGS(outline.getBounds()));
+        }
     }
 }
 

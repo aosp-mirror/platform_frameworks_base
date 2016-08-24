@@ -19,20 +19,24 @@ package com.android.server.pm;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.os.Environment;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Slog;
 import android.util.Xml;
 
 import libcore.io.IoUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,9 +44,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Centralized access to SELinux MMAC (middleware MAC) implementation. This
@@ -63,45 +64,27 @@ public final class SELinuxMMAC {
     // to synchronize access during policy load and access attempts.
     private static List<Policy> sPolicies = new ArrayList<>();
 
-    // Data policy override version file.
-    private static final String DATA_VERSION_FILE =
-            Environment.getDataDirectory() + "/security/current/selinux_version";
+    /** Path to version on rootfs */
+    private static final File VERSION_FILE = new File("/selinux_version");
 
-    // Base policy version file.
-    private static final String BASE_VERSION_FILE = "/selinux_version";
+    /** Path to MAC permissions on system image */
+    private static final File MAC_PERMISSIONS = new File(Environment.getRootDirectory(),
+            "/etc/security/mac_permissions.xml");
 
-    // Whether override security policies should be loaded.
-    private static final boolean USE_OVERRIDE_POLICY = useOverridePolicy();
+    /** Path to app contexts on rootfs */
+    private static final File SEAPP_CONTEXTS = new File("/seapp_contexts");
 
-    // Data override mac_permissions.xml policy file.
-    private static final String DATA_MAC_PERMISSIONS =
-            Environment.getDataDirectory() + "/security/current/mac_permissions.xml";
+    /** Calculated hash of {@link #SEAPP_CONTEXTS} */
+    private static final byte[] SEAPP_CONTEXTS_HASH = returnHash(SEAPP_CONTEXTS);
 
-    // Base mac_permissions.xml policy file.
-    private static final String BASE_MAC_PERMISSIONS =
-            Environment.getRootDirectory() + "/etc/security/mac_permissions.xml";
-
-    // Determine which mac_permissions.xml file to use.
-    private static final String MAC_PERMISSIONS = USE_OVERRIDE_POLICY ?
-            DATA_MAC_PERMISSIONS : BASE_MAC_PERMISSIONS;
-
-    // Data override seapp_contexts policy file.
-    private static final String DATA_SEAPP_CONTEXTS =
-            Environment.getDataDirectory() + "/security/current/seapp_contexts";
-
-    // Base seapp_contexts policy file.
-    private static final String BASE_SEAPP_CONTEXTS = "/seapp_contexts";
-
-    // Determine which seapp_contexts file to use.
-    private static final String SEAPP_CONTEXTS = USE_OVERRIDE_POLICY ?
-            DATA_SEAPP_CONTEXTS : BASE_SEAPP_CONTEXTS;
-
-    // Stores the hash of the last used seapp_contexts file.
-    private static final String SEAPP_HASH_FILE =
-            Environment.getDataDirectory().toString() + "/system/seapp_hash";
+    /** Attribute where {@link #SEAPP_CONTEXTS_HASH} is stored */
+    private static final String XATTR_SEAPP_HASH = "user.seapp_hash";
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
+
+    // Append autoplay to existing seinfo label
+    private static final String AUTOPLAY_APP_STR = ":autoplayapp";
 
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
@@ -109,7 +92,7 @@ public final class SELinuxMMAC {
      * MAC_PERMISSIONS class variable which is set at class load time which itself
      * is based on the USE_OVERRIDE_POLICY class variable. For further guidance on
      * the proper structure of a mac_permissions.xml file consult the source code
-     * located at external/sepolicy/mac_permissions.xml.
+     * located at system/sepolicy/mac_permissions.xml.
      *
      * @return boolean indicating if policy was correctly loaded. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
@@ -316,6 +299,9 @@ public final class SELinuxMMAC {
             }
         }
 
+        if (pkg.applicationInfo.isAutoPlayApp())
+            pkg.applicationInfo.seinfo += AUTOPLAY_APP_STR;
+
         if (pkg.applicationInfo.isPrivilegedApp())
             pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
 
@@ -326,71 +312,42 @@ public final class SELinuxMMAC {
     }
 
     /**
-     * Determines if a recursive restorecon on /data/data and /data/user is needed.
-     * It does this by comparing the SHA-1 of the seapp_contexts file against the
-     * stored hash at /data/system/seapp_hash.
+     * Determines if a recursive restorecon on the given package data directory
+     * is needed. It does this by comparing the SHA-1 of the seapp_contexts file
+     * against the stored hash in an xattr.
+     * <p>
+     * Note that the xattr isn't in the 'security' namespace, so this should
+     * only be run on directories owned by the system.
      *
      * @return Returns true if the restorecon should occur or false otherwise.
      */
-    public static boolean shouldRestorecon() {
-        // Any error with the seapp_contexts file should be fatal
-        byte[] currentHash = null;
+    public static boolean isRestoreconNeeded(File file) {
         try {
-            currentHash = returnHash(SEAPP_CONTEXTS);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "Error with hashing seapp_contexts.", ioe);
-            return false;
+            final byte[] buf = new byte[20];
+            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, buf);
+            if ((len == 20) && Arrays.equals(SEAPP_CONTEXTS_HASH, buf)) {
+                return false;
+            }
+        } catch (ErrnoException e) {
+            if (e.errno != OsConstants.ENODATA) {
+                Slog.e(TAG, "Failed to read seapp hash for " + file, e);
+            }
         }
 
-        // Push past any error with the stored hash file
-        byte[] storedHash = null;
-        try {
-            storedHash = IoUtils.readFileAsByteArray(SEAPP_HASH_FILE);
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Error opening " + SEAPP_HASH_FILE + ". Assuming first boot.");
-        }
-
-        return (storedHash == null || !MessageDigest.isEqual(storedHash, currentHash));
+        return true;
     }
 
     /**
-     * Stores the SHA-1 of the seapp_contexts to /data/system/seapp_hash.
+     * Stores the SHA-1 of the seapp_contexts into an xattr.
+     * <p>
+     * Note that the xattr isn't in the 'security' namespace, so this should
+     * only be run on directories owned by the system.
      */
-    public static void setRestoreconDone() {
+    public static void setRestoreconDone(File file) {
         try {
-            final byte[] currentHash = returnHash(SEAPP_CONTEXTS);
-            dumpHash(new File(SEAPP_HASH_FILE), currentHash);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "Error with saving hash to " + SEAPP_HASH_FILE, ioe);
-        }
-    }
-
-    /**
-     * Dump the contents of a byte array to a specified file.
-     *
-     * @param file The file that receives the byte array content.
-     * @param content A byte array that will be written to the specified file.
-     * @throws IOException if any failed I/O operation occured.
-     *         Included is the failure to atomically rename the tmp
-     *         file used in the process.
-     */
-    private static void dumpHash(File file, byte[] content) throws IOException {
-        FileOutputStream fos = null;
-        File tmp = null;
-        try {
-            tmp = File.createTempFile("seapp_hash", ".journal", file.getParentFile());
-            tmp.setReadable(true);
-            fos = new FileOutputStream(tmp);
-            fos.write(content);
-            fos.getFD().sync();
-            if (!tmp.renameTo(file)) {
-                throw new IOException("Failure renaming " + file.getCanonicalPath());
-            }
-        } finally {
-            if (tmp != null) {
-                tmp.delete();
-            }
-            IoUtils.closeQuietly(fos);
+            Os.setxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, SEAPP_CONTEXTS_HASH, 0);
+        } catch (ErrnoException e) {
+            Slog.e(TAG, "Failed to persist seapp hash in " + file, e);
         }
     }
 
@@ -399,32 +356,14 @@ public final class SELinuxMMAC {
      *
      * @param file The path to the file given as a string.
      * @return Returns the SHA-1 of the file as a byte array.
-     * @throws IOException if any failed I/O operations occured.
      */
-    private static byte[] returnHash(String file) throws IOException {
+    private static byte[] returnHash(File file) {
         try {
-            final byte[] contents = IoUtils.readFileAsByteArray(file);
+            final byte[] contents = IoUtils.readFileAsByteArray(file.getAbsolutePath());
             return MessageDigest.getInstance("SHA-1").digest(contents);
-        } catch (NoSuchAlgorithmException nsae) {
-            throw new RuntimeException(nsae);  // impossible
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    private static boolean useOverridePolicy() {
-        try {
-            final String overrideVersion = IoUtils.readFileAsString(DATA_VERSION_FILE);
-            final String baseVersion = IoUtils.readFileAsString(BASE_VERSION_FILE);
-            if (overrideVersion.equals(baseVersion)) {
-                return true;
-            }
-            Slog.e(TAG, "Override policy version '" + overrideVersion + "' doesn't match " +
-                   "base version '" + baseVersion + "'. Skipping override policy files.");
-        } catch (FileNotFoundException fnfe) {
-            // Override version file doesn't have to exist so silently ignore.
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Skipping override policy files.", ioe);
-        }
-        return false;
     }
 }
 
@@ -434,7 +373,7 @@ public final class SELinuxMMAC {
  * {@link Policy#getMatchedSeinfo} method. To create an instance of this use the
  * {@link PolicyBuilder} pattern class, where each instance is validated against a set
  * of invariants before being built and returned. Each instance can be guaranteed to
- * hold one valid policy stanza as outlined in the external/sepolicy/mac_permissions.xml
+ * hold one valid policy stanza as outlined in the system/sepolicy/mac_permissions.xml
  * file.
  * <p>
  * The following is an example of how to use {@link Policy.PolicyBuilder} to create a
@@ -580,7 +519,7 @@ final class Policy {
      * A nested builder class to create {@link Policy} instances. A {@link Policy}
      * class instance represents one valid policy stanza found in a mac_permissions.xml
      * file. A valid policy stanza is defined to be a signer stanza which obeys the rules
-     * outlined in external/sepolicy/mac_permissions.xml. The {@link #build} method
+     * outlined in system/sepolicy/mac_permissions.xml. The {@link #build} method
      * ensures a set of invariants are upheld enforcing the correct stanza structure
      * before returning a valid Policy object.
      */

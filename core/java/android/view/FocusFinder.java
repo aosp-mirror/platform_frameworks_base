@@ -17,6 +17,9 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.util.ArrayMap;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -173,6 +176,7 @@ public class FocusFinder {
             // Note: This sort is stable.
             mSequentialFocusComparator.setRoot(root);
             mSequentialFocusComparator.setIsLayoutRtl(root.isLayoutRtl());
+            mSequentialFocusComparator.setFocusables(focusables);
             Collections.sort(focusables, mSequentialFocusComparator);
         } finally {
             mSequentialFocusComparator.recycle();
@@ -598,8 +602,16 @@ public class FocusFinder {
                 + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");
     }
 
+    private static final boolean isValidId(final int id) {
+        return id != 0 && id != View.NO_ID;
+    }
+
     /**
      * Sorts views according to their visual layout and geometry for default tab order.
+     * If views are part of a focus chain (nextFocusForwardId), then they are all grouped
+     * together. The head of the chain is used to determine the order of the chain and is
+     * first in the order and the tail of the chain is the last in the order. The views
+     * in the middle of the chain can be arbitrary order.
      * This is used for sequential focus traversal.
      */
     private static final class SequentialFocusComparator implements Comparator<View> {
@@ -607,9 +619,15 @@ public class FocusFinder {
         private final Rect mSecondRect = new Rect();
         private ViewGroup mRoot;
         private boolean mIsLayoutRtl;
+        private final SparseArray<View> mFocusables = new SparseArray<View>();
+        private final SparseBooleanArray mIsConnectedTo = new SparseBooleanArray();
+        private final ArrayMap<View, View> mHeadsOfChains = new ArrayMap<View, View>();
 
         public void recycle() {
             mRoot = null;
+            mFocusables.clear();
+            mHeadsOfChains.clear();
+            mIsConnectedTo.clear();
         }
 
         public void setRoot(ViewGroup root) {
@@ -620,11 +638,72 @@ public class FocusFinder {
             mIsLayoutRtl = b;
         }
 
+        public void setFocusables(ArrayList<View> focusables) {
+            for (int i = focusables.size() - 1; i >= 0; i--) {
+                final View view = focusables.get(i);
+                final int id = view.getId();
+                if (isValidId(id)) {
+                    mFocusables.put(id, view);
+                }
+                final int nextId = view.getNextFocusForwardId();
+                if (isValidId(nextId)) {
+                    mIsConnectedTo.put(nextId, true);
+                }
+            }
+
+            for (int i = focusables.size() - 1; i >= 0; i--) {
+                final View view = focusables.get(i);
+                final int nextId = view.getNextFocusForwardId();
+                if (isValidId(nextId) && !mIsConnectedTo.get(view.getId())) {
+                    setHeadOfChain(view);
+                }
+            }
+        }
+
+        private void setHeadOfChain(View head) {
+            for (View view = head; view != null;
+                    view = mFocusables.get(view.getNextFocusForwardId())) {
+                final View otherHead = mHeadsOfChains.get(view);
+                if (otherHead != null) {
+                    if (otherHead == head) {
+                        return; // This view has already had its head set properly
+                    }
+                    // A hydra -- multi-headed focus chain (e.g. A->C and B->C)
+                    // Use the one we've already chosen instead and reset this chain.
+                    view = head;
+                    head = otherHead;
+                }
+                mHeadsOfChains.put(view, head);
+            }
+        }
+
         public int compare(View first, View second) {
             if (first == second) {
                 return 0;
             }
+            // Order between views within a chain is immaterial -- next/previous is
+            // within a chain is handled elsewhere.
+            View firstHead = mHeadsOfChains.get(first);
+            View secondHead = mHeadsOfChains.get(second);
+            if (firstHead == secondHead && firstHead != null) {
+                if (first == firstHead) {
+                    return -1; // first is the head, it should be first
+                } else if (second == firstHead) {
+                    return 1; // second is the head, it should be first
+                } else if (isValidId(first.getNextFocusForwardId())) {
+                    return -1; // first is not the end of the chain
+                } else {
+                    return 1; // first is end of chain
+                }
+            }
+            if (firstHead != null) {
+                first = firstHead;
+            }
+            if (secondHead != null) {
+                second = secondHead;
+            }
 
+            // First see if they belong to the same focus chain.
             getRect(first, mFirstRect);
             getRect(second, mSecondRect);
 

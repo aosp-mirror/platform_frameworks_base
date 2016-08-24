@@ -16,6 +16,9 @@
 
 package android.net.http;
 
+import android.annotation.SystemApi;
+import android.security.net.config.UserCertificateSource;
+
 import com.android.org.conscrypt.TrustManagerImpl;
 
 import java.lang.reflect.Field;
@@ -41,7 +44,7 @@ public class X509TrustManagerExtensions {
     // Methods to use when mDelegate is not a TrustManagerImpl and duck typing is being used.
     private final X509TrustManager mTrustManager;
     private final Method mCheckServerTrusted;
-    private final Method mIsUserAddedCertificate;
+    private final Method mIsSameTrustConfiguration;
 
     /**
      * Constructs a new X509TrustManagerExtensions wrapper.
@@ -54,7 +57,7 @@ public class X509TrustManagerExtensions {
             mDelegate = (TrustManagerImpl) tm;
             mTrustManager = null;
             mCheckServerTrusted = null;
-            mIsUserAddedCertificate = null;
+            mIsSameTrustConfiguration = null;
             return;
         }
         // Use duck typing if possible.
@@ -70,14 +73,15 @@ public class X509TrustManagerExtensions {
             throw new IllegalArgumentException("Required method"
                     + " checkServerTrusted(X509Certificate[], String, String, String) missing");
         }
-        // Check that isUserAddedCertificate is present.
+        // Get the option isSameTrustConfiguration method.
+        Method isSameTrustConfiguration = null;
         try {
-            mIsUserAddedCertificate = tm.getClass().getMethod("isUserAddedCertificate",
-                    X509Certificate.class);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(
-                    "Required method isUserAddedCertificate(X509Certificate) missing");
+            isSameTrustConfiguration = tm.getClass().getMethod("isSameTrustConfiguration",
+                    String.class,
+                    String.class);
+        } catch (ReflectiveOperationException ignored) {
         }
+        mIsSameTrustConfiguration = isSameTrustConfiguration;
     }
 
     /**
@@ -115,27 +119,37 @@ public class X509TrustManagerExtensions {
     /**
      * Checks whether a CA certificate is added by an user.
      *
-     * <p>Since {@link X509TrustManager#checkServerTrusted} allows its parameter {@code chain} to
+     * <p>Since {@link X509TrustManager#checkServerTrusted} may allow its parameter {@code chain} to
      * chain up to user-added CA certificates, this method can be used to perform additional
      * policies for user-added CA certificates.
      *
-     * @return {@code true} to indicate that the certificate was added by the user, {@code false}
-     * otherwise.
+     * @return {@code true} to indicate that the certificate authority exists in the user added
+     * certificate store, {@code false} otherwise.
      */
     public boolean isUserAddedCertificate(X509Certificate cert) {
-        if (mDelegate != null) {
-            return mDelegate.isUserAddedCertificate(cert);
-        } else {
-            try {
-                return (Boolean) mIsUserAddedCertificate.invoke(mTrustManager, cert);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Failed to call isUserAddedCertificate", e);
-            } catch (InvocationTargetException e) {
-                if (e.getCause() instanceof RuntimeException) {
-                    throw (RuntimeException) e.getCause();
-                } else {
-                    throw new RuntimeException("isUserAddedCertificate failed", e.getCause());
-                }
+        return UserCertificateSource.getInstance().findBySubjectAndPublicKey(cert) != null;
+    }
+
+    /**
+     * Returns {@code true} if the TrustManager uses the same trust configuration for the provided
+     * hostnames.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isSameTrustConfiguration(String hostname1, String hostname2) {
+        if (mIsSameTrustConfiguration == null) {
+            return true;
+        }
+        try {
+            return (Boolean) mIsSameTrustConfiguration.invoke(mTrustManager, hostname1, hostname2);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to call isSameTrustConfiguration", e);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new RuntimeException("isSameTrustConfiguration failed", e.getCause());
             }
         }
     }

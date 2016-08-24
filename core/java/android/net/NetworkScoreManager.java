@@ -105,7 +105,8 @@ public class NetworkScoreManager {
     /**
      * Broadcast action: the active scorer has been changed. Scorer apps may listen to this to
      * perform initialization once selected as the active scorer, or clean up unneeded resources
-     * if another scorer has been selected. Note that it is unnecessary to clear existing scores as
+     * if another scorer has been selected. This is an explicit broadcast only sent to the
+     * previous scorer and new scorer. Note that it is unnecessary to clear existing scores as
      * this is handled by the system.
      *
      * <p>The new scorer will be specified in {@link #EXTRA_NEW_SCORER}.
@@ -165,7 +166,7 @@ public class NetworkScoreManager {
         try {
             return mService.updateScores(networks);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -185,7 +186,7 @@ public class NetworkScoreManager {
         try {
             return mService.clearScores();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -205,7 +206,7 @@ public class NetworkScoreManager {
         try {
             return mService.setActiveScorer(packageName);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -220,6 +221,7 @@ public class NetworkScoreManager {
         try {
             mService.disableScoring();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -245,7 +247,8 @@ public class NetworkScoreManager {
         intent.putExtra(EXTRA_NETWORKS_TO_SCORE, networks);
         // A scorer should never become active if its package doesn't hold SCORE_NETWORKS, but
         // ensure the package still holds it to be extra safe.
-        mContext.sendBroadcastAsUser(intent, UserHandle.OWNER, Manifest.permission.SCORE_NETWORKS);
+        // TODO: http://b/23422763
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM, Manifest.permission.SCORE_NETWORKS);
         return true;
     }
 
@@ -263,6 +266,7 @@ public class NetworkScoreManager {
         try {
             mService.registerNetworkScoreCache(networkType, scoreCache);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

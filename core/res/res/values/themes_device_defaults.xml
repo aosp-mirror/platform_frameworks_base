@@ -98,7 +98,6 @@ easier.
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@style/Widget.DeviceDefault.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.DeviceDefault.TextSuggestionsPopupWindow</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.DeviceDefault.AbsListView</item>
@@ -350,7 +349,6 @@ easier.
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@style/Widget.DeviceDefault.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.DeviceDefault.Light.TextSuggestionsPopupWindow</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.DeviceDefault.Light.AbsListView</item>
@@ -546,9 +544,7 @@ easier.
         <item name="windowNoTitle">true</item>
         <item name="windowBackground">@color/transparent</item>
         <item name="backgroundDimEnabled">true</item>
-        <item name="windowTranslucentStatus">false</item>
-        <item name="windowTranslucentNavigation">false</item>
-        <item name="windowDrawsSystemBarBackgrounds">false</item>
+        <item name="statusBarColor">@color/transparent</item>
         <item name="windowContentOverlay">@null</item>
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>

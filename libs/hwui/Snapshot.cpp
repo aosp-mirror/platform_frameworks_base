@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "Snapshot.h"
 
-#include <SkCanvas.h>
+#include "hwui/Canvas.h"
 
 namespace android {
 namespace uirenderer {
@@ -47,7 +45,7 @@ Snapshot::Snapshot()
  * Copies the specified snapshot/ The specified snapshot is stored as
  * the previous snapshot.
  */
-Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
+Snapshot::Snapshot(Snapshot* s, int saveFlags)
         : flags(0)
         , previous(s)
         , layer(s->layer)
@@ -60,14 +58,14 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         , mClipArea(nullptr)
         , mViewportData(s->mViewportData)
         , mRelativeLightCenter(s->mRelativeLightCenter) {
-    if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
-        mTransformRoot.load(*s->transform);
+    if (saveFlags & SaveFlags::Matrix) {
+        mTransformRoot = *s->transform;
         transform = &mTransformRoot;
     } else {
         transform = s->transform;
     }
 
-    if (saveFlags & SkCanvas::kClip_SaveFlag) {
+    if (saveFlags & SaveFlags::Clip) {
         mClipAreaRoot = s->getClipArea();
         mClipArea = &mClipAreaRoot;
     } else {
@@ -86,24 +84,24 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
 // Clipping
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
+void Snapshot::clipRegionTransformed(const SkRegion& region, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipRegion(region, op);
+    mClipArea->clipRegion(region, op);
 }
 
-bool Snapshot::clip(float left, float top, float right, float bottom, SkRegion::Op op) {
+void Snapshot::clip(const Rect& localClip, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipRectWithTransform(left, top, right, bottom, transform, op);
+    mClipArea->clipRectWithTransform(localClip, transform, op);
 }
 
-bool Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
+void Snapshot::clipPath(const SkPath& path, SkRegion::Op op) {
     flags |= Snapshot::kFlagClipSet;
-    return mClipArea->clipPathWithTransform(path, transform, op);
+    mClipArea->clipPathWithTransform(path, transform, op);
 }
 
 void Snapshot::setClip(float left, float top, float right, float bottom) {
-    mClipArea->setClip(left, top, right, bottom);
     flags |= Snapshot::kFlagClipSet;
+    mClipArea->setClip(left, top, right, bottom);
 }
 
 bool Snapshot::hasPerspectiveTransform() const {
@@ -133,6 +131,9 @@ void Snapshot::resetClip(float left, float top, float right, float bottom) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Snapshot::resetTransform(float x, float y, float z) {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("not supported - light center managed differently");
+#else
     // before resetting, map current light pos with inverse of current transform
     Vector3 center = mRelativeLightCenter;
     mat4 inverse;
@@ -142,16 +143,20 @@ void Snapshot::resetTransform(float x, float y, float z) {
 
     transform = &mTransformRoot;
     transform->loadTranslate(x, y, z);
+#endif
 }
 
 void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("not supported - not needed by new ops");
+#else
     // build (reverse ordered) list of the stack of snapshots, terminated with a NULL
     Vector<const Snapshot*> snapshotList;
     snapshotList.push(nullptr);
     const Snapshot* current = this;
     do {
         snapshotList.push(current);
-        current = current->previous.get();
+        current = current->previous;
     } while (current);
 
     // traverse the list, adding in each transform that contributes to the total transform
@@ -170,6 +175,7 @@ void Snapshot::buildScreenSpaceTransform(Matrix4* outTransform) const {
             outTransform->multiply(*(current->transform));
         }
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,8 +199,7 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
     state->highPriority = highPriority;
 
     // store the inverse drawing matrix
-    Matrix4 roundRectDrawingMatrix;
-    roundRectDrawingMatrix.load(getOrthoMatrix());
+    Matrix4 roundRectDrawingMatrix = getOrthoMatrix();
     roundRectDrawingMatrix.multiply(*transform);
     state->matrix.loadInverse(roundRectDrawingMatrix);
 
@@ -223,15 +228,46 @@ void Snapshot::setClippingRoundRect(LinearAllocator& allocator, const Rect& boun
 }
 
 void Snapshot::setProjectionPathMask(LinearAllocator& allocator, const SkPath* path) {
+#if HWUI_NEW_OPS
+    // TODO: remove allocator param for HWUI_NEW_OPS
+    projectionPathMask = path;
+#else
     if (path) {
         ProjectionPathMask* mask = new (allocator) ProjectionPathMask;
         mask->projectionMask = path;
         buildScreenSpaceTransform(&(mask->projectionMaskTransform));
-
         projectionPathMask = mask;
     } else {
         projectionPathMask = nullptr;
     }
+#endif
+}
+
+static Snapshot* getClipRoot(Snapshot* target) {
+    while (target->previous && target->previous->previous) {
+        target = target->previous;
+    }
+    return target;
+}
+
+const ClipBase* Snapshot::serializeIntersectedClip(LinearAllocator& allocator,
+        const ClipBase* recordedClip, const Matrix4& recordedClipTransform) {
+    auto target = this;
+    if (CC_UNLIKELY(recordedClip && recordedClip->intersectWithRoot)) {
+        // Clip must be intersected with root, instead of current clip.
+        target = getClipRoot(this);
+    }
+
+    return target->mClipArea->serializeIntersectedClip(allocator,
+            recordedClip, recordedClipTransform);
+}
+
+void Snapshot::applyClip(const ClipBase* recordedClip, const Matrix4& transform) {
+    if (CC_UNLIKELY(recordedClip && recordedClip->intersectWithRoot)) {
+        // current clip is being replaced, but must intersect with clip root
+        *mClipArea = *(getClipRoot(this)->mClipArea);
+    }
+    mClipArea->applyClip(recordedClip, transform);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,7 +280,7 @@ bool Snapshot::isIgnored() const {
 
 void Snapshot::dump() const {
     ALOGD("Snapshot %p, flags %x, prev %p, height %d, ignored %d, hasComplexClip %d",
-            this, flags, previous.get(), getViewportHeight(), isIgnored(), !mClipArea->isSimple());
+            this, flags, previous, getViewportHeight(), isIgnored(), !mClipArea->isSimple());
     const Rect& clipRect(mClipArea->getClipRect());
     ALOGD("  ClipRect %.1f %.1f %.1f %.1f, clip simple %d",
             clipRect.left, clipRect.top, clipRect.right, clipRect.bottom, mClipArea->isSimple());

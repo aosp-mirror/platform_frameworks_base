@@ -162,6 +162,9 @@
         <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
         <attr name="textAppearanceSmallPopupMenu" format="reference" />
 
+        <!-- Text color, typeface, size, and style for header text inside of a popup menu. -->
+        <attr name="textAppearancePopupMenuHeader" format="reference" />
+
         <!-- The underline color and thickness for easy correct suggestion -->
         <attr name="textAppearanceEasyCorrectSuggestion" format="reference" />
 
@@ -320,7 +323,9 @@
         <attr name="windowBackground" format="reference" />
         <!-- Drawable to draw selectively within the inset areas when the windowBackground
              has been set to null. This protects against seeing visual garbage in the
-             surface when the app has not drawn any content into this area. -->
+             surface when the app has not drawn any content into this area. One example is
+             when the user is resizing a window of an activity that has
+             {@link android.R.attr#resizeableActivity} set for multi-window mode. -->
         <attr name="windowBackgroundFallback" format="reference" />
         <!-- Drawable to use as a frame around the window. -->
         <attr name="windowFrame" format="reference" />
@@ -639,6 +644,8 @@ i
         <attr name="imageButtonStyle" format="reference" />
         <!-- The style resource to use for an ImageButton that is an image well. -->
         <attr name="imageWellStyle" format="reference" />
+        <!-- Default menu-style ListView style. -->
+        <attr name="listMenuViewStyle" format="reference" />
         <!-- Default ListView style. -->
         <attr name="listViewStyle" format="reference" />
         <!-- ListView with white background. -->
@@ -727,6 +734,8 @@ i
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
+        <!-- Default context menu PopupMenu style. -->
+        <attr name="contextPopupMenuStyle" format="reference" />
         <!-- Default StackView style. -->
         <attr name="stackViewStyle" format="reference" />
 
@@ -933,6 +942,10 @@ i
 
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" format="reference" />
+        <!-- Layout of the container of the suggestion popup window. -->
+        <attr name="textEditSuggestionContainerLayout" format="reference" />
+        <!-- Text appearance of the focused words to be replaced by suggested word. -->
+        <attr name="textEditSuggestionHighlightStyle" format="reference" />
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
@@ -1012,9 +1025,6 @@ i
         <!-- Pointer styles -->
         <!-- ============== -->
         <eat-comment />
-
-        <!-- Reference to the Pointer style -->
-        <attr name="pointerStyle" format="reference" />
 
         <!-- The drawable for accessibility focused views. -->
         <attr name="accessibilityFocusedDrawable" format="reference" />
@@ -1810,11 +1820,18 @@ i
         <enum name="KEYCODE_STEM_1" value="265" />
         <enum name="KEYCODE_STEM_2" value="266" />
         <enum name="KEYCODE_STEM_3" value="267" />
+        <enum name="KEYCODE_DPAD_UP_LEFT" value="268" />
+        <enum name="KEYCODE_DPAD_DOWN_LEFT" value="269" />
+        <enum name="KEYCODE_DPAD_UP_RIGHT" value="270" />
+        <enum name="KEYCODE_DPAD_DOWN_RIGHT" value="271" />
         <enum name="KEYCODE_MEDIA_SKIP_FORWARD" value="272" />
         <enum name="KEYCODE_MEDIA_SKIP_BACKWARD" value="273" />
         <enum name="KEYCODE_MEDIA_STEP_FORWARD" value="274" />
         <enum name="KEYCODE_MEDIA_STEP_BACKWARD" value="275" />
         <enum name="KEYCODE_SOFT_SLEEP" value="276" />
+        <enum name="KEYCODE_CUT" value="277" />
+        <enum name="KEYCODE_COPY" value="278" />
+        <enum name="KEYCODE_PASTE" value="279" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2022,6 +2039,8 @@ i
         <attr name="listItemLayout" format="reference" />
         <attr name="progressLayout" format="reference" />
         <attr name="horizontalProgressLayout" format="reference" />
+        <!-- @hide Not ready for public use. -->
+        <attr name="showTitle" format="boolean" />
         <!-- @hide Whether fullDark, etc. should use default values if null. -->
         <attr name="needsDefaultBackgrounds" format="boolean" />
     </declare-styleable>
@@ -2774,6 +2793,61 @@ i
             <flag name="end" value="0x20" />
         </attr>
 
+        <attr name="pointerIcon">
+            <!-- Null icon, pointer becomes invisible. -->
+            <enum name="none" value="0" />
+            <!-- The default icon of arrow pointer. -->
+            <enum name="arrow" value="1000" />
+            <!-- Pointer icon indicating context-menu will appear. -->
+            <enum name="context_menu" value="1001" />
+            <!-- Pointer icon of a hand with the index finger. -->
+            <enum name="hand" value="1002" />
+            <!-- Pointer icon indicating help. -->
+            <enum name="help" value="1003" />
+            <!-- Pointer icon indicating something is going on and waiting. -->
+            <enum name="wait" value="1004" />
+            <!-- Pointer icon for cell and grid. -->
+            <enum name="cell" value="1006" />
+            <!-- Pointer icon of crosshair, indicating to spot a location. -->
+            <enum name="crosshair" value="1007" />
+            <!-- Pointer icon of I-beam, usually for text. -->
+            <enum name="text" value="1008" />
+            <!-- Pointer icon of I-beam with 90-degree rotated, for vertical text. -->
+            <enum name="vertical_text" value="1009" />
+            <!-- Pointer icon of 'alias', indicating an alias of/shortcut to something is to be
+                 created. -->
+            <enum name="alias" value="1010" />
+            <!-- Pointer icon of 'copy', used for drag/drop. -->
+            <enum name="copy" value="1011" />
+            <!-- Pointer icon of 'no-drop', indicating the drop will not be accepted at the
+                 current location. -->
+            <enum name="no_drop" value="1012" />
+            <!-- Pointer icon of four-way arrows, indicating scrolling all direction. -->
+            <enum name="all_scroll" value="1013" />
+            <!-- Pointer icon of horizontal double arrow, indicating horizontal resize. -->
+            <enum name="horizontal_double_arrow" value="1014" />
+            <!-- Pointer icon of vertical double arrow, indicating vertical resize. -->
+            <enum name="vertical_double_arrow" value="1015" />
+            <!-- Pointer icon of diagonal double arrow, starting from top-right to bottom-left.
+                 Indicating freeform resize. -->
+            <enum name="top_right_diagonal_double_arrow" value="1016" />
+            <!-- Pointer icon of diagonal double arrow, starting from top-left to bottom-right.
+                 Indicating freeform resize. -->
+            <enum name="top_left_diagonal_double_arrow" value="1017" />
+            <!-- Pointer icon indicating zoom-in. -->
+            <enum name="zoom_in" value="1018" />
+            <!-- Pointer icon indicating zoom-out. -->
+            <enum name="zoom_out" value="1019" />
+            <!-- Pointer icon of a hand sign to grab something. -->
+            <enum name="grab" value="1020" />
+            <!-- Pointer icon of a hand sign while grabbing something. -->
+            <enum name="grabbing" value="1021" />
+        </attr>
+
+        <!-- Whether this view has elements that may overlap when drawn. See
+             {@link android.view.View#forceHasOverlappingRendering(boolean)}. -->
+        <attr name="forceHasOverlappingRendering" format="boolean" />
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3025,7 +3099,8 @@ i
         <attr name="imeSubtypeLocale" format="string" />
         <!-- The mode of the subtype. This string can be a mode (e.g. voice, keyboard...) and this
              string will be passed to the IME when the framework calls the IME with the
-             subtype.  -->
+             subtype.  {@link android.view.inputmethod.InputMethodSubtype#getLocale()} returns the
+             value specified in this attribute.  -->
         <attr name="imeSubtypeMode" format="string" />
         <!-- Set true if the subtype is auxiliary.  An auxiliary subtype won't be shown in the
              input method selection list in the settings app.
@@ -3050,6 +3125,9 @@ i
              this subtype. This is important because many password fields only allow
              ASCII-characters. -->
         <attr name="isAsciiCapable" format="boolean" />
+        <!-- The BCP-47 Language Tag of the subtype.  This replaces
+        {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->
+        <attr name="languageTag" format="string" />
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
@@ -3073,11 +3151,22 @@ i
         <attr name="label" />
         <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
              This is also used by the framework to know the supported locales
-             of the spell checker.  -->
+             of the spell checker. {@link android.view.textservice.SpellCheckerSubtype#getLocale()}
+             returns the value specified in this attribute.  -->
         <attr name="subtypeLocale" format="string" />
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the SpellChecker.  -->
         <attr name="subtypeExtraValue" format="string" />
+        <!-- The unique id for the subtype. The text service (spell checker) framework keeps track
+             of enabled subtypes by ID. When the spell checker package gets upgraded, enabled IDs
+             will stay enabled even if other attributes are different. If the ID is unspecified or
+             or explicitly specified to 0 in XML resources,
+             {@code Arrays.hashCode(new Object[] {subtypeLocale, extraValue}) will be used instead.
+              -->
+        <attr name="subtypeId" />
+        <!-- The BCP-47 Language Tag of the subtype.  This replaces
+        {@link android.R.styleable#SpellChecker_Subtype_subtypeLocale}.  -->
+        <attr name="languageTag" />
     </declare-styleable>
 
     <!-- Use <code>accessibility-service</code> as the root tag of the XML resource that
@@ -3226,7 +3315,22 @@ i
              </p>
          -->
         <attr name="canRequestFilterKeyEvents" format="boolean" />
-        <!-- Short description of the accessibility serivce purpose or behavior.-->
+        <!-- Attribute whether the accessibility service wants to be able to control
+             display magnification.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_CAN_CONTROL_MAGNIFICATION} flag.
+             </p>
+         -->
+        <attr name="canControlMagnification" format="boolean" />
+        <!-- Attribute whether the accessibility service wants to be able to perform gestures.
+             <p>
+             Required to allow setting the {@link android.accessibilityservice
+             #AccessibilityServiceInfo#FLAG_CAN_PERFORM_GESTURES} flag.
+             </p>
+         -->
+        <attr name="canPerformGestures" format="boolean" />
+        <!-- Short description of the accessibility service purpose or behavior.-->
         <attr name="description" />
     </declare-styleable>
 
@@ -3392,7 +3496,7 @@ i
              property is set to true by default but should be set to false if your adapter
              will display items of varying heights. When this property is set to true and
              your adapter displays items of varying heights, the scrollbar thumb will
-             change size as the user scrolls through the list. When set to fale, the list
+             change size as the user scrolls through the list. When set to false, the list
              will use only the number of items in the adapter and the number of items visible
              on screen to determine the scrollbar's properties. -->
         <attr name="smoothScrollbar" format="boolean" />
@@ -3421,6 +3525,13 @@ i
              This setting implies fastScrollEnabled. -->
         <attr name="fastScrollAlwaysVisible" format="boolean" />
     </declare-styleable>
+    <!-- @hide -->
+    <declare-styleable name="RecycleListView">
+        <!-- Bottom padding to use when no buttons are present. -->
+        <attr name="paddingBottomNoButtons" format="dimension" />
+        <!-- Top padding to use when no title is present. -->
+        <attr name="paddingTopNoTitle" format="dimension" />
+    </declare-styleable>
     <declare-styleable name="AbsSpinner">
         <!-- Reference to an array resource that will populate the Spinner.  For static content,
              this is simpler than populating the Spinner programmatically. -->
@@ -3440,6 +3551,9 @@ i
              If no format string is specified, the Chronometer will simply display
              "MM:SS" or "H:MM:SS". -->
         <attr name="format" format="string" localization="suggested" />
+        <!-- Specifies whether this Chronometer counts down or counts up from the base.
+              If not specified this is false and the Chronometer counts up. -->
+        <attr name="countDown" format="boolean" />
     </declare-styleable>
     <declare-styleable name="CompoundButton">
         <!-- Indicates the initial checked state of this button. -->
@@ -3630,7 +3744,7 @@ i
         <!-- Controls how the image should be resized or moved to match the size
              of this ImageView.  See {@link android.widget.ImageView.ScaleType} -->
         <attr name="scaleType">
-            <!-- Scale using the image matrix when drawing. See  
+            <!-- Scale using the image matrix when drawing. See
                  {@link android.widget.ImageView#setImageMatrix(Matrix)}. -->
             <enum name="matrix" value="0" />
             <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#FILL}. -->
@@ -3643,7 +3757,7 @@ i
             <enum name="fitEnd" value="4" />
             <!-- Center the image in the view, but perform no scaling. -->
             <enum name="center" value="5" />
-            <!-- Scale the image uniformly (maintain the image's aspect ratio) so both dimensions 
+            <!-- Scale the image uniformly (maintain the image's aspect ratio) so both dimensions
                  (width and height) of the image will be equal to or larger than the corresponding
                  dimension of the view (minus padding). The image is then centered in the view. -->
             <enum name="centerCrop" value="6" />
@@ -3814,6 +3928,8 @@ i
         <attr name="itemIconDisabledAlpha" format="float" />
         <!-- Whether space should be reserved in layout when an icon is missing. -->
         <attr name="preserveIconSpacing" format="boolean" />
+        <!-- Drawable for the arrow icon indicating a particular item is a submenu. -->
+        <attr name="subMenuArrow" format="reference" />
     </declare-styleable>
     <declare-styleable name="IconMenuView">
         <!-- Defines the height of each row. -->
@@ -3973,10 +4089,34 @@ i
              should always be false for Material and  beyond.
              @hide Developers shouldn't need to change this. -->
         <attr name="useDisabledAlpha" format="boolean" />
-        <!-- Tint to apply to the button graphic. -->
+        <!-- Tint to apply to the thumb drawable. -->
         <attr name="thumbTint" format="color" />
-        <!-- Blending mode used to apply the button graphic tint. -->
+        <!-- Blending mode used to apply the thumb tint. -->
         <attr name="thumbTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Drawable displayed at each progress position on a seekbar. -->
+        <attr name="tickMark" format="reference" />
+        <!-- Tint to apply to the tick mark drawable. -->
+        <attr name="tickMarkTint" format="color" />
+        <!-- Blending mode used to apply the tick mark tint. -->
+        <attr name="tickMarkTintMode">
             <!-- The tint is drawn on top of the drawable.
                  [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
             <enum name="src_over" value="3" />
@@ -4304,7 +4444,9 @@ i
              inside of its frozen icicle in addition to meta-data such as
              the current cursor position.  By default this is disabled;
              it can be useful when the contents of a text view is not stored
-             in a persistent place such as a content provider. -->
+             in a persistent place such as a content provider. For
+             {@link android.widget.EditText} it is always enabled, regardless
+             of the value of the attribute. -->
         <attr name="freezesText" format="boolean" />
         <!-- If set, causes words that are longer than the view is wide
              to be ellipsized instead of broken in the middle.
@@ -4410,6 +4552,10 @@ i
 
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" />
+        <!-- Layout of the container of the suggestion popup window. -->
+        <attr name="textEditSuggestionContainerLayout" />
+        <!-- Style of the highlighted string in the suggestion popup window. -->
+        <attr name="textEditSuggestionHighlightStyle" />
 
 
         <!-- Reference to a drawable that will be drawn under the insertion cursor. -->
@@ -4445,10 +4591,6 @@ i
             screens with limited space for text. -->
             <enum name="full" value="2" />
         </attr>
-        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
-        <attr name="__removeBeforeMRelease_leftIndents" format="reference" />
-        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
-        <attr name="__removeBeforeMRelease_rightIndents" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
@@ -4515,6 +4657,8 @@ i
             <enum name="wrap_content" value="-2" />
         </attr>
         <attr name="inputType" />
+        <!-- Theme to use for the completion popup window. -->
+        <attr name="popupTheme" />
     </declare-styleable>
     <declare-styleable name="PopupWindow">
         <!-- The background to use for the popup window. -->
@@ -4896,7 +5040,7 @@ i
         <attr name="firstDayOfWeek" format="integer" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" />
-        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" />
         <!-- The text appearance for the month and year in the calendar header. -->
         <attr name="monthTextAppearance" format="reference" />
@@ -5022,6 +5166,12 @@ i
              RTL (right-to-left).  See
              {@link android.graphics.drawable.Drawable#setAutoMirrored}. -->
         <attr name="autoMirrored" format="boolean" />
+    </declare-styleable>
+
+    <!-- Drawable class used to wrap other drawables. -->
+    <declare-styleable name="DrawableWrapper">
+        <!-- The wrapped drawable. -->
+        <attr name="drawable" />
     </declare-styleable>
 
     <!-- Drawable used to render several states. Each state is represented by
@@ -5391,6 +5541,7 @@ i
         <attr name="color" />
     </declare-styleable>
 
+    <!-- Drawable used to wrap and inset another drawable. -->
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
@@ -5573,6 +5724,8 @@ i
             <!-- Push object to the end of its container, not changing its size. -->
             <flag name="end" value="0x00800005" />
         </attr>
+        <!-- Specifies the initial drawable level in the range 0 to 10000. -->
+        <attr name="level" format="integer" />
         <!-- Reference to a drawable resource to draw with the specified scale. -->
         <attr name="drawable" />
         <!-- Use the drawable's intrinsic width and height as minimum size values.
@@ -5727,6 +5880,12 @@ i
         </attr>
         <!-- sets the Miter limit for a stroked path -->
         <attr name="strokeMiterLimit" format="float"/>
+        <!-- sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
+             For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty -->
+        <attr name="fillType" format="enum">
+            <enum name="nonZero" value="0"/>
+            <enum name="evenOdd" value="1"/>
+        </attr>
     </declare-styleable>
 
     <!-- Defines the clip path used in VectorDrawables. -->
@@ -6216,34 +6375,9 @@ i
     <!-- ========================== -->
     <eat-comment />
 
-    <!-- Drawable states.
-         The mapping of Drawable states to a particular drawables is specified
-         in the "state" elements of a Widget's "selector" element.
-         Possible values:
-         <ul>
-         <li>"state_focused"
-         <li>"state_window_focused"
-         <li>"state_enabled"
-         <li>"state_checked"
-         <li>"state_selected"
-         <li>"state_active"
-         <li>"state_single"
-         <li>"state_first"
-         <li>"state_mid"
-         <li>"state_last"
-         <li>"state_only"
-         <li>"state_pressed"
-         <li>"state_activated"
-         <li>"state_error"
-         <li>"state_circle"
-         <li>"state_rect"
-         <li>"state_grow"
-         <li>"state_move"
-         <li>"state_hovered"
-         <li>"state_drag_can_accept"
-         <li>"state_drag_hovered"
-         <li>"state_accessibility_focused"
-         </ul>  -->
+    <!-- Set of framework-provided states that may be specified on a Drawable. Actual usage of
+         states may vary between view implementations, as documented on the individual state
+         attributes. -->
     <declare-styleable name="DrawableStates">
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a view has input focus. -->
@@ -6254,13 +6388,13 @@ i
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a view is enabled. -->
         <attr name="state_enabled" format="boolean" />
-        <!-- State identifier indicating that the object <var>may</var> display a check mark.
-             See {@link android.R.attr#state_checked} for the identifier that indicates whether it is
+        <!-- State identifier indicating that the object <var>may</var> display a check mark. See
+             {@link android.R.attr#state_checked} for the identifier that indicates whether it is
              actually checked. -->
         <attr name="state_checkable" format="boolean"/>
         <!-- State identifier indicating that the object is currently checked.  See
-             {@link android.R.attr#state_checkable} for an additional identifier that can indicate if
-             any object may ever display a check, regardless of whether state_checked is
+             {@link android.R.attr#state_checkable} for an additional identifier that can indicate
+             if any object may ever display a check, regardless of whether state_checked is
              currently set. -->
         <attr name="state_checked" format="boolean"/>
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
@@ -6274,15 +6408,25 @@ i
              marked it as being of interest.  This is an alternative representation of
              state_checked for when the state should be propagated down the view hierarchy. -->
         <attr name="state_activated" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is considered "active" by its host. Actual usage may vary
+             between views. Consult the host view documentation for details. -->
         <attr name="state_active" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is considered "single" by its host. Actual usage may vary
+             between views. Consult the host view documentation for details. -->
         <attr name="state_single" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the first position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_first" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the middle position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_middle" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the last position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_last" format="boolean" />
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              indicating that the Drawable is in a view that is hardware accelerated.
@@ -7399,6 +7543,10 @@ i
         <!-- Flag indicating whether this voice interaction service is capable of being launched
              from the keyguard. -->
         <attr name="supportsLaunchVoiceAssistFromKeyguard" format="boolean" />
+        <!-- Flag indicating whether this voice interaction service can handle local voice
+             interaction requests from an Activity. This flag is new in
+             {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
+        <attr name="supportsLocalInteraction" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>
@@ -7495,6 +7643,12 @@ i
         <!-- Minimum inset for content views within a bar. Navigation buttons and
              menu views are excepted. Only valid for some themes and configurations. -->
         <attr name="contentInsetRight" format="dimension" />
+        <!-- Minimum inset for content views within a bar when a navigation button
+             is present, such as the Up button. Only valid for some themes and configurations. -->
+        <attr name="contentInsetStartWithNavigation" format="dimension" />
+        <!-- Minimum inset for content views within a bar when actions from a menu
+             are present. Only valid for some themes and configurations. -->
+        <attr name="contentInsetEndWithActions" format="dimension" />
         <!-- Elevation for the action bar itself -->
         <attr name="elevation" />
         <!-- Reference to a theme that should be used to inflate popups
@@ -7614,6 +7768,46 @@ i
         <attr name="pointerIconSpotTouch" format="reference" />
         <!-- Reference to a pointer icon drawable with STYLE_SPOT_ANCHOR -->
         <attr name="pointerIconSpotAnchor" format="reference" />
+        <!-- Reference to a pointer drawable with STYLE_CONTEXT_MENU -->
+        <attr name="pointerIconContextMenu" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HAND -->
+        <attr name="pointerIconHand" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HELP -->
+        <attr name="pointerIconHelp" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_WAIT -->
+        <attr name="pointerIconWait" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_CELL -->
+        <attr name="pointerIconCell" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_CROSSHAIR -->
+        <attr name="pointerIconCrosshair" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TEXT -->
+        <attr name="pointerIconText" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_TEXT -->
+        <attr name="pointerIconVerticalText" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ALIAS -->
+        <attr name="pointerIconAlias" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_COPY -->
+        <attr name="pointerIconCopy" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_NODROP -->
+        <attr name="pointerIconNodrop" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ALL_SCROLL -->
+        <attr name="pointerIconAllScroll" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_HORIZONTAL_DOUBLE_ARROW -->
+        <attr name="pointerIconHorizontalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_VERTICAL_DOUBLE_ARROW -->
+        <attr name="pointerIconVerticalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW -->
+        <attr name="pointerIconTopRightDiagonalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW -->
+        <attr name="pointerIconTopLeftDiagonalDoubleArrow" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_IN -->
+        <attr name="pointerIconZoomIn" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_ZOOM_OUT -->
+        <attr name="pointerIconZoomOut" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_GRAB -->
+        <attr name="pointerIconGrab" format="reference"/>
+        <!-- Reference to a pointer drawable with STYLE_GRABBING -->
+        <attr name="pointerIconGrabbing" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="PointerIcon">
@@ -7673,6 +7867,7 @@ i
     <declare-styleable name="PreferenceFragment">
         <!-- The layout for the PreferenceFragment. This should rarely need to be changed. -->
         <attr name="layout" />
+        <attr name="divider" />
     </declare-styleable>
 
     <!-- Base attributes available to PreferenceActivity. -->
@@ -7713,6 +7908,12 @@ i
         <attr name="label" />
         <!-- The key character map file resource. -->
         <attr name="keyboardLayout" format="reference" />
+        <!-- The locales the given keyboard layout corresponds to. -->
+        <attr name="locale" format="string" />
+        <!-- The vendor ID of the hardware the given layout corresponds to. @hide -->
+        <attr name="vendorId" format="integer" />
+        <!-- The product ID of the hardware the given layout corresponds to. @hide -->
+        <attr name="productId" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="MediaRouteButton">
@@ -7792,15 +7993,31 @@ i
         <attr name="title" />
         <attr name="subtitle" />
         <attr name="gravity" />
-        <attr name="titleMargins" format="dimension" />
+        <!--  Specifies extra space on the left, start, right and end sides
+              of the toolbar's title. Margin values should be positive. -->
+        <attr name="titleMargin" format="dimension" />
+        <!--  Specifies extra space on the start side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginStart" format="dimension" />
+        <!--  Specifies extra space on the end side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginEnd" format="dimension" />
+        <!--  Specifies extra space on the top side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginTop" format="dimension" />
+        <!--  Specifies extra space on the bottom side of the toolbar's title.
+              If both this attribute and titleMargin are specified, then this
+              attribute takes precedence. Margin values should be positive. -->
         <attr name="titleMarginBottom" format="dimension" />
         <attr name="contentInsetStart" />
         <attr name="contentInsetEnd" />
         <attr name="contentInsetLeft" />
         <attr name="contentInsetRight" />
+        <attr name="contentInsetStartWithNavigation" />
+        <attr name="contentInsetEndWithActions" />
         <attr name="maxButtonHeight" format="dimension" />
         <attr name="navigationButtonStyle" format="reference" />
         <attr name="buttonGravity">
@@ -7852,12 +8069,19 @@ i
          {@link android.media.tv.TvInputService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="TvInputService">
-        <!-- Component name of an activity for setup of this service.
-             The setup includes scanning channels and registering EPG data. -->
+        <!-- Component name of an activity that allows the user to set up this service. -->
         <attr name="setupActivity" format="string" />
-        <!-- Component name of an activity that allows the user to modify
-             the settings for this service. -->
+        <!-- Component name of an activity that allows the user to modify the settings for this
+             service. -->
         <attr name="settingsActivity" />
+        <!-- Attribute whether the TV input service can record programs. This value can be changed
+             at runtime by calling
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
+        <attr name="canRecord" format="boolean" />
+        <!-- The number of tuners that the TV input service is associated with. This value can be
+             changed at runtime by calling
+             {@link android.media.tv.TvInputManager#updateTvInputInfo(android.media.tv.TvInputInfo)}. -->
+        <attr name="tunerCount" format="integer" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
@@ -7898,10 +8122,20 @@ i
         <attr name="maxCollapsedHeightSmall" format="dimension" />
     </declare-styleable>
 
+    <declare-styleable name="MessagingLinearLayout">
+        <attr name="maxHeight" />
+        <attr name="spacing" />
+    </declare-styleable>
+
+    <declare-styleable name="DateTimeView">
+        <attr name="showRelative" format="boolean" />
+    </declare-styleable>
+
     <declare-styleable name="ResolverDrawerLayout_LayoutParams">
         <attr name="layout_alwaysShow" format="boolean" />
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
+        <attr name="layout_hasNestedScrollIndicator" format="boolean" />
     </declare-styleable>
 
     <!-- @hide -->
@@ -7930,5 +8164,66 @@ i
         <attr name="defaultValue" />
         <attr name="entries" />
         <attr name="entryValues" />
+    </declare-styleable>
+
+    <!-- Used to describe the gradient for fill or stroke in a path of VectorDrawable. -->
+    <declare-styleable name="GradientColor">
+        <!-- Start color of the gradient. -->
+        <attr name="startColor" />
+        <!-- Optional center color. -->
+        <attr name="centerColor" />
+        <!-- End color of the gradient. -->
+        <attr name="endColor" />
+        <!-- Type of gradient. The default type is linear. -->
+        <attr name="type" />
+
+        <!-- Only applied to RadialGradient-->
+        <!-- Radius of the gradient, used only with radial gradient. -->
+        <attr name="gradientRadius" />
+
+        <!-- Only applied to SweepGradient / RadialGradient-->
+        <!-- X coordinate of the center of the gradient within the path. -->
+        <attr name="centerX" />
+        <!-- Y coordinate of the center of the gradient within the path. -->
+        <attr name="centerY" />
+
+        <!-- LinearGradient specific -->
+        <!-- X coordinate of the start point origin of the gradient.
+             Defined in same coordinates as the path itself -->
+        <attr name="startX" format="float" />
+        <!-- Y coordinate of the start point of the gradient within the shape.
+             Defined in same coordinates as the path itself -->
+        <attr name="startY" format="float" />
+        <!-- X coordinate of the end point origin of the gradient.
+             Defined in same coordinates as the path itself -->
+        <attr name="endX" format="float" />
+        <!-- Y coordinate of the end point of the gradient within the shape.
+             Defined in same coordinates as the path itself -->
+        <attr name="endY" format="float" />
+
+        <!-- Defines the tile mode of the gradient. SweepGradient don't support tiling. -->
+        <attr name="tileMode"/>
+    </declare-styleable>
+
+    <!-- Describes an item of a GradientColor. Minimally need 2 items to define the gradient
+         Colors defined in <item> override the simple color attributes such as
+         "startColor / centerColor / endColor" are ignored -->
+    <declare-styleable name="GradientColorItem">
+        <!-- The offset (or ratio) of this current color item inside the gradient.
+             The value is only meaningful when it is between 0 and 1. -->
+        <attr name="offset" format="float" />
+        <!-- The current color for the offset inside the gradient. -->
+        <attr name="color" />
+    </declare-styleable>
+
+    <!-- @hide Attributes which will be read by the Activity to intialize the 
+               base activity TaskDescription. -->
+    <declare-styleable name="ActivityTaskDescription">
+        <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary 
+                   color. -->
+        <attr name="colorPrimary" />
+        <!-- @hide From Theme.colorBackground, used for the TaskDescription background 
+                   color. -->
+        <attr name="colorBackground" />
     </declare-styleable>
 </resources>

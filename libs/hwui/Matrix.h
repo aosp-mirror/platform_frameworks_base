@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_MATRIX_H
-#define ANDROID_HWUI_MATRIX_H
-
-#include <SkMatrix.h>
-
-#include <cutils/compiler.h>
+#pragma once
 
 #include "Rect.h"
+
+#include <cutils/compiler.h>
+#include <iomanip>
+#include <ostream>
+#include <SkMatrix.h>
 
 namespace android {
 namespace uirenderer {
@@ -114,7 +114,6 @@ public:
     void loadIdentity();
 
     void load(const float* v);
-    void load(const Matrix4& v);
     void load(const SkMatrix& v);
 
     void loadInverse(const Matrix4& v);
@@ -127,6 +126,9 @@ public:
     void loadMultiply(const Matrix4& u, const Matrix4& v);
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
+    void loadOrtho(int width, int height) {
+        loadOrtho(0, width, height, 0, -1, 1);
+    }
 
     uint8_t getType() const;
 
@@ -137,9 +139,11 @@ public:
     }
 
     void multiply(const Matrix4& v) {
-        Matrix4 u;
-        u.loadMultiply(*this, v);
-        load(u);
+        if (!v.isIdentity()) {
+            Matrix4 u;
+            u.loadMultiply(*this, v);
+            *this = u;
+        }
     }
 
     void multiply(float v);
@@ -214,7 +218,25 @@ public:
 
     void dump(const char* label = nullptr) const;
 
+    friend std::ostream& operator<<(std::ostream& os, const Matrix4& matrix) {
+        if (matrix.isSimple()) {
+            os << "offset " << matrix.getTranslateX() << "x" << matrix.getTranslateY();
+            if (!matrix.isPureTranslate()) {
+                os << ", scale " << matrix[kScaleX] << "x" << matrix[kScaleY];
+            }
+        } else {
+            os << "[" << matrix[0];
+            for (int i = 1; i < 16; i++) {
+                os << ", " << matrix[i];
+            }
+            os << "]";
+        }
+        return os;
+    }
+
     static const Matrix4& identity();
+
+    void invalidateType() { mType = kTypeUnknown; }
 
 private:
     mutable uint8_t mType;
@@ -240,4 +262,3 @@ typedef Matrix4 mat4;
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_MATRIX_H

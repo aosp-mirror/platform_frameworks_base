@@ -19,7 +19,10 @@ package com.android.uiautomator.core;
  * Used to enumerate a container's UI elements for the purpose of counting,
  * or targeting a sub elements by a child's text or description.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiCollection extends UiObject {
 
     /**

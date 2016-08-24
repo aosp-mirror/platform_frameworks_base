@@ -144,7 +144,7 @@ public final class BluetoothManager {
     }
 
     /**
-     * 
+     *
      * Get a list of devices that match any of the given connection
      * states.
      *

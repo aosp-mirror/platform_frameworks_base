@@ -16,74 +16,149 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.*;
+import android.content.res.Resources;
+import android.graphics.Outline;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityManager;
+import android.util.FloatProperty;
+import android.util.Property;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
-import android.view.animation.AccelerateInterpolator;
-import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
+import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.recents.model.TaskStack;
 
-/* A task view */
-public class TaskView extends FrameLayout implements Task.TaskCallbacks,
-        View.OnClickListener, View.OnLongClickListener {
+import java.util.ArrayList;
+
+/**
+ * A {@link TaskView} represents a fixed view of a task. Because the TaskView's layout is directed
+ * solely by the {@link TaskStackView}, we make it a fixed size layout which allows relayouts down
+ * the view hierarchy, but not upwards from any of its children (the TaskView will relayout itself
+ * with the previous bounds if any child requests layout).
+ */
+public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks,
+        TaskStackAnimationHelper.Callbacks, View.OnClickListener, View.OnLongClickListener {
 
     /** The TaskView callbacks */
     interface TaskViewCallbacks {
-        public void onTaskViewAppIconClicked(TaskView tv);
-        public void onTaskViewAppInfoClicked(TaskView tv);
-        public void onTaskViewClicked(TaskView tv, Task task, boolean lockToTask);
-        public void onTaskViewDismissed(TaskView tv);
-        public void onTaskViewClipStateChanged(TaskView tv);
-        public void onTaskViewFocusChanged(TaskView tv, boolean focused);
-
-        public void onTaskResize(TaskView tv);
+        void onTaskViewClipStateChanged(TaskView tv);
     }
 
-    RecentsConfiguration mConfig;
-
-    float mTaskProgress;
-    ObjectAnimator mTaskProgressAnimator;
-    float mMaxDimScale;
-    int mDimAlpha;
-    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1f);
-    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
-    Paint mDimLayerPaint = new Paint();
-    float mActionButtonTranslationZ;
-
-    Task mTask;
-    boolean mTaskDataLoaded;
-    boolean mIsFocused;
-    boolean mFocusAnimationsEnabled;
-    boolean mClipViewInStack;
-    AnimateableViewBounds mViewBounds;
-
-    View mContent;
-    TaskViewThumbnail mThumbnailView;
-    TaskViewHeader mHeaderView;
-    View mActionButtonView;
-    TaskViewCallbacks mCb;
-
-    // Optimizations
-    ValueAnimator.AnimatorUpdateListener mUpdateDimListener =
-            new ValueAnimator.AnimatorUpdateListener() {
+    /**
+     * The dim overlay is generally calculated from the task progress, but occasionally (like when
+     * launching) needs to be animated independently of the task progress.  This call is only used
+     * when animating the task into Recents, when the header dim is already applied
+     */
+    public static final Property<TaskView, Float> DIM_ALPHA_WITHOUT_HEADER =
+            new FloatProperty<TaskView>("dimAlphaWithoutHeader") {
                 @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    setTaskProgress((Float) animation.getAnimatedValue());
+                public void setValue(TaskView tv, float dimAlpha) {
+                    tv.setDimAlphaWithoutHeader(dimAlpha);
+                }
+
+                @Override
+                public Float get(TaskView tv) {
+                    return tv.getDimAlpha();
                 }
             };
 
+    /**
+     * The dim overlay is generally calculated from the task progress, but occasionally (like when
+     * launching) needs to be animated independently of the task progress.
+     */
+    public static final Property<TaskView, Float> DIM_ALPHA =
+            new FloatProperty<TaskView>("dimAlpha") {
+                @Override
+                public void setValue(TaskView tv, float dimAlpha) {
+                    tv.setDimAlpha(dimAlpha);
+                }
+
+                @Override
+                public Float get(TaskView tv) {
+                    return tv.getDimAlpha();
+                }
+            };
+
+    /**
+     * The dim overlay is generally calculated from the task progress, but occasionally (like when
+     * launching) needs to be animated independently of the task progress.
+     */
+    public static final Property<TaskView, Float> VIEW_OUTLINE_ALPHA =
+            new FloatProperty<TaskView>("viewOutlineAlpha") {
+                @Override
+                public void setValue(TaskView tv, float alpha) {
+                    tv.getViewBounds().setAlpha(alpha);
+                }
+
+                @Override
+                public Float get(TaskView tv) {
+                    return tv.getViewBounds().getAlpha();
+                }
+            };
+
+    @ViewDebug.ExportedProperty(category="recents")
+    private float mDimAlpha;
+    private float mActionButtonTranslationZ;
+
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
+    private Task mTask;
+    @ViewDebug.ExportedProperty(category="recents")
+    private boolean mClipViewInStack = true;
+    @ViewDebug.ExportedProperty(category="recents")
+    private boolean mTouchExplorationEnabled;
+    @ViewDebug.ExportedProperty(category="recents")
+    private boolean mIsDisabledInSafeMode;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="view_bounds_")
+    private AnimateableViewBounds mViewBounds;
+
+    private AnimatorSet mTransformAnimation;
+    private ObjectAnimator mDimAnimator;
+    private ObjectAnimator mOutlineAnimator;
+    private final TaskViewTransform mTargetAnimationTransform = new TaskViewTransform();
+    private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
+
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
+    TaskViewThumbnail mThumbnailView;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
+    TaskViewHeader mHeaderView;
+    private View mActionButtonView;
+    private View mIncompatibleAppToastView;
+    private TaskViewCallbacks mCb;
+
+    @ViewDebug.ExportedProperty(category="recents")
+    private Point mDownTouchPos = new Point();
+
+    private Toast mDisabledAppToast;
 
     public TaskView(Context context) {
         this(context, null);
@@ -99,16 +174,15 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     public TaskView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mConfig = RecentsConfiguration.getInstance();
-        mMaxDimScale = mConfig.taskStackMaxDim / 255f;
-        mClipViewInStack = true;
-        mViewBounds = new AnimateableViewBounds(this, mConfig.taskViewRoundedCornerRadiusPx);
-        setTaskProgress(getTaskProgress());
-        setDim(getDim());
-        if (mConfig.fakeShadows) {
-            setBackground(new FakeShadowDrawable(context.getResources(), mConfig));
+        RecentsConfiguration config = Recents.getConfiguration();
+        Resources res = context.getResources();
+        mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
+                R.dimen.recents_task_view_shadow_rounded_corners_radius));
+        if (config.fakeShadows) {
+            setBackground(new FakeShadowDrawable(res, config));
         }
         setOutlineProvider(mViewBounds);
+        setOnLongClickListener(this);
     }
 
     /** Set callback */
@@ -116,16 +190,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mCb = cb;
     }
 
-    /** Resets this TaskView for reuse. */
-    void reset() {
-        resetViewProperties();
+    /**
+     * Called from RecentsActivity when it is relaunched.
+     */
+    void onReload(boolean isResumingFromVisible) {
         resetNoUserInteractionState();
-        setClipViewInStack(false);
-        setCallbacks(null);
+        if (!isResumingFromVisible) {
+            resetViewProperties();
+        }
     }
 
     /** Gets the task */
-    Task getTask() {
+    public Task getTask() {
         return mTask;
     }
 
@@ -137,7 +213,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     protected void onFinishInflate() {
         // Bind the views
-        mContent = findViewById(R.id.task_view_content);
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
         mThumbnailView.updateClipToTaskBar(mHeaderView);
@@ -147,316 +222,141 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             public void getOutline(View view, Outline outline) {
                 // Set the outline to match the FAB background
                 outline.setOval(0, 0, mActionButtonView.getWidth(), mActionButtonView.getHeight());
+                outline.setAlpha(0.35f);
             }
         });
+        mActionButtonView.setOnClickListener(this);
         mActionButtonTranslationZ = mActionButtonView.getTranslationZ();
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
+    /**
+     * Update the task view when the configuration changes.
+     */
+    void onConfigurationChanged() {
+        mHeaderView.onConfigurationChanged();
+    }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        if (w > 0 && h > 0) {
+            mHeaderView.onTaskViewSizeChanged(w, h);
+            mThumbnailView.onTaskViewSizeChanged(w, h);
+
+            mActionButtonView.setTranslationX(w - getMeasuredWidth());
+            mActionButtonView.setTranslationY(h - getMeasuredHeight());
+        }
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mDownTouchPos.set((int) (ev.getX() * getScaleX()), (int) (ev.getY() * getScaleY()));
+        }
+        return super.onInterceptTouchEvent(ev);
+    }
+
+
+    @Override
+    protected void measureContents(int width, int height) {
         int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
         int heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
+        int widthSpec = MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY);
+        int heightSpec = MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY);
 
         // Measure the content
-        mContent.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
+        measureChildren(widthSpec, heightSpec);
 
-        // Measure the bar view, and action button
-        mHeaderView.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mConfig.taskBarHeight, MeasureSpec.EXACTLY));
-        mActionButtonView.measure(
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.AT_MOST));
-        // Measure the thumbnail to be square
-        mThumbnailView.measure(
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY));
         setMeasuredDimension(width, height);
-        invalidateOutline();
     }
 
-    /** Synchronizes this view's properties with the task's transform */
-    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration) {
-        updateViewPropertiesToTaskTransform(toTransform, duration, null);
-    }
+    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform,
+            AnimationProps toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        cancelTransformAnimation();
 
-    void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform, int duration,
-                                             ValueAnimator.AnimatorUpdateListener updateCallback) {
-        // Apply the transform
-        toTransform.applyToTaskView(this, duration, mConfig.fastOutSlowInInterpolator, false,
-                !mConfig.fakeShadows, updateCallback);
-
-        // Update the task progress
-        Utilities.cancelAnimationWithoutCallbacks(mTaskProgressAnimator);
-        if (duration <= 0) {
-            setTaskProgress(toTransform.p);
+        // Compose the animations for the transform
+        mTmpAnimators.clear();
+        toTransform.applyToTaskView(this, mTmpAnimators, toAnimation, !config.fakeShadows);
+        if (toAnimation.isImmediate()) {
+            if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
+                setDimAlpha(toTransform.dimAlpha);
+            }
+            if (Float.compare(mViewBounds.getAlpha(), toTransform.viewOutlineAlpha) != 0) {
+                mViewBounds.setAlpha(toTransform.viewOutlineAlpha);
+            }
+            // Manually call back to the animator listener and update callback
+            if (toAnimation.getListener() != null) {
+                toAnimation.getListener().onAnimationEnd(null);
+            }
+            if (updateCallback != null) {
+                updateCallback.onAnimationUpdate(null);
+            }
         } else {
-            mTaskProgressAnimator = ObjectAnimator.ofFloat(this, "taskProgress", toTransform.p);
-            mTaskProgressAnimator.setDuration(duration);
-            mTaskProgressAnimator.addUpdateListener(mUpdateDimListener);
-            mTaskProgressAnimator.start();
+            // Both the progress and the update are a function of the bounds movement of the task
+            if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
+                mDimAnimator = ObjectAnimator.ofFloat(this, DIM_ALPHA, getDimAlpha(),
+                        toTransform.dimAlpha);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, mDimAnimator));
+            }
+            if (Float.compare(mViewBounds.getAlpha(), toTransform.viewOutlineAlpha) != 0) {
+                mOutlineAnimator = ObjectAnimator.ofFloat(this, VIEW_OUTLINE_ALPHA,
+                        mViewBounds.getAlpha(), toTransform.viewOutlineAlpha);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, mOutlineAnimator));
+            }
+            if (updateCallback != null) {
+                ValueAnimator updateCallbackAnim = ValueAnimator.ofInt(0, 1);
+                updateCallbackAnim.addUpdateListener(updateCallback);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, updateCallbackAnim));
+            }
+
+            // Create the animator
+            mTransformAnimation = toAnimation.createAnimator(mTmpAnimators);
+            mTransformAnimation.start();
+            mTargetAnimationTransform.copyFrom(toTransform);
         }
     }
 
     /** Resets this view's properties */
     void resetViewProperties() {
-        setDim(0);
-        setLayerType(View.LAYER_TYPE_NONE, null);
+        cancelTransformAnimation();
+        setDimAlpha(0);
+        setVisibility(View.VISIBLE);
+        getViewBounds().reset();
+        getHeaderView().reset();
         TaskViewTransform.reset(this);
-        if (mActionButtonView != null) {
-            mActionButtonView.setScaleX(1f);
-            mActionButtonView.setScaleY(1f);
-            mActionButtonView.setAlpha(1f);
-            mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
-        }
-    }
 
-    /**
-     * When we are un/filtering, this method will set up the transform that we are animating to,
-     * in order to hide the task.
-     */
-    void prepareTaskTransformForFilterTaskHidden(TaskViewTransform toTransform) {
-        // Fade the view out and slide it away
-        toTransform.alpha = 0f;
-        toTransform.translationY += 200;
-        toTransform.translationZ = 0;
-    }
-
-    /**
-     * When we are un/filtering, this method will setup the transform that we are animating from,
-     * in order to show the task.
-     */
-    void prepareTaskTransformForFilterTaskVisible(TaskViewTransform fromTransform) {
-        // Fade the view in
-        fromTransform.alpha = 0f;
-    }
-
-    /** Prepares this task view for the enter-recents animations.  This is called earlier in the
-     * first layout because the actual animation into recents may take a long time. */
-    void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
-                                             boolean occludesLaunchTarget, int offscreenY) {
-        int initialDim = getDim();
-        if (mConfig.launchedHasConfigurationChanged) {
-            // Just load the views as-is
-        } else if (mConfig.launchedFromAppWithThumbnail) {
-            if (isTaskViewLaunchTargetTask) {
-                // Set the dim to 0 so we can animate it in
-                initialDim = 0;
-                // Hide the action button
-                mActionButtonView.setAlpha(0f);
-            } else if (occludesLaunchTarget) {
-                // Move the task view off screen (below) so we can animate it in
-                setTranslationY(offscreenY);
-            }
-
-        } else if (mConfig.launchedFromHome) {
-            // Move the task view off screen (below) so we can animate it in
-            setTranslationY(offscreenY);
-            setTranslationZ(0);
-            setScaleX(1f);
-            setScaleY(1f);
-        }
-        // Apply the current dim
-        setDim(initialDim);
-        // Prepare the thumbnail view alpha
-        mThumbnailView.prepareEnterRecentsAnimation(isTaskViewLaunchTargetTask);
-    }
-
-    /** Animates this task view as it enters recents */
-    void startEnterRecentsAnimation(final ViewAnimation.TaskViewEnterContext ctx) {
-        final TaskViewTransform transform = ctx.currentTaskTransform;
-        int startDelay = 0;
-
-        if (mConfig.launchedFromAppWithThumbnail) {
-            if (mTask.isLaunchTarget) {
-                // Animate the dim/overlay
-                if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
-                    // Animate the thumbnail alpha before the dim animation (to prevent updating the
-                    // hardware layer)
-                    mThumbnailView.startEnterRecentsAnimation(mConfig.transitionEnterFromAppDelay,
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    animateDimToProgress(0, mConfig.taskViewEnterFromAppDuration,
-                                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                                }
-                            });
-                } else {
-                    // Immediately start the dim animation
-                    animateDimToProgress(mConfig.transitionEnterFromAppDelay,
-                            mConfig.taskViewEnterFromAppDuration,
-                            ctx.postAnimationTrigger.decrementOnAnimationEnd());
-                }
-                ctx.postAnimationTrigger.increment();
-
-                // Animate the action button in
-                fadeInActionButton(mConfig.transitionEnterFromAppDelay,
-                        mConfig.taskViewEnterFromAppDuration);
-            } else {
-                // Animate the task up if it was occluding the launch target
-                if (ctx.currentTaskOccludesLaunchTarget) {
-                    setTranslationY(transform.translationY + mConfig.taskViewAffiliateGroupEnterOffsetPx);
-                    setAlpha(0f);
-                    animate().alpha(1f)
-                            .translationY(transform.translationY)
-                            .setStartDelay(mConfig.transitionEnterFromAppDelay)
-                            .setUpdateListener(null)
-                            .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                            .setDuration(mConfig.taskViewEnterFromHomeDuration)
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Decrement the post animation trigger
-                                    ctx.postAnimationTrigger.decrement();
-                                }
-                            })
-                            .start();
-                    ctx.postAnimationTrigger.increment();
-                }
-            }
-            startDelay = mConfig.transitionEnterFromAppDelay;
-
-        } else if (mConfig.launchedFromHome) {
-            // Animate the tasks up
-            int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            int delay = mConfig.transitionEnterFromHomeDelay +
-                    frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
-
-            setScaleX(transform.scale);
-            setScaleY(transform.scale);
-            if (!mConfig.fakeShadows) {
-                animate().translationZ(transform.translationZ);
-            }
-            animate()
-                    .translationY(transform.translationY)
-                    .setStartDelay(delay)
-                    .setUpdateListener(ctx.updateListener)
-                    .setInterpolator(mConfig.quintOutInterpolator)
-                    .setDuration(mConfig.taskViewEnterFromHomeDuration +
-                            frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Decrement the post animation trigger
-                            ctx.postAnimationTrigger.decrement();
-                        }
-                    })
-                    .start();
-            ctx.postAnimationTrigger.increment();
-            startDelay = delay;
-        }
-
-        // Enable the focus animations from this point onwards so that they aren't affected by the
-        // window transitions
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                enableFocusAnimations();
-            }
-        }, startDelay);
-    }
-
-    public void fadeInActionButton(int delay, int duration) {
-        // Hide the action button
+        mActionButtonView.setScaleX(1f);
+        mActionButtonView.setScaleY(1f);
         mActionButtonView.setAlpha(0f);
-
-        // Animate the action button in
-        mActionButtonView.animate().alpha(1f)
-                .setStartDelay(delay)
-                .setDuration(duration)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                .start();
-    }
-
-    /** Animates this task view as it leaves recents by pressing home. */
-    void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
-        animate()
-                .translationY(ctx.offscreenTranslationY)
-                .setStartDelay(0)
-                .setUpdateListener(null)
-                .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                .setDuration(mConfig.taskViewExitToHomeDuration)
-                .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
-                .start();
-        ctx.postAnimationTrigger.increment();
-    }
-
-    /** Animates this task view away when dismissing all tasks. */
-    void startDismissAllAnimation() {
-        dismissTask();
-    }
-
-    /** Animates this task view as it exits recents */
-    void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
-            boolean occludesLaunchTarget, boolean lockToTask) {
-        if (isLaunchingTask) {
-            // Animate the thumbnail alpha back into full opacity for the window animation out
-            mThumbnailView.startLaunchTaskAnimation(postAnimRunnable);
-
-            // Animate the dim
-            if (mDimAlpha > 0) {
-                ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
-                anim.setDuration(mConfig.taskViewExitToAppDuration);
-                anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
-                anim.start();
-            }
-
-            // Animate the action button away
-            if (!lockToTask) {
-                float toScale = 0.9f;
-                mActionButtonView.animate()
-                        .scaleX(toScale)
-                        .scaleY(toScale);
-            }
-            mActionButtonView.animate()
-                    .alpha(0f)
-                    .setStartDelay(0)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
-                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .start();
-        } else {
-            // Hide the dismiss button
-            mHeaderView.startLaunchTaskDismissAnimation();
-            // If this is another view in the task grouping and is in front of the launch task,
-            // animate it away first
-            if (occludesLaunchTarget) {
-                animate().alpha(0f)
-                    .translationY(getTranslationY() + mConfig.taskViewAffiliateGroupEnterOffsetPx)
-                    .setStartDelay(0)
-                    .setUpdateListener(null)
-                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .setDuration(mConfig.taskViewExitToAppDuration)
-                    .start();
-            }
+        mActionButtonView.setTranslationX(0f);
+        mActionButtonView.setTranslationY(0f);
+        mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
+        if (mIncompatibleAppToastView != null) {
+            mIncompatibleAppToastView.setVisibility(View.INVISIBLE);
         }
     }
 
-    /** Animates the deletion of this task view */
-    void startDeleteTaskAnimation(final Runnable r, int delay) {
-        // Disabling clipping with the stack while the view is animating away
-        setClipViewInStack(false);
+    /**
+     * @return whether we are animating towards {@param transform}
+     */
+    boolean isAnimatingTo(TaskViewTransform transform) {
+        return mTransformAnimation != null && mTransformAnimation.isStarted()
+                && mTargetAnimationTransform.isSame(transform);
+    }
 
-        animate().translationX(mConfig.taskViewRemoveAnimTranslationXPx)
-            .alpha(0f)
-            .setStartDelay(delay)
-            .setUpdateListener(null)
-            .setInterpolator(mConfig.fastOutSlowInInterpolator)
-            .setDuration(mConfig.taskViewRemoveAnimDuration)
-            .withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    if (r != null) {
-                        r.run();
-                    }
-
-                    // Re-enable clipping with the stack (we will reuse this view)
-                    setClipViewInStack(true);
-                }
-            })
-            .start();
+    /**
+     * Cancels any current transform animations.
+     */
+    public void cancelTransformAnimation() {
+        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+        Utilities.cancelAnimationWithoutCallbacks(mOutlineAnimator);
     }
 
     /** Enables/disables handling touch on this task view. */
@@ -483,14 +383,16 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void dismissTask() {
         // Animate out the view and call the callback
         final TaskView tv = this;
-        startDeleteTaskAnimation(new Runnable() {
+        DismissTaskViewEvent dismissEvent = new DismissTaskViewEvent(tv);
+        dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
-                if (mCb != null) {
-                    mCb.onTaskViewDismissed(tv);
-                }
+                EventBus.getDefault().send(new TaskViewDismissedEvent(mTask, tv,
+                        new AnimationProps(TaskStackView.DEFAULT_SYNC_STACK_DURATION,
+                                Interpolators.FAST_OUT_SLOW_IN)));
             }
-        }, 0);
+        });
+        EventBus.getDefault().send(dismissEvent);
     }
 
     /**
@@ -498,7 +400,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * view.
      */
     boolean shouldClipViewInStack() {
-        return mClipViewInStack && (getVisibility() == View.VISIBLE);
+        // Never clip for freeform tasks or if invisible
+        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE) {
+            return false;
+        }
+        return mClipViewInStack;
     }
 
     /** Sets whether this view should be clipped, or clipped against. */
@@ -511,268 +417,289 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
     }
 
-    /** Sets the current task progress. */
-    public void setTaskProgress(float p) {
-        mTaskProgress = p;
-        mViewBounds.setAlpha(p);
-        updateDimFromTaskProgress();
+    public TaskViewHeader getHeaderView() {
+        return mHeaderView;
     }
 
-    /** Returns the current task progress. */
-    public float getTaskProgress() {
-        return mTaskProgress;
+    /**
+     * Sets the current dim.
+     */
+    public void setDimAlpha(float dimAlpha) {
+        mDimAlpha = dimAlpha;
+        mThumbnailView.setDimAlpha(dimAlpha);
+        mHeaderView.setDimAlpha(dimAlpha);
     }
 
-    /** Returns the current dim. */
-    public void setDim(int dim) {
-        mDimAlpha = dim;
-        if (mConfig.useHardwareLayers) {
-            // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
-            if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
-                mDimColorFilter.setColor(Color.argb(mDimAlpha, 0, 0, 0));
-                mDimLayerPaint.setColorFilter(mDimColorFilter);
-                mContent.setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
-            }
-        } else {
-            float dimAlpha = mDimAlpha / 255.0f;
-            if (mThumbnailView != null) {
-                mThumbnailView.setDimAlpha(dimAlpha);
-            }
-            if (mHeaderView != null) {
-                mHeaderView.setDimAlpha(dim);
-            }
-        }
+    /**
+     * Sets the current dim without updating the header's dim.
+     */
+    public void setDimAlphaWithoutHeader(float dimAlpha) {
+        mDimAlpha = dimAlpha;
+        mThumbnailView.setDimAlpha(dimAlpha);
     }
 
-    /** Returns the current dim. */
-    public int getDim() {
+    /**
+     * Returns the current dim.
+     */
+    public float getDimAlpha() {
         return mDimAlpha;
     }
 
-    /** Animates the dim to the task progress. */
-    void animateDimToProgress(int delay, int duration, Animator.AnimatorListener postAnimRunnable) {
-        // Animate the dim into view as well
-        int toDim = getDimFromTaskProgress();
-        if (toDim != getDim()) {
-            ObjectAnimator anim = ObjectAnimator.ofInt(TaskView.this, "dim", toDim);
-            anim.setStartDelay(delay);
-            anim.setDuration(duration);
-            if (postAnimRunnable != null) {
-                anim.addListener(postAnimRunnable);
+    /**
+     * Explicitly sets the focused state of this task.
+     */
+    public void setFocusedState(boolean isFocused, boolean requestViewFocus) {
+        if (isFocused) {
+            if (requestViewFocus && !isFocused()) {
+                requestFocus();
             }
-            anim.start();
+        } else {
+            if (isAccessibilityFocused() && mTouchExplorationEnabled) {
+                clearAccessibilityFocus();
+            }
         }
-    }
-
-    /** Compute the dim as a function of the scale of this view. */
-    int getDimFromTaskProgress() {
-        float dim = mMaxDimScale * mDimInterpolator.getInterpolation(1f - mTaskProgress);
-        return (int) (dim * 255);
-    }
-
-    /** Update the dim as a function of the scale of this view. */
-    void updateDimFromTaskProgress() {
-        setDim(getDimFromTaskProgress());
-    }
-
-    /**** View focus state ****/
-
-    /**
-     * Sets the focused task explicitly. We need a separate flag because requestFocus() won't happen
-     * if the view is not currently visible, or we are in touch state (where we still want to keep
-     * track of focus).
-     */
-    public void setFocusedTask(boolean animateFocusedState) {
-        mIsFocused = true;
-        if (mFocusAnimationsEnabled) {
-            // Focus the header bar
-            mHeaderView.onTaskViewFocusChanged(true, animateFocusedState);
-        }
-        // Update the thumbnail alpha with the focus
-        mThumbnailView.onFocusChanged(true);
-        // Call the callback
-        if (mCb != null) {
-            mCb.onTaskViewFocusChanged(this, true);
-        }
-        // Workaround, we don't always want it focusable in touch mode, but we want the first task
-        // to be focused after the enter-recents animation, which can be triggered from either touch
-        // or keyboard
-        setFocusableInTouchMode(true);
-        requestFocus();
-        setFocusableInTouchMode(false);
-        invalidate();
     }
 
     /**
-     * Unsets the focused task explicitly.
+     * Shows the action button.
+     * @param fadeIn whether or not to animate the action button in.
+     * @param fadeInDuration the duration of the action button animation, only used if
+     *                       {@param fadeIn} is true.
      */
-    void unsetFocusedTask() {
-        mIsFocused = false;
-        if (mFocusAnimationsEnabled) {
-            // Un-focus the header bar
-            mHeaderView.onTaskViewFocusChanged(false, true);
-        }
+    public void showActionButton(boolean fadeIn, int fadeInDuration) {
+        mActionButtonView.setVisibility(View.VISIBLE);
 
-        // Update the thumbnail alpha with the focus
-        mThumbnailView.onFocusChanged(false);
-        // Call the callback
-        if (mCb != null) {
-            mCb.onTaskViewFocusChanged(this, false);
+        if (fadeIn && mActionButtonView.getAlpha() < 1f) {
+            mActionButtonView.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(fadeInDuration)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .start();
+        } else {
+            mActionButtonView.setScaleX(1f);
+            mActionButtonView.setScaleY(1f);
+            mActionButtonView.setAlpha(1f);
+            mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
         }
-        invalidate();
     }
 
     /**
-     * Updates the explicitly focused state when the view focus changes.
+     * Immediately hides the action button.
+     *
+     * @param fadeOut whether or not to animate the action button out.
      */
+    public void hideActionButton(boolean fadeOut, int fadeOutDuration, boolean scaleDown,
+            final Animator.AnimatorListener animListener) {
+        if (fadeOut && mActionButtonView.getAlpha() > 0f) {
+            if (scaleDown) {
+                float toScale = 0.9f;
+                mActionButtonView.animate()
+                        .scaleX(toScale)
+                        .scaleY(toScale);
+            }
+            mActionButtonView.animate()
+                    .alpha(0f)
+                    .setDuration(fadeOutDuration)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (animListener != null) {
+                                animListener.onAnimationEnd(null);
+                            }
+                            mActionButtonView.setVisibility(View.INVISIBLE);
+                        }
+                    })
+                    .start();
+        } else {
+            mActionButtonView.setAlpha(0f);
+            mActionButtonView.setVisibility(View.INVISIBLE);
+            if (animListener != null) {
+                animListener.onAnimationEnd(null);
+            }
+        }
+    }
+
+    /**** TaskStackAnimationHelper.Callbacks Implementation ****/
+
     @Override
-    protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
-        if (!gainFocus) {
-            unsetFocusedTask();
+    public void onPrepareLaunchTargetForEnterAnimation() {
+        // These values will be animated in when onStartLaunchTargetEnterAnimation() is called
+        setDimAlphaWithoutHeader(0);
+        mActionButtonView.setAlpha(0f);
+        if (mIncompatibleAppToastView != null &&
+                mIncompatibleAppToastView.getVisibility() == View.VISIBLE) {
+            mIncompatibleAppToastView.setAlpha(0f);
         }
     }
 
-    /**
-     * Returns whether we have explicitly been focused.
-     */
-    public boolean isFocusedTask() {
-        return mIsFocused || isFocused();
-    }
+    @Override
+    public void onStartLaunchTargetEnterAnimation(TaskViewTransform transform, int duration,
+            boolean screenPinningEnabled, ReferenceCountedTrigger postAnimationTrigger) {
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
 
-    /** Enables all focus animations. */
-    void enableFocusAnimations() {
-        boolean wasFocusAnimationsEnabled = mFocusAnimationsEnabled;
-        mFocusAnimationsEnabled = true;
-        if (mIsFocused && !wasFocusAnimationsEnabled) {
-            // Re-notify the header if we were focused and animations were not previously enabled
-            mHeaderView.onTaskViewFocusChanged(true, true);
+        // Dim the view after the app window transitions down into recents
+        postAnimationTrigger.increment();
+        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
+        mDimAnimator = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+                DIM_ALPHA_WITHOUT_HEADER, getDimAlpha(), transform.dimAlpha));
+        mDimAnimator.addListener(postAnimationTrigger.decrementOnAnimationEnd());
+        mDimAnimator.start();
+
+        if (screenPinningEnabled) {
+            showActionButton(true /* fadeIn */, duration /* fadeInDuration */);
+        }
+
+        if (mIncompatibleAppToastView != null &&
+                mIncompatibleAppToastView.getVisibility() == View.VISIBLE) {
+            mIncompatibleAppToastView.animate()
+                    .alpha(1f)
+                    .setDuration(duration)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .start();
         }
     }
 
-    public void disableLayersForOneFrame() {
-        mHeaderView.disableLayersForOneFrame();
+    @Override
+    public void onStartLaunchTargetLaunchAnimation(int duration, boolean screenPinningRequested,
+            ReferenceCountedTrigger postAnimationTrigger) {
+        Utilities.cancelAnimationWithoutCallbacks(mDimAnimator);
+
+        // Un-dim the view before/while launching the target
+        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
+        mDimAnimator = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+                DIM_ALPHA, getDimAlpha(), 0));
+        mDimAnimator.start();
+
+        postAnimationTrigger.increment();
+        hideActionButton(true /* fadeOut */, duration,
+                !screenPinningRequested /* scaleDown */,
+                postAnimationTrigger.decrementOnAnimationEnd());
+    }
+
+    @Override
+    public void onStartFrontTaskEnterAnimation(boolean screenPinningEnabled) {
+        if (screenPinningEnabled) {
+            showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
+        }
     }
 
     /**** TaskCallbacks Implementation ****/
 
-    /** Binds this task view to the task */
-    public void onTaskBound(Task t) {
+    public void onTaskBound(Task t, boolean touchExplorationEnabled, int displayOrientation,
+            Rect displayRect) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mTouchExplorationEnabled = touchExplorationEnabled;
         mTask = t;
-        mTask.setCallbacks(this);
+        mTask.addCallback(this);
+        mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
+        mThumbnailView.bindToTask(mTask, mIsDisabledInSafeMode, displayOrientation, displayRect);
+        mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
 
-        // Hide the action button if lock to app is disabled for this view
-        int lockButtonVisibility = (!t.lockToTaskEnabled || !t.lockToThisTask) ? GONE : VISIBLE;
-        if (mActionButtonView.getVisibility() != lockButtonVisibility) {
-            mActionButtonView.setVisibility(lockButtonVisibility);
-            requestLayout();
+        if (!t.isDockable && ssp.hasDockedTask()) {
+            if (mIncompatibleAppToastView == null) {
+                mIncompatibleAppToastView = Utilities.findViewStubById(this,
+                        R.id.incompatible_app_toast_stub).inflate();
+                TextView msg = (TextView) findViewById(com.android.internal.R.id.message);
+                msg.setText(R.string.recents_incompatible_app_message);
+            }
+            mIncompatibleAppToastView.setVisibility(View.VISIBLE);
+        } else if (mIncompatibleAppToastView != null) {
+            mIncompatibleAppToastView.setVisibility(View.INVISIBLE);
         }
     }
 
     @Override
-    public void onTaskDataLoaded() {
-        if (mThumbnailView != null && mHeaderView != null) {
-            // Bind each of the views to the new task data
-            mThumbnailView.rebindToTask(mTask);
-            mHeaderView.rebindToTask(mTask);
-            // Rebind any listeners
-            AccessibilityManager am = (AccessibilityManager) getContext().
-                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-            if (Constants.DebugFlags.App.EnableTaskFiltering || (am != null && am.isEnabled())) {
-                mHeaderView.mApplicationIcon.setOnClickListener(this);
-            }
-            mHeaderView.mDismissButton.setOnClickListener(this);
-            if (mConfig.multiStackEnabled) {
-                mHeaderView.mMoveTaskButton.setOnClickListener(this);
-            }
-            mActionButtonView.setOnClickListener(this);
-            mHeaderView.mApplicationIcon.setOnLongClickListener(this);
-        }
-        mTaskDataLoaded = true;
+    public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
+        // Update each of the views to the new task data
+        mThumbnailView.onTaskDataLoaded(thumbnailInfo);
+        mHeaderView.onTaskDataLoaded();
     }
 
     @Override
     public void onTaskDataUnloaded() {
-        if (mThumbnailView != null && mHeaderView != null) {
-            // Unbind each of the views from the task data and remove the task callback
-            mTask.setCallbacks(null);
-            mThumbnailView.unbindFromTask();
-            mHeaderView.unbindFromTask();
-            // Unbind any listeners
-            mHeaderView.mApplicationIcon.setOnClickListener(null);
-            mHeaderView.mDismissButton.setOnClickListener(null);
-            if (mConfig.multiStackEnabled) {
-                mHeaderView.mMoveTaskButton.setOnClickListener(null);
-            }
-            mActionButtonView.setOnClickListener(null);
-            mHeaderView.mApplicationIcon.setOnLongClickListener(null);
-        }
-        mTaskDataLoaded = false;
+        // Unbind each of the views from the task and remove the task callback
+        mTask.removeCallback(this);
+        mThumbnailView.unbindFromTask();
+        mHeaderView.unbindFromTask(mTouchExplorationEnabled);
     }
 
     @Override
-    public void onMultiStackDebugTaskStackIdChanged() {
-        mHeaderView.rebindToTask(mTask);
+    public void onTaskStackIdChanged() {
+        // Force rebind the header, the thumbnail does not change due to stack changes
+        mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
+        mHeaderView.onTaskDataLoaded();
     }
 
     /**** View.OnClickListener Implementation ****/
 
     @Override
      public void onClick(final View v) {
-        final TaskView tv = this;
-        final boolean delayViewClick = (v != this) && (v != mActionButtonView);
-        if (delayViewClick) {
-            // We purposely post the handler delayed to allow for the touch feedback to draw
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (v == mHeaderView.mApplicationIcon) {
-                        if (Constants.DebugFlags.App.EnableTaskFiltering) {
-                            if (mCb != null) {
-                                mCb.onTaskViewAppIconClicked(tv);
-                            }
-                        } else {
-                            AccessibilityManager am = (AccessibilityManager) getContext().
-                                    getSystemService(Context.ACCESSIBILITY_SERVICE);
-                            if (am != null && am.isEnabled()) {
-                                if (mCb != null) {
-                                    mCb.onTaskViewAppInfoClicked(tv);
-                                }
-                            }
-                        }
-                    } else if (v == mHeaderView.mDismissButton) {
-                        dismissTask();
-                        // Keep track of deletions by the dismiss button
-                        MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
-                                Constants.Metrics.DismissSourceHeaderButton);
-                    } else if (v == mHeaderView.mMoveTaskButton) {
-                        if (mCb != null) {
-                            mCb.onTaskResize(tv);
-                        }
-                    }
-                }
-            }, 125);
-        } else {
-            if (v == mActionButtonView) {
-                // Reset the translation of the action button before we animate it out
-                mActionButtonView.setTranslationZ(0f);
+        if (mIsDisabledInSafeMode) {
+            Context context = getContext();
+            String msg = context.getString(R.string.recents_launch_disabled_message, mTask.title);
+            if (mDisabledAppToast != null) {
+                mDisabledAppToast.cancel();
             }
-            if (mCb != null) {
-                mCb.onTaskViewClicked(tv, tv.getTask(), (v == mActionButtonView));
-            }
+            mDisabledAppToast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+            mDisabledAppToast.show();
+            return;
         }
+
+        boolean screenPinningRequested = false;
+        if (v == mActionButtonView) {
+            // Reset the translation of the action button before we animate it out
+            mActionButtonView.setTranslationZ(0f);
+            screenPinningRequested = true;
+        }
+        EventBus.getDefault().send(new LaunchTaskEvent(this, mTask, null, INVALID_STACK_ID,
+                screenPinningRequested));
+
+        MetricsLogger.action(v.getContext(), MetricsEvent.ACTION_OVERVIEW_SELECT,
+                mTask.key.getComponent().toString());
     }
 
     /**** View.OnLongClickListener Implementation ****/
 
     @Override
     public boolean onLongClick(View v) {
-        if (v == mHeaderView.mApplicationIcon) {
-            if (mCb != null) {
-                mCb.onTaskViewAppInfoClicked(this);
-                return true;
-            }
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        // Since we are clipping the view to the bounds, manually do the hit test
+        Rect clipBounds = new Rect(mViewBounds.mClipBounds);
+        clipBounds.scale(getScaleX());
+        boolean inBounds = clipBounds.contains(mDownTouchPos.x, mDownTouchPos.y);
+        if (v == this && inBounds && !ssp.hasDockedTask()) {
+            // Start listening for drag events
+            setClipViewInStack(false);
+
+            mDownTouchPos.x += ((1f - getScaleX()) * getWidth()) / 2;
+            mDownTouchPos.y += ((1f - getScaleY()) * getHeight()) / 2;
+
+            EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+            EventBus.getDefault().send(new DragStartEvent(mTask, this, mDownTouchPos));
+            return true;
         }
         return false;
+    }
+
+    /**** Events ****/
+
+    public final void onBusEvent(DragEndEvent event) {
+        if (!(event.dropTarget instanceof TaskStack.DockState)) {
+            event.addPostAnimationCallback(() -> {
+                // Reset the clip state for the drag view after the end animation completes
+                setClipViewInStack(true);
+            });
+        }
+        EventBus.getDefault().unregister(this);
+    }
+
+    public final void onBusEvent(DragEndCancelledEvent event) {
+        // Reset the clip state for the drag view after the cancel animation completes
+        event.addPostAnimationCallback(() -> {
+            setClipViewInStack(true);
+        });
     }
 }

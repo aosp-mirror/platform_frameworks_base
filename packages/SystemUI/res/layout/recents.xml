@@ -17,34 +17,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!-- Status Bar Scrim View -->
-    <ImageView
-        android:id="@+id/status_bar_scrim"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top"
-        android:scaleType="fitXY"
-        android:src="@drawable/recents_status_gradient" />
 
     <!-- Recents View -->
     <com.android.systemui.recents.views.RecentsView
         android:id="@+id/recents_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:focusable="true">
+        android:layout_height="match_parent">
     </com.android.systemui.recents.views.RecentsView>
 
-    <!-- Empty View -->
-    <ViewStub android:id="@+id/empty_view_stub"
-           android:layout="@layout/recents_empty"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent" />
-
-    <!-- Debug Overlay View -->
-    <ViewStub android:id="@+id/debug_overlay_stub"
-           android:layout="@layout/recents_debug_overlay"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent" />
+    <!-- Incompatible task overlay -->
+    <ViewStub android:id="@+id/incompatible_app_overlay_stub"
+        android:inflatedId="@+id/incompatible_app_overlay"
+        android:layout="@layout/recents_incompatible_app_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:layout_gravity="center_horizontal|top" />
 
     <!-- Nav Bar Scrim View -->
     <ImageView

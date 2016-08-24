@@ -17,10 +17,13 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -28,18 +31,19 @@ import android.os.BatteryStats;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
-import android.util.Log;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -58,13 +62,15 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Size;
-import android.util.Slog;
+
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,12 +79,41 @@ import java.util.List;
  */
 public class ActivityManager {
     private static String TAG = "ActivityManager";
-    private static boolean localLOGV = false;
 
     private static int gMaxRecentTasks = -1;
 
     private final Context mContext;
     private final Handler mHandler;
+
+    /**
+     * Defines acceptable types of bugreports.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            BUGREPORT_OPTION_FULL,
+            BUGREPORT_OPTION_INTERACTIVE,
+            BUGREPORT_OPTION_REMOTE
+    })
+    public @interface BugreportMode {}
+    /**
+     * Takes a bugreport without user interference (and hence causing less
+     * interference to the system), but includes all sections.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_FULL = 0;
+    /**
+     * Allows user to monitor progress and enter additional data; might not include all
+     * sections.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_INTERACTIVE = 1;
+    /**
+     * Takes a bugreport requested remotely by administrator of the Device Owner app,
+     * not the device's user.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_REMOTE = 2;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
@@ -87,6 +122,19 @@ public class ActivityManager {
      * signed with the same certificate as the one declaring the {@code <meta-data>}.
      */
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
+
+    /**
+     * Result for IActivityManager.startVoiceActivity: active session is currently hidden.
+     * @hide
+     */
+    public static final int START_VOICE_HIDDEN_SESSION = -10;
+
+    /**
+     * Result for IActivityManager.startVoiceActivity: active session does not match
+     * the requesting token.
+     * @hide
+     */
+    public static final int START_VOICE_NOT_ACTIVE_SESSION = -9;
 
     /**
      * Result for IActivityManager.startActivity: trying to start a background user
@@ -204,24 +252,17 @@ public class ActivityManager {
 
     /**
      * Flag for IActivityManaqer.startActivity: launch the app for
-     * OpenGL tracing.
-     * @hide
-     */
-    public static final int START_FLAG_OPENGL_TRACES = 1<<2;
-
-    /**
-     * Flag for IActivityManaqer.startActivity: launch the app for
      * allocation tracking.
      * @hide
      */
-    public static final int START_FLAG_TRACK_ALLOCATION = 1<<3;
+    public static final int START_FLAG_TRACK_ALLOCATION = 1<<2;
 
     /**
      * Flag for IActivityManaqer.startActivity: launch the app with
      * native debugging support.
      * @hide
      */
-    public static final int START_FLAG_NATIVE_DEBUGGING = 1<<4;
+    public static final int START_FLAG_NATIVE_DEBUGGING = 1<<3;
 
     /**
      * Result for IActivityManaqer.broadcastIntent: success!
@@ -279,6 +320,12 @@ public class ActivityManager {
 
     /** @hide User operation call: given user id is the current user, can't be stopped. */
     public static final int USER_OP_IS_CURRENT = -2;
+
+    /** @hide User operation call: system user can't be stopped. */
+    public static final int USER_OP_ERROR_IS_SYSTEM = -3;
+
+    /** @hide User operation call: one of related users cannot be stopped. */
+    public static final int USER_OP_ERROR_RELATED_USERS_CANNOT_STOP = -4;
 
     /** @hide Process does not exist. */
     public static final int PROCESS_STATE_NONEXISTENT = -1;
@@ -342,11 +389,44 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 16;
 
+    /** @hide The lowest process state number */
+    public static final int MIN_PROCESS_STATE = PROCESS_STATE_NONEXISTENT;
+
+    /** @hide The highest process state number */
+    public static final int MAX_PROCESS_STATE = PROCESS_STATE_CACHED_EMPTY;
+
+    /** @hide Should this process state be considered a background state? */
+    public static final boolean isProcStateBackground(int procState) {
+        return procState >= PROCESS_STATE_BACKUP;
+    }
+
     /** @hide requestType for assist context: only basic information. */
     public static final int ASSIST_CONTEXT_BASIC = 0;
 
     /** @hide requestType for assist context: generate full AssistStructure. */
     public static final int ASSIST_CONTEXT_FULL = 1;
+
+    /** @hide Flag for registerUidObserver: report changes in process state. */
+    public static final int UID_OBSERVER_PROCSTATE = 1<<0;
+
+    /** @hide Flag for registerUidObserver: report uid gone. */
+    public static final int UID_OBSERVER_GONE = 1<<1;
+
+    /** @hide Flag for registerUidObserver: report uid has become idle. */
+    public static final int UID_OBSERVER_IDLE = 1<<2;
+
+    /** @hide Flag for registerUidObserver: report uid has become active. */
+    public static final int UID_OBSERVER_ACTIVE = 1<<3;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: normal free-to-run operation. */
+    public static final int APP_START_MODE_NORMAL = 0;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: delay running until later. */
+    public static final int APP_START_MODE_DELAYED = 1;
+
+    /** @hide Mode for {@link IActivityManager#getAppStartMode}: disable/cancel pending
+     * launches. */
+    public static final int APP_START_MODE_DISABLED = 2;
 
     /**
      * Lock task mode is not active.
@@ -412,12 +492,294 @@ public class ActivityManager {
     public static final int COMPAT_MODE_TOGGLE = 2;
 
     /** @hide */
+    public static class StackId {
+        /** Invalid stack ID. */
+        public static final int INVALID_STACK_ID = -1;
+
+        /** First static stack ID. */
+        public static final int FIRST_STATIC_STACK_ID = 0;
+
+        /** Home activity stack ID. */
+        public static final int HOME_STACK_ID = FIRST_STATIC_STACK_ID;
+
+        /** ID of stack where fullscreen activities are normally launched into. */
+        public static final int FULLSCREEN_WORKSPACE_STACK_ID = 1;
+
+        /** ID of stack where freeform/resized activities are normally launched into. */
+        public static final int FREEFORM_WORKSPACE_STACK_ID = FULLSCREEN_WORKSPACE_STACK_ID + 1;
+
+        /** ID of stack that occupies a dedicated region of the screen. */
+        public static final int DOCKED_STACK_ID = FREEFORM_WORKSPACE_STACK_ID + 1;
+
+        /** ID of stack that always on top (always visible) when it exist. */
+        public static final int PINNED_STACK_ID = DOCKED_STACK_ID + 1;
+
+        /** Last static stack stack ID. */
+        public static final int LAST_STATIC_STACK_ID = PINNED_STACK_ID;
+
+        /** Start of ID range used by stacks that are created dynamically. */
+        public static final int FIRST_DYNAMIC_STACK_ID = LAST_STATIC_STACK_ID + 1;
+
+        public static boolean isStaticStack(int stackId) {
+            return stackId >= FIRST_STATIC_STACK_ID && stackId <= LAST_STATIC_STACK_ID;
+        }
+
+        /**
+         * Returns true if the activities contained in the input stack display a shadow around
+         * their border.
+         */
+        public static boolean hasWindowShadow(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the activities contained in the input stack display a decor view.
+         */
+        public static boolean hasWindowDecor(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Returns true if the tasks contained in the stack can be resized independently of the
+         * stack.
+         */
+        public static boolean isTaskResizeAllowed(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /** Returns true if the task bounds should persist across power cycles. */
+        public static boolean persistTaskBounds(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Returns true if dynamic stacks are allowed to be visible behind the input stack.
+         */
+        public static boolean isDynamicStacksVisibleBehindAllowed(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if we try to maintain focus in the current stack when the top activity
+         * finishes.
+         */
+        public static boolean keepFocusInStackIfPossible(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if Stack size is affected by the docked stack changing size.
+         */
+        public static boolean isResizeableByDockedStack(int stackId) {
+            return isStaticStack(stackId) &&
+                    stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the size of tasks in the input stack are affected by the docked stack
+         * changing size.
+         */
+        public static boolean isTaskResizeableByDockedStack(int stackId) {
+            return isStaticStack(stackId) && stackId != FREEFORM_WORKSPACE_STACK_ID
+                    && stackId != DOCKED_STACK_ID && stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the windows of tasks being moved to the target stack from the source
+         * stack should be replaced, meaning that window manager will keep the old window around
+         * until the new is ready.
+         */
+        public static boolean replaceWindowsOnTaskMove(int sourceStackId, int targetStackId) {
+            return sourceStackId == FREEFORM_WORKSPACE_STACK_ID
+                    || targetStackId == FREEFORM_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Return whether a stackId is a stack containing floating windows. Floating windows
+         * are laid out differently as they are allowed to extend past the display bounds
+         * without overscan insets.
+         */
+        public static boolean tasksAreFloating(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if animation specs should be constructed for app transition that moves
+         * the task to the specified stack.
+         */
+        public static boolean useAnimationSpecForAppTransition(int stackId) {
+
+            // TODO: INVALID_STACK_ID is also animated because we don't persist stack id's across
+            // reboots.
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID
+                    || stackId == INVALID_STACK_ID;
+        }
+
+        /** Returns true if the windows in the stack can receive input keys. */
+        public static boolean canReceiveKeys(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the stack can be visible above lockscreen.
+         */
+        public static boolean isAllowedOverLockscreen(int stackId) {
+            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+        }
+
+        public static boolean isAlwaysOnTop(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the top task in the task is allowed to return home when finished and
+         * there are other tasks in the stack.
+         */
+        public static boolean allowTopTaskToReturnHome(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the stack should be resized to match the bounds specified by
+         * {@link ActivityOptions#setLaunchBounds} when launching an activity into the stack.
+         */
+        public static boolean resizeStackWithLaunchBounds(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if any visible windows belonging to apps in this stack should be kept on
+         * screen when the app is killed due to something like the low memory killer.
+         */
+        public static boolean keepVisibleDeadAppWindowOnScreen(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the backdrop on the client side should match the frame of the window.
+         * Returns false, if the backdrop should be fullscreen.
+         */
+        public static boolean useWindowFrameForBackdrop(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if a window from the specified stack with {@param stackId} are normally
+         * fullscreen, i. e. they can become the top opaque fullscreen window, meaning that it
+         * controls system bars, lockscreen occluded/dismissing state, screen rotation animation,
+         * etc.
+         */
+        public static boolean normallyFullscreenWindows(int stackId) {
+            return stackId != PINNED_STACK_ID && stackId != FREEFORM_WORKSPACE_STACK_ID
+                    && stackId != DOCKED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the input stack id should only be present on a device that supports
+         * multi-window mode.
+         * @see android.app.ActivityManager#supportsMultiWindow
+         */
+        public static boolean isMultiWindowStack(int stackId) {
+            return isStaticStack(stackId) || stackId == PINNED_STACK_ID
+                    || stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+        }
+
+        /**
+         * Returns true if activities contained in this stack can request visible behind by
+         * calling {@link Activity#requestVisibleBehind}.
+         */
+        public static boolean activitiesCanRequestVisibleBehind(int stackId) {
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+        }
+
+        /**
+         * Returns true if this stack may be scaled without resizing,
+         * and windows within may need to be configured as such.
+         */
+        public static boolean windowsAreScaleable(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if windows in this stack should be given move animations
+         * by default.
+         */
+        public static boolean hasMovementAnimations(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
+    }
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#moveTaskToDockedStack} which
+     * specifies the position of the created docked stack at the top half of the screen if
+     * in portrait mode or at the left half of the screen if in landscape mode.
+     * @hide
+     */
+    public static final int DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT = 0;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#moveTaskToDockedStack} which
+     * specifies the position of the created docked stack at the bottom half of the screen if
+     * in portrait mode or at the right half of the screen if in landscape mode.
+     * @hide
+     */
+    public static final int DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT = 1;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize doesn't need to preserve the window, and can be skipped if bounds
+     * is unchanged. This mode is used by window manager in most cases.
+     * @hide
+     */
+    public static final int RESIZE_MODE_SYSTEM = 0;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize should preserve the window if possible.
+     * @hide
+     */
+    public static final int RESIZE_MODE_PRESERVE_WINDOW   = (0x1 << 0);
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize should be performed even if the bounds appears unchanged.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCED = (0x1 << 1);
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} used by window
+     * manager during a screen rotation.
+     * @hide
+     */
+    public static final int RESIZE_MODE_SYSTEM_SCREEN_ROTATION = RESIZE_MODE_PRESERVE_WINDOW;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} used when the
+     * resize is due to a drag action.
+     * @hide
+     */
+    public static final int RESIZE_MODE_USER = RESIZE_MODE_PRESERVE_WINDOW;
+
+    /**
+     * Input parameter to {@link android.app.IActivityManager#resizeTask} which indicates
+     * that the resize should preserve the window if possible, and should not be skipped
+     * even if the bounds is unchanged. Usually used to force a resizing when a drag action
+     * is ending.
+     * @hide
+     */
+    public static final int RESIZE_MODE_USER_FORCED =
+            RESIZE_MODE_PRESERVE_WINDOW | RESIZE_MODE_FORCED;
+
+    /** @hide */
     public int getFrontActivityScreenCompatMode() {
         try {
             return ActivityManagerNative.getDefault().getFrontActivityScreenCompatMode();
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -426,7 +788,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setFrontActivityScreenCompatMode(mode);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -435,8 +797,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getPackageScreenCompatMode(packageName);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -445,7 +806,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setPackageScreenCompatMode(packageName, mode);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -454,8 +815,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getPackageAskScreenCompat(packageName);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -464,7 +824,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setPackageAskScreenCompat(packageName, ask);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -549,7 +909,7 @@ public class ActivityManager {
      */
     static public int getMaxRecentTasksStatic() {
         if (gMaxRecentTasks < 0) {
-            return gMaxRecentTasks = isLowRamDeviceStatic() ? 50 : 100;
+            return gMaxRecentTasks = isLowRamDeviceStatic() ? 36 : 48;
         }
         return gMaxRecentTasks;
     }
@@ -571,6 +931,17 @@ public class ActivityManager {
     }
 
     /**
+     * Returns true if the system supports at least one form of multi-window.
+     * E.g. freeform, split-screen, picture-in-picture.
+     * @hide
+     */
+    static public boolean supportsMultiWindow() {
+        return !isLowRamDeviceStatic()
+                && Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_supportsMultiWindow);
+    }
+
+    /**
      * Information you can set and retrieve about the current activity within the recent task list.
      */
     public static class TaskDescription implements Parcelable {
@@ -578,8 +949,10 @@ public class ActivityManager {
         public static final String ATTR_TASKDESCRIPTION_PREFIX = "task_description_";
         private static final String ATTR_TASKDESCRIPTIONLABEL =
                 ATTR_TASKDESCRIPTION_PREFIX + "label";
-        private static final String ATTR_TASKDESCRIPTIONCOLOR =
+        private static final String ATTR_TASKDESCRIPTIONCOLOR_PRIMARY =
                 ATTR_TASKDESCRIPTION_PREFIX + "color";
+        private static final String ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND =
+                ATTR_TASKDESCRIPTION_PREFIX + "colorBackground";
         private static final String ATTR_TASKDESCRIPTIONICONFILENAME =
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_filename";
 
@@ -587,28 +960,21 @@ public class ActivityManager {
         private Bitmap mIcon;
         private String mIconFilename;
         private int mColorPrimary;
+        private int mColorBackground;
 
         /**
          * Creates the TaskDescription to the specified values.
          *
          * @param label A label and description of the current state of this task.
          * @param icon An icon that represents the current state of this task.
-         * @param colorPrimary A color to override the theme's primary color.  This color must be opaque.
+         * @param colorPrimary A color to override the theme's primary color.  This color must be
+         *                     opaque.
          */
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
+            this(label, icon, null, colorPrimary, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
-
-            mLabel = label;
-            mIcon = icon;
-            mColorPrimary = colorPrimary;
-        }
-
-        /** @hide */
-        public TaskDescription(String label, int colorPrimary, String iconFilename) {
-            this(label, null, colorPrimary);
-            mIconFilename = iconFilename;
         }
 
         /**
@@ -618,7 +984,7 @@ public class ActivityManager {
          * @param icon An icon that represents the current state of this activity.
          */
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon, 0);
+            this(label, icon, null, 0, 0);
         }
 
         /**
@@ -627,24 +993,43 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          */
         public TaskDescription(String label) {
-            this(label, null, 0);
+            this(label, null, null, 0, 0);
         }
 
         /**
          * Creates an empty TaskDescription.
          */
         public TaskDescription() {
-            this(null, null, 0);
+            this(null, null, null, 0, 0);
+        }
+
+        /** @hide */
+        public TaskDescription(String label, Bitmap icon, String iconFilename, int colorPrimary,
+                int colorBackground) {
+            mLabel = label;
+            mIcon = icon;
+            mIconFilename = iconFilename;
+            mColorPrimary = colorPrimary;
+            mColorBackground = colorBackground;
         }
 
         /**
          * Creates a copy of another TaskDescription.
          */
         public TaskDescription(TaskDescription td) {
-            mLabel = td.mLabel;
-            mIcon = td.mIcon;
-            mColorPrimary = td.mColorPrimary;
-            mIconFilename = td.mIconFilename;
+            copyFrom(td);
+        }
+
+        /**
+         * Copies this the values from another TaskDescription.
+         * @hide
+         */
+        public void copyFrom(TaskDescription other) {
+            mLabel = other.mLabel;
+            mIcon = other.mIcon;
+            mIconFilename = other.mIconFilename;
+            mColorPrimary = other.mColorPrimary;
+            mColorBackground = other.mColorBackground;
         }
 
         private TaskDescription(Parcel source) {
@@ -669,6 +1054,18 @@ public class ActivityManager {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
             mColorPrimary = primaryColor;
+        }
+
+        /**
+         * Sets the background color for this task description.
+         * @hide
+         */
+        public void setBackgroundColor(int backgroundColor) {
+            // Ensure that the given color is valid
+            if ((backgroundColor != 0) && (Color.alpha(backgroundColor) != 255)) {
+                throw new RuntimeException("A TaskDescription's background color should be opaque");
+            }
+            mColorBackground = backgroundColor;
         }
 
         /**
@@ -703,7 +1100,7 @@ public class ActivityManager {
             if (mIcon != null) {
                 return mIcon;
             }
-            return loadTaskDescriptionIcon(mIconFilename);
+            return loadTaskDescriptionIcon(mIconFilename, UserHandle.myUserId());
         }
 
         /** @hide */
@@ -717,12 +1114,13 @@ public class ActivityManager {
         }
 
         /** @hide */
-        public static Bitmap loadTaskDescriptionIcon(String iconFilename) {
+        public static Bitmap loadTaskDescriptionIcon(String iconFilename, int userId) {
             if (iconFilename != null) {
                 try {
-                    return ActivityManagerNative.getDefault().
-                            getTaskDescriptionIcon(iconFilename);
+                    return ActivityManagerNative.getDefault().getTaskDescriptionIcon(iconFilename,
+                            userId);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return null;
@@ -735,13 +1133,26 @@ public class ActivityManager {
             return mColorPrimary;
         }
 
+        /**
+         * @return The background color.
+         * @hide
+         */
+        public int getBackgroundColor() {
+            return mColorBackground;
+        }
+
         /** @hide */
         public void saveToXml(XmlSerializer out) throws IOException {
             if (mLabel != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONLABEL, mLabel);
             }
             if (mColorPrimary != 0) {
-                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR, Integer.toHexString(mColorPrimary));
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR_PRIMARY,
+                        Integer.toHexString(mColorPrimary));
+            }
+            if (mColorBackground != 0) {
+                out.attribute(null, ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND,
+                        Integer.toHexString(mColorBackground));
             }
             if (mIconFilename != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONICONFILENAME, mIconFilename);
@@ -752,8 +1163,10 @@ public class ActivityManager {
         public void restoreFromXml(String attrName, String attrValue) {
             if (ATTR_TASKDESCRIPTIONLABEL.equals(attrName)) {
                 setLabel(attrValue);
-            } else if (ATTR_TASKDESCRIPTIONCOLOR.equals(attrName)) {
+            } else if (ATTR_TASKDESCRIPTIONCOLOR_PRIMARY.equals(attrName)) {
                 setPrimaryColor((int) Long.parseLong(attrValue, 16));
+            } else if (ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND.equals(attrName)) {
+                setBackgroundColor((int) Long.parseLong(attrValue, 16));
             } else if (ATTR_TASKDESCRIPTIONICONFILENAME.equals(attrName)) {
                 setIconFilename(attrValue);
             }
@@ -779,6 +1192,7 @@ public class ActivityManager {
                 mIcon.writeToParcel(dest, 0);
             }
             dest.writeInt(mColorPrimary);
+            dest.writeInt(mColorBackground);
             if (mIconFilename == null) {
                 dest.writeInt(0);
             } else {
@@ -791,6 +1205,7 @@ public class ActivityManager {
             mLabel = source.readInt() > 0 ? source.readString() : null;
             mIcon = source.readInt() > 0 ? Bitmap.CREATOR.createFromParcel(source) : null;
             mColorPrimary = source.readInt();
+            mColorBackground = source.readInt();
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
@@ -807,7 +1222,8 @@ public class ActivityManager {
         @Override
         public String toString() {
             return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
-                    " colorPrimary: " + mColorPrimary;
+                    " IconFilename: " + mIconFilename + " colorPrimary: " + mColorPrimary +
+                    " colorBackground: " + mColorBackground;
         }
     }
 
@@ -841,6 +1257,13 @@ public class ActivityManager {
          * implementation that the alias referred to.  Otherwise, this is null.
          */
         public ComponentName origActivity;
+
+        /**
+         * The actual activity component that started the task.
+         * @hide
+         */
+        @Nullable
+        public ComponentName realActivity;
 
         /**
          * Description of the task's last state.
@@ -906,6 +1329,24 @@ public class ActivityManager {
          */
         public int numActivities;
 
+        /**
+         * The bounds of the task.
+         * @hide
+         */
+        public Rect bounds;
+
+        /**
+         * True if the task can go in the docked stack.
+         * @hide
+         */
+        public boolean isDockable;
+
+        /**
+         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
+         * @hide
+         */
+        public int resizeMode;
+
         public RecentTaskInfo() {
         }
 
@@ -925,6 +1366,7 @@ public class ActivityManager {
                 dest.writeInt(0);
             }
             ComponentName.writeToParcel(origActivity, dest);
+            ComponentName.writeToParcel(realActivity, dest);
             TextUtils.writeToParcel(description, dest,
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             if (taskDescription != null) {
@@ -942,6 +1384,14 @@ public class ActivityManager {
             ComponentName.writeToParcel(baseActivity, dest);
             ComponentName.writeToParcel(topActivity, dest);
             dest.writeInt(numActivities);
+            if (bounds != null) {
+                dest.writeInt(1);
+                bounds.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(resizeMode);
         }
 
         public void readFromParcel(Parcel source) {
@@ -949,6 +1399,7 @@ public class ActivityManager {
             persistentId = source.readInt();
             baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
             origActivity = ComponentName.readFromParcel(source);
+            realActivity = ComponentName.readFromParcel(source);
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             taskDescription = source.readInt() > 0 ?
                     TaskDescription.CREATOR.createFromParcel(source) : null;
@@ -961,6 +1412,10 @@ public class ActivityManager {
             baseActivity = ComponentName.readFromParcel(source);
             topActivity = ComponentName.readFromParcel(source);
             numActivities = source.readInt();
+            bounds = source.readInt() > 0 ?
+                    Rect.CREATOR.createFromParcel(source) : null;
+            isDockable = source.readInt() == 1;
+            resizeMode = source.readInt();
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -1005,6 +1460,18 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
 
     /**
+     * Ignores the top task in the docked stack.
+     * @hide
+     */
+    public static final int RECENT_INGORE_DOCKED_STACK_TOP_TASK = 0x0010;
+
+    /**
+     * Ignores all tasks that are on the pinned stack.
+     * @hide
+     */
+    public static final int RECENT_INGORE_PINNED_STACK_TASKS = 0x0020;
+
+    /**
      * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *
@@ -1042,8 +1509,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
                     flags, UserHandle.myUserId());
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1058,7 +1524,7 @@ public class ActivityManager {
      * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
      *
      * @return Returns a list of RecentTaskInfo records describing each of
-     * the recent tasks.
+     * the recent tasks. Most recently activated tasks go first.
      *
      * @hide
      */
@@ -1068,8 +1534,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
                     flags, userId);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1086,6 +1551,12 @@ public class ActivityManager {
          * A unique identifier for this task.
          */
         public int id;
+
+        /**
+         * The stack that currently contains this task.
+         * @hide
+         */
+        public int stackId;
 
         /**
          * The component launched as the first activity in the task.  This can
@@ -1127,6 +1598,18 @@ public class ActivityManager {
          */
         public long lastActiveTime;
 
+        /**
+         * True if the task can go in the docked stack.
+         * @hide
+         */
+        public boolean isDockable;
+
+        /**
+         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
+         * @hide
+         */
+        public int resizeMode;
+
         public RunningTaskInfo() {
         }
 
@@ -1136,6 +1619,7 @@ public class ActivityManager {
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
+            dest.writeInt(stackId);
             ComponentName.writeToParcel(baseActivity, dest);
             ComponentName.writeToParcel(topActivity, dest);
             if (thumbnail != null) {
@@ -1148,10 +1632,13 @@ public class ActivityManager {
                     Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             dest.writeInt(numActivities);
             dest.writeInt(numRunning);
+            dest.writeInt(isDockable ? 1 : 0);
+            dest.writeInt(resizeMode);
         }
 
         public void readFromParcel(Parcel source) {
             id = source.readInt();
+            stackId = source.readInt();
             baseActivity = ComponentName.readFromParcel(source);
             topActivity = ComponentName.readFromParcel(source);
             if (source.readInt() != 0) {
@@ -1162,6 +1649,8 @@ public class ActivityManager {
             description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
             numActivities = source.readInt();
             numRunning = source.readInt();
+            isDockable = source.readInt() != 0;
+            resizeMode = source.readInt();
         }
 
         public static final Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
@@ -1190,8 +1679,7 @@ public class ActivityManager {
         try {
             appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
         int numAppTasks = appTasks.size();
         for (int i = 0; i < numAppTasks; i++) {
@@ -1216,7 +1704,7 @@ public class ActivityManager {
             try {
                 mAppTaskThumbnailSize = ActivityManagerNative.getDefault().getAppTaskThumbnailSize();
             } catch (RemoteException e) {
-                throw new IllegalStateException("System dead?", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1282,7 +1770,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().addAppTask(activity.getActivityToken(),
                     intent, description, thumbnail);
         } catch (RemoteException e) {
-            throw new IllegalStateException("System dead?", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1324,8 +1812,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getTasks(maxNum, 0);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1341,17 +1828,111 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().removeTask(taskId);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return false;
+            throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Metadata related to the {@link TaskThumbnail}.
+     *
+     * @hide
+     */
+    public static class TaskThumbnailInfo implements Parcelable {
+        /** @hide */
+        public static final String ATTR_TASK_THUMBNAILINFO_PREFIX = "task_thumbnailinfo_";
+        private static final String ATTR_TASK_WIDTH =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_width";
+        private static final String ATTR_TASK_HEIGHT =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "task_height";
+        private static final String ATTR_SCREEN_ORIENTATION =
+                ATTR_TASK_THUMBNAILINFO_PREFIX + "screen_orientation";
+
+        public int taskWidth;
+        public int taskHeight;
+        public int screenOrientation = Configuration.ORIENTATION_UNDEFINED;
+
+        public TaskThumbnailInfo() {
+            // Do nothing
+        }
+
+        private TaskThumbnailInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        /**
+         * Resets this info state to the initial state.
+         * @hide
+         */
+        public void reset() {
+            taskWidth = 0;
+            taskHeight = 0;
+            screenOrientation = Configuration.ORIENTATION_UNDEFINED;
+        }
+
+        /**
+         * Copies from another ThumbnailInfo.
+         */
+        public void copyFrom(TaskThumbnailInfo o) {
+            taskWidth = o.taskWidth;
+            taskHeight = o.taskHeight;
+            screenOrientation = o.screenOrientation;
+        }
+
+        /** @hide */
+        public void saveToXml(XmlSerializer out) throws IOException {
+            out.attribute(null, ATTR_TASK_WIDTH, Integer.toString(taskWidth));
+            out.attribute(null, ATTR_TASK_HEIGHT, Integer.toString(taskHeight));
+            out.attribute(null, ATTR_SCREEN_ORIENTATION, Integer.toString(screenOrientation));
+        }
+
+        /** @hide */
+        public void restoreFromXml(String attrName, String attrValue) {
+            if (ATTR_TASK_WIDTH.equals(attrName)) {
+                taskWidth = Integer.parseInt(attrValue);
+            } else if (ATTR_TASK_HEIGHT.equals(attrName)) {
+                taskHeight = Integer.parseInt(attrValue);
+            } else if (ATTR_SCREEN_ORIENTATION.equals(attrName)) {
+                screenOrientation = Integer.parseInt(attrValue);
+            }
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(taskWidth);
+            dest.writeInt(taskHeight);
+            dest.writeInt(screenOrientation);
+        }
+
+        public void readFromParcel(Parcel source) {
+            taskWidth = source.readInt();
+            taskHeight = source.readInt();
+            screenOrientation = source.readInt();
+        }
+
+        public static final Creator<TaskThumbnailInfo> CREATOR = new Creator<TaskThumbnailInfo>() {
+            public TaskThumbnailInfo createFromParcel(Parcel source) {
+                return new TaskThumbnailInfo(source);
+            }
+            public TaskThumbnailInfo[] newArray(int size) {
+                return new TaskThumbnailInfo[size];
+            }
+        };
     }
 
     /** @hide */
     public static class TaskThumbnail implements Parcelable {
         public Bitmap mainThumbnail;
         public ParcelFileDescriptor thumbnailFileDescriptor;
+        public TaskThumbnailInfo thumbnailInfo;
 
         public TaskThumbnail() {
+        }
+
+        private TaskThumbnail(Parcel source) {
+            readFromParcel(source);
         }
 
         public int describeContents() {
@@ -1374,6 +1955,12 @@ public class ActivityManager {
             } else {
                 dest.writeInt(0);
             }
+            if (thumbnailInfo != null) {
+                dest.writeInt(1);
+                thumbnailInfo.writeToParcel(dest, flags);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -1387,6 +1974,11 @@ public class ActivityManager {
             } else {
                 thumbnailFileDescriptor = null;
             }
+            if (source.readInt() != 0) {
+                thumbnailInfo = TaskThumbnailInfo.CREATOR.createFromParcel(source);
+            } else {
+                thumbnailInfo = null;
+            }
         }
 
         public static final Creator<TaskThumbnail> CREATOR = new Creator<TaskThumbnail>() {
@@ -1397,10 +1989,6 @@ public class ActivityManager {
                 return new TaskThumbnail[size];
             }
         };
-
-        private TaskThumbnail(Parcel source) {
-            readFromParcel(source);
-        }
     }
 
     /** @hide */
@@ -1408,8 +1996,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getTaskThumbnail(id);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1418,8 +2005,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().isInHomeStack(taskId);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1468,7 +2054,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1654,8 +2240,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault()
                     .getServices(maxNum, 0);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1670,8 +2255,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault()
                     .getRunningServiceControlPanel(service);
         } catch (RemoteException e) {
-            // System dead, we will be dead too soon!
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1775,6 +2359,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().getMemoryInfo(outInfo);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1787,7 +2372,14 @@ public class ActivityManager {
         public Rect bounds = new Rect();
         public int[] taskIds;
         public String[] taskNames;
+        public Rect[] taskBounds;
+        public int[] taskUserIds;
+        public ComponentName topActivity;
         public int displayId;
+        public int userId;
+        public boolean visible;
+        // Index of the stack in the display's stack list, can be used for comparison of stack order
+        public int position;
 
         @Override
         public int describeContents() {
@@ -1803,7 +2395,25 @@ public class ActivityManager {
             dest.writeInt(bounds.bottom);
             dest.writeIntArray(taskIds);
             dest.writeStringArray(taskNames);
+            final int boundsCount = taskBounds == null ? 0 : taskBounds.length;
+            dest.writeInt(boundsCount);
+            for (int i = 0; i < boundsCount; i++) {
+                dest.writeInt(taskBounds[i].left);
+                dest.writeInt(taskBounds[i].top);
+                dest.writeInt(taskBounds[i].right);
+                dest.writeInt(taskBounds[i].bottom);
+            }
+            dest.writeIntArray(taskUserIds);
             dest.writeInt(displayId);
+            dest.writeInt(userId);
+            dest.writeInt(visible ? 1 : 0);
+            dest.writeInt(position);
+            if (topActivity != null) {
+                dest.writeInt(1);
+                topActivity.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         public void readFromParcel(Parcel source) {
@@ -1812,7 +2422,25 @@ public class ActivityManager {
                     source.readInt(), source.readInt(), source.readInt(), source.readInt());
             taskIds = source.createIntArray();
             taskNames = source.createStringArray();
+            final int boundsCount = source.readInt();
+            if (boundsCount > 0) {
+                taskBounds = new Rect[boundsCount];
+                for (int i = 0; i < boundsCount; i++) {
+                    taskBounds[i] = new Rect();
+                    taskBounds[i].set(
+                            source.readInt(), source.readInt(), source.readInt(), source.readInt());
+                }
+            } else {
+                taskBounds = null;
+            }
+            taskUserIds = source.createIntArray();
             displayId = source.readInt();
+            userId = source.readInt();
+            visible = source.readInt() > 0;
+            position = source.readInt();
+            if (source.readInt() > 0) {
+                topActivity = ComponentName.readFromParcel(source);
+            }
         }
 
         public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
@@ -1838,11 +2466,21 @@ public class ActivityManager {
             sb.append(prefix); sb.append("Stack id="); sb.append(stackId);
                     sb.append(" bounds="); sb.append(bounds.toShortString());
                     sb.append(" displayId="); sb.append(displayId);
+                    sb.append(" userId="); sb.append(userId);
                     sb.append("\n");
             prefix = prefix + "  ";
             for (int i = 0; i < taskIds.length; ++i) {
                 sb.append(prefix); sb.append("taskId="); sb.append(taskIds[i]);
-                        sb.append(": "); sb.append(taskNames[i]); sb.append("\n");
+                        sb.append(": "); sb.append(taskNames[i]);
+                        if (taskBounds != null) {
+                            sb.append(" bounds="); sb.append(taskBounds[i].toShortString());
+                        }
+                        sb.append(" userId=").append(taskUserIds[i]);
+                        sb.append(" visible=").append(visible);
+                        if (topActivity != null) {
+                            sb.append(" topActivity=").append(topActivity);
+                        }
+                        sb.append("\n");
             }
             return sb.toString();
         }
@@ -1861,7 +2499,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().clearApplicationUserData(packageName,
                     observer, UserHandle.myUserId());
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1877,6 +2515,44 @@ public class ActivityManager {
      */
     public boolean clearApplicationUserData() {
         return clearApplicationUserData(mContext.getPackageName(), null);
+    }
+
+
+    /**
+     * Permits an application to get the persistent URI permissions granted to another.
+     *
+     * <p>Typically called by Settings.
+     *
+     * @param packageName application to look for the granted permissions
+     * @return list of granted URI permissions
+     *
+     * @hide
+     */
+    public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName) {
+        try {
+            return ActivityManagerNative.getDefault().getGrantedUriPermissions(packageName,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Permits an application to clear the persistent URI permissions granted to another.
+     *
+     * <p>Typically called by Settings.
+     *
+     * @param packageName application to clear its granted permissions
+     *
+     * @hide
+     */
+    public void clearGrantedUriPermissions(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().clearGrantedUriPermissions(packageName,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1995,7 +2671,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getProcessesInErrorState();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2309,7 +2985,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getRunningExternalApplications();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2326,7 +3002,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().setProcessMemoryTrimLevel(process, userId,
                     level);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2344,7 +3020,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getRunningAppProcesses();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2363,7 +3039,7 @@ public class ActivityManager {
                     mContext.getOpPackageName());
             return RunningAppProcessInfo.procStateToImportance(procState);
         } catch (RemoteException e) {
-            return RunningAppProcessInfo.IMPORTANCE_GONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2382,6 +3058,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().getMyMemoryState(outState);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2400,7 +3077,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getProcessMemoryInfo(pids);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2434,6 +3111,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().killBackgroundProcesses(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2444,13 +3122,14 @@ public class ActivityManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.KILL_UID)
     public void killUid(int uid, String reason) {
         try {
             ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
                     UserHandle.getUserId(uid), reason);
         } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't kill uid:" + uid, e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2477,6 +3156,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().forceStopPackage(packageName, userId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2495,8 +3175,8 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getDeviceConfigurationInfo();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -2585,8 +3265,8 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().isUserAMonkey();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -2661,10 +3341,8 @@ public class ActivityManager {
             return AppGlobals.getPackageManager()
                     .checkUidPermission(permission, uid);
         } catch (RemoteException e) {
-            // Should never happen, but if it does... deny!
-            Slog.e(TAG, "PackageManager is dead?!?", e);
+            throw e.rethrowFromSystemServer();
         }
-        return PackageManager.PERMISSION_DENIED;
     }
 
     /** @hide */
@@ -2673,10 +3351,8 @@ public class ActivityManager {
             return AppGlobals.getPackageManager()
                     .checkUidPermission(permission, uid);
         } catch (RemoteException e) {
-            // Should never happen, but if it does... deny!
-            Slog.e(TAG, "PackageManager is dead?!?", e);
+            throw e.rethrowFromSystemServer();
         }
-        return PackageManager.PERMISSION_DENIED;
     }
 
     /**
@@ -2712,7 +3388,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().handleIncomingUser(callingPid,
                     callingUid, userId, allowAll, requireFull, name, callerPackage);
         } catch (RemoteException e) {
-            throw new SecurityException("Failed calling activity manager", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2727,7 +3403,7 @@ public class ActivityManager {
             ui = ActivityManagerNative.getDefault().getCurrentUser();
             return ui != null ? ui.id : 0;
         } catch (RemoteException e) {
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2739,9 +3415,35 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().switchUser(userid);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Logs out current current foreground user by switching to the system user and stopping the
+     * user being switched from.
+     * @hide
+     */
+    public static void logoutCurrentUser() {
+        int currentUser = ActivityManager.getCurrentUser();
+        if (currentUser != UserHandle.USER_SYSTEM) {
+            try {
+                ActivityManagerNative.getDefault().switchUser(UserHandle.USER_SYSTEM);
+                ActivityManagerNative.getDefault().stopUser(currentUser, /* force= */ false, null);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /** {@hide} */
+    public static final int FLAG_OR_STOPPED = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_AND_LOCKED = 1 << 1;
+    /** {@hide} */
+    public static final int FLAG_AND_UNLOCKED = 1 << 2;
+    /** {@hide} */
+    public static final int FLAG_AND_UNLOCKING_OR_UNLOCKED = 1 << 3;
 
     /**
      * Return whether the given user is actively running.  This means that
@@ -2752,11 +3454,20 @@ public class ActivityManager {
      * @param userid the user's id. Zero indicates the default user.
      * @hide
      */
-    public boolean isUserRunning(int userid) {
+    public boolean isUserRunning(int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(userid, false);
+            return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public boolean isVrModePackageEnabled(ComponentName component) {
+        try {
+            return ActivityManagerNative.getDefault().isVrModePackageEnabled(component);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2841,6 +3552,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, pssSize,
                     mContext.getPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2859,6 +3571,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, 0, null);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2869,6 +3582,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().startLockTaskMode(taskId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2879,6 +3593,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().stopLockTaskMode();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2905,7 +3620,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getLockTaskModeState();
         } catch (RemoteException e) {
-            return ActivityManager.LOCK_TASK_MODE_NONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2928,7 +3643,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.finishAndRemoveTask();
             } catch (RemoteException e) {
-                Slog.e(TAG, "Invalid AppTask", e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2941,8 +3656,7 @@ public class ActivityManager {
             try {
                 return mAppTaskImpl.getTaskInfo();
             } catch (RemoteException e) {
-                Slog.e(TAG, "Invalid AppTask", e);
-                return null;
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2956,7 +3670,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.moveToFront();
             } catch (RemoteException e) {
-                Slog.e(TAG, "Invalid AppTask", e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2998,7 +3712,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.setExcludeFromRecents(exclude);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Invalid AppTask", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }

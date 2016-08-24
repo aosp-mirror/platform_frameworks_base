@@ -18,15 +18,15 @@ package com.android.server.policy;
 
 import android.app.StatusBarManager;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy.WindowState;
 
-import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
 
@@ -47,13 +47,14 @@ public class BarController {
     private final int mTransientFlag;
     private final int mUnhideFlag;
     private final int mTranslucentFlag;
+    private final int mTransparentFlag;
     private final int mStatusBarManagerId;
     private final int mTranslucentWmFlag;
     protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
-    protected IStatusBarService mStatusBarService;
+    protected StatusBarManagerInternal mStatusBarInternal;
 
-    private WindowState mWin;
+    protected WindowState mWin;
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
     private int mTransientBarState;
     private boolean mPendingShow;
@@ -63,13 +64,14 @@ public class BarController {
     private boolean mNoAnimationOnNextShow;
 
     public BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
-            int statusBarManagerId, int translucentWmFlag) {
+            int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
         mTransientFlag = transientFlag;
         mUnhideFlag = unhideFlag;
         mTranslucentFlag = translucentFlag;
         mStatusBarManagerId = statusBarManagerId;
         mTranslucentWmFlag = translucentWmFlag;
+        mTransparentFlag = transparentFlag;
         mHandler = new Handler();
     }
 
@@ -126,13 +128,13 @@ public class BarController {
                     vis &= ~mTranslucentFlag;
                 }
                 if ((fl & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-                    vis |= View.SYSTEM_UI_TRANSPARENT;
+                    vis |= mTransparentFlag;
                 } else {
-                    vis &= ~View.SYSTEM_UI_TRANSPARENT;
+                    vis &= ~mTransparentFlag;
                 }
             } else {
                 vis = (vis & ~mTranslucentFlag) | (oldVis & mTranslucentFlag);
-                vis = (vis & ~View.SYSTEM_UI_TRANSPARENT) | (oldVis & View.SYSTEM_UI_TRANSPARENT);
+                vis = (vis & ~mTransparentFlag) | (oldVis & mTransparentFlag);
             }
         }
         return vis;
@@ -146,12 +148,16 @@ public class BarController {
         }
         final boolean wasVis = mWin.isVisibleLw();
         final boolean wasAnim = mWin.isAnimatingLw();
-        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow)
-                : mWin.hideLw(!mNoAnimationOnNextShow);
+        final boolean change = show ? mWin.showLw(!mNoAnimationOnNextShow && !skipAnimation())
+                : mWin.hideLw(!mNoAnimationOnNextShow && !skipAnimation());
         mNoAnimationOnNextShow = false;
         final int state = computeStateLw(wasVis, wasAnim, mWin, change);
         final boolean stateChanged = updateStateLw(state);
         return change || stateChanged;
+    }
+
+    protected boolean skipAnimation() {
+        return false;
     }
 
     private int computeStateLw(boolean wasVis, boolean wasAnim, WindowState win, boolean change) {
@@ -180,15 +186,9 @@ public class BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.setWindowState(mStatusBarManagerId, state);
-                        }
-                    } catch (RemoteException e) {
-                        if (DEBUG) Slog.w(mTag, "Error posting window state", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.setWindowState(mStatusBarManagerId, state);
                     }
                 }
             });
@@ -247,7 +247,7 @@ public class BarController {
             }
         }
         if (mShowTransparent) {
-            vis |= View.SYSTEM_UI_TRANSPARENT;
+            vis |= mTransparentFlag;
             if (mSetUnHideFlagWhenNextTransparent) {
                 vis |= mUnhideFlag;
                 mSetUnHideFlagWhenNextTransparent = false;
@@ -258,7 +258,7 @@ public class BarController {
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
         if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0 ||
-                ((vis | oldVis) & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0) {
+                ((vis | oldVis) & mTransparentFlag) != 0) {
             mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;
@@ -274,13 +274,12 @@ public class BarController {
         }
     }
 
-    protected IStatusBarService getStatusBarService() {
+    protected StatusBarManagerInternal getStatusBarInternal() {
         synchronized (mServiceAquireLock) {
-            if (mStatusBarService == null) {
-                mStatusBarService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService("statusbar"));
+            if (mStatusBarInternal == null) {
+                mStatusBarInternal = LocalServices.getService(StatusBarManagerInternal.class);
             }
-            return mStatusBarService;
+            return mStatusBarInternal;
         }
     }
 

@@ -34,7 +34,7 @@ The License Agreement constitutes a contract between you and Google with respect
 SDK.</p>
     <p class="note"><strong>Note:</strong> You must agree to this license agreement in order to
 download one of the archived SDKs, because these SDK packages contain Google software (whereas, the
-<a href="http://developer.android.com/sdk/index.html">current SDK</a> packages do not require a
+<a href="http://developer.android.com/studio/index.html">current SDK</a> packages do not require a
 license agreement, because they contain only the open sourced SDK tools).</p>
 
   <iframe id="terms" style="border:1px solid #888;margin:0 0 1em;height:400px;width:100%;"
@@ -72,7 +72,7 @@ download</a>.</p>
 recommended. We no longer maintain documentation about how to install these archived SDKs nor
 support the tools contained within.</p>
   <p>We recommend that you instead download the latest <a
-href="http://developer.android.com/sdk/index.html">Android SDK starter package</a>, which includes
+href="http://developer.android.com/studio/index.html">Android SDK starter package</a>, which includes
 the latest SDK tools and allows you to develop against any version of the Android platform, back to
 Android 1.1.</p>
 </div>

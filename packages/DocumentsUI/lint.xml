@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+        Lint configuration for the framework-lint tool (go/fwlint).  See
+        http://tools.android.com/tips/lint for full docs on the lint tool.
+    -->
+
+    <!-- min-sdk doesn't apply to platform apps. -->
+    <issue id="UsesMinSdkAttributes" severity="ignore" />
+
+    <!-- Protected permissions don't apply to system apps. -->
+    <issue id="ProtectedPermissions" severity="ignore" />
+
+    <!-- Other recommended suppressions copied from go/fwlint. -->
+    <issue id="Assert" severity="ignore" />
+    <issue id="ClickableViewAccessibility" severity="ignore" />
+    <issue id="GoogleAppIndexingWarning" severity="ignore" />
+    <issue id="MissingPermission" severity="ignore" />
+    <issue id="ParcelClassLoader" severity="ignore" />
+    <issue id="ParcelCreator" severity="ignore" />
+    <issue id="Registered" severity="ignore" />
+    <issue id="RtlHardcoded" severity="ignore" />
+    <issue id="ShiftFlags" severity="ignore" />
+    <issue id="SuspiciousImport" severity="ignore" />
+
+    <!-- Don't lint automatically translated strings. -->
+    <issue id="all">
+      <ignore path="res/values-*/strings.xml" />
+    </issue>
+
+    <!-- Don't warn about missing translations. -->
+    <issue id="MissingTranslation">
+      <ignore path="res/values/strings.xml" />
+    </issue>
+    
+</lint>

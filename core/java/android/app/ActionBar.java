@@ -31,9 +31,11 @@ import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.ViewParent;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
 import java.lang.annotation.Retention;
@@ -1071,6 +1073,66 @@ public abstract class ActionBar {
     }
 
     /**
+     * Attempts to move focus to the ActionBar if it does not already contain the focus.
+     *
+     * @return {@code true} if focus changes or {@code false} if focus doesn't change.
+     * @hide
+     */
+    public boolean requestFocus() {
+        return false;
+    }
+
+    /** @hide */
+    public void onDestroy() {
+    }
+
+    /**
+     * Common implementation for requestFocus that takes in the Toolbar and moves focus
+     * to the contents. This makes the ViewGroups containing the toolbar allow focus while it stays
+     * in the ActionBar and then prevents it again once it leaves.
+     *
+     * @param viewGroup The toolbar ViewGroup
+     * @return {@code true} if focus changes or {@code false} if focus doesn't change.
+     * @hide
+     */
+    protected boolean requestFocus(ViewGroup viewGroup) {
+        if (viewGroup != null && !viewGroup.hasFocus()) {
+            final ViewGroup toolbar = viewGroup.getTouchscreenBlocksFocus() ? viewGroup : null;
+            ViewParent parent = viewGroup.getParent();
+            ViewGroup container = null;
+            while (parent != null && parent instanceof ViewGroup) {
+                final ViewGroup vgParent = (ViewGroup) parent;
+                if (vgParent.getTouchscreenBlocksFocus()) {
+                    container = vgParent;
+                    break;
+                }
+                parent = vgParent.getParent();
+            }
+            if (container != null) {
+                container.setTouchscreenBlocksFocus(false);
+            }
+            if (toolbar != null) {
+                toolbar.setTouchscreenBlocksFocus(false);
+            }
+            viewGroup.requestFocus();
+            final View focused = viewGroup.findFocus();
+            if (focused != null) {
+                focused.setOnFocusChangeListener(new FollowOutOfActionBar(viewGroup,
+                        container, toolbar));
+            } else {
+                if (container != null) {
+                    container.setTouchscreenBlocksFocus(true);
+                }
+                if (toolbar != null) {
+                    toolbar.setTouchscreenBlocksFocus(true);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Listener interface for ActionBar navigation events.
      *
      * @deprecated Action bar navigation modes are deprecated and not supported by inline
@@ -1386,6 +1448,45 @@ public abstract class ActionBar {
             super.encodeProperties(encoder);
 
             encoder.addProperty("gravity", gravity);
+        }
+    }
+
+    /**
+     * Tracks the focused View until it leaves the ActionBar, then it resets the
+     * touchscreenBlocksFocus value.
+     */
+    private static class FollowOutOfActionBar implements OnFocusChangeListener, Runnable {
+        private final ViewGroup mFocusRoot;
+        private final ViewGroup mContainer;
+        private final ViewGroup mToolbar;
+
+        public FollowOutOfActionBar(ViewGroup focusRoot, ViewGroup container, ViewGroup toolbar) {
+            mContainer = container;
+            mToolbar = toolbar;
+            mFocusRoot = focusRoot;
+        }
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                v.setOnFocusChangeListener(null);
+                final View focused = mFocusRoot.findFocus();
+                if (focused != null) {
+                    focused.setOnFocusChangeListener(this);
+                } else {
+                    mFocusRoot.post(this);
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            if (mContainer != null) {
+                mContainer.setTouchscreenBlocksFocus(true);
+            }
+            if (mToolbar != null) {
+                mToolbar.setTouchscreenBlocksFocus(true);
+            }
         }
     }
 }

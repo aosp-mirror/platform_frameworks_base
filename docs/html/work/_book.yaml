@@ -1,0 +1,132 @@
+toc:
+- title: Android for Work Home
+  path: /work/index.html
+  path_attributes:
+  - name: es-lang
+    value: Página principal de Android for Work
+  - name: in-lang
+    value: Beranda Android for Work
+  - name: ja-lang
+    value: Android for Work ホーム
+  - name: ko-lang
+    value: Android for Work 홈
+  - name: pt-br-lang
+    value: Página inicial do Android for Work
+  - name: ru-lang
+    value: Главная – Android for Work
+  - name: vi-lang
+    value: Trang chủ Android for Work
+  - name: zh-cn-lang
+    value: Android for Work 首页
+  - name: zh-tw-lang
+    value: Android for Work 首頁
+
+- title: Overview
+  path: /work/overview.html
+  path_attributes:
+  - name: es-lang
+    value: Información general
+  - name: in-lang
+    value: Ringkasan
+  - name: ja-lang
+    value: 概要
+  - name: ko-lang
+    value: 개요
+  - name: pt-br-lang
+    value: Visão geral
+  - name: ru-lang
+    value: Обзор
+  - name: vi-lang
+    value: Tổng quan
+  - name: zh-cn-lang
+    value: 概览
+  - name: zh-tw-lang
+    value: 總覽
+
+- title: Developer Guide
+  path: /work/guide.html
+  path_attributes:
+  - name: es-lang
+    value: Guía para desarrolladores
+  - name: in-lang
+    value: Panduan Pengembang
+  - name: ja-lang
+    value: デベロッパー ガイド
+  - name: ko-lang
+    value: 개발자 가이드
+  - name: pt-br-lang
+    value: Guia do desenvolvedor
+  - name: ru-lang
+    value: Руководство для разработчиков
+  - name: vi-lang
+    value: Hướng dẫn cho nhà phát triển
+  - name: zh-cn-lang
+    value: 开发者指南
+  - name: zh-tw-lang
+    value: 開發人員指南
+
+- title: Set up Managed Profiles
+  path: /work/managed-profiles.html
+  path_attributes:
+  - name: es-lang
+    value: Configurar perfiles administrados
+  - name: in-lang
+    value: Menyiapkan Profil Terkelola
+  - name: ja-lang
+    value: 管理対象プロファイルの設定
+  - name: ko-lang
+    value: 관리 프로필 설정
+  - name: pt-br-lang
+    value: Configurar perfis gerenciados
+  - name: ru-lang
+    value: Настройка управляемых профилей
+  - name: vi-lang
+    value: Thiết lập hồ sơ được quản lý
+  - name: zh-cn-lang
+    value: 设置托管配置文件
+  - name: zh-tw-lang
+    value: 設定受管理的設定檔
+
+- title: Set up Managed Configurations
+  path: /work/managed-configurations.html
+  path_attributes:
+  - name: es-lang
+    value: Configurar ajustes administrados
+  - name: in-lang
+    value: Menyiapkan Konfigurasi Terkelola
+  - name: ja-lang
+    value: 管理対象構成の設定
+  - name: ko-lang
+    value: 관리 구성 설정
+  - name: pt-br-lang
+    value: Definir configurações gerenciadas
+  - name: ru-lang
+    value: Настройка управляемых конфигураций
+  - name: vi-lang
+    value: Thiết lập cấu hình được quản lý
+  - name: zh-cn-lang
+    value: 设置托管配置
+  - name: zh-tw-lang
+    value: 設置受管理的設定
+
+- title: Set up Single-Purpose Devices
+  path: /work/cosu.html
+  path_attributes:
+  - name: es-lang
+    value: Configurar dispositivos con una sola finalidad
+  - name: in-lang
+    value: Menyiapkan Perangkat Tujuan Tunggal
+  - name: ja-lang
+    value: 用途に特化した端末の設定
+  - name: ko-lang
+    value: 단일 목적 기기 설정
+  - name: pt-br-lang
+    value: Configurar dispositivos com uma finalidade específica
+  - name: ru-lang
+    value: Настройка одноцелевых устройств
+  - name: vi-lang
+    value: Thiết lập thiết bị chuyên dùng
+  - name: zh-cn-lang
+    value: 设置单一用途设备
+  - name: zh-tw-lang
+    value: 設定單一用途的裝置

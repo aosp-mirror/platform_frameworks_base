@@ -18,6 +18,7 @@ package android.widget;
 
 import android.animation.ObjectAnimator;
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.content.Context;
@@ -1026,9 +1027,9 @@ public class Switch extends CompoundButton {
 
         if (newState != oldState) {
             playSoundEffect(SoundEffectConstants.CLICK);
-            setChecked(newState);
         }
-
+        // Always call setChecked so that the thumb is moved back to the correct edge
+        setChecked(newState);
         cancelSuperTouch(ev);
     }
 
@@ -1339,17 +1340,22 @@ public class Switch extends CompoundButton {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
 
-        final int[] myDrawableState = getDrawableState();
+        final int[] state = getDrawableState();
+        boolean changed = false;
 
-        if (mThumbDrawable != null) {
-            mThumbDrawable.setState(myDrawableState);
+        final Drawable thumbDrawable = mThumbDrawable;
+        if (thumbDrawable != null && thumbDrawable.isStateful()) {
+            changed |= thumbDrawable.setState(state);
         }
 
-        if (mTrackDrawable != null) {
-            mTrackDrawable.setState(myDrawableState);
+        final Drawable trackDrawable = mTrackDrawable;
+        if (trackDrawable != null && trackDrawable.isStateful()) {
+            changed |= trackDrawable.setState(state);
         }
 
-        invalidate();
+        if (changed) {
+            invalidate();
+        }
     }
 
     @Override
@@ -1366,7 +1372,7 @@ public class Switch extends CompoundButton {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mThumbDrawable || who == mTrackDrawable;
     }
 
@@ -1382,7 +1388,7 @@ public class Switch extends CompoundButton {
             mTrackDrawable.jumpToCurrentState();
         }
 
-        if (mPositionAnimator != null && mPositionAnimator.isRunning()) {
+        if (mPositionAnimator != null && mPositionAnimator.isStarted()) {
             mPositionAnimator.end();
             mPositionAnimator = null;
         }

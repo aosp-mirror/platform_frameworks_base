@@ -144,6 +144,18 @@ public class Process {
     public static final int SHARED_RELRO_UID = 1037;
 
     /**
+     * Defines the UID/GID for the audioserver process.
+     * @hide
+     */
+    public static final int AUDIOSERVER_UID = 1041;
+
+    /**
+     * Defines the UID/GID for the cameraserver process
+     * @hide
+     */
+    public static final int CAMERASERVER_UID = 1047;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.
@@ -361,9 +373,18 @@ public class Process {
      **/
     public static final int THREAD_GROUP_AUDIO_SYS = 4;
 
+    /**
+     * Thread group for top foreground app.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_TOP_APP = 5;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
+
+    private static long sStartElapsedRealtime;
+    private static long sStartUptimeMillis;
 
     /**
      * State for communicating with the zygote process.
@@ -754,6 +775,26 @@ public class Process {
     public static final native long getElapsedCpuTime();
 
     /**
+     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
+     */
+    public static final long getStartElapsedRealtime() {
+        return sStartElapsedRealtime;
+    }
+
+    /**
+     * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
+     */
+    public static final long getStartUptimeMillis() {
+        return sStartUptimeMillis;
+    }
+
+    /** @hide */
+    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis) {
+        sStartElapsedRealtime = elapsedRealtime;
+        sStartUptimeMillis = uptimeMillis;
+    }
+
+    /**
      * Returns true if the current process is a 64-bit runtime.
      */
     public static final boolean is64Bit() {
@@ -800,8 +841,18 @@ public class Process {
      * {@link #myUid()} in that a particular user will have multiple
      * distinct apps running under it each with their own uid.
      */
-    public static final UserHandle myUserHandle() {
-        return new UserHandle(UserHandle.getUserId(myUid()));
+    public static UserHandle myUserHandle() {
+        return UserHandle.of(UserHandle.getUserId(myUid()));
+    }
+
+    /**
+     * Returns whether the given uid belongs to an application.
+     * @param uid A kernel uid.
+     * @return Whether the uid corresponds to an application sandbox running in
+     *     a specific user.
+     */
+    public static boolean isApplicationUid(int uid) {
+        return UserHandle.isApp(uid);
     }
 
     /**
@@ -945,6 +996,31 @@ public class Process {
      */
     public static final native int getProcessGroup(int pid)
             throws IllegalArgumentException, SecurityException;
+
+    /**
+     * On some devices, the foreground process may have one or more CPU
+     * cores exclusively reserved for it. This method can be used to
+     * retrieve which cores that are (if any), so the calling process
+     * can then use sched_setaffinity() to lock a thread to these cores.
+     * Note that the calling process must currently be running in the
+     * foreground for this method to return any cores.
+     *
+     * The CPU core(s) exclusively reserved for the foreground process will
+     * stay reserved for as long as the process stays in the foreground.
+     *
+     * As soon as a process leaves the foreground, those CPU cores will
+     * no longer be reserved for it, and will most likely be reserved for
+     * the new foreground process. It's not necessary to change the affinity
+     * of your process when it leaves the foreground (if you had previously
+     * set it to use a reserved core); the OS will automatically take care
+     * of resetting the affinity at that point.
+     *
+     * @return an array of integers, indicating the CPU cores exclusively
+     * reserved for this process. The array will have length zero if no
+     * CPU cores are exclusively reserved for this process at this point
+     * in time.
+     */
+    public static final native int[] getExclusiveCores();
 
     /**
      * Set the priority of the calling thread, based on Linux priorities.  See
@@ -1107,6 +1183,8 @@ public class Process {
     public static final int PROC_PARENS = 0x200;
     /** @hide */
     public static final int PROC_QUOTES = 0x400;
+    /** @hide */
+    public static final int PROC_CHAR = 0x800;
     /** @hide */
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */

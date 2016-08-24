@@ -44,9 +44,9 @@ namespace uirenderer {
  */
 class RoundRectClipState {
 public:
-    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size) = delete;
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
+        return allocator.alloc<RoundRectClipState>(size);
     }
 
     bool areaRequiresRoundRectClip(const Rect& rect) const {
@@ -63,11 +63,12 @@ public:
     float radius;
 };
 
+// TODO: remove for HWUI_NEW_OPS
 class ProjectionPathMask {
 public:
-    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size) = delete;
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
+        return allocator.alloc<ProjectionPathMask>(size);
     }
 
     const SkPath* projectionMask;
@@ -83,11 +84,11 @@ public:
  * Each snapshot has a link to a previous snapshot, indicating the previous
  * state of the renderer.
  */
-class Snapshot: public LightRefBase<Snapshot> {
+class Snapshot {
 public:
 
     Snapshot();
-    Snapshot(const sp<Snapshot>& s, int saveFlags);
+    Snapshot(Snapshot* s, int saveFlags);
 
     /**
      * Various flags set on ::flags.
@@ -116,7 +117,7 @@ public:
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x8,
+        kFlagFboTarget = 0x8, // TODO: remove for HWUI_NEW_OPS
     };
 
     /**
@@ -124,26 +125,25 @@ public:
      * the specified operation. The specified rectangle is transformed
      * by this snapshot's trasnformation.
      */
-    bool clip(float left, float top, float right, float bottom,
-            SkRegion::Op op = SkRegion::kIntersect_Op);
+    void clip(const Rect& localClip, SkRegion::Op op);
 
     /**
      * Modifies the current clip with the new clip rectangle and
      * the specified operation. The specified rectangle is considered
      * already transformed.
      */
-    bool clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
+    void clipTransformed(const Rect& r, SkRegion::Op op = SkRegion::kIntersect_Op);
 
     /**
      * Modifies the current clip with the specified region and operation.
      * The specified region is considered already transformed.
      */
-    bool clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
+    void clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
 
     /**
      * Modifies the current clip with the specified path and operation.
      */
-    bool clipPath(const SkPath& path, SkRegion::Op op);
+    void clipPath(const SkPath& path, SkRegion::Op op);
 
     /**
      * Sets the current clip.
@@ -159,16 +159,20 @@ public:
     /**
      * Returns the current clip in render target coordinates.
      */
-    const Rect& getRenderTargetClip() { return mClipArea->getClipRect(); }
+    const Rect& getRenderTargetClip() const { return mClipArea->getClipRect(); }
 
     /*
      * Accessor functions so that the clip area can stay private
      */
     bool clipIsEmpty() const { return mClipArea->isEmpty(); }
-    const Rect& getClipRect() const { return mClipArea->getClipRect(); }
     const SkRegion& getClipRegion() const { return mClipArea->getClipRegion(); }
     bool clipIsSimple() const { return mClipArea->isSimple(); }
     const ClipArea& getClipArea() const { return *mClipArea; }
+    ClipArea& mutateClipArea() { return *mClipArea; }
+
+    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
+            const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
+    void applyClip(const ClipBase* clip, const Matrix4& transform);
 
     /**
      * Resets the clip to the specified rect.
@@ -220,6 +224,7 @@ public:
      * Fills outTransform with the current, total transform to screen space,
      * across layer boundaries.
      */
+    // TODO: remove for HWUI_NEW_OPS
     void buildScreenSpaceTransform(Matrix4* outTransform) const;
 
     /**
@@ -230,7 +235,7 @@ public:
     /**
      * Previous snapshot.
      */
-    sp<Snapshot> previous;
+    Snapshot* previous;
 
     /**
      * A pointer to the currently active layer.
@@ -295,9 +300,13 @@ public:
     const RoundRectClipState* roundRectClipState;
 
     /**
-     * Current projection masking path - used exclusively to mask tessellated circles.
+     * Current projection masking path - used exclusively to mask projected, tessellated circles.
      */
+#if HWUI_NEW_OPS
+    const SkPath* projectionPathMask;
+#else
     const ProjectionPathMask* projectionPathMask;
+#endif
 
     void dump() const;
 

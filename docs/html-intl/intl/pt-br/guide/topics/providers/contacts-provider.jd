@@ -1,0 +1,2356 @@
+page.title=Provedor de Contatos
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Visualização rápida</h2>
+<ul>
+    <li>Repositório de informações sobre pessoas do Android.</li>
+    <li>
+        Sincronização com a web.
+    </li>
+    <li>
+        Integração de dados de fluxos sociais.
+    </li>
+</ul>
+<h2>Neste documento</h2>
+<ol>
+    <li>
+        <a href="#InformationTypes">Organização do Provedor de Contatos</a>
+    </li>
+    <li>
+        <a href="#RawContactBasics">Contatos brutos</a>
+    </li>
+    <li>
+        <a href="#DataBasics">Dados</a>
+    </li>
+    <li>
+        <a href="#ContactBasics">Contatos</a>
+    </li>
+    <li>
+        <a href="#Sources">Dados de adaptadores de sincronização</a>
+    </li>
+    <li>
+        <a href="#Permissions">Permissões necessárias</a>
+    </li>
+    <li>
+        <a href="#UserProfile">O perfil do usuário</a>
+    </li>
+    <li>
+        <a href="#ContactsProviderMetadata">Metadados do Provedor de Contatos</a>
+    </li>
+    <li>
+        <a href="#Access">Acesso ao Provedor de Contatos</a>
+    <li>
+    </li>
+    <li>
+        <a href="#SyncAdapters">Adaptadores de sincronização do Provedor de Contatos</a>
+    </li>
+    <li>
+        <a href="#SocialStream">Dados de fluxos sociais</a>
+    </li>
+    <li>
+        <a href="#AdditionalFeatures">Recursos adicionais do Provedor de Contatos</a>
+    </li>
+</ol>
+<h2>Classes principais</h2>
+<ol>
+    <li>{@link android.provider.ContactsContract.Contacts}</li>
+    <li>{@link android.provider.ContactsContract.RawContacts}</li>
+    <li>{@link android.provider.ContactsContract.Data}</li>
+    <li>{@code android.provider.ContactsContract.StreamItems}</li>
+</ol>
+<h2>Exemplos relacionados</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}resources/samples/ContactManager/index.html">
+        Gerente de contatos
+        </a>
+    </li>
+    <li>
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Exemplo de adaptador de sincronização</a>
+    </li>
+</ol>
+<h2>Veja também</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Preceitos do provedor de conteúdo
+        </a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    O Provedor de Contatos é um componente poderoso e flexível do Android que gerencia
+o principal repositório de dados sobre pessoas do dispositivo. O Provedor de Contatos é a fonte dos dados
+    vistos nos aplicativos de contatos do dispositivo e, por ele, também é possível acessar os dados
+    no próprio aplicativo e transferi-los entre o dispositivo e serviços on-line. O provedor fornece
+    uma grande variedade de fontes de dados e tenta gerenciar o máximo de dados possíveis para cada pessoa,
+    uma vez que organizá-los é algo complexo. Por isso, a API do provedor contém
+    um conjunto extensivo de classes e interfaces de contrato que facilitam a recuperação e a modificação
+    dos dados.
+</p>
+<p>
+    Este guia descreve o seguinte:
+</p>
+    <ul>
+        <li>
+            A estrutura básica do provedor.
+        </li>
+        <li>
+            Como recuperar dados por um provedor.
+        </li>
+        <li>
+            Como modificar dados no provedor.
+        </li>
+        <li>
+            Como criar um adaptador de sincronização para sincronizar dados do servidor com
+o Provedor de Contatos.
+        </li>
+    </ul>
+<p>
+    Este guia considera que o leitor conhece os preceitos dos provedores de conteúdo do Android. Para saber mais
+    sobre provedores de conteúdo do Android, leia o guia
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Preceitos do provedor de conteúdo</a>. 
+    O aplicativo <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>
+    é um exemplo de uso de um adaptador de sincronização que transfere dados entre o Provedor
+    de contatos e um aplicativo de amostra hospedado pelo Google Web Services.
+</p>
+<h2 id="InformationTypes">Organização do Provedor de Contatos</h2>
+<p>
+    O Provedor de Contatos é um componente do provedor de conteúdo do Android. Ele mantém três tipos de 
+    dados sobre uma pessoa, sendo cada um deles correspondente a uma tabela fornecida pelo provedor, como
+    ilustrado na figura 1:
+</p>
+<img src="{@docRoot}images/providers/contacts_structure.png" alt="" height="364" id="figure1" />
+<p class="img-caption">
+  <strong>Figura 1.</strong> Estrutura da tabela do Provedor de Contatos.
+</p>
+<p>
+    As três tabelas são comumente identificadas pelo nome de suas classes de contrato. As classes
+    definem constantes para URIs de conteúdo e nomes e valores de colunas usados pela tabela:
+</p>
+<dl>
+    <dt>
+        Tabela {@link android.provider.ContactsContract.Contacts}
+    </dt>
+    <dd>
+        As linhas representam pessoas diferentes com base em agregações de linhas de contatos brutos.
+    </dd>
+    <dt>
+        Tabela {@link android.provider.ContactsContract.RawContacts}
+    </dt>
+    <dd>
+        As linhas contêm um resumo dos dados de uma pessoa, específicos a um tipo e uma conta de usuário.
+    </dd>
+    <dt>
+        Tabela {@link android.provider.ContactsContract.Data}
+    </dt>
+    <dd>
+        As linhas contêm os detalhes dos contatos brutos, como endereços de e-mail ou números de telefone.
+    </dd>
+</dl>
+<p>
+    As outras tabelas representadas pelas classes de contrato em {@link android.provider.ContactsContract}
+    são tabelas auxiliares que o Provedor de Contatos usa para gerenciar suas operações ou compatibilizar
+    funções específicas nos contatos do dispositivo ou em aplicativos de telefonia.
+</p>
+<h2 id="RawContactBasics">Contatos brutos</h2>
+<p>
+    Os contatos brutos representam os dados de uma pessoa provenientes de um tipo único de conta e um nome
+    de conta. Como o Provedor de Contatos permite mais de um serviço on-line como fonte
+de dados de uma pessoa, ele permite diversos contatos brutos para a mesma pessoa.
+    Diversos contatos brutos também permitem que um usuário combine os dados de uma pessoa de mais de uma conta
+    a partir do mesmo tipo de conta.
+</p>
+<p>
+    A maioria dos dados de um contato bruto não é armazenada
+    na tabela {@link android.provider.ContactsContract.RawContacts}. Em vez disso, é armazenada em uma ou mais
+    linhas na tabela {@link android.provider.ContactsContract.Data}. Cada linha de dados tem uma coluna
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID Data.RAW_CONTACT_ID} que
+    contém o valor {@code android.provider.BaseColumns#_ID RawContacts._ID} de sua
+    linha {@link android.provider.ContactsContract.RawContacts} pai.
+</p>
+<h3 id="RawContactsColumns">Colunas importantes de contatos brutos</h3>
+<p>
+    As colunas importantes na tabela {@link android.provider.ContactsContract.RawContacts} são
+    listadas na tabela 1. Leia as observações que se seguem após a tabela:
+</p>
+<p class="table-caption" id="table1">
+    <strong>Tabela 1.</strong> Importantes colunas de contatos brutos.
+</p>
+<table>
+    <tr>
+        <th scope="col">Nome da coluna</th>
+        <th scope="col">Uso</th>
+        <th scope="col">Observações</th>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_NAME}
+        </td>
+        <td>
+            O nome da conta para o tipo de conta que é a fonte desse contato bruto.
+            Por exemplo: o nome da conta de uma conta da Google é um dos endereços do Gmail do proprietário
+    do dispositivo. Para obter mais informações,
+            acesse o próximo item
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}.
+        </td>
+        <td>
+            O formato desse nome é específico deste tipo de conta. 
+            Não se trata necessariamente de um endereço de e-mail.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.SyncColumns#ACCOUNT_TYPE}
+        </td>
+        <td>
+            O tipo de conta que é a fonte desse contato bruto. Por exemplo: o tipo
+            de conta de uma conta da Google é <code>com.google</code>. Sempre qualifique o tipo de conta
+            com um identificador de domínio para um domínio que você controla ou possui. Isso garantirá que seu
+            tipo de conta seja único.
+        </td>
+        <td>
+            Os tipos de conta que fornecem dados de contatos normalmente têm um adaptador de sincronização associado que
+            sincroniza-se com o Provedor de Contatos.
+    </tr>
+    <tr>
+        <td>
+            {@link android.provider.ContactsContract.RawContactsColumns#DELETED}
+        </td>
+        <td>
+            O sinalizador "excluído" de um contato bruto.
+        </td>
+        <td>
+            Esse sinalizador permite que o Provedor de Contatos mantenha a linha internamente até
+            que os adaptadores de sincronização possam excluí-la dos servidores e, em seguida, excluí-la
+            do repositório.
+        </td>
+    </tr>
+</table>
+<h4>Observações</h4>
+<p>
+    As observações a seguir sobre a tabela
+    {@link android.provider.ContactsContract.RawContacts} são importantes:
+</p>
+<ul>
+    <li>
+        O nome de um contato bruto não é armazenado em sua linha em
+        {@link android.provider.ContactsContract.RawContacts}. Em vez disso, é armazenado na 
+        tabela {@link android.provider.ContactsContract.Data}, em uma
+        linha {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}. Os contatos brutos
+        têm apenas uma linha desse tipo na tabela {@link android.provider.ContactsContract.Data}.
+    </li>
+    <li>
+        <strong>Atenção:</strong> para usar os dados da própria conta em uma linha de contato bruto, é necessário
+        registrá-la primeiro com o {@link android.accounts.AccountManager}. Para isso, faça com que
+        os usuários adicionem o tipo e o nome da conta à lista de contas. Caso
+        contrário, o Provedor de Contatos excluirá a linha do contato bruto automaticamente.
+        <p>
+            Por exemplo: se quiser que o aplicativo mantenha dados de contato do seu serviço baseado em web
+            com o {@code com.example.dataservice} de domínio e com a conta do usuário do serviço
+            {@code becky.sharp@dataservice.example.com}, o usuário precisa, primeiramente, adicionar o "tipo"
+            de conta ({@code com.example.dataservice}) e o "nome" da conta
+            ({@code becky.smart@dataservice.example.com}) antes que o aplicativo adicione linhas de contato bruto.
+            Você pode explicar esse requisito ao usuário em documentações ou pode exigir que o
+            usuário adicione o tipo ou o nome ou ambos. Tipos e nomes de conta
+            são descritos com mais detalhes na próxima seção.
+    </li>
+</ul>
+<h3 id="RawContactsExample">Fontes de dados de contatos brutos</h3>
+<p>
+    Para compreender como os contatos brutos funcionam, considere a usuária "Emily Dickinson" que tem as seguintes
+    três contas de usuário definidas no seu dispositivo:
+</p>
+<ul>
+    <li><code>emily.dickinson@gmail.com</code></li>
+    <li><code>emilyd@gmail.com</code></li>
+    <li>Conta do twitter "belle_of_amherst"</li>
+</ul>
+<p>
+    Essa usuária ativou <em>Sincronizar contatos</em> para todas as três contas nas
+    Configurações da <em>conta</em>.
+</p>
+<p>
+    Suponhamos que Emily Dickinson abra uma janela do navegador, acesse o Gmail como 
+    <code>emily.dickinson@gmail.com</code>, abra
+    Contatos e adicione "Thomas Higginson". Mais tarde, ela acessa o Gmail como
+    <code>emilyd@gmail.com</code> e envia um e-mail para "Thomas Higginson", o que automaticamente
+    o adiciona como um contato. Ela também segue "colonel_tom" (ID do twitter de Thomas Higginson) no
+    Twitter.
+</p>
+<p>
+    O Provedor de Contatos cria três contatos brutos como resultado desse trabalho:
+</p>
+<ol>
+    <li>
+        Um contato bruto de "Thomas Higginson" associado a <code>emily.dickinson@gmail.com</code>.
+        O tipo de conta do usuário é Google.
+    </li>
+    <li>
+        Um segundo contato bruto de "Thomas Higginson" associado a <code>emilyd@gmail.com</code>.
+        O tipo de conta do usuário também é Google. Há um segundo contato bruto,
+        embora o nome seja idêntico a um nome anterior porque a pessoa foi adicionada
+        a uma conta de usuário diferente.
+    </li>
+    <li>
+        Um terceiro contato bruto de "Thomas Higginson" associado a "belle_of_amherst". O tipo
+        de conta de usuário é Twitter.
+    </li>
+</ol>
+<h2 id="DataBasics">Dados</h2>
+<p>
+    Como observado anteriormente, os dados de um contato bruto são armazenados
+    em uma linha {@link android.provider.ContactsContract.Data} vinculada ao valor <code>_ID</code>
+    do contato bruto. Isso permite que um único contato bruto tenha diversas instâncias do mesmo
+    tipo de dados, como endereços de e-mail ou números de telefone. Por exemplo: se
+    "Thomas Higginson" para {@code emilyd@gmail.com}  (a linha do contato bruto de Thomas Higginson
+    associada à conta Google <code>emilyd@gmail.com</code>) tem um endereço de e-mail pessoal
+    <code>thigg@gmail.com</code> e um de trabalho 
+    <code>thomas.higginson@gmail.com</code>, o Provedor de Contatos armazena as duas linhas de endereço de e-mail
+    e vincula ambas ao contato bruto.
+</p>
+<p>
+    Observe que diferentes tipos de dados são armazenados nessa única tabela. Linhas de nome de exibição,
+    número de telefone, e-mail, endereço postal, foto e detalhes de site são encontradas
+    na tabela {@link android.provider.ContactsContract.Data}. Para ajudar a gerenciar isso,
+    a tabela {@link android.provider.ContactsContract.Data} tem algumas colunas com nomes descritivos
+    e outras com nomes genéricos. O conteúdo de uma coluna de nome descritivo tem o mesmo significado
+    independente do tipo de dado da linha, enquanto o conteúdo de uma coluna de nome genérico tem
+    diferentes significados dependendo do tipo de dados.
+</p>
+<h3 id="DescriptiveColumns">Nomes de coluna descritiva</h3>
+<p>
+    A seguir há alguns exemplos de nomes descritivos de colunas:
+</p>
+<dl>
+    <dt>
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
+    </dt>
+    <dd>
+        O valor da coluna <code>_ID</code> do contato bruto para estes dados.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
+    </dt>
+    <dd>
+        O tipo de dado armazenado nessa linha, expresso como um tipo MIME personalizado. O Provedor de Contatos
+        usa os tipos MIME definidos nas subclasses de
+        {@link android.provider.ContactsContract.CommonDataKinds}. Esses tipos MIME têm código aberto
+        e podem ser usados por qualquer aplicativo ou adaptador de sincronização que funcione com o Provedor de Contatos.
+    </dd>
+    <dt>
+        {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    </dt>
+    <dd>
+        Se esse tipo de linha de dados puder ocorrer mais do que uma vez em um contato bruto,
+        a coluna {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} sinaliza
+        a linha de dados que contém os dados primários do tipo. Por exemplo: se
+        o usuário pressionar por algum tempo um número de telefone de um contato e selecionar <strong>Definir padrão</strong>,
+        a linha {@link android.provider.ContactsContract.Data} que contém esse número
+        tem sua coluna {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY} definida
+        como um valor diferente de zero.
+    </dd>
+</dl>
+<h3 id="GenericColumns">Nomes de coluna genérica</h3>
+<p>
+    Há 15 colunas genéricas de nome <code>DATA1</code> a
+    <code>DATA15</code> que estão, em geral, disponíveis e quatro colunas genéricas
+     adicionais <code>SYNC1</code> a <code>SYNC4</code> que devem ser usadas somente por adaptadores
+    de sincronização. As constantes de nome da coluna genérica sempre funcionam independentemente do tipo
+    de dados que a linha contenha.
+</p>
+<p>
+    A coluna <code>DATA1</code> é indexada.  O Provedor de Contatos sempre usa essa coluna para
+    os dados que o provedor espera serem os alvos mais frequentes de uma consulta. Por exemplo:
+    em uma linha de e-mail, essa coluna contém o endereço de e-mail atual.
+</p>
+<p>
+    Por convenção, a coluna <code>DATA15</code> é reservada para armazenar dados de BLOBs
+    (Binary Large Object), como miniaturas de fotos.
+</p>
+<h3 id="TypeSpecificNames">Nomes de coluna de tipo específico</h3>
+<p>
+    Para facilitar o trabalho com as colunas para um tipo específico de linha, o Provedor de Contatos
+    também fornece constantes de nome de colunas de tipo específico, definidas em subclasses de
+    {@link android.provider.ContactsContract.CommonDataKinds}. As constantes simplesmente dão
+    um nome de constante diferente para o mesmo nome de coluna, o que ajuda no acesso aos dados em uma linha
+    de um tipo específico.
+</p>
+<p>
+    Por exemplo: a classe {@link android.provider.ContactsContract.CommonDataKinds.Email} define
+    constantes de nome de coluna de tipo específico para uma linha {@link android.provider.ContactsContract.Data}
+    que tem o tipo MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE}. A classe contém a constante
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} para a coluna de endereço
+    de e-mail. O valor atual
+    de {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS} é "data1", que é
+    igual ao nome genérico da coluna.
+</p>
+<p class="caution">
+    <strong>Atenção:</strong> não adicione seus dados personalizados
+    à tabela {@link android.provider.ContactsContract.Data} usando uma linha que tenha um dos
+    tipos de MIME predefinidos do provedor. Caso contrário, há o risco de perda de dados ou mau funcionamento
+    do provedor. Por exemplo: não se deve adicionar uma linha com o tipo MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_ITEM_TYPE
+    Email.CONTENT_ITEM_TYPE} que contenha um nome de usuário em vez de um endereço de e-mail na
+    coluna <code>DATA1</code>. Se for usado um tipo MIME personalizado para a linha, será possível
+    definir os próprios nomes de coluna de tipo específico e usar as colunas como quiser.
+</p>
+<p>
+    A figura 2 mostra como colunas descritivas e colunas de dados aparecem
+    em uma linha {@link android.provider.ContactsContract.Data} e como os nomes de coluna de tipo específico se "sobrepõem"
+    aos nomes de coluna genérica.
+</p>
+<img src="{@docRoot}images/providers/data_columns.png" alt="How type-specific column names map to generic column names" height="311" id="figure2" />
+<p class="img-caption">
+  <strong>Figura 2.</strong> Nomes de coluna de tipo específico e nomes de coluna genérica.
+</p>
+<h3 id="ColumnMaps">Classes de nome de coluna de tipo específico</h3>
+<p>
+    A tabela 2 lista as classes de nome de coluna de tipo específico mais usadas:
+</p>
+<p class="table-caption" id="table2">
+  <strong>Tabela 2.</strong> Classes de nome de coluna de tipo específico</p>
+<table>
+  <tr>
+    <th scope="col">Classes de mapeamento</th>
+    <th scope="col">Tipo de dados</th>
+    <th scope="col">Observações</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredName}</td>
+    <td>Os dados de nome do contato bruto associados a essa linha de dados.</td>
+    <td>Os contatos brutos têm apenas uma dessas linhas.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Photo}</td>
+    <td>A foto principal do contato bruto associada a essa linha de dados.</td>
+    <td>Os contatos brutos têm apenas uma dessas linhas.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.Email}</td>
+    <td>Um endereço de e-mail do contato bruto associado a essa linha de dados.</td>
+    <td>Os contatos brutos podem ter diversos endereços de e-mail.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal}</td>
+    <td>Um endereço postal do contato bruto associado a essa linha de dados.</td>
+    <td>Os contatos brutos podem ter diversos endereços postais.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}</td>
+    <td>Um identificador que vincula o contato bruto a um dos grupos no Provedor de Contatos.</td>
+    <td>
+        Grupos são um recurso opcional de um tipo e um nome de conta. Eles são descritos
+        mais detalhadamente na seção <a href="#Groups">Grupos de contato</a>.
+    </td>
+  </tr>
+</table>
+<h3 id="ContactBasics">Contatos</h3>
+<p>
+    O Provedor de Contatos combina as linhas do contato bruto entre todos os tipos e nomes de conta
+    para formar um <strong>contato</strong>. Isso facilita a exibição e modificação de todos os dados de uma pessoa que um
+    usuário tenha coletado. O Provedor de Contatos gerencia a criação de linhas
+    de novos contatos e a agregação de contatos brutos a uma linha de contato existente. Nem os aplicativos, nem
+    os adaptadores de sincronização têm permissão para adicionar contatos, e algumas colunas em uma linha de contato são de somente leitura.
+</p>
+<p class="note">
+    <strong>Observação:</strong> a tentativa de adicionar um contato ao Provedor de Contatos com um
+    {@link android.content.ContentResolver#insert(Uri,ContentValues) insert()} gerará
+    uma exceção {@link java.lang.UnsupportedOperationException}. A tentativa de atualizar uma coluna
+    listada como "somente leitura" será ignorada.
+</p>
+<p>
+    O Provedor de Contatos cria um novo contato em resposta à adição de um novo contato bruto
+    que não corresponda a nenhum contato existente. O provedor também faz isso se os dados de um
+    contato bruto existente mudam de modo a não corresponder mais ao contato
+    inserido anteriormente. Se um aplicativo ou um adaptador de sincronização criar um novo contato bruto que
+    <em>corresponda</em> a um contato existente, o novo contato bruto será agregado ao contato
+    existente.
+</p>
+<p>
+    O Provedor de Contatos liga uma linha do contato às linhas do contato bruto com a coluna <code>_ID</code>
+    da linha do contato na tabela
+    {@link android.provider.ContactsContract.Contacts Contacts}. A coluna <code>CONTACT_ID</code> da tabela de contatos brutos
+    {@link android.provider.ContactsContract.RawContacts} contém valores <code>_ID</code> para
+    a linha dos contatos associados a cada linha dos contatos brutos.
+</p>
+<p>
+    A tabela {@link android.provider.ContactsContract.Contacts} também tem a coluna
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}, que é
+    um vínculo "permanente" com a linha do contato. Como o Provedor de Contatos mantém contatos
+    automaticamente, ele pode mudar o valor de {@code android.provider.BaseColumns#_ID} da linha do contato
+    em resposta a uma agregação ou sincronização. Mesmo que isso aconteça, a URI de conteúdo
+    {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} combinada com
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do contato continuará
+    apontado para a linha do contato para permitir o uso de
+    {@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}
+    e manter ligações com contatos "favoritos" e assim por diante. Essa coluna tem o próprio formato, que 
+    não tem nenhuma relação com o formato da coluna {@code android.provider.BaseColumns#_ID}.
+</p>
+<p>
+    A figura 3 mostra como as três tabelas principais se relacionam entre si.
+</p>
+<img src="{@docRoot}images/providers/contacts_tables.png" alt="Contacts provider main tables" height="514" id="figure4" />
+<p class="img-caption">
+  <strong>Figura 3.</strong> Contatos, contatos brutos e relacionamentos da tabela de detalhes.
+</p>
+<h2 id="Sources">Dados de adaptadores de sincronização</h2>
+<p>
+    Os usuários inserem dados de contato diretamente no dispositivo, mas os dados também são direcionados ao Provedor
+    de Contatos a partir de serviços web via <strong>adaptadores de sincronização</strong>, que automatizam
+    a transferência de dados entre dispositivo e serviços. Adaptadores de sincronização funcionam em segundo plano,
+    controlados pelo sistema, e chamam métodos {@link android.content.ContentResolver}
+    para gerenciar os dados.
+</p>
+<p>
+    No Android, o serviço web com o qual um adaptador de sincronização trabalha é identificado por um tipo de conta.
+    Cada adaptador de sincronização funciona com um tipo de conta, mas é compatível com diversos nomes de conta
+    para o tipo em questão. Tipos e nomes de conta são descritos brevemente na seção
+    <a href="#RawContactsExample">Fontes de dados de contatos brutos</a>. As definições a seguir fornecem
+    mais detalhes e descrevem como o tipo e o nome de conta se relacionam com adaptadores de sincronização e serviços.
+</p>
+<dl>
+    <dt>
+        Tipo de conta
+    </dt>
+    <dd>
+        Identifica um serviço em que o usuário tenha armazenado dados. Na maior parte do tempo, o usuário deve
+        autenticar com o serviço. Por exemplo: Google Contacts é um tipo de conta, identificado
+        pelo código <code>google.com</code>. Esse valor corresponde ao tipo de conta usado pelo
+        {@link android.accounts.AccountManager}.
+    </dd>
+    <dt>
+        Nome da conta
+    </dt>
+    <dd>
+        Identifica uma conta ou login específico de um tipo de conta. As contas Google Contacts
+        são idênticas às contas Google, que têm um endereço de e-mail como nome da conta.
+        Outros serviços podem usar um nome de usuário com só uma palavra ou ID numérico.
+    </dd>
+</dl>
+<p>
+    Os tipos de conta não precisam ser exclusivos. Um usuário pode configurar diversas contas Google Contacts
+    e baixar os dados dela para o Provedor de Contatos. Isso pode acontecer se o usuário tiver um grupo de
+    contatos pessoais para um nome de conta pessoal e outro grupo para um de conta de trabalho. Nomes de conta normalmente
+    são exclusivos. Juntos, eles identificam um fluxo de dados específicos entre o Provedor de Contatos e
+    um serviço externo.
+</p>
+<p>
+    Se você desejar transferir os dados do serviço ao Provedor de Contatos, precisará criar seu
+    próprio adaptador de sincronização. Isso é descrito com mais detalhes na seção
+    <a href="#SyncAdapters">Adaptadores de sincronização do Provedor de Contatos</a>.
+</p>
+<p>
+    A figura 4 mostra como o Provedor de Contatos se insere no fluxo de dados
+    sobre pessoas. Na caixa marcada "adaptadores de sincronização", cada adaptador é etiquetado pelo tipo de conta.
+</p>
+<img src="{@docRoot}images/providers/ContactsDataFlow.png" alt="Flow of data about people" height="252" id="figure5" />
+<p class="img-caption">
+  <strong>Figura 4.</strong> Fluxo de dados do Provedor de Contatos.
+</p>
+<h2 id="Permissions">Permissões necessárias</h2>
+<p>
+    Os aplicativos que queiram acessar o Provedor de Contatos devem solicitar as seguintes
+    permissões:
+</p>
+<dl>
+    <dt>Acesso de leitura a uma ou mais tabelas</dt>
+    <dd>
+        {@link android.Manifest.permission#READ_CONTACTS}, especificado em
+        <code>AndroidManifest.xml</code> com
+        o elemento <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code>
+        como <code>&lt;uses-permission android:name="android.permission.READ_CONTACTS"&gt;</code>.
+    </dd>
+    <dt>Acesso de gravação a uma ou mais tabelas</dt>
+    <dd>
+        {@link android.Manifest.permission#WRITE_CONTACTS}, especificado em
+        <code>AndroidManifest.xml</code> com
+        o elemento <code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+        &lt;uses-permission&gt;</a></code>
+        como <code>&lt;uses-permission android:name="android.permission.WRITE_CONTACTS"&gt;</code>.
+    </dd>
+</dl>
+<p>
+    Essas permissões não se estendem aos dados do perfil do usuário. O perfil do usuário
+        e suas permissões necessárias são abordados na seção a seguir:
+        <a href="#UserProfile">O perfil do usuário</a>.
+</p>
+<p>
+    Lembre-se de que os dados de contato do usuário são pessoais e confidenciais. Os usuários se preocupam
+    com a privacidade e, por isso, não querem aplicativos que coletem dados sobre eles ou seus contatos.
+    Se não for óbvio o motivo da necessidade de permissões para acessar os dados de contato de um usuário, eles podem atribuir
+    avaliações ruins ao seu aplicativo ou simplesmente não instalá-lo.
+</p>
+<h2 id="UserProfile">O perfil do usuário</h2>
+<p>
+    A tabela {@link android.provider.ContactsContract.Contacts} tem uma única linha contendo
+    os dados do perfil do usuário do dispositivo. Esses dados descrevem o <code>user</code> do dispositivo em vez
+    de um dos contatos do usuário. A linha de contatos do perfil é vinculada a uma linha
+    de contatos brutos para cada sistema que usa um perfil.
+    Cada linha de contato bruto de perfil pode ter diversas linhas de dados. Constantes de acesso ao perfil
+    do usuário estão disponíveis na classe {@link android.provider.ContactsContract.Profile}.
+</p>
+<p>
+    O acesso ao perfil do usuário exige permissões especiais. Além das permissões
+    {@link android.Manifest.permission#READ_CONTACTS} e
+    {@link android.Manifest.permission#WRITE_CONTACTS} necessárias para ler e gravar, o acesso
+    ao perfil do usuário requer as permissões {@code android.Manifest.permission#READ_PROFILE} e
+    {@code android.Manifest.permission#WRITE_PROFILE}, respectivamente, para ler e
+    gravar.
+</p>
+<p>
+    Lembre-se de que é preciso considerar a confidencialidade de um perfil do usuário. A permissão
+    {@code android.Manifest.permission#READ_PROFILE} permite o acesso aos dados de identificação
+    pessoal do usuário do dispositivo. Certifique-se de informar ao usuário o motivo
+    da necessidade de permissões de acesso ao perfil do usuário na descrição do aplicativo.
+</p>
+<p>
+    Para recuperar a linha de contato que contém o perfil do usuário,
+    chame {@link android.content.ContentResolver#query(Uri,String[], String, String[], String)
+    ContentResolver.query()}. Defina a URI de conteúdo como
+    {@link android.provider.ContactsContract.Profile#CONTENT_URI} e não forneça nenhum
+    critério de seleção. Também é possível usar essa URI de conteúdo como base para recuperar
+    contatos brutos ou dados do perfil. Por exemplo, esse fragmento recupera dados do perfil:
+</p>
+<pre>
+// Sets the columns to retrieve for the user profile
+mProjection = new String[]
+    {
+        Profile._ID,
+        Profile.DISPLAY_NAME_PRIMARY,
+        Profile.LOOKUP_KEY,
+        Profile.PHOTO_THUMBNAIL_URI
+    };
+
+// Retrieves the profile from the Contacts Provider
+mProfileCursor =
+        getContentResolver().query(
+                Profile.CONTENT_URI,
+                mProjection ,
+                null,
+                null,
+                null);
+</pre>
+<p class="note">
+    <strong>Observação:</strong> se você recuperar diversas linhas de contato e quiser determinar se uma delas
+    é o perfil do usuário, teste a coluna
+    {@link android.provider.ContactsContract.ContactsColumns#IS_USER_PROFILE} da linha. Essa coluna
+    é definida como "1" se o contato for o perfil do usuário.
+</p>
+<h2 id="ContactsProviderMetadata">Metadados do Provedor de Contatos</h2>
+<p>
+    O Provedor de Contatos gerencia dados que acompanham o estado dos dados de contatos
+    no repositório. Esses metadados sobre o repositório são armazenados em vários locais, inclusive
+    os contatos brutos, os dados e as linhas da tabela de contatos,
+    a tabela {@link android.provider.ContactsContract.Settings}
+    e a tabela {@link android.provider.ContactsContract.SyncState}. A tabela a seguir mostra
+    o efeito de cada uma dessas partes de metadados:
+</p>
+<p class="table-caption" id="table3">
+  <strong>Tabela 3.</strong> Metadados no Provedor de Contatos</p>
+<table>
+    <tr>
+        <th scope="col">Tabela</th>
+        <th scope="col">Coluna</th>
+        <th scope="col">Valores</th>
+        <th scope="col">Significado</th>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.RawContacts}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.SyncColumns#DIRTY}</td>
+        <td>"0" - sem modificação desde a última sincronização.</td>
+        <td rowspan="2">
+            Sinaliza contatos brutos que não mudaram no dispositivo e devem ser sincronizados com
+            o servidor. O valor é definido automaticamente pelo Provedor de Contatos quando os aplicativos
+            do Android atualizam uma linha.
+            <p>
+                Adaptadores de sincronização que modificam o contato bruto ou as tabelas de dados sempre devem anexar a
+                string {@link android.provider.ContactsContract#CALLER_IS_SYNCADAPTER}
+                à URI de conteúdo usada. Isso evita que o provedor sinalize alguma linha como suja.
+                Caso contrário, as modificações do adaptador de sincronização parecem ser modificações locais e são
+                enviadas ao servidor, mesmo que o servidor seja a origem da modificação.
+            </p>
+        </td>
+    </tr>
+    <tr>
+            <td>"1" - modificado desde a última sincronização, precisa ser sincronizado com o servidor.</td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#VERSION}</td>
+        <td>O número da versão dessa linha.</td>
+        <td>
+            O Provedor de Contatos incrementa esse valor automaticamente sempre que a linha ou
+            os dados relacionados a ela mudam.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.Data}</td>
+        <td>{@link android.provider.ContactsContract.DataColumns#DATA_VERSION}</td>
+        <td>O número da versão dessa linha.</td>
+        <td>
+            O Provedor de Contatos incrementa esse valor automaticamente sempre que a linha de dados
+            é modificada.
+        </td>
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.RawContacts}</td>
+        <td>{@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}</td>
+        <td>
+            Valor de string que identifica exclusivamente esse contato bruto para a conta em
+            que foi criado.
+        </td>
+        <td>
+            Quando um adaptador de sincronização cria um novo contato bruto, essa coluna deve ser definida como
+            o ID exclusivo do servidor para o contato bruto. Quando um aplicativo do Android cria um novo
+            contato bruto, o aplicativo deve deixar essa coluna vazia. Isso sinaliza ao adaptador
+            de sincronização que ele deve criar um novo contato bruto no servidor e obter
+            um valor para o {@link android.provider.ContactsContract.SyncColumns#SOURCE_ID}.
+            <p>
+                Em particular, o ID de origem deve ser <strong>exclusivo</strong> de cada tipo
+            de conta e estável em sincronizações:
+            </p>
+                <ul>
+                    <li>
+                        Exclusivo: cada contato bruto de uma conta deve ter o próprio ID de origem. Se isso
+                        não for aplicado, haverá problemas no aplicativo de contatos.
+                        Observe que dois contatos brutos do mesmo <em>tipo</em> de conta podem ter
+                        o mesmo ID de origem. Por exemplo: o contato bruto "Thomas Higginson" da
+                        conta {@code emily.dickinson@gmail.com} pode ter o mesmo ID
+                        de origem do contato bruto "Thomas Higginson" da conta
+                        {@code emilyd@gmail.com}.
+                    </li>
+                    <li>
+                        Estável: IDs de origem são uma parte permanente dos dados do serviço on-line para
+                        o contato bruto. Por exemplo: se o usuário apaga o Armazenamento de Contatos
+                        nas configurações dos aplicativos e ressincroniza, os contatos brutos restaurados devem ter os mesmos
+                        IDs de origem de antes. Se isso não for aplicado, os atalhos
+                        deixarão de funcionar.
+                    </li>
+                </ul>
+        </td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Groups}</td>
+        <td rowspan="2">{@link android.provider.ContactsContract.GroupsColumns#GROUP_VISIBLE}</td>
+        <td>"0" - os contatos nesse grupo não devem ser visíveis em IUs do aplicativo do Android.</td>
+        <td>
+            Essa coluna se destina à compatibilidade com servidores, que permitem que um usuário oculte contatos
+            em determinados grupos.
+        </td>
+    </tr>
+    <tr>
+        <td>"1" - os contatos nesse grupo podem ser visíveis nas IUs do aplicativo.</td>
+    </tr>
+    <tr>
+        <td rowspan="2">{@link android.provider.ContactsContract.Settings}</td>
+        <td rowspan="2">
+            {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE}</td>
+        <td>
+            "0" - para essa conta e esse tipo de conta, os contatos que não pertencem a um grupo são
+            invisíveis nas IUs do aplicativo do Android.
+        </td>
+        <td rowspan="2">
+            Por padrão, os contatos são invisíveis se nenhum dos contatos brutos pertencer a algum grupo
+            (a associação de grupo de um contato bruto é indicada por uma ou mais
+            linhas {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}
+            na tabela {@link android.provider.ContactsContract.Data}).
+            Por padrão, é possível fazer com que contatos sem grupos sejam visíveis
+            por meio desse sinalizador na linha da tabela {@link android.provider.ContactsContract.Settings} para um tipo de conta e uma conta.
+            Esse sinalizador serve para exibir contatos de servidores que não usam grupos.
+        </td>
+    </tr>
+    <tr>
+        <td>
+            "1" - para essa conta e esse tipo de conta, os contatos que não pertencem a um grupo são
+            visíveis nas IUs do aplicativo.
+        </td>
+
+    </tr>
+    <tr>
+        <td>{@link android.provider.ContactsContract.SyncState}</td>
+        <td>(todos)</td>
+        <td>
+            Use essa tabela para armazenar metadados do seu adaptador de sincronização.
+        </td>
+        <td>
+            Com essa tabela, é possível armazenar o estado de sincronização e outros dados relacionados à sincronização persistentes
+            no dispositivo.
+        </td>
+    </tr>
+</table>
+<h2 id="Access">Acesso ao Provedor de Contatos</h2>
+<p>
+    Esta seção descreve orientações quanto ao acesso a dados do Provedor de Contatos, com foco
+    no seguinte:
+</p>
+<ul>
+    <li>
+        Consultas de entidade.
+    </li>
+    <li>
+        Modificação em lote.
+    </li>
+    <li>
+        Recuperação e modificação com intenções.
+    </li>
+    <li>
+        Integridade dos dados.
+    </li>
+</ul>
+<p>
+    A realização de modificações de um adaptador de sincronização também é abordada na seção
+    <a href="#SyncAdapters">Adaptadores de sincronização do Provedor de Contatos</a>.
+</p>
+<h3 id="Entities">Consultas de entidades</h3>
+<p>
+    A organização hierárquica das tabelas do Provedor de Contatos é muito útil
+    para recuperar uma linha e todas as linhas "filhas" vinculadas. Por exemplo: para exibir
+    todas as informações de uma pessoa, você pode querer recuperar todas
+    as linhas {@link android.provider.ContactsContract.RawContacts} de uma única
+    linha {@link android.provider.ContactsContract.Contacts} ou todas
+    as linhas {@link android.provider.ContactsContract.CommonDataKinds.Email} de uma única
+    linha {@link android.provider.ContactsContract.RawContacts}. Para facilitar isso, o Provedor
+    de contatos oferece a ideia de <strong>entidade</strong>, que atua como uma junção dos bancos de dados entre
+    tabelas.
+</p>
+<p>
+    Entidade é como uma tabela composta de colunas selecionadas de uma tabela pai e uma tabela filha.
+    Ao consultar uma entidade, fornece-se uma projeção e buscam-se critérios com base nas colunas
+    disponíveis da entidade. O resultado é um {@link android.database.Cursor} que contém
+    uma linha para cada linha recuperada da tabela filha. Por exemplo: ao consultar
+    {@link android.provider.ContactsContract.Contacts.Entity} de um nome de contato
+    e todas as linhas {@link android.provider.ContactsContract.CommonDataKinds.Email} de todos os
+    contatos brutos por esse nome, você obterá um {@link android.database.Cursor} contendo uma linha
+    para cada linha {@link android.provider.ContactsContract.CommonDataKinds.Email}.
+</p>
+<p>
+    As entidades simplificam as consultas. Usando uma entidade, é possível recuperar todos os dados de contatos
+    de um contato ou contato bruto de uma vez, sem precisar consultar primeiro a tabela pai para obter
+    um ID e, em seguida, ter que consultar a tabela filha com esse ID. Além disso, o Provedor de Contatos processa
+    uma consulta com uma entidade em uma transação única, o que garante que os dados recuperados
+    sejam consistentes internamente.
+</p>
+<p class="note">
+    <strong>Observação:</strong> uma entidade normalmente não contém todas as colunas da tabela pai e
+    da tabela filha. Se você tentar trabalhar com um nome de coluna que não esteja na lista de constantes de nomes de coluna
+    da entidade, será gerada uma {@link java.lang.Exception}.
+</p>
+<p>
+    O fragmento a seguir mostra como recuperar todas as linhas de contato bruto de um contato. O fragmento
+    é parte de um aplicativo maior que tem duas atividades: "principal" e “de detalhes". A atividade principal
+    exibe uma lista de linhas de contato. Quando um usuário seleciona uma delas, a atividade envia o ID correspondente à atividade
+    de detalhes. A atividade de detalhes usa {@link android.provider.ContactsContract.Contacts.Entity}
+    para exibir todas as linhas de dados de todos os contatos brutos associados ao contato
+    selecionado.
+</p>
+<p>
+    Esse fragmento é extraído da atividade "de detalhes":
+</p>
+<pre>
+...
+    /*
+     * Appends the entity path to the URI. In the case of the Contacts Provider, the
+     * expected URI is content://com.google.contacts/#/entity (# is the ID value).
+     */
+    mContactUri = Uri.withAppendedPath(
+            mContactUri,
+            ContactsContract.Contacts.Entity.CONTENT_DIRECTORY);
+
+    // Initializes the loader identified by LOADER_ID.
+    getLoaderManager().initLoader(
+            LOADER_ID,  // The identifier of the loader to initialize
+            null,       // Arguments for the loader (in this case, none)
+            this);      // The context of the activity
+
+    // Creates a new cursor adapter to attach to the list view
+    mCursorAdapter = new SimpleCursorAdapter(
+            this,                        // the context of the activity
+            R.layout.detail_list_item,   // the view item containing the detail widgets
+            mCursor,                     // the backing cursor
+            mFromColumns,                // the columns in the cursor that provide the data
+            mToViews,                    // the views in the view item that display the data
+            0);                          // flags
+
+    // Sets the ListView's backing adapter.
+    mRawContactList.setAdapter(mCursorAdapter);
+...
+&#64;Override
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+
+    /*
+     * Sets the columns to retrieve.
+     * RAW_CONTACT_ID is included to identify the raw contact associated with the data row.
+     * DATA1 contains the first column in the data row (usually the most important one).
+     * MIMETYPE indicates the type of data in the data row.
+     */
+    String[] projection =
+        {
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID,
+            ContactsContract.Contacts.Entity.DATA1,
+            ContactsContract.Contacts.Entity.MIMETYPE
+        };
+
+    /*
+     * Sorts the retrieved cursor by raw contact id, to keep all data rows for a single raw
+     * contact collated together.
+     */
+    String sortOrder =
+            ContactsContract.Contacts.Entity.RAW_CONTACT_ID +
+            " ASC";
+
+    /*
+     * Returns a new CursorLoader. The arguments are similar to
+     * ContentResolver.query(), except for the Context argument, which supplies the location of
+     * the ContentResolver to use.
+     */
+    return new CursorLoader(
+            getApplicationContext(),  // The activity's context
+            mContactUri,              // The entity content URI for a single contact
+            projection,               // The columns to retrieve
+            null,                     // Retrieve all the raw contacts and their data rows.
+            null,                     //
+            sortOrder);               // Sort by the raw contact ID.
+}
+</pre>
+<p>
+    Quando o carregamento é finalizado, {@link android.app.LoaderManager} invoca um retorno de chamada para
+    {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished(Loader, D)
+    onLoadFinished()}. Um dos argumentos de entrada nesse método é um
+    {@link android.database.Cursor} com os resultados da consulta. No seu aplicativo, você pode obter os
+    dados desse {@link android.database.Cursor} para exibi-los ou trabalhar com eles posteriormente.
+</p>
+<h3 id="Transactions">Modificação em lote</h3>
+<p>
+    Sempre que possível, deve-se inserir, atualizar e excluir dados no Provedor de Contatos
+    em "modo de lote", criando um {@link java.util.ArrayList} de
+    objetos {@link android.content.ContentProviderOperation} e chamando
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Como
+    o Provedor de Contatos realiza todas as operações em um
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} em uma única
+    transação, as modificações nunca deixarão o repositório de contatos em um estado
+    inconsistente. As modificações em lote também facilitam a inserção de um contato bruto e seus dados de detalhe
+    ao mesmo tempo.
+</p>
+<p class="note">
+    <strong>Observação:</strong> para modificar um contato bruto <em>exclusivo</em>, considere enviar uma intenção ao
+    aplicativo de contatos do dispositivo em vez de realizar a modificação no aplicativo.
+    Na seção <a href="#Intents">Recuperação e modificação com intenções</a> há mais detalhes
+    sobre como fazer isso.
+</p>
+<h4>Pontos de rendimento</h4>
+<p>
+    As modificações em lote que contiverem muitas operações podem bloquear outros processos,
+    resultando em uma experiência geral ruim para o usuário. Para organizar todas as modificações
+    a realizar no menor número de listas separadas possível e, ao mesmo tempo, evitar
+    o bloqueio do sistema, é preciso definir <strong>pontos de rendimento</strong> para uma ou mais operações.
+    Pontos de rendimento são objetos {@link android.content.ContentProviderOperation} que têm seu
+    valor {@link android.content.ContentProviderOperation#isYieldAllowed()} definido como
+    <code>true</code>. Quando o Provedor de Contatos encontra um ponto de rendimento, ele pausa o trabalho
+    para permitir a execução de outros processos e encerra a transação em curso. Quando o provedor retorna, ele
+    continua na próxima operação da {@link java.util.ArrayList} e inicia
+    uma nova transação.
+</p>
+<p>
+    Os pontos de rendimento resultam em mais de uma transação por chamada de
+    {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Por isso,
+    é preciso definir um ponto de rendimento para a última operação de um conjunto de linhas relacionadas.
+    Por exemplo: é preciso definir um ponto de rendimento para a última operação em um conjunto que adicione
+    linhas de um contato bruto e linhas de dados associados a ele, ou para a última operação de um conjunto de linhas relacionadas
+    a um único contato.
+</p>
+<p>
+    Os pontos de rendimento também são uma unidade de operação atômica. Todos os acessos entre dois pontos de rendimento
+    terão sucesso ou fracasso como uma unidade. Se não houver pontos de rendimento definidos, a menor
+    operação atômica será todo o lote de operações. Se forem usados pontos de rendimento, eles evitarão
+    que as operações prejudiquem o desempenho do sistema e, ao mesmo tempo, garantirá que o subconjunto
+    de operações seja atômico.
+</p>
+<h4>Referências de retorno da modificação</h4>
+<p>
+    Ao inserir uma nova linha de contato bruto e as linhas de dados associados como um conjunto
+    de objetos {@link android.content.ContentProviderOperation}, é preciso vincular as linhas de dados
+    à linha de contato bruto pela inserção do valor
+    {@code android.provider.BaseColumns#_ID} do contato bruto como
+    o valor {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Contudo, esse
+    valor não está disponível ao criar a {@link android.content.ContentProviderOperation}
+    para a linha de dados porque 
+    {@link android.content.ContentProviderOperation} ainda não foi aplicada à linha de contato bruto. Para trabalhar com isso,
+    a classe {@link android.content.ContentProviderOperation.Builder} tem o método
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}.
+    Esse método permite a inserção ou modificação de uma coluna com
+    o resultado de uma operação anterior.
+</p>
+<p>
+    O método {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    tem dois argumentos:
+</p>
+    <dl>
+        <dt>
+            <code>key</code>
+        </dt>
+        <dd>
+            O principal de um par de valores principais. O valor desse argumento deve ser o nome de uma coluna
+            na tabela que será modificada.
+        </dd>
+        <dt>
+            <code>previousResult</code>
+        </dt>
+        <dd>
+            O índice com base 0 de um valor em uma matriz
+            de objetos {@link android.content.ContentProviderResult}
+de             {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}. Quando
+            as operações em lote são aplicadas, o resultado de cada operação é armazenado
+            em uma matriz intermediária de resultados. O valor <code>previousResult</code> é o índice
+            de um desses resultados, que é recuperado e armazenado com o valor
+            <code>key</code>. Isso permite a inserção de um novo registro de contato bruto e a recuperação do seu
+            valor {@code android.provider.BaseColumns#_ID}, seguido de uma "referência de retorno" ao
+            valor ao adicionar uma linha {@link android.provider.ContactsContract.Data}.
+            <p>
+                Toda a matriz de resultados é criada ao chamar
+                {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} pela primeira vez,
+                com tamanho igual ao da {@link java.util.ArrayList}
+                de objetos {@link android.content.ContentProviderOperation} fornecidos. No entanto, todos
+                os elementos na matriz de resultados são definidos como <code>null</code> e, se houver uma tentativa
+                de referência de retorno a um resultado de uma operação ainda não realizada,
+{@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+                gera uma {@link java.lang.Exception}.
+
+            </p>
+        </dd>
+    </dl>
+<p>
+    Os fragmentos a seguir mostram como inserir um novo contato bruto e dados em lote. Eles
+    contém o código que estabelece um ponto de rendimento e usam uma referência de retorno. Os fragmentos são
+    uma versão expandida do método <code>createContacEntry()</code>, que é parte
+    da classe <code>ContactAdder</code>
+    no aplicativo de exemplo de <code><a href="{@docRoot}resources/samples/ContactManager/index.html">
+    Contact Manager</a></code>.
+</p>
+<p>
+    O primeiro fragmento recupera dados de contato da IU. Nesse momento, o usuário já
+    selecionou a conta na qual o novo contato bruto deve ser adicionado.
+</p>
+<pre>
+// Creates a contact entry from the current UI values, using the currently-selected account.
+protected void createContactEntry() {
+    /*
+     * Gets values from the UI
+     */
+    String name = mContactNameEditText.getText().toString();
+    String phone = mContactPhoneEditText.getText().toString();
+    String email = mContactEmailEditText.getText().toString();
+
+    int phoneType = mContactPhoneTypes.get(
+            mContactPhoneTypeSpinner.getSelectedItemPosition());
+
+    int emailType = mContactEmailTypes.get(
+            mContactEmailTypeSpinner.getSelectedItemPosition());
+</pre>
+<p>
+    O próximo fragmento cria uma operação para inserir a linha de contato bruto
+    na tabela {@link android.provider.ContactsContract.RawContacts}:
+</p>
+<pre>
+    /*
+     * Prepares the batch operation for inserting a new raw contact and its data. Even if
+     * the Contacts Provider does not have any data for this person, you can't add a Contact,
+     * only a raw contact. The Contacts Provider will then add a Contact automatically.
+     */
+
+     // Creates a new array of ContentProviderOperation objects.
+    ArrayList&lt;ContentProviderOperation&gt; ops =
+            new ArrayList&lt;ContentProviderOperation&gt;();
+
+    /*
+     * Creates a new raw contact with its account type (server type) and account name
+     * (user's account). Remember that the display name is not stored in this row, but in a
+     * StructuredName data row. No other data is required.
+     */
+    ContentProviderOperation.Builder op =
+            ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType())
+            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    Em seguida, o código cria linhas de dados para as linhas de nome de exibição, telefone e e-mail.
+</p>
+<p>
+    Cada objeto construtor de operações usa
+    {@link android.content.ContentProviderOperation.Builder#withValueBackReference(String, int) withValueBackReference()}
+    para obter
+    o {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}. Os pontos de referência
+    voltam ao objeto {@link android.content.ContentProviderResult} a partir da primeira operação,
+    que adiciona a linha de contato bruto e retorna seu novo valor
+    {@code android.provider.BaseColumns#_ID}. Como resultado, cada linha de dados é automaticamente vinculada por meio do
+    {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
+    à nova linha {@link android.provider.ContactsContract.RawContacts} à qual ela pertence.
+</p>
+<p>
+    O objeto {@link android.content.ContentProviderOperation.Builder} que adiciona a linha de e-mail é
+    sinalizado com {@link android.content.ContentProviderOperation.Builder#withYieldAllowed(boolean)
+    withYieldAllowed()}, que define um ponto de rendimento:
+</p>
+<pre>
+    // Creates the display name for the new raw contact, as a StructuredName data row.
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * withValueBackReference sets the value of the first argument to the value of
+             * the ContentProviderResult indexed by the second argument. In this particular
+             * call, the raw contact ID column of the StructuredName data row is set to the
+             * value of the result returned by the first operation, which is the one that
+             * actually adds the raw contact row.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to StructuredName
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+            // Sets the data row's display name to the name in the UI.
+            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified phone number and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Phone
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+
+            // Sets the phone number and type
+            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, phoneType);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+
+    // Inserts the specified email and type as a Phone data row
+    op =
+            ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+            /*
+             * Sets the value of the raw contact id column to the new raw contact ID returned
+             * by the first operation in the batch.
+             */
+            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+
+            // Sets the data row's MIME type to Email
+            .withValue(ContactsContract.Data.MIMETYPE,
+                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+
+            // Sets the email address and type
+            .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+            .withValue(ContactsContract.CommonDataKinds.Email.TYPE, emailType);
+
+    /*
+     * Demonstrates a yield point. At the end of this insert, the batch operation's thread
+     * will yield priority to other threads. Use after every set of operations that affect a
+     * single contact, to avoid degrading performance.
+     */
+    op.withYieldAllowed(true);
+
+    // Builds the operation and adds it to the array of operations
+    ops.add(op.build());
+</pre>
+<p>
+    O último fragmento exibe a chamada
+    a {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()} que
+    insere as novas linhas de contato bruto e de dados.
+</p>
+<pre>
+    // Ask the Contacts Provider to create a new contact
+    Log.d(TAG,"Selected account: " + mSelectedAccount.getName() + " (" +
+            mSelectedAccount.getType() + ")");
+    Log.d(TAG,"Creating contact: " + name);
+
+    /*
+     * Applies the array of ContentProviderOperation objects in batch. The results are
+     * discarded.
+     */
+    try {
+
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    } catch (Exception e) {
+
+            // Display a warning
+            Context ctx = getApplicationContext();
+
+            CharSequence txt = getString(R.string.contactCreationFailure);
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(ctx, txt, duration);
+            toast.show();
+
+            // Log exception
+            Log.e(TAG, "Exception encountered while inserting contact: " + e);
+    }
+}
+</pre>
+<p>
+    As operações de lote também permitem a implementação de <strong>controle otimista de simultaneidade</strong>,
+    um método de aplicar transações de modificação sem precisar bloquear o repositório subjacente.
+    Para usar esse método, aplique a transação e, em seguida, verifique se há outras modificações que
+    possam ter sido realizadas ao mesmo tempo. Se ficar determinado que houve uma modificação incoerente,
+    reverte-se a transação e tenta-se novamente.
+</p>
+<p>
+    O controle otimista de simultaneidade é útil para dispositivos móveis em que haja somente um usuário
+    de uma vez e que sejam raros os acessos simultâneos a um repositório de dados. Como os bloqueios não são usados,
+    não há tempo gasto em bloqueios de configuração nem espera para que outras transações liberem os respectivos bloqueios.
+</p>
+<p>
+    Para usar o controle otimista de simultaneidade ao atualizar uma única
+    linha {@link android.provider.ContactsContract.RawContacts}, siga estas etapas:
+</p>
+<ol>
+    <li>
+        Recupere a coluna {@link android.provider.ContactsContract.SyncColumns#VERSION}
+        do contato bruto em conjunto com os outros dados recuperados.
+    </li>
+    <li>
+        Crie um objeto {@link android.content.ContentProviderOperation.Builder} adequado para
+        forçar uma restrição com o método
+        {@link android.content.ContentProviderOperation#newAssertQuery(Uri)}. Para a URI de conteúdo,
+        use {@link android.provider.ContactsContract.RawContacts#CONTENT_URI
+        RawContacts.CONTENT_URI}
+        com o {@code android.provider.BaseColumns#_ID} do contato bruto anexado a ela.
+    </li>
+    <li>
+        Para o objeto {@link android.content.ContentProviderOperation.Builder}, chame
+        {@link android.content.ContentProviderOperation.Builder#withValue(String, Object)
+        withValue()} para comparar a coluna
+        {@link android.provider.ContactsContract.SyncColumns#VERSION} com o número da versão recém-recuperado.
+    </li>
+    <li>
+        Para o mesmo {@link android.content.ContentProviderOperation.Builder}, chame
+        {@link android.content.ContentProviderOperation.Builder#withExpectedCount(int)
+        withExpectedCount()} para garantir que somente uma linha seja testada por essa instrução.
+    </li>
+    <li>
+        Chame {@link android.content.ContentProviderOperation.Builder#build()} para criar
+        o objeto {@link android.content.ContentProviderOperation}; em seguida, adicione esse objeto como
+        o primeiro objeto na {@link java.util.ArrayList} passada para
+        {@link android.content.ContentResolver#applyBatch(String, ArrayList) applyBatch()}.
+    </li>
+    <li>
+        Aplique a transação em lote.
+    </li>
+</ol>
+<p>
+    Se a linha de contato bruto for atualizada por outra operação entre o momento da leitura da linha
+       e o momento de sua modificação, a "assert" {@link android.content.ContentProviderOperation}
+        falhará e todo o lote de operações será cancelado. Depois disso, as opções são tentar novamente
+        ou tomar outra medida.
+</p>
+<p>
+    O fragmento a seguir demonstra como criar uma "assert"
+        {@link android.content.ContentProviderOperation} após consultar um contato bruto exclusivo usando
+    um {@link android.content.CursorLoader}:
+</p>
+<pre>
+/*
+ * The application uses CursorLoader to query the raw contacts table. The system calls this method
+ * when the load is finished.
+ */
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor cursor) {
+
+    // Gets the raw contact's _ID and VERSION values
+    mRawContactID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+    mVersion = cursor.getInt(cursor.getColumnIndex(SyncColumns.VERSION));
+}
+
+...
+
+// Sets up a Uri for the assert operation
+Uri rawContactUri = ContentUris.withAppendedId(RawContacts.CONTENT_URI, mRawContactID);
+
+// Creates a builder for the assert operation
+ContentProviderOperation.Builder assertOp = ContentProviderOperation.netAssertQuery(rawContactUri);
+
+// Adds the assertions to the assert operation: checks the version and count of rows tested
+assertOp.withValue(SyncColumns.VERSION, mVersion);
+assertOp.withExpectedCount(1);
+
+// Creates an ArrayList to hold the ContentProviderOperation objects
+ArrayList ops = new ArrayList&lt;ContentProviderOperationg&gt;;
+
+ops.add(assertOp.build());
+
+// You would add the rest of your batch operations to "ops" here
+
+...
+
+// Applies the batch. If the assert fails, an Exception is thrown
+try
+    {
+        ContentProviderResult[] results =
+                getContentResolver().applyBatch(AUTHORITY, ops);
+
+    } catch (OperationApplicationException e) {
+
+        // Actions you want to take if the assert operation fails go here
+    }
+</pre>
+<h3 id="Intents">Recuperação e modificação com intenções</h3>
+<p>
+    Enviar uma intenção ao aplicativo de contatos do dispositivo permite o acesso indireto ao Provedor
+    de contatos. A intenção inicia a IU do aplicativo de contatos do dispositivo, na qual os usuários podem
+    fazer tarefas relacionadas a contatos. Com esse tipo de acesso, os usuários podem:
+    <ul>
+        <li>Selecionar um contato de uma lista e retorná-lo ao aplicativo para trabalhos futuros.</li>
+        <li>Editar dados de um contato existente.</li>
+        <li>Inserir um novo contato bruto para quaisquer das suas contas.</li>
+        <li>Excluir um contato ou dados dos contatos.</li>
+    </ul>
+<p>
+    Se o usuário estiver inserindo ou atualizando dados, é possível coletar os dados antes e enviá-los como
+    parte da intenção.
+</p>
+<p>
+    Ao usar intenções para acessar o Provedor de Contatos por meio do aplicativo de contatos do dispositivo,
+    não é necessário criar a própria IU ou código para acessar o provedor. Também não é necessário
+    solicitar permissão de leitura e gravação ao provedor. O aplicativo de contatos do dispositivo pode
+    delegar a você permissões de leitura de um contato e, pelo fato de você fazer modificações
+    no provedor por meio de outro aplicativo, não é necessário ter permissões de gravação.
+</p>
+<p>
+    O processo geral de envio de uma intenção para acessar um provedor é descrito detalhadamente
+    no guia<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Preceitos do provedor de conteúdo</a>, seção "Acesso a dados via intenções". Os valores
+    de ação, do tipo MIME e dos dados usados para as tarefas disponíveis são resumidos na tabela 4
+    e os valores extras que podem ser usados com
+    {@link android.content.Intent#putExtra(String, String) putExtra()} são listados na
+    documentação de referência de {@link android.provider.ContactsContract.Intents.Insert}:
+</p>
+<p class="table-caption" id="table4">
+  <strong>Tabela 4.</strong> Intenções do Provedor de Contatos
+</p>
+<table style="width:75%">
+    <tr>
+        <th scope="col" style="width:10%">Tarefa</th>
+        <th scope="col" style="width:5%">Ação</th>
+        <th scope="col" style="width:10%">Dados</th>
+        <th scope="col" style="width:10%">Tipo MIME</th>
+        <th scope="col" style="width:25%">Observações</th>
+    </tr>
+    <tr>
+        <td><strong>Selecionar um contato de uma lista</strong></td>
+        <td>{@link android.content.Intent#ACTION_PICK}</td>
+        <td>
+            Um dos seguintes:
+            <ul>
+                <li>
+{@link android.provider.ContactsContract.Contacts#CONTENT_URI Contacts.CONTENT_URI},
+                    que exibe uma lista de contatos.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Phone#CONTENT_URI Phone.CONTENT_URI},
+                    que exibe uma lista de números de telefone de um contato bruto.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#CONTENT_URI
+StructuredPostal.CONTENT_URI},
+                    que exibe uma lista de endereços postais de um contato bruto.
+                </li>
+                <li>
+{@link android.provider.ContactsContract.CommonDataKinds.Email#CONTENT_URI Email.CONTENT_URI},
+                    que exibe uma lista de endereços de e-mail de um contato bruto.
+                </li>
+            </ul>
+        </td>
+        <td>
+            Não usado
+        </td>
+        <td>
+            Exibe uma lista de contatos brutos ou uma lista de dados de um contato bruto conforme
+            o tipo da URI de conteúdo fornecido.
+            <p>
+                Chame
+         {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+                que retorna a URI de conteúdo da linha selecionada. O formulário da URI é a
+                URI de conteúdo da tabela com o <code>LOOKUP_ID</code> da linha anexado a ela.
+                O aplicativo de contatos do dispositivo delega permissões de leitura e gravação a essa URI de conteúdo
+                pelo tempo que a atividade durar. Consulte
+                o guia<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+                Preceitos do provedor de conteúdo</a> para obter mais detalhes.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Inserir um novo contato bruto</strong></td>
+        <td>{@link android.provider.ContactsContract.Intents.Insert#ACTION Insert.ACTION}</td>
+        <td>Não aplicável</td>
+        <td>
+            {@link android.provider.ContactsContract.RawContacts#CONTENT_TYPE
+            RawContacts.CONTENT_TYPE}, tipo MIME para um grupo de contatos brutos.
+        </td>
+        <td>
+            Exibe a tela <strong>Adicionar contato</strong> do aplicativo de contatos do dispositivo. 
+            São exibidos os valores extras adicionados à intenção. Se enviada com
+        {@link android.app.Activity#startActivityForResult(Intent, int) startActivityForResult()},
+            a URI de conteúdo do contato bruto recentemente adicionado é passada de volta
+            ao método de retorno de chamada
+            {@link android.app.Activity#onActivityResult(int, int, Intent) onActivityResult()}no argumento {@link android.content.Intent},
+no campo "dados". Para obter o valor, chame {@link android.content.Intent#getData()}.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Editar um contato</strong></td>
+        <td>{@link android.content.Intent#ACTION_EDIT}</td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
+            do contato. A atividade do editor permitirá que o usuário edite os dados associados
+            a esse contato.
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE
+            Contacts.CONTENT_ITEM_TYPE}, um único contato.</td>
+        <td>
+            Exibe a tela Editar contato no aplicativo de contatos. São exibidos os valores extras
+            adicionados à intenção. Quando o usuário clica em <strong>Concluído</strong> para salvar
+            as edições, a atividade retorna ao primeiro plano.
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Exibir um seletor que também pode adicionar dados.</strong></td>
+        <td>{@link android.content.Intent#ACTION_INSERT_OR_EDIT}</td>
+        <td>
+            Não aplicável
+        </td>
+        <td>
+            {@link android.provider.ContactsContract.Contacts#CONTENT_ITEM_TYPE}
+        </td>
+         <td>
+            Essa intenção sempre exibe a tela do seletor do aplicativo de contatos. </strong>O usuário pode
+            selecionar um contato para editar ou adicionar um novo. É exibida a tela de edição ou de adição,
+            conforme a escolha do usuário e são exibidos os dados extras passados
+            para a intenção. Se o aplicativo exibe dados de contato como um e-mail ou número de telefone, use
+            essa intenção para permitir que o usuário adicione os dados a um contato existente.
+
+            <p class="note">
+                <strong>Observação:</strong> Não é necessário enviar nenhum valor de nome dos extras da intenção
+            porque o usuário sempre seleciona um nome existente ou adiciona um novo. Além disso,
+            se você enviar um nome e o usuário escolher editar, o aplicativo de contatos
+            exibirá o nome enviado, substituindo o valor anterior. Se o usuário
+            não notar isso e salvar a edição, o valor antigo será perdido.
+            </p>
+         </td>
+    </tr>
+</table>
+<p>
+    O aplicativo de contatos do dispositivo não permite a exclusão de um contato bruto ou de seus dados
+    com uma intenção. Em vez disso, para excluir um contato bruto, use
+    {@link android.content.ContentResolver#delete(Uri, String, String[]) ContentResolver.delete()}
+    ou {@link android.content.ContentProviderOperation#newDelete(Uri)
+    ContentProviderOperation.newDelete()}.
+</p>
+<p>
+    O fragmento a seguir mostra como construir e enviar uma intenção que insira um novo
+    contato bruto e dados:
+</p>
+<pre>
+// Gets values from the UI
+String name = mContactNameEditText.getText().toString();
+String phone = mContactPhoneEditText.getText().toString();
+String email = mContactEmailEditText.getText().toString();
+
+String company = mCompanyName.getText().toString();
+String jobtitle = mJobTitle.getText().toString();
+
+// Creates a new intent for sending to the device's contacts application
+Intent insertIntent = new Intent(ContactsContract.Intents.Insert.ACTION);
+
+// Sets the MIME type to the one expected by the insertion activity
+insertIntent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+
+// Sets the new contact name
+insertIntent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+
+// Sets the new company and job title
+insertIntent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+insertIntent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobtitle);
+
+/*
+ * Demonstrates adding data rows as an array list associated with the DATA key
+ */
+
+// Defines an array list to contain the ContentValues objects for each row
+ArrayList&lt;ContentValues&gt; contactData = new ArrayList&lt;ContentValues&gt;();
+
+
+/*
+ * Defines the raw contact row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues rawContactRow = new ContentValues();
+
+// Adds the account type and name to the row
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_TYPE, mSelectedAccount.getType());
+rawContactRow.put(ContactsContract.RawContacts.ACCOUNT_NAME, mSelectedAccount.getName());
+
+// Adds the row to the array
+contactData.add(rawContactRow);
+
+/*
+ * Sets up the phone number data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues phoneRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+phoneRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+);
+
+// Adds the phone number and its type to the row
+phoneRow.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+
+// Adds the row to the array
+contactData.add(phoneRow);
+
+/*
+ * Sets up the email data row
+ */
+
+// Sets up the row as a ContentValues object
+ContentValues emailRow = new ContentValues();
+
+// Specifies the MIME type for this data row (all data rows must be marked by their type)
+emailRow.put(
+        ContactsContract.Data.MIMETYPE,
+        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+);
+
+// Adds the email address and its type to the row
+emailRow.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+
+// Adds the row to the array
+contactData.add(emailRow);
+
+/*
+ * Adds the array to the intent's extras. It must be a parcelable object in order to
+ * travel between processes. The device's contacts app expects its key to be
+ * Intents.Insert.DATA
+ */
+insertIntent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+
+// Send out the intent to start the device's contacts app in its add contact activity.
+startActivity(insertIntent);
+</pre>
+<h3 id="DataIntegrity">Integridade dos dados</h3>
+<p>
+    Como o repositório de contatos contém dados importantes e confidenciais que usuários esperam que estejam
+    corretos e atualizados, o Provedor de Contatos tem regras bem definidas para a integridade dos dados. É de
+    sua responsabilidade adequar-se a essas regras ao modificar dados de contatos. As regras
+    importantes são listadas a seguir:
+</p>
+<dl>
+    <dt>
+        Sempre adicione uma linha {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}
+        para cada linha {@link android.provider.ContactsContract.RawContacts} adicionada.
+    </dt>
+    <dd>
+        Uma linha {@link android.provider.ContactsContract.RawContacts} sem uma
+        linha {@link android.provider.ContactsContract.CommonDataKinds.StructuredName}
+        na tabela {@link android.provider.ContactsContract.Data} pode causar problemas durante
+        a agregação.
+    </dd>
+    <dt>
+        Sempre conecte novas linhas {@link android.provider.ContactsContract.Data} às respectivas
+        linhas pai {@link android.provider.ContactsContract.RawContacts}.
+    </dt>
+    <dd>
+        Uma linha {@link android.provider.ContactsContract.Data} que não esteja conectada a um
+        {@link android.provider.ContactsContract.RawContacts} não será visível no aplicativo
+        de contatos do dispositivo, o que pode causar problemas com adaptadores de sincronização.
+    </dd>
+    <dt>
+        Altere dados somente para os seus contatos brutos.
+    </dt>
+    <dd>
+        Lembre-se de que o Provedor de Contatos normalmente gerencia dados de diversos tipos de conta
+        e serviços on-line diferentes. É preciso garantir que o aplicativo modifique
+        ou exclua somente dados de linhas que pertencem a você e que ele insira dados apenas
+        com um tipo e nome de conta que você controla.
+    </dd>
+    <dt>
+        Sempre use as constantes definidas em {@link android.provider.ContactsContract} e suas
+        subclasses de autoridades, URIs de conteúdo, caminhos de URI, nomes de coluna, tipos MIME e
+        valores {@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE}.
+    </dt>
+    <dd>
+        O uso dessas constantes ajuda a evitar erros. Você também será notificado com avisos
+        do compilador se uma das constantes não for aprovada.
+    </dd>
+</dl>
+<h3 id="CustomData">Linhas de dados personalizados</h3>
+<p>
+    Ao criar e usar seus próprios tipos MIME personalizados, você pode inserir, editar, excluir e recuperar
+    suas linhas de dados na tabela {@link android.provider.ContactsContract.Data}. As linhas
+    são limitadas a usar a coluna definida em
+    {@link android.provider.ContactsContract.DataColumns}, embora seja possível mapear
+    os nomes de coluna de tipo específico para os nomes de coluna padrão. No aplicativo de contatos do dispositivo,
+    os dados das linhas são exibidos, mas não podem ser editados nem excluídos e os usuários não podem inserir
+    dados adicionais. Para permitir que usuários modifiquem suas linhas de dados personalizados, é necessário fornecer
+    uma atividade do editor no próprio aplicativo.
+</p>
+<p>
+    Para exibir os dados personalizados, forneça um arquivo <code>contacts.xml</code> contendo
+    um elemento <code>&lt;ContactsAccountType&gt;</code> ou um ou mais
+    dos elementos filho <code>&lt;ContactsDataKind&gt;</code>. Isso é abordado com mais detalhes na
+    seção <a href="#SocialStreamDataKind"><code>&lt;ContactsDataKind&gt; element</code></a>.
+</p>
+<p>
+    Para saber mais sobre tipos MIME personalizados, leia o
+    guia <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+    Criação de um provedor de conteúdo</a>.
+</p>
+<h2 id="SyncAdapters">Adaptadores de sincronização do Provedor de Contatos</h2>
+<p>
+    O Provedor de Contatos foi projetado especificamente para tratar a <strong>sincronização</strong>
+    de dados de contatos entre um dispositivo e um serviço on-line. Isso permite que usuários baixem
+    dados existentes em um novo dispositivo e transfiram dados existentes a uma nova conta.
+    A sincronização também garante que usuários tenham os dados mais recentes à mão, independentemente
+    da origem de adições e alterações. Outra vantagem da sincronização é
+    a disponibilidade dos dados dos contatos mesmo quando o dispositivo não está conectado à rede.
+</p>
+<p>
+    Embora seja possível implementar a sincronização de diversos modos, o sistema Android fornece 
+    uma estrutura de sincronização de extensão que automatiza as seguintes tarefas:
+    <ul>
+
+    <li>
+        Verificação da disponibilidade da rede.
+    </li>
+    <li>
+        Agendamento e execução de sincronizações, com base nas preferências do usuário.
+    </li>
+    <li>
+        Reinicialização de sincronizações que foram interrompidas.
+    </li>
+    </ul>
+<p>
+    Para usar essa estrutura, deve-se fornecer uma extensão do adaptador de sincronização. Cada adaptador de sincronização é exclusivo
+    de um serviço e um provedor de conteúdo, mas pode tratar diversos nomes de conta do mesmo serviço. 
+    A estrutura também permite diversos adaptadores de sincronização para o mesmo serviço e provedor.
+</p>
+<h3 id="SyncClassesFiles">Classes e arquivos do adaptador de sincronização</h3>
+<p>
+    O adaptador de sincronização é implementado como uma subclasse
+    de {@link android.content.AbstractThreadedSyncAdapter} e instalado como parte do aplicativo
+    do Android. O sistema coleta dados do adaptador de sincronização a partir de elementos no manifesto
+    do aplicativo e de um arquivo XML especial direcionado pelo manifesto. O arquivo XML define
+    o tipo de conta do serviço on-line e a autoridade do provedor de conteúdo que, juntos,
+    identificam exclusivamente o adaptador. O adaptador de sincronização não fica ativo até que o usuário adicione
+    uma conta para o tipo de conta do adaptador de sincronização e habilite a sincronização para
+    o provedor de conteúdo com o qual o adaptador se sincroniza.  Nesse ponto, o sistema começa a gerenciar o adaptador,
+    chamando-o quando necessário para estabelecer a sincronização entre o provedor de conteúdo e o servidor.
+</p>
+<p class="note">
+    <strong>Observação:</strong> usar um tipo de conta como parte da identificação do adaptador de sincronização permite
+    que o sistema detecte e agrupe adaptadores de sincronização que acessam diferentes serviços
+    da mesma organização. Por exemplo, todos os adaptadores de sincronização dos serviços on-line da Google têm o mesmo
+    tipo de conta <code>com.google</code>. Quando o usuário adiciona uma conta Google aos dispositivos, todos
+    os adaptadores de sincronização dos serviços Google instalados são listados juntos; cada um
+    dos listados sincroniza-se com um provedor de conteúdo diferente no dispositivo.
+</p>
+<p>
+    Como a maioria dos serviços exige que usuários verifiquem a identidade antes de acessar
+    os dados, o sistema Android oferece uma estrutura de autenticação similar à estrutura
+    dos adaptadores de sincronização e muitas vezes usada junto com eles. A estrutura de autenticação usa
+    autenticadores de extensão que são subclasses
+    de {@link android.accounts.AbstractAccountAuthenticator}. Um autenticador verifica
+    a identidade do usuário nas seguintes etapas:
+    <ol>
+        <li>
+            Coleta nome, senha ou informação similar do usuário (as <strong>credenciais</strong>
+            do usuário).
+        </li>
+        <li>
+            Envia as credenciais para o serviço
+        </li>
+        <li>
+            Avalia a resposta do serviço.
+        </li>
+    </ol>
+<p>
+    Se o serviço aceitar as credenciais, o autenticador pode
+    armazená-las para uso futuro. Devido à estrutura do autenticador de extensão,
+    o {@link android.accounts.AccountManager} pode conferir acesso a quaisquer tokens de autenticação compatíveis com
+    um autenticador que escolha expô-los, como os tokens de autenticação OAuth2.
+</p>
+<p>
+    Embora as autenticações não sejam necessárias, a maioria dos serviços de contato as usam.
+    Contudo, não é obrigatório usar a estrutura de autenticação do Android para efetuá-las.
+</p>
+<h3 id="SyncAdapterImplementing">Implementação do adaptador de sincronização</h3>
+<p>
+    Para implementar um adaptador de sincronização para o Provedor de Contatos, primeiramente é necessário criar
+    um aplicativo do Android que contenha o seguinte:
+</p>
+    <dl>
+        <dt>
+            Um componente {@link android.app.Service} que responda a solicitações do sistema para
+            vincular ao adaptador de sincronização.
+        </dt>
+        <dd>
+            Quando o sistema quer executar uma sincronização, ele chama o método
+            {@link android.app.Service#onBind(Intent) onBind()} do serviço para obter
+            um {@link android.os.IBinder} para o adaptador de sincronização. Isso permite que o sistema efetue chamadas
+            entre processos aos métodos do adaptador.
+            <p>
+                No aplicativo
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>, o nome de classe desse serviço é
+                <code>com.example.android.samplesync.syncadapter.SyncService</code>.
+            </p>
+        </dd>
+        <dt>
+            O adaptador de sincronização atual, implementado como uma subclasse concreta de
+                {@link android.content.AbstractThreadedSyncAdapter}.
+        </dt>
+        <dd>
+            Essa classe realiza o trabalho de baixar dados do servidor, atualizar dados
+                do dispositivo e resolver conflitos. A principal tarefa do adaptador é
+                feita no método {@link android.content.AbstractThreadedSyncAdapter#onPerformSync(
+            Account, Bundle, String, ContentProviderClient, SyncResult)
+            onPerformSync()}. Essa classe deve ser instanciada como um singleton.
+            <p>
+                No aplicativo
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>, o adaptador de sincronização é definido na classe
+                <code>com.example.android.samplesync.syncadapter.SyncAdapter</code>.
+            </p>
+        </dd>
+        <dt>
+            Uma subclasse de {@link android.app.Application}.
+        </dt>
+        <dd>
+            Essa classe atua como uma fábrica para o singleton do adaptador de sincronização. Use
+            o método {@link android.app.Application#onCreate()} para instanciar o adaptador de sincronização
+            e fornecer um método "coletor" estático para retornar o singleton ao
+            método {@link android.app.Service#onBind(Intent) onBind()} do serviço do adaptador
+            de sincronização.
+        </dd>
+        <dt>
+            <strong>Opcional:</strong> um componente {@link android.app.Service} que responda a
+            solicitações do sistema para autenticação do usuário.
+        </dt>
+        <dd>
+            O {@link android.accounts.AccountManager} ativa esse serviço para iniciar o processo
+            de autenticação. O método {@link android.app.Service#onCreate()} do serviço instancia
+            um objeto autenticador. Quando o sistema quer autenticar uma conta de usuário para
+            o adaptador de sincronização do aplicativo, ele chama o método
+            {@link android.app.Service#onBind(Intent) onBind()} do serviço para obter um
+            {@link android.os.IBinder} para o autenticador. Isso permite que o sistema efetue chamadas
+            entre processos aos métodos do autenticador.
+            <p>
+                No aplicativo
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>, o nome de classe desse serviço é
+                <code>com.example.android.samplesync.authenticator.AuthenticationService</code>.
+            </p>
+        </dd>
+        <dt>
+            <strong>Opcional:</strong> uma subclasse concreta de
+            {@link android.accounts.AbstractAccountAuthenticator} que trate de solicitações de
+            autenticação.
+        </dt>
+        <dd>
+            Essa classe fornece métodos que chamam {@link android.accounts.AccountManager}
+            para autenticar as credenciais do usuário no servidor. Os detalhes
+            desse processo de autenticação variam amplamente, com base na tecnologia em uso no servidor. Consulte
+            a documentação do software do servidor para ver mais informações sobre autenticação.
+            <p>
+                No aplicativo
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">Exemplo de adaptador de sincronização</a>, o autenticador é definido na classe
+                <code>com.example.android.samplesync.authenticator.Authenticator</code>.
+            </p>
+        </dd>
+        <dt>
+            Os arquivos XML que definem o adaptador de sincronização e o autenticador para o sistema.
+        </dt>
+        <dd>
+            Os componentes de serviço do adaptador de sincronização e do autenticador descritos anteriormente são
+            definidos em
+elementos <code>&lt;<a href="{@docRoot}guide/topics/manifest/service-element.html">service</a>&gt;</code>
+ no manifesto do aplicativo. Esses elementos
+            contêm
+elementos filho <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+que fornecem dados específicos ao
+            sistema:
+            <ul>
+                <li>
+                    O
+elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+ de serviço do adaptador de sincronização direciona-se
+            ao <code>res/xml/syncadapter.xml</code> do arquivo XML. Em troca, esse arquivo especifica
+                    uma URI para o serviço web que será sincronizado com o Provedor de Contatos
+                    e um tipo de conta.
+                </li>
+                <li>
+                    <strong>Opcional:</strong> o
+elemento <code>&lt;<a href="{@docRoot}guide/topics/manifest/meta-data-element.html">meta-data</a>&gt;</code>
+ do autenticador aponta para o arquivo XML
+                    <code>res/xml/authenticator.xml</code>. Em troca, esse arquivo especifica
+                    o tipo de conta compatível com esse autenticador, bem como recursos de IU
+                    que aparecem durante o processo de autenticação. O tipo de conta especificado
+                    nesse elemento deve ser o mesmo que o especificado para
+                    o adaptador de sincronização.
+                </li>
+            </ul>
+        </dd>
+    </dl>
+<h2 id="SocialStream">Dados de fluxos sociais</h2>
+<p>
+    As tabelas {@code android.provider.ContactsContract.StreamItems}
+    e {@code android.provider.ContactsContract.StreamItemPhotos}
+    gerenciam dados advindos de redes sociais. É possível criar um adaptador de sincronização que adicione dados de fluxo
+    da sua própria rede a essas tabelas ou ler dados de fluxo dessas tabelas
+    e exibi-los no seu aplicativo, ou ambos. Com esses recursos, os serviços e aplicativos
+    de redes sociais podem ser integrados na experiência das redes sociais no Android.
+</p>
+<h3 id="StreamText">Textos de fluxos sociais</h3>
+<p>
+    Itens de fluxo sempre são associados a um contato bruto. 
+    O {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID} conecta-se ao
+    valor <code>_ID</code> do contato bruto. O tipo e o nome da conta do contato
+    bruto também são armazenados na linha do item de fluxo.
+</p>
+<p>
+    Armazene os dados do seu fluxo nas colunas a seguir:
+</p>
+<dl>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_TYPE}
+    </dt>
+    <dd>
+        <strong>Obrigatório.</strong> O tipo de conta do usuário do contato bruto associado a esse
+        item de fluxo. Lembre-se de definir esse valor ao inserir um item de fluxo.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#ACCOUNT_NAME}
+    </dt>
+    <dd>
+        <strong>Obrigatório.</strong> O nome de conta do usuário do contato bruto associado
+        a esse item de fluxo. Lembre-se de definir esse valor ao inserir um item de fluxo.
+    </dd>
+    <dt>
+        Colunas identificadoras
+    </dt>
+    <dd>
+        <strong>Obrigatório.</strong> É necessário inserir as colunas identificadoras a seguir
+        ao inserir um item de fluxo:
+        <ul>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_ID}: 
+                o valor {@code android.provider.BaseColumns#_ID} do contato ao qual esse item
+                de fluxo está associado.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#CONTACT_LOOKUP_KEY}: 
+                o valor{@code android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} do
+                contato ao qual esse item de fluxo está associado.
+            </li>
+            <li>
+                {@code android.provider.ContactsContract.StreamItemsColumns#RAW_CONTACT_ID}: 
+                o valor {@code android.provider.BaseColumns#_ID} do contato bruto ao qual esse item
+                de fluxo está associado.
+            </li>
+        </ul>
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#COMMENTS}
+    </dt>
+    <dd>
+        Opcional. Armazena informações resumidas que podem ser exibidas no início do item de fluxo.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TEXT}
+    </dt>
+    <dd>
+        O texto do item de fluxo, o conteúdo que foi publicado pela fonte do item
+                ou uma descrição de alguma ação que gerou o item de fluxo. Essa coluna pode conter
+                imagens de recurso incorporadas e de qualquer formato que possam ser renderizadas
+        {@link android.text.Html#fromHtml(String) fromHtml()}. O provedor pode truncar
+        ou abreviar conteúdos longos, mas ele tentará evitar quebrar as tags.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP}
+    </dt>
+    <dd>
+        Uma string de texto contendo o tempo em que o item de fluxo foi inserido ou atualizado, em forma
+        de <em>milissegundos</em> desde a época. Aplicativos que inserem ou atualizam itens de fluxo são
+        responsáveis por manter essa coluna, ela não é mantida automaticamente pelo
+        Provedor de Contatos.
+    </dd>
+</dl>
+<p>
+    Para exibir informações de identificação para os itens de fluxo, use
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_ICON},
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_LABEL} e
+    {@code android.provider.ContactsContract.StreamItemsColumns#RES_PACKAGE} para vincular a recursos
+    no aplicativo.
+</p>
+<p>
+    A tabela {@code android.provider.ContactsContract.StreamItems} também contém as colunas
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC1} por meio de
+    {@code android.provider.ContactsContract.StreamItemsColumns#SYNC4} para uso exclusivo
+    dos adaptadores de sincronização.
+</p>
+<h3 id="StreamPhotos">Fotos de fluxos sociais</h3>
+<p>
+   A tabela {@code android.provider.ContactsContract.StreamItemPhotos} armazena fotos associadas
+    a um item de fluxo. A coluna
+    {@code android.provider.ContactsContract.StreamItemPhotosColumns#STREAM_ITEM_ID} da tabela
+    vincula-se a valores na coluna {@code android.provider.BaseColumns#_ID}
+    da tabela {@code android.provider.ContactsContract.StreamItems}. Referências de fotografias são armazenadas
+    na tabela nessas colunas:
+</p>
+<dl>
+    <dt>
+        Coluna {@code android.provider.ContactsContract.StreamItemPhotos#PHOTO} (um BLOB).
+    </dt>
+    <dd>
+        Representação binária da foto, redimensionada pelo provedor para armazenar e exibir.
+        Essa coluna está disponível para compatibilidade retroativa com versões anteriores do Provedor
+        de Contatos que a usavam para armazenar fotos. Contudo, na versão atual,
+        não se deve usar essa coluna para armazenar fotos. Em vez disso, use
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID} ou
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI} (ambas são
+        descritas nos pontos a seguir) para armazenar fotos em um arquivo. Essa coluna
+        passa a conter uma miniatura da foto, que estará disponível para leitura.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_FILE_ID}
+    </dt>
+    <dd>
+        Identificador numérico de uma foto de um contato bruto. Anexe esse valor à constante
+        {@link android.provider.ContactsContract.DisplayPhoto#CONTENT_URI DisplayPhoto.CONTENT_URI}
+        para obter uma URI de conteúdo direcionada para um único arquivo de foto e, em seguida, chame
+        {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} para obter um identificador para o arquivo de foto.
+    </dd>
+    <dt>
+        {@code android.provider.ContactsContract.StreamItemPhotosColumns#PHOTO_URI}
+    </dt>
+    <dd>
+        URI de conteúdo direcionada diretamente para o arquivo de foto da foto representada por essa linha.
+        Chame {@link android.content.ContentResolver#openAssetFileDescriptor(Uri, String)
+        openAssetFileDescriptor()} com essa URI para obter um identificador para o arquivo de foto.
+    </dd>
+</dl>
+<h3 id="SocialStreamTables">Uso de tabelas de fluxos sociais</h3>
+<p>
+    Essas tabelas funcionam como as outras tabelas principais do Provedor de Contatos, exceto que:
+</p>
+    <ul>
+        <li>
+            Exigem permissões de acesso adicionais. Para ler o conteúdo delas, o aplicativo
+            deve ter a permissão {@code android.Manifest.permission#READ_SOCIAL_STREAM}. Para
+            modificá-las, o aplicativo precisa ter a permissão
+            {@code android.Manifest.permission#WRITE_SOCIAL_STREAM}.
+        </li>
+        <li>
+            Para a tabela {@code android.provider.ContactsContract.StreamItems}, o número de linhas
+            armazenadas para cada contato bruto é limitado. Ao atingir o limite,
+            o Provedor de Contatos abre espaço para novas linhas de itens de fluxo excluindo automaticamente
+            as linhas que têm
+            o {@code android.provider.ContactsContract.StreamItemsColumns#TIMESTAMP} mais antigo. Para conhecer
+            o limite, faça uma consulta à URI de conteúdo
+            {@code android.provider.ContactsContract.StreamItems#CONTENT_LIMIT_URI}. É possível deixar
+            todos os argumentos, exceto a URI de conteúdo, definidos como <code>null</code>. A consulta
+            retorna um Cursor contendo uma linha única com a coluna única
+            {@code android.provider.ContactsContract.StreamItems#MAX_ITEMS}.
+        </li>
+    </ul>
+
+<p>
+    A classe {@code android.provider.ContactsContract.StreamItems.StreamItemPhotos} define
+    uma subtabela de {@code android.provider.ContactsContract.StreamItemPhotos} que contém as linhas
+    de foto de um único item de fluxo.
+</p>
+<h3 id="SocialStreamInteraction">Interações de fluxos sociais</h3>
+<p>
+    Os dados de fluxos sociais gerenciados pelo Provedor de Contatos, em conjunto com o
+    aplicativo de contatos do dispositivo, oferecem um método poderoso de conexão ao sistema de redes sociais
+    com contatos existentes. Os seguintes recursos estão disponíveis:
+</p>
+    <ul>
+        <li>
+            Ao sincronizar seu serviço de rede social com o Provedor de Contatos com um adaptador
+            de sincronização, é possível recuperar atividades recentes de contatos de um usuário e armazená-las
+            nas tabelas {@code android.provider.ContactsContract.StreamItems}
+            e {@code android.provider.ContactsContract.StreamItemPhotos} para uso posterior.
+        </li>
+        <li>
+            Além da sincronização regular, é possível ativar o adaptador de sincronização para recuperar
+            dados adicionais quando o usuário seleciona um contato para exibir. Isso permite que o adaptador de sincronização
+            recupere fotos de alta resolução e os itens de fluxo mais recentes do contato.
+        </li>
+        <li>
+            Ao registrar uma notificação com o aplicativo de contatos do dispositivo e o Provedor
+            de Contatos, é possível <em>recuperar</em> uma intenção quando um contato é exibido e, nesse ponto,
+            atualizar o status do contato pelo serviço. Essa abordagem pode ser mais rápida e usar menos
+            largura de banda do que realizar uma sincronização completa com um adaptador de sincronização.
+        </li>
+        <li>
+            Os usuários podem adicionar um contato ao seu serviço de rede social enquanto exibem-no
+            no aplicativo de contatos do dispositivo. É possível ativar isso com o recurso "convidar contato",
+            que é ativado com uma combinação de uma atividade que adiciona um contato existente à sua
+            rede, um arquivo XML que fornece o aplicativo de contatos do dispositivo
+            e o Provedor de Contatos com os detalhes do aplicativo.
+        </li>
+    </ul>
+<p>
+    A sincronização regular de itens de fluxo com o Provedor de Contatos é igual
+    a outras sincronizações. Para saber mais sobre sincronizações, consulte a seção
+    <a href="#SyncAdapters">Adaptadores de sincronização do Provedor de Contatos</a>. O registro de notificações
+    e o convite a contatos são abordados nas próximas duas seções.
+</p>
+<h4>Registro para manipular exibições de redes sociais</h4>
+<p>
+    Para registrar o adaptador de sincronização para receber notificações quando o usuário exibe um contato que é
+    gerenciado pelo adaptador de sincronização:
+</p>
+<ol>
+    <li>
+        Crie um arquivo chamado <code>contacts.xml</code> no diretório <code>res/xml/</code>
+        do projeto. Se você já tiver esse arquivo, pule esta etapa.
+    </li>
+    <li>
+        Nesse arquivo, adicione o elemento
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Se esse elemento já existir, pule esta etapa.
+    </li>
+    <li>
+        Para registrar um serviço que seja notificado quando o usuário abre uma página de detalhes do contato
+        no aplicativo de contatos do dispositivo, adicione o atributo
+        <code>viewContactNotifyService="<em>serviceclass</em>"</code> ao elemento, em que
+        <code><em>serviceclass</em></code> é o nome de classe totalmente qualificado do serviço
+        que deve receber a intenção do aplicativo de contatos do dispositivo. Para o serviço
+        de notificação, use a classe que estende {@link android.app.IntentService} para permitir que o serviço
+        receba intenções. Os dados nas intenções recebidas contêm a URI de conteúdo do contato
+        bruto em que o usuário clicou. No serviço de notificação, é possível vincular e chamar
+        o adaptador de sincronização para atualizar os dados do contato bruto.
+    </li>
+</ol>
+<p>
+    Para registrar uma atividade a ser chamada quando o usuário clica em um item de fluxo ou foto, ou ambos:
+</p>
+<ol>
+    <li>
+        Crie um arquivo chamado <code>contacts.xml</code> no diretório <code>res/xml/</code>
+        do projeto. Se você já tiver esse arquivo, pule esta etapa.
+    </li>
+    <li>
+        Nesse arquivo, adicione o elemento
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Se esse elemento já existir, pule esta etapa.
+    </li>
+    <li>
+        Para registrar uma das atividades para tratar do usuário que clica em um item de fluxo
+        no aplicativo de contatos do dispositivo, adicione o atributo
+        <code>viewStreamItemActivity="<em>activityclass</em>"</code> ao elemento, em que
+        <code><em>activityclass</em></code> é o nome de classe totalmente qualificado da atividade
+        que deve receber a intenção do aplicativo de contatos do dispositivo.
+    </li>
+    <li>
+        Para registrar uma das atividades para tratar do usuário que clica em uma foto de fluxo
+        no aplicativo de contatos do dispositivo, adicione o atributo
+        <code>viewStreamItemPhotoActivity="<em>activityclass</em>"</code> ao elemento, em que
+        <code><em>activityclass</em></code> é o nome de classe totalmente qualificado da atividade
+        que deve receber a intenção do aplicativo de contatos do dispositivo.
+    </li>
+</ol>
+<p>
+    O elemento <code>&lt;ContactsAccountType&gt;</code> é descrito em mais detalhes
+        na seção <a href="#SocialStreamAcctType">Elemento &lt;ContactsAccountType&gt;</a>.
+</p>
+<p>
+    A intenção recebida contém a URI de conteúdo do item ou foto em que o usuário clicou.
+    Para ter atividades separadas para itens de texto e para fotos, use os dois atributos no mesmo arquivo.
+</p>
+<h4>Interação com o serviço de redes sociais</h4>
+<p>
+    Os usuários não precisam sair do aplicativo de contatos do dispositivo para convidar um contato para
+        seu site de contatos. Em vez disso, o aplicativo de contatos do dispositivo pode enviar uma intenção de convidar
+        o contato para uma das atividades. Para configurar isso:
+</p>
+<ol>
+    <li>
+        Crie um arquivo chamado <code>contacts.xml</code> no diretório <code>res/xml/</code>
+        do projeto. Se você já tiver esse arquivo, pule esta etapa.
+    </li>
+    <li>
+        Nesse arquivo, adicione o elemento
+<code>&lt;ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android"&gt;</code>.
+        Se esse elemento já existir, pule esta etapa.
+    </li>
+    <li>
+        Adicione os seguintes atributos:
+        <ul>
+            <li><code>inviteContactActivity="<em>activityclass</em>"</code></li>
+            <li>
+                <code>inviteContactActionLabel="&#64;string/<em>invite_action_label</em>"</code>
+            </li>
+        </ul>
+        O valor <code><em>activityclass</em></code> é o nome de classe totalmente qualificado
+        da atividade que deve receber a intenção. O valor <code><em>invite_action_label</em></code>
+        é uma string de texto exibida no menu <strong>Adicionar conexão</strong>
+        no aplicativo de contatos do dispositivo.
+    </li>
+</ol>
+<p class="note">
+    <strong>Observação:</strong> <code>ContactsSource</code> é um nome de tag reprovado para
+    <code>ContactsAccountType</code>.
+</p>
+<h3 id="ContactsFile">Referência do contacts.xml</h3>
+<p>
+    O arquivo <code>contacts.xml</code> contém elementos XML que controlam a interação
+    do adaptador de sincronização e o aplicativo com o aplicativo de contatos e o Provedor de Contatos. Esses
+    elementos são descritos nas seções a seguir.
+</p>
+<h4 id="SocialStreamAcctType">Elemento &lt;ContactsAccountType&gt;</h4>
+<p>
+    O elemento <code>&lt;ContactsAccountType&gt;</code> controla a interação
+    do aplicativo com o aplicativo de contatos. Ele tem a seguinte sintaxe:
+</p>
+<pre>
+&lt;ContactsAccountType
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        inviteContactActivity="<em>activity_name</em>"
+        inviteContactActionLabel="<em>invite_command_text</em>"
+        viewContactNotifyService="<em>view_notify_service</em>"
+        viewGroupActivity="<em>group_view_activity</em>"
+        viewGroupActionLabel="<em>group_action_text</em>"
+        viewStreamItemActivity="<em>viewstream_activity_name</em>"
+        viewStreamItemPhotoActivity="<em>viewphotostream_activity_name</em>"&gt;
+</pre>
+<p>
+    <strong>contido em:</strong>
+</p>
+<p>
+    <code>res/xml/contacts.xml</code>
+</p>
+<p>
+    <strong>pode conter:</strong>
+</p>
+<p>
+    <strong><code>&lt;ContactsDataKind&gt;</code></strong>
+</p>
+<p>
+    <strong>Descrição:</strong>
+</p>
+<p>
+    Declara componentes e etiquetas da IU do Android que permitem aos usuários convidar um dos seus contatos a
+    uma rede social, notificar usuários quando um dos seus fluxos de redes sociais é atualizado
+    etc.
+</p>
+<p>
+    Observe que o prefixo <code>android:</code> do atributo não é necessário para os atributos
+    de <code>&lt;ContactsAccountType&gt;</code>.
+</p>
+<p>
+    <strong>Atributos:</strong>
+</p>
+<dl>
+    <dt>{@code inviteContactActivity}</dt>
+    <dd>
+        O nome de classe totalmente qualificado da atividade no aplicativo que você deseja
+        ativar quando o usuário seleciona <strong>Adicionar conexão</strong> no aplicativo
+        de contatos do dispositivo.
+    </dd>
+    <dt>{@code inviteContactActionLabel}</dt>
+    <dd>
+        Uma string de texto exibida para a atividade especificada
+        em {@code inviteContactActivity}, no menu <strong>Adicionar conexão</strong>.
+        Por exemplo: você pode usar a string "Siga-me na rede". Você pode usar um identificador
+        do recurso da string nessa etiqueta.
+    </dd>
+    <dt>{@code viewContactNotifyService}</dt>
+    <dd>
+        O nome de classe totalmente qualificado de um serviço no aplicativo que deve receber
+        notificações de quando o usuário exibe um contato. Essa notificação é enviada pelo aplicativo
+        de contatos do dispositivo, isso permite que o aplicativo adie operações de dados intensivos
+        até que elas sejam necessárias. Por exemplo: o aplicativo pode responder a essa notificação
+        lendo e exibindo a foto de alta resolução do contato e os itens de fluxo social
+        mais recentes. Esse recurso é descrito com mais detalhes na seção
+        <a href="#SocialStreamInteraction">Interações de fluxos sociais</a>. É possível ver
+        um exemplo de serviço de notificação no arquivo <code>NotifierService.java</code>
+        no aplicativo de exemplo
+        <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.
+    </dd>
+    <dt>{@code viewGroupActivity}</dt>
+    <dd>
+        O nome de classe totalmente qualificado de uma atividade no aplicativo que pode exibir
+        informações de grupo. Quando o usuário clica na etiqueta do grupo no aplicativo
+        de contatos do dispositivo, a IU dessa atividade é exibida.
+    </dd>
+    <dt>{@code viewGroupActionLabel}</dt>
+    <dd>
+        A etiqueta que o aplicativo de contatos exibe para um controle de IU que permite
+ que o usuário veja grupos no seu aplicativo.
+        <p>
+            Por exemplo: se você instalar o aplicativo do Google+ no dispositivo e sincronizá-lo
+        com o aplicativo de contatos, verá os círculos do Google+ listados como grupos
+        na aba <strong>Grupos</strong> do aplicativo de contatos. Ao clicar
+        em um círculo do Google+, você verá pessoas nesse círculo listadas como um "grupo". Na parte superior
+        da tela, você verá um ícone do Google+; ao clicar nele, o controle muda para
+        o aplicativo do Google+. O aplicativo de contatos faz isso com
+        {@code viewGroupActivity} usando o ícone como o valor
+            de {@code viewGroupActionLabel}.
+        </p>
+        <p>
+            Um identificador de recurso de string é permitido para esse atributo.
+        </p>
+    </dd>
+    <dt>{@code viewStreamItemActivity}</dt>
+    <dd>
+        O nome de classe totalmente qualificado de uma atividade no aplicativo que
+        o aplicativo de contatos do dispositivo executa quando o usuário clica em um item de fluxo de um contato bruto.
+    </dd>
+    <dt>{@code viewStreamItemPhotoActivity}</dt>
+    <dd>
+        O nome de classe totalmente qualificado de uma atividade no aplicativo que
+        o aplicativo de contatos do dispositivo executa quando o usuário clica em uma foto no item de fluxo
+        de um contato bruto.
+    </dd>
+</dl>
+<h4 id="SocialStreamDataKind">Elemento &lt;ContactsDataKind&gt;</h4>
+<p>
+    O elemento <code>&lt;ContactsDataKind&gt;</code> controla a tela das linhas de dados
+        personalizados do aplicativo na IU do aplicativo de contatos. Ele tem a seguinte sintaxe:
+</p>
+<pre>
+&lt;ContactsDataKind
+        android:mimeType="<em>MIMEtype</em>"
+        android:icon="<em>icon_resources</em>"
+        android:summaryColumn="<em>column_name</em>"
+        android:detailColumn="<em>column_name</em>"&gt;
+</pre>
+<p>
+    <strong>contido em:</strong>
+</p>
+<code>&lt;ContactsAccountType&gt;</code>
+<p>
+    <strong>Descrição:</strong>
+</p>
+<p>
+    Use esse elemento para que o aplicativo de contatos exiba o conteúdo de uma linha de dados personalizados como
+        parte dos detalhes de um contato bruto. Cada elemento filho <code>&lt;ContactsDataKind&gt;</code>
+    de <code>&lt;ContactsAccountType&gt;</code> representa um tipo de linha de dados personalizados que o adaptador
+    de sincronização adiciona à tabela {@link android.provider.ContactsContract.Data}. Adicione
+    um elemento <code>&lt;ContactsDataKind&gt;</code> para cada tipo MIME personalizado usado. Não será necessário
+    adicionar o elemento se você tiver uma linha de dados personalizados para a qual não deseja exibir dados.
+</p>
+<p>
+    <strong>Atributos:</strong>
+</p>
+<dl>
+    <dt>{@code android:mimeType}</dt>
+    <dd>
+        O tipo MIME personalizado definido para um dos tipos de linha de dados personalizados
+        na tabela {@link android.provider.ContactsContract.Data}. Por exemplo: o valor
+        <code>vnd.android.cursor.item/vnd.example.locationstatus</code> poderia ser um tipo MIME
+        personalizado para uma linha de dados que registra a última localização conhecida do contato.
+    </dd>
+    <dt>{@code android:icon}</dt>
+    <dd>
+        
+        <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Recurso desenhável</a> do Android
+        que o aplicativo de contatos exibe próximo aos dados. Use isso para indicar
+        ao usuário que os dados são advindos do seu serviço.
+    </dd>
+    <dt>{@code android:summaryColumn}</dt>
+    <dd>
+        O nome de coluna do primeiro de dois valores recuperados da linha de dados. 
+        O valor é exibido como a primeira linha da entrada para essa linha de dados. A primeira linha
+        destina-se ao uso como um resumo dos dados, mas isso é opcional. Veja também
+        <a href="#detailColumn">android:detailColumn</a>.
+    </dd>
+    <dt>{@code android:detailColumn}</dt>
+    <dd>
+        O nome de coluna do segundo de dois valores recuperados da linha de dados. O valor é
+        exibido como a segunda linha da entrada dessa linha de dados. Veja também
+        {@code android:summaryColumn}.
+    </dd>
+</dl>
+<h2 id="AdditionalFeatures">Recursos adicionais do Provedor de Contatos</h2>
+<p>
+    Além dos principais recursos descritos nas seções anteriores, o Provedor de Contatos oferece
+        estes recursos úteis para trabalhar com dados de contatos:
+</p>
+    <ul>
+       <li>Grupos de contatos</li>
+       <li>Recursos de foto</li>
+    </ul>
+<h3 id="Groups">Grupos de contatos</h3>
+<p>
+    O Provedor de Contatos pode, opcionalmente, etiquetar grupos de contatos relacionados com
+    dados de <strong>grupo</strong>. Se o servidor associado a uma conta de usuário
+    deseja manter grupos, o adaptador de sincronização para o tipo da conta deve transferir
+    dados de grupo entre o Provedor de Contatos e o servidor. Quando o usuário adiciona um novo contato
+    ao servidor e, em seguida, coloca este contato em um novo grupo, o adaptador de sincronização deve adicionar o novo grupo
+    na tabela {@link android.provider.ContactsContract.Groups}. O grupo ou grupos a que um contato
+    bruto pertence são armazenados na tabela {@link android.provider.ContactsContract.Data}, usando
+    o tipo MIME {@link android.provider.ContactsContract.CommonDataKinds.GroupMembership}.
+</p>
+<p>
+    Se estiver projetando um adaptador de sincronização que adicionará dados de contato bruto ao Provedor de Contatos
+    a partir de servidores e não estiver usando grupos, será necessário fazer com que
+    o provedor torne os dados visíveis. No código que é executado quando um usuário adiciona uma conta
+    ao dispositivo, atualize a linha {@link android.provider.ContactsContract.Settings}
+    que o Provedor de Contatos adicionou para a conta. Nessa linha, defina o valor da
+    coluna {@link android.provider.ContactsContract.SettingsColumns#UNGROUPED_VISIBLE
+    Settings.UNGROUPED_VISIBLE} como 1. Ao fazê-lo, o Provedor de Contatos sempre
+    deixará os dados de contatos visíveis, mesmo sem usar grupos.
+</p>
+<h3 id="Photos">Fotos de contatos</h3>
+<p>
+    A tabela {@link android.provider.ContactsContract.Data} armazena fotos como linhas com tipo MIME
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE}. A coluna
+    {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID} da linha é vinculada
+    à coluna {@code android.provider.BaseColumns#_ID} do contato bruto à qual pertence.
+    A classe {@link android.provider.ContactsContract.Contacts.Photo} define uma subtabela de
+    {@link android.provider.ContactsContract.Contacts} contendo informações de foto
+    de uma foto principal do contato, que é a foto principal do contato bruto principal do contato. Da mesma forma,
+    a classe {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} define uma subtabela
+    de {@link android.provider.ContactsContract.RawContacts} contendo informações de foto
+    de uma foto principal do contato bruto.
+</p>
+<p>
+    A documentação de referência de {@link android.provider.ContactsContract.Contacts.Photo} e
+    {@link android.provider.ContactsContract.RawContacts.DisplayPhoto} contém exemplos
+    de recuperação de informações de foto. Não há classe conveniente para recuperar a miniatura
+    principal de um contato bruto, mas é possível enviar uma consulta
+    à tabela {@link android.provider.ContactsContract.Data}, selecionando no {@code android.provider.BaseColumns#_ID}
+    do contato bruto, o
+    {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
+    Photo.CONTENT_ITEM_TYPE} e a coluna
+    {@link android.provider.ContactsContract.Data#IS_PRIMARY} para encontrar a linha da foto principal do contato bruto.
+</p>
+<p>
+    Dados de fluxos sociais de uma pessoa também podem conter fotos. Elas são armazenadas
+    na tabela {@code android.provider.ContactsContract.StreamItemPhotos}, que é descrita com mais
+    detalhes na seção <a href="#StreamPhotos">Fotos de fluxos sociais</a>.
+</p>

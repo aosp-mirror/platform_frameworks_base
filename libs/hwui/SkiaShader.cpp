@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "SkiaShader.h"
 
 #include "Caches.h"
@@ -34,11 +32,18 @@ namespace uirenderer {
 // Support
 ///////////////////////////////////////////////////////////////////////////////
 
-static const GLenum gTileModes[] = {
+static constexpr GLenum gTileModes[] = {
         GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
         GL_REPEAT,          // == SkShader::kRepeat_Mode
         GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
 };
+
+static_assert(gTileModes[SkShader::kClamp_TileMode] == GL_CLAMP_TO_EDGE,
+        "SkShader TileModes have changed");
+static_assert(gTileModes[SkShader::kRepeat_TileMode] == GL_REPEAT,
+        "SkShader TileModes have changed");
+static_assert(gTileModes[SkShader::kMirror_TileMode] == GL_MIRRORED_REPEAT,
+        "SkShader TileModes have changed");
 
 /**
  * This function does not work for n == 0.
@@ -52,7 +57,7 @@ static inline void bindUniformColor(int slot, FloatColor color) {
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->textureState().bindTexture(texture->id);
+    caches->textureState().bindTexture(texture->id());
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -199,7 +204,7 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
         SkiaShaderData::BitmapShaderData* outData) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
-    if (shader.asABitmap(&bitmap, nullptr, xy) != SkShader::kDefault_BitmapType) {
+    if (!shader.isABitmap(&bitmap, nullptr, xy)) {
         return false;
     }
 
@@ -214,8 +219,8 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
 
     outData->bitmapSampler = (*textureUnit)++;
 
-    const float width = outData->bitmapTexture->width;
-    const float height = outData->bitmapTexture->height;
+    const float width = outData->bitmapTexture->width();
+    const float height = outData->bitmapTexture->height();
 
     description->hasBitmap = true;
     if (!caches.extensions().hasNPot()
@@ -267,7 +272,7 @@ SkiaShaderType getComposeSubType(const SkShader& shader) {
     }
 
     // The shader is not a gradient. Check for a bitmap shader.
-    if (shader.asABitmap(nullptr, nullptr, nullptr) == SkShader::kDefault_BitmapType) {
+    if (shader.isABitmap()) {
         return kBitmap_SkiaShaderType;
     }
     return kNone_SkiaShaderType;

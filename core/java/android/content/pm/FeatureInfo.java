@@ -20,9 +20,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A single feature that can be requested by an application. This corresponds
- * to information collected from the
- * AndroidManifest.xml's {@code <uses-feature>} tag.
+ * Definition of a single optional hardware or software feature of an Android
+ * device.
+ * <p>
+ * This object is used to represent both features supported by a device and
+ * features requested by an app. Apps can request that certain features be
+ * available as a prerequisite to being installed through the
+ * {@code uses-feature} tag in their manifests.
+ * <p>
+ * Starting in {@link android.os.Build.VERSION_CODES#N}, features can have a
+ * version, which must always be backwards compatible. That is, a device
+ * claiming to support version 3 of a specific feature must support apps
+ * requesting version 1 of that feature.
  */
 public class FeatureInfo implements Parcelable {
     /**
@@ -31,7 +40,20 @@ public class FeatureInfo implements Parcelable {
      * in {@link #reqGlEsVersion}.
      */
     public String name;
-    
+
+    /**
+     * If this object represents a feature supported by a device, this is the
+     * maximum version of this feature supported by the device. The device
+     * implicitly supports all older versions of this feature.
+     * <p>
+     * If this object represents a feature requested by an app, this is the
+     * minimum version of the feature required by the app.
+     * <p>
+     * When a feature version is undefined by a device, it's assumed to be
+     * version 0.
+     */
+    public int version;
+
     /**
      * Default value for {@link #reqGlEsVersion};
      */
@@ -59,15 +81,17 @@ public class FeatureInfo implements Parcelable {
 
     public FeatureInfo(FeatureInfo orig) {
         name = orig.name;
+        version = orig.version;
         reqGlEsVersion = orig.reqGlEsVersion;
         flags = orig.flags;
     }
 
+    @Override
     public String toString() {
         if (name != null) {
             return "FeatureInfo{"
                     + Integer.toHexString(System.identityHashCode(this))
-                    + " " + name + " fl=0x" + Integer.toHexString(flags) + "}";
+                    + " " + name + " v=" + version + " fl=0x" + Integer.toHexString(flags) + "}";
         } else {
             return "FeatureInfo{"
                     + Integer.toHexString(System.identityHashCode(this))
@@ -76,21 +100,25 @@ public class FeatureInfo implements Parcelable {
         }
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(name);
+        dest.writeInt(version);
         dest.writeInt(reqGlEsVersion);
         dest.writeInt(flags);
     }
 
-    public static final Creator<FeatureInfo> CREATOR =
-        new Creator<FeatureInfo>() {
+    public static final Creator<FeatureInfo> CREATOR = new Creator<FeatureInfo>() {
+        @Override
         public FeatureInfo createFromParcel(Parcel source) {
             return new FeatureInfo(source);
         }
+        @Override
         public FeatureInfo[] newArray(int size) {
             return new FeatureInfo[size];
         }
@@ -98,6 +126,7 @@ public class FeatureInfo implements Parcelable {
 
     private FeatureInfo(Parcel source) {
         name = source.readString();
+        version = source.readInt();
         reqGlEsVersion = source.readInt();
         flags = source.readInt();
     }

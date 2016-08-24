@@ -65,6 +65,11 @@ public class EditText extends TextView {
     }
 
     @Override
+    public boolean getFreezesText() {
+        return true;
+    }
+
+    @Override
     protected boolean getDefaultEditable() {
         return true;
     }
@@ -112,6 +117,16 @@ public class EditText extends TextView {
         Selection.extendSelection(getText(), index);
     }
 
+    /**
+     * Causes words in the text that are longer than the view's width to be ellipsized instead of
+     * broken in the middle. {@link TextUtils.TruncateAt#MARQUEE
+     * TextUtils.TruncateAt#MARQUEE} is not supported.
+     *
+     * @param ellipsis Type of ellipsis to be applied.
+     * @throws IllegalArgumentException When the value of <code>ellipsis</code> parameter is
+     *      {@link TextUtils.TruncateAt#MARQUEE}.
+     * @see TextView#setEllipsize(TextUtils.TruncateAt)
+     */
     @Override
     public void setEllipsize(TextUtils.TruncateAt ellipsis) {
         if (ellipsis == TextUtils.TruncateAt.MARQUEE) {
@@ -128,20 +143,10 @@ public class EditText extends TextView {
 
     /** @hide */
     @Override
-    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SET_TEXT: {
-                CharSequence text = (arguments != null) ? arguments.getCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE) : null;
-                setText(text);
-                if (text != null && text.length() > 0) {
-                    setSelection(text.length());
-                }
-                return true;
-            }
-            default: {
-                return super.performAccessibilityActionInternal(action, arguments);
-            }
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (isEnabled()) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT);
         }
     }
 }

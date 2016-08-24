@@ -21,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -43,7 +42,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private boolean mCollapseSnoozes;
     private NotificationPanelView mPanel;
     private ExpandableNotificationRow mPickedChild;
-    private final int mNotificationsTopPadding;
 
     public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
             NotificationStackScrollLayout stackScroller,
@@ -54,8 +52,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         Context context = stackScroller.getContext();
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
-        mNotificationsTopPadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.notifications_top_padding);
     }
 
     public boolean isTrackingHeadsUp() {
@@ -80,14 +76,11 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 mInitialTouchX = x;
                 setTrackingHeadsUp(false);
                 ExpandableView child = mStackScroller.getChildAtRawPosition(x, y);
-                if (child == null && y < mNotificationsTopPadding) {
-                    // We should also allow drags from the margin above the heads up
-                    child = mStackScroller.getChildAtRawPosition(x, y + mNotificationsTopPadding);
-                }
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
                     mPickedChild = (ExpandableNotificationRow) child;
-                    mTouchingHeadsUpView = mPickedChild.isHeadsUp() && mPickedChild.isPinned();
+                    mTouchingHeadsUpView = !mStackScroller.isExpanded()
+                            && mPickedChild.isHeadsUp() && mPickedChild.isPinned();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -112,10 +105,11 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     int expandedHeight = mPickedChild.getActualHeight();
                     mPanel.setPanelScrimMinFraction((float) expandedHeight
                             / mPanel.getMaxPanelHeight());
-                    mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight
-                            + mNotificationsTopPadding);
-                    mPanel.clearNotificattonEffects();
+                    mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight);
+                    // This call needs to be after the expansion start otherwise we will get a
+                    // flicker of one frame as it's not expanded yet.
                     mHeadsUpManager.unpinAll();
+                    mPanel.clearNotificationEffects();
                     return true;
                 }
                 break;

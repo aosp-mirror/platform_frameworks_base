@@ -1,0 +1,494 @@
+page.title=Optimizing for Doze and App Standby
+page.metaDescription=Test and optimize your app for the power-saving features in Android 6.0.
+page.tags=doze, app standby, marshmallow, alarms
+meta.tags="battery", "marshmallow", "alarms"
+page.image=images/cards/card-doze_16-9_2x.png
+
+
+parent.link=index.html
+
+trainingnavtop=true
+next.title=Monitoring the Battery Level and Charging State
+next.link=battery-monitoring.html
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#understand_doze">Understanding Doze</a>
+      <ol>
+        <li><a href="#restrictions">Doze restrictions</a></li>
+        <li><a href="#assessing_your_app">Adapting your app to Doze</a></li>
+      </ol>
+      </li>
+      <li><a href="#understand_app_standby">Understanding App Standby</a></li>
+      <li><a href="#using_gcm">Using GCM to Interact with Your App</a></li>
+      <li><a href="#support_for_other_use_cases">Support for Other Use Cases</a></li>
+      <li><a href="#testing_doze_and_app_standby">Testing with Doze and App
+Standby</a>
+      <ol>
+        <li><a href="#testing_doze">Testing your app with Doze</a></li>
+        <li><a href="#testing_your_app_with_app_standby">Testing your app with App Standby</a></li>
+      </ol>
+      </li>
+      <li><a href="#whitelisting-cases">Acceptable Use Cases for Whitelisting</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Starting from Android 6.0 (API level 23), Android introduces two
+  power-saving features that extend battery life for users by managing how apps behave when a
+  device is not connected to a power source. <em>Doze</em> reduces battery consumption by deferring
+  background CPU and network activity for apps when the device is unused for long periods
+  of time. <em>App Standby</em> defers background network activity for apps
+  with which the user has not recently interacted.
+</p>
+
+<p>
+  Doze and App Standby manage the behavior of all apps running on Android 6.0
+  or higher, regardless whether they are specifically targeting API level 23.
+  To ensure the best experience for users, test your app in Doze and App
+  Standby modes and make any necessary adjustments to your code. The sections
+  below provide details.
+</p>
+
+
+<h2 id="understand_doze">Understanding Doze</h2>
+<p>
+  If a user leaves a device unplugged and stationary for a period of time, with
+  the screen off, the device enters Doze mode. In Doze mode, the system
+  attempts to conserve battery by restricting apps' access to network and
+  CPU-intensive services. It also prevents apps from accessing the network and
+  defers their jobs, syncs, and standard alarms.
+</p>
+
+<p>
+  Periodically, the system exits Doze for a brief time to let apps complete
+  their deferred activities. During this <em>maintenance window</em>, the
+  system runs all pending syncs, jobs, and alarms, and lets apps access the
+  network.
+</p>
+
+<div style="margin:1em 0em;">
+  <img src="{@docRoot}images/training/doze.png">
+  <p class="img-caption" style="text-align:center;">
+    <strong>Figure 1.</strong> Doze provides a recurring maintenance window for apps to use the
+    network and handle pending activities.
+  </p>
+</div>
+
+<p>
+  At the conclusion of each maintenance window, the system again enters Doze,
+  suspending network access and deferring jobs, syncs, and alarms. Over time,
+  the system schedules maintenance windows less and less frequently, helping to
+  reduce battery consumption in cases of longer-term inactivity when the device is not
+  connected to a charger.
+</p>
+
+
+<p>
+  As soon as the user wakes the device by moving it, turning on the screen, or
+  connecting a charger, the system exits Doze and all apps return to normal
+  activity.
+</p>
+
+
+<h3 id="restrictions">Doze restrictions</h3>
+
+<p>
+  The following restrictions apply to your apps while in Doze:
+</p>
+
+<ul>
+  <li>Network access is suspended.
+  </li>
+
+  <li>The system ignores <a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">
+  wake locks</a>.
+  </li>
+
+  <li>Standard {@link android.app.AlarmManager} alarms (including {@link
+  android.app.AlarmManager#setExact(int, long, android.app.PendingIntent) setExact()} and
+  {@link android.app.AlarmManager#setWindow(int, long, long,
+  android.app.PendingIntent) setWindow()}) are deferred to the next maintenance window.
+  </li>
+
+  <li style="list-style: none; display: inline">
+    <ul>
+      <li>If you need to set alarms that fire while in Doze, use {@link
+      android.app.AlarmManager#setAndAllowWhileIdle(int,long,android.app.PendingIntent)
+      setAndAllowWhileIdle()}
+      or {@link android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
+      android.app.PendingIntent) setExactAndAllowWhileIdle()}.
+      </li>
+
+      <li>Alarms set with {@link
+      android.app.AlarmManager#setAlarmClock(android.app.AlarmManager.AlarmClockInfo,
+      android.app.PendingIntent) setAlarmClock()} continue to fire normally &mdash; the system
+      exits Doze shortly before those alarms fire.
+      </li>
+    </ul>
+  </li>
+
+  <li>The system does not perform Wi-Fi scans.
+  </li>
+
+  <li>The system does not allow
+  <a href="{@docRoot}reference/android/content/AbstractThreadedSyncAdapter.html">sync adapters</a>
+  to run.
+  </li>
+
+  <li>The system does not allow {@link android.app.job.JobScheduler} to run.
+  </li>
+</ul>
+
+
+<div id="qv-wrapper">
+<div id="qv" style="width:300px">
+<h2>Doze checklist</h2>
+<ol>
+<ul>
+  <li>If possible, use GCM for <a href=
+  "https://developers.google.com/cloud-messaging/downstream">downstream
+  messaging</a>.
+  </li>
+
+  <li>If your users must see a notification right away, make sure to use a <a href=
+  "https://developers.google.com/cloud-messaging/concept-options#setting-the-priority-of-a-message">GCM
+  high priority message</a>.
+  </li>
+
+  <li>Provide sufficient information within the initial <a href=
+  "https://developers.google.com/cloud-messaging/concept-options#payload">message
+  payload</a>, so subsequent network access is unnecessary.
+  </li>
+
+  <li>Set critical alarms with {@link
+  android.app.AlarmManager#setAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setAndAllowWhileIdle()} and {@link
+  android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setExactAndAllowWhileIdle()}.
+  </li>
+
+  <li>
+    <a href="#testing_doze">Test your app in Doze.</a>
+  </li>
+</ul>
+</ol>
+</div>
+</div>
+
+<h3 id="assessing_your_app">Adapting your app to Doze</h3>
+
+<p>
+  Doze can affect apps differently, depending on the capabilities they offer
+  and the services they use. Many apps function normally across Doze
+  cycles without modification. In some cases, you must optimize the way
+  that your app manages network, alarms, jobs, and syncs. Apps should be able
+  to efficiently manage activities during each maintenance window.
+</p>
+<p>
+  Doze is particularly likely to affect activities that {@link android.app.AlarmManager} alarms and
+  timers manage, because alarms in Android 5.1 (API level 22) or lower do not fire when the system
+  is in Doze.
+</p>
+
+<p>
+  To help with scheduling alarms, Android 6.0 (API level 23) introduces two new
+  {@link android.app.AlarmManager} methods: {@link
+  android.app.AlarmManager#setAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setAndAllowWhileIdle()} and {@link
+  android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setExactAndAllowWhileIdle()}. With these methods,
+  you can set alarms that will fire even if the device is in Doze.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Neither {@link
+  android.app.AlarmManager#setAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setAndAllowWhileIdle()} nor {@link
+  android.app.AlarmManager#setExactAndAllowWhileIdle(int, long,
+  android.app.PendingIntent) setExactAndAllowWhileIdle()} can fire alarms more
+  than once per 9 minutes, per app.
+</p>
+
+<p>
+  The Doze restriction on network access is also likely to affect your app,
+  especially if the app relies on real-time messages such as tickles or
+  notifications. If your app requires a persistent connection to the network to
+  receive messages, you should use <a href="#using_gcm">Google Cloud Messaging (GCM)</a>
+  if possible.
+</p>
+
+<p>
+  To confirm that your app behaves as expected with Doze, you can use adb commands to force the
+  system to enter and exit Doze and observe your app’s behavior. For details, see
+  <a href="#testing_doze_and_app_standby">Testing with Doze and App Standby</a>.
+</p>
+
+<h2 id="understand_app_standby">Understanding App Standby</h2>
+
+<p>
+  App Standby allows the system to determine that an app is idle when the user
+  is not actively using it. The system makes this determination when the user
+  does not touch the app for a certain period of time and none of the following
+  conditions applies:
+</p>
+
+<ul>
+  <li>The user explicitly launches the app.
+  </li>
+
+  <li>The app has a process currently in the foreground (either as an activity
+  or foreground service, or in use by another activity or foreground service).
+  </li>
+
+  <li>The app generates a notification that users see on the lock screen or in
+  the notification tray.
+  </li>
+</ul>
+
+<p>
+  When the user plugs the device into a power supply, the system releases apps
+  from the standby state, allowing them to freely access the network and to
+  execute any pending jobs and syncs. If the device is idle for long periods of
+  time, the system allows idle apps network access around once a day.
+</p>
+
+<h2 id="using_gcm">Using GCM to Interact with Your App While the Device is Idle</h2>
+
+<p>
+  <a href="https://developers.google.com/cloud-messaging/">Google Cloud
+  Messaging (GCM)</a> is a cloud-to-device service that lets you support
+  real-time downstream messaging between backend services and apps on
+  Android devices. GCM provides a single, persistent connection to the cloud; all apps needing
+  real-time messaging can share this connection. This shared
+  connection significantly optimizes battery consumption by making it unnecessary for
+  multiple apps to maintain their own, separate persistent connections, which can
+  deplete the battery rapidly. For this reason, if your app requires messaging integration with a
+  backend service, we strongly recommend that you <strong>use GCM if possible</strong>, rather than
+  maintaining your own persistent network connection.
+</p>
+
+<p>
+  GCM is optimized to work with Doze and App Standby idle modes by means of
+  <a href="https://developers.google.com/cloud-messaging/concept-options#setting-the-priority-of-a-message">
+  high-priority GCM messages</a>. GCM high-priority messages let you reliably wake your app to
+  access the network, even if the user’s device is in Doze or the app is in App Standby mode.
+  In Doze or App Standby mode, the system delivers the message and gives the
+  app temporary access to network services and partial wakelocks, then returns the device or app
+  to idle state.
+</p>
+
+<p>
+  High-priority GCM messages do not otherwise affect Doze mode, and they don’t
+  affect the state of any other app. This means that your app can use them to communicate
+  efficiently while minimizing battery impacts across the system and device.
+</p>
+
+<p>
+  As a general best practice, if your app requires downstream messaging, it
+  should use GCM. If your server and client already uses GCM, make sure that your service uses
+  high-priority messages for critical messages, since this will reliably
+  wake apps even when the device is in Doze.
+</p>
+
+<h2 id="support_for_other_use_cases">Support for Other Use Cases</h2>
+
+<p>
+  Almost all apps should be able to support Doze by managing network connectivity, alarms,
+  jobs, and syncs properly, and using GCM high-priority messages. For a narrow
+  set of use cases, this might not be sufficient. For such cases, the system
+  provides a configurable whitelist of apps that are <strong>partially
+  exempt</strong> from Doze and App Standby optimizations.
+</p>
+
+<p>
+  An app that is whitelisted can use the network and hold
+
+  <a href="{@docRoot}reference/android/os/PowerManager.html#PARTIAL_WAKE_LOCK">
+  partial wake locks</a> during Doze and
+  App Standby. However, <strong>other restrictions still apply</strong> to the
+  whitelisted app, just as they do to other apps. For example, the whitelisted
+  app’s jobs and syncs are deferred, and its regular {@link android.app.AlarmManager} alarms do not
+  fire. An app can check whether it is currently on the exemption whitelist by
+  calling {@link
+  android.os.PowerManager#isIgnoringBatteryOptimizations(java.lang.String)
+  isIgnoringBatteryOptimizations()}.
+  </li>
+</p>
+
+<p>
+  Users can manually configure the whitelist in <strong>Settings &gt; Battery
+  &gt; Battery Optimization.</strong> Alternatively, the system provides
+  ways for apps to ask users to whitelist them.
+
+</p>
+
+<ul>
+  <li>An app can fire the {@link
+  android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS} intent
+  to take the user directly to the <strong>Battery Optimization</strong>, where they can
+  add the app.
+  </li>
+
+  <li>An app holding the {@link
+  android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS} permission
+  can trigger a system dialog to let the user add the app to the whitelist
+  directly, without going to settings. The app fires a {@link
+  android.provider.Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS} Intent
+  to trigger the dialog.
+  </li>
+
+  <li>The user can manually remove apps from the whitelist as needed.
+  </li>
+</ul>
+
+<p>Before asking the user to add your app to the whitelist, make sure the app
+
+matches the <a href="#whitelisting-cases">acceptable use cases</a> for whitelisting.</p>
+
+
+<p class="caution">
+  <strong>Note:</strong> Google Play policies prohibit apps from requesting
+  direct exemption from Power Management features in Android 6.0+ (Doze and App
+  Standby) unless the core function of the app is adversely affected.
+</p>
+
+<h2 id="testing_doze_and_app_standby">Testing with Doze and App Standby</h2>
+
+<p>
+  To ensure a great experience for your users, you should test your app fully
+  in Doze and App Standby.
+</p>
+
+<h3 id="testing_doze">Testing your app with Doze</h4>
+
+<p>You can test Doze mode by following these steps:</p>
+<ol>
+  <li>Configure a hardware device or virtual device with an Android 6.0 (API
+  level 23) or higher system image.
+  </li>
+
+  <li>Connect the device to your development machine and install your app.
+  </li>
+
+  <li>Run your app and leave it active.
+  </li>
+
+  <li>Shut off the device screen. (The app remains active.)
+  </li>
+
+  <li>Force the system to cycle through Doze modes by running the following
+  commands:
+
+  <pre class="no-pretty-print">
+$ adb shell dumpsys battery unplug
+$ adb shell dumpsys deviceidle step</pre>
+
+  <p>You may need to run the second command more than once. Repeat it until
+  the device state changes to idle.</p>
+  </li>
+
+  <li> Observe the behavior of your app after you reactivate the device. Make
+  sure the app recovers gracefully when the device exits Doze.
+  </li>
+</ol>
+
+<h3 id="testing_your_app_with_app_standby">Testing your app with App Standby</h4>
+
+<p>To test the App Standby mode with your app:</p>
+
+<ol>
+  <li> Configure a hardware device or virtual device with an Android 6.0 (API level
+  23) or higher system image.
+  </li>
+  <li> Connect the device to your development machine and install your app.</li>
+  <li> Run your app and leave it active.</li>
+  <li> Force the app into App Standby mode by running the following commands:
+
+  <pre class="no-pretty-print">$ adb shell dumpsys battery unplug
+$ adb shell am set-inactive &lt;packageName&gt; true</pre>
+  <li>Simulate waking your app using the following commands:
+
+  <pre class="no-pretty-print">$ adb shell am set-inactive &lt;packageName&gt; false
+$ adb shell am get-inactive &lt;packageName&gt;</pre>
+  </li>
+  <li>Observe the behavior of your app after waking it. Make sure the app recovers gracefully
+    from standby mode. In particular, you should check if your app's Notifications and background
+    jobs continue to function as expected.
+  </li>
+</ol>
+
+
+<h2 id="whitelisting-cases">Acceptable Use Cases for Whitelisting</h2>
+
+<p>The table below highlights the acceptable use cases for requesting or being on
+   the Battery Optimizations exceptions whitelist. In general, your app should not be on the
+   whitelist unless Doze or App Standby break the core function of the app or there is a
+   technical reason why your app cannot use GCM high-priority messages.</p>
+
+   <p>For more information, see <a href="#support_for_other_use_cases">Support for Other Use Cases
+   </a>.</p>
+
+<table>
+ <tr>
+    <th>Type</td>
+    <th>Use-case</td>
+    <th>Can use GCM?</td>
+    <th>Whitelisting acceptable?</td>
+    <th>Notes</td>
+ </tr>
+
+ <tr>
+    <td rowspan="2">Instant messaging, chat, or calling app. </td>
+    <td rowspan="3">Requires delivery of real-time messages to users while device is in Doze or app
+    is in App Standby.</td>
+    <td>Yes, using GCM</td>
+    <td rowspan="2" style="color:red">Not Acceptable</td>
+    <td rowspan="2">Should use GCM high-priority messages to wake the app and access the network.</td>
+ </tr>
+
+ <tr>
+    <td>Yes, but is not using GCM high-priority messages.</td>
+ </tr>
+
+ <tr>
+    <td rowspan="1">Instant messaging, chat, or calling app;
+    enterprise VOIP apps.</td>
+    <td>No, can not use GCM because of technical dependency on another messaging
+    service or Doze and App Standby break the core function of the app.</td>
+    <td style="color:green">Acceptable</td>
+    <td></td>
+ </tr>
+
+  <tr>
+    <td rowspan="1">Task automation app</td>
+    <td>App's core function is scheduling automated actions, such as for instant
+    messaging, voice calling, new photo management, or location actions.</td>
+    <td>If applicable.</td>
+    <td style="color:green">Acceptable</td>
+    <td></td>
+ </tr>
+
+  <tr>
+    <td rowspan="2">Peripheral device companion app</td>
+    <td>App's core function is maintaining a persistent connection with the peripheral
+    device for the purpose of providing the peripheral device internet access.</td>
+    <td >If applicable.</td>
+    <td style="color:green">Acceptable</td>
+    <td rowspan="2"></td>
+  </tr>
+
+  <tr>
+    <td>App only needs to connect to a peripheral device periodically to sync, or only
+    needs to connect to devices, such as wireless headphones, connected via standard
+    Bluetooth profiles.</td>
+    <td >If applicable.</td>
+    <td style="color:red">Not Acceptable</td>
+  </tr>
+</table>
+
+

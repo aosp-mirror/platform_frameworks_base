@@ -8,11 +8,12 @@
                  android:process="system"
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
-                 android:icon="@mipmap/ic_launcher_settings">
-                 
-    <!-- todo add: android:neverEncrypt="true" -->
+                 android:icon="@mipmap/ic_launcher_settings"
+                 android:defaultToDeviceProtectedStorage="true"
+                 android:directBootAware="true">
 
-        <provider android:name="SettingsProvider" android:authorities="settings"
+        <provider android:name="SettingsProvider"
+                  android:authorities="settings"
                   android:multiprocess="false"
                   android:exported="true"
                   android:singleUser="true"

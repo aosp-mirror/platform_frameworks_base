@@ -51,6 +51,30 @@ public abstract class CarrierMessagingService extends Service {
             = "android.service.carrier.CarrierMessagingService";
 
     /**
+     * The default bitmask value passed to the callback of {@link #onReceiveTextSms} with all
+     * {@code RECEIVE_OPTIONS_x} flags cleared to indicate that the message should be kept and a
+     * new message notification should be shown.
+     *
+     * @see #RECEIVE_OPTIONS_DROP
+     * @see #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE
+     */
+    public static final int RECEIVE_OPTIONS_DEFAULT = 0;
+
+    /**
+     * Used to set the flag in the bitmask passed to the callback of {@link #onReceiveTextSms} to
+     * indicate that the inbound SMS should be dropped.
+     */
+    public static final int RECEIVE_OPTIONS_DROP = 0x1;
+
+    /**
+     * Used to set the flag in the bitmask passed to the callback of {@link #onReceiveTextSms} to
+     * indicate that a new message notification should not be shown to the user when the
+     * credential-encrypted storage of the device is not available before the user unlocks the
+     * phone. It is only applicable to devices that support file-based encryption.
+     */
+    public static final int RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE = 0x2;
+
+    /**
      * Indicates that an SMS or MMS message was successfully sent.
      */
     public static final int SEND_STATUS_OK = 0;
@@ -96,7 +120,9 @@ public abstract class CarrierMessagingService extends Service {
      * @param subId SMS subscription ID of the SIM
      * @param callback result callback. Call with {@code true} to keep an inbound SMS message and
      *        deliver to SMS apps, and {@code false} to drop the message.
+     * @deprecated Use {@link #onReceiveTextSms} instead.
      */
+    @Deprecated
     public void onFilterSms(@NonNull MessagePdu pdu, @NonNull String format, int destPort,
             int subId, @NonNull ResultCallback<Boolean> callback) {
         // optional
@@ -104,6 +130,36 @@ public abstract class CarrierMessagingService extends Service {
             callback.onReceiveResult(true);
         } catch (RemoteException ex) {
         }
+    }
+
+    /**
+     * Override this method to filter inbound SMS messages.
+     *
+     * <p>This method will be called once for every incoming text SMS. You can invoke the callback
+     * with a bitmask to tell the platform how to handle the SMS. For a SMS received on a
+     * file-based encryption capable device while the credential-encrypted storage is not available,
+     * this method will be called for the second time when the credential-encrypted storage becomes
+     * available after the user unlocks the phone, if the bit {@link #RECEIVE_OPTIONS_DROP} is not
+     * set when invoking the callback.
+     *
+     * @param pdu the PDUs of the message
+     * @param format the format of the PDUs, typically "3gpp" or "3gpp2"
+     * @param destPort the destination port of a binary SMS, this will be -1 for text SMS
+     * @param subId SMS subscription ID of the SIM
+     * @param callback result callback. Call with a bitmask integer to indicate how the incoming
+     *        text SMS should be handled by the platform. Use {@link #RECEIVE_OPTIONS_DROP} and
+     *        {@link #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE}
+     *        to set the flags in the bitmask.
+     */
+    public void onReceiveTextSms(@NonNull MessagePdu pdu, @NonNull String format,
+            int destPort, int subId, @NonNull final ResultCallback<Integer> callback) {
+        onFilterSms(pdu, format, destPort, subId, new ResultCallback<Boolean>() {
+            @Override
+            public void onReceiveResult(Boolean result) throws RemoteException {
+                callback.onReceiveResult(result ? RECEIVE_OPTIONS_DEFAULT : RECEIVE_OPTIONS_DROP
+                    | RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE);
+            }
+        });
     }
 
     /**
@@ -408,10 +464,11 @@ public abstract class CarrierMessagingService extends Service {
         @Override
         public void filterSms(MessagePdu pdu, String format, int destPort,
                               int subId, final ICarrierMessagingCallback callback) {
-            onFilterSms(pdu, format, destPort, subId, new ResultCallback<Boolean>() {
+            onReceiveTextSms(pdu, format, destPort, subId,
+                new ResultCallback<Integer>() {
                     @Override
-                    public void onReceiveResult(final Boolean result) throws RemoteException {
-                        callback.onFilterComplete(result);
+                    public void onReceiveResult(Integer options) throws RemoteException {
+                        callback.onFilterComplete(options);
                     }
                 });
         }

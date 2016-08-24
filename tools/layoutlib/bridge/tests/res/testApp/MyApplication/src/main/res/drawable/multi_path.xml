@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="76dp"
+        android:width="76dp"
+        android:viewportHeight="48"
+        android:viewportWidth="48">
+
+    <group
+        android:name="root"
+        android:translateX="24.0"
+        android:translateY="24.0">
+        <!--
+            This is the same as the material indeterminate progressbar which involves drawing
+            several cubic segments
+        -->
+        <path
+            android:pathData="M0, 0 m 0, -19 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
+            android:strokeColor="#00FF00"
+            android:strokeLineCap="square"
+            android:strokeLineJoin="miter"
+            android:strokeWidth="1"
+            android:trimPathEnd="0.8"
+            android:trimPathStart="0.3" />
+        <!-- Same figure with reversed end and start -->
+        <path
+            android:pathData="M0, 0 m 0, -12 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
+            android:strokeColor="#FFFF00"
+            android:strokeLineCap="square"
+            android:strokeLineJoin="miter"
+            android:strokeWidth="1"
+            android:trimPathEnd="0.3"
+            android:trimPathStart="0.8" />
+
+        <!--
+            Draw a few partial quadratic segments
+        -->
+        <path
+            android:strokeWidth="2"
+            android:strokeColor="#FFFF00"
+            android:pathData="M2,2 Q 5 30 15 0"
+            android:trimPathStart="0.1"
+            android:trimPathEnd="0.9"
+        />
+
+        <!--
+            Draw a line
+        -->
+        <path
+            android:strokeWidth="3"
+            android:strokeColor="#00FFFF"
+            android:pathData="M-10,-10 L 10, 10"
+            android:trimPathStart="0.2"
+            android:trimPathEnd="0.8"
+        />
+
+        <!--
+            Draw a line with gradient stroke color
+        -->
+        <path
+            android:strokeWidth="1"
+            android:strokeColor="#FF00FF"
+            android:fillColor="@color/gradient"
+            android:pathData="M-20,-20 l0, 10 l10, 0 l0, -10 l-10,0 "
+        />
+
+        <!--
+            Draw squares with different fill types
+        -->
+        <path
+            android:fillType="evenOdd"
+            android:strokeWidth="1"
+            android:strokeColor="#AABBCC"
+            android:fillColor="#AAEFCC"
+            android:pathData="M-20,-40 l0, 10 l10, 0 l0, -10 l-10,0 m5,0 l0, 10 l10, 0 l0, -10 l-10,0"
+        />
+
+        <path
+            android:fillType="nonZero"
+            android:strokeWidth="1"
+            android:strokeColor="#AABBCC"
+            android:fillColor="#AAEFCC"
+            android:pathData="M0,-40 l0, 10 l10, 0 l0, -10 l-10,0 m5,0 l0, 10 l10, 0 l0, -10 l-10,0"
+        />
+    </group>
+
+</vector>

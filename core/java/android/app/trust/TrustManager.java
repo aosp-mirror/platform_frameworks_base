@@ -16,19 +16,16 @@
 
 package android.app.trust;
 
-import android.annotation.IntDef;
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.Log;
-import android.util.SparseIntArray;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.android.internal.widget.LockPatternUtils;
 
 /**
  * See {@link com.android.server.trust.TrustManagerService}
@@ -51,6 +48,24 @@ public class TrustManager {
     }
 
     /**
+     * Changes the lock status for the given user. This is only applicable to Managed Profiles,
+     * other users should be handled by Keyguard.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param userId The id for the user to be locked/unlocked.
+     * @param locked The value for that user's locked state.
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
+    public void setDeviceLockedForUser(int userId, boolean locked) {
+        try {
+            mService.setDeviceLockedForUser(userId, locked);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Reports that user {@param userId} has tried to unlock the device.
      *
      * @param successful if true, the unlock attempt was successful.
@@ -61,7 +76,7 @@ public class TrustManager {
         try {
             mService.reportUnlockAttempt(successful, userId);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -74,7 +89,7 @@ public class TrustManager {
         try {
             mService.reportEnabledTrustAgentsChanged(userId);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -87,7 +102,7 @@ public class TrustManager {
         try {
             mService.reportKeyguardShowingChanged();
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -118,7 +133,7 @@ public class TrustManager {
             mService.registerTrustListener(iTrustListener);
             mTrustListeners.put(trustListener, iTrustListener);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -133,13 +148,22 @@ public class TrustManager {
             try {
                 mService.unregisterTrustListener(iTrustListener);
             } catch (RemoteException e) {
-                onError(e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
 
-    private void onError(Exception e) {
-        Log.e(TAG, "Error while calling TrustManagerService", e);
+    /**
+     * @return whether {@param userId} has enabled and configured trust agents. Ignores short-term
+     * unavailability of trust due to {@link LockPatternUtils.StrongAuthTracker}.
+     */
+    @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
+    public boolean isTrustUsuallyManaged(int userId) {
+        try {
+            return mService.isTrustUsuallyManaged(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {

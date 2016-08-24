@@ -28,15 +28,22 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     String getString(in String key, in String defaultValue, in int userId);
     void setLockPattern(in String pattern, in String savedPattern, int userId);
+    void resetKeyStore(int userId);
     VerifyCredentialResponse checkPattern(in String pattern, int userId);
     VerifyCredentialResponse verifyPattern(in String pattern, long challenge, int userId);
     void setLockPassword(in String password, in String savedPassword, int userId);
     VerifyCredentialResponse checkPassword(in String password, int userId);
     VerifyCredentialResponse verifyPassword(in String password, long challenge, int userId);
+    VerifyCredentialResponse verifyTiedProfileChallenge(String password, boolean isPattern, long challenge, int userId);
     boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);
+    void setSeparateProfileChallengeEnabled(int userId, boolean enabled, String managedUserPassword);
+    boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
     void unregisterStrongAuthTracker(in IStrongAuthTracker tracker);
     void requireStrongAuth(int strongAuthReason, int userId);
+    void systemReady();
+    void userPresent(int userId);
+    int getStrongAuthForUser(int userId);
 }

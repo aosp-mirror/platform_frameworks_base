@@ -80,6 +80,10 @@ option java_package com.android.server
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
 # a notification emited noise, vibration, or light
 27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1)
+# a notification was added to a autogroup
+27533 notification_autogrouped (key|3)
+# notification was removed from an autogroup
+275534 notification_unautogrouped (key|3)
 
 # ---------------------------
 # Watchdog.java
@@ -107,6 +111,8 @@ option java_package com.android.server
 2825 backup_success (Packages|1|1),(Time|1|3)
 2826 backup_reset (Transport|3)
 2827 backup_initialize
+2828 backup_requested (Total|1|1),(Key-Value|1|1),(Full|1|1)
+2829 backup_quota_exceeded (Package|3)
 2830 restore_start (Transport|3),(Source|2|5)
 2831 restore_transport_failure
 2832 restore_agent_failure (Package|3),(Message|3)
@@ -118,6 +124,7 @@ option java_package com.android.server
 2842 full_backup_transport_failure
 2843 full_backup_success (Package|3)
 2844 full_restore_package (Package|3)
+2845 full_backup_quota_exceeded (Package|3)
 
 2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
 
@@ -161,11 +168,13 @@ option java_package com.android.server
 # Task removed with source explanation.
 31003 wm_task_removed (TaskId|1|5),(Reason|3)
 # Stack created.
-31004 wm_stack_created (StackId|1|5),(RelativeBoxId|1|5),(Position|1),(Weight|1|6)
+31004 wm_stack_created (StackId|1|5)
 # Home stack moved to top (1) or bottom (0).
 31005 wm_home_stack_moved (ToTop|1)
 # Stack removed.
 31006 wm_stack_removed (StackId|1|5)
+# bootanim finished:
+31007 wm_boot_animation_done (time|2|3)
 
 
 # ---------------------------
@@ -192,6 +201,8 @@ option java_package com.android.server
 34006 device_idle_off_start (reason|3)
 34007 device_idle_off_phase (what|3)
 34008 device_idle_off_complete
+34009 device_idle_light (state|1|5), (reason|3)
+34010 device_idle_light_step
 
 # ---------------------------
 # DisplayManagerService.java

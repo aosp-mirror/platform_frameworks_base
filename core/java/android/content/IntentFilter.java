@@ -449,11 +449,12 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
-     * Modify priority of this filter.  The default priority is 0. Positive
-     * values will be before the default, lower values will be after it.
-     * Applications must use a value that is larger than
-     * {@link #SYSTEM_LOW_PRIORITY} and smaller than
-     * {@link #SYSTEM_HIGH_PRIORITY} .
+     * Modify priority of this filter.  This only affects receiver filters.
+     * The priority of activity filters are set in XML and cannot be changed
+     * programatically. The default priority is 0. Positive values will be
+     * before the default, lower values will be after it. Applications should
+     * use a value that is larger than {@link #SYSTEM_LOW_PRIORITY} and
+     * smaller than {@link #SYSTEM_HIGH_PRIORITY} .
      *
      * @param priority The new priority value.
      *
@@ -883,6 +884,15 @@ public class IntentFilter implements Parcelable {
             return true;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof AuthorityEntry) {
+                final AuthorityEntry other = (AuthorityEntry)obj;
+                return match(other);
+            }
+            return false;
+        }
+
         /**
          * Determine whether this AuthorityEntry matches the given data Uri.
          * <em>Note that this comparison is case-sensitive, unlike formal
@@ -917,7 +927,7 @@ public class IntentFilter implements Parcelable {
             }
             return MATCH_CATEGORY_HOST;
         }
-    };
+    }
 
     /**
      * Add a new Intent data "scheme specific part" to match against.  The filter must

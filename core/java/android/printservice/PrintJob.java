@@ -16,11 +16,18 @@
 
 package android.printservice;
 
+import android.annotation.FloatRange;
+import android.annotation.MainThread;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.content.Context;
 import android.os.RemoteException;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.text.TextUtils;
 import android.util.Log;
+import com.android.internal.util.Preconditions;
 
 /**
  * This class represents a print job from the perspective of a print
@@ -41,7 +48,12 @@ public final class PrintJob {
 
     private PrintJobInfo mCachedInfo;
 
-    PrintJob(PrintJobInfo jobInfo, IPrintServiceClient client) {
+    /** Context that created the object */
+    private final Context mContext;
+
+    PrintJob(@NonNull Context context, @NonNull PrintJobInfo jobInfo,
+            @NonNull IPrintServiceClient client) {
+        mContext = context;
         mCachedInfo = jobInfo;
         mPrintServiceClient = client;
         mDocument = new PrintDocument(mCachedInfo.getId(), client,
@@ -53,6 +65,7 @@ public final class PrintJob {
      *
      * @return The id.
      */
+    @MainThread
     public PrintJobId getId() {
         PrintService.throwIfNotCalledOnMainThread();
         return mCachedInfo.getId();
@@ -68,7 +81,8 @@ public final class PrintJob {
      *
      * @return The print job info.
      */
-    public PrintJobInfo getInfo() {
+    @MainThread
+    public @NonNull PrintJobInfo getInfo() {
         PrintService.throwIfNotCalledOnMainThread();
         if (isInImmutableState()) {
             return mCachedInfo;
@@ -90,7 +104,8 @@ public final class PrintJob {
      *
      * @return The document.
      */
-    public PrintDocument getDocument() {
+    @MainThread
+    public @NonNull PrintDocument getDocument() {
         PrintService.throwIfNotCalledOnMainThread();
         return mDocument;
     }
@@ -104,6 +119,7 @@ public final class PrintJob {
      * @see #start()
      * @see #cancel()
      */
+    @MainThread
     public boolean isQueued() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_QUEUED;
@@ -117,8 +133,9 @@ public final class PrintJob {
      *
      * @see #complete()
      * @see #cancel()
-     * @see #fail(CharSequence)
+     * @see #fail(String)
      */
+    @MainThread
     public boolean isStarted() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_STARTED;
@@ -132,8 +149,9 @@ public final class PrintJob {
      *
      * @see #start()
      * @see #cancel()
-     * @see #fail(CharSequence)
+     * @see #fail(String)
      */
+    @MainThread
     public boolean isBlocked() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_BLOCKED;
@@ -147,6 +165,7 @@ public final class PrintJob {
      *
      * @see #complete()
      */
+    @MainThread
     public boolean isCompleted() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_COMPLETED;
@@ -158,8 +177,9 @@ public final class PrintJob {
      *
      * @return Whether the print job is failed.
      *
-     * @see #fail(CharSequence)
+     * @see #fail(String)
      */
+    @MainThread
     public boolean isFailed() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_FAILED;
@@ -173,6 +193,7 @@ public final class PrintJob {
      *
      * @see #cancel()
      */
+    @MainThread
     public boolean isCancelled() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_CANCELED;
@@ -182,12 +203,16 @@ public final class PrintJob {
      * Starts the print job. You should call this method if {@link
      * #isQueued()} or {@link #isBlocked()} returns true and you started
      * resumed printing.
+     * <p>
+     * This resets the print status to null. Set the new status by using {@link #setStatus}.
+     * </p>
      *
      * @return Whether the job was started.
      *
      * @see #isQueued()
      * @see #isBlocked()
      */
+    @MainThread
     public boolean start() {
         PrintService.throwIfNotCalledOnMainThread();
         final int state = getInfo().getState();
@@ -199,24 +224,23 @@ public final class PrintJob {
     }
 
     /**
-     * Blocks the print job. You should call this method if {@link
-     * #isStarted()} or {@link #isBlocked()} returns true and you need
-     * to block the print job. For example, the user has to add some
-     * paper to continue printing. To resume the print job call {@link
-     * #start()}.
+     * Blocks the print job. You should call this method if {@link #isStarted()} returns true and
+     * you need to block the print job. For example, the user has to add some paper to continue
+     * printing. To resume the print job call {@link #start()}. To change the reason call
+     * {@link #setStatus(CharSequence)}.
      *
+     * @param reason The human readable, short, and translated reason why the print job is blocked.
      * @return Whether the job was blocked.
      *
      * @see #isStarted()
      * @see #isBlocked()
      */
-    public boolean block(String reason) {
+    @MainThread
+    public boolean block(@Nullable String reason) {
         PrintService.throwIfNotCalledOnMainThread();
         PrintJobInfo info = getInfo();
         final int state = info.getState();
-        if (state == PrintJobInfo.STATE_STARTED
-                || (state == PrintJobInfo.STATE_BLOCKED
-                        && !TextUtils.equals(info.getStateReason(), reason))) {
+        if (state == PrintJobInfo.STATE_STARTED || state == PrintJobInfo.STATE_BLOCKED) {
             return setState(PrintJobInfo.STATE_BLOCKED, reason);
         }
         return false;
@@ -230,6 +254,7 @@ public final class PrintJob {
      *
      * @see #isStarted()
      */
+    @MainThread
     public boolean complete() {
         PrintService.throwIfNotCalledOnMainThread();
         if (isStarted()) {
@@ -251,7 +276,8 @@ public final class PrintJob {
      * @see #isStarted()
      * @see #isBlocked()
      */
-    public boolean fail(String error) {
+    @MainThread
+    public boolean fail(@Nullable String error) {
         PrintService.throwIfNotCalledOnMainThread();
         if (!isInImmutableState()) {
             return setState(PrintJobInfo.STATE_FAILED, error);
@@ -271,12 +297,69 @@ public final class PrintJob {
      * @see #isQueued()
      * @see #isBlocked()
      */
+    @MainThread
     public boolean cancel() {
         PrintService.throwIfNotCalledOnMainThread();
         if (!isInImmutableState()) {
             return setState(PrintJobInfo.STATE_CANCELED, null);
         }
         return false;
+    }
+
+    /**
+     * Sets the progress of this print job as a fraction of 1.
+     *
+     * @param progress The new progress
+     */
+    @MainThread
+    public void setProgress(@FloatRange(from=0.0, to=1.0) float progress) {
+        PrintService.throwIfNotCalledOnMainThread();
+
+        try {
+            mPrintServiceClient.setProgress(mCachedInfo.getId(), progress);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting progress for job: " + mCachedInfo.getId(), re);
+        }
+    }
+
+    /**
+     * Sets the status of this print job. This should be a human readable, short, and translated
+     * description of the current state of the print job.
+     * <p />
+     * This overrides any previously set status set via {@link #setStatus(CharSequence)},
+     * {@link #setStatus(int)}, {@link #block(String)}, or {@link #fail(String)},
+     *
+     * @param status The new status. If null the status will be empty.
+     */
+    @MainThread
+    public void setStatus(@Nullable CharSequence status) {
+        PrintService.throwIfNotCalledOnMainThread();
+
+        try {
+            mPrintServiceClient.setStatus(mCachedInfo.getId(), status);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting status for job: " + mCachedInfo.getId(), re);
+        }
+    }
+
+    /**
+     * Sets the status of this print job as a string resource.
+     * <p />
+     * This overrides any previously set status set via {@link #setStatus(CharSequence)},
+     * {@link #setStatus(int)}, {@link #block(String)}, or {@link #fail(String)},
+     *
+     * @param statusResId The new status as a String resource. If 0 the status will be empty.
+     */
+    @MainThread
+    public void setStatus(@StringRes int statusResId) {
+        PrintService.throwIfNotCalledOnMainThread();
+
+        try {
+            mPrintServiceClient.setStatusRes(mCachedInfo.getId(), statusResId,
+                    mContext.getPackageName());
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error setting status for job: " + mCachedInfo.getId(), re);
+        }
     }
 
     /**
@@ -288,7 +371,8 @@ public final class PrintJob {
      * @param tag The tag.
      * @return True if the tag was set, false otherwise.
      */
-    public boolean setTag(String tag) {
+    @MainThread
+    public boolean setTag(@NonNull String tag) {
         PrintService.throwIfNotCalledOnMainThread();
         if (isInImmutableState()) {
             return false;
@@ -308,7 +392,8 @@ public final class PrintJob {
      *
      * @see #setTag(String)
      */
-    public String getTag() {
+    @MainThread
+    public @Nullable String getTag() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getTag();
     }
@@ -319,6 +404,7 @@ public final class PrintJob {
      * @param key The option key.
      * @return The option value.
      */
+    @MainThread
     public String getAdvancedStringOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getAdvancedStringOption(key);
@@ -331,6 +417,7 @@ public final class PrintJob {
      * @param key The option key.
      * @return Whether the option is present.
      */
+    @MainThread
     public boolean hasAdvancedOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().hasAdvancedOption(key);
@@ -342,6 +429,7 @@ public final class PrintJob {
      * @param key The option key.
      * @return The option value.
      */
+    @MainThread
     public int getAdvancedIntOption(String key) {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getAdvancedIntOption(key);
@@ -374,14 +462,14 @@ public final class PrintJob {
                 || state == PrintJobInfo.STATE_FAILED;
     }
 
-    private boolean setState(int state, String error) {
+    private boolean setState(int state, @Nullable String error) {
         try {
             if (mPrintServiceClient.setPrintJobState(mCachedInfo.getId(), state, error)) {
                 // Best effort - update the state of the cached info since
                 // we may not be able to re-fetch it later if the job gets
                 // removed from the spooler as a result of the state change.
                 mCachedInfo.setState(state);
-                mCachedInfo.setStateReason(error);
+                mCachedInfo.setStatus(error);
                 return true;
             }
         } catch (RemoteException re) {

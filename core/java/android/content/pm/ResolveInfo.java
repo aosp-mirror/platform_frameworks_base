@@ -61,6 +61,19 @@ public class ResolveInfo implements Parcelable {
     public ProviderInfo providerInfo;
 
     /**
+     * The ephemeral application that corresponds to this resolution match. This will
+     * only be set in specific circumstances.
+     * @hide
+     */
+    public EphemeralResolveInfo ephemeralResolveInfo;
+
+    /**
+     * A ResolveInfo that points at the ephemeral installer.
+     * @hide
+     */
+    public ResolveInfo ephemeralInstaller;
+
+    /**
      * The IntentFilter that was matched for this ResolveInfo.
      */
     public IntentFilter filter;
@@ -159,7 +172,8 @@ public class ResolveInfo implements Parcelable {
      */
     public boolean handleAllWebDataURI;
 
-    private ComponentInfo getComponentInfo() {
+    /** {@hide} */
+    public ComponentInfo getComponentInfo() {
         if (activityInfo != null) return activityInfo;
         if (serviceInfo != null) return serviceInfo;
         if (providerInfo != null) return providerInfo;
@@ -260,6 +274,11 @@ public class ResolveInfo implements Parcelable {
     }
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, PackageItemInfo.DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, int flags) {
         if (filter != null) {
             pw.println(prefix + "Filter:");
             filter.dump(pw, prefix + "  ");
@@ -279,16 +298,16 @@ public class ResolveInfo implements Parcelable {
         }
         if (activityInfo != null) {
             pw.println(prefix + "ActivityInfo:");
-            activityInfo.dump(pw, prefix + "  ");
+            activityInfo.dump(pw, prefix + "  ", flags);
         } else if (serviceInfo != null) {
             pw.println(prefix + "ServiceInfo:");
-            serviceInfo.dump(pw, prefix + "  ");
+            serviceInfo.dump(pw, prefix + "  ", flags);
         } else if (providerInfo != null) {
             pw.println(prefix + "ProviderInfo:");
-            providerInfo.dump(pw, prefix + "  ");
+            providerInfo.dump(pw, prefix + "  ", flags);
         }
     }
-    
+
     public ResolveInfo() {
         targetUserId = UserHandle.USER_CURRENT;
     }

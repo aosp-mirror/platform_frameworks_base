@@ -1,0 +1,111 @@
+page.title=Android Wear 2.0 Developer Preview
+page.tags="wear","wear-preview"
+meta.tags="wear","preview"
+fullpage=true
+forcelocalnav=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<script>
+  $(document).ready(function() {
+    if (useUpdatedTemplates) {
+      $("#useUpdatedTemplates").css("display","block");
+    } else {
+      $("#useOldTemplates").css("display","block");
+    }
+  })
+</script>
+
+<section class="dac-expand dac-hero dac-light" style="background-color:#FFFFFF">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+    <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+      <div class="col-7of16 col-push-9of16" style="padding-left:2em">
+        <h1 class="dac-hero-title">Android Wear 2.0 Developer Preview</h1>
+        <p class="dac-hero-description">
+          Get ready for the next version of Android Wear!
+          Support <strong>stand-alone</strong> Wear devices and apps.
+          Create <strong>enhanced user interaction</strong> and
+          <strong>glanceable experiences</strong>.
+          Test your apps on <strong>Wear devices</strong>.
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}wear/preview/program.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Learn about the Preview
+        </a>
+        <a class="dac-hero-cta" href="https://www.google.com/design/spec-wear">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Material Design for Wear
+        </a>
+      </div>
+      <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
+        <img class="dac-hero-image" src="{@docRoot}wear/preview/images/hero-1x.png"
+             srcset="{@docRoot}wear/preview/images/hero-1x.png 1x,
+             {@docRoot}wear/preview/images/hero-2x.png 2x">
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:wear/preview/landing"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="http://g.co/wearpreviewbug">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Report an issue
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="http://g.co/androidweardev">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Join developer community
+        </a>
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end .dac-actions -->
+
+<div id="useOldTemplates" style="display:none;color:black" class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+
+    <div class="actions">
+      <div><a href="{@docRoot}wear/preview/bug">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Report an issue
+      </a></div>
+      <div><a href="http://g.co/androidweardev">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Join developer community
+      </a></div>
+    </div><!-- end .actions -->
+  </div><!-- end .wrap -->
+</div>
+
+<section class="dac-section dac-light"><div class="wrap">
+  <h1 class="dac-section-title">Resources</h1>
+  <div class="dac-section-subtitle">
+    Essential information to help you get your apps ready for the next version of Android Wear.
+  </div>
+
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:wear/preview/landing/resources"
+       data-cardSizes="6x6"
+       data-items-per-page="6"
+       data-maxResults="15"
+       data-initial-results="6"></div>
+
+  </div>
+</section>
+

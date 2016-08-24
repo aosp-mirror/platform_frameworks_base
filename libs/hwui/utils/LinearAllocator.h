@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <type_traits>
 
+#include <vector>
+
 namespace android {
 namespace uirenderer {
 
@@ -50,30 +52,43 @@ public:
      * The lifetime of the returned buffers is tied to that of the LinearAllocator. If calling
      * delete() on an object stored in a buffer is needed, it should be overridden to use
      * rewindIfLastAlloc()
-     */
-    void* alloc(size_t size);
-
-    /**
-     * Allocates an instance of the template type with the default constructor
-     * and adds it to the automatic destruction list.
+     *
+     * Note that unlike create, for alloc the type is purely for compile-time error
+     * checking and does not affect size.
      */
     template<class T>
-    T* alloc() {
-        T* ret = new (*this) T;
-        autoDestroy(ret);
-        return ret;
+    void* alloc(size_t size) {
+        static_assert(std::is_trivially_destructible<T>::value,
+                "Error, type is non-trivial! did you mean to use create()?");
+        return allocImpl(size);
     }
 
     /**
-     * Adds the pointer to the tracking list to have its destructor called
-     * when the LinearAllocator is destroyed.
+     * Allocates an instance of the template type with the given construction parameters
+     * and adds it to the automatic destruction list.
      */
-    template<class T>
-    void autoDestroy(T* addr) {
+    template<class T, typename... Params>
+    T* create(Params&&... params) {
+        T* ret = new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
         if (!std::is_trivially_destructible<T>::value) {
-            auto dtor = [](void* addr) { ((T*)addr)->~T(); };
-            addToDestructionList(dtor, addr);
+            auto dtor = [](void* ret) { ((T*)ret)->~T(); };
+            addToDestructionList(dtor, ret);
         }
+        return ret;
+    }
+
+    template<class T, typename... Params>
+    T* create_trivial(Params&&... params) {
+        static_assert(std::is_trivially_destructible<T>::value,
+                "Error, called create_trivial on a non-trivial type");
+        return new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
+    }
+
+    template<class T>
+    T* create_trivial_array(int count) {
+        static_assert(std::is_trivially_destructible<T>::value,
+                "Error, called create_trivial_array on a non-trivial type");
+        return reinterpret_cast<T*>(allocImpl(sizeof(T) * count));
     }
 
     /**
@@ -112,6 +127,8 @@ private:
         DestructorNode* next = nullptr;
     };
 
+    void* allocImpl(size_t size);
+
     void addToDestructionList(Destructor, void* addr);
     void runDestructorFor(void* addr);
     Page* newPage(size_t pageSize);
@@ -134,9 +151,55 @@ private:
     size_t mDedicatedPageCount;
 };
 
+template <class T>
+class LinearStdAllocator {
+public:
+    typedef T value_type; // needed to implement std::allocator
+    typedef T* pointer; // needed to implement std::allocator
+
+    LinearStdAllocator(LinearAllocator& allocator)
+            : linearAllocator(allocator) {}
+    LinearStdAllocator(const LinearStdAllocator& other)
+            : linearAllocator(other.linearAllocator) {}
+    ~LinearStdAllocator() {}
+
+    // rebind marks that allocators can be rebound to different types
+    template <class U>
+    struct rebind {
+        typedef LinearStdAllocator<U> other;
+    };
+    // enable allocators to be constructed from other templated types
+    template <class U>
+    LinearStdAllocator(const LinearStdAllocator<U>& other)
+            : linearAllocator(other.linearAllocator) {}
+
+    T* allocate(size_t num, const void* = 0) {
+        return (T*)(linearAllocator.alloc<void*>(num * sizeof(T)));
+    }
+
+    void deallocate(pointer p, size_t num) {
+        // attempt to rewind, but no guarantees
+        linearAllocator.rewindIfLastAlloc(p, num * sizeof(T));
+    }
+
+    // public so template copy constructor can access
+    LinearAllocator& linearAllocator;
+};
+
+// return that all specializations of LinearStdAllocator are interchangeable
+template <class T1, class T2>
+bool operator== (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return true; }
+template <class T1, class T2>
+bool operator!= (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) { return false; }
+
+template <class T>
+class LsaVector : public std::vector<T, LinearStdAllocator<T>> {
+public:
+    LsaVector(const LinearStdAllocator<T>& allocator)
+            : std::vector<T, LinearStdAllocator<T>>(allocator) {}
+};
+
 }; // namespace uirenderer
 }; // namespace android
-
-void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la);
 
 #endif // ANDROID_LINEARALLOCATOR_H

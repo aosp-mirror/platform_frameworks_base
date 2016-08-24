@@ -29,6 +29,7 @@ public class WifiPowerCalculator extends PowerCalculator {
     private final double mTxCurrentMa;
     private final double mRxCurrentMa;
     private double mTotalAppPowerDrain = 0;
+    private long mTotalAppRunningTime = 0;
 
     public WifiPowerCalculator(PowerProfile profile) {
         mIdleCurrentMa = profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE);
@@ -39,11 +40,17 @@ public class WifiPowerCalculator extends PowerCalculator {
     @Override
     public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
                              long rawUptimeUs, int statsType) {
-        final long idleTime = u.getWifiControllerActivity(BatteryStats.CONTROLLER_IDLE_TIME,
-                statsType);
-        final long txTime = u.getWifiControllerActivity(BatteryStats.CONTROLLER_TX_TIME, statsType);
-        final long rxTime = u.getWifiControllerActivity(BatteryStats.CONTROLLER_RX_TIME, statsType);
+        final BatteryStats.ControllerActivityCounter counter = u.getWifiControllerActivity();
+        if (counter == null) {
+            return;
+        }
+
+        final long idleTime = counter.getIdleTimeCounter().getCountLocked(statsType);
+        final long txTime = counter.getTxTimeCounters()[0].getCountLocked(statsType);
+        final long rxTime = counter.getRxTimeCounter().getCountLocked(statsType);
         app.wifiRunningTimeMs = idleTime + rxTime + txTime;
+        mTotalAppRunningTime += app.wifiRunningTimeMs;
+
         app.wifiPowerMah =
                 ((idleTime * mIdleCurrentMa) + (txTime * mTxCurrentMa) + (rxTime * mRxCurrentMa))
                 / (1000*60*60);
@@ -67,16 +74,17 @@ public class WifiPowerCalculator extends PowerCalculator {
     @Override
     public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
                                    long rawUptimeUs, int statsType) {
-        final long idleTimeMs = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_IDLE_TIME,
-                statsType);
-        final long rxTimeMs = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_RX_TIME,
-                statsType);
-        final long txTimeMs = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_TX_TIME,
-                statsType);
-        app.wifiRunningTimeMs = idleTimeMs + rxTimeMs + txTimeMs;
+        final BatteryStats.ControllerActivityCounter counter = stats.getWifiControllerActivity();
 
-        double powerDrainMah = stats.getWifiControllerActivity(BatteryStats.CONTROLLER_POWER_DRAIN,
-                statsType) / (double)(1000*60*60);
+        final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(statsType);
+        final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(statsType);
+        final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(statsType);
+
+        app.wifiRunningTimeMs = Math.max(0,
+                (idleTimeMs + rxTimeMs + txTimeMs) - mTotalAppRunningTime);
+
+        double powerDrainMah = counter.getPowerCounter().getCountLocked(statsType)
+                / (double)(1000*60*60);
         if (powerDrainMah == 0) {
             // Some controllers do not report power drain, so we can calculate it here.
             powerDrainMah = ((idleTimeMs * mIdleCurrentMa) + (txTimeMs * mTxCurrentMa)
@@ -92,5 +100,6 @@ public class WifiPowerCalculator extends PowerCalculator {
     @Override
     public void reset() {
         mTotalAppPowerDrain = 0;
+        mTotalAppRunningTime = 0;
     }
 }

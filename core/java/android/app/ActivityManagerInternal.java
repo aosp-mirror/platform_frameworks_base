@@ -18,6 +18,13 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.IIntentSender;
+import android.os.IBinder;
+import android.service.voice.IVoiceInteractionSession;
+
+import com.android.internal.app.IVoiceInteractor;
+
+import java.util.List;
 
 /**
  * Activity manager local system service interface.
@@ -25,6 +32,31 @@ import android.content.ComponentName;
  * @hide Only for use within the system server.
  */
 public abstract class ActivityManagerInternal {
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because we had
+     * the surface saved.
+     */
+    public static final int APP_TRANSITION_SAVED_SURFACE = 0;
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because we drew
+     * the starting window.
+     */
+    public static final int APP_TRANSITION_STARTING_WINDOW = 1;
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because we all
+     * app windows were drawn
+     */
+    public static final int APP_TRANSITION_WINDOWS_DRAWN = 2;
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because of a
+     * timeout.
+     */
+    public static final int APP_TRANSITION_TIMEOUT = 3;
+
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
@@ -44,6 +76,7 @@ public abstract class ActivityManagerInternal {
      * with underlying activities.
      */
     public static abstract class SleepToken {
+
         /**
          * Releases the sleep token.
          */
@@ -52,7 +85,70 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Returns home activity for the specified user.
+     *
      * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}
      */
     public abstract ComponentName getHomeActivityForUser(int userId);
+
+    /**
+     * Called when a user has been deleted. This can happen during normal device usage
+     * or just at startup, when partially removed users are purged. Any state persisted by the
+     * ActivityManager should be purged now.
+     *
+     * @param userId The user being cleaned up.
+     */
+    public abstract void onUserRemoved(int userId);
+
+    public abstract void onLocalVoiceInteractionStarted(IBinder callingActivity,
+            IVoiceInteractionSession mSession,
+            IVoiceInteractor mInteractor);
+
+    /**
+     * Callback for window manager to let activity manager know that the starting window has been
+     * drawn
+     */
+    public abstract void notifyStartingWindowDrawn();
+
+    /**
+     * Callback for window manager to let activity manager know that we are finally starting the
+     * app transition;
+     *
+     * @param reason The reason why the app transition started. Must be one of the APP_TRANSITION_*
+     *               values.
+     */
+    public abstract void notifyAppTransitionStarting(int reason);
+
+    /**
+     * Callback for window manager to let activity manager know that the app transition was
+     * cancelled.
+     */
+    public abstract void notifyAppTransitionCancelled();
+
+    /**
+     * Callback for window manager to let activity manager know that the app transition is finished.
+     */
+    public abstract void notifyAppTransitionFinished();
+
+    /**
+     * Returns the top activity from each of the currently visible stacks. The first entry will be
+     * the focused activity.
+     */
+    public abstract List<IBinder> getTopVisibleActivities();
+
+    /**
+     * Callback for window manager to let activity manager know that docked stack changes its
+     * minimized state.
+     */
+    public abstract void notifyDockedStackMinimizedChanged(boolean minimized);
+
+    /**
+     * Kill foreground apps from the specified user.
+     */
+    public abstract void killForegroundAppsForUser(int userHandle);
+
+    /**
+     *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
+     *  such as Power Save mode.
+     */
+    public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
 }

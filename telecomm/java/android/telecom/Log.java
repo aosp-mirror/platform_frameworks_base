@@ -16,6 +16,11 @@
 
 package android.telecom;
 
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.telephony.PhoneNumberUtils;
+import android.text.TextUtils;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.IllegalFormatException;
@@ -38,7 +43,28 @@ final public class Log {
     public static final boolean WARN = isLoggable(android.util.Log.WARN);
     public static final boolean ERROR = isLoggable(android.util.Log.ERROR);
 
+    private static MessageDigest sMessageDigest;
+    private static final Object sMessageDigestLock = new Object();
+
     private Log() {}
+
+    public static void initMd5Sum() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            public Void doInBackground(Void... args) {
+                MessageDigest md;
+                try {
+                    md = MessageDigest.getInstance("SHA-1");
+                } catch (NoSuchAlgorithmException e) {
+                    md = null;
+                }
+                synchronized (sMessageDigestLock) {
+                    sMessageDigest = md;
+                }
+                return null;
+            }
+        }.execute();
+    }
 
     public static boolean isLoggable(int level) {
         return FORCE_LOGGING || android.util.Log.isLoggable(TAG, level);
@@ -132,20 +158,48 @@ final public class Log {
     public static String pii(Object pii) {
         if (pii == null || VERBOSE) {
             return String.valueOf(pii);
+        } if (pii instanceof Uri) {
+            return piiUri((Uri) pii);
         }
         return "[" + secureHash(String.valueOf(pii).getBytes()) + "]";
     }
 
-    private static String secureHash(byte[] input) {
-        MessageDigest messageDigest;
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            return null;
+    private static String piiUri(Uri handle) {
+        StringBuilder sb = new StringBuilder();
+        String scheme = handle.getScheme();
+        if (!TextUtils.isEmpty(scheme)) {
+            sb.append(scheme).append(":");
         }
-        messageDigest.update(input);
-        byte[] result = messageDigest.digest();
-        return encodeHex(result);
+        String value = handle.getSchemeSpecificPart();
+        if (!TextUtils.isEmpty(value)) {
+            for (int i = 0; i < value.length(); i++) {
+                char c = value.charAt(i);
+                if (PhoneNumberUtils.isStartsPostDial(c)) {
+                    sb.append(c);
+                } else if (PhoneNumberUtils.isDialable(c)) {
+                    sb.append("*");
+                } else if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')) {
+                    sb.append("*");
+                } else {
+                    sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
+
+    }
+
+    private static String secureHash(byte[] input) {
+        synchronized (sMessageDigestLock) {
+            if (sMessageDigest != null) {
+                sMessageDigest.reset();
+                sMessageDigest.update(input);
+                byte[] result = sMessageDigest.digest();
+                return encodeHex(result);
+            } else {
+                return "Uninitialized SHA1";
+            }
+        }
     }
 
     private static String encodeHex(byte[] bytes) {

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+** Copyright 2012, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+-->
+
+<!-- Extends RelativeLayout -->
+<com.android.systemui.statusbar.phone.QuickStatusBarHeader
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/status_bar_header_height"
+    android:layout_gravity="@integer/notification_panel_layout_gravity"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:baselineAligned="false"
+    android:clickable="false"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="12dp">
+
+        <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ripple_drawable" >
+            <ImageView android:id="@+id/multi_user_avatar"
+                android:layout_width="@dimen/multi_user_avatar_expanded_size"
+                android:layout_height="@dimen/multi_user_avatar_expanded_size"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"/>
+        </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+            android:id="@+id/settings_button_container"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <com.android.systemui.statusbar.phone.SettingsButton android:id="@+id/settings_button"
+                style="@android:style/Widget.Material.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/ripple_drawable"
+                android:src="@drawable/ic_settings"
+                android:contentDescription="@string/accessibility_quick_settings_settings" />
+            <com.android.systemui.statusbar.AlphaOptimizedImageView android:id="@+id/tuner_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="36dp"
+                android:tint="#4DFFFFFF"
+                android:tintMode="src_in"
+                android:visibility="invisible"
+                android:src="@drawable/tuner" />
+
+        </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+
+        <com.android.systemui.statusbar.phone.ExpandableIndicator
+            android:id="@+id/expand_indicator"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clipToPadding="false"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/accessibility_quick_settings_expand"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/header_emergency_calls_only"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:visibility="gone"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
+        android:text="@*android:string/emergency_calls_only"
+        android:singleLine="true"
+        android:gravity="center_vertical"
+        android:focusable="true" />
+
+    <include
+        android:id="@+id/date_time_alarm_group"
+        layout="@layout/status_bar_alarm_group"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" />
+
+    <com.android.systemui.qs.QuickQSPanel
+        android:id="@+id/quick_qs_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_alignParentEnd="true"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:importantForAccessibility="yes"
+        android:focusable="true"
+        android:accessibilityTraversalAfter="@+id/date_time_group"
+        android:accessibilityTraversalBefore="@id/expand_indicator" />
+
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
+        android:id="@+id/qs_detail_header_progress"
+        android:src="@drawable/indeterminate_anim"
+        android:alpha="0"
+        android:background="@color/qs_detail_progress_track"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        />
+
+    <TextView
+        android:id="@+id/header_debug_info"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="11dp"
+        android:textStyle="bold"
+        android:textColor="#00A040"
+        android:padding="2dp"
+        />
+
+</com.android.systemui.statusbar.phone.QuickStatusBarHeader>

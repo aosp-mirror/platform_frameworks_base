@@ -14,9 +14,10 @@
      limitations under the License.
 -->
 
+<!-- Used for the text of a bordered colored button. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
           android:alpha="?attr/disabledAlpha"
-          android:color="?attr/textColorSecondary" />
-    <item android:color="?attr/colorAccent"/>
+          android:color="?attr/textColorPrimary" />
+    <item android:color="?attr/textColorPrimaryInverse" />
 </selector>

@@ -16,8 +16,10 @@
 
 package android.media.tv;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -56,7 +58,7 @@ import java.util.Queue;
  * TV inputs available on the system can be obtained by calling
  * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
  *
- * <p>Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+ * <p>Once the application supplies the URI for a specific TV channel to {@link #tune}
  * method, it takes care of underlying service binding (and unbinding if the current TvView is
  * already bound to a service) and automatically allocates/deallocates resources needed. In addition
  * to a few essential methods to control how the contents are presented, it also provides a way to
@@ -206,13 +208,18 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets the Z order of a window owning the surface of this TvView above the normal TvView
-     * but below an application.
+     * Controls whether the TvView's surface is placed on top of another regular surface view in the
+     * window (but still behind the window itself).
+     * This is typically used to place overlays on top of an underlying TvView.
      *
-     * @see SurfaceView#setZOrderMediaOverlay
-     * @hide
+     * <p>Note that this must be set before the TvView's containing window is attached to the
+     * window manager.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
+     *
+     * @param isMediaOverlay {@code true} to be on top of another regular surface, {@code false}
+     *            otherwise.
      */
-    @SystemApi
     public void setZOrderMediaOverlay(boolean isMediaOverlay) {
         if (isMediaOverlay) {
             mWindowZOrder = ZORDER_MEDIA_OVERLAY;
@@ -230,12 +237,18 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Sets the Z order of a window owning the surface of this TvView on top of an application.
+     * Controls whether the TvView's surface is placed on top of its window. Normally it is placed
+     * behind the window, to allow it to (for the most part) appear to composite with the views in
+     * the hierarchy.  By setting this, you cause it to be placed above the window. This means that
+     * none of the contents of the window this TvView is in will be visible on top of its surface.
      *
-     * @see SurfaceView#setZOrderOnTop
-     * @hide
+     * <p>Note that this must be set before the TvView's containing window is attached to the window
+     * manager.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     *
+     * @param onTop {@code true} to be on top of its window, {@code false} otherwise.
      */
-    @SystemApi
     public void setZOrderOnTop(boolean onTop) {
         if (onTop) {
             mWindowZOrder = ZORDER_ON_TOP;
@@ -259,7 +272,7 @@ public class TvView extends ViewGroup {
      *
      * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
      */
-    public void setStreamVolume(float volume) {
+    public void setStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume) {
         if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
         mStreamVolume = volume;
         if (mSession == null) {
@@ -280,14 +293,15 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Tunes to a given channel.
+     * Tunes to a given channel. This can be used to provide domain-specific features that are only
+     * known between certain clients and their TV inputs.
      *
      * @param inputId The ID of TV input for the given channel.
      * @param channelUri The URI of a channel.
-     * @param params Extra parameters.
-     * @hide
+     * @param params Domain-specific data for this tune request. Keys <em>must</em> be a scoped
+     *            name, i.e. prefixed with a package name you own, so that different developers will
+     *            not create conflicting keys.
      */
-    @SystemApi
     public void tune(String inputId, Uri channelUri, Bundle params) {
         if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
@@ -360,11 +374,8 @@ public class TvView extends ViewGroup {
      *
      * @param unblockedRating A TvContentRating to unblock.
      * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
-     * @hide
-     * @deprecated Use {@link #unblockContent} instead.
+     * @removed
      */
-    @Deprecated
-    @SystemApi
     public void requestUnblockContent(TvContentRating unblockedRating) {
         unblockContent(unblockedRating);
     }
@@ -379,6 +390,7 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS)
     public void unblockContent(TvContentRating unblockedRating) {
         if (mSession != null) {
             mSession.unblockContent(unblockedRating);
@@ -448,6 +460,37 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Plays a given recorded TV program.
+     *
+     * @param inputId The ID of the TV input that created the given recorded program.
+     * @param recordedProgramUri The URI of a recorded program.
+     */
+    public void timeShiftPlay(String inputId, Uri recordedProgramUri) {
+        if (DEBUG) Log.d(TAG, "timeShiftPlay(" + recordedProgramUri + ")");
+        if (TextUtils.isEmpty(inputId)) {
+            throw new IllegalArgumentException("inputId cannot be null or an empty string");
+        }
+        synchronized (sMainTvViewLock) {
+            if (sMainTvView.get() == null) {
+                sMainTvView = new WeakReference<>(this);
+            }
+        }
+        if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
+            if (mSession != null) {
+                mSession.timeShiftPlay(recordedProgramUri);
+            } else {
+                mSessionCallback.mRecordedProgramUri = recordedProgramUri;
+            }
+        } else {
+            resetInternal();
+            mSessionCallback = new MySessionCallback(inputId, recordedProgramUri);
+            if (mTvInputManager != null) {
+                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+            }
+        }
+    }
+
+    /**
      * Pauses playback. No-op if it is already paused. Call {@link #timeShiftResume} to resume.
      */
     public void timeShiftPause() {
@@ -508,16 +551,14 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
-     * TvInputService.Session.appPrivateCommand()} on the current TvView.
+     * Sends a private command to the underlying TV input. This can be used to provide
+     * domain-specific features that are only known between certain clients and their TV inputs.
      *
      * @param action The name of the private command to send. This <em>must</em> be a scoped name,
      *            i.e. prefixed with a package name you own, so that different developers will not
      *            create conflicting commands.
      * @param data An optional bundle to send with the command.
-     * @hide
      */
-    @SystemApi
     public void sendAppPrivateCommand(@NonNull String action, Bundle data) {
         if (TextUtils.isEmpty(action)) {
             throw new IllegalArgumentException("action cannot be null or an empty string");
@@ -739,6 +780,8 @@ public class TvView extends ViewGroup {
                 super.updateWindow(force, redrawNeeded);
                 relayoutSessionOverlayView();
             }};
+        // The surface view's content should be treated as secure all the time.
+        mSurfaceView.setSecure(true);
         mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
         if (mWindowZOrder == ZORDER_MEDIA_OVERLAY) {
             mSurfaceView.setZOrderMediaOverlay(true);
@@ -807,32 +850,34 @@ public class TvView extends ViewGroup {
     public abstract static class TimeShiftPositionCallback {
 
         /**
-         * This is called when the start playback position is changed.
+         * This is called when the start position for time shifting has changed.
          *
-         * <p>The start playback position of the time shifted program can be adjusted by the TV
-         * input when it cannot retain the whole recorded program due to some reason (e.g.
-         * limitation on storage space). The application should not allow the user to seek to a
-         * position earlier than the start position.
+         * <p>The start position for time shifting indicates the earliest possible time the user can
+         * seek to. Initially this is equivalent to the time when the underlying TV input starts
+         * recording. Later it may be adjusted because there is insufficient space or the duration
+         * of recording is limited. The application must not allow the user to seek to a position
+         * earlier than the start position.
          *
-         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
-         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         * <p>For playback of a recorded program initiated by {@link #timeShiftPlay(String, Uri)},
+         * the start position is the time when playback starts. It does not change.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs The start playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The start position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftStartPositionChanged(String inputId, long timeMs) {
         }
 
         /**
-         * This is called when the current playback position is changed.
+         * This is called when the current position for time shifting has changed.
          *
-         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
-         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         * <p>The current position for time shifting is the same as the current position of
+         * playback. During playback, the current position changes continuously. When paused, it
+         * does not change.
+         *
+         * <p>Note that {@code timeMs} is wall-clock time.
          *
          * @param inputId The ID of the TV input bound to this view.
-         * @param timeMs The current playback position of the time shifted program, in milliseconds
-         *            since the epoch.
+         * @param timeMs The current position for time shifting, in milliseconds since the epoch.
          */
         public void onTimeShiftCurrentPositionChanged(String inputId, long timeMs) {
         }
@@ -862,7 +907,7 @@ public class TvView extends ViewGroup {
 
         /**
          * This is invoked when the channel of this TvView is changed by the underlying TV input
-         * without any {@link TvView#tune(String, Uri)} request.
+         * without any {@link TvView#tune} request.
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param channelUri The URI of a channel.
@@ -924,7 +969,8 @@ public class TvView extends ViewGroup {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          * </ul>
          */
-        public void onVideoUnavailable(String inputId, int reason) {
+        public void onVideoUnavailable(
+                String inputId, @TvInputManager.VideoUnavailableReason int reason) {
         }
 
         /**
@@ -969,7 +1015,8 @@ public class TvView extends ViewGroup {
          * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
          * </ul>
          */
-        public void onTimeShiftStatusChanged(String inputId, int status) {
+        public void onTimeShiftStatusChanged(
+                String inputId, @TvInputManager.TimeShiftStatus int status) {
         }
     }
 
@@ -994,11 +1041,17 @@ public class TvView extends ViewGroup {
         final String mInputId;
         Uri mChannelUri;
         Bundle mTuneParams;
+        Uri mRecordedProgramUri;
 
         MySessionCallback(String inputId, Uri channelUri, Bundle tuneParams) {
             mInputId = inputId;
             mChannelUri = channelUri;
             mTuneParams = tuneParams;
+        }
+
+        MySessionCallback(String inputId, Uri recordedProgramUri) {
+            mInputId = inputId;
+            mRecordedProgramUri = recordedProgramUri;
         }
 
         @Override
@@ -1043,7 +1096,11 @@ public class TvView extends ViewGroup {
                 if (mCaptionEnabled != null) {
                     mSession.setCaptionEnabled(mCaptionEnabled);
                 }
-                mSession.tune(mChannelUri, mTuneParams);
+                if (mChannelUri != null) {
+                    mSession.tune(mChannelUri, mTuneParams);
+                } else {
+                    mSession.timeShiftPlay(mRecordedProgramUri);
+                }
                 ensurePositionTracking();
             } else {
                 mSessionCallback = null;

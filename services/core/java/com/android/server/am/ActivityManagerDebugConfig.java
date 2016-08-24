@@ -46,6 +46,7 @@ class ActivityManagerDebugConfig {
 
     // Available log categories in the activity manager package.
     static final boolean DEBUG_ADD_REMOVE = DEBUG_ALL_ACTIVITIES || false;
+    static final boolean DEBUG_ANR = false;
     static final boolean DEBUG_APP = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_BACKUP = DEBUG_ALL || false;
     static final boolean DEBUG_BROADCAST = DEBUG_ALL || false;
@@ -88,6 +89,8 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBLE_BEHIND = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || false;
+    static final boolean DEBUG_PERMISSIONS_REVIEW = DEBUG_ALL || false;
+    static final boolean DEBUG_WHITELISTS = DEBUG_ALL || false;
 
     static final String POSTFIX_ADD_REMOVE = (APPEND_CATEGORY_NAME) ? "_AddRemove" : "";
     static final String POSTFIX_APP = (APPEND_CATEGORY_NAME) ? "_App" : "";

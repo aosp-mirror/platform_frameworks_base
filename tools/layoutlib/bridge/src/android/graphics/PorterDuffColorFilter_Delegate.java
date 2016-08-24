@@ -48,7 +48,7 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     // ---- delegate data ----
 
-    private final int mSrcColor;
+    private final java.awt.Color mSrcColor;
     private final Mode mMode;
 
 
@@ -66,9 +66,9 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     @Override
     public void applyFilter(Graphics2D g, int width, int height) {
-        BufferedImage image = createFilterImage(width, height);
         g.setComposite(getComposite(mMode, 0xFF));
-        g.drawImage(image, 0, 0, null);
+        g.setColor(mSrcColor);
+        g.fillRect(0, 0, width, height);
     }
 
     // ---- native methods ----
@@ -84,20 +84,8 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
     // ---- Private delegate/helper methods ----
 
     private PorterDuffColorFilter_Delegate(int srcColor, int mode) {
-        mSrcColor = srcColor;
+        mSrcColor = new java.awt.Color(srcColor, true /* hasAlpha */);
         mMode = getCompatibleMode(getPorterDuffMode(mode));
-    }
-
-    private BufferedImage createFilterImage(int width, int height) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics = image.createGraphics();
-        try {
-            graphics.setColor(new java.awt.Color(mSrcColor, true /* hasAlpha */));
-            graphics.fillRect(0, 0, width, height);
-        } finally {
-            graphics.dispose();
-        }
-        return image;
     }
 
     // For filtering the colors, the src image should contain the "color" only for pixel values

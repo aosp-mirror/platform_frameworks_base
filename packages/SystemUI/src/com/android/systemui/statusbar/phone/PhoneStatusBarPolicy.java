@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
-import android.app.IUserSwitchObserver;
-import android.app.StatusBarManager;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +28,6 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -40,13 +39,16 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
+import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
@@ -54,27 +56,34 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  * bar at boot time.  It goes through the normal API for icons, even though it probably
  * strictly doesn't need to.
  */
-public class PhoneStatusBarPolicy implements Callback {
+public class PhoneStatusBarPolicy implements Callback, RotationLockController.RotationLockControllerCallback, DataSaverController.Listener {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String SLOT_CAST = "cast";
-    private static final String SLOT_HOTSPOT = "hotspot";
-    private static final String SLOT_BLUETOOTH = "bluetooth";
-    private static final String SLOT_TTY = "tty";
-    private static final String SLOT_ZEN = "zen";
-    private static final String SLOT_VOLUME = "volume";
-    private static final String SLOT_ALARM_CLOCK = "alarm_clock";
-    private static final String SLOT_MANAGED_PROFILE = "managed_profile";
+    private final String mSlotCast;
+    private final String mSlotHotspot;
+    private final String mSlotBluetooth;
+    private final String mSlotTty;
+    private final String mSlotZen;
+    private final String mSlotVolume;
+    private final String mSlotAlarmClock;
+    private final String mSlotManagedProfile;
+    private final String mSlotRotate;
+    private final String mSlotHeadset;
+    private final String mSlotDataSaver;
 
     private final Context mContext;
-    private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
     private final NextAlarmController mNextAlarm;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
+    private final UserManager mUserManager;
+    private final StatusBarIconController mIconController;
+    private final RotationLockController mRotationLockController;
+    private final DataSaverController mDataSaver;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -87,55 +96,53 @@ public class PhoneStatusBarPolicy implements Callback {
     private int mZen;
 
     private boolean mManagedProfileFocused = false;
-    private boolean mManagedProfileIconVisible = true;
+    private boolean mManagedProfileIconVisible = false;
+    private boolean mManagedProfileInQuietMode = false;
 
-    private boolean mKeyguardVisible = true;
     private BluetoothController mBluetooth;
 
-    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
-                    action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
-                updateVolumeZen();
-            }
-            else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
-                updateSimState(intent);
-            }
-            else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
-                updateTTY(intent);
-            }
-        }
-    };
-
-    private Runnable mRemoveCastIconRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (DEBUG) Log.v(TAG, "updateCast: hiding icon NOW");
-            mService.setIconVisibility(SLOT_CAST, false);
-        }
-    };
-
-    public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot,
-            UserInfoController userInfoController, BluetoothController bluetooth,
-            NextAlarmController nextAlarm) {
+    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
+            CastController cast, HotspotController hotspot, UserInfoController userInfoController,
+            BluetoothController bluetooth, RotationLockController rotationLockController,
+            DataSaverController dataSaver, NextAlarmController nextAlarm) {
         mContext = context;
+        mIconController = iconController;
         mCast = cast;
         mHotspot = hotspot;
         mBluetooth = bluetooth;
         mBluetooth.addStateChangedCallback(this);
-        mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
         mNextAlarm = nextAlarm;
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mUserInfoController = userInfoController;
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mRotationLockController = rotationLockController;
+        mDataSaver = dataSaver;
+
+        mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
+        mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
+        mSlotBluetooth = context.getString(com.android.internal.R.string.status_bar_bluetooth);
+        mSlotTty = context.getString(com.android.internal.R.string.status_bar_tty);
+        mSlotZen = context.getString(com.android.internal.R.string.status_bar_zen);
+        mSlotVolume = context.getString(com.android.internal.R.string.status_bar_volume);
+        mSlotAlarmClock = context.getString(com.android.internal.R.string.status_bar_alarm_clock);
+        mSlotManagedProfile = context.getString(
+                com.android.internal.R.string.status_bar_managed_profile);
+        mSlotRotate = context.getString(com.android.internal.R.string.status_bar_rotate);
+        mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
+        mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
+
+        mRotationLockController.addRotationLockControllerCallback(this);
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(AudioManager.ACTION_HEADSET_PLUG);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // listen for user / profile change.
@@ -146,41 +153,52 @@ public class PhoneStatusBarPolicy implements Callback {
         }
 
         // TTY status
-        mService.setIcon(SLOT_TTY,  R.drawable.stat_sys_tty_mode, 0, null);
-        mService.setIconVisibility(SLOT_TTY, false);
+        mIconController.setIcon(mSlotTty,  R.drawable.stat_sys_tty_mode, null);
+        mIconController.setIconVisibility(mSlotTty, false);
 
         // bluetooth status
         updateBluetooth();
 
         // Alarm clock
-        mService.setIcon(SLOT_ALARM_CLOCK, R.drawable.stat_sys_alarm, 0, null);
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, false);
+        mIconController.setIcon(mSlotAlarmClock, R.drawable.stat_sys_alarm, null);
+        mIconController.setIconVisibility(mSlotAlarmClock, false);
         mNextAlarm.addStateChangedCallback(mNextAlarmCallback);
 
         // zen
-        mService.setIcon(SLOT_ZEN, R.drawable.stat_sys_zen_important, 0, null);
-        mService.setIconVisibility(SLOT_ZEN, false);
+        mIconController.setIcon(mSlotZen, R.drawable.stat_sys_zen_important, null);
+        mIconController.setIconVisibility(mSlotZen, false);
 
         // volume
-        mService.setIcon(SLOT_VOLUME, R.drawable.stat_sys_ringer_vibrate, 0, null);
-        mService.setIconVisibility(SLOT_VOLUME, false);
+        mIconController.setIcon(mSlotVolume, R.drawable.stat_sys_ringer_vibrate, null);
+        mIconController.setIconVisibility(mSlotVolume, false);
         updateVolumeZen();
 
         // cast
-        mService.setIcon(SLOT_CAST, R.drawable.stat_sys_cast, 0, null);
-        mService.setIconVisibility(SLOT_CAST, false);
+        mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
+        mIconController.setIconVisibility(mSlotCast, false);
         mCast.addCallback(mCastCallback);
 
         // hotspot
-        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0,
+        mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
                 mContext.getString(R.string.accessibility_status_bar_hotspot));
-        mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
+        mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
         mHotspot.addCallback(mHotspotCallback);
 
         // managed profile
-        mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0,
+        mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
                 mContext.getString(R.string.accessibility_managed_profile));
-        mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
+        mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
+
+        // data saver
+        mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
+                context.getString(R.string.accessibility_data_saver_on));
+        mIconController.setIconVisibility(mSlotDataSaver, false);
+        mDataSaver.addListener(this);
+    }
+
+    public void setStatusBarKeyguardViewManager(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
     public void setZenMode(int zen) {
@@ -192,32 +210,27 @@ public class PhoneStatusBarPolicy implements Callback {
         final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         final boolean zenNone = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mService.setIcon(SLOT_ALARM_CLOCK, zenNone ? R.drawable.stat_sys_alarm_dim
-                : R.drawable.stat_sys_alarm, 0, null);
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, mCurrentUserSetup && hasAlarm);
+        mIconController.setIcon(mSlotAlarmClock, zenNone ? R.drawable.stat_sys_alarm_dim
+                : R.drawable.stat_sys_alarm, null);
+        mIconController.setIconVisibility(mSlotAlarmClock, mCurrentUserSetup && hasAlarm);
     }
 
     private final void updateSimState(Intent intent) {
         String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
         if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
             mSimState = IccCardConstants.State.ABSENT;
-        }
-        else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
+        } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
             mSimState = IccCardConstants.State.CARD_IO_ERROR;
-        }
-        else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+        } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
             mSimState = IccCardConstants.State.READY;
-        }
-        else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
+        } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
             final String lockedReason =
                     intent.getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
             if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
                 mSimState = IccCardConstants.State.PIN_REQUIRED;
-            }
-            else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
+            } else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                 mSimState = IccCardConstants.State.PUK_REQUIRED;
-            }
-            else {
+            } else {
                 mSimState = IccCardConstants.State.NETWORK_LOCKED;
             }
         } else {
@@ -264,18 +277,18 @@ public class PhoneStatusBarPolicy implements Callback {
         }
 
         if (zenVisible) {
-            mService.setIcon(SLOT_ZEN, zenIconId, 0, zenDescription);
+            mIconController.setIcon(mSlotZen, zenIconId, zenDescription);
         }
         if (zenVisible != mZenVisible) {
-            mService.setIconVisibility(SLOT_ZEN, zenVisible);
+            mIconController.setIconVisibility(mSlotZen, zenVisible);
             mZenVisible = zenVisible;
         }
 
         if (volumeVisible) {
-            mService.setIcon(SLOT_VOLUME, volumeIconId, 0, volumeDescription);
+            mIconController.setIcon(mSlotVolume, volumeIconId, volumeDescription);
         }
         if (volumeVisible != mVolumeVisible) {
-            mService.setIconVisibility(SLOT_VOLUME, volumeVisible);
+            mIconController.setIconVisibility(mSlotVolume, volumeVisible);
             mVolumeVisible = volumeVisible;
         }
         updateAlarm();
@@ -304,8 +317,8 @@ public class PhoneStatusBarPolicy implements Callback {
             }
         }
 
-        mService.setIcon(SLOT_BLUETOOTH, iconId, 0, contentDescription);
-        mService.setIconVisibility(SLOT_BLUETOOTH, bluetoothEnabled);
+        mIconController.setIcon(mSlotBluetooth, iconId, contentDescription);
+        mIconController.setIconVisibility(mSlotBluetooth, bluetoothEnabled);
     }
 
     private final void updateTTY(Intent intent) {
@@ -318,13 +331,13 @@ public class PhoneStatusBarPolicy implements Callback {
         if (enabled) {
             // TTY is on
             if (DEBUG) Log.v(TAG, "updateTTY: set TTY on");
-            mService.setIcon(SLOT_TTY, R.drawable.stat_sys_tty_mode, 0,
+            mIconController.setIcon(mSlotTty, R.drawable.stat_sys_tty_mode,
                     mContext.getString(R.string.accessibility_tty_enabled));
-            mService.setIconVisibility(SLOT_TTY, true);
+            mIconController.setIconVisibility(mSlotTty, true);
         } else {
             // TTY is off
             if (DEBUG) Log.v(TAG, "updateTTY: set TTY off");
-            mService.setIconVisibility(SLOT_TTY, false);
+            mIconController.setIconVisibility(mSlotTty, false);
         }
     }
 
@@ -340,9 +353,9 @@ public class PhoneStatusBarPolicy implements Callback {
         if (DEBUG) Log.v(TAG, "updateCast: isCasting: " + isCasting);
         mHandler.removeCallbacks(mRemoveCastIconRunnable);
         if (isCasting) {
-            mService.setIcon(SLOT_CAST, R.drawable.stat_sys_cast, 0,
+            mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast,
                     mContext.getString(R.string.accessibility_casting));
-            mService.setIconVisibility(SLOT_CAST, true);
+            mIconController.setIconVisibility(mSlotCast, true);
         } else {
             // don't turn off the screen-record icon for a few seconds, just to make sure the user
             // has seen it
@@ -351,8 +364,18 @@ public class PhoneStatusBarPolicy implements Callback {
         }
     }
 
+    private void updateQuietState() {
+        mManagedProfileInQuietMode = false;
+        int currentUserId = ActivityManager.getCurrentUser();
+        for (UserInfo ui : mUserManager.getEnabledProfiles(currentUserId)) {
+            if (ui.isManagedProfile() && ui.isQuietModeEnabled()) {
+                mManagedProfileInQuietMode = true;
+                return;
+            }
+        }
+    }
+
     private void profileChanged(int userId) {
-        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         UserInfo user = null;
         if (userId == UserHandle.USER_CURRENT) {
             try {
@@ -361,7 +384,7 @@ public class PhoneStatusBarPolicy implements Callback {
                 // Ignore
             }
         } else {
-            user = userManager.getUserInfo(userId);
+            user = mUserManager.getUserInfo(userId);
         }
 
         mManagedProfileFocused = user != null && user.isManagedProfile();
@@ -371,37 +394,67 @@ public class PhoneStatusBarPolicy implements Callback {
 
     private void updateManagedProfile() {
         if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
-                + mManagedProfileFocused
-                + " mKeyguardVisible: " + mKeyguardVisible);
-        boolean showIcon = mManagedProfileFocused && !mKeyguardVisible;
+                + mManagedProfileFocused);
+        final boolean showIcon;
+        if (mManagedProfileFocused && !mStatusBarKeyguardViewManager.isShowing()) {
+            showIcon = true;
+            mIconController.setIcon(mSlotManagedProfile,
+                    R.drawable.stat_sys_managed_profile_status,
+                    mContext.getString(R.string.accessibility_managed_profile));
+        } else if (mManagedProfileInQuietMode) {
+            showIcon = true;
+            mIconController.setIcon(mSlotManagedProfile,
+                    R.drawable.stat_sys_managed_profile_status_off,
+                    mContext.getString(R.string.accessibility_managed_profile));
+        } else {
+            showIcon = false;
+        }
         if (mManagedProfileIconVisible != showIcon) {
-            mService.setIconVisibility(SLOT_MANAGED_PROFILE, showIcon);
+            mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
             mManagedProfileIconVisible = showIcon;
         }
     }
 
-    private final IUserSwitchObserver.Stub mUserSwitchListener =
-            new IUserSwitchObserver.Stub() {
+    private final SynchronousUserSwitchObserver mUserSwitchListener =
+            new SynchronousUserSwitchObserver() {
                 @Override
-                public void onUserSwitching(int newUserId, IRemoteCallback reply) {
-                    mUserInfoController.reloadUserInfo();
+                public void onUserSwitching(int newUserId) throws RemoteException {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUserInfoController.reloadUserInfo();
+                        }
+                    });
                 }
 
                 @Override
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                    profileChanged(newUserId);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateAlarm();
+                            profileChanged(newUserId);
+                            updateQuietState();
+                            updateManagedProfile();
+                        }
+                    });
                 }
 
                 @Override
                 public void onForegroundProfileSwitch(int newProfileId) {
-                    profileChanged(newProfileId);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            profileChanged(newProfileId);
+                        }
+                    });
                 }
             };
 
     private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
         @Override
         public void onHotspotChanged(boolean enabled) {
-            mService.setIconVisibility(SLOT_HOTSPOT, enabled);
+            mIconController.setIconVisibility(mSlotHotspot, enabled);
         }
     };
 
@@ -424,8 +477,7 @@ public class PhoneStatusBarPolicy implements Callback {
         updateManagedProfile();
     }
 
-    public void setKeyguardShowing(boolean visible) {
-        mKeyguardVisible = visible;
+    public void notifyKeyguardShowingChanged() {
         updateManagedProfile();
     }
 
@@ -433,5 +485,74 @@ public class PhoneStatusBarPolicy implements Callback {
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();
+        updateQuietState();
     }
+
+    @Override
+    public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
+        boolean portrait = RotationLockTile.isCurrentOrientationLockPortrait(
+                mRotationLockController, mContext);
+        if (rotationLocked) {
+            if (portrait) {
+                mIconController.setIcon(mSlotRotate, R.drawable.stat_sys_rotate_portrait,
+                        mContext.getString(R.string.accessibility_rotation_lock_on_portrait));
+            } else {
+                mIconController.setIcon(mSlotRotate, R.drawable.stat_sys_rotate_landscape,
+                        mContext.getString(R.string.accessibility_rotation_lock_on_landscape));
+            }
+            mIconController.setIconVisibility(mSlotRotate, true);
+        } else {
+            mIconController.setIconVisibility(mSlotRotate, false);
+        }
+    }
+
+    private void updateHeadsetPlug(Intent intent) {
+        boolean connected = intent.getIntExtra("state", 0) != 0;
+        boolean hasMic = intent.getIntExtra("microphone", 0) != 0;
+        if (connected) {
+            String contentDescription = mContext.getString(hasMic
+                    ? R.string.accessibility_status_bar_headset
+                    : R.string.accessibility_status_bar_headphones);
+            mIconController.setIcon(mSlotHeadset, hasMic ? R.drawable.ic_headset_mic
+                    : R.drawable.ic_headset, contentDescription);
+            mIconController.setIconVisibility(mSlotHeadset, true);
+        } else {
+            mIconController.setIconVisibility(mSlotHeadset, false);
+        }
+    }
+
+    @Override
+    public void onDataSaverChanged(boolean isDataSaving) {
+        mIconController.setIconVisibility(mSlotDataSaver, isDataSaving);
+    }
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
+                    action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
+                updateVolumeZen();
+            } else if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
+                updateSimState(intent);
+            } else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
+                updateTTY(intent);
+            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABLE) ||
+                    action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE) ||
+                    action.equals(Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
+                updateQuietState();
+                updateManagedProfile();
+            } else if (action.equals(AudioManager.ACTION_HEADSET_PLUG)) {
+                updateHeadsetPlug(intent);
+            }
+        }
+    };
+
+    private Runnable mRemoveCastIconRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) Log.v(TAG, "updateCast: hiding icon NOW");
+            mIconController.setIconVisibility(mSlotCast, false);
+        }
+    };
 }

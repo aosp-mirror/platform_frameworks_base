@@ -39,9 +39,9 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-10dp</dimen>
+    <dimen name="bottom_text_spacing_digital">-1dp</dimen>
     <dimen name="widget_label_font_size">14sp</dimen>
-    <dimen name="widget_big_font_size">88dp</dimen>
+    <dimen name="widget_big_font_size">78dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

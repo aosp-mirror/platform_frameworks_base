@@ -62,8 +62,9 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(3);
+        sBroadcastOnRestore = new ArraySet<String>(4);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+        sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_INPUT_METHODS);
     }
@@ -123,7 +124,8 @@ public class SettingsHelper {
         }
 
         if (sBroadcastOnRestore.contains(name)) {
-            oldValue = table.lookup(cr, name, UserHandle.USER_OWNER);
+            // TODO: http://b/22388012
+            oldValue = table.lookup(cr, name, UserHandle.USER_SYSTEM);
             sendBroadcast = true;
         }
 
@@ -165,7 +167,7 @@ public class SettingsHelper {
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
                         .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
                         .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue);
-                context.sendBroadcastAsUser(intent, UserHandle.OWNER, null);
+                context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
             }
         }
     }
@@ -228,22 +230,33 @@ public class SettingsHelper {
     }
 
     private boolean isAlreadyConfiguredCriticalAccessibilitySetting(String name) {
-        // These are the critical accessibility settings that are required for a
-        // blind user to be able to interact with the device. If these settings are
+        // These are the critical accessibility settings that are required for users with
+        // accessibility needs to be able to interact with the device. If these settings are
         // already configured, we will not overwrite them. If they are already set,
-        // it means that the user has performed a global gesture to enable accessibility
-        // and definitely needs these features working after the restore.
-        if (Settings.Secure.ACCESSIBILITY_ENABLED.equals(name)
-                || Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION.equals(name)
-                || Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD.equals(name)
-                || Settings.Secure.TOUCH_EXPLORATION_ENABLED.equals(name)) {
-            return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) != 0;
-        } else if (Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES.equals(name)
-                || Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(name)) {
-            return !TextUtils.isEmpty(Settings.Secure.getString(
-                    mContext.getContentResolver(), name));
+        // it means that the user has performed a global gesture to enable accessibility or set
+        // these settings in the Accessibility portion of the Setup Wizard, and definitely needs
+        // these features working after the restore.
+        switch (name) {
+            case Settings.Secure.ACCESSIBILITY_ENABLED:
+            case Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION:
+            case Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD:
+            case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED:
+            case Settings.Secure.UI_NIGHT_MODE:
+                return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) != 0;
+            case Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES:
+            case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES:
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX:
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER:
+            case Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE:
+                return !TextUtils.isEmpty(Settings.Secure.getString(
+                        mContext.getContentResolver(), name));
+            case Settings.System.FONT_SCALE:
+                return Settings.System.getFloat(mContext.getContentResolver(), name, 1.0f) != 1.0f;
+            default:
+                return false;
         }
-        return false;
     }
 
     private void setAutoRestore(boolean enabled) {

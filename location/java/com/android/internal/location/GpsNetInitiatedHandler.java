@@ -62,7 +62,7 @@ public class GpsNetInitiatedHandler {
     public static final String NI_INTENT_KEY_TIMEOUT = "timeout";
     public static final String NI_INTENT_KEY_DEFAULT_RESPONSE = "default_resp";
 
-    // the extra command to send NI response to GpsLocationProvider
+    // the extra command to send NI response to GnssLocationProvider
     public static final String NI_RESPONSE_EXTRA_CMD = "send_ni_response";
 
     // the extra command parameter names in the Bundle

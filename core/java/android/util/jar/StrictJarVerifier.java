@@ -30,13 +30,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import android.util.ArraySet;
+import android.util.apk.ApkSignatureSchemeV2Verifier;
 import libcore.io.Base64;
 import sun.security.jca.Providers;
 import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.SignerInfo;
 
 /**
  * Non-public class used by {@link JarFile} and {@link JarInputStream} to manage
@@ -68,6 +74,7 @@ class StrictJarVerifier {
     private final StrictJarManifest manifest;
     private final HashMap<String, byte[]> metaEntries;
     private final int mainAttributesEnd;
+    private final boolean signatureSchemeRollbackProtectionsEnforced;
 
     private final Hashtable<String, HashMap<String, Attributes>> signatures =
             new Hashtable<String, HashMap<String, Attributes>>(5);
@@ -160,13 +167,19 @@ class StrictJarVerifier {
      *
      * @param name
      *            the name of the JAR file being verified.
+     *
+     * @param signatureSchemeRollbackProtectionsEnforced {@code true} to enforce protections against
+     *        stripping newer signature schemes (e.g., APK Signature Scheme v2) from the file, or
+     *        {@code false} to ignore any such protections.
      */
     StrictJarVerifier(String name, StrictJarManifest manifest,
-        HashMap<String, byte[]> metaEntries) {
+        HashMap<String, byte[]> metaEntries, boolean signatureSchemeRollbackProtectionsEnforced) {
         jarName = name;
         this.manifest = manifest;
         this.metaEntries = metaEntries;
         this.mainAttributesEnd = manifest.getMainAttributesEnd();
+        this.signatureSchemeRollbackProtectionsEnforced =
+                signatureSchemeRollbackProtectionsEnforced;
     }
 
     /**
@@ -297,18 +310,29 @@ class StrictJarVerifier {
 
             obj = Providers.startJarVerification();
             PKCS7 block = new PKCS7(blockBytes);
-            if (block.verify(sfBytes) == null) {
-                throw new GeneralSecurityException("Failed to verify signature");
+            SignerInfo[] verifiedSignerInfos = block.verify(sfBytes);
+            if ((verifiedSignerInfos == null) || (verifiedSignerInfos.length == 0)) {
+                throw new GeneralSecurityException(
+                        "Failed to verify signature: no verified SignerInfos");
             }
-            X509Certificate[] blockCerts = block.getCertificates();
-            Certificate[] signerCertChain = null;
-            if (blockCerts != null) {
-                signerCertChain = new Certificate[blockCerts.length];
-                for (int i = 0; i < blockCerts.length; ++i) {
-                    signerCertChain[i] = blockCerts[i];
-                }
+            // Ignore any SignerInfo other than the first one, to be compatible with older Android
+            // platforms which have been doing this for years. See
+            // libcore/luni/src/main/java/org/apache/harmony/security/utils/JarUtils.java
+            // verifySignature method of older platforms.
+            SignerInfo verifiedSignerInfo = verifiedSignerInfos[0];
+            List<X509Certificate> verifiedSignerCertChain =
+                    verifiedSignerInfo.getCertificateChain(block);
+            if (verifiedSignerCertChain == null) {
+                // Should never happen
+                throw new GeneralSecurityException(
+                    "Failed to find verified SignerInfo certificate chain");
+            } else if (verifiedSignerCertChain.isEmpty()) {
+                // Should never happen
+                throw new GeneralSecurityException(
+                    "Verified SignerInfo certificate chain is emtpy");
             }
-            return signerCertChain;
+            return verifiedSignerCertChain.toArray(
+                    new X509Certificate[verifiedSignerCertChain.size()]);
         } catch (IOException e) {
             throw new GeneralSecurityException("IO exception verifying jar cert", e);
         } finally {
@@ -351,6 +375,45 @@ class StrictJarVerifier {
             im.readEntries(entries, null);
         } catch (IOException e) {
             return;
+        }
+
+        // If requested, check whether APK Signature Scheme v2 signature was stripped.
+        if (signatureSchemeRollbackProtectionsEnforced) {
+            String apkSignatureSchemeIdList =
+                    attributes.getValue(
+                            ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_NAME);
+            if (apkSignatureSchemeIdList != null) {
+                // This field contains a comma-separated list of APK signature scheme IDs which
+                // were used to sign this APK. If an ID is known to us, it means signatures of that
+                // scheme were stripped from the APK because otherwise we wouldn't have fallen back
+                // to verifying the APK using the JAR signature scheme.
+                boolean v2SignatureGenerated = false;
+                StringTokenizer tokenizer = new StringTokenizer(apkSignatureSchemeIdList, ",");
+                while (tokenizer.hasMoreTokens()) {
+                    String idText = tokenizer.nextToken().trim();
+                    if (idText.isEmpty()) {
+                        continue;
+                    }
+                    int id;
+                    try {
+                        id = Integer.parseInt(idText);
+                    } catch (Exception ignored) {
+                        continue;
+                    }
+                    if (id == ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID) {
+                        // This APK was supposed to be signed with APK Signature Scheme v2 but no
+                        // such signature was found.
+                        v2SignatureGenerated = true;
+                        break;
+                    }
+                }
+
+                if (v2SignatureGenerated) {
+                    throw new SecurityException(signatureFile + " indicates " + jarName
+                            + " is signed using APK Signature Scheme v2, but no such signature was"
+                            + " found. Signature stripped?");
+                }
+            }
         }
 
         // Do we actually have any signatures to look at?

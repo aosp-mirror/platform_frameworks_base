@@ -364,7 +364,7 @@ status_t ZipFile::addCommon(const char* fileName, const void* data, size_t size,
     long lfhPosn, startPosn, endPosn, uncompressedLen;
     FILE* inputFp = NULL;
     unsigned long crc;
-    time_t modWhen;
+    time_t modWhen = 0;
 
     if (mReadOnly)
         return INVALID_OPERATION;
@@ -497,7 +497,6 @@ status_t ZipFile::addCommon(const char* fileName, const void* data, size_t size,
      */
     pEntry->setDataInfo(uncompressedLen, endPosn - startPosn, crc,
         compressionMethod);
-    modWhen = getModTime(inputFp ? fileno(inputFp) : fileno(mZipFp));
     pEntry->setModWhen(modWhen);
     pEntry->setLFHOffset(lfhPosn);
     mEOCD.mNumEntries++;

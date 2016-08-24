@@ -1,0 +1,168 @@
+page.title=호환성 유지
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>이 과정에서 다루는 내용</h2>
+<ol>
+  <li><a href="#Theme">대체 스타일 정의</a></li>
+  <li><a href="#Layouts">대체 레이아웃 제공</a></li>
+  <li><a href="#SupportLib">지원 라이브러리 사용</a></li>
+  <li><a href="#CheckVersion">시스템 버전 확인</a></li>
+</ol>
+<h2>필독 항목</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Android의 머티리얼 디자인</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>머티리얼 테마 및 사용자지정 액티비티 전환과 같은 일부 머티리얼 디자인 기능은 Android 5.0(API 레벨 21) 이상에서만 이용할 수 있습니다.
+ 그러나 머티리얼 디자인을 지원하는 기기에서 실행할 경우 이러한 기능을 사용하면서도 이전 버전의 Android를 실행하는 기기와도 호환되도록 앱을 디자인할 수 있습니다.
+
+</p>
+
+
+<h2 id="Theme">대체 스타일 정의</h2>
+
+<p>머티리얼 테마를 지원하는 기기에서 해당 테마를 사용하고, 이전 버전의 Android를 실행하는 기기에서 구버전의 테마로 되돌리도록 앱을 구성할 수 있습니다.
+</p>
+
+<ol>
+<li>
+<code>res/values/styles.xml</code>에서 구버전의 테마에서 상속된 테마(Holo 등)를 정의합니다.</li>
+<li>
+<code>res/values-v21/styles.xml</code>에서 머티리얼 테마에서 상속된, 같은 이름을 가진 테마를 정의합니다.</li>
+<li>매니페스트 파일에서 이 테마를 앱의 테마로 설정합니다.</li>
+</ol>
+
+<p class="note"><strong>참고:</strong>
+앱이 머티리얼 테마를 사용하지만 이러한 방식으로 대체 테마를 제공하지 않으면 Android 5.0 이전 버전에서는 앱이 실행되지 않습니다.
+
+</p>
+
+
+<h2 id="Layouts">대체 레이아웃 제공</h2>
+
+<p>머티리얼 디자인 지침에 따라 디자인한 레이아웃이 Android 5.0(API 레벨 21)에서 새로 도입된 XML 특성을 사용하지 않는 경우, 해당 레이아웃은 이전 버전의 Android에서 실행됩니다.
+
+ 그렇지 않은 경우 대체 레이아웃을 제공할 수 있습니다. 또한 이전 버전의 Android에서 앱이 표시되는 방식을 사용자가 지정할 수 있는 대체 레이아웃을 제공할 수도 있습니다.
+</p>
+
+<p><code>res/layout-v21/</code> 안에서 Android 5.0(API 레벨 21)의 레이아웃 파일을 생성하고, <code>res/layout/</code> 안에서 이전 버전의 Android를 위한 대체 레이아웃 파일을 생성합니다.
+예를 들어, <code>res/layout/my_activity.xml</code>은
+<code>res/layout-v21/my_activity.xml</code>의 대체 레이아웃입니다.
+</p>
+
+<p>코드의 중복을 피하기 위해 <code>res/values/</code> 안에서 스타일을 정의하고, 새 API에 대해 <code>res/values-v21/</code>에서 스타일을 수정하고, 스타일 상속을 사용하여 <code>res/values/</code>에서 기본 스타일을 정의하고 <code>res/values-v21/</code>에서 해당 스타일로부터 상속합니다.
+
+</p>
+
+
+<h2 id="SupportLib">지원 라이브러리 사용</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">v7 Support Libraries</a>
+ r21 이상에는 다음과 같은 머티리얼 디자인 기능이 포함되어 있습니다.</p>
+
+<ul>
+<li><code>Theme.AppCompat</code> 테마 중 하나를 적용할 때 일부 시스템 위젯에
+대한 <a href="{@docRoot}training/material/theme.html">머티리얼 디자인 스타일</a></li>
+<li><code>Theme.AppCompat</code> 테마의 <a href="{@docRoot}training/material/theme.html#ColorPalette">색상표 테마 특성</a>
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#RecyclerView">데이터 컬렉션 표시</a>를 위한 {@link android.support.v7.widget.RecyclerView} 위젯
+</li>
+<li><a href="{@docRoot}training/material/lists-cards.html#CardView">카드 생성</a>을 위한 {@link android.support.v7.widget.CardView} 위젯</li>
+<li><a href="{@docRoot}training/material/drawables.html#ColorExtract">이미지에서 주요 색상을 추출</a>하기 위한 {@link android.support.v7.graphics.Palette} 클래스
+</li>
+</ul>
+
+<h3>시스템 위젯</h3>
+
+<p><code>Theme.AppCompat</code> 테마는 다음 위젯에 대한 머티리얼 디자인 스타일을 제공합니다.</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>색상표</h3>
+
+<p>Android v7 지원 라이브러리에서 머티리얼 디자인 스타일을 가져와서 색상표를 사용자지정하려면 <code>Theme.AppCompat</code> 테마 중 하나를 적용합니다.
+</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>목록 및 카드</h3>
+
+<p>{@link android.support.v7.widget.RecyclerView} 및 {@link
+android.support.v7.widget.CardView} 위젯은 Android v7 지원 라이브러리를 통해 이전 버전의 Android에서 사용할 수 있지만, 다음과 같은 제약이 있습니다.
+</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView}는 추가 패딩을 사용하여 프로그래밍 방식의 그림자 구현으로 환원됩니다.
+</li>
+<li>{@link android.support.v7.widget.CardView}는 둥근 모서리와 교차하는 하위 뷰를 클리핑하지 않습니다.
+</li>
+</ul>
+
+
+<h3>종속 사항</h3>
+
+<p>Android 5.0(API 레벨 21) 이전 버전에서 이러한 기능을 사용하려면 프로젝트에 Android v7 지원 라이브러리를 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 종속 사항</a>으로 포함합니다.
+</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">시스템 버전 확인</h2>
+
+<p>다음 기능은 Android 5.0(API 레벨 21) 이상에서만 사용할 수 있습니다.</p>
+
+<ul>
+<li>액티비티 전환</li>
+<li>터치 피드백</li>
+<li>애니메이션 표시</li>
+<li>경로기반 애니메이션</li>
+<li>벡터 드로어블</li>
+<li>드로어블 색조 적용</li>
+</ul>
+
+<p>이전 버전 Android와 호환성을 유지하려면, 이러한 기능을 위한 API를 호출하기 전에 런타임에 시스템 {@link
+android.os.Build.VERSION#SDK_INT version}을 확인하세요.
+</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>참고:</strong> 앱에서 어떤 버전의 Android를 지원할지 지정하려면 매니페스트 파일에서 <code>android:minSdkVersion</code> 및 <code>android:targetSdkVersion</code>
+특성을 사용하세요.
+ Android 5.0에서 머티어리얼 디자인 기능을 사용하려면 <code>android:targetSdkVersion</code> 특성을 <code>21</code>로 설정하세요.
+ 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt; API 가이드</a>를 참조하세요.
+
+</p>

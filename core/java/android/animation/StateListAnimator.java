@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 import android.util.StateSet;
 import android.view.View;
@@ -53,7 +54,7 @@ public class StateListAnimator implements Cloneable {
     private WeakReference<View> mViewRef;
     private StateListAnimatorConstantState mConstantState;
     private AnimatorListenerAdapter mAnimatorListener;
-    private int mChangingConfigurations;
+    private @Config int mChangingConfigurations;
 
     public StateListAnimator() {
         initAnimatorListener();
@@ -223,7 +224,7 @@ public class StateListAnimator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return mChangingConfigurations;
     }
 
@@ -237,7 +238,7 @@ public class StateListAnimator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public void setChangingConfigurations(int configs) {
+    public void setChangingConfigurations(@Config int configs) {
         mChangingConfigurations = configs;
     }
 
@@ -247,7 +248,7 @@ public class StateListAnimator implements Cloneable {
      * This method is called while loading the animator.
      * @hide
      */
-    public void appendChangingConfigurations(int configs) {
+    public void appendChangingConfigurations(@Config int configs) {
         mChangingConfigurations |= configs;
     }
 
@@ -309,7 +310,7 @@ public class StateListAnimator implements Cloneable {
 
         final StateListAnimator mAnimator;
 
-        int mChangingConf;
+        @Config int mChangingConf;
 
         public StateListAnimatorConstantState(StateListAnimator animator) {
             mAnimator = animator;
@@ -318,7 +319,7 @@ public class StateListAnimator implements Cloneable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConf;
         }
 

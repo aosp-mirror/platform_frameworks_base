@@ -119,8 +119,12 @@ public final class LinkProperties implements Parcelable {
             //
             // For one such example of this, see b/18867306.
             //
-            // TODO: Remove this special case altogether.
-            if (before.isIPv4Provisioned() && !after.isIPv4Provisioned()) {
+            // Additionally, losing IPv6 provisioning can result in TCP
+            // connections getting stuck until timeouts fire and other
+            // baffling failures. Therefore, loss of either IPv4 or IPv6 on a
+            // previously dualstack network is deemed a lost of provisioning.
+            if ((before.isIPv4Provisioned() && !after.isIPv4Provisioned()) ||
+                (before.isIPv6Provisioned() && !after.isIPv6Provisioned())) {
                 return ProvisioningChange.LOST_PROVISIONING;
             }
             return ProvisioningChange.STILL_PROVISIONED;
@@ -667,7 +671,8 @@ public final class LinkProperties implements Parcelable {
      * @return {@code true} if there is an IPv4 address, {@code false} otherwise.
      */
     private boolean hasIPv4AddressOnInterface(String iface) {
-        return (mIfaceName.equals(iface) && hasIPv4Address()) ||
+        // mIfaceName can be null.
+        return (Objects.equals(iface, mIfaceName) && hasIPv4Address()) ||
                 (iface != null && mStackedLinks.containsKey(iface) &&
                         mStackedLinks.get(iface).hasIPv4Address());
     }

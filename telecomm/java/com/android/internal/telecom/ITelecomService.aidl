@@ -17,6 +17,8 @@
 package com.android.internal.telecom;
 
 import android.content.ComponentName;
+import android.content.Intent;
+import android.telecom.ParcelableCallAnalytics;
 import android.telecom.PhoneAccountHandle;
 import android.net.Uri;
 import android.os.Bundle;
@@ -143,6 +145,11 @@ interface ITelecomService {
      */
     String getSystemDialerPackage();
 
+    /**
+    * @see TelecomServiceImpl#dumpCallAnalytics
+    */
+    List<ParcelableCallAnalytics> dumpCallAnalytics();
+
     //
     // Internal system apis relating to call management.
     //
@@ -176,6 +183,11 @@ interface ITelecomService {
      * @see TelecomServiceImpl#acceptRingingCall
      */
     void acceptRingingCall();
+
+    /**
+     * @see TelecomServiceImpl#acceptRingingCallWithVideoState(int)
+     */
+    void acceptRingingCallWithVideoState(int videoState);
 
     /**
      * @see TelecomServiceImpl#cancelMissedCallsNotification
@@ -232,4 +244,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#setDefaultDialer
      */
     boolean setDefaultDialer(in String packageName);
+
+    /**
+    * @see TelecomServiceImpl#createManageBlockedNumbersIntent
+    **/
+    Intent createManageBlockedNumbersIntent();
 }

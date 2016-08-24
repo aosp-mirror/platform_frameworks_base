@@ -17,4 +17,11 @@
         package="com.android.frameworks.coretests.keysets_api">
     <application android:hasCode="false">
     </application>
+    <key-sets>
+        <key-set android:name="A" >
+          <public-key android:name="keyA"
+                      android:value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJoN1Nsgqf0V4C/bbN8wo8O2X/S5D76+5Mb9mlIsHkUTUTbHCNk+LxHIUYLm89YbP9zImrV0bUHLUAZUyoMUCiMCAwEAAQ=="/>
+        </key-set>
+    </key-sets>
+
 </manifest>

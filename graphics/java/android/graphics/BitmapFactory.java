@@ -163,8 +163,11 @@ public class BitmapFactory {
         public boolean inPremultiplied;
 
         /**
-         * If dither is true, the decoder will attempt to dither the decoded
-         * image.
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#N}, this is
+         * ignored.
+         *
+         * In {@link android.os.Build.VERSION_CODES#M} and below, if dither is
+         * true, the decoder will attempt to dither the decoded image.
          */
         public boolean inDither;
 
@@ -308,7 +311,11 @@ public class BitmapFactory {
         public boolean inInputShareable;
 
         /**
-         * If inPreferQualityOverSpeed is set to true, the decoder will try to
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#N}, this is
+         * ignored.  The output will always be high quality.
+         *
+         * In {@link android.os.Build.VERSION_CODES#M} and below, if
+         * inPreferQualityOverSpeed is set to true, the decoder will try to
          * decode the reconstructed image to a higher quality even at the
          * expense of the decoding speed. Currently the field only affects JPEG
          * decode, in the case of which a more accurate, but slightly slower,
@@ -347,9 +354,10 @@ public class BitmapFactory {
          */
         public byte[] inTempStorage;
 
-        private native void requestCancel();
-
         /**
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#N}, see
+         * comments on {@link #requestCancelDecode()}.
+         *
          * Flag to indicate that cancel has been called on this object.  This
          * is useful if there's an intermediary that wants to first decode the
          * bounds and then decode the image.  In that case the intermediary
@@ -359,16 +367,19 @@ public class BitmapFactory {
         public boolean mCancel;
 
         /**
-         *  This can be called from another thread while this options object is
-         *  inside a decode... call. Calling this will notify the decoder that
-         *  it should cancel its operation. This is not guaranteed to cancel
-         *  the decode, but if it does, the decoder... operation will return
-         *  null, or if inJustDecodeBounds is true, will set outWidth/outHeight
+         *  @deprecated As of {@link android.os.Build.VERSION_CODES#N}, this
+         *  will not affect the decode, though it will still set mCancel.
+         *
+         *  In {@link android.os.Build.VERSION_CODES#M} and below, if this can
+         *  be called from another thread while this options object is inside
+         *  a decode... call. Calling this will notify the decoder that it
+         *  should cancel its operation. This is not guaranteed to cancel the
+         *  decode, but if it does, the decoder... operation will return null,
+         *  or if inJustDecodeBounds is true, will set outWidth/outHeight
          *  to -1
          */
         public void requestCancelDecode() {
             mCancel = true;
-            requestCancel();
         }
     }
 

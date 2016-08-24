@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
@@ -156,7 +157,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long txBytes) {
-        final int i = stats.findIndex(iface, uid, set, tag);
+        final int i = stats.findIndex(iface, uid, set, tag, ROAMING_NO);
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
@@ -164,7 +165,7 @@ public class NetworkStatsFactoryTest extends AndroidTestCase {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        final int i = stats.findIndex(iface, uid, set, tag);
+        final int i = stats.findIndex(iface, uid, set, tag, ROAMING_NO);
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);

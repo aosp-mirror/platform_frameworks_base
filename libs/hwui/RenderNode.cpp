@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-#define ATRACE_TAG ATRACE_TAG_VIEW
-#define LOG_TAG "OpenGLRenderer"
-
 #include "RenderNode.h"
-
-#include <algorithm>
-#include <string>
-
-#include <SkCanvas.h>
-#include <algorithm>
-
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
+#if HWUI_NEW_OPS
+#include "BakedOpRenderer.h"
+#include "RecordedOp.h"
+#include "OpDumper.h"
+#endif
 #include "DisplayListOp.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
@@ -36,52 +31,99 @@
 #include "utils/TraceUtils.h"
 #include "renderthread/CanvasContext.h"
 
+#include "protos/hwui.pb.h"
+#include "protos/ProtoHelpers.h"
+
+#include <algorithm>
+#include <sstream>
+#include <string>
+
 namespace android {
 namespace uirenderer {
 
 void RenderNode::debugDumpLayers(const char* prefix) {
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("TODO: dump layer");
+#else
     if (mLayer) {
         ALOGD("%sNode %p (%s) has layer %p (fbo = %u, wasBuildLayered = %s)",
                 prefix, this, getName(), mLayer, mLayer->getFbo(),
                 mLayer->wasBuildLayered ? "true" : "false");
     }
-    if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-            mDisplayListData->children()[i]->mRenderNode->debugDumpLayers(prefix);
+#endif
+    if (mDisplayList) {
+        for (auto&& child : mDisplayList->getChildren()) {
+            child->renderNode->debugDumpLayers(prefix);
         }
     }
 }
 
 RenderNode::RenderNode()
         : mDirtyPropertyFields(0)
-        , mNeedsDisplayListDataSync(false)
-        , mDisplayListData(nullptr)
-        , mStagingDisplayListData(nullptr)
+        , mNeedsDisplayListSync(false)
+        , mDisplayList(nullptr)
+        , mStagingDisplayList(nullptr)
         , mAnimatorManager(*this)
-        , mLayer(nullptr)
         , mParentCount(0) {
 }
 
 RenderNode::~RenderNode() {
-    deleteDisplayListData();
-    delete mStagingDisplayListData;
+    deleteDisplayList(nullptr);
+    delete mStagingDisplayList;
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL_IF(mLayer, "layer missed detachment!");
+#else
     if (mLayer) {
         ALOGW("Memory Warning: Layer %p missed its detachment, held on to for far too long!", mLayer);
         mLayer->postDecStrong();
         mLayer = nullptr;
     }
+#endif
 }
 
-void RenderNode::setStagingDisplayList(DisplayListData* data) {
-    mNeedsDisplayListDataSync = true;
-    delete mStagingDisplayListData;
-    mStagingDisplayListData = data;
+void RenderNode::setStagingDisplayList(DisplayList* displayList, TreeObserver* observer) {
+    mNeedsDisplayListSync = true;
+    delete mStagingDisplayList;
+    mStagingDisplayList = displayList;
+    // If mParentCount == 0 we are the sole reference to this RenderNode,
+    // so immediately free the old display list
+    if (!mParentCount && !mStagingDisplayList) {
+        deleteDisplayList(observer);
+    }
 }
 
 /**
  * This function is a simplified version of replay(), where we simply retrieve and log the
  * display list. This function should remain in sync with the replay() function.
  */
+#if HWUI_NEW_OPS
+void RenderNode::output(uint32_t level, const char* label) {
+    ALOGD("%s (%s %p%s%s%s%s%s)",
+            label,
+            getName(),
+            this,
+            (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
+            (properties().hasShadow() ? ", casting shadow" : ""),
+            (isRenderable() ? "" : ", empty"),
+            (properties().getProjectBackwards() ? ", projected" : ""),
+            (mLayer != nullptr ? ", on HW Layer" : ""));
+    properties().debugOutputProperties(level + 1);
+
+    if (mDisplayList) {
+        for (auto&& op : mDisplayList->getOps()) {
+            std::stringstream strout;
+            OpDumper::dump(*op, strout, level + 1);
+            if (op->opId == RecordedOpId::RenderNodeOp) {
+                auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
+                rnOp->renderNode->output(level + 1, strout.str().c_str());
+            } else {
+                ALOGD("%s", strout.str().c_str());
+            }
+        }
+    }
+    ALOGD("%*s/RenderNode(%s %p)", level * 2, "", getName(), this);
+}
+#else
 void RenderNode::output(uint32_t level) {
     ALOGD("%*sStart display list (%p, %s%s%s%s%s%s)", (level - 1) * 2, "", this,
             getName(),
@@ -90,28 +132,97 @@ void RenderNode::output(uint32_t level) {
             (isRenderable() ? "" : ", empty"),
             (properties().getProjectBackwards() ? ", projected" : ""),
             (mLayer != nullptr ? ", on HW Layer" : ""));
-    ALOGD("%*s%s %d", level * 2, "", "Save",
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
-
+    ALOGD("%*s%s %d", level * 2, "", "Save", SaveFlags::MatrixClip);
     properties().debugOutputProperties(level);
-    int flags = DisplayListOp::kOpLogFlag_Recurse;
-    if (mDisplayListData) {
+    if (mDisplayList) {
         // TODO: consider printing the chunk boundaries here
-        for (unsigned int i = 0; i < mDisplayListData->displayListOps.size(); i++) {
-            mDisplayListData->displayListOps[i]->output(level, flags);
+        for (auto&& op : mDisplayList->getOps()) {
+            op->output(level, DisplayListOp::kOpLogFlag_Recurse);
         }
     }
-
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
+    }
+#endif
+
+void RenderNode::copyTo(proto::RenderNode *pnode) {
+    pnode->set_id(static_cast<uint64_t>(
+            reinterpret_cast<uintptr_t>(this)));
+    pnode->set_name(mName.string(), mName.length());
+
+    proto::RenderProperties* pprops = pnode->mutable_properties();
+    pprops->set_left(properties().getLeft());
+    pprops->set_top(properties().getTop());
+    pprops->set_right(properties().getRight());
+    pprops->set_bottom(properties().getBottom());
+    pprops->set_clip_flags(properties().getClippingFlags());
+    pprops->set_alpha(properties().getAlpha());
+    pprops->set_translation_x(properties().getTranslationX());
+    pprops->set_translation_y(properties().getTranslationY());
+    pprops->set_translation_z(properties().getTranslationZ());
+    pprops->set_elevation(properties().getElevation());
+    pprops->set_rotation(properties().getRotation());
+    pprops->set_rotation_x(properties().getRotationX());
+    pprops->set_rotation_y(properties().getRotationY());
+    pprops->set_scale_x(properties().getScaleX());
+    pprops->set_scale_y(properties().getScaleY());
+    pprops->set_pivot_x(properties().getPivotX());
+    pprops->set_pivot_y(properties().getPivotY());
+    pprops->set_has_overlapping_rendering(properties().getHasOverlappingRendering());
+    pprops->set_pivot_explicitly_set(properties().isPivotExplicitlySet());
+    pprops->set_project_backwards(properties().getProjectBackwards());
+    pprops->set_projection_receiver(properties().isProjectionReceiver());
+    set(pprops->mutable_clip_bounds(), properties().getClipBounds());
+
+    const Outline& outline = properties().getOutline();
+    if (outline.getType() != Outline::Type::None) {
+        proto::Outline* poutline = pprops->mutable_outline();
+        poutline->clear_path();
+        if (outline.getType() == Outline::Type::Empty) {
+            poutline->set_type(proto::Outline_Type_Empty);
+        } else if (outline.getType() == Outline::Type::ConvexPath) {
+            poutline->set_type(proto::Outline_Type_ConvexPath);
+            if (const SkPath* path = outline.getPath()) {
+                set(poutline->mutable_path(), *path);
+            }
+        } else if (outline.getType() == Outline::Type::RoundRect) {
+            poutline->set_type(proto::Outline_Type_RoundRect);
+        } else {
+            ALOGW("Uknown outline type! %d", static_cast<int>(outline.getType()));
+            poutline->set_type(proto::Outline_Type_None);
+        }
+        poutline->set_should_clip(outline.getShouldClip());
+        poutline->set_alpha(outline.getAlpha());
+        poutline->set_radius(outline.getRadius());
+        set(poutline->mutable_bounds(), outline.getBounds());
+    } else {
+        pprops->clear_outline();
+    }
+
+    const RevealClip& revealClip = properties().getRevealClip();
+    if (revealClip.willClip()) {
+        proto::RevealClip* prevealClip = pprops->mutable_reveal_clip();
+        prevealClip->set_x(revealClip.getX());
+        prevealClip->set_y(revealClip.getY());
+        prevealClip->set_radius(revealClip.getRadius());
+    } else {
+        pprops->clear_reveal_clip();
+    }
+
+    pnode->clear_children();
+    if (mDisplayList) {
+        for (auto&& child : mDisplayList->getChildren()) {
+            child->renderNode->copyTo(pnode->add_children());
+        }
+    }
 }
 
 int RenderNode::getDebugSize() {
     int size = sizeof(RenderNode);
-    if (mStagingDisplayListData) {
-        size += mStagingDisplayListData->getUsedSize();
+    if (mStagingDisplayList) {
+        size += mStagingDisplayList->getUsedSize();
     }
-    if (mDisplayListData && mDisplayListData != mStagingDisplayListData) {
-        size += mDisplayListData->getUsedSize();
+    if (mDisplayList && mDisplayList != mStagingDisplayList) {
+        size += mDisplayList->getUsedSize();
     }
     return size;
 }
@@ -130,6 +241,10 @@ void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
     mAnimatorManager.addAnimator(animator);
 }
 
+void RenderNode::removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+    mAnimatorManager.removeAnimator(animator);
+}
+
 void RenderNode::damageSelf(TreeInfo& info) {
     if (isRenderable()) {
         if (properties().getClipDamageToBounds()) {
@@ -137,7 +252,7 @@ void RenderNode::damageSelf(TreeInfo& info) {
         } else {
             // Hope this is big enough?
             // TODO: Get this from the display list ops or something
-            info.damageAccumulator->dirty(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+            info.damageAccumulator->dirty(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
         }
     }
 }
@@ -157,13 +272,38 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     }
 }
 
+static layer_t* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
+#if HWUI_NEW_OPS
+    return renderState.layerPool().get(renderState, width, height);
+#else
+    return LayerRenderer::createRenderLayer(renderState, width, height);
+#endif
+}
+
+static void destroyLayer(layer_t* layer) {
+#if HWUI_NEW_OPS
+    RenderState& renderState = layer->renderState;
+    renderState.layerPool().putOrDelete(layer);
+#else
+    LayerRenderer::destroyLayer(layer);
+#endif
+}
+
+static bool layerMatchesWidthAndHeight(layer_t* layer, int width, int height) {
+#if HWUI_NEW_OPS
+    return layer->viewportWidth == (uint32_t) width && layer->viewportHeight == (uint32_t)height;
+#else
+    return layer->layer.getWidth() == width && layer->layer.getHeight() == height;
+#endif
+}
+
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
     if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
         if (CC_UNLIKELY(mLayer)) {
-            LayerRenderer::destroyLayer(mLayer);
+            destroyLayer(mLayer);
             mLayer = nullptr;
         }
         return;
@@ -171,13 +311,24 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
 
     bool transformUpdateNeeded = false;
     if (!mLayer) {
-        mLayer = LayerRenderer::createRenderLayer(info.renderState, getWidth(), getHeight());
+        mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
+#if !HWUI_NEW_OPS
         applyLayerPropertiesToLayer(info);
+#endif
         damageSelf(info);
         transformUpdateNeeded = true;
-    } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
+    } else if (!layerMatchesWidthAndHeight(mLayer, getWidth(), getHeight())) {
+#if HWUI_NEW_OPS
+        // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
+        // Or, ideally, maintain damage between frames on node/layer so ordering is always correct
+        RenderState& renderState = mLayer->renderState;
+        if (properties().fitsOnLayer()) {
+            mLayer = renderState.layerPool().resize(mLayer, getWidth(), getHeight());
+        } else {
+#else
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
-            LayerRenderer::destroyLayer(mLayer);
+#endif
+            destroyLayer(mLayer);
             mLayer = nullptr;
         }
         damageSelf(info);
@@ -190,20 +341,30 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (!mLayer) {
         Caches::getInstance().dumpMemoryUsage();
         if (info.errorHandler) {
-            std::string msg = "Unable to create layer for ";
-            msg += getName();
-            info.errorHandler->onError(msg);
+            std::ostringstream err;
+            err << "Unable to create layer for " << getName();
+            const int maxTextureSize = Caches::getInstance().maxTextureSize;
+            if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
+                err << ", size " << getWidth() << "x" << getHeight()
+                        << " exceeds max size " << maxTextureSize;
+            } else {
+                err << ", see logcat for more info";
+            }
+            info.errorHandler->onError(err.str());
         }
         return;
     }
 
-    if (transformUpdateNeeded) {
+    if (transformUpdateNeeded && mLayer) {
         // update the transform in window of the layer to reset its origin wrt light source position
         Matrix4 windowTransform;
         info.damageAccumulator->computeCurrentTransform(&windowTransform);
         mLayer->setWindowTransform(windowTransform);
     }
 
+#if HWUI_NEW_OPS
+    info.layerUpdateQueue->enqueueLayerWithDamage(this, dirty);
+#else
     if (dirty.intersect(0, 0, getWidth(), getHeight())) {
         dirty.roundOut(&dirty);
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);
@@ -213,13 +374,12 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (info.renderer && mLayer->deferredUpdateScheduled) {
         info.renderer->pushLayerUpdate(mLayer);
     }
+#endif
 
-    if (info.canvasContext) {
-        // There might be prefetched layers that need to be accounted for.
-        // That might be us, so tell CanvasContext that this layer is in the
-        // tree and should not be destroyed.
-        info.canvasContext->markLayerInUse(this);
-    }
+    // There might be prefetched layers that need to be accounted for.
+    // That might be us, so tell CanvasContext that this layer is in the
+    // tree and should not be destroyed.
+    info.canvasContext.markLayerInUse(this);
 }
 
 /**
@@ -242,22 +402,30 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     }
 
     bool willHaveFunctor = false;
-    if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayListData) {
-        willHaveFunctor = !mStagingDisplayListData->functors.isEmpty();
-    } else if (mDisplayListData) {
-        willHaveFunctor = !mDisplayListData->functors.isEmpty();
+    if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayList) {
+        willHaveFunctor = !mStagingDisplayList->getFunctors().empty();
+    } else if (mDisplayList) {
+        willHaveFunctor = !mDisplayList->getFunctors().empty();
     }
     bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
             willHaveFunctor, functorsNeedLayer);
+
+    if (CC_UNLIKELY(mPositionListener.get())) {
+        mPositionListener->onPositionUpdated(*this, info);
+    }
 
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
     }
-    prepareSubTree(info, childFunctorsNeedLayer, mDisplayListData);
+    prepareSubTree(info, childFunctorsNeedLayer, mDisplayList);
     pushLayerUpdate(info);
 
     info.damageAccumulator->popTransform();
+}
+
+void RenderNode::syncProperties() {
+    mProperties = mStagingProperties;
 }
 
 void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
@@ -271,8 +439,10 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
         mDirtyPropertyFields = 0;
         damageSelf(info);
         info.damageAccumulator->popTransform();
-        mProperties = mStagingProperties;
+        syncProperties();
+#if !HWUI_NEW_OPS
         applyLayerPropertiesToLayer(info);
+#endif
         // We could try to be clever and only re-damage if the matrix changed.
         // However, we don't need to worry about that. The cost of over-damaging
         // here is only going to be a single additional map rect of this node
@@ -283,6 +453,7 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     }
 }
 
+#if !HWUI_NEW_OPS
 void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
     if (CC_LIKELY(!mLayer)) return;
 
@@ -291,96 +462,107 @@ void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
     mLayer->setColorFilter(props.colorFilter());
     mLayer->setBlend(props.needsBlending());
 }
+#endif
+
+void RenderNode::syncDisplayList(TreeInfo* info) {
+    // Make sure we inc first so that we don't fluctuate between 0 and 1,
+    // which would thrash the layer cache
+    if (mStagingDisplayList) {
+        for (auto&& child : mStagingDisplayList->getChildren()) {
+            child->renderNode->incParentRefCount();
+        }
+    }
+    deleteDisplayList(info ? info->observer : nullptr, info);
+    mDisplayList = mStagingDisplayList;
+    mStagingDisplayList = nullptr;
+    if (mDisplayList) {
+        for (auto& iter : mDisplayList->getFunctors()) {
+            (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
+        }
+        for (size_t i = 0; i < mDisplayList->getPushStagingFunctors().size(); i++) {
+            (*mDisplayList->getPushStagingFunctors()[i])();
+        }
+    }
+}
 
 void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
-    if (mNeedsDisplayListDataSync) {
-        mNeedsDisplayListDataSync = false;
-        // Make sure we inc first so that we don't fluctuate between 0 and 1,
-        // which would thrash the layer cache
-        if (mStagingDisplayListData) {
-            for (size_t i = 0; i < mStagingDisplayListData->children().size(); i++) {
-                mStagingDisplayListData->children()[i]->mRenderNode->incParentRefCount();
-            }
-        }
+    if (mNeedsDisplayListSync) {
+        mNeedsDisplayListSync = false;
         // Damage with the old display list first then the new one to catch any
         // changes in isRenderable or, in the future, bounds
         damageSelf(info);
-        deleteDisplayListData();
-        // TODO: Remove this caches stuff
-        if (mStagingDisplayListData && mStagingDisplayListData->functors.size()) {
-            Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
-        }
-        mDisplayListData = mStagingDisplayListData;
-        mStagingDisplayListData = nullptr;
-        if (mDisplayListData) {
-            for (size_t i = 0; i < mDisplayListData->functors.size(); i++) {
-                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, nullptr);
-            }
-        }
+        syncDisplayList(&info);
         damageSelf(info);
     }
 }
 
-void RenderNode::deleteDisplayListData() {
-    if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-            mDisplayListData->children()[i]->mRenderNode->decParentRefCount();
-        }
-        if (mDisplayListData->functors.size()) {
-            Caches::getInstance().unregisterFunctors(mDisplayListData->functors.size());
+void RenderNode::deleteDisplayList(TreeObserver* observer, TreeInfo* info) {
+    if (mDisplayList) {
+        for (auto&& child : mDisplayList->getChildren()) {
+            child->renderNode->decParentRefCount(observer, info);
         }
     }
-    delete mDisplayListData;
-    mDisplayListData = nullptr;
+    delete mDisplayList;
+    mDisplayList = nullptr;
 }
 
-void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree) {
+void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
-        info.out.hasFunctors |= subtree->functors.size();
-        for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
-            info.prepareTextures = cache.prefetchAndMarkInUse(
-                    info.canvasContext, subtree->bitmapResources[i]);
+        info.out.hasFunctors |= subtree->getFunctors().size();
+        for (auto&& bitmapResource : subtree->getBitmapResources()) {
+            void* ownerToken = &info.canvasContext;
+            info.prepareTextures = cache.prefetchAndMarkInUse(ownerToken, bitmapResource);
         }
-        for (size_t i = 0; i < subtree->children().size(); i++) {
-            DrawRenderNodeOp* op = subtree->children()[i];
-            RenderNode* childNode = op->mRenderNode;
-            info.damageAccumulator->pushTransform(&op->mTransformFromParent);
+        for (auto&& op : subtree->getChildren()) {
+            RenderNode* childNode = op->renderNode;
+#if HWUI_NEW_OPS
+            info.damageAccumulator->pushTransform(&op->localMatrix);
+            bool childFunctorsNeedLayer = functorsNeedLayer; // TODO! || op->mRecordedWithPotentialStencilClip;
+#else
+            info.damageAccumulator->pushTransform(&op->localMatrix);
             bool childFunctorsNeedLayer = functorsNeedLayer
                     // Recorded with non-rect clip, or canvas-rotated by parent
                     || op->mRecordedWithPotentialStencilClip;
+#endif
             childNode->prepareTreeImpl(info, childFunctorsNeedLayer);
             info.damageAccumulator->popTransform();
         }
     }
 }
 
-void RenderNode::destroyHardwareResources() {
+void RenderNode::destroyHardwareResources(TreeObserver* observer, TreeInfo* info) {
     if (mLayer) {
-        LayerRenderer::destroyLayer(mLayer);
+        destroyLayer(mLayer);
         mLayer = nullptr;
     }
-    if (mDisplayListData) {
-        for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
-            mDisplayListData->children()[i]->mRenderNode->destroyHardwareResources();
+    if (mDisplayList) {
+        for (auto&& child : mDisplayList->getChildren()) {
+            child->renderNode->destroyHardwareResources(observer, info);
         }
-        if (mNeedsDisplayListDataSync) {
+        if (mNeedsDisplayListSync) {
             // Next prepare tree we are going to push a new display list, so we can
             // drop our current one now
-            deleteDisplayListData();
+            deleteDisplayList(observer, info);
         }
     }
 }
 
-void RenderNode::decParentRefCount() {
+void RenderNode::decParentRefCount(TreeObserver* observer, TreeInfo* info) {
     LOG_ALWAYS_FATAL_IF(!mParentCount, "already 0!");
     mParentCount--;
     if (!mParentCount) {
+        if (observer) {
+            observer->onMaybeRemovedFromTree(this);
+        }
+        if (CC_UNLIKELY(mPositionListener.get())) {
+            mPositionListener->onPositionLost(*this, info);
+        }
         // If a child of ours is being attached to our parent then this will incorrectly
         // destroy its hardware resources. However, this situation is highly unlikely
         // and the failure is "just" that the layer is re-created, so this should
         // be safe enough
-        destroyHardwareResources();
+        destroyHardwareResources(observer, info);
     }
 }
 
@@ -431,7 +613,7 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
                     layerBounds.left, layerBounds.top,
                     layerBounds.right, layerBounds.bottom,
                     (int) (properties().getAlpha() * 255),
-                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+                    SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
         }
 
@@ -520,46 +702,43 @@ void RenderNode::computeOrdering() {
 
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
     // transform properties are applied correctly to top level children
-    if (mDisplayListData == nullptr) return;
-    for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
-        DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
-        childOp->mRenderNode->computeOrderingImpl(childOp,
-                properties().getOutline().getPath(), &mProjectedNodes, &mat4::identity());
+    if (mDisplayList == nullptr) return;
+    for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
+        renderNodeOp_t* childOp = mDisplayList->getChildren()[i];
+        childOp->renderNode->computeOrderingImpl(childOp, &mProjectedNodes, &mat4::identity());
     }
 }
 
 void RenderNode::computeOrderingImpl(
-        DrawRenderNodeOp* opState,
-        const SkPath* outlineOfProjectionSurface,
-        Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
+        renderNodeOp_t* opState,
+        std::vector<renderNodeOp_t*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
-    if (mDisplayListData == nullptr || mDisplayListData->isEmpty()) return;
+    if (mDisplayList == nullptr || mDisplayList->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
     Matrix4 localTransformFromProjectionSurface(*transformFromProjectionSurface);
-    localTransformFromProjectionSurface.multiply(opState->mTransformFromParent);
+    localTransformFromProjectionSurface.multiply(opState->localMatrix);
 
     if (properties().getProjectBackwards()) {
         // composited projectee, flag for out of order draw, save matrix, and store in proj surface
-        opState->mSkipInOrderDraw = true;
-        opState->mTransformFromCompositingAncestor.load(localTransformFromProjectionSurface);
-        compositedChildrenOfProjectionSurface->add(opState);
+        opState->skipInOrderDraw = true;
+        opState->transformFromCompositingAncestor = localTransformFromProjectionSurface;
+        compositedChildrenOfProjectionSurface->push_back(opState);
     } else {
         // standard in order draw
-        opState->mSkipInOrderDraw = false;
+        opState->skipInOrderDraw = false;
     }
 
-    if (mDisplayListData->children().size() > 0) {
-        const bool isProjectionReceiver = mDisplayListData->projectionReceiveIndex >= 0;
+    if (mDisplayList->getChildren().size() > 0) {
+        const bool isProjectionReceiver = mDisplayList->projectionReceiveIndex >= 0;
         bool haveAppliedPropertiesToProjection = false;
-        for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
-            DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
-            RenderNode* child = childOp->mRenderNode;
+        for (unsigned int i = 0; i < mDisplayList->getChildren().size(); i++) {
+            renderNodeOp_t* childOp = mDisplayList->getChildren()[i];
+            RenderNode* child = childOp->renderNode;
 
-            const SkPath* projectionOutline = nullptr;
-            Vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
+            std::vector<renderNodeOp_t*>* projectionChildren = nullptr;
             const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
                 // if receiving projections, collect projecting descendant
@@ -567,7 +746,6 @@ void RenderNode::computeOrderingImpl(
                 // Note that if a direct descendant is projecting backwards, we pass its
                 // grandparent projection collection, since it shouldn't project onto its
                 // parent, where it will already be drawing.
-                projectionOutline = properties().getOutline().getPath();
                 projectionChildren = &mProjectedNodes;
                 projectionTransform = &mat4::identity();
             } else {
@@ -575,12 +753,10 @@ void RenderNode::computeOrderingImpl(
                     applyViewPropertyTransforms(localTransformFromProjectionSurface);
                     haveAppliedPropertiesToProjection = true;
                 }
-                projectionOutline = outlineOfProjectionSurface;
                 projectionChildren = compositedChildrenOfProjectionSurface;
                 projectionTransform = &localTransformFromProjectionSurface;
             }
-            child->computeOrderingImpl(childOp,
-                    projectionOutline, projectionChildren, projectionTransform);
+            child->computeOrderingImpl(childOp, projectionChildren, projectionTransform);
         }
     }
 }
@@ -640,26 +816,28 @@ void RenderNode::replay(ReplayStateStruct& replayStruct, const int level) {
     issueOperations<ReplayOperationHandler>(replayStruct.mRenderer, handler);
 }
 
-void RenderNode::buildZSortedChildList(const DisplayListData::Chunk& chunk,
-        Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
+void RenderNode::buildZSortedChildList(const DisplayList::Chunk& chunk,
+        std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes) {
+#if !HWUI_NEW_OPS
     if (chunk.beginChildIndex == chunk.endChildIndex) return;
 
     for (unsigned int i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
-        DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
-        RenderNode* child = childOp->mRenderNode;
+        DrawRenderNodeOp* childOp = mDisplayList->getChildren()[i];
+        RenderNode* child = childOp->renderNode;
         float childZ = child->properties().getZ();
 
         if (!MathUtils::isZero(childZ) && chunk.reorderChildren) {
-            zTranslatedNodes.add(ZDrawRenderNodeOpPair(childZ, childOp));
-            childOp->mSkipInOrderDraw = true;
+            zTranslatedNodes.push_back(ZDrawRenderNodeOpPair(childZ, childOp));
+            childOp->skipInOrderDraw = true;
         } else if (!child->properties().getProjectBackwards()) {
             // regular, in order drawing DisplayList
-            childOp->mSkipInOrderDraw = false;
+            childOp->skipInOrderDraw = false;
         }
     }
 
     // Z sort any 3d children (stable-ness makes z compare fall back to standard drawing order)
     std::stable_sort(zTranslatedNodes.begin(), zTranslatedNodes.end());
+#endif
 }
 
 template <class T>
@@ -695,7 +873,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
     if (revealClipPath) {
         frameAllocatedPath = handler.allocPathForFrame();
 
-        Op(*outlinePath, *revealClipPath, kIntersect_PathOp, frameAllocatedPath);
+        Op(*outlinePath, *revealClipPath, kIntersect_SkPathOp, frameAllocatedPath);
         outlinePath = frameAllocatedPath;
     }
 
@@ -711,7 +889,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
         clipBoundsPath.addRect(clipBounds.left, clipBounds.top,
                 clipBounds.right, clipBounds.bottom);
 
-        Op(*outlinePath, clipBoundsPath, kIntersect_PathOp, frameAllocatedPath);
+        Op(*outlinePath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
         outlinePath = frameAllocatedPath;
     }
 
@@ -724,20 +902,20 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
 template <class T>
 void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
-        const Matrix4& initialTransform, const Vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
+        const Matrix4& initialTransform, const std::vector<ZDrawRenderNodeOpPair>& zTranslatedNodes,
         OpenGLRenderer& renderer, T& handler) {
     const int size = zTranslatedNodes.size();
     if (size == 0
-            || (mode == kNegativeZChildren && zTranslatedNodes[0].key > 0.0f)
-            || (mode == kPositiveZChildren && zTranslatedNodes[size - 1].key < 0.0f)) {
+            || (mode == ChildrenSelectMode::NegativeZChildren && zTranslatedNodes[0].key > 0.0f)
+            || (mode == ChildrenSelectMode::PositiveZChildren && zTranslatedNodes[size - 1].key < 0.0f)) {
         // no 3d children to draw
         return;
     }
 
     // Apply the base transform of the parent of the 3d children. This isolates
     // 3d children of the current chunk from transformations made in previous chunks.
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
-    renderer.setMatrix(initialTransform);
+    int rootRestoreTo = renderer.save(SaveFlags::Matrix);
+    renderer.setGlobalMatrix(initialTransform);
 
     /**
      * Draw shadows and (potential) casters mostly in order, but allow the shadows of casters
@@ -748,7 +926,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
      */
     const size_t nonNegativeIndex = findNonNegativeIndex(zTranslatedNodes);
     size_t drawIndex, shadowIndex, endIndex;
-    if (mode == kNegativeZChildren) {
+    if (mode == ChildrenSelectMode::NegativeZChildren) {
         drawIndex = 0;
         endIndex = nonNegativeIndex;
         shadowIndex = endIndex; // draw no shadows
@@ -765,12 +943,12 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
     while (shadowIndex < endIndex || drawIndex < endIndex) {
         if (shadowIndex < endIndex) {
             DrawRenderNodeOp* casterOp = zTranslatedNodes[shadowIndex].value;
-            RenderNode* caster = casterOp->mRenderNode;
+            RenderNode* caster = casterOp->renderNode;
             const float casterZ = zTranslatedNodes[shadowIndex].key;
             // attempt to render the shadow if the caster about to be drawn is its caster,
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
-                caster->issueDrawShadowOperation(casterOp->mTransformFromParent, handler);
+                caster->issueDrawShadowOperation(casterOp->localMatrix, handler);
 
                 lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
                 shadowIndex++;
@@ -780,14 +958,14 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
 
         // only the actual child DL draw needs to be in save/restore,
         // since it modifies the renderer's matrix
-        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+        int restoreTo = renderer.save(SaveFlags::Matrix);
 
         DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
 
-        renderer.concatMatrix(childOp->mTransformFromParent);
-        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        renderer.concatMatrix(childOp->localMatrix);
+        childOp->skipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
-        childOp->mSkipInOrderDraw = true;
+        childOp->skipInOrderDraw = true;
 
         renderer.restoreToCount(restoreTo);
         drawIndex++;
@@ -802,31 +980,36 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     int restoreTo = renderer.getSaveCount();
 
     LinearAllocator& alloc = handler.allocator();
-    handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+    handler(new (alloc) SaveOp(SaveFlags::MatrixClip),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
     // Transform renderer to match background we're projecting onto
     // (by offsetting canvas by translationX/Y of background rendernode, since only those are set)
     const DisplayListOp* op =
-            (mDisplayListData->displayListOps[mDisplayListData->projectionReceiveIndex]);
+#if HWUI_NEW_OPS
+            nullptr;
+    LOG_ALWAYS_FATAL("unsupported");
+#else
+            (mDisplayList->getOps()[mDisplayList->projectionReceiveIndex]);
+#endif
     const DrawRenderNodeOp* backgroundOp = reinterpret_cast<const DrawRenderNodeOp*>(op);
-    const RenderProperties& backgroundProps = backgroundOp->mRenderNode->properties();
+    const RenderProperties& backgroundProps = backgroundOp->renderNode->properties();
     renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
 
-    // If the projection reciever has an outline, we mask projected content to it
+    // If the projection receiver has an outline, we mask projected content to it
     // (which we know, apriori, are all tessellated paths)
     renderer.setProjectionPathMask(alloc, projectionReceiverOutline);
 
     // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
-        DrawRenderNodeOp* childOp = mProjectedNodes[i];
+        renderNodeOp_t* childOp = mProjectedNodes[i];
 
         // matrix save, concat, and restore can be done safely without allocating operations
-        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
-        renderer.concatMatrix(childOp->mTransformFromCompositingAncestor);
-        childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
+        int restoreTo = renderer.save(SaveFlags::Matrix);
+        renderer.concatMatrix(childOp->transformFromCompositingAncestor);
+        childOp->skipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
-        childOp->mSkipInOrderDraw = true;
+        childOp->skipInOrderDraw = true;
         renderer.restoreToCount(restoreTo);
     }
 
@@ -845,13 +1028,17 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
  */
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
-    if (mDisplayListData->isEmpty()) {
+    if (mDisplayList->isEmpty()) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", handler.level() * 2, "",
                 this, getName());
         return;
     }
 
+#if HWUI_NEW_OPS
+    const bool drawLayer = false;
+#else
     const bool drawLayer = (mLayer && (&renderer != mLayer->renderer.get()));
+#endif
     // If we are updating the contents of mLayer, we don't want to apply any of
     // the RenderNode's properties to this issueOperations pass. Those will all
     // be applied when the layer is drawn, aka when this is true.
@@ -879,16 +1066,19 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 
     LinearAllocator& alloc = handler.allocator();
     int restoreTo = renderer.getSaveCount();
-    handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+    handler(new (alloc) SaveOp(SaveFlags::MatrixClip),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
     DISPLAY_LIST_LOGD("%*sSave %d %d", (handler.level() + 1) * 2, "",
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
+            SaveFlags::MatrixClip, restoreTo);
 
     if (useViewProperties) {
         setViewProperties<T>(renderer, handler);
     }
 
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("legacy op traversal not supported");
+#else
     bool quickRejected = properties().getClipToBounds()
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
@@ -896,39 +1086,39 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         renderer.setBaseTransform(initialTransform);
 
         if (drawLayer) {
-            handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
+            handler(new (alloc) DrawLayerOp(mLayer),
                     renderer.getSaveCount() - 1, properties().getClipToBounds());
         } else {
             const int saveCountOffset = renderer.getSaveCount() - 1;
-            const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
-            for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
-                const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
+            const int projectionReceiveIndex = mDisplayList->projectionReceiveIndex;
+            for (size_t chunkIndex = 0; chunkIndex < mDisplayList->getChunks().size(); chunkIndex++) {
+                const DisplayList::Chunk& chunk = mDisplayList->getChunks()[chunkIndex];
 
-                Vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
+                std::vector<ZDrawRenderNodeOpPair> zTranslatedNodes;
                 buildZSortedChildList(chunk, zTranslatedNodes);
 
-                issueOperationsOf3dChildren(kNegativeZChildren,
+                issueOperationsOf3dChildren(ChildrenSelectMode::NegativeZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
 
-
                 for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
-                    DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
+                    DisplayListOp *op = mDisplayList->getOps()[opIndex];
 #if DEBUG_DISPLAY_LIST
                     op->output(handler.level() + 1);
 #endif
                     handler(op, saveCountOffset, properties().getClipToBounds());
 
-                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && projectionReceiveIndex >= 0 &&
+                    if (CC_UNLIKELY(!mProjectedNodes.empty() && projectionReceiveIndex >= 0 &&
                         opIndex == static_cast<size_t>(projectionReceiveIndex))) {
                         issueOperationsOfProjectedChildren(renderer, handler);
                     }
                 }
 
-                issueOperationsOf3dChildren(kPositiveZChildren,
+                issueOperationsOf3dChildren(ChildrenSelectMode::PositiveZChildren,
                         initialTransform, zTranslatedNodes, renderer, handler);
             }
         }
     }
+#endif
 
     DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (handler.level() + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),

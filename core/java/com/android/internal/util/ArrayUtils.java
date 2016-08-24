@@ -26,6 +26,10 @@ import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -125,21 +129,42 @@ public class ArrayUtils {
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static <T> boolean isEmpty(T[] array) {
+    public static boolean isEmpty(@Nullable Collection<?> array) {
+        return array == null || array.isEmpty();
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static <T> boolean isEmpty(@Nullable T[] array) {
         return array == null || array.length == 0;
     }
 
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(int[] array) {
+    public static boolean isEmpty(@Nullable int[] array) {
         return array == null || array.length == 0;
     }
 
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(long[] array) {
+    public static boolean isEmpty(@Nullable long[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(@Nullable byte[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(@Nullable boolean[] array) {
         return array == null || array.length == 0;
     }
 
@@ -149,7 +174,7 @@ public class ArrayUtils {
      * @param value the value to check for
      * @return true if the value is present in the array
      */
-    public static <T> boolean contains(T[] array, T value) {
+    public static <T> boolean contains(@Nullable T[] array, T value) {
         return indexOf(array, value) != -1;
     }
 
@@ -157,7 +182,7 @@ public class ArrayUtils {
      * Return first index of {@code value} in {@code array}, or {@code -1} if
      * not found.
      */
-    public static <T> int indexOf(T[] array, T value) {
+    public static <T> int indexOf(@Nullable T[] array, T value) {
         if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
             if (Objects.equals(array[i], value)) return i;
@@ -168,7 +193,7 @@ public class ArrayUtils {
     /**
      * Test if all {@code check} items are contained in {@code array}.
      */
-    public static <T> boolean containsAll(T[] array, T[] check) {
+    public static <T> boolean containsAll(@Nullable T[] array, T[] check) {
         if (check == null) return true;
         for (T checkItem : check) {
             if (!contains(array, checkItem)) {
@@ -178,7 +203,20 @@ public class ArrayUtils {
         return true;
     }
 
-    public static boolean contains(int[] array, int value) {
+    /**
+     * Test if any {@code check} items are contained in {@code array}.
+     */
+    public static <T> boolean containsAny(@Nullable T[] array, T[] check) {
+        if (check == null) return false;
+        for (T checkItem : check) {
+            if (contains(array, checkItem)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean contains(@Nullable int[] array, int value) {
         if (array == null) return false;
         for (int element : array) {
             if (element == value) {
@@ -188,7 +226,7 @@ public class ArrayUtils {
         return false;
     }
 
-    public static boolean contains(long[] array, long value) {
+    public static boolean contains(@Nullable long[] array, long value) {
         if (array == null) return false;
         for (long element : array) {
             if (element == value) {
@@ -198,12 +236,22 @@ public class ArrayUtils {
         return false;
     }
 
-    public static long total(long[] array) {
+    public static long total(@Nullable long[] array) {
         long total = 0;
-        for (long value : array) {
-            total += value;
+        if (array != null) {
+            for (long value : array) {
+                total += value;
+            }
         }
         return total;
+    }
+
+    public static int[] convertToIntArray(List<Integer> list) {
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
 
     /**
@@ -359,11 +407,15 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static long[] cloneOrNull(long[] array) {
+    public static @Nullable long[] cloneOrNull(@Nullable long[] array) {
         return (array != null) ? array.clone() : null;
     }
 
-    public static <T> ArraySet<T> add(ArraySet<T> cur, T val) {
+    public static @Nullable <T> ArraySet<T> cloneOrNull(@Nullable ArraySet<T> array) {
+        return (array != null) ? new ArraySet<T>(array) : null;
+    }
+
+    public static @NonNull <T> ArraySet<T> add(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             cur = new ArraySet<>();
         }
@@ -371,7 +423,7 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static <T> ArraySet<T> remove(ArraySet<T> cur, T val) {
+    public static @Nullable <T> ArraySet<T> remove(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             return null;
         }
@@ -383,11 +435,11 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(ArraySet<T> cur, T val) {
+    public static <T> boolean contains(@Nullable ArraySet<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
     }
 
-    public static <T> ArrayList<T> add(ArrayList<T> cur, T val) {
+    public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             cur = new ArrayList<>();
         }
@@ -395,7 +447,7 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static <T> ArrayList<T> remove(ArrayList<T> cur, T val) {
+    public static @Nullable <T> ArrayList<T> remove(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             return null;
         }
@@ -407,8 +459,18 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(ArrayList<T> cur, T val) {
+    public static <T> boolean contains(@Nullable Collection<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
+    }
+
+    public static @Nullable <T> T[] trimToSize(@Nullable T[] array, int size) {
+        if (array == null || size == 0) {
+            return null;
+        } else if (array.length == size) {
+            return array;
+        } else {
+            return Arrays.copyOf(array, size);
+        }
     }
 
     /**
@@ -431,5 +493,49 @@ public class ArrayUtils {
             diff |= a.get(i) != b.get(i);
         }
         return !diff;
+    }
+
+    /**
+     * Removes elements that match the predicate in an efficient way that alters the order of
+     * elements in the collection. This should only be used if order is not important.
+     * @param collection The ArrayList from which to remove elements.
+     * @param predicate The predicate that each element is tested against.
+     * @return the number of elements removed.
+     */
+    public static <T> int unstableRemoveIf(@Nullable ArrayList<T> collection,
+                                           @NonNull java.util.function.Predicate<T> predicate) {
+        if (collection == null) {
+            return 0;
+        }
+
+        final int size = collection.size();
+        int leftIdx = 0;
+        int rightIdx = size - 1;
+        while (leftIdx <= rightIdx) {
+            // Find the next element to remove moving left to right.
+            while (leftIdx < size && !predicate.test(collection.get(leftIdx))) {
+                leftIdx++;
+            }
+
+            // Find the next element to keep moving right to left.
+            while (rightIdx > leftIdx && predicate.test(collection.get(rightIdx))) {
+                rightIdx--;
+            }
+
+            if (leftIdx >= rightIdx) {
+                // Done.
+                break;
+            }
+
+            Collections.swap(collection, leftIdx, rightIdx);
+            leftIdx++;
+            rightIdx--;
+        }
+
+        // leftIdx is now at the end.
+        for (int i = size - 1; i >= leftIdx; i--) {
+            collection.remove(i);
+        }
+        return size - leftIdx;
     }
 }

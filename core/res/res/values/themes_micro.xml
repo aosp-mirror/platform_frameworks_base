@@ -24,7 +24,6 @@
         <item name="windowBackground">@color/black</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowSwipeToDismiss">true</item>
         <!-- Required to force windowInsets dispatch through application UI. -->
         <item name="windowOverscan">true</item>
     </style>
@@ -42,7 +41,6 @@
         <item name="windowBackground">@color/white</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowSwipeToDismiss">true</item>
         <!-- Required to force windowInsets dispatch through application UI. -->
         <item name="windowOverscan">true</item>
     </style>
@@ -84,5 +82,19 @@
         <item name="textSize">20sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
         <item name="textColor">@color/micro_text_light</item>
+    </style>
+
+   <style name="Theme.Micro.Panel" parent="Theme.Material.Panel"  />
+   <style name="Theme.Micro.Light.Panel" parent="Theme.Material.Light.Panel"  />
+
+    <!-- Default theme for material style input methods, which is used by the
+         {@link android.inputmethodservice.InputMethodService} class.
+         This inherits from Theme.Panel, but sets up IME appropriate animations
+         and a few custom attributes. -->
+    <style name="Theme.Micro.InputMethod" parent="Theme.Micro.Panel">
+        <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
+        <item name="imeFullscreenBackground">#1e282c</item>
+        <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
+        <item name="imeExtractExitAnimation">@anim/input_method_extract_exit</item>
     </style>
 </resources>

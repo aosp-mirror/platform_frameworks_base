@@ -1,0 +1,36 @@
+page.title=Vulkan Graphics API
+@jd:body
+
+
+<p>The Android platform includes an Android-specific implementation of the
+<a class="external-link" href="https://www.khronos.org/vulkan/">Vulkan</a> API
+specification from the Khronos Group. Vulkan is a
+low-overhead, cross-platform API for high-performance, 3D graphics. It provides tools
+for creating high-quality, real-time graphics in
+applications. Vulkan also provides advantages such as reducing
+CPU overhead and providing support for the
+<a class="external-link" href="https://www.khronos.org/spir">SPIR-V Binary
+Intermediate language</a>.
+</p>
+
+<p>
+This section begins with information on how to
+<a href="{@docRoot}ndk/guides/graphics/getting-started.html">get started</a> using Vulkan in your
+Android app. Next, it provides useful information that you should know about
+<a href="{@docRoot}ndk/guides/graphics/design-notes.html">Vulkan design guidelines</a>
+on the Android platform. From there, it explains how
+to use Vulkan's <a href="{@docRoot}ndk/guides/graphics/shader-compilers.html">shader compilers</a>.
+Last, it teaches you how to use
+<a href="{@docRoot}ndk/guides/graphics/validation-layer.html">validation layers</a>
+to help assure stability in apps using Vulkan.
+</p>
+
+<p>
+For more general information about this cross-platform API specification, see
+Khronos's
+<a class="external-link" href="http://khr.io/vulkanlaunchoverview">
+Vulkan Overview</a>.
+You can also keep up with the latest Vulkan-related developments at the
+Vulkan
+<a class="external-link" href="https://www.khronos.org/#slider_vulkan">news page</a>.
+</p>

@@ -22,8 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.Process;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Log;
+
+import com.android.systemui.stackdivider.Divider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,11 +48,23 @@ public class SystemUIApplication extends Application {
             com.android.systemui.keyguard.KeyguardViewMediator.class,
             com.android.systemui.recents.Recents.class,
             com.android.systemui.volume.VolumeUI.class,
+            Divider.class,
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.usb.StorageNotification.class,
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
+            com.android.systemui.tv.pip.PipUI.class,
+            com.android.systemui.shortcut.ShortcutKeyDispatcher.class
+    };
+
+    /**
+     * The classes of the stuff to start for each user.  This is a subset of the services listed
+     * above.
+     */
+    private final Class<?>[] SERVICES_PER_USER = new Class[] {
+            com.android.systemui.recents.Recents.class,
+            com.android.systemui.tv.pip.PipUI.class
     };
 
     /**
@@ -57,7 +73,7 @@ public class SystemUIApplication extends Application {
     private final SystemUI[] mServices = new SystemUI[SERVICES.length];
     private boolean mServicesStarted;
     private boolean mBootCompleted;
-    private final Map<Class<?>, Object> mComponents = new HashMap<Class<?>, Object>();
+    private final Map<Class<?>, Object> mComponents = new HashMap<>();
 
     @Override
     public void onCreate() {
@@ -67,24 +83,34 @@ public class SystemUIApplication extends Application {
         // the theme set there.
         setTheme(R.style.systemui_theme);
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (mBootCompleted) return;
+        SystemUIFactory.createFromConfig(this);
 
-                if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
-                unregisterReceiver(this);
-                mBootCompleted = true;
-                if (mServicesStarted) {
-                    final int N = mServices.length;
-                    for (int i = 0; i < N; i++) {
-                        mServices[i].onBootCompleted();
+        if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (mBootCompleted) return;
+
+                    if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
+                    unregisterReceiver(this);
+                    mBootCompleted = true;
+                    if (mServicesStarted) {
+                        final int N = mServices.length;
+                        for (int i = 0; i < N; i++) {
+                            mServices[i].onBootCompleted();
+                        }
                     }
                 }
-            }
-        }, filter);
+            }, filter);
+        } else {
+            // For a secondary user, boot-completed will never be called because it has already
+            // been broadcasted on startup for the primary SystemUI process.  Instead, for
+            // components which require the SystemUI component to be initialized per-user, we
+            // start those components now for the current non-system user.
+            startServicesIfNeeded(SERVICES_PER_USER);
+        }
     }
 
     /**
@@ -95,6 +121,21 @@ public class SystemUIApplication extends Application {
      * <p>This method must only be called from the main thread.</p>
      */
     public void startServicesIfNeeded() {
+        startServicesIfNeeded(SERVICES);
+    }
+
+    /**
+     * Ensures that all the Secondary user SystemUI services are running. If they are already
+     * running, this is a no-op. This is needed to conditinally start all the services, as we only
+     * need to have it in the main process.
+     *
+     * <p>This method must only be called from the main thread.</p>
+     */
+    void startSecondaryUserServicesIfNeeded() {
+        startServicesIfNeeded(SERVICES_PER_USER);
+    }
+
+    private void startServicesIfNeeded(Class<?>[] services) {
         if (mServicesStarted) {
             return;
         }
@@ -108,18 +149,21 @@ public class SystemUIApplication extends Application {
             }
         }
 
-        Log.v(TAG, "Starting SystemUI services.");
-        final int N = SERVICES.length;
+        Log.v(TAG, "Starting SystemUI services for user " +
+                Process.myUserHandle().getIdentifier() + ".");
+        final int N = services.length;
         for (int i=0; i<N; i++) {
-            Class<?> cl = SERVICES[i];
+            Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
             try {
-                mServices[i] = (SystemUI)cl.newInstance();
+                Object newService = SystemUIFactory.getInstance().createInstance(cl);
+                mServices[i] = (SystemUI) ((newService == null) ? cl.newInstance() : newService);
             } catch (IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             } catch (InstantiationException ex) {
                 throw new RuntimeException(ex);
             }
+
             mServices[i].mContext = this;
             mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
@@ -137,7 +181,9 @@ public class SystemUIApplication extends Application {
         if (mServicesStarted) {
             int len = mServices.length;
             for (int i = 0; i < len; i++) {
-                mServices[i].onConfigurationChanged(newConfig);
+                if (mServices[i] != null) {
+                    mServices[i].onConfigurationChanged(newConfig);
+                }
             }
         }
     }

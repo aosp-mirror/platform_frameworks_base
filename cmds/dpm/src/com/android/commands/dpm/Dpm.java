@@ -16,6 +16,9 @@
 
 package com.android.commands.dpm;
 
+import android.app.ActivityManagerNative;
+import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,27 +44,38 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_SET_ACTIVE_ADMIN = "set-active-admin";
     private static final String COMMAND_SET_DEVICE_OWNER = "set-device-owner";
     private static final String COMMAND_SET_PROFILE_OWNER = "set-profile-owner";
+    private static final String COMMAND_REMOVE_ACTIVE_ADMIN = "remove-active-admin";
 
     private IDevicePolicyManager mDevicePolicyManager;
-    private int mUserId = UserHandle.USER_OWNER;
+    private int mUserId = UserHandle.USER_SYSTEM;
+    private String mName = "";
     private ComponentName mComponent = null;
 
     @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: dpm [subcommand] [options]\n" +
-                "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
-                "usage: dpm set-device-owner <COMPONENT>\n" +
-                "usage: dpm set-profile-owner [ --user <USER_ID> ] <COMPONENT>\n" +
+                "usage: dpm set-active-admin [ --user <USER_ID> | current ] <COMPONENT>\n" +
+                // STOPSHIP Finalize it
+                "usage: dpm set-device-owner [ --user <USER_ID> | current *EXPERIMENTAL* ] " +
+                "[ --name <NAME> ] <COMPONENT>\n" +
+                "usage: dpm set-profile-owner [ --user <USER_ID> | current ] [ --name <NAME> ] " +
+                "<COMPONENT>\n" +
+                "usage: dpm remove-active-admin [ --user <USER_ID> | current ] [ --name <NAME> ] " +
+                "<COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
                 " for an existing user.\n" +
                 "\n" +
-                "dpm set-device-owner: Sets the given component as active admin, and its\n" +
-                "  package as device owner.\n" +
+                "dpm set-device-owner: Sets the given component as active admin, and its" +
+                " package as device owner.\n" +
                 "\n" +
                 "dpm set-profile-owner: Sets the given component as active admin and profile" +
-                "  owner for an existing user.\n");
+                " owner for an existing user.\n" +
+                "\n" +
+                "dpm remove-active-admin: Disables an active admin, the admin must have declared" +
+                " android:testOnly in the application in its manifest. This will also remove" +
+                " device and profile owners\n");
     }
 
     @Override
@@ -84,52 +98,82 @@ public final class Dpm extends BaseCommand {
             case COMMAND_SET_PROFILE_OWNER:
                 runSetProfileOwner();
                 break;
+            case COMMAND_REMOVE_ACTIVE_ADMIN:
+                runRemoveActiveAdmin();
+                break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
         }
     }
 
-    private void parseArgs(boolean canHaveUser) {
-        String nextArg = nextArgRequired();
-        if (canHaveUser && "--user".equals(nextArg)) {
-            mUserId = parseInt(nextArgRequired());
-            nextArg = nextArgRequired();
+    private void parseArgs(boolean canHaveName) {
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if ("--user".equals(opt)) {
+                String arg = nextArgRequired();
+                if ("current".equals(arg) || "cur".equals(arg)) {
+                    mUserId = UserHandle.USER_CURRENT;
+                } else {
+                    mUserId = parseInt(arg);
+                }
+                if (mUserId == UserHandle.USER_CURRENT) {
+                    IActivityManager activityManager = ActivityManagerNative.getDefault();
+                    try {
+                        mUserId = activityManager.getCurrentUser().id;
+                    } catch (RemoteException e) {
+                        e.rethrowAsRuntimeException();
+                    }
+                }
+            } else if (canHaveName && "--name".equals(opt)) {
+                mName = nextArgRequired();
+            } else {
+                throw new IllegalArgumentException("Unknown option: " + opt);
+            }
         }
-        mComponent = parseComponentName(nextArg);
+        mComponent = parseComponentName(nextArgRequired());
     }
 
     private void runSetActiveAdmin() throws RemoteException {
-        parseArgs(true);
+        parseArgs(/*canHaveName=*/ false);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         System.out.println("Success: Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetDeviceOwner() throws RemoteException {
-        ComponentName component = parseComponentName(nextArgRequired());
-        mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, UserHandle.USER_OWNER);
-
-        String packageName = component.getPackageName();
-        try {
-            if (!mDevicePolicyManager.setDeviceOwner(packageName, null /*ownerName*/)) {
-                throw new RuntimeException(
-                        "Can't set package " + packageName + " as device owner.");
-            }
-        } catch (Exception e) {
-            // Need to remove the admin that we just added.
-            mDevicePolicyManager.removeActiveAdmin(component, UserHandle.USER_OWNER);
-            throw e;
-        }
-        System.out.println("Success: Device owner set to package " + packageName);
-        System.out.println("Active admin set to component " + component.toShortString());
-    }
-
-    private void runSetProfileOwner() throws RemoteException {
-        parseArgs(true);
+        parseArgs(/*canHaveName=*/ true);
         mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         try {
-            if (!mDevicePolicyManager.setProfileOwner(mComponent, "" /*ownerName*/, mUserId)) {
+            if (!mDevicePolicyManager.setDeviceOwner(mComponent, mName, mUserId)) {
+                throw new RuntimeException(
+                        "Can't set package " + mComponent + " as device owner.");
+            }
+        } catch (Exception e) {
+            // Need to remove the admin that we just added.
+            mDevicePolicyManager.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
+            throw e;
+        }
+
+        mDevicePolicyManager.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
+        System.out.println("Success: Device owner set to package " + mComponent);
+        System.out.println("Active admin set to component " + mComponent.toShortString());
+    }
+
+    private void runRemoveActiveAdmin() throws RemoteException {
+        parseArgs(/*canHaveName=*/ false);
+        mDevicePolicyManager.forceRemoveActiveAdmin(mComponent, mUserId);
+        System.out.println("Success: Admin removed " + mComponent);
+    }
+
+    private void runSetProfileOwner() throws RemoteException {
+        parseArgs(/*canHaveName=*/ true);
+        mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
+
+        try {
+            if (!mDevicePolicyManager.setProfileOwner(mComponent, mName, mUserId)) {
                 throw new RuntimeException("Can't set component " + mComponent.toShortString() +
                         " as profile owner for user " + mUserId);
             }
@@ -138,6 +182,10 @@ public final class Dpm extends BaseCommand {
             mDevicePolicyManager.removeActiveAdmin(mComponent, mUserId);
             throw e;
         }
+
+        mDevicePolicyManager.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
         System.out.println("Success: Active admin and profile owner set to "
                 + mComponent.toShortString() + " for user " + mUserId);
     }

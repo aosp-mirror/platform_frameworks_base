@@ -16,13 +16,17 @@
 
 package com.android.server.media;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Keeps track of media sessions and their priority for notifications, media
@@ -61,6 +65,36 @@ public class MediaSessionStack {
     private ArrayList<MediaSessionRecord> mCachedTransportControlList;
 
     /**
+     * Checks if a media session is created from the most recent app.
+     *
+     * @param record A media session record to be examined.
+     * @return true if the media session's package name equals to the most recent app, false
+     * otherwise.
+     */
+    private static boolean isFromMostRecentApp(MediaSessionRecord record) {
+        if (ActivityManager.getCurrentUser() != record.getUserId()) {
+            return false;
+        }
+        try {
+            List<ActivityManager.RecentTaskInfo> tasks =
+                    ActivityManagerNative.getDefault().getRecentTasks(1,
+                            ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+                            ActivityManager.RECENT_IGNORE_UNAVAILABLE |
+                            ActivityManager.RECENT_INCLUDE_PROFILES |
+                            ActivityManager.RECENT_WITH_EXCLUDED, record.getUserId());
+            if (tasks != null && !tasks.isEmpty()) {
+                ActivityManager.RecentTaskInfo recentTask = tasks.get(0);
+                if (recentTask.baseIntent != null)
+                    return recentTask.baseIntent.getComponent().getPackageName()
+                            .equals(record.getPackageName());
+            }
+        } catch (RemoteException e) {
+            return false;
+        }
+        return false;
+    }
+
+    /**
      * Add a record to the priority tracker.
      *
      * @param record The record to add.
@@ -68,7 +102,9 @@ public class MediaSessionStack {
     public void addSession(MediaSessionRecord record) {
         mSessions.add(record);
         clearCache();
-        mLastInterestingRecord = record;
+        if (isFromMostRecentApp(record)) {
+            mLastInterestingRecord = record;
+        }
     }
 
     /**

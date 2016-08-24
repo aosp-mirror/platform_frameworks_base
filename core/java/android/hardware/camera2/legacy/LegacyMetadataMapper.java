@@ -175,7 +175,8 @@ public class LegacyMetadataMapper {
          * colorCorrection.*
          */
         m.set(COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES,
-                new int[] { COLOR_CORRECTION_ABERRATION_MODE_FAST });
+                new int[] { COLOR_CORRECTION_ABERRATION_MODE_FAST,
+                            COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY });
         /*
          * control.ae*
          */
@@ -210,7 +211,8 @@ public class LegacyMetadataMapper {
          * noiseReduction.*
          */
         m.set(NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES,
-                new int[] { NOISE_REDUCTION_MODE_FAST });
+                new int[] { NOISE_REDUCTION_MODE_FAST,
+                            NOISE_REDUCTION_MODE_HIGH_QUALITY});
 
         /*
          * scaler.*
@@ -1389,7 +1391,22 @@ public class LegacyMetadataMapper {
         /*
          * noiseReduction.*
          */
-        m.set(CaptureRequest.NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_FAST);
+        if (templateId == CameraDevice.TEMPLATE_STILL_CAPTURE) {
+            m.set(CaptureRequest.NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_HIGH_QUALITY);
+        } else {
+            m.set(CaptureRequest.NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_FAST);
+        }
+
+        /*
+        * colorCorrection.*
+        */
+        if (templateId == CameraDevice.TEMPLATE_STILL_CAPTURE) {
+            m.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
+                    COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY);
+        } else {
+            m.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
+                    COLOR_CORRECTION_ABERRATION_MODE_FAST);
+        }
 
         /*
          * lens.*

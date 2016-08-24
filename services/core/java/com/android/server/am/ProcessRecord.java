@@ -24,7 +24,8 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.Slog;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.app.ActivityManager;
@@ -36,9 +37,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -69,9 +72,10 @@ final class ProcessRecord {
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
-    ProcessStats.ProcessState baseProcessTracker;
+    ProcessState baseProcessTracker;
     BatteryStatsImpl.Uid.Proc curProcBatteryStats;
     int pid;                    // The process of this application; 0 if none
+    String procStatFile;        // path to /proc/<pid>/stat
     int[] gids;                 // The gids this process was launched with
     String requiredAbi;         // The ABI this process was launched with
     String instructionSet;      // The instruction set this process was launched with
@@ -82,12 +86,15 @@ final class ProcessRecord {
     long lastStateTime;         // Last time setProcState changed
     long initialIdlePss;        // Initial memory pss of process for idle maintenance.
     long lastPss;               // Last computed memory pss.
+    long lastSwapPss;           // Last computed SwapPss.
     long lastCachedPss;         // Last computed pss when in cached state.
+    long lastCachedSwapPss;     // Last computed SwapPss when in cached state.
     int maxAdj;                 // Maximum OOM adjustment for this process
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
+    int verifiedAdj;            // The last adjustment that was verified as actually being set
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
@@ -114,6 +121,7 @@ final class ProcessRecord {
     boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
+    boolean unlocked;           // True when proc was started in user unlocked state
     long interactionEventTime;  // The time we sent the last interaction event
     long fgInteractionTime;     // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
@@ -173,10 +181,10 @@ final class ProcessRecord {
     boolean debugging;          // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
-    
+
     String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
-    
+
     // These reports are generated & stored when an app gets into an error condition.
     // They will be "null" when all is OK.
     ActivityManager.ProcessErrorStateInfo crashingReport;
@@ -185,6 +193,11 @@ final class ProcessRecord {
     // Who will be notified of the error. This is usually an activity in the
     // app that installed the package.
     ComponentName errorReportReceiver;
+
+    // Process is currently hosting a backup agent for backup or restore
+    public boolean inFullBackup;
+    // App is allowed to manage whitelists such as temporary Power Save mode whitelist.
+    boolean whitelistManager;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -257,7 +270,9 @@ final class ProcessRecord {
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPss="); DebugUtils.printSizeValue(pw, lastPss*1024);
+                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss*1024);
                 pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
+                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw, lastCachedSwapPss*1024);
                 pw.println();
         pw.print(prefix); pw.print("cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
@@ -365,6 +380,9 @@ final class ProcessRecord {
                     }
                     pw.println();
         }
+        if (whitelistManager) {
+            pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
+        }
         if (activities.size() > 0) {
             pw.print(prefix); pw.println("Activities:");
             for (int i=0; i<activities.size(); i++) {
@@ -413,7 +431,7 @@ final class ProcessRecord {
             }
         }
     }
-    
+
     ProcessRecord(BatteryStatsImpl _batteryStats, ApplicationInfo _info,
             String _processName, int _uid) {
         mBatteryStats = _batteryStats;
@@ -424,8 +442,8 @@ final class ProcessRecord {
         processName = _processName;
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.versionCode));
         maxAdj = ProcessList.UNKNOWN_ADJ;
-        curRawAdj = setRawAdj = -100;
-        curAdj = setAdj = -100;
+        curRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
+        curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
         persistent = false;
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
@@ -433,13 +451,14 @@ final class ProcessRecord {
 
     public void setPid(int _pid) {
         pid = _pid;
+        procStatFile = null;
         shortStringName = null;
         stringName = null;
     }
 
     public void makeActive(IApplicationThread _thread, ProcessStatsService tracker) {
         if (thread == null) {
-            final ProcessStats.ProcessState origBase = baseProcessTracker;
+            final ProcessState origBase = baseProcessTracker;
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
@@ -465,7 +484,7 @@ final class ProcessRecord {
 
     public void makeInactive(ProcessStatsService tracker) {
         thread = null;
-        final ProcessStats.ProcessState origBase = baseProcessTracker;
+        final ProcessState origBase = baseProcessTracker;
         if (origBase != null) {
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
@@ -546,6 +565,29 @@ final class ProcessRecord {
         return adj;
     }
 
+    void scheduleCrash(String message) {
+        // Checking killedbyAm should keep it from showing the crash dialog if the process
+        // was already dead for a good / normal reason.
+        if (!killedByAm) {
+            if (thread != null) {
+                if (pid == Process.myPid()) {
+                    Slog.w(TAG, "scheduleCrash: trying to crash system process!");
+                    return;
+                }
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    thread.scheduleCrash(message);
+                } catch (RemoteException e) {
+                    // If it's already dead our work is done. If it's wedged just kill it.
+                    // We won't get the crash dialog or the error reporting.
+                    kill("scheduleCrash for '" + message + "' failed", true);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        }
+    }
+
     void kill(String reason, boolean noisy) {
         if (!killedByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
@@ -554,7 +596,7 @@ final class ProcessRecord {
             }
             EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
             Process.killProcessQuiet(pid);
-            Process.killProcessGroup(info.uid, pid);
+            ActivityManagerService.killProcessGroup(uid, pid);
             if (!persistent) {
                 killed = true;
                 killedByAm = true;
@@ -571,7 +613,7 @@ final class ProcessRecord {
         toShortString(sb);
         return shortStringName = sb.toString();
     }
-    
+
     void toShortString(StringBuilder sb) {
         sb.append(pid);
         sb.append(':');
@@ -596,7 +638,7 @@ final class ProcessRecord {
             }
         }
     }
-    
+
     public String toString() {
         if (stringName != null) {
             return stringName;
@@ -691,7 +733,7 @@ final class ProcessRecord {
 
                 }
                 pkgList.clear();
-                ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
+                ProcessState ps = tracker.getProcessStateLocked(
                         info.packageName, uid, info.versionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.versionCode);
@@ -706,7 +748,7 @@ final class ProcessRecord {
             pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.versionCode));
         }
     }
-    
+
     public String[] getPackageList() {
         int size = pkgList.size();
         if (size == 0) {

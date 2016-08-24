@@ -1,0 +1,393 @@
+page.title=Notificaciones
+page.tags=notifications
+helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!-- table of contents -->
+<h2>Este documento incluye lo siguiente:</h2>
+<ol>
+  <li><a href="#direct">Respuesta directa</a></li>
+  <li><a href="#bundle">Notificaciones integradas</a></li>
+  <li><a href="#custom">Vistas personalizadas</a></li>
+  <li><a href="#style">Estilo de mensajería</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N presenta varias API nuevas que permiten a las aplicaciones publicar
+notificaciones altamente visibles e interactivas.</p>
+
+<p>Android N amplía la API de notificación existente {@link android.support.v4.app.RemoteInput}
+para admitir respuestas en línea en teléfonos celulares. Esta función permite a los usuarios
+ responder rápidamente desde el panel de notificaciones sin tener que visitar tu aplicación.</p>
+
+<p>
+  Android N también te permite agrupar notificaciones similares para que
+  aparezcan como una sola notificación. Para que esto sea posible, Android N usa el método existente {@link
+  android.support.v4.app.NotificationCompat.Builder#setGroup
+  NotificationCompat.Builder.setGroup()}. Los usuarios pueden expandir cada una de las
+  notificaciones y realizar acciones como responder e ignorar en cada una
+  de ellas, de forma individual desde el panel de notificaciones.
+</p>
+
+<p>Por último, Android N también suma nuevas API que te permiten aprovechar las decoraciones
+del sistema en las vistas de notificación personalizadas de tu aplicación. Estas API ayudan a
+garantizar que las vistas de notificaciones compartan una presentación acorde a las
+plantillas estándar.</p>
+
+<p>En este documento se destacan algunos de los cambios clave que puedes tener en cuenta
+ al usar las nuevas funciones de notificación en tus aplicaciones.</p>
+
+<h2 id="direct">Respuesta directa</h2>
+
+<p>Con la función de respuesta directa en Android N, los usuarios pueden responder
+rápidamente mensajes de texto o actualizar listas de tareas directamente dentro de la interfaz de
+notificación. En un dispositivo portátil, la acción de respuesta en línea aparece como un botón adicional
+ anexado a la notificación. Cuando un usuario responde mediante el teclado, el sistema adjunta
+ la respuesta de texto a la intent
+ que especificaste para la acción de notificación y envía la intención a tu
+ aplicación para dispositivos portátiles.
+
+
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
+<p class="img-caption">
+  <strong>Figura 1.</strong> Android N agrega el botón de acción <strong>Reply</strong>
+.
+</p>
+
+<h3>Adición de acciones de respuesta en línea</h3>
+
+<p>Para crear una acción de notificación que admita respuesta directa:
+</p>
+
+<ol>
+<li>Crea una instancia de {@link android.support.v4.app.RemoteInput.Builder}
+  que puedas agregar a tu acción de
+notificación. El constructor de esta clase acepta una cadena que el sistema usa como clave
+ para la inserción de texto. Luego, tu aplicación para dispositivos portátiles usará esa clave para recuperar el texto
+  de la entrada.
+
+<pre>
+// Key for the string that's delivered in the action's intent.
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li>Adjunta el objeto {@link android.support.v4.app.RemoteInput}
+ a una acción usando <code>addRemoteInput()</code>.
+
+<pre>
+// Create the reply action and add the remote input.
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>Aplica la acción a una notificación y emite la notificación.
+
+<pre>
+// Build the notification and add the action.
+Notification newMessageNotification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification.
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, newMessageNotification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> Cuando se active la acción de notificación,
+el sistema le solicitará al usuario que ingrese una respuesta. </p>
+
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png" srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Figura 2.</strong> El usuario ingresa texto desde el panel de notificaciones.
+</p>
+
+<h3>
+  Recuperación de entradas del usuario a partir de la respuesta en línea
+</h3>
+
+<p>
+  Para recibir entradas del usuario de la interfaz de notificación a la actividad que
+ declaraste en la intent de la acción de respuesta:
+</p>
+
+<ol>
+  <li>Llama a {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()} pasando la intent de la acción de notificación como
+ el parámetro de entrada. Este método devuelve un {@link android.os.Bundle} que
+ contiene la respuesta de texto.
+
+    <pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+  </li>
+
+  <li>Consulta el paquete con la clave de resultado (proporcionada al constructor {@link
+  android.support.v4.app.RemoteInput.Builder}). Puedes completar
+ este proceso y recuperar el texto de entrada mediante la creación de un método, como en el
+ siguiente fragmento de código:
+
+    <pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
+    return null;
+ }
+</pre>
+  </li>
+
+  <li>Crea y emite otra notificación, utilizando la misma ID de notificación que
+ proporcionaste para la notificación anterior. El indicador de progreso
+ desaparece de la interfaz de notificación para informarles a los usuarios que la respuesta
+ fue exitosa. Al trabajar con esta nueva notificación, usa el contexto que se
+ pasa al método {@code onReceive()} del receptor.
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  En el caso de las aplicaciones interactivas, como los chats, podría ser útil incluir 
+ contexto adicional cuando se administra texto recuperado. Por ejemplo, en estas aplicaciones, se podrían mostrar
+ múltiples líneas de historial de chat. Cuando el usuario responde a través de {@link
+  android.support.v4.app.RemoteInput}, puedes actualizar el historial de respuestas
+ por medio del método {@code setRemoteInputHistory()}.
+</p>
+
+<p>
+  La notificación se debe actualizar o cancelar luego de que la aplicación haya
+ recibido entradas remotas. Cuando el usuario responde a una actualización remota
+ por medio de la respuesta directa,
+ no canceles la notificación. En cambio, actualiza la notificación para mostrar la respuesta del usuario.
+En el caso de las notificaciones que utilizan {@code MessagingStyle}, debes agregar
+la respuesta como el mensaje más reciente. Cuando se utilizan otras plantillas, puedes
+agregar la respuesta del usuario al historial de entradas remotas.
+</p>
+
+<h2 id="bundle">Notificaciones integradas</h2>
+
+<p>Android N ofrece a los desarrolladores una nueva manera de representar
+ una cola de notificaciones: <i>notificaciones integradas</i>. Esto es similar a la función
+  <a href="{@docRoot}training/wearables/notifications/stacks.html">Pilas de
+  notificaciones</a> en Android Wear. Por ejemplo, si tu aplicación crea notificaciones
+  para los mensajes recibidos, cuando se recibe más de un mensaje, agrupa las
+ notificaciones en un solo paquete. Puedes
+ usar el método existente {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()} para agrupar notificaciones similares.</p>
+
+<p>
+  El grupo de notificaciones impone una jerarquía en las notificaciones que lo integran.
+  En la parte superior de esa jerarquía se encuentra una notificación principal que muestra información
+  resumida para el grupo. El usuario puede expandir
+  progresivamente el grupo de notificaciones, y el sistema muestra más información a medida que el
+  usuario continúa indagando. Cuando el usuario expande el paquete, el sistema revela más
+  información para todas sus notificaciones secundarias; cuando el usuario
+  expande una de esas notificaciones, el sistema revela todo su contenido.
+</p>
+
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png" srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>Figura 3.</strong> El usuario puede expandir progresivamente el grupo de
+ notificaciones.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Si la misma aplicación envía cuatro o más notificaciones
+ y no se especifica un grupo, el
+ sistema las agrupa automáticamente.
+</p>
+
+<p>Para obtener información acerca de cómo agregar notificaciones a un grupo, consulta
+<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Agregar
+cada notificación a un grupo</a>.</p>
+
+
+<h3 id="best-practices">Prácticas recomendadas para las notificaciones integradas</h3>
+<p>Esta sección proporciona pautas acerca de cuándo usar grupos de notificaciones en lugar
+de las notificaciones {@link android.app.Notification.InboxStyle InboxStyle}
+que estaban disponibles en versiones anteriores de la
+plataforma Android.</p>
+
+<h3>Cuándo usar notificaciones integradas</h3>
+
+<p>Solo debes usar grupos de notificaciones si se cumplen todas las siguientes condiciones
+para tu caso de uso:</p>
+
+<ul>
+  <li>Las notificaciones secundarias son notificaciones completas y se pueden mostrar
+   individualmente sin la necesidad de un resumen del grupo.</li>
+  <li>El aislamiento de notificaciones secundarias de forma individual tiene un beneficio. Por
+  ejemplo:
+  </li>
+  <ul>
+    <li>Son interactivas, con acciones específicas para cada notificación secundaria.</li>
+    <li>Hay más información sobre la notificación secundaria que el usuario quiere leer.</li>
+  </ul>
+</ul>
+
+<p>Algunos ejemplos de buenos casos de uso para grupos de notificaciones incluyen: una aplicación de mensajería
+que exhiba una lista de mensajes entrantes, o una aplicación de correo electrónico que exhiba una lista de
+correos electrónicos recibidos.</p>
+
+<p>
+Algunos ejemplos de casos en los que se prefiere una sola notificación
+ incluyen mensajes individuales de una sola persona, o una lista de
+ elementos de texto de una sola línea. Para lograr esto, puedes usar
+({@link android.app.Notification.InboxStyle InboxStyle} o
+{@link android.app.Notification.BigTextStyle BigTextStyle})
+.
+</p>
+
+<h3 id ="post">Visualización de notificaciones integradas</h3>
+
+<p>
+  La aplicación siempre debe publicar un resumen del grupo, aún si el grupo contiene una sola
+ notificación secundaria. Si contiene una sola notificación, el sistema suprimirá el resumen y mostrará directamente la
+  notificación secundaria. Esto garantiza
+  que el sistema pueda proporcionar una experiencia uniforme cuando el usuario quita con un gesto de "deslizar" notificaciones
+  secundarias de un grupo.
+</p>
+
+<p class="note">
+  <strong>Nota:</strong> Esta versión de Android N aún no
+  suprime el resumen para los grupos de notificaciones que contienen una sola notificación secundaria. Esta
+  funcionalidad se agregará en una versión posterior de Android N.
+</p>
+
+<h3>Inspección de notificaciones</h3>
+
+<p>Si bien el sistema generalmente muestra las notificaciones secundarias como un grupo, puedes configurarlas
+ para que aparezcan temporalmente como
+ <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">
+ notificaciones emergentes</a>. Esta función es especialmente útil porque permite
+  el acceso inmediato a la notificación secundaria más reciente y a las acciones asociadas a ella.
+</p>
+
+
+<h3>Compatibilidad con versiones anteriores</h3>
+
+<p>
+  Tanto los grupos de notificaciones como las entradas remotas han formado parte de la API {@link
+  android.app.Notification} desde Android 5.0 (API nivel 21) para soportar dispositivos
+  con Android Wear. Si ya compilaste notificaciones con esas API,
+  lo único que debes hacer es verificar que el comportamiento de la aplicación concuerde
+  las pautas antes descritas y considerar la implementación de {@code
+  setRemoteInputHistory()}.
+</p>
+
+<p>
+  Para poder ser compatible con versiones anteriores, están disponibles las mismas API con
+  la clase {@link android.support.v4.app.NotificationCompat}
+  de la biblioteca de soporte, que te permite crear notificaciones que funcionan en versiones de Android
+  anteriores. En dispositivos portátiles y tablets, los usuarios solo ven la notificación de resumen
+  de modo que una aplicación aún debe tener un estilo de bandeja de entrada o una notificación equivalente
+  que represente todo el contenido del grupo. Dado que los dispositivos con Android
+  Wear permiten a los usuarios ver todas las notificaciones secundarias incluso en
+  niveles anteriores de la plataforma, debes crear notificaciones secundarias independientemente del nivel de
+  API.
+</p>
+
+<h2 id="custom"> Vistas personalizadas</h2>
+<p>A partir de la versión Android N, puedes personalizar vistas de notificaciones y
+aún obtener decoraciones del sistema, como encabezados de notificaciones, acciones y diseños
+expandibles.</p>
+
+<p>Para habilitar esta característica, Android N suma las siguientes API para que puedas diseñar tu
+  vista personalizada:</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> Permite diseñar notificaciones que no sean notificaciones
+de medios.</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> Permite diseñar notificaciones de medios.</dd>
+</dl>
+
+<p>Para usar esta nueva API, llama al método {@code setStyle()} y pásale
+el estilo de la vista personalizada que hayas elegido.</p>
+
+<p>Este fragmento muestra cómo crear un objeto de notificación personalizada con el método
+{@code DecoratedCustomViewStyle()}.</p>
+
+<pre>
+Notification notification = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>
+
+<h2 id="style">Estilo de mensajería</h2>
+<p>
+  Android N presenta una nueva API para personalizar el estilo de una notificación.
+  Por medio de la clase <code>MessageStyle</code>, puedes modificar varias de las
+ etiquetas que aparecen en la notificación, incluidos el título de la conversación,
+ mensajes adicionales y la vista de contenido para la notificación.
+</p>
+
+<p>
+  El siguiente fragmento de código demuestra cómo personalizar el estilo
+ de una notificación mediante la clase <code>MessageStyle</code>.
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
+</pre>

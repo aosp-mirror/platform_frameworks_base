@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
+import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Toolbar;
 
@@ -503,6 +505,9 @@ public class WindowDecorActionBar extends ActionBar implements
         mContextView.killMode();
         ActionModeImpl mode = new ActionModeImpl(mContextView.getContext(), callback);
         if (mode.dispatchOnCreate()) {
+            // This needs to be set before invalidate() so that it calls
+            // onPrepareActionMode()
+            mActionMode = mode;
             mode.invalidate();
             mContextView.initForMode(mode);
             animateToMode(true);
@@ -516,7 +521,6 @@ public class WindowDecorActionBar extends ActionBar implements
                 }
             }
             mContextView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            mActionMode = mode;
             return mode;
         }
         return null;
@@ -869,22 +873,38 @@ public class WindowDecorActionBar extends ActionBar implements
             hideForActionMode();
         }
 
-        Animator fadeIn, fadeOut;
-        if (toActionMode) {
-            fadeOut = mDecorToolbar.setupAnimatorToVisibility(View.GONE,
-                    FADE_OUT_DURATION_MS);
-            fadeIn = mContextView.setupAnimatorToVisibility(View.VISIBLE,
-                    FADE_IN_DURATION_MS);
+        if (shouldAnimateContextView()) {
+            Animator fadeIn, fadeOut;
+            if (toActionMode) {
+                fadeOut = mDecorToolbar.setupAnimatorToVisibility(View.GONE,
+                        FADE_OUT_DURATION_MS);
+                fadeIn = mContextView.setupAnimatorToVisibility(View.VISIBLE,
+                        FADE_IN_DURATION_MS);
+            } else {
+                fadeIn = mDecorToolbar.setupAnimatorToVisibility(View.VISIBLE,
+                        FADE_IN_DURATION_MS);
+                fadeOut = mContextView.setupAnimatorToVisibility(View.GONE,
+                        FADE_OUT_DURATION_MS);
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.playSequentially(fadeOut, fadeIn);
+            set.start();
         } else {
-            fadeIn = mDecorToolbar.setupAnimatorToVisibility(View.VISIBLE,
-                    FADE_IN_DURATION_MS);
-            fadeOut = mContextView.setupAnimatorToVisibility(View.GONE,
-                    FADE_OUT_DURATION_MS);
+            if (toActionMode) {
+                mDecorToolbar.setVisibility(View.GONE);
+                mContextView.setVisibility(View.VISIBLE);
+            } else {
+                mDecorToolbar.setVisibility(View.VISIBLE);
+                mContextView.setVisibility(View.GONE);
+            }
         }
-        AnimatorSet set = new AnimatorSet();
-        set.playSequentially(fadeOut, fadeIn);
-        set.start();
         // mTabScrollView's visibility is not affected by action mode.
+    }
+
+    private boolean shouldAnimateContextView() {
+        // We only to animate the action mode in if the container view has already been laid out.
+        // If it hasn't been laid out, it hasn't been drawn to screen yet.
+        return mContainerView.isLaidOut();
     }
 
     public Context getThemedContext() {
@@ -948,6 +968,12 @@ public class WindowDecorActionBar extends ActionBar implements
             return true;
         }
         return false;
+    }
+
+    /** @hide */
+    @Override
+    public boolean requestFocus() {
+        return requestFocus(mDecorToolbar.getViewGroup());
     }
 
     /**

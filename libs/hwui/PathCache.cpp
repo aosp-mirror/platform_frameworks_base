@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-#define ATRACE_TAG ATRACE_TAG_VIEW
-
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaint.h>
 #include <SkPath.h>
+#include <SkPathEffect.h>
 #include <SkRect.h>
 
 #include <utils/JenkinsHash.h>
@@ -33,21 +31,39 @@
 #include "thread/Signal.h"
 #include "thread/TaskProcessor.h"
 
+#include <cutils/properties.h>
+
 namespace android {
 namespace uirenderer {
+
+template <class T>
+static bool compareWidthHeight(const T& lhs, const T& rhs) {
+    return (lhs.mWidth == rhs.mWidth) && (lhs.mHeight == rhs.mHeight);
+}
+
+static bool compareRoundRects(const PathDescription::Shape::RoundRect& lhs,
+        const PathDescription::Shape::RoundRect& rhs) {
+    return compareWidthHeight(lhs, rhs) && lhs.mRx == rhs.mRx && lhs.mRy == rhs.mRy;
+}
+
+static bool compareArcs(const PathDescription::Shape::Arc& lhs, const PathDescription::Shape::Arc& rhs) {
+    return compareWidthHeight(lhs, rhs) && lhs.mStartAngle == rhs.mStartAngle &&
+            lhs.mSweepAngle == rhs.mSweepAngle && lhs.mUseCenter == rhs.mUseCenter;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Cache entries
 ///////////////////////////////////////////////////////////////////////////////
 
 PathDescription::PathDescription()
-        : type(kShapeNone)
+        : type(ShapeType::None)
         , join(SkPaint::kDefault_Join)
         , cap(SkPaint::kDefault_Cap)
         , style(SkPaint::kFill_Style)
         , miter(4.0f)
         , strokeWidth(1.0f)
         , pathEffect(nullptr) {
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -59,11 +75,12 @@ PathDescription::PathDescription(ShapeType type, const SkPaint* paint)
         , miter(paint->getStrokeMiter())
         , strokeWidth(paint->getStrokeWidth())
         , pathEffect(paint->getPathEffect()) {
+    // Shape bits should be set to zeroes, because they are used for hash calculation.
     memset(&shape, 0, sizeof(Shape));
 }
 
 hash_t PathDescription::hash() const {
-    uint32_t hash = JenkinsHashMix(0, type);
+    uint32_t hash = JenkinsHashMix(0, static_cast<int>(type));
     hash = JenkinsHashMix(hash, join);
     hash = JenkinsHashMix(hash, cap);
     hash = JenkinsHashMix(hash, style);
@@ -72,6 +89,32 @@ hash_t PathDescription::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(pathEffect));
     hash = JenkinsHashMixBytes(hash, (uint8_t*) &shape, sizeof(Shape));
     return JenkinsHashWhiten(hash);
+}
+
+bool PathDescription::operator==(const PathDescription& rhs) const {
+    if (type != rhs.type) return false;
+    if (join != rhs.join) return false;
+    if (cap != rhs.cap) return false;
+    if (style != rhs.style) return false;
+    if (miter != rhs.miter) return false;
+    if (strokeWidth != rhs.strokeWidth) return false;
+    if (pathEffect != rhs.pathEffect) return false;
+    switch (type) {
+        case ShapeType::None:
+            return 0;
+        case ShapeType::Rect:
+            return compareWidthHeight(shape.rect, rhs.shape.rect);
+        case ShapeType::RoundRect:
+            return compareRoundRects(shape.roundRect, rhs.shape.roundRect);
+        case ShapeType::Circle:
+            return shape.circle.mRadius == rhs.shape.circle.mRadius;
+        case ShapeType::Oval:
+            return compareWidthHeight(shape.oval, rhs.shape.oval);
+        case ShapeType::Arc:
+            return compareArcs(shape.arc, rhs.shape.arc);
+        case ShapeType::Path:
+            return shape.path.mGenerationID == rhs.shape.path.mGenerationID;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,17 +179,11 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 // Cache constructor/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PathCache::PathCache():
-        mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)), mTexNum(0) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting %s cache size to %sMB", name, property);
-        mMaxSize = MB(atof(property));
-    } else {
-        INIT_LOGD("  Using default %s cache size of %.2fMB", name, DEFAULT_PATH_CACHE_SIZE);
-    }
-
+PathCache::PathCache()
+        : mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(Properties::pathCacheSize)
+        , mTexNum(0) {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
@@ -186,7 +223,7 @@ void PathCache::operator()(PathDescription& entry, PathTexture*& texture) {
 
 void PathCache::removeTexture(PathTexture* texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height;
+        const uint32_t size = texture->width() * texture->height();
 
         // If there is a pending task we must wait for it to return
         // before attempting our cleanup
@@ -211,9 +248,7 @@ void PathCache::removeTexture(PathTexture* texture) {
             ALOGD("Shape deleted, size = %d", size);
         }
 
-        if (texture->id) {
-            Caches::getInstance().textureState().deleteTexture(texture->id);
-        }
+        texture->deleteTexture();
         delete texture;
     }
 }
@@ -250,8 +285,7 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     drawPath(path, paint, bitmap, left, top, offset, width, height);
 
     PathTexture* texture = new PathTexture(Caches::getInstance(),
-            left, top, offset, width, height,
-            path->getGenerationID());
+            left, top, offset, path->getGenerationID());
     generateTexture(entry, &bitmap, texture);
 
     return texture;
@@ -264,7 +298,7 @@ void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
     // Note here that we upload to a texture even if it's bigger than mMaxSize.
     // Such an entry in mCache will only be temporary, since it will be evicted
     // immediately on trim, or on any other Path entering the cache.
-    uint32_t size = texture->width * texture->height;
+    uint32_t size = texture->width() * texture->height();
     mSize += size;
     PATH_LOGD("PathCache::get/create: name, size, mSize = %d, %d, %d",
             texture->id, size, mSize);
@@ -282,24 +316,8 @@ void PathCache::clear() {
 
 void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
     ATRACE_NAME("Upload Path Texture");
-    SkAutoLockPixels alp(bitmap);
-    if (!bitmap.readyToDraw()) {
-        ALOGE("Cannot generate texture from bitmap");
-        return;
-    }
-
-    glGenTextures(1, &texture->id);
-
-    Caches::getInstance().textureState().bindTexture(texture->id);
-    // Textures are Alpha8
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    texture->blend = true;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, texture->width, texture->height, 0,
-            GL_ALPHA, GL_UNSIGNED_BYTE, bitmap.getPixels());
-
+    texture->upload(bitmap);
     texture->setFilter(GL_LINEAR);
-    texture->setWrap(GL_CLAMP_TO_EDGE);
     mTexNum++;
 }
 
@@ -323,16 +341,12 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
     texture->left = left;
     texture->top = top;
     texture->offset = offset;
-    texture->width = width;
-    texture->height = height;
 
     if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
         SkBitmap* bitmap = new SkBitmap();
         drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
         t->setResult(bitmap);
     } else {
-        texture->width = 0;
-        texture->height = 0;
         t->setResult(nullptr);
     }
 }
@@ -343,7 +357,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 
 void PathCache::removeDeferred(const SkPath* path) {
     Mutex::Autolock l(mLock);
-    mGarbage.push(path->getGenerationID());
+    mGarbage.push_back(path->getGenerationID());
 }
 
 void PathCache::clearGarbage() {
@@ -351,14 +365,11 @@ void PathCache::clearGarbage() {
 
     { // scope for the mutex
         Mutex::Autolock l(mLock);
-        size_t count = mGarbage.size();
-        for (size_t i = 0; i < count; i++) {
-            const uint32_t generationID = mGarbage.itemAt(i);
-
+        for (const uint32_t generationID : mGarbage) {
             LruCache<PathDescription, PathTexture*>::Iterator iter(mCache);
             while (iter.next()) {
                 const PathDescription& key = iter.key();
-                if (key.type == kShapePath && key.shape.path.mGenerationID == generationID) {
+                if (key.type == ShapeType::Path && key.shape.path.mGenerationID == generationID) {
                     pathsToRemove.push(key);
                 }
             }
@@ -372,7 +383,7 @@ void PathCache::clearGarbage() {
 }
 
 PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
-    PathDescription entry(kShapePath, paint);
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
@@ -402,9 +413,8 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
     return texture;
 }
 
-void PathCache::remove(const SkPath* path, const SkPaint* paint)
-{
-    PathDescription entry(kShapePath, paint);
+void PathCache::remove(const SkPath* path, const SkPaint* paint) {
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
     mCache.remove(entry);
 }
@@ -414,7 +424,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
         return;
     }
 
-    PathDescription entry(kShapePath, paint);
+    PathDescription entry(ShapeType::Path, paint);
     entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
@@ -453,7 +463,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
 
 PathTexture* PathCache::getRoundRect(float width, float height,
         float rx, float ry, const SkPaint* paint) {
-    PathDescription entry(kShapeRoundRect, paint);
+    PathDescription entry(ShapeType::RoundRect, paint);
     entry.shape.roundRect.mWidth = width;
     entry.shape.roundRect.mHeight = height;
     entry.shape.roundRect.mRx = rx;
@@ -478,7 +488,7 @@ PathTexture* PathCache::getRoundRect(float width, float height,
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
-    PathDescription entry(kShapeCircle, paint);
+    PathDescription entry(ShapeType::Circle, paint);
     entry.shape.circle.mRadius = radius;
 
     PathTexture* texture = get(entry);
@@ -498,7 +508,7 @@ PathTexture* PathCache::getCircle(float radius, const SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint) {
-    PathDescription entry(kShapeOval, paint);
+    PathDescription entry(ShapeType::Oval, paint);
     entry.shape.oval.mWidth = width;
     entry.shape.oval.mHeight = height;
 
@@ -521,7 +531,7 @@ PathTexture* PathCache::getOval(float width, float height, const SkPaint* paint)
 ///////////////////////////////////////////////////////////////////////////////
 
 PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint) {
-    PathDescription entry(kShapeRect, paint);
+    PathDescription entry(ShapeType::Rect, paint);
     entry.shape.rect.mWidth = width;
     entry.shape.rect.mHeight = height;
 
@@ -545,7 +555,7 @@ PathTexture* PathCache::getRect(float width, float height, const SkPaint* paint)
 
 PathTexture* PathCache::getArc(float width, float height,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) {
-    PathDescription entry(kShapeArc, paint);
+    PathDescription entry(ShapeType::Arc, paint);
     entry.shape.arc.mWidth = width;
     entry.shape.arc.mHeight = height;
     entry.shape.arc.mStartAngle = startAngle;

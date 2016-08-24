@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Parcel;
@@ -25,6 +26,7 @@ import android.text.SpannedString;
 import android.text.TextUtils;
 import android.view.inputmethod.SparseRectFArray.SparseRectFArrayBuilder;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -35,6 +37,11 @@ import java.util.Objects;
  * actually inserted.</p>
  */
 public final class CursorAnchorInfo implements Parcelable {
+    /**
+     * The pre-computed hash code.
+     */
+    private final int mHashCode;
+
     /**
      * The index of the first character of the selected text (inclusive). {@code -1} when there is
      * no text selection.
@@ -100,7 +107,8 @@ public final class CursorAnchorInfo implements Parcelable {
      * Transformation matrix that is applied to any positional information of this class to
      * transform local coordinates into screen coordinates.
      */
-    private final Matrix mMatrix;
+    @NonNull
+    private final float[] mMatrixValues;
 
     /**
      * Flag for {@link #getInsertionMarkerFlags()} and {@link #getCharacterBoundsFlags(int)}: the
@@ -121,6 +129,7 @@ public final class CursorAnchorInfo implements Parcelable {
     public static final int FLAG_IS_RTL = 0x04;
 
     public CursorAnchorInfo(final Parcel source) {
+        mHashCode = source.readInt();
         mSelectionStart = source.readInt();
         mSelectionEnd = source.readInt();
         mComposingTextStart = source.readInt();
@@ -131,8 +140,7 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerBaseline = source.readFloat();
         mInsertionMarkerBottom = source.readFloat();
         mCharacterBoundsArray = source.readParcelable(SparseRectFArray.class.getClassLoader());
-        mMatrix = new Matrix();
-        mMatrix.setValues(source.createFloatArray());
+        mMatrixValues = source.createFloatArray();
     }
 
     /**
@@ -143,6 +151,7 @@ public final class CursorAnchorInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mHashCode);
         dest.writeInt(mSelectionStart);
         dest.writeInt(mSelectionEnd);
         dest.writeInt(mComposingTextStart);
@@ -153,27 +162,12 @@ public final class CursorAnchorInfo implements Parcelable {
         dest.writeFloat(mInsertionMarkerBaseline);
         dest.writeFloat(mInsertionMarkerBottom);
         dest.writeParcelable(mCharacterBoundsArray, flags);
-        final float[] matrixArray = new float[9];
-        mMatrix.getValues(matrixArray);
-        dest.writeFloatArray(matrixArray);
+        dest.writeFloatArray(mMatrixValues);
     }
 
     @Override
     public int hashCode(){
-        final float floatHash = mInsertionMarkerHorizontal + mInsertionMarkerTop
-                + mInsertionMarkerBaseline + mInsertionMarkerBottom;
-        int hash = floatHash > 0 ? (int) floatHash : (int)(-floatHash);
-        hash *= 31;
-        hash += mInsertionMarkerFlags;
-        hash *= 31;
-        hash += mSelectionStart + mSelectionEnd + mComposingTextStart;
-        hash *= 31;
-        hash += Objects.hashCode(mComposingText);
-        hash *= 31;
-        hash += Objects.hashCode(mCharacterBoundsArray);
-        hash *= 31;
-        hash += Objects.hashCode(mMatrix);
-        return hash;
+        return mHashCode;
     }
 
     /**
@@ -202,13 +196,13 @@ public final class CursorAnchorInfo implements Parcelable {
         if (hashCode() != that.hashCode()) {
             return false;
         }
+
+        // Check fields that are not covered by hashCode() first.
+
         if (mSelectionStart != that.mSelectionStart || mSelectionEnd != that.mSelectionEnd) {
             return false;
         }
-        if (mComposingTextStart != that.mComposingTextStart
-                || !Objects.equals(mComposingText, that.mComposingText)) {
-            return false;
-        }
+
         if (mInsertionMarkerFlags != that.mInsertionMarkerFlags
                 || !areSameFloatImpl(mInsertionMarkerHorizontal, that.mInsertionMarkerHorizontal)
                 || !areSameFloatImpl(mInsertionMarkerTop, that.mInsertionMarkerTop)
@@ -216,18 +210,35 @@ public final class CursorAnchorInfo implements Parcelable {
                 || !areSameFloatImpl(mInsertionMarkerBottom, that.mInsertionMarkerBottom)) {
             return false;
         }
+
         if (!Objects.equals(mCharacterBoundsArray, that.mCharacterBoundsArray)) {
             return false;
         }
-        if (!Objects.equals(mMatrix, that.mMatrix)) {
+
+        // Following fields are (partially) covered by hashCode().
+
+        if (mComposingTextStart != that.mComposingTextStart
+                || !Objects.equals(mComposingText, that.mComposingText)) {
             return false;
+        }
+
+        // We do not use Arrays.equals(float[], float[]) to keep the previous behavior regarding
+        // NaN, 0.0f, and -0.0f.
+        if (mMatrixValues.length != that.mMatrixValues.length) {
+            return false;
+        }
+        for (int i = 0; i < mMatrixValues.length; ++i) {
+            if (mMatrixValues[i] != that.mMatrixValues[i]) {
+                return false;
+            }
         }
         return true;
     }
 
     @Override
     public String toString() {
-        return "SelectionInfo{mSelection=" + mSelectionStart + "," + mSelectionEnd
+        return "CursorAnchorInfo{mHashCode=" + mHashCode
+                + " mSelection=" + mSelectionStart + "," + mSelectionEnd
                 + " mComposingTextStart=" + mComposingTextStart
                 + " mComposingText=" + Objects.toString(mComposingText)
                 + " mInsertionMarkerFlags=" + mInsertionMarkerFlags
@@ -236,7 +247,7 @@ public final class CursorAnchorInfo implements Parcelable {
                 + " mInsertionMarkerBaseline=" + mInsertionMarkerBaseline
                 + " mInsertionMarkerBottom=" + mInsertionMarkerBottom
                 + " mCharacterBoundsArray=" + Objects.toString(mCharacterBoundsArray)
-                + " mMatrix=" + Objects.toString(mMatrix)
+                + " mMatrix=" + Arrays.toString(mMatrixValues)
                 + "}";
     }
 
@@ -254,7 +265,7 @@ public final class CursorAnchorInfo implements Parcelable {
         private float mInsertionMarkerBottom = Float.NaN;
         private int mInsertionMarkerFlags = 0;
         private SparseRectFArrayBuilder mCharacterBoundsArrayBuilder = null;
-        private final Matrix mMatrix = new Matrix(Matrix.IDENTITY_MATRIX);
+        private float[] mMatrixValues = null;
         private boolean mMatrixInitialized = false;
 
         /**
@@ -349,7 +360,10 @@ public final class CursorAnchorInfo implements Parcelable {
          * is interpreted as an identity matrix.
          */
         public Builder setMatrix(final Matrix matrix) {
-            mMatrix.set(matrix != null ? matrix : Matrix.IDENTITY_MATRIX);
+            if (mMatrixValues == null) {
+                mMatrixValues = new float[9];
+            }
+            (matrix != null ? matrix : Matrix.IDENTITY_MATRIX).getValues(mMatrixValues);
             mMatrixInitialized = true;
             return this;
         }
@@ -391,7 +405,6 @@ public final class CursorAnchorInfo implements Parcelable {
             mInsertionMarkerTop = Float.NaN;
             mInsertionMarkerBaseline = Float.NaN;
             mInsertionMarkerBottom = Float.NaN;
-            mMatrix.set(Matrix.IDENTITY_MATRIX);
             mMatrixInitialized = false;
             if (mCharacterBoundsArrayBuilder != null) {
                 mCharacterBoundsArrayBuilder.reset();
@@ -411,7 +424,18 @@ public final class CursorAnchorInfo implements Parcelable {
         mInsertionMarkerBottom = builder.mInsertionMarkerBottom;
         mCharacterBoundsArray = builder.mCharacterBoundsArrayBuilder != null ?
                 builder.mCharacterBoundsArrayBuilder.build() : null;
-        mMatrix = new Matrix(builder.mMatrix);
+        mMatrixValues = new float[9];
+        if (builder.mMatrixInitialized) {
+            System.arraycopy(builder.mMatrixValues, 0, mMatrixValues, 0, 9);
+        } else {
+            Matrix.IDENTITY_MATRIX.getValues(mMatrixValues);
+        }
+
+        // To keep hash function simple, we only use some complex objects for hash.
+        int hash = Objects.hashCode(mComposingText);
+        hash *= 31;
+        hash += Arrays.hashCode(mMatrixValues);
+        mHashCode = hash;
     }
 
     /**
@@ -527,7 +551,9 @@ public final class CursorAnchorInfo implements Parcelable {
      * @return a new instance (copy) of the transformation matrix.
      */
     public Matrix getMatrix() {
-        return new Matrix(mMatrix);
+        final Matrix matrix = new Matrix();
+        matrix.setValues(mMatrixValues);
+        return matrix;
     }
 
     /**

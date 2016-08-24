@@ -16,7 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
+import static com.android.documentsui.State.ACTION_CREATE;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -30,27 +31,25 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils.TruncateAt;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
-import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
@@ -65,8 +64,7 @@ import java.util.List;
 public class RecentsCreateFragment extends Fragment {
 
     private View mEmptyView;
-    private ListView mListView;
-
+    private RecyclerView mRecView;
     private DocumentStackAdapter mAdapter;
     private LoaderCallbacks<List<DocumentStack>> mCallbacks;
 
@@ -86,13 +84,14 @@ public class RecentsCreateFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
+        mRecView = (RecyclerView) view.findViewById(R.id.dir_list);
+        mRecView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecView.addOnItemTouchListener(mItemListener);
+
         mEmptyView = view.findViewById(android.R.id.empty);
 
-        mListView = (ListView) view.findViewById(R.id.list);
-        mListView.setOnItemClickListener(mItemListener);
-
         mAdapter = new DocumentStackAdapter();
-        mListView.setAdapter(mAdapter);
+        mRecView.setAdapter(mAdapter);
 
         final RootsCache roots = DocumentsApplication.getRootsCache(context);
         final State state = ((BaseActivity) getActivity()).getDisplayState();
@@ -106,18 +105,19 @@ public class RecentsCreateFragment extends Fragment {
             @Override
             public void onLoadFinished(
                     Loader<List<DocumentStack>> loader, List<DocumentStack> data) {
-                mAdapter.swapStacks(data);
+                mAdapter.update(data);
 
                 // When launched into empty recents, show drawer
-                if (mAdapter.isEmpty() && !state.stackTouched &&
-                        context instanceof DocumentsActivity) {
+                if (mAdapter.isEmpty() && !state.hasLocationChanged()
+                        && state.action != ACTION_CREATE
+                        && context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
             }
 
             @Override
             public void onLoaderReset(Loader<List<DocumentStack>> loader) {
-                mAdapter.swapStacks(null);
+                mAdapter.update(null);
             }
         };
 
@@ -136,13 +136,24 @@ public class RecentsCreateFragment extends Fragment {
         getLoaderManager().destroyLoader(LOADER_RECENTS);
     }
 
-    private OnItemClickListener mItemListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final DocumentStack stack = mAdapter.getItem(position);
-            ((BaseActivity) getActivity()).onStackPicked(stack);
-        }
-    };
+    private RecyclerView.OnItemTouchListener mItemListener =
+            new RecyclerView.OnItemTouchListener() {
+                @Override
+                public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                    Events.MotionInputEvent event = new Events.MotionInputEvent(e, mRecView);
+                    if (event.isOverItem() && event.isActionUp()) {
+                        final DocumentStack stack = mAdapter.getItem(event.getItemPosition());
+                        ((BaseActivity) getActivity()).onStackPicked(stack);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
+                @Override
+                public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
+            };
 
     public static class RecentsCreateLoader extends UriDerivativeLoader<Uri, List<DocumentStack>> {
         private final RootsCache mRoots;
@@ -157,7 +168,7 @@ public class RecentsCreateFragment extends Fragment {
         @Override
         public List<DocumentStack> loadInBackground(Uri uri, CancellationSignal signal) {
             final Collection<RootInfo> matchingRoots = mRoots.getMatchingRootsBlocking(mState);
-            final ArrayList<DocumentStack> result = Lists.newArrayList();
+            final ArrayList<DocumentStack> result = new ArrayList<>();
 
             final ContentResolver resolver = getContext().getContentResolver();
             final Cursor cursor = resolver.query(
@@ -188,14 +199,32 @@ public class RecentsCreateFragment extends Fragment {
         }
     }
 
-    private class DocumentStackAdapter extends BaseAdapter {
-        private List<DocumentStack> mStacks;
+    private static final class StackHolder extends RecyclerView.ViewHolder {
+        public View view;
+        public StackHolder(View view) {
+            super(view);
+            this.view = view;
+        }
+    }
 
-        public DocumentStackAdapter() {
+    private class DocumentStackAdapter extends RecyclerView.Adapter<StackHolder> {
+        @Nullable private List<DocumentStack> mItems;
+
+        DocumentStack getItem(int position) {
+            return mItems.get(position);
         }
 
-        public void swapStacks(List<DocumentStack> stacks) {
-            mStacks = stacks;
+        @Override
+        public int getItemCount() {
+            return mItems == null ? 0 : mItems.size();
+        }
+
+        boolean isEmpty() {
+            return mItems == null ? true : mItems.isEmpty();
+        }
+
+        void update(@Nullable List<DocumentStack> items) {
+            mItems = items;
 
             if (isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
@@ -207,17 +236,22 @@ public class RecentsCreateFragment extends Fragment {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final Context context = parent.getContext();
+        public StackHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+          final Context context = parent.getContext();
 
-            if (convertView == null) {
-                final LayoutInflater inflater = LayoutInflater.from(context);
-                convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
-            }
+          final LayoutInflater inflater = LayoutInflater.from(context);
+          return new StackHolder(
+                  (View) inflater.inflate(R.layout.item_doc_list, parent, false));
+        }
 
-            final ImageView iconMime = (ImageView) convertView.findViewById(R.id.icon_mime);
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final View line2 = convertView.findViewById(R.id.line2);
+        @Override
+        public void onBindViewHolder(StackHolder holder, int position) {
+            Context context = getContext();
+            View view = holder.view;
+
+            final ImageView iconMime = (ImageView) view.findViewById(R.id.icon_mime);
+            final TextView title = (TextView) view.findViewById(android.R.id.title);
+            final View line2 = view.findViewById(R.id.line2);
 
             final DocumentStack stack = getItem(position);
             iconMime.setImageDrawable(stack.root.loadIcon(context));
@@ -235,23 +269,6 @@ public class RecentsCreateFragment extends Fragment {
             title.setEllipsize(TruncateAt.MIDDLE);
 
             if (line2 != null) line2.setVisibility(View.GONE);
-
-            return convertView;
-        }
-
-        @Override
-        public int getCount() {
-            return mStacks != null ? mStacks.size() : 0;
-        }
-
-        @Override
-        public DocumentStack getItem(int position) {
-            return mStacks.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
         }
     }
 

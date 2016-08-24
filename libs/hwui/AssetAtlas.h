@@ -17,18 +17,16 @@
 #ifndef ANDROID_HWUI_ASSET_ATLAS_H
 #define ANDROID_HWUI_ASSET_ATLAS_H
 
-#include <GLES2/gl2.h>
-
-#include <ui/GraphicBuffer.h>
-
-#include <utils/KeyedVector.h>
-
-#include <cutils/compiler.h>
-
-#include <SkBitmap.h>
-
 #include "Texture.h"
 #include "UvMapper.h"
+
+#include <cutils/compiler.h>
+#include <GLES2/gl2.h>
+#include <ui/GraphicBuffer.h>
+#include <SkBitmap.h>
+
+#include <memory>
+#include <unordered_map>
 
 namespace android {
 namespace uirenderer {
@@ -71,6 +69,10 @@ public:
             return texture->blend ? &atlas.mBlendKey : &atlas.mOpaqueKey;
         }
 
+        ~Entry() {
+            delete texture;
+        }
+
     private:
         /**
          * The pixel ref that generated this atlas entry.
@@ -88,10 +90,6 @@ public:
                 , uvMapper(mapper)
                 , pixelRef(pixelRef)
                 , atlas(atlas) {
-        }
-
-        ~Entry() {
-            delete texture;
         }
 
         friend class AssetAtlas;
@@ -127,7 +125,7 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     uint32_t getWidth() const {
-        return mTexture ? mTexture->width : 0;
+        return mTexture ? mTexture->width() : 0;
     }
 
     /**
@@ -135,7 +133,7 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     uint32_t getHeight() const {
-        return mTexture ? mTexture->height : 0;
+        return mTexture ? mTexture->height() : 0;
     }
 
     /**
@@ -143,24 +141,23 @@ public:
      * Can return 0 if the atlas is not initialized.
      */
     GLuint getTexture() const {
-        return mTexture ? mTexture->id : 0;
+        return mTexture ? mTexture->id() : 0;
     }
 
     /**
      * Returns the entry in the atlas associated with the specified
-     * bitmap. If the bitmap is not in the atlas, return NULL.
+     * pixelRef. If the pixelRef is not in the atlas, return NULL.
      */
-    Entry* getEntry(const SkBitmap* bitmap) const;
+    Entry* getEntry(const SkPixelRef* pixelRef) const;
 
     /**
      * Returns the texture for the atlas entry associated with the
-     * specified bitmap. If the bitmap is not in the atlas, return NULL.
+     * specified pixelRef. If the pixelRef is not in the atlas, return NULL.
      */
-    Texture* getEntryTexture(const SkBitmap* bitmap) const;
+    Texture* getEntryTexture(const SkPixelRef* pixelRef) const;
 
 private:
     void createEntries(Caches& caches, int64_t* map, int count);
-    void updateTextureId();
 
     Texture* mTexture;
     Image* mImage;
@@ -168,7 +165,7 @@ private:
     const bool mBlendKey;
     const bool mOpaqueKey;
 
-    KeyedVector<const SkPixelRef*, Entry*> mEntries;
+    std::unordered_map<const SkPixelRef*, std::unique_ptr<Entry>> mEntries;
 }; // class AssetAtlas
 
 }; // namespace uirenderer

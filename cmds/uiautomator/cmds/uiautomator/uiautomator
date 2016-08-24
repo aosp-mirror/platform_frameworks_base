@@ -67,6 +67,11 @@ jars=
 
 # special case pre-processing for 'runtest' command
 if [ "${cmd}" == "runtest" ]; then
+  # Print deprecation warning
+  echo "Warning: This version of UI Automator is deprecated. New tests should be written using"
+  echo "UI Automator 2.0 which is available as part of the Android Testing Support Library."
+  echo "See https://developer.android.com/training/testing/ui-testing/uiautomator-testing.html"
+  echo "for more details."
   # first parse the jar paths
   while [ true ]; do
     if [ -z "${1}" ] && [ -z "${jars}" ]; then

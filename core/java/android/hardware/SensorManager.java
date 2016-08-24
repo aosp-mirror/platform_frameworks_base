@@ -46,7 +46,7 @@ import java.util.List;
  * is an example of a trigger sensor.
  * </p>
  * <pre class="prettyprint">
- * public class SensorActivity extends Activity, implements SensorEventListener {
+ * public class SensorActivity extends Activity implements SensorEventListener {
  *     private final SensorManager mSensorManager;
  *     private final Sensor mAccelerometer;
  *
@@ -377,6 +377,12 @@ public abstract class SensorManager {
     protected abstract List<Sensor> getFullSensorList();
 
     /**
+     * Gets the full list of dynamic sensors that are available.
+     * @hide
+     */
+    protected abstract List<Sensor> getFullDynamicSensorList();
+
+    /**
      * @return available sensors.
      * @deprecated This method is deprecated, use
      *             {@link SensorManager#getSensorList(int)} instead
@@ -427,6 +433,38 @@ public abstract class SensorManager {
             }
         }
         return list;
+    }
+
+    /**
+     * Use this method to get a list of available dynamic sensors of a certain type.
+     * Make multiple calls to get sensors of different types or use
+     * {@link android.hardware.Sensor#TYPE_ALL Sensor.TYPE_ALL} to get all dynamic sensors.
+     *
+     * <p class="note">
+     * NOTE: Both wake-up and non wake-up sensors matching the given type are
+     * returned. Check {@link Sensor#isWakeUpSensor()} to know the wake-up properties
+     * of the returned {@link Sensor}.
+     * </p>
+     *
+     * @param type of sensors requested
+     *
+     * @return a list of dynamic sensors matching the requested type.
+     *
+     * @see Sensor
+     */
+    public List<Sensor> getDynamicSensorList(int type) {
+        // cache the returned lists the first time
+        final List<Sensor> fullList = getFullDynamicSensorList();
+        if (type == Sensor.TYPE_ALL) {
+            return Collections.unmodifiableList(fullList);
+        } else {
+            List<Sensor> list = new ArrayList();
+            for (Sensor i : fullList) {
+                if (i.getType() == type)
+                    list.add(i);
+            }
+            return Collections.unmodifiableList(list);
+        }
     }
 
     /**
@@ -840,6 +878,97 @@ public abstract class SensorManager {
 
     /** @hide */
     protected abstract boolean flushImpl(SensorEventListener listener);
+
+
+    /**
+     * Used for receiving notifications from the SensorManager when dynamic sensors are connected or
+     * disconnected.
+     */
+    public static abstract class DynamicSensorCallback {
+        /**
+         * Called when there is a dynamic sensor being connected to the system.
+         *
+         * @param sensor the newly connected sensor. See {@link android.hardware.Sensor Sensor}.
+         */
+        public void onDynamicSensorConnected(Sensor sensor) {}
+
+        /**
+         * Called when there is a dynamic sensor being disconnected from the system.
+         *
+         * @param sensor the disconnected sensor. See {@link android.hardware.Sensor Sensor}.
+         */
+        public void onDynamicSensorDisconnected(Sensor sensor) {}
+    }
+
+
+    /**
+     * Add a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to receive dynamic sensor connection callbacks. Repeat
+     * registration with the already registered callback object will have no additional effect.
+     *
+     * @param callback An object that implements the
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback}
+     *        interface for receiving callbacks.
+     * @see #addDynamicSensorCallback(DynamicSensorCallback, Handler)
+     *
+     * @throws IllegalArgumentException when callback is null.
+     */
+    public void registerDynamicSensorCallback(DynamicSensorCallback callback) {
+        registerDynamicSensorCallback(callback, null);
+    }
+
+    /**
+     * Add a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to receive dynamic sensor connection callbacks. Repeat
+     * registration with the already registered callback object will have no additional effect.
+     *
+     * @param callback An object that implements the
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback} interface for receiving callbacks.
+     * @param handler The {@link android.os.Handler Handler} the {@link
+     *        android.hardware.SensorManager.DynamicSensorCallback
+     *        sensor connection events} will be delivered to.
+     *
+     * @throws IllegalArgumentException when callback is null.
+     */
+    public void registerDynamicSensorCallback(
+            DynamicSensorCallback callback, Handler handler) {
+        registerDynamicSensorCallbackImpl(callback, handler);
+    }
+
+    /**
+     * Remove a {@link android.hardware.SensorManager.DynamicSensorCallback
+     * DynamicSensorCallback} to stop sending dynamic sensor connection events to that
+     * callback.
+     *
+     * @param callback An object that implements the
+     *        {@link android.hardware.SensorManager.DynamicSensorCallback
+     *        DynamicSensorCallback}
+     *        interface for receiving callbacks.
+     */
+    public void unregisterDynamicSensorCallback(DynamicSensorCallback callback) {
+        unregisterDynamicSensorCallbackImpl(callback);
+    }
+
+    /**
+     * Tell if dynamic sensor discovery feature is supported by system.
+     *
+     * @return <code>true</code> if dynamic sensor discovery is supported, <code>false</code>
+     * otherwise.
+     */
+    public boolean isDynamicSensorDiscoverySupported() {
+        List<Sensor> sensors = getSensorList(Sensor.TYPE_DYNAMIC_SENSOR_META);
+        return sensors.size() > 0;
+    }
+
+    /** @hide */
+    protected abstract void registerDynamicSensorCallbackImpl(
+            DynamicSensorCallback callback, Handler handler);
+
+    /** @hide */
+    protected abstract void unregisterDynamicSensorCallbackImpl(
+            DynamicSensorCallback callback);
 
     /**
      * <p>

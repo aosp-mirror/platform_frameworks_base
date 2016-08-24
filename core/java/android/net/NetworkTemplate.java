@@ -18,6 +18,8 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
+import static android.net.ConnectivityManager.TYPE_PROXY;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -28,15 +30,18 @@ import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_UNKNOWN;
 import static android.telephony.TelephonyManager.getNetworkClass;
-import static com.android.internal.util.ArrayUtils.contains;
 
-import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.BackupUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -47,6 +52,10 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkTemplate implements Parcelable {
+    /**
+     * Current Version of the Backup Serializer.
+     */
+    private static final int BACKUP_VERSION = 1;
 
     public static final int MATCH_MOBILE_ALL = 1;
     @Deprecated
@@ -58,16 +67,7 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_MOBILE_WILDCARD = 6;
     public static final int MATCH_WIFI_WILDCARD = 7;
     public static final int MATCH_BLUETOOTH = 8;
-
-    /**
-     * Set of {@link NetworkInfo#getType()} that reflect data usage.
-     */
-    private static final int[] DATA_USAGE_NETWORK_TYPES;
-
-    static {
-        DATA_USAGE_NETWORK_TYPES = Resources.getSystem().getIntArray(
-                com.android.internal.R.array.config_data_usage_network_types);
-    }
+    public static final int MATCH_PROXY = 9;
 
     private static boolean sForceAllNetworkTypes = false;
 
@@ -145,6 +145,14 @@ public class NetworkTemplate implements Parcelable {
      */
     public static NetworkTemplate buildTemplateBluetooth() {
         return new NetworkTemplate(MATCH_BLUETOOTH, null, null);
+    }
+
+    /**
+     * Template to combine all {@link ConnectivityManager#TYPE_PROXY} style
+     * networks together.
+     */
+    public static NetworkTemplate buildTemplateProxy() {
+        return new NetworkTemplate(MATCH_PROXY, null, null);
     }
 
     private final int mMatchRule;
@@ -240,6 +248,16 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    public boolean isPersistable() {
+        switch (mMatchRule) {
+            case MATCH_MOBILE_WILDCARD:
+            case MATCH_WIFI_WILDCARD:
+                return false;
+            default:
+                return true;
+        }
+    }
+
     public int getMatchRule() {
         return mMatchRule;
     }
@@ -273,6 +291,8 @@ public class NetworkTemplate implements Parcelable {
                 return matchesWifiWildcard(ident);
             case MATCH_BLUETOOTH:
                 return matchesBluetooth(ident);
+            case MATCH_PROXY:
+                return matchesProxy(ident);
             default:
                 throw new IllegalArgumentException("unknown network template");
         }
@@ -286,9 +306,8 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            final boolean matchesType = (sForceAllNetworkTypes
-                    || contains(DATA_USAGE_NETWORK_TYPES, ident.mType));
-            return matchesType && !ArrayUtils.isEmpty(mMatchSubscriberIds)
+            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
+                    && !ArrayUtils.isEmpty(mMatchSubscriberIds)
                     && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
         }
     }
@@ -357,7 +376,7 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType);
+            return sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered);
         }
     }
 
@@ -381,6 +400,13 @@ public class NetworkTemplate implements Parcelable {
         return false;
     }
 
+    /**
+     * Check if matches Proxy network template.
+     */
+    private boolean matchesProxy(NetworkIdentity ident) {
+        return ident.mType == TYPE_PROXY;
+    }
+
     private static String getMatchRuleName(int matchRule) {
         switch (matchRule) {
             case MATCH_MOBILE_3G_LOWER:
@@ -399,6 +425,8 @@ public class NetworkTemplate implements Parcelable {
                 return "WIFI_WILDCARD";
             case MATCH_BLUETOOTH:
                 return "BLUETOOTH";
+            case MATCH_PROXY:
+                return "PROXY";
             default:
                 return "UNKNOWN";
         }
@@ -443,4 +471,31 @@ public class NetworkTemplate implements Parcelable {
             return new NetworkTemplate[size];
         }
     };
+
+    public byte[] getBytesForBackup() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+
+        out.writeInt(BACKUP_VERSION);
+
+        out.writeInt(mMatchRule);
+        BackupUtils.writeString(out, mSubscriberId);
+        BackupUtils.writeString(out, mNetworkId);
+
+        return baos.toByteArray();
+    }
+
+    public static NetworkTemplate getNetworkTemplateFromBackup(DataInputStream in)
+            throws IOException, BackupUtils.BadVersionException {
+        int version = in.readInt();
+        if (version < 1 || version > BACKUP_VERSION) {
+            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
+        }
+
+        int matchRule = in.readInt();
+        String subscriberId = BackupUtils.readString(in);
+        String networkId = BackupUtils.readString(in);
+
+        return new NetworkTemplate(matchRule, subscriberId, networkId);
+    }
 }

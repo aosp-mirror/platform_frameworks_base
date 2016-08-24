@@ -16,7 +16,7 @@
 
 package android.util;
 
-import libcore.util.Objects;
+import java.util.Objects;
 
 /**
  * Container to ease passing around a tuple of two objects. This object provides a sensible
@@ -52,7 +52,7 @@ public class Pair<F, S> {
             return false;
         }
         Pair<?, ?> p = (Pair<?, ?>) o;
-        return Objects.equal(p.first, first) && Objects.equal(p.second, second);
+        return Objects.equals(p.first, first) && Objects.equals(p.second, second);
     }
 
     /**
@@ -63,6 +63,11 @@ public class Pair<F, S> {
     @Override
     public int hashCode() {
         return (first == null ? 0 : first.hashCode()) ^ (second == null ? 0 : second.hashCode());
+    }
+
+    @Override
+    public String toString() {
+        return "Pair{" + String.valueOf(first) + " " + String.valueOf(second) + "}";
     }
 
     /**

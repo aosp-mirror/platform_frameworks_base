@@ -16,8 +16,11 @@
 
 package android.net.nsd;
 
+import android.annotation.NonNull;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.ArrayMap;
 
@@ -95,8 +98,99 @@ public final class NsdServiceInfo implements Parcelable {
         mPort = p;
     }
 
+    /**
+     * Unpack txt information from a base-64 encoded byte array.
+     *
+     * @param rawRecords The raw base64 encoded records string read from netd.
+     *
+     * @hide
+     */
+    public void setTxtRecords(@NonNull String rawRecords) {
+        byte[] txtRecordsRawBytes = Base64.decode(rawRecords, Base64.DEFAULT);
+
+        // There can be multiple TXT records after each other. Each record has to following format:
+        //
+        // byte                  type                  required   meaning
+        // -------------------   -------------------   --------   ----------------------------------
+        // 0                     unsigned 8 bit        yes        size of record excluding this byte
+        // 1 - n                 ASCII but not '='     yes        key
+        // n + 1                 '='                   optional   separator of key and value
+        // n + 2 - record size   uninterpreted bytes   optional   value
+        //
+        // Example legal records:
+        // [11, 'm', 'y', 'k', 'e', 'y', '=', 0x0, 0x4, 0x65, 0x7, 0xff]
+        // [17, 'm', 'y', 'K', 'e', 'y', 'W', 'i', 't', 'h', 'N', 'o', 'V', 'a', 'l', 'u', 'e', '=']
+        // [12, 'm', 'y', 'B', 'o', 'o', 'l', 'e', 'a', 'n', 'K', 'e', 'y']
+        //
+        // Example corrupted records
+        // [3, =, 1, 2]    <- key is empty
+        // [3, 0, =, 2]    <- key contains non-ASCII character. We handle this by replacing the
+        //                    invalid characters instead of skipping the record.
+        // [30, 'a', =, 2] <- length exceeds total left over bytes in the TXT records array, we
+        //                    handle this by reducing the length of the record as needed.
+        int pos = 0;
+        while (pos < txtRecordsRawBytes.length) {
+            // recordLen is an unsigned 8 bit value
+            int recordLen = txtRecordsRawBytes[pos] & 0xff;
+            pos += 1;
+
+            try {
+                if (recordLen == 0) {
+                    throw new IllegalArgumentException("Zero sized txt record");
+                } else if (pos + recordLen > txtRecordsRawBytes.length) {
+                    Log.w(TAG, "Corrupt record length (pos = " + pos + "): " + recordLen);
+                    recordLen = txtRecordsRawBytes.length - pos;
+                }
+
+                // Decode key-value records
+                String key = null;
+                byte[] value = null;
+                int valueLen = 0;
+                for (int i = pos; i < pos + recordLen; i++) {
+                    if (key == null) {
+                        if (txtRecordsRawBytes[i] == '=') {
+                            key = new String(txtRecordsRawBytes, pos, i - pos,
+                                    StandardCharsets.US_ASCII);
+                        }
+                    } else {
+                        if (value == null) {
+                            value = new byte[recordLen - key.length() - 1];
+                        }
+                        value[valueLen] = txtRecordsRawBytes[i];
+                        valueLen++;
+                    }
+                }
+
+                // If '=' was not found we have a boolean record
+                if (key == null) {
+                    key = new String(txtRecordsRawBytes, pos, recordLen, StandardCharsets.US_ASCII);
+                }
+
+                if (TextUtils.isEmpty(key)) {
+                    // Empty keys are not allowed (RFC6763 6.4)
+                    throw new IllegalArgumentException("Invalid txt record (key is empty)");
+                }
+
+                if (getAttributes().containsKey(key)) {
+                    // When we have a duplicate record, the later ones are ignored (RFC6763 6.4)
+                    throw new IllegalArgumentException("Invalid txt record (duplicate key \"" + key + "\")");
+                }
+
+                setAttribute(key, value);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "While parsing txt records (pos = " + pos + "): " + e.getMessage());
+            }
+
+            pos += recordLen;
+        }
+    }
+
     /** @hide */
     public void setAttribute(String key, byte[] value) {
+        if (TextUtils.isEmpty(key)) {
+            throw new IllegalArgumentException("Key cannot be empty");
+        }
+
         // Key must be printable US-ASCII, excluding =.
         for (int i = 0; i < key.length(); ++i) {
             char character = key.charAt(i);
@@ -177,10 +271,10 @@ public final class NsdServiceInfo implements Parcelable {
     }
 
     /** @hide */
-    public byte[] getTxtRecord() {
+    public @NonNull byte[] getTxtRecord() {
         int txtRecordSize = getTxtRecordSize();
         if (txtRecordSize == 0) {
-            return null;
+            return new byte[]{};
         }
 
         byte[] txtRecord = new byte[txtRecordSize];

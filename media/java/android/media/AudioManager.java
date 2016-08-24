@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -808,7 +810,7 @@ public class AudioManager {
             service.adjustStreamVolume(streamType, direction, flags,
                     getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in adjustStreamVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -876,7 +878,7 @@ public class AudioManager {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
                     UserHandle.getCallingUserId());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMasterMute", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -892,8 +894,7 @@ public class AudioManager {
         try {
             return service.getRingerModeExternal();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getRingerMode", e);
-            return RINGER_MODE_NORMAL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -913,8 +914,7 @@ public class AudioManager {
         try {
             return service.isValidRingerMode(ringerMode);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isValidRingerMode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -930,8 +930,7 @@ public class AudioManager {
         try {
             return service.getStreamMaxVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamMaxVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -948,8 +947,7 @@ public class AudioManager {
         try {
             return service.getStreamMinVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamMinVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -966,8 +964,7 @@ public class AudioManager {
         try {
             return service.getStreamVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -981,8 +978,7 @@ public class AudioManager {
         try {
             return service.getLastAudibleStreamVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getLastAudibleStreamVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -997,8 +993,7 @@ public class AudioManager {
         try {
             return service.getUiSoundsStreamType();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getUiSoundsStreamType", e);
-            return STREAM_RING;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1010,6 +1005,9 @@ public class AudioManager {
      * according to user settings.
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
+     * unless the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param ringerMode The ringer mode, one of {@link #RINGER_MODE_NORMAL},
      *            {@link #RINGER_MODE_SILENT}, or {@link #RINGER_MODE_VIBRATE}.
      * @see #getRingerMode()
@@ -1023,7 +1021,7 @@ public class AudioManager {
         try {
             service.setRingerModeExternal(ringerMode, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRingerMode", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1031,6 +1029,9 @@ public class AudioManager {
      * Sets the volume index for a particular stream.
      * <p>This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, volume adjustments that would toggle Do Not Disturb are not allowed unless
+     * the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      * @param streamType The stream whose volume index should be set.
      * @param index The volume index to set. See
      *            {@link #getStreamMaxVolume(int)} for the largest valid value.
@@ -1044,7 +1045,7 @@ public class AudioManager {
         try {
             service.setStreamVolume(streamType, index, flags, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setStreamVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1121,8 +1122,7 @@ public class AudioManager {
         try {
             return service.isStreamMute(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isStreamMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1136,8 +1136,7 @@ public class AudioManager {
         try {
             return service.isMasterMute();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isMasterMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1153,7 +1152,7 @@ public class AudioManager {
         try {
             service.forceVolumeControlStream(streamType, mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in forceVolumeControlStream", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1181,8 +1180,7 @@ public class AudioManager {
         try {
             return service.shouldVibrate(vibrateType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in shouldVibrate", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1208,8 +1206,7 @@ public class AudioManager {
         try {
             return service.getVibrateSetting(vibrateType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getVibrateSetting", e);
-            return VIBRATE_SETTING_OFF;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1236,7 +1233,7 @@ public class AudioManager {
         try {
             service.setVibrateSetting(vibrateType, vibrateSetting);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setVibrateSetting", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1254,7 +1251,7 @@ public class AudioManager {
         try {
             service.setSpeakerphoneOn(on);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setSpeakerphoneOn", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1268,8 +1265,7 @@ public class AudioManager {
         try {
             return service.isSpeakerphoneOn();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isSpeakerphoneOn", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
      }
 
@@ -1410,7 +1406,7 @@ public class AudioManager {
             service.startBluetoothSco(mICallBack,
                     getContext().getApplicationInfo().targetSdkVersion);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in startBluetoothSco", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1434,7 +1430,7 @@ public class AudioManager {
         try {
             service.startBluetoothScoVirtualCall(mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in startBluetoothScoVirtualCall", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1453,7 +1449,7 @@ public class AudioManager {
         try {
             service.stopBluetoothSco(mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in stopBluetoothSco", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1471,7 +1467,7 @@ public class AudioManager {
         try {
             service.setBluetoothScoOn(on);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setBluetoothScoOn", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1486,8 +1482,7 @@ public class AudioManager {
         try {
             return service.isBluetoothScoOn();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isBluetoothScoOn", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1507,11 +1502,16 @@ public class AudioManager {
      */
     public boolean isBluetoothA2dpOn() {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP,"")
-            == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
-            return false;
-        } else {
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
+            return true;
+        } else if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,"")
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
+            return true;
+        } else if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER,"")
+                == AudioSystem.DEVICE_STATE_AVAILABLE) {
             return true;
         }
+        return false;
     }
 
     /**
@@ -1559,7 +1559,7 @@ public class AudioManager {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
                     UserHandle.getCallingUserId());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMicrophoneMute", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1592,7 +1592,7 @@ public class AudioManager {
         try {
             service.setMode(mode, mICallBack, mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMode", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1608,8 +1608,7 @@ public class AudioManager {
         try {
             return service.getMode();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getMode", e);
-            return MODE_INVALID;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1746,8 +1745,7 @@ public class AudioManager {
         try {
             return service.getCurrentAudioFocus() == AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isAudioFocusExclusive()", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1913,7 +1911,7 @@ public class AudioManager {
         try {
             service.playSoundEffect(effectType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1948,7 +1946,7 @@ public class AudioManager {
         try {
             service.playSoundEffect(effectType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1980,7 +1978,7 @@ public class AudioManager {
         try {
             service.playSoundEffectVolume(effectType, volume);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2002,7 +2000,7 @@ public class AudioManager {
         try {
             service.loadSoundEffects();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in loadSoundEffects"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2016,7 +2014,7 @@ public class AudioManager {
         try {
             service.unloadSoundEffects();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unloadSoundEffects"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2115,36 +2113,60 @@ public class AudioManager {
     }
 
     /**
-     * Handler for audio focus events coming from the audio service.
+     * Handler for events (audio focus change, recording config change) coming from the
+     * audio service.
      */
-    private final FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
-            new FocusEventHandlerDelegate();
+    private final ServiceEventHandlerDelegate mServiceEventHandlerDelegate =
+            new ServiceEventHandlerDelegate(null);
 
     /**
-     * Helper class to handle the forwarding of audio focus events to the appropriate listener
+     * Event types
      */
-    private class FocusEventHandlerDelegate {
+    private final static int MSSG_FOCUS_CHANGE = 0;
+    private final static int MSSG_RECORDING_CONFIG_CHANGE = 1;
+
+    /**
+     * Helper class to handle the forwarding of audio service events to the appropriate listener
+     */
+    private class ServiceEventHandlerDelegate {
         private final Handler mHandler;
 
-        FocusEventHandlerDelegate() {
+        ServiceEventHandlerDelegate(Handler handler) {
             Looper looper;
-            if ((looper = Looper.myLooper()) == null) {
-                looper = Looper.getMainLooper();
+            if (handler == null) {
+                if ((looper = Looper.myLooper()) == null) {
+                    looper = Looper.getMainLooper();
+                }
+            } else {
+                looper = handler.getLooper();
             }
 
             if (looper != null) {
-                // implement the event handler delegate to receive audio focus events
+                // implement the event handler delegate to receive events from audio service
                 mHandler = new Handler(looper) {
                     @Override
                     public void handleMessage(Message msg) {
-                        OnAudioFocusChangeListener listener = null;
-                        synchronized(mFocusListenerLock) {
-                            listener = findFocusListener((String)msg.obj);
-                        }
-                        if (listener != null) {
-                            Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
-                                    + msg.what + ") for " + msg.obj);
-                            listener.onAudioFocusChange(msg.what);
+                        switch (msg.what) {
+                            case MSSG_FOCUS_CHANGE:
+                                OnAudioFocusChangeListener listener = null;
+                                synchronized(mFocusListenerLock) {
+                                    listener = findFocusListener((String)msg.obj);
+                                }
+                                if (listener != null) {
+                                    Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
+                                            + msg.arg1 + ") for " + msg.obj);
+                                    listener.onAudioFocusChange(msg.arg1);
+                                }
+                                break;
+                            case MSSG_RECORDING_CONFIG_CHANGE:
+                                final RecordConfigChangeCallbackData cbData =
+                                        (RecordConfigChangeCallbackData) msg.obj;
+                                if (cbData.mCb != null) {
+                                    cbData.mCb.onRecordingConfigChanged(cbData.mConfigs);
+                                }
+                                break;
+                            default:
+                                Log.e(TAG, "Unknown event " + msg.what);
                         }
                     }
                 };
@@ -2161,8 +2183,9 @@ public class AudioManager {
     private final IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
 
         public void dispatchAudioFocusChange(int focusChange, String id) {
-            Message m = mAudioFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
-            mAudioFocusEventHandlerDelegate.getHandler().sendMessage(m);
+            final Message m = mServiceEventHandlerDelegate.getHandler().obtainMessage(
+                    MSSG_FOCUS_CHANGE/*what*/, focusChange/*arg1*/, 0/*arg2 ignored*/, id/*obj*/);
+            mServiceEventHandlerDelegate.getHandler().sendMessage(m);
         }
 
     };
@@ -2403,7 +2426,7 @@ public class AudioManager {
                     getContext().getOpPackageName() /* package name */, flags,
                     ap != null ? ap.cb() : null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocus() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
         return status;
     }
@@ -2429,7 +2452,7 @@ public class AudioManager {
                     AUDIOFOCUS_FLAG_LOCK,
                     null /* policy token */);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2445,7 +2468,7 @@ public class AudioManager {
             service.abandonAudioFocus(null, AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     null /*AudioAttributes, legacy behavior*/);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2474,7 +2497,7 @@ public class AudioManager {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
                     getIdForAudioFocusListener(l), aa);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
         return status;
     }
@@ -2658,108 +2681,9 @@ public class AudioManager {
         rctlr.stopListeningToSessions();
     }
 
-    /**
-     * @hide
-     * Registers a remote control display that will be sent information by remote control clients.
-     * Use this method if your IRemoteControlDisplay is not going to display artwork, otherwise
-     * use {@link #registerRemoteControlDisplay(IRemoteControlDisplay, int, int)} to pass the
-     * artwork size directly, or
-     * {@link #remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay, int, int)} later if artwork
-     * is not yet needed.
-     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
-     * @param rcd the IRemoteControlDisplay
-     */
-    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
-        // passing a negative value for art work width and height as they are unknown at this stage
-        registerRemoteControlDisplay(rcd, /*w*/-1, /*h*/ -1);
-    }
 
-    /**
-     * @hide
-     * Registers a remote control display that will be sent information by remote control clients.
-     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
-     * @param rcd
-     * @param w the maximum width of the expected bitmap. Negative values indicate it is
-     *   useless to send artwork.
-     * @param h the maximum height of the expected bitmap. Negative values indicate it is
-     *   useless to send artwork.
-     */
-    public void registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
-        if (rcd == null) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            service.registerRemoteControlDisplay(rcd, w, h);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
-        }
-    }
-
-    /**
-     * @hide
-     * Unregisters a remote control display that was sent information by remote control clients.
-     * @param rcd
-     */
-    public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
-        if (rcd == null) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            service.unregisterRemoteControlDisplay(rcd);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
-        }
-    }
-
-    /**
-     * @hide
-     * Sets the artwork size a remote control display expects when receiving bitmaps.
-     * @param rcd
-     * @param w the maximum width of the expected bitmap. Negative values indicate it is
-     *   useless to send artwork.
-     * @param h the maximum height of the expected bitmap. Negative values indicate it is
-     *   useless to send artwork.
-     */
-    public void remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay rcd, int w, int h) {
-        if (rcd == null) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            service.remoteControlDisplayUsesBitmapSize(rcd, w, h);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in remoteControlDisplayUsesBitmapSize " + e);
-        }
-    }
-
-    /**
-     * @hide
-     * Controls whether a remote control display needs periodic checks of the RemoteControlClient
-     * playback position to verify that the estimated position has not drifted from the actual
-     * position. By default the check is not performed.
-     * The IRemoteControlDisplay must have been previously registered for this to have any effect.
-     * @param rcd the IRemoteControlDisplay for which the anti-drift mechanism will be enabled
-     *     or disabled. No effect is null.
-     * @param wantsSync if true, RemoteControlClient instances which expose their playback position
-     *     to the framework will regularly compare the estimated playback position with the actual
-     *     position, and will update the IRemoteControlDisplay implementation whenever a drift is
-     *     detected.
-     */
-    public void remoteControlDisplayWantsPlaybackPositionSync(IRemoteControlDisplay rcd,
-            boolean wantsSync) {
-        if (rcd == null) {
-            return;
-        }
-        IAudioService service = getService();
-        try {
-            service.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in remoteControlDisplayWantsPlaybackPositionSync " + e);
-        }
-    }
-
+    //====================================================================
+    // Audio policy
     /**
      * @hide
      * Register the given {@link AudioPolicy}.
@@ -2787,8 +2711,7 @@ public class AudioManager {
             }
             // successful registration
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerAudioPolicyAsync()", e);
-            return ERROR;
+            throw e.rethrowFromSystemServer();
         }
         return SUCCESS;
     }
@@ -2807,10 +2730,204 @@ public class AudioManager {
             service.unregisterAudioPolicyAsync(policy.cb());
             policy.setRegistration(null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
+
+    //====================================================================
+    // Recording configuration
+    /**
+     * Interface for receiving update notifications about the recording configuration. Extend
+     * this abstract class and register it with
+     * {@link AudioManager#registerAudioRecordingCallback(AudioRecordingCallback, Handler)}
+     * to be notified.
+     * Use {@link AudioManager#getActiveRecordingConfigurations()} to query the current
+     * configuration.
+     */
+    public static abstract class AudioRecordingCallback {
+        /**
+         * Called whenever the device recording configuration has changed.
+         * @param configs list containing the results of
+         *      {@link AudioManager#getActiveRecordingConfigurations()}.
+         */
+        public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {}
+    }
+
+    private static class AudioRecordingCallbackInfo {
+        final AudioRecordingCallback mCb;
+        final Handler mHandler;
+        AudioRecordingCallbackInfo(AudioRecordingCallback cb, Handler handler) {
+            mCb = cb;
+            mHandler = handler;
+        }
+    }
+
+    private final static class RecordConfigChangeCallbackData {
+        final AudioRecordingCallback mCb;
+        final List<AudioRecordingConfiguration> mConfigs;
+
+        RecordConfigChangeCallbackData(AudioRecordingCallback cb,
+                List<AudioRecordingConfiguration> configs) {
+            mCb = cb;
+            mConfigs = configs;
+        }
+    }
+
+    /**
+     * Register a callback to be notified of audio recording changes through
+     * {@link AudioRecordingCallback}
+     * @param cb non-null callback to register
+     * @param handler the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the {@link Handler} associated with the main
+     * {@link Looper} will be used.
+     */
+    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb, Handler handler)
+    {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
+        }
+
+        synchronized(mRecordCallbackLock) {
+            // lazy initialization of the list of recording callbacks
+            if (mRecordCallbackList == null) {
+                mRecordCallbackList = new ArrayList<AudioRecordingCallbackInfo>();
+            }
+            final int oldCbCount = mRecordCallbackList.size();
+            if (!hasRecordCallback_sync(cb)) {
+                mRecordCallbackList.add(new AudioRecordingCallbackInfo(cb,
+                        new ServiceEventHandlerDelegate(handler).getHandler()));
+                final int newCbCount = mRecordCallbackList.size();
+                if ((oldCbCount == 0) && (newCbCount > 0)) {
+                    // register binder for callbacks
+                    final IAudioService service = getService();
+                    try {
+                        service.registerRecordingCallback(mRecCb);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call registerAudioRecordingCallback() on a previously"
+                        + "registered callback");
+            }
+        }
+    }
+
+    /**
+     * Unregister an audio recording callback previously registered with
+     * {@link #registerAudioRecordingCallback(AudioRecordingCallback, Handler)}.
+     * @param cb non-null callback to unregister
+     */
+    public void unregisterAudioRecordingCallback(@NonNull AudioRecordingCallback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
+        }
+        synchronized(mRecordCallbackLock) {
+            if (mRecordCallbackList == null) {
+                return;
+            }
+            final int oldCbCount = mRecordCallbackList.size();
+            if (removeRecordCallback_sync(cb)) {
+                final int newCbCount = mRecordCallbackList.size();
+                if ((oldCbCount > 0) && (newCbCount == 0)) {
+                    // unregister binder for callbacks
+                    final IAudioService service = getService();
+                    try {
+                        service.unregisterRecordingCallback(mRecCb);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call unregisterAudioRecordingCallback() on a callback"
+                        + " already unregistered or never registered");
+            }
+        }
+    }
+
+    /**
+     * Returns the current active audio recording configurations of the device.
+     * @return a non-null list of recording configurations. An empty list indicates there is
+     *     no recording active when queried.
+     */
+    public @NonNull List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
+        final IAudioService service = getService();
+        try {
+            return service.getActiveRecordingConfigurations();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * constants for the recording events, to keep in sync
+     * with frameworks/av/include/media/AudioPolicy.h
+     */
+    /** @hide */
+    public final static int RECORD_CONFIG_EVENT_START = 1;
+    /** @hide */
+    public final static int RECORD_CONFIG_EVENT_STOP = 0;
+
+    /**
+     * All operations on this list are sync'd on mRecordCallbackLock.
+     * List is lazy-initialized in
+     * {@link #registerAudioRecordingCallback(AudioRecordingCallback, Handler)}.
+     * List can be null.
+     */
+    private List<AudioRecordingCallbackInfo> mRecordCallbackList;
+    private final Object mRecordCallbackLock = new Object();
+
+    /**
+     * Must be called synchronized on mRecordCallbackLock
+     */
+    private boolean hasRecordCallback_sync(@NonNull AudioRecordingCallback cb) {
+        if (mRecordCallbackList != null) {
+            for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                if (cb.equals(mRecordCallbackList.get(i).mCb)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Must be called synchronized on mRecordCallbackLock
+     */
+    private boolean removeRecordCallback_sync(@NonNull AudioRecordingCallback cb) {
+        if (mRecordCallbackList != null) {
+            for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                if (cb.equals(mRecordCallbackList.get(i).mCb)) {
+                    mRecordCallbackList.remove(i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
+
+        public void dispatchRecordingConfigChange(List<AudioRecordingConfiguration> configs) {
+            synchronized(mRecordCallbackLock) {
+                if (mRecordCallbackList != null) {
+                    for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                        final AudioRecordingCallbackInfo arci = mRecordCallbackList.get(i);
+                        if (arci.mHandler != null) {
+                            final Message m = arci.mHandler.obtainMessage(
+                                    MSSG_RECORDING_CONFIG_CHANGE/*what*/,
+                                    new RecordConfigChangeCallbackData(arci.mCb, configs)/*obj*/);
+                            arci.mHandler.sendMessage(m);
+                        }
+                    }
+                }
+            }
+        }
+
+    };
+
+    //=====================================================================
 
     /**
      *  @hide
@@ -2823,7 +2940,7 @@ public class AudioManager {
         try {
             service.reloadAudioSettings();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in reloadAudioSettings"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2838,7 +2955,7 @@ public class AudioManager {
         try {
             service.avrcpSupportsAbsoluteVolume(address, support);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in avrcpSupportsAbsoluteVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3132,7 +3249,7 @@ public class AudioManager {
             service.setWiredDeviceConnectionState(type, state, address, name,
                     mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setWiredDeviceConnectionState "+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3154,7 +3271,7 @@ public class AudioManager {
         try {
             delay = service.setBluetoothA2dpDeviceConnectionState(device, state, profile);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setBluetoothA2dpDeviceConnectionState "+e);
+            throw e.rethrowFromSystemServer();
         }
         return delay;
     }
@@ -3164,7 +3281,7 @@ public class AudioManager {
         try {
             return getService().getRingtonePlayer();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3172,6 +3289,7 @@ public class AudioManager {
      * Used as a key for {@link #getProperty} to request the native or optimal output sample rate
      * for this device's primary output stream, in decimal Hz.
      */
+    // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_SAMPLE_RATE =
             "android.media.property.OUTPUT_SAMPLE_RATE";
 
@@ -3179,6 +3297,7 @@ public class AudioManager {
      * Used as a key for {@link #getProperty} to request the native or optimal output buffer size
      * for this device's primary output stream, in decimal PCM frames.
      */
+    // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_FRAMES_PER_BUFFER =
             "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
 
@@ -3197,10 +3316,19 @@ public class AudioManager {
             "android.media.property.SUPPORT_SPEAKER_NEAR_ULTRASOUND";
 
     /**
+     * Used as a key for {@link #getProperty} to determine if the unprocessed audio source is
+     * available and supported with the expected frequency range and level response.
+     */
+    public static final String PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED =
+            "android.media.property.SUPPORT_AUDIO_SOURCE_UNPROCESSED";
+    /**
      * Returns the value of the property with the specified key.
      * @param key One of the strings corresponding to a property key: either
-     *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE} or
-     *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER}
+     *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE},
+     *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER},
+     *            {@link #PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND},
+     *            {@link #PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND}, or
+     *            {@link #PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED}.
      * @return A string representing the associated value for that property key,
      *         or null if there is no value for that key.
      */
@@ -3219,6 +3347,9 @@ public class AudioManager {
         } else if (PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND.equals(key)) {
             return String.valueOf(getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_supportSpeakerNearUltrasound));
+        } else if (PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED.equals(key)) {
+            return String.valueOf(getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.config_supportAudioSourceUnprocessed));
         } else {
             // null or unknown key
             return null;
@@ -3245,7 +3376,7 @@ public class AudioManager {
         try {
             getService().setVolumeController(controller);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error setting volume controller", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3259,7 +3390,7 @@ public class AudioManager {
         try {
             getService().notifyVolumeControllerVisible(controller, visible);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error notifying about volume controller visibility", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3271,8 +3402,7 @@ public class AudioManager {
         try {
             return getService().isStreamAffectedByRingerMode(streamType);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling isStreamAffectedByRingerMode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3284,8 +3414,7 @@ public class AudioManager {
         try {
             return getService().isStreamAffectedByMute(streamType);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling isStreamAffectedByMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3297,7 +3426,7 @@ public class AudioManager {
         try {
             getService().disableSafeMediaVolume(mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Error disabling safe media volume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3309,7 +3438,7 @@ public class AudioManager {
         try {
             getService().setRingerModeInternal(ringerMode, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling setRingerModeInternal", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3321,8 +3450,7 @@ public class AudioManager {
         try {
             return getService().getRingerModeInternal();
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling getRingerModeInternal", e);
-            return RINGER_MODE_NORMAL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3334,7 +3462,7 @@ public class AudioManager {
         try {
             getService().setVolumePolicy(policy);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling setVolumePolicy", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3349,8 +3477,7 @@ public class AudioManager {
         try {
             return getService().setHdmiSystemAudioSupported(on);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error setting system audio mode", e);
-            return AudioSystem.DEVICE_NONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3364,8 +3491,7 @@ public class AudioManager {
         try {
             return getService().isHdmiSystemAudioSupported();
         } catch (RemoteException e) {
-            Log.w(TAG, "Error querying system audio mode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -24,6 +24,8 @@
 
 #include "utils/Macros.h"
 
+#include <vector>
+
 namespace android {
 namespace uirenderer {
 
@@ -59,8 +61,14 @@ public:
         mMayRunAsync = mayRunAsync;
     }
     bool mayRunAsync() { return mMayRunAsync; }
-    ANDROID_API void start() { mStagingPlayState = RUNNING; onStagingPlayStateChanged(); }
-    ANDROID_API void end() { mStagingPlayState = FINISHED; onStagingPlayStateChanged(); }
+    ANDROID_API void start();
+    ANDROID_API void reset();
+    ANDROID_API void reverse();
+    // Terminates the animation at its current progress.
+    ANDROID_API void cancel();
+
+    // Terminates the animation and skip to the end of the animation.
+    ANDROID_API void end();
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
@@ -68,33 +76,58 @@ public:
     void pushStaging(AnimationContext& context);
     bool animate(AnimationContext& context);
 
-    bool isRunning() { return mPlayState == RUNNING; }
-    bool isFinished() { return mPlayState == FINISHED; }
+    bool isRunning() { return mPlayState == PlayState::Running
+            || mPlayState == PlayState::Reversing; }
+    bool isFinished() { return mPlayState == PlayState::Finished; }
     float finalValue() { return mFinalValue; }
 
     ANDROID_API virtual uint32_t dirtyMask() = 0;
 
     void forceEndNow(AnimationContext& context);
+    RenderNode* target() { return mTarget; }
+    RenderNode* stagingTarget() { return mStagingTarget; }
 
 protected:
+    // PlayState is used by mStagingPlayState and mPlayState to track the state initiated from UI
+    // thread and Render Thread animation state, respectively.
+    // From the UI thread, mStagingPlayState transition looks like
+    // NotStarted -> Running/Reversing -> Finished
+    //                ^                     |
+    //                |                     |
+    //                ----------------------
+    // Note: For mStagingState, the Finished state (optional) is only set when the animation is
+    // terminated by user.
+    //
+    // On Render Thread, mPlayState transition:
+    // NotStart -> Running/Reversing-> Finished
+    //                ^                 |
+    //                |                 |
+    //                ------------------
+    // Note that if the animation is in Running/Reversing state, calling start or reverse again
+    // would do nothing if the animation has the same play direction as the request; otherwise,
+    // the animation would start from where it is and change direction (i.e. Reversing <-> Running)
+
+    enum class PlayState {
+        NotStarted,
+        Running,
+        Reversing,
+        Finished,
+    };
+
     explicit BaseRenderNodeAnimator(float finalValue);
     virtual ~BaseRenderNodeAnimator();
 
     virtual float getValue(RenderNode* target) const = 0;
     virtual void setValue(RenderNode* target, float value) = 0;
-    RenderNode* target() { return mTarget; }
 
     void callOnFinishedListener(AnimationContext& context);
 
     virtual void onStagingPlayStateChanged() {}
-
-    enum PlayState {
-        NOT_STARTED,
-        RUNNING,
-        FINISHED,
-    };
+    virtual void onPlayTimeChanged(nsecs_t playTime) {}
+    virtual void onPushStaging() {}
 
     RenderNode* mTarget;
+    RenderNode* mStagingTarget;
 
     float mFinalValue;
     float mDeltaValue;
@@ -108,13 +141,28 @@ protected:
     nsecs_t mDuration;
     nsecs_t mStartDelay;
     bool mMayRunAsync;
+    // Play Time tracks the progress of animation, it should always be [0, mDuration], 0 being
+    // the beginning of the animation, will reach mDuration at the end of an animation.
+    nsecs_t mPlayTime;
 
     sp<AnimationListener> mListener;
 
 private:
+    enum class Request {
+        Start,
+        Reverse,
+        Reset,
+        Cancel,
+        End
+    };
     inline void checkMutable();
     virtual void transitionToRunning(AnimationContext& context);
     void doSetStartValue(float value);
+    bool updatePlayTime(nsecs_t playTime);
+    void resolveStagingRequest(Request request);
+
+    std::vector<Request> mStagingRequests;
+
 };
 
 class RenderPropertyAnimator : public BaseRenderNodeAnimator {
@@ -143,6 +191,7 @@ protected:
     virtual void setValue(RenderNode* target, float value) override;
     virtual void onAttached() override;
     virtual void onStagingPlayStateChanged() override;
+    virtual void onPushStaging() override;
 
 private:
     typedef bool (RenderProperties::*SetFloatProperty)(float value);
@@ -152,6 +201,8 @@ private:
     const PropertyAccessors* mPropertyAccess;
 
     static const PropertyAccessors PROPERTY_ACCESSOR_LUT[];
+    bool mShouldSyncPropertyFields = false;
+    bool mShouldUpdateStagingProperties = false;
 };
 
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {

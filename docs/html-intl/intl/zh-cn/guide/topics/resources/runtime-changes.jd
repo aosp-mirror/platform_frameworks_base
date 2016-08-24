@@ -1,0 +1,281 @@
+page.title=处理运行时变更
+page.tags=Activity,生命周期
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">在配置变更期间保留对象</a></li>
+    <li><a href="#HandlingTheChange">自行处理配置变更</a>
+  </ol>
+
+  <h2>另请参阅</h2>
+  <ol>
+    <li><a href="providing-resources.html">提供资源</a></li>
+    <li><a href="accessing-resources.html">访问资源</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">加快屏幕方向变更</a>
+</li>
+  </ol>
+</div>
+</div>
+
+<p>有些设备配置可能会在运行时发生变化（例如屏幕方向、键盘可用性及语言）。
+发生这种变化时，Android
+会重启正在运行的
+{@link android.app.Activity}（先后调用 {@link android.app.Activity#onDestroy()} 和 {@link
+android.app.Activity#onCreate(Bundle) onCreate()}）。重启行为旨在通过利用与新设备配置匹配的备用资源自动重新加载您的应用，来帮助它适应新配置。
+
+</p>
+
+<p>要妥善处理重启行为，Activity 必须通过常规的<a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity 生命周期</a>恢复其以前的状态，在 Activity 生命周期中，Android
+会在销毁 Activity 之前调用
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()}，以便您保存有关应用状态的数据。
+
+然后，您可以在
+{@link android.app.Activity#onCreate(Bundle) onCreate()} 或 {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()} 期间恢复 Activity 状态。</p>
+
+<p>要测试应用能否在保持应用状态完好的情况下自行重启，您应该在应用中执行各种任务时调用配置变更（例如，更改屏幕方向）。
+
+您的应用应该能够在不丢失用户数据或状态的情况下随时重启，以便处理如下事件：配置发生变化，或者用户收到来电并在应用进程被销毁很久之后返回到应用。
+
+
+要了解如何恢复 Activity 状态，请阅读<a href="{@docRoot}guide/components/activities.html#Lifecycle">Activity 生命周期</a>。</p>
+
+<p>但是，您可能会遇到这种情况：重启应用并恢复大量数据不仅成本高昂，而且给用户留下糟糕的使用体验。
+在这种情况下，您有两个其他选择：
+</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">在配置变更期间保留对象</a>
+  <p>允许 Activity 在配置变更时重启，但是要将有状态对象传递给 Activity 的新实例。
+</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">自行处理配置变更</a>
+  <p>阻止系统在某些配置变更期间重启 Activity，但要在配置确实发生变化时接收回调，这样，您就能够根据需要手动更新 Activity。
+
+</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">在配置变更期间保留对象</h2>
+
+<p>如果重启 Activity 需要恢复大量数据、重新建立网络连接或执行其他密集操作，那么因配置变更而引起的完全重启可能会给用户留下应用运行缓慢的体验。
+
+此外，依靠系统通过 {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} 回调为您保存的
+{@link android.os.Bundle}，可能无法完全恢复 Activity 状态，因为它
+并非设计用于携带大型对象（例如位图），而且其中的数据必须先序列化，再进行反序列化，
+这可能会消耗大量内存并使得配置变更速度缓慢。在这种情况下，如果 Activity 因配置变更而重启，则可通过保留
+{@link
+android.app.Fragment} 来减轻重新初始化 Activity 的负担。此片段可能包含对您要保留的有状态对象的引用。
+</p>
+
+<p>当
+Android 系统因配置变更而关闭 Activity 时，不会销毁您已标记为要保留的 Activity 的片段。您可以将此类片段添加到 Activity 以保留有状态的对象。
+</p>
+
+<p>要在运行时配置变更期间将有状态的对象保留在片段中，请执行以下操作：</p>
+
+<ol>
+  <li>扩展 {@link android.app.Fragment}
+类并声明对有状态对象的引用。</li>
+  <li>在创建片段后调用 {@link android.app.Fragment#setRetainInstance(boolean)}。
+      </li>
+  <li>将片段添加到 Activity。</li>
+  <li>重启 Activity 后，使用 {@link android.app.FragmentManager}
+检索片段。</li>
+</ol>
+
+<p>例如，按如下所示定义片段：</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>注意：</strong>尽管您可以存储任何对象，但是切勿传递与
+{@link android.app.Activity} 绑定的对象，例如，{@link
+android.graphics.drawable.Drawable}、{@link android.widget.Adapter}、{@link android.view.View}
+或其他任何与 {@link android.content.Context} 关联的对象。否则，它将泄漏原始 Activity 实例的所有视图和资源。
+（泄漏资源意味着应用将继续持有这些资源，但是无法对其进行垃圾回收，因此可能会丢失大量内存。）
+
+</p>
+
+<p>然后，使用 {@link android.app.FragmentManager} 将片段添加到 Activity。在运行时配置变更期间再次启动 Activity 时，您可以获得片段中的数据对象。
+
+例如，按如下所示定义 Activity：</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>在此示例中，{@link android.app.Activity#onCreate(Bundle) onCreate()}
+添加了一个片段或恢复了对它的引用。此外，{@link android.app.Activity#onCreate(Bundle) onCreate()}
+还将有状态的对象存储在片段实例内部。{@link android.app.Activity#onDestroy() onDestroy()}
+对所保留的片段实例内的有状态对象进行更新。
+</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">自行处理配置变更</h2>
+
+<p>如果应用在特定配置变更期间无需更新资源，并且因性能限制您需要尽量避免重启，则可声明 Activity 将自行处理配置变更，这样可以阻止系统重启 Activity。<em></em>
+
+
+</p>
+
+<p class="note"><strong>注：</strong>自行处理配置变更可能导致备用资源的使用更为困难，因为系统不会为您自动应用这些资源。
+
+只能在您必须避免Activity因配置变更而重启这一万般无奈的情况下，才考虑采用自行处理配置变更这种方法，而且对于大多数应用并不建议使用此方法。
+</p>
+
+<p>要声明由 Activity 处理配置变更，请在清单文件中编辑相应的 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+元素，以包含 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a>
+属性以及代表要处理的配置的值。<a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a>属性的文档中列出了该属性的可能值（最常用的值包括 {@code "orientation"}
+和
+{@code "keyboardHidden"}，分别用于避免因屏幕方向和可用键盘改变而导致重启）。您可以在该属性中声明多个配置值，方法是用管道
+{@code |} 字符分隔这些配置值。</p>
+
+<p>例如，以下清单文件代码声明的 Activity 可同时处理屏幕方向变更和键盘可用性变更：
+</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>现在，当其中一个配置发生变化时，{@code MyActivity} 不会重启。相反，{@code MyActivity}
+会收到对 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 的调用。向此方法传递
+{@link android.content.res.Configuration}
+对象指定新设备配置。您可以通过读取
+{@link android.content.res.Configuration}
+中的字段，确定新配置，然后通过更新界面中使用的资源进行适当的更改。调用此方法时，Activity 的
+{@link android.content.res.Resources}
+对象会相应地进行更新，以根据新配置返回资源，这样，您就能够在系统不重启 Activity 的情况下轻松重置
+UI 的元素。</p>
+
+<p class="caution"><strong>注意：</strong>从
+Android
+3.2（API 级别 13）开始，当设备在纵向和横向之间切换时，<strong>“屏幕尺寸”也会发生变化</strong>。因此，在开发针对
+API 级别 13 或更高版本系统的应用时，若要避免由于设备方向改变而导致运行时重启（正如 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 和 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+属性中所声明），则除了 {@code
+"orientation"} 值以外，您还必须添加 {@code "screenSize"} 值。即，您必须声明 {@code
+android:configChanges="orientation|screenSize"}。但是，如果您的应用是面向 API 级别
+12 或更低版本的系统，则 Activity 始终会自行处理此配置变更（即便是在
+Android 3.2 或更高版本的设备上运行，此配置变更也不会重启 Activity）。</p>
+
+<p>例如，以下 {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} 实现
+检查当前设备方向：</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>{@link android.content.res.Configuration}
+对象代表所有当前配置，而不仅仅是已经变更的配置。大多数时候，您并不在意配置具体发生了哪些变更，而且您可以轻松地重新分配所有资源，为您正在处理的配置提供备用资源。
+
+例如，由于 {@link
+android.content.res.Resources} 对象现已更新，因此您可以通过
+{@link android.widget.ImageView#setImageResource(int)
+setImageResource()}
+重置任何 {@link android.widget.ImageView}，并且使用适合于新配置的资源（如<a href="providing-resources.html#AlternateResources">提供资源</a>中所述）。</p>
+
+<p>请注意，{@link
+android.content.res.Configuration} 字段中的值是与
+{@link android.content.res.Configuration} 类中的特定常量匹配的整型数。有关要对每个字段使用哪些常量的文档，请参阅
+{@link
+android.content.res.Configuration} 参考文档中的相应字段。</p>
+
+<p class="note"><strong>请谨记：</strong>在声明由 Activity 处理配置变更时，您有责任重置要为其提供备用资源的所有元素。
+如果您声明由 Activity 处理方向变更，而且有些图像应该在横向和纵向之间切换，则必须在
+{@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}
+期间将每个资源重新分配给每个元素。</p>
+
+<p>如果无需基于这些配置变更更新应用，则可不用实现
+{@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}。<em></em>在这种情况下，仍将使用在配置变更之前用到的所有资源，只是您无需重启 Activity。
+
+但是，应用应该始终能够在保持之前状态完好的情况下关闭和重启，因此您不得试图通过此方法来逃避在正常 Activity 生命周期期间保持您的应用状态。
+
+这不仅仅是因为还存在其他一些无法禁止重启应用的配置变更，还因为有些事件必须由您处理，例如用户离开应用，而在用户返回应用之前该应用已被销毁。
+
+
+</p>
+
+<p>如需了解有关您可以在 Activity 中处理哪些配置变更的详细信息，请参阅 <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> 文档和 {@link android.content.res.Configuration}
+类。</p>

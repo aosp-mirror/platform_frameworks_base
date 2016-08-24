@@ -19,11 +19,8 @@
 
 #include <cutils/compiler.h>
 
-#include <utils/Singleton.h>
-#include <utils/SortedVector.h>
-#include <utils/String8.h>
-
-#include <GLES2/gl2.h>
+#include <string>
+#include <unordered_set>
 
 namespace android {
 namespace uirenderer {
@@ -32,7 +29,7 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class ANDROID_API Extensions {
+class Extensions {
 public:
     Extensions();
 
@@ -40,10 +37,8 @@ public:
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
-    inline bool hasTiledRendering() const { return mHasTiledRendering; }
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
-    inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
     inline bool hasUnpackRowLength() const { return mVersionMajor >= 3 || mHasUnpackSubImage; }
     inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
     inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
@@ -52,25 +47,13 @@ public:
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
 
-    bool hasGlExtension(const char* extension) const;
-    bool hasEglExtension(const char* extension) const;
-
-    void dump() const;
-
 private:
-    void findExtensions(const char* extensions, SortedVector<String8>& list) const;
-
-    SortedVector<String8> mGlExtensionList;
-    SortedVector<String8> mEglExtensionList;
-
     bool mHasNPot;
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
-    bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
-    bool mHasNvSystemTime;
     bool mHasUnpackSubImage;
 
     int mVersionMajor;

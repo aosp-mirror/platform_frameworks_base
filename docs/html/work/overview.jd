@@ -1,0 +1,142 @@
+page.title=Android for Work Developer Overview
+meta.tags="android for work, work, enterprise, corporate"
+page.tags="android for work, work, enterprise, corporate"
+page.metaDescription=Learn how to build Android apps for the enterprise and take advantage of Google's Android for Work program.
+page.image=images/work/cards/briefcase_600px.png
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ul>
+      <li><a href="#developer-guide">Create Apps Using the Developer Guide</a></li>
+      <li><a href="#community-overview">What Does the Android for Work DevHub Offer?</a></li>
+      <li><a href="#develop-apps">Develop Apps for Enterprises</a></li>
+      <li><a href="#manage-devices">Manage Devices and Apps</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  As an Android for Work developer, you can deploy devices and apps to
+  employees and keep your corporate data secure. With Android for
+  Work, organizations can choose what devices, APIs, and framework
+  they want to use to develop apps.
+</p>
+
+<p>
+  With Android for Work, you can:
+  <ul>
+    <li>Build apps to help employees be more productive in scenarios
+    such as bring your own device (BYOD), and corporate-owned,
+    single-use devices (COSU).</li>
+    <li>Connect with leading enterprise mobility management (EMM)
+    <a href="https://www.google.com/work/android/partners/"
+    >partners</a> to help integrate Android in your business.</li>
+  </ul>
+</p>
+
+<p>
+  Additionally, Android for Work offers a partner program for
+  developers through the
+  <a href="https://www.google.com/work/android/developers/applyDevHub/"
+  >Android for Work DevHub</a>, which provides exclusive access to beta
+  features and developer events, along with access to a community of
+  Android developers making enterprise apps.
+</p>
+
+<h2 id="developer-guide">Create Apps Using the Developer Guide</h2>
+
+<p>
+  The <a href="{@docRoot}work/guide.html"
+  >Android for Work Developer Guide</a> is for developers who want to
+  create Android apps that best utilize and complement the features in
+  Android for Work. The guide defines the best practices to develop
+  and test enterprise-focused apps for Android devices running Android
+  for Work.
+</p>
+
+<h3>If you’re new to creating Android apps ...</h3>
+
+<p>
+  The Developer Guide assumes that you’re working as an independent
+  software vendor (ISV) or in a similar role, and have already built
+  an Android app. If you haven’t yet created an Android app, see
+  <a href="{@docRoot}training/basics/firstapp/index.html"
+  >Building Your First App</a>. If you’re looking for an accelerated
+  course, see the <a href="https://www.udacity.com/course/ud853"
+  >Developing Android Apps</a> course taught by Google employees.
+</p>
+
+<h2 id="community-overview">What Does the Android for Work DevHub Offer?</h2>
+
+<p>
+  The <a href="https://www.google.com/work/android/developers/applyDevHub/"
+  >Android for Work DevHub</a> offers these incentives:
+</p>
+
+<h3>Get exclusives</h3>
+
+<p>
+  Access to beta features and Android for Work developer training and
+  events, including invite-only hackathons.
+</p>
+
+<h3>Learn from experts</h3>
+
+<p>
+  Special content from Android for Work experts, including how to
+  optimize your app for the Play for Work store so that businesses can
+  see your app.
+</p>
+
+<h3>Talk to others</h3>
+
+<p>
+  Access to a moderated space dedicated to enterprise developers. Talk
+  with peers about issues specific to developing Android apps for
+  businesses.
+</p>
+
+<h3>How do I join?</h3>
+
+<p>
+  Apply to join the
+  <a href="https://www.google.com/work/android/developers/applyDevHub/"
+  >Android for Work DevHub</a>.
+</p>
+
+<h2 id="develop-apps">Develop Apps for Enterprises</h2>
+
+<p>
+  Learn how to make your app function smoothly in corporate
+  environments that restrict device features and data access. Go
+  further to support business use of your app by enabling restrictions
+  that administrators can use to remotely configure your app:
+</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+       data-query="collection:work/apps"
+       data-cardSizes="6x6"
+       data-maxResults="6">
+  </div>
+</div>
+
+
+<h2 id="manage-devices">Manage Devices and Apps</h2>
+
+<p>
+  Learn how to build policy controller apps that enable enterprise
+  administrators to manage devices, manage corporate apps, and provide
+  access to company resources:
+</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+       data-query="collection:work/admin"
+       data-cardSizes="6x6"
+       data-maxResults="4">
+  </div>
+</div>

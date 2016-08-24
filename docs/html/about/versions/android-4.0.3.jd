@@ -45,7 +45,7 @@ use the Android SDK Manager to download the platform into your SDK.</p>
 <div class="toggle-content closed">
 
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-closed.png"
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" /><strong>Table of Contents</strong>
   </a></p>
 
@@ -264,7 +264,7 @@ profiles. Quality level is represented by the
 {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_QVGA} constants.</li>
 
 <li>New methods {@link android.hardware.Camera.Parameters#setVideoStabilization(boolean) setVideoStabilization()},
-{@link android.hardware.Camera.Parameters#getVideoStabilization() setVideoStabilization()}, and {@link android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
+{@link android.hardware.Camera.Parameters#getVideoStabilization() getVideoStabilization()}, and {@link android.hardware.Camera.Parameters#isVideoStabilizationSupported() isVideoStabilizationSupported()}
 let you check and manage video stabilization for a {@link android.hardware.Camera}.</li>
 </ul>
 

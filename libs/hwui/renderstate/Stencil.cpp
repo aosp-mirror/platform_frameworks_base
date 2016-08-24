@@ -34,10 +34,6 @@ namespace uirenderer {
 #define STENCIL_MASK_VALUE 0x1
 #endif
 
-Stencil::Stencil()
-        : mState(kDisabled) {
-}
-
 uint8_t Stencil::getStencilSize() {
     return STENCIL_BUFFER_SIZE;
 }
@@ -64,14 +60,14 @@ void Stencil::clear() {
     glClearStencil(0);
     glClear(GL_STENCIL_BUFFER_BIT);
 
-    if (mState == kTest) {
+    if (mState == StencilState::Test) {
         // reset to test state, with immutable stencil
         glStencilMask(0);
     }
 }
 
 void Stencil::enableTest(int incrementThreshold) {
-    if (mState != kTest) {
+    if (mState != StencilState::Test) {
         enable();
         if (incrementThreshold > 0) {
             glStencilFunc(GL_EQUAL, incrementThreshold, 0xff);
@@ -82,12 +78,12 @@ void Stencil::enableTest(int incrementThreshold) {
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glStencilMask(0);
-        mState = kTest;
+        mState = StencilState::Test;
     }
 }
 
 void Stencil::enableWrite(int incrementThreshold) {
-    if (mState != kWrite) {
+    if (mState != StencilState::Write) {
         enable();
         if (incrementThreshold > 0) {
             glStencilFunc(GL_ALWAYS, 1, 0xff);
@@ -100,7 +96,7 @@ void Stencil::enableWrite(int incrementThreshold) {
         }
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         glStencilMask(0xff);
-        mState = kWrite;
+        mState = StencilState::Write;
     }
 }
 
@@ -109,7 +105,7 @@ void Stencil::enableDebugTest(GLint value, bool greater) {
     glStencilFunc(greater ? GL_LESS : GL_EQUAL, value, 0xffffffff);
     // We only want to test, let's keep everything
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    mState = kTest;
+    mState = StencilState::Test;
     glStencilMask(0);
 }
 
@@ -119,20 +115,20 @@ void Stencil::enableDebugWrite() {
     // The test always passes so the first two values are meaningless
     glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    mState = kWrite;
+    mState = StencilState::Write;
     glStencilMask(0xff);
 }
 
 void Stencil::enable() {
-    if (mState == kDisabled) {
+    if (mState == StencilState::Disabled) {
         glEnable(GL_STENCIL_TEST);
     }
 }
 
 void Stencil::disable() {
-    if (mState != kDisabled) {
+    if (mState != StencilState::Disabled) {
         glDisable(GL_STENCIL_TEST);
-        mState = kDisabled;
+        mState = StencilState::Disabled;
     }
 }
 

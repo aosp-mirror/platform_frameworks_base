@@ -425,6 +425,15 @@ public class WifiInfo implements Parcelable {
         return mMacAddress;
     }
 
+    /**
+     * @return true if {@link #getMacAddress()} has a real MAC address.
+     *
+     * @hide
+     */
+    public boolean hasRealMacAddress() {
+        return mMacAddress != null && !DEFAULT_MAC_ADDRESS.equals(mMacAddress);
+    }
+
     /** {@hide} */
     public void setMeteredHint(boolean meteredHint) {
         mMeteredHint = meteredHint;

@@ -37,7 +37,9 @@ public class MarshalRegistry {
      * @param queryable a non-{@code null} marshal queryable that supports marshaling {@code T}
      */
     public static <T> void registerMarshalQueryable(MarshalQueryable<T> queryable) {
-        sRegisteredMarshalQueryables.add(queryable);
+        synchronized(sMarshalLock) {
+            sRegisteredMarshalQueryables.add(queryable);
+        }
     }
 
     /**
@@ -54,47 +56,50 @@ public class MarshalRegistry {
      */
     @SuppressWarnings("unchecked")
     public static <T> Marshaler<T> getMarshaler(TypeReference<T> typeToken, int nativeType) {
-        // TODO: can avoid making a new token each time by code-genning
-        // the list of type tokens and native types from the keys (at the call sites)
-        MarshalToken<T> marshalToken = new MarshalToken<T>(typeToken, nativeType);
+        synchronized(sMarshalLock) {
+            // TODO: can avoid making a new token each time by code-genning
+            // the list of type tokens and native types from the keys (at the call sites)
+            MarshalToken<T> marshalToken = new MarshalToken<T>(typeToken, nativeType);
 
-        /*
-         * Marshalers are instantiated lazily once they are looked up; successive lookups
-         * will not instantiate new marshalers.
-         */
-        Marshaler<T> marshaler =
-                (Marshaler<T>) sMarshalerMap.get(marshalToken);
-
-        if (sRegisteredMarshalQueryables.size() == 0) {
-            throw new AssertionError("No available query marshalers registered");
-        }
-
-        if (marshaler == null) {
-            // Query each marshaler to see if they support the native/managed type combination
-            for (MarshalQueryable<?> potentialMarshaler : sRegisteredMarshalQueryables) {
-
-                MarshalQueryable<T> castedPotential =
-                        (MarshalQueryable<T>)potentialMarshaler;
-
-                if (castedPotential.isTypeMappingSupported(typeToken, nativeType)) {
-                    marshaler = castedPotential.createMarshaler(typeToken, nativeType);
-                    break;
-                }
-            }
+            /*
+             * Marshalers are instantiated lazily once they are looked up; successive lookups
+             * will not instantiate new marshalers.
+             */
+            Marshaler<T> marshaler =
+                    (Marshaler<T>) sMarshalerMap.get(marshalToken);
 
             if (marshaler == null) {
-                throw new UnsupportedOperationException(
+
+                if (sRegisteredMarshalQueryables.size() == 0) {
+                    throw new AssertionError("No available query marshalers registered");
+                }
+
+                // Query each marshaler to see if they support the native/managed type combination
+                for (MarshalQueryable<?> potentialMarshaler : sRegisteredMarshalQueryables) {
+
+                    MarshalQueryable<T> castedPotential =
+                            (MarshalQueryable<T>)potentialMarshaler;
+
+                    if (castedPotential.isTypeMappingSupported(typeToken, nativeType)) {
+                        marshaler = castedPotential.createMarshaler(typeToken, nativeType);
+                        break;
+                    }
+                }
+
+                if (marshaler == null) {
+                    throw new UnsupportedOperationException(
                         "Could not find marshaler that matches the requested " +
-                                "combination of type reference " +
-                                typeToken + " and native type " +
-                                MarshalHelpers.toStringNativeType(nativeType));
+                        "combination of type reference " +
+                        typeToken + " and native type " +
+                        MarshalHelpers.toStringNativeType(nativeType));
+                }
+
+                // Only put when no cached version exists to avoid +0.5ms lookup per call.
+                sMarshalerMap.put(marshalToken, marshaler);
             }
 
-            // Only put when no cached version exists to avoid +0.5ms lookup per call.
-            sMarshalerMap.put(marshalToken, marshaler);
+            return marshaler;
         }
-
-        return marshaler;
     }
 
     private static class MarshalToken<T> {
@@ -125,9 +130,12 @@ public class MarshalRegistry {
         }
     }
 
-    private static List<MarshalQueryable<?>> sRegisteredMarshalQueryables =
+    // Control access to the static data structures below
+    private static final Object sMarshalLock = new Object();
+
+    private static final List<MarshalQueryable<?>> sRegisteredMarshalQueryables =
             new ArrayList<MarshalQueryable<?>>();
-    private static HashMap<MarshalToken<?>, Marshaler<?>> sMarshalerMap =
+    private static final HashMap<MarshalToken<?>, Marshaler<?>> sMarshalerMap =
             new HashMap<MarshalToken<?>, Marshaler<?>>();
 
     private MarshalRegistry() {

@@ -15,12 +15,10 @@
  */
 
 #include "StringPool.h"
-#include "Util.h"
+#include "util/Util.h"
 
 #include <gtest/gtest.h>
 #include <string>
-
-using namespace android;
 
 namespace aapt {
 
@@ -67,15 +65,23 @@ TEST(StringPoolTest, MaintainInsertionOrderIndex) {
 TEST(StringPoolTest, PruneStringsWithNoReferences) {
     StringPool pool;
 
+    StringPool::Ref refA = pool.makeRef(u"foo");
     {
         StringPool::Ref ref = pool.makeRef(u"wut");
         EXPECT_EQ(*ref, u"wut");
-        EXPECT_EQ(1u, pool.size());
+        EXPECT_EQ(2u, pool.size());
     }
+    StringPool::Ref refB = pool.makeRef(u"bar");
 
-    EXPECT_EQ(1u, pool.size());
+    EXPECT_EQ(3u, pool.size());
     pool.prune();
-    EXPECT_EQ(0u, pool.size());
+    EXPECT_EQ(2u, pool.size());
+    StringPool::const_iterator iter = begin(pool);
+    EXPECT_EQ((*iter)->value, u"foo");
+    EXPECT_LT((*iter)->index, 2u);
+    ++iter;
+    EXPECT_EQ((*iter)->value, u"bar");
+    EXPECT_LT((*iter)->index, 2u);
 }
 
 TEST(StringPoolTest, SortAndMaintainIndexesInReferences) {
@@ -163,18 +169,40 @@ TEST(StringPoolTest, DoNotDedupeStyleWithSameStringAsNonStyle) {
 }
 
 TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
+    using namespace android; // For NO_ERROR on Windows.
+
     StringPool pool;
     BigBuffer buffer(1024);
     StringPool::flattenUtf8(&buffer, pool);
 
     std::unique_ptr<uint8_t[]> data = util::copy(buffer);
-    android::ResStringPool test;
-    ASSERT_EQ(test.setTo(data.get(), buffer.size()), android::NO_ERROR);
+    ResStringPool test;
+    ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
+}
+
+TEST(StringPoolTest, FlattenOddCharactersUtf16) {
+    using namespace android; // For NO_ERROR on Windows.
+
+    StringPool pool;
+    pool.makeRef(u"\u093f");
+    BigBuffer buffer(1024);
+    StringPool::flattenUtf16(&buffer, pool);
+
+    std::unique_ptr<uint8_t[]> data = util::copy(buffer);
+    ResStringPool test;
+    ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
+    size_t len = 0;
+    const char16_t* str = test.stringAt(0, &len);
+    EXPECT_EQ(1u, len);
+    EXPECT_EQ(u'\u093f', *str);
+    EXPECT_EQ(0u, str[1]);
 }
 
 constexpr const char16_t* sLongString = u"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使 用するその他のアプリは、起動しても更新されないことがあります。バッテリーセーバーは端末の充電中は自動的にOFFになります。";
 
 TEST(StringPoolTest, FlattenUtf8) {
+    using namespace android; // For NO_ERROR on Windows.
+
     StringPool pool;
 
     StringPool::Ref ref1 = pool.makeRef(u"hello");
@@ -195,8 +223,8 @@ TEST(StringPoolTest, FlattenUtf8) {
 
     std::unique_ptr<uint8_t[]> data = util::copy(buffer);
     {
-        android::ResStringPool test;
-        ASSERT_EQ(test.setTo(data.get(), buffer.size()), android::NO_ERROR);
+        ResStringPool test;
+        ASSERT_EQ(test.setTo(data.get(), buffer.size()), NO_ERROR);
 
         EXPECT_EQ(util::getString(test, 0), u"hello");
         EXPECT_EQ(util::getString(test, 1), u"goodbye");

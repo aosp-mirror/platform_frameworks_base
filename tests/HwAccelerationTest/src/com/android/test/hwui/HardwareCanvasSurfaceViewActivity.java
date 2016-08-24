@@ -17,18 +17,25 @@
 package com.android.test.hwui;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.os.Environment;
+import android.view.PixelCopy;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
-@SuppressWarnings({"UnusedDeclaration"})
+import java.io.FileOutputStream;
+
 public class HardwareCanvasSurfaceViewActivity extends Activity implements Callback {
     private SurfaceView mSurfaceView;
     private HardwareCanvasSurfaceViewActivity.RenderingThread mThread;
@@ -42,10 +49,40 @@ public class HardwareCanvasSurfaceViewActivity extends Activity implements Callb
         mSurfaceView = new SurfaceView(this);
         mSurfaceView.getHolder().addCallback(this);
 
-        content.addView(mSurfaceView, new FrameLayout.LayoutParams(
+        Button button = new Button(this);
+        button.setText("Copy bitmap to /sdcard/surfaceview.png");
+        button.setOnClickListener((View v) -> {
+            final Bitmap b = Bitmap.createBitmap(
+                    mSurfaceView.getWidth(), mSurfaceView.getHeight(),
+                    Bitmap.Config.ARGB_8888);
+            PixelCopy.request(mSurfaceView, b,
+                    (int result) -> {
+                        if (result != PixelCopy.SUCCESS) {
+                            Toast.makeText(HardwareCanvasSurfaceViewActivity.this,
+                                    "Failed to copy", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        try {
+                            try (FileOutputStream out = new FileOutputStream(
+                                    Environment.getExternalStorageDirectory() + "/surfaceview.png");) {
+                                b.compress(Bitmap.CompressFormat.PNG, 100, out);
+                            }
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                    }, mSurfaceView.getHandler());
+        });
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(button, LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        layout.addView(mSurfaceView, LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        content.addView(layout, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                Gravity.CENTER));
+                FrameLayout.LayoutParams.MATCH_PARENT));
         setContentView(content);
     }
 

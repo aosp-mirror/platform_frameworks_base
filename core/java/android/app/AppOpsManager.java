@@ -105,7 +105,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpToPerms, sOpDefault
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -237,8 +237,10 @@ public class AppOpsManager {
     public static final int OP_TURN_SCREEN_ON = 61;
     /** @hide Get device accounts. */
     public static final int OP_GET_ACCOUNTS = 62;
+    /** @hide Control whether an application is allowed to run in the background. */
+    public static final int OP_RUN_IN_BACKGROUND = 63;
     /** @hide */
-    public static final int _NUM_OP = 63;
+    public static final int _NUM_OP = 64;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -337,6 +339,43 @@ public class AppOpsManager {
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
 
+    private static final int[] RUNTIME_PERMISSIONS_OPS = {
+            // Contacts
+            OP_READ_CONTACTS,
+            OP_WRITE_CONTACTS,
+            OP_GET_ACCOUNTS,
+            // Calendar
+            OP_READ_CALENDAR,
+            OP_WRITE_CALENDAR,
+            // SMS
+            OP_SEND_SMS,
+            OP_RECEIVE_SMS,
+            OP_READ_SMS,
+            OP_RECEIVE_WAP_PUSH,
+            OP_RECEIVE_MMS,
+            OP_READ_CELL_BROADCASTS,
+            // Storage
+            OP_READ_EXTERNAL_STORAGE,
+            OP_WRITE_EXTERNAL_STORAGE,
+            // Location
+            OP_COARSE_LOCATION,
+            OP_FINE_LOCATION,
+            // Phone
+            OP_READ_PHONE_STATE,
+            OP_CALL_PHONE,
+            OP_READ_CALL_LOG,
+            OP_WRITE_CALL_LOG,
+            OP_ADD_VOICEMAIL,
+            OP_USE_SIP,
+            OP_PROCESS_OUTGOING_CALLS,
+            // Microphone
+            OP_RECORD_AUDIO,
+            // Camera
+            OP_CAMERA,
+            // Body sensors
+            OP_BODY_SENSORS
+    };
+
     /**
      * This maps each operation to the operation that serves as the
      * switch to determine whether it is allowed.  Generally this is
@@ -409,6 +448,7 @@ public class AppOpsManager {
             OP_WRITE_EXTERNAL_STORAGE,
             OP_TURN_SCREEN_ON,
             OP_GET_ACCOUNTS,
+            OP_RUN_IN_BACKGROUND,
     };
 
     /**
@@ -478,7 +518,8 @@ public class AppOpsManager {
             OPSTR_READ_EXTERNAL_STORAGE,
             OPSTR_WRITE_EXTERNAL_STORAGE,
             null,
-            OPSTR_GET_ACCOUNTS
+            OPSTR_GET_ACCOUNTS,
+            null,
     };
 
     /**
@@ -549,6 +590,7 @@ public class AppOpsManager {
             "WRITE_EXTERNAL_STORAGE",
             "TURN_ON_SCREEN",
             "GET_ACCOUNTS",
+            "RUN_IN_BACKGROUND",
     };
 
     /**
@@ -618,7 +660,8 @@ public class AppOpsManager {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             null, // no permission for turning the screen on
-            Manifest.permission.GET_ACCOUNTS
+            Manifest.permission.GET_ACCOUNTS,
+            null, // no permission for running in background
     };
 
     /**
@@ -653,7 +696,7 @@ public class AppOpsManager {
             null, //WRITE_SETTINGS
             UserManager.DISALLOW_CREATE_WINDOWS, //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS
-            null, //CAMERA
+            UserManager.DISALLOW_CAMERA, //CAMERA
             UserManager.DISALLOW_RECORD_AUDIO, //RECORD_AUDIO
             null, //PLAY_AUDIO
             null, //READ_CLIPBOARD
@@ -674,7 +717,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
             null, //PROJECT_MEDIA
-            UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
+            null, // ACTIVATE_VPN
             UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
             null, // ASSIST_STRUCTURE
             null, // ASSIST_SCREENSHOT
@@ -690,6 +733,7 @@ public class AppOpsManager {
             null, // WRITE_EXTERNAL_STORAGE
             null, // TURN_ON_SCREEN
             null, // GET_ACCOUNTS
+            null, // RUN_IN_BACKGROUND
     };
 
     /**
@@ -697,8 +741,8 @@ public class AppOpsManager {
      * (and system ui) to bypass the user restriction when active.
      */
     private static boolean[] sOpAllowSystemRestrictionBypass = new boolean[] {
-            false, //COARSE_LOCATION
-            false, //FINE_LOCATION
+            true, //COARSE_LOCATION
+            true, //FINE_LOCATION
             false, //GPS
             false, //VIBRATE
             false, //READ_CONTACTS
@@ -760,6 +804,7 @@ public class AppOpsManager {
             false, // WRITE_EXTERNAL_STORAGE
             false, // TURN_ON_SCREEN
             false, // GET_ACCOUNTS
+            false, // RUN_IN_BACKGROUND
     };
 
     /**
@@ -829,6 +874,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
     };
 
     /**
@@ -901,7 +947,8 @@ public class AppOpsManager {
             false,
             false,
             false,
-            false
+            false,
+            false,
     };
 
     /**
@@ -912,7 +959,7 @@ public class AppOpsManager {
     /**
      * Mapping from a permission to the corresponding app op.
      */
-    private static HashMap<String, Integer> sPermToOp = new HashMap<>();
+    private static HashMap<String, Integer> sRuntimePermToOp = new HashMap<>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
@@ -952,9 +999,9 @@ public class AppOpsManager {
                 sOpStrToOp.put(sOpToString[i], i);
             }
         }
-        for (int i=0; i<_NUM_OP; i++) {
-            if (sOpPerms[i] != null) {
-                sPermToOp.put(sOpPerms[i], i);
+        for (int op : RUNTIME_PERMISSIONS_OPS) {
+            if (sOpPerms[op] != null) {
+                sRuntimePermToOp.put(sOpPerms[op], op);
             }
         }
     }
@@ -1006,10 +1053,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve the app op code for a permission, or null if there is not one.
+     * This API is intended to be used for mapping runtime permissions to the
+     * corresponding app op.
      * @hide
      */
     public static int permissionToOpCode(String permission) {
-        Integer boxedOpCode = sPermToOp.get(permission);
+        Integer boxedOpCode = sRuntimePermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
     }
 
@@ -1226,8 +1275,8 @@ public class AppOpsManager {
         try {
             return mService.getPackagesForOps(ops);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -1242,15 +1291,65 @@ public class AppOpsManager {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
-    /** @hide */
+    /**
+     * Sets given app op in the specified mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in
+     * this UID in the future.
+     *
+     * @param code The app op.
+     * @param uid The UID for which to set the app.
+     * @param mode The app op mode to set.
+     * @hide
+     */
     public void setUidMode(int code, int uid, int mode) {
         try {
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets given app op in the specified mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in
+     * this UID in the future.
+     *
+     * @param appOp The app op.
+     * @param uid The UID for which to set the app.
+     * @param mode The app op mode to set.
+     * @hide
+     */
+    @SystemApi
+    public void setUidMode(String appOp, int uid, int mode) {
+        try {
+            mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void setUserRestriction(int code, boolean restricted, IBinder token) {
+        setUserRestriction(code, restricted, token, /*exceptionPackages*/null);
+    }
+
+    /** @hide */
+    public void setUserRestriction(int code, boolean restricted, IBinder token,
+            String[] exceptionPackages) {
+        setUserRestrictionForUser(code, restricted, token, exceptionPackages, mContext.getUserId());
+    }
+
+    /** @hide */
+    public void setUserRestrictionForUser(int code, boolean restricted, IBinder token,
+            String[] exceptionPackages, int userId) {
+        try {
+            mService.setUserRestriction(code, restricted, token, userId, exceptionPackages);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1259,6 +1358,7 @@ public class AppOpsManager {
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1279,6 +1379,7 @@ public class AppOpsManager {
             final int uid = Binder.getCallingUid();
             mService.setAudioRestriction(code, usage, uid, mode, exceptionPackages);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1287,6 +1388,7 @@ public class AppOpsManager {
         try {
             mService.resetAllModes(UserHandle.myUserId(), null);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1294,12 +1396,14 @@ public class AppOpsManager {
      * Gets the app op name associated with a given permission.
      * The app op name is one of the public constants defined
      * in this class such as {@link #OPSTR_COARSE_LOCATION}.
+     * This API is intended to be used for mapping runtime
+     * permissions to the corresponding app op.
      *
      * @param permission The permission.
      * @return The app op associated with the permission or null.
      */
     public static String permissionToOp(String permission) {
-        final Integer opCode = sPermToOp.get(permission);
+        final Integer opCode = sRuntimePermToOp.get(permission);
         if (opCode == null) {
             return null;
         }
@@ -1329,7 +1433,7 @@ public class AppOpsManager {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
                 cb = new IAppOpsCallback.Stub() {
-                    public void opChanged(int op, String packageName) {
+                    public void opChanged(int op, int uid, String packageName) {
                         if (callback instanceof OnOpChangedInternalListener) {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }
@@ -1343,6 +1447,7 @@ public class AppOpsManager {
             try {
                 mService.startWatchingMode(op, packageName, cb);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1358,6 +1463,7 @@ public class AppOpsManager {
                 try {
                     mService.stopWatchingMode(cb);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -1522,8 +1628,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1535,8 +1641,8 @@ public class AppOpsManager {
         try {
             return mService.checkOperation(op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1552,7 +1658,7 @@ public class AppOpsManager {
                         "Package " + packageName + " does not belong to " + uid);
             }
         } catch (RemoteException e) {
-            throw new SecurityException("Unable to verify package ownership", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1568,8 +1674,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1581,8 +1687,8 @@ public class AppOpsManager {
         try {
             return mService.checkAudioOperation(op, stream, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1608,8 +1714,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1651,8 +1757,8 @@ public class AppOpsManager {
             return mService.noteProxyOperation(op, mContext.getOpPackageName(),
                     Binder.getCallingUid(), proxiedPackageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1664,8 +1770,8 @@ public class AppOpsManager {
         try {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /** @hide */
@@ -1682,7 +1788,7 @@ public class AppOpsManager {
             try {
                 sToken = service.getToken(new Binder());
             } catch (RemoteException e) {
-                // System is dead, whatevs.
+                throw e.rethrowFromSystemServer();
             }
             return sToken;
         }
@@ -1713,8 +1819,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1726,8 +1832,8 @@ public class AppOpsManager {
         try {
             return mService.startOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /** @hide */
@@ -1746,6 +1852,7 @@ public class AppOpsManager {
         try {
             mService.finishOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

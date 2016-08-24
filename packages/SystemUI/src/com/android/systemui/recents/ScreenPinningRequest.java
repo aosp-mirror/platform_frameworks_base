@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -52,6 +53,9 @@ public class ScreenPinningRequest implements View.OnClickListener {
 
     private RequestWindowView mRequestWindow;
 
+    // Id of task to be pinned or locked.
+    private int taskId;
+
     public ScreenPinningRequest(Context context) {
         mContext = context;
         mAccessibilityService = (AccessibilityManager)
@@ -67,8 +71,15 @@ public class ScreenPinningRequest implements View.OnClickListener {
         }
     }
 
-    public void showPrompt(boolean allowCancel) {
-        clearPrompt();
+    public void showPrompt(int taskId, boolean allowCancel) {
+        try {
+            clearPrompt();
+        } catch (IllegalArgumentException e) {
+            // If the call to show the prompt fails due to the request window not already being
+            // attached, then just ignore the error since we will be re-adding it below.
+        }
+
+        this.taskId = taskId;
 
         mRequestWindow = new RequestWindowView(mContext, allowCancel);
 
@@ -106,7 +117,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.screen_pinning_ok_button || mRequestWindow == v) {
             try {
-                ActivityManagerNative.getDefault().startLockTaskModeOnCurrent();
+                ActivityManagerNative.getDefault().startSystemLockTaskMode(taskId);
             } catch (RemoteException e) {}
         }
         clearPrompt();
@@ -199,11 +210,15 @@ public class ScreenPinningRequest implements View.OnClickListener {
             // Status bar is always on the right.
             mLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             // Buttons and text do switch sides though.
-            View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
-            swapChildrenIfRtlAndVertical(buttons);
+            View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
+            if (Recents.getSystemServices().hasSoftNavigationBar()) {
+                buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
+                swapChildrenIfRtlAndVertical(buttons);
+            } else {
+                buttons.setVisibility(View.GONE);
+            }
 
             ((Button) mLayout.findViewById(R.id.screen_pinning_ok_button))
                     .setOnClickListener(ScreenPinningRequest.this);
@@ -215,11 +230,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         .setVisibility(View.INVISIBLE);
             }
 
-            final int description = mAccessibilityService.isEnabled()
-                    ? R.string.screen_pinning_description_accessible
-                    : R.string.screen_pinning_description;
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
-                    .setText(description);
+                    .setText(R.string.screen_pinning_description);
             final int backBgVisibility =
                     mAccessibilityService.isEnabled() ? View.INVISIBLE : View.VISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);

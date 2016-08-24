@@ -36,6 +36,7 @@ import android.view.InputChannel;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
@@ -164,9 +165,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             case DO_START_INPUT: {
                 SomeArgs args = (SomeArgs)msg.obj;
+                int missingMethods = msg.arg1;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(inputContext) : null;
+                        ? new InputConnectionWrapper(inputContext, missingMethods) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.startInput(ic, info);
@@ -175,9 +177,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_RESTART_INPUT: {
                 SomeArgs args = (SomeArgs)msg.obj;
+                int missingMethods = msg.arg1;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(inputContext) : null;
+                        ? new InputConnectionWrapper(inputContext, missingMethods) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.restartInput(ic, info);
@@ -246,8 +249,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @Override
     public void bindInput(InputBinding binding) {
+        // This IInputContext is guaranteed to implement all the methods.
+        final int missingMethodFlags = 0;
         InputConnection ic = new InputConnectionWrapper(
-                IInputContext.Stub.asInterface(binding.getConnectionToken()));
+                IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags);
         InputBinding nu = new InputBinding(ic, binding);
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
     }
@@ -258,15 +263,19 @@ class IInputMethodWrapper extends IInputMethod.Stub
     }
 
     @Override
-    public void startInput(IInputContext inputContext, EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_START_INPUT,
-                inputContext, attribute));
+    public void startInput(IInputContext inputContext,
+            @InputConnectionInspector.MissingMethodFlags final int missingMethods,
+            EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_START_INPUT,
+                missingMethods, inputContext, attribute));
     }
 
     @Override
-    public void restartInput(IInputContext inputContext, EditorInfo attribute) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_RESTART_INPUT,
-                inputContext, attribute));
+    public void restartInput(IInputContext inputContext,
+            @InputConnectionInspector.MissingMethodFlags final int missingMethods,
+            EditorInfo attribute) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(DO_RESTART_INPUT,
+                missingMethods, inputContext, attribute));
     }
 
     @Override

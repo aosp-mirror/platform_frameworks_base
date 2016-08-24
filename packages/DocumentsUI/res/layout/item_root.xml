@@ -22,13 +22,11 @@
     android:paddingEnd="@dimen/list_item_padding"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:baselineAligned="false"
-    android:background="@drawable/item_root_background">
+    android:baselineAligned="false">
 
     <FrameLayout
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginEnd="16dp"
         android:duplicateParentState="true">
 
         <ImageView
@@ -55,7 +53,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAppearance="@android:style/TextAppearance.Material.Menu"
             android:textColor="@color/item_root_primary_text" />
 
         <TextView
@@ -65,7 +63,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
             android:textColor="@color/item_root_primary_text" />
 
     </LinearLayout>

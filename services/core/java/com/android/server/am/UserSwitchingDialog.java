@@ -18,9 +18,12 @@ package com.android.server.am;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -49,20 +52,26 @@ final class UserSwitchingDialog extends AlertDialog
     @GuardedBy("this")
     private boolean mStartedUser;
 
-    public UserSwitchingDialog(ActivityManagerService service, Context context,
-            int userId, String userName, boolean aboveSystem) {
+    public UserSwitchingDialog(ActivityManagerService service, Context context, UserInfo oldUser,
+            UserInfo newUser, boolean aboveSystem) {
         super(context);
 
         mService = service;
-        mUserId = userId;
+        mUserId = newUser.id;
 
         // Set up the dialog contents
         setCancelable(false);
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
         View view = LayoutInflater.from(getContext()).inflate(R.layout.user_switching_dialog, null);
-        ((TextView) view.findViewById(R.id.message)).setText(
-                res.getString(com.android.internal.R.string.user_switching_message, userName));
+
+        String viewMessage;
+        if (UserManager.isSplitSystemUser() && newUser.id == UserHandle.USER_SYSTEM) {
+            viewMessage = res.getString(R.string.user_logging_out_message, oldUser.name);
+        } else {
+            viewMessage = res.getString(R.string.user_switching_message, newUser.name);
+        }
+        ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
 
         if (aboveSystem) {
@@ -97,7 +106,7 @@ final class UserSwitchingDialog extends AlertDialog
     void startUser() {
         synchronized (this) {
             if (!mStartedUser) {
-                mService.startUserInForeground(mUserId, this);
+                mService.mUserController.startUserInForeground(mUserId, this);
                 mStartedUser = true;
                 final View decorView = getWindow().getDecorView();
                 if (decorView != null) {

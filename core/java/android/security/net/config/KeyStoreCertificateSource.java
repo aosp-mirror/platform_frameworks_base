@@ -105,4 +105,9 @@ class KeyStoreCertificateSource implements CertificateSource {
         }
         return certs;
     }
+
+    @Override
+    public void handleTrustStorageUpdate() {
+        // Nothing to do.
+    }
 }

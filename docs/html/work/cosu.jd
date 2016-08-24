@@ -1,0 +1,504 @@
+page.title=Set up Single-Purpose Devices
+page.tags=work, cosu
+page.keywords=cosu, work
+page.metaDescription=Learn how to develop single-use solutions for Android devices.
+page.image=images/work/cards/briefcase_600px.png
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#locktask">How to use LockTask mode</a></li>
+      <li><a href="#cosu-solutions">Build COSU solutions</a></li>
+      <li><a href="#create-dpc">Create your own DPC app</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+As an IT administrator, you can configure Android 6.0 Marshmallow and later
+devices as <em>corporate-owned, single-use (COSU)</em> devices. These are Android
+devices used for a single purpose, such as digital signage, ticket printing,
+point of sale, or inventory management. To use Android devices as COSU devices,
+you need to develop Android apps that your customers can manage.
+</p>
+
+<p>
+Your customers can configure COSU devices:
+</p>
+<ul>
+<li>
+To lock a single application to the screen, and hide the
+<strong>Home</strong> and <strong>Recents</strong> buttons to prevent users
+from escaping the app.
+</li>
+
+<li>
+To allow multiple applications to appear on the screen, such as a library kiosk
+with a catalog app and web browser.
+</li>
+</ul>
+
+<h2 id="pinning">
+App pinning vs. lock task mode
+</h2>
+
+<p>Android 5.0 Lollipop introduced two new ways to configure Android devices
+for a single purpose:
+</p>
+
+<ul>
+<li>
+With app pinning, the device user can temporarily pin specific apps to the
+screen.
+</li>
+
+<li>
+With lock task mode, a user can’t escape the app and the Home and Recents
+buttons are hidden. Additionally, lock task mode gives the IT administrator
+a more robust way to manage COSU devices, as discussed below.
+</li>
+</ul>
+
+<p>
+This graphic compares the features of app pinning and lock task mode:
+</p>
+
+<img src="{@docRoot}images/work/cosu-pinning_vs_locktaskmode.png"
+width="640" srcset="{@docRoot}images/work/cosu-pinning_vs_locktaskmode.png 1x,
+{@docRoot}images/work/cosu-pinning_vs_locktaskmode_2x.png 2x" />
+
+ <p class="img-caption">
+   <strong>Figure 1.</strong> Comparing the features of app pinning in Lollipop
+   vs. Lock task mode in Marshmallow and later
+ </p>
+
+<p>
+In Lollipop, you can pin a single application to cover the full screen, but
+only apps whitelisted by the device policy controller (DPC) can be locked.
+</p>
+
+<h2 id="locktask">
+  How to use LockTask mode
+</h2>
+
+<p>
+  To use LockTask mode, and the APIs that manage COSU devices, there must be
+  a device owner application installed on the device. Device owners are a
+  type of device policy controller (DPC) that manages the whole device. For
+  more information about DPCs, see the
+  <a class="external-link" href="https://developers.google.com/android/work/overview">EMM Developer’s Overview</a>.
+</p>
+
+<p>
+If you’re creating a new COSU app, we recommend you develop it for
+Marshmallow or later, which includes the following COSU features:
+</p>
+
+<ul>
+<li>
+Controls system updates
+</li>
+
+<li>
+Sets status and menu bar visibility
+</li>
+
+<li>
+Disables screen lock and sleep functions
+</li>
+
+<li>
+Permits switching between apps while staying in lock task mode
+</li>
+
+<li>
+Prevents restarting in safe mode
+</li>
+</ul>
+
+<p class="note">
+  <strong>Note:</strong> If you develop COSU features targeted for
+  Marshmallow devices, your app can still be compatible with prior
+  versions of Android.
+</p>
+
+<p>
+Additional COSU management features launched with Marshmallow make it easier to
+develop and deploy Android devices as a single-use device. If you want to
+enforce server-side managed configurations or server-side profile policy controls,
+you need to use an EMM or make your application a DPC. Follow the instructions
+below as you create your application.
+</p>
+
+<h2 id="cosu-solutions">
+  Build COSU solutions
+</h2>
+
+<p>
+  There are two different ways to manage COSU devices:
+</p>
+
+<ul>
+<li>
+<strong>Use a third-party enterprise mobility management (EMM)
+solution</strong>: Using an EMM, all you need to do is set up lock task mode.
+For instructions, skip to the next section,
+<a href="#emm-solutions">Solutions managed by a third-party EMM</a>.
+</li>
+
+<li>
+<strong>Advanced setup—Create your own DPC app</strong>: This requires
+more work and is intended for an advanced developer audience. With this
+option, you’ll need to set up the device so that you can manage it, set
+up APIs, and set up a DPC app and test it. For instructions, skip to
+<a href="#create-dpc">Create your own DPC app</a>.
+</li>
+</ul>
+
+<h2 id="emm-solutions">
+Solutions managed by a third-party EMM
+</h2>
+
+<p>
+In this section, you’ll need to do a small amount of development to
+have your device work with a third-party EMM.
+</p>
+
+<h3 id="use-smartlocktask">
+Using startLockTask()
+</h3>
+
+<p>
+If you need to add COSU functionality to an existing app, make sure that
+the customer’s EMM supports {@link android.R.attr#lockTaskMode}.
+</p>
+
+<ul>
+<li>
+The device owner must include your app’s package(s) in
+{@link android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages}</li>
+<ul>
+<li>
+Sets the packages that can enter into lock task mode
+</li>
+<li>
+Needs to be set by the EMM
+</li>
+<li>
+You can call {@link android.app.admin.DevicePolicyManager#isLockTaskPermitted isLockTaskPermitted}
+to verify that your package has been whitelisted by
+{@link android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages}.
+</li>
+</ul>
+
+<li>
+Your activity calls {@link android.app.Activity#startLockTask()}
+</li>
+<ul>
+<li>
+Requests to lock the user into the current task
+</li>
+<li>
+Prevents launching other apps, settings, and the <strong>Home</strong>
+button
+</li>
+</ul>
+
+<li>
+To exit, your activity must call {@link android.app.Activity#stopLockTask()}
+</li>
+<ul>
+<li>
+Can only be called on an activity that’s previously called
+ {@link android.app.Activity#startLockTask()}
+</li>
+<li>
+Should be called when the app is user-facing between {@link android.app.Activity#onResume()}
+and {@link android.app.Activity#onPause()}
+</li>
+</ul>
+</ul>
+
+<p>
+Starting from Marshmallow, if your app is whitelisted by an EMM using {@link 
+android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages},
+your activities can automatically start lock task mode when the app is
+launched.
+</p>
+
+<h3 id="locktaskmode-attribute">
+Set the lockTaskMode attribute
+</h3>
+
+<p>
+  The {@link android.R.attr#lockTaskMode} attribute allows you to define
+  your app’s lock task mode behavior in the AndroidManifest.xml file:
+</p>
+
+<ul>
+<li>
+If you set {@link android.R.attr#lockTaskMode} to <code>if_whitelisted</code>,
+you don’t need to call {@link android.app.Activity#startLockTask()}, and the
+app automatically enters into lock task mode.
+</li>
+
+<li>
+System apps and privileged apps can also set {@link android.R.attr#lockTaskMode}
+to always. This setting causes tasks (rooted at your activity) to always
+launch into lock task mode. Non-privileged apps are treated as normal.
+</li>
+
+<li>
+The default value of the {@link android.R.attr#lockTaskMode} attribute is
+normal. When this attribute is set to normal, tasks don’t launch into 
+{@link android.R.attr#lockTaskMode}, unless {@link android.app.Activity#startLockTask()} 
+is called. To call {@link android.app.Activity#startLockTask()},
+applications still need to be whitelisted using 
+{@link android.app.admin.DevicePolicyManager#setLockTaskPackages setLockTaskPackages}, 
+otherwise, the user sees a dialog to approve entering pinned mode.
+</li>
+</ul>
+  
+<p>To have your activity <em>automatically</em> enter {@link android.R.attr#lockTaskMode},
+change the value of this attribute to <code>if_whitelisted</code>.
+Doing so causes your app to behave in this manner:
+</p>
+
+<ul>
+<li>
+If your app isn’t whitelisted for {@link android.R.attr#lockTaskMode},
+it behaves as normal.
+</li>
+
+<li>
+If your app is a system or privileged app, and it’s whitelisted,
+{@link android.R.attr#lockTaskMode} automatically starts when the app is
+launched.
+</li>
+</ul>
+
+<p>
+Example XML as follows:
+</p>
+
+ <pre>&lt;activity android:name=".MainActivity" android:lockTaskMode="if_whitelisted"&gt;</pre>
+
+<p>
+Given either of these options, you still need to create a mechanism for
+calling {@link android.app.Activity#stopLockTask()} so that users can
+exit {@link android.R.attr#lockTaskMode}. 
+</p>
+
+<h2 id="create-dpc">
+  Advanced setup—Create your own DPC app
+</h2>
+
+<p>
+To manage applications in COSU, you need a DPC running as device
+owner to set several policies on the device. 
+</p>
+
+<p class="note">
+<strong>Note:</strong> This setup is advanced, and requires
+a thorough understanding of the EMM concepts described in the
+<a class="external-link" href="https://developers.google.com/android/work/prov-devices#implementation_considerations_for_device_owner_mode">EMM developer overview</a>.
+For more information about building a DPC, see
+<a class="external-link"
+href="https://developers.google.com/android/work/prov-devices">Provision Customer Devices</a>.
+</p>
+
+<p>
+To create a DPC app that can manage COSU device configuration,
+the DPC needs to:
+</p>
+
+<ol>
+<li>
+Provision the device into device owner mode. We recommend that
+you support provisioning with near field communication (NFC) bump.
+For more information, see
+<a class="external-link" href="https://developers.google.com/android/work/prov-devices#nfc_method"
+>Device Owner Provisioning via NFC</a>.
+</li>
+
+<li>
+Use the following APIs:
+<ul>
+<li>
+Keep devices from locking with the keyguard using
+{@link android.app.admin.DevicePolicyManager#setKeyguardDisabled setKeyguardDisabled()}
+</li>
+
+<li>
+Disable the status bar using
+{@link android.app.admin.DevicePolicyManager#setStatusBarDisabled setStatusBarDisabled()}
+</li>
+
+<li>
+Keep a device’s screen on while plugged in via
+{@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN}
+</li>
+
+<li>
+Set default user restriction for managed configurations via
+{@link android.app.admin.DevicePolicyManager#addUserRestriction addUserRestriction()}
+</li>
+
+<li>
+Set system update policies using
+{@link android.app.admin.DevicePolicyManager#setSystemUpdatePolicy setSystemUpdatePolicy()}
+</li>
+
+<li>
+Ensure your app is launched on reboot by setting it as the default launcher
+</li>
+</ul>
+</li>
+</ol>
+
+<p>
+Here’s an example of how to implement an activity that starts lock task mode
+and implements the relevant COSU device management APIs:
+</p>
+
+<pre>
+public class CosuActivity extends Activity {
+
+    private ComponentName mAdminComponentName;
+    private DevicePolicyManager mDevicePolicyManager;
+    private PackageManager mPackageManager;
+    private static final String Battery_PLUGGED_ANY = Integer.toString(
+            BatteryManager.BATTERY_PLUGGED_AC |
+            BatteryManager.BATTERY_PLUGGED_USB |
+            BatteryManager.BATTERY_PLUGGED_WIRELESS);
+
+    private static final String DONT_STAY_ON = "0";
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mAdminComponentName = DeviceAdminReceiver.getComponentName(this);
+        mDevicePolicyManager = (DevicePolicyManager) getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        mPackageManager = getPackageManager();
+        setDefaultCosuPolicies(true);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+
+        // start lock task mode if it's not already active
+        ActivityManager am = (ActivityManager) getSystemService(
+                Context.ACTIVITY_SERVICE);
+        // ActivityManager.getLockTaskModeState api is not available in pre-M.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (!am.isInLockTaskMode()) {
+                startLockTask();
+            }
+        } else {
+            if (am.getLockTaskModeState() ==
+                    ActivityManager.LOCK_TASK_MODE_NONE) {
+                startLockTask();
+            }
+        }
+    }
+
+    private void setDefaultCosuPolicies(boolean active) {
+        // set user restrictions
+        setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, active);
+        setUserRestriction(UserManager.DISALLOW_FACTORY_RESET, active);
+        setUserRestriction(UserManager.DISALLOW_ADD_USER, active);
+        setUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, active);
+        setUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME, active);
+
+        // disable keyguard and status bar
+        mDevicePolicyManager.setKeyguardDisabled(mAdminComponentName, active);
+        mDevicePolicyManager.setStatusBarDisabled(mAdminComponentName, active);
+
+        // enable STAY_ON_WHILE_PLUGGED_IN
+        enableStayOnWhilePluggedIn(active);
+
+        // set System Update policy
+
+        if (active){
+            mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName,
+                    SystemUpdatePolicy.createWindowedInstallPolicy(60,120));
+        } else {
+            DevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName, null);
+        }
+
+        // set this Activity as a lock task package
+
+        mDevicePolicyManager.setLockTaskPackages(mAdminComponentName,
+                active ? new String[]{getPackageName()} : new String[]{});
+
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MAIN);
+        intentFilter.addCategory(Intent.CATEGORY_HOME);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        if (active) {
+            // set Cosu activity as home intent receiver so that it is started
+            // on reboot
+            mDevicePolicyManager.addPersistentPreferredActivity(
+                    mAdminComponentName, intentFilter, new ComponentName(
+                            getPackageName(), CosuActivity.class.getName()));
+        } else {
+            mDevicePolicyManager.clearPackagePersistentPreferredActivities(
+                    mAdminComponentName, getPackageName());
+        }
+    }
+
+    private void setUserRestriction(String restriction, boolean disallow) {
+        if (disallow) {
+            mDevicePolicyManager.addUserRestriction(mAdminComponentName,
+                    restriction);
+        } else {
+            mDevicePolicyManager.clearUserRestriction(mAdminComponentName,
+                    restriction);
+        }
+    }
+
+    private void enableStayOnWhilePluggedIn(boolean enabled) {
+        if (enabled) {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                    Battery_PLUGGED_ANY);
+        } else {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN, DONT_STAY_ON);
+        }
+    }
+
+    // TODO: Implement the rest of the Activity
+}
+</pre>
+
+
+<h2 id="testing-plan">
+  Develop a test plan for COSU
+</h2>
+
+<p>
+  If you’re planning to support a third-party EMM, develop an end-to-end
+  testing plan utilizing the EMM’s app. We also provide testing resources,
+  which you can use to create your own Test Device Policy Client (Test DPC):
+</p>
+
+<ul>
+<li>
+<a class="external-link" href="https://play.google.com/store/search?q=testdpc">TestDPC on Google Play</a>
+</li>
+<li>
+<a class="external-link" href="https://github.com/googlesamples/android-testdpc/tree/master/app/src/main/java/com/afwsamples/testdpc/cosu">TestDPC for COSU source code on GitHub</a>
+</li>
+<li>
+<a class="external-link" href="https://github.com/googlesamples/android-testdpc">Test Device Policy Control app source code on GitHub</a>
+</li>
+</ul>

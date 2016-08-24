@@ -40,10 +40,14 @@ extends CharSequence, GetChars, Spannable, Appendable
      * is Spanned, the spans from it are preserved into the Editable.
      * Existing spans within the Editable that entirely cover the replaced
      * range are retained, but any that were strictly within the range
-     * that was replaced are removed.  As a special case, the cursor
-     * position is preserved even when the entire range where it is
-     * located is replaced.
+     * that was replaced are removed. If the <code>source</code> contains a span
+     * with {@link Spanned#SPAN_PARAGRAPH} flag, and it does not satisfy the
+     * paragraph boundary constraint, it is not retained. As a special case, the
+     * cursor position is preserved even when the entire range where it is located
+     * is replaced.
      * @return  a reference to this object.
+     *
+     * @see Spanned#SPAN_PARAGRAPH
      */
     public Editable replace(int st, int en, CharSequence source, int start, int end);
 

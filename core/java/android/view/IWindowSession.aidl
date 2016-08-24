@@ -81,6 +81,8 @@ interface IWindowSession {
      * so complex relayout of the window should not happen based on them.
      * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
      * treat as real display. Example of such area is a chin in some models of wearable devices.
+     * @param outBackdropFrame Rect which is used draw the resizing background during a resize
+     * operation.
      * @param outConfiguration New configuration of window, if it is now
      * becoming visible and the global configuration has changed since it
      * was last displayed.
@@ -93,7 +95,43 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Configuration outConfig, out Surface outSurface);
+            out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,
+            out Surface outSurface);
+
+    /**
+     *  Position a window relative to it's parent (attached) window without triggering
+     *  a full relayout. This action may be deferred until a given frame number
+     *  for the parent window appears. This allows for synchronizing movement of a child
+     *  to repainting the contents of the parent.
+     *
+     *  "width" and "height" correspond to the width and height members of
+     *  WindowManager.LayoutParams in the {@link #relayout relayout()} case.
+     *  This may differ from the surface buffer size in the
+     *  case of {@link LayoutParams#FLAG_SCALED} and {@link #relayout relayout()}
+     *  must be used with requestedWidth/height if this must be changed.
+     *
+     *  @param window The window being modified. Must be attached to a parent window
+     *  or this call will fail.
+     *  @param left The new left position
+     *  @param top The new top position
+     *  @param right The new right position
+     *  @param bottom The new bottom position
+     *  @param deferTransactionUntilFrame Frame number from our parent (attached) to
+     *  defer this action until.
+     *  @param outFrame Rect in which is placed the new position/size on screen.
+     */
+    void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
+            long deferTransactionUntilFrame, out Rect outFrame);
+
+    /*
+     * Notify the window manager that an application is relaunching and
+     * windows should be prepared for replacement.
+     *
+     * @param appToken The application
+     * @param childrenOnly Whether to only prepare child windows for replacement
+     * (for example when main windows are being reused via preservation).
+     */
+    void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,
@@ -150,8 +188,8 @@ interface IWindowSession {
     /**
      * Initiate the drag operation itself
      */
-    boolean performDrag(IWindow window, IBinder dragToken, float touchX, float touchY,
-            float thumbCenterX, float thumbCenterY, in ClipData data);
+    boolean performDrag(IWindow window, IBinder dragToken, int touchSource,
+            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
    /**
      * Report the result of a drop action targeted to the given window.
@@ -159,6 +197,11 @@ interface IWindowSession {
      * 'false' otherwise.
      */
 	void reportDropResult(IWindow window, boolean consumed);
+
+    /**
+     * Cancel the current drag operation.
+     */
+    void cancelDragAndDrop(IBinder dragToken);
 
     /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop
@@ -211,4 +254,14 @@ interface IWindowSession {
      * The assumption is that this method will be called rather infrequently.
      */
     void pokeDrawLock(IBinder window);
+
+    /**
+     * Starts a task window move with {startX, startY} as starting point. The amount of move
+     * will be the offset between {startX, startY} and the new cursor position.
+     *
+     * Returns true if the move started successfully; false otherwise.
+     */
+    boolean startMovingTask(IWindow window, float startX, float startY);
+
+    void updatePointerIcon(IWindow window);
 }

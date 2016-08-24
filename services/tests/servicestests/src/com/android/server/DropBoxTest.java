@@ -52,8 +52,10 @@ public class DropBoxTest extends AndroidTestCase {
     }
 
     public void testAddText() throws Exception {
-        DropBoxManager dropbox = (DropBoxManager) getContext().getSystemService(
-                Context.DROPBOX_SERVICE);
+        File dir = getEmptyDir("testAddText");
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
+
         long before = System.currentTimeMillis();
         Thread.sleep(5);
         dropbox.addText("DropBoxTest", "TEST0");
@@ -86,8 +88,10 @@ public class DropBoxTest extends AndroidTestCase {
     }
 
     public void testAddData() throws Exception {
-        DropBoxManager dropbox = (DropBoxManager) getContext().getSystemService(
-                Context.DROPBOX_SERVICE);
+        File dir = getEmptyDir("testAddData");
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
+
         long before = System.currentTimeMillis();
         dropbox.addData("DropBoxTest", "TEST".getBytes(), 0);
         long after = System.currentTimeMillis();
@@ -130,8 +134,8 @@ public class DropBoxTest extends AndroidTestCase {
         os2.close();
         gz3.close();
 
-        DropBoxManager dropbox = (DropBoxManager) getContext().getSystemService(
-                Context.DROPBOX_SERVICE);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addFile("DropBoxTest", f0, DropBoxManager.IS_TEXT);
         dropbox.addFile("DropBoxTest", f1, DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED);
@@ -197,7 +201,7 @@ public class DropBoxTest extends AndroidTestCase {
         new FileOutputStream(new File(dir, "DropBoxTest@" + (before + 100002) + ".lost")).close();
 
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         // Until a write, the timestamps are taken at face value
         DropBoxManager.Entry e0 = dropbox.getNextEntry(null, before);
@@ -243,12 +247,13 @@ public class DropBoxTest extends AndroidTestCase {
         e1.close();
         e2.close();
         e3.close();
-        service.stop();
     }
 
     public void testIsTagEnabled() throws Exception {
-        DropBoxManager dropbox = (DropBoxManager) getContext().getSystemService(
-                Context.DROPBOX_SERVICE);
+        File dir = getEmptyDir("testIsTagEnabled");
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
+
         long before = System.currentTimeMillis();
         dropbox.addText("DropBoxTest", "TEST-ENABLED");
         assertTrue(dropbox.isTagEnabled("DropBoxTest"));
@@ -280,7 +285,7 @@ public class DropBoxTest extends AndroidTestCase {
     public void testGetNextEntry() throws Exception {
         File dir = getEmptyDir("testGetNextEntry");
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         long before = System.currentTimeMillis();
         dropbox.addText("DropBoxTest.A", "A0");
@@ -320,7 +325,6 @@ public class DropBoxTest extends AndroidTestCase {
         x0.close();
         x1.close();
         x2.close();
-        service.stop();
     }
 
     public void testSizeLimits() throws Exception {
@@ -343,7 +347,7 @@ public class DropBoxTest extends AndroidTestCase {
         final int overhead = 64;
         long before = System.currentTimeMillis();
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         addRandomEntry(dropbox, "DropBoxTest0", blockSize - overhead);
         addRandomEntry(dropbox, "DropBoxTest0", blockSize - overhead);
@@ -422,7 +426,6 @@ public class DropBoxTest extends AndroidTestCase {
         t0.close();
         t1.close();
         t2.close();
-        service.stop();
     }
 
     public void testAgeLimits() throws Exception {
@@ -438,7 +441,7 @@ public class DropBoxTest extends AndroidTestCase {
         // Write one normal entry and another so big that it is instantly tombstoned
         long before = System.currentTimeMillis();
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addText("DropBoxTest", "TEST");
         addRandomEntry(dropbox, "DropBoxTest", blockSize * 20);
@@ -469,7 +472,7 @@ public class DropBoxTest extends AndroidTestCase {
         File dir = getEmptyDir("testFileCountLimits");
 
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
         dropbox.addText("DropBoxTest", "TEST0");
         dropbox.addText("DropBoxTest", "TEST1");
         dropbox.addText("DropBoxTest", "TEST2");
@@ -522,7 +525,7 @@ public class DropBoxTest extends AndroidTestCase {
         File dir = new File(getEmptyDir("testCreateDropBoxManagerWith"), "InvalidDirectory");
         new FileOutputStream(dir).close();  // Create an empty file
         DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
-        DropBoxManager dropbox = new DropBoxManager(service);
+        DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addText("DropBoxTest", "should be ignored");
         dropbox.addData("DropBoxTest", "should be ignored".getBytes(), 0);
@@ -535,7 +538,6 @@ public class DropBoxTest extends AndroidTestCase {
         assertEquals("DropBoxTest", e.getTag());
         assertEquals("TEST", e.getText(80));
         e.close();
-        service.stop();
     }
 
     public void testDropBoxEntrySerialization() throws Exception {
@@ -678,7 +680,6 @@ public class DropBoxTest extends AndroidTestCase {
         assertEquals("File Value",
                 new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
         e.close();
-
         e = DropBoxManager.Entry.CREATOR.createFromParcel(parcel);
         assertEquals("emptyfile", e.getTag());
         assertEquals(8000000, e.getTimeMillis());
@@ -702,7 +703,6 @@ public class DropBoxTest extends AndroidTestCase {
         assertEquals("Gzip File Value",
                 new BufferedReader(new InputStreamReader(e.getInputStream())).readLine());
         e.close();
-
         assertEquals(0, parcel.dataAvail());
         parcel.recycle();
     }

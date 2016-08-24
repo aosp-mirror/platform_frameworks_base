@@ -73,7 +73,7 @@ application.</p>
 
 
 <h2 id="ChartReqs">Chart Your Requirements</h2>
- 
+
 <p>The Android Developer Guide provides a handy reference of some of common supported textures on
 the <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">supports-gl-texture
 page</a>.  This page also contains some hints as to which phones (or families of phones) support
@@ -109,16 +109,9 @@ color themes, bugs fixed in shared code), which improves your development time a
 likelihood of mistakes that could have been easily avoided.</p>
 
 <p class="note"><strong>Note:</strong>  While the implementation details of how to create and
-include library projects are beyond the scope of this lesson, you can get up to speed quickly on
-their creation at the following links:</p>
-<ul>
-<li><a
-href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
-a library project (Eclipse)</a></li>
-<li><a
-href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
-a library project (Command line)</a></li>
-</ul>
+include library projects are beyond the scope of this lesson, you can get up to speed
+by reading <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 <p>If you’re converting an existing application to use multiple APK support,
 scour your codebase for every localized string file, list of values, theme
@@ -135,7 +128,7 @@ to the library section without screwing anything up.</p>
 
 <h2 id="CreateAPKs">Create New APK Projects</h2>
 <p>There should be a separate Android project for each APK you’re going to release.  For easy
-organization, place the library project and all related APK projects under the same parent folder. 
+organization, place the library project and all related APK projects under the same parent folder.
 Also remember that each APK needs to have the same package name, although they don’t necessarily
 need to share the package name with the library.  If you were to have 3 APKs following the scheme
 described earlier, your root directory might look like this:</p>
@@ -194,7 +187,7 @@ device.</p>
     <tr>
       <td class="blueCell">ETC1</td>
       <td class="blueCell">ETC1</td>
-      <td class="blueCell">ETC1</td>      
+      <td class="blueCell">ETC1</td>
     </tr>
     <tr>
       <td></td>
@@ -290,7 +283,7 @@ densities: '120' '160' '240'
 supports-screens and compatible-screens, and that you don’t have unintended "uses-feature" values
 that were added as a result of permissions you set in the manifest. In the example above, the APK
 will be invisible to most, if not all devices.</p>
-<p>Why?  By adding the required permission SEND_SMS, the feature requirement of android.hardware.telephony was implicitly added.  Since most (if not all) xlarge devices are tablets without telephony hardware in them, Google Play will filter out this APK in these cases, until future devices come along which are both large enough to report as xlarge screen size, and possess telephony hardware.  
+<p>Why?  By adding the required permission SEND_SMS, the feature requirement of android.hardware.telephony was implicitly added.  Since most (if not all) xlarge devices are tablets without telephony hardware in them, Google Play will filter out this APK in these cases, until future devices come along which are both large enough to report as xlarge screen size, and possess telephony hardware.
 </p>
 <p>Fortunately this is easily fixed by adding the following to your manifest:</p>
 <pre>

@@ -21,154 +21,104 @@
     android:layout_height="wrap_content"
     android:tag="inbox"
     >
-    <include layout="@layout/notification_template_icon_group"
-        android:layout_width="@dimen/notification_large_icon_width"
-        android:layout_height="@dimen/notification_large_icon_height"
-        />
+    <include layout="@layout/notification_template_header" />
     <LinearLayout
-        android:id="@+id/notification_main_column"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:layout_marginStart="@dimen/notification_large_icon_width"
-        android:minHeight="@dimen/notification_large_icon_height"
-        android:orientation="vertical"
-        >
-        <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_part_line2" />
-
-        <!-- We can't have another vertical linear layout here with weight != 0 so this forces us to
-             put the badge on the first line. -->
-        <LinearLayout
+            android:id="@+id/notification_action_list_margin_target"
             android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:orientation="horizontal"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:clipToPadding="false"
+            android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/notification_main_column"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:paddingStart="@dimen/notification_content_margin_start"
+            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:paddingBottom="@dimen/notification_content_margin_bottom"
+            android:minHeight="@dimen/notification_min_content_height"
+            android:clipToPadding="false"
+            android:orientation="vertical"
             >
+            <include layout="@layout/notification_template_part_line1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <include layout="@layout/notification_template_progress"
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_marginTop="4dp"/>
             <TextView android:id="@+id/inbox_text0"
                 android:textAppearance="@style/TextAppearance.Material.Notification"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:visibility="gone"
                 android:layout_weight="1"
                 />
-            <ImageView android:id="@+id/profile_badge_large_template"
-                android:layout_width="@dimen/notification_badge_size"
-                android:layout_height="@dimen/notification_badge_size"
-                android:layout_weight="0"
-                android:layout_marginStart="4dp"
-                android:scaleType="fitCenter"
+            <TextView android:id="@+id/inbox_text1"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:visibility="gone"
-                android:contentDescription="@string/notification_work_profile_content_description"
+                android:layout_weight="1"
+                />
+            <TextView android:id="@+id/inbox_text2"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:layout_weight="1"
+                />
+            <TextView android:id="@+id/inbox_text3"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:layout_weight="1"
+                />
+            <TextView android:id="@+id/inbox_text4"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:layout_weight="1"
+                />
+            <TextView android:id="@+id/inbox_text5"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:layout_weight="1"
+                />
+            <TextView android:id="@+id/inbox_text6"
+                android:textAppearance="@style/TextAppearance.Material.Notification"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:layout_weight="1"
                 />
         </LinearLayout>
-        <TextView android:id="@+id/inbox_text1"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_text2"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_text3"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_text4"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_text5"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_text6"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            />
-        <TextView android:id="@+id/inbox_more"
-            android:textAppearance="@style/TextAppearance.Material.Notification"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:visibility="gone"
-            android:layout_weight="1"
-            android:text="@android:string/notification_inbox_ellipsis"
-            />
-        <FrameLayout
-            android:id="@+id/inbox_end_pad"
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:visibility="gone"
-            android:layout_weight="0"
-        />
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:id="@+id/action_divider"
-            android:visibility="gone"
-            android:background="@drawable/notification_template_divider" />
-        <include
-            layout="@layout/notification_material_action_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="-8dp"
-            android:layout_marginRight="-8dp"
-            android:layout_weight="0"
-            />
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:id="@+id/overflow_divider"
-            android:visibility="visible"
-            android:background="@drawable/notification_template_divider" />
-        <include
-            layout="@layout/notification_template_part_line3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="10dp" />
+        <ViewStub android:layout="@layout/notification_material_reply_text"
+                android:id="@+id/notification_material_reply_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
     </LinearLayout>
+    <include layout="@layout/notification_material_action_list" />
+    <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

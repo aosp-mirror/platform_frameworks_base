@@ -16,24 +16,25 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
-import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.misc.Utilities;
+import android.view.ViewDebug;
+
+import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
 
 
@@ -43,37 +44,43 @@ import com.android.systemui.recents.model.Task;
  */
 public class TaskViewThumbnail extends View {
 
-    RecentsConfiguration mConfig;
+    private static final ColorMatrix TMP_FILTER_COLOR_MATRIX = new ColorMatrix();
+    private static final ColorMatrix TMP_BRIGHTNESS_COLOR_MATRIX = new ColorMatrix();
+
+    private Task mTask;
+
+    private int mDisplayOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private Rect mDisplayRect = new Rect();
 
     // Drawing
-    float mDimAlpha;
-    Matrix mScaleMatrix = new Matrix();
-    Paint mDrawPaint = new Paint();
-    RectF mBitmapRect = new RectF();
-    RectF mLayoutRect = new RectF();
-    BitmapShader mBitmapShader;
-    LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mTaskViewRect = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mThumbnailRect = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
+    private float mThumbnailScale;
+    private float mFullscreenThumbnailScale;
+    private ActivityManager.TaskThumbnailInfo mThumbnailInfo;
 
-    // Thumbnail alpha
-    float mThumbnailAlpha;
-    ValueAnimator mThumbnailAlphaAnimator;
-    ValueAnimator.AnimatorUpdateListener mThumbnailAlphaUpdateListener
-            = new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator animation) {
-            mThumbnailAlpha = (float) animation.getAnimatedValue();
-            updateThumbnailPaintFilter();
-        }
-    };
+    private int mCornerRadius;
+    @ViewDebug.ExportedProperty(category="recents")
+    private float mDimAlpha;
+    private Matrix mScaleMatrix = new Matrix();
+    private Paint mDrawPaint = new Paint();
+    private Paint mBgFillPaint = new Paint();
+    private BitmapShader mBitmapShader;
+    private LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
-    // Task bar clipping, the top of this thumbnail can be clipped against the opaque header
-    // bar that overlaps this thumbnail
-    View mTaskBar;
-    Rect mClipRect = new Rect();
+    // Clip the top of the thumbnail against the opaque header bar that overlaps this view
+    private View mTaskBar;
 
     // Visibility optimization, if the thumbnail height is less than the height of the header
     // bar for the task view, then just mark this thumbnail view as invisible
-    boolean mInvisible;
+    @ViewDebug.ExportedProperty(category="recents")
+    private boolean mInvisible;
+
+    @ViewDebug.ExportedProperty(category="recents")
+    private boolean mDisabledInSafeMode;
 
     public TaskViewThumbnail(Context context) {
         this(context, null);
@@ -89,25 +96,29 @@ public class TaskViewThumbnail extends View {
 
     public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mConfig = RecentsConfiguration.getInstance();
         mDrawPaint.setColorFilter(mLightingColorFilter);
         mDrawPaint.setFilterBitmap(true);
         mDrawPaint.setAntiAlias(true);
+        mCornerRadius = getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
+        mBgFillPaint.setColor(Color.WHITE);
+        mFullscreenThumbnailScale = context.getResources().getFraction(
+                com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
-        updateThumbnailPaintFilter();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        if (changed) {
-            mLayoutRect.set(0, 0, getWidth(), getHeight());
-            updateThumbnailScale();
+    /**
+     * Called when the task view frame changes, allowing us to move the contents of the header
+     * to match the frame changes.
+     */
+    public void onTaskViewSizeChanged(int width, int height) {
+        // Return early if the bounds have not changed
+        if (mTaskViewRect.width() == width && mTaskViewRect.height() == height) {
+            return;
         }
+
+        mTaskViewRect.set(0, 0, width, height);
+        setLeftTopRightBottom(0, 0, width, height);
+        updateThumbnailScale();
     }
 
     @Override
@@ -115,25 +126,55 @@ public class TaskViewThumbnail extends View {
         if (mInvisible) {
             return;
         }
-        // Draw the thumbnail with the rounded corners
-        canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
-                mConfig.taskViewRoundedCornerRadiusPx,
-                mConfig.taskViewRoundedCornerRadiusPx, mDrawPaint);
+
+        int viewWidth = mTaskViewRect.width();
+        int viewHeight = mTaskViewRect.height();
+        int thumbnailWidth = Math.min(viewWidth,
+                (int) (mThumbnailRect.width() * mThumbnailScale));
+        int thumbnailHeight = Math.min(viewHeight,
+                (int) (mThumbnailRect.height() * mThumbnailScale));
+        if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+            int topOffset = mTaskBar != null
+                    ? mTaskBar.getHeight() - mCornerRadius
+                    : 0;
+
+            // Draw the background, there will be some small overdraw with the thumbnail
+            if (thumbnailWidth < viewWidth) {
+                // Portrait thumbnail on a landscape task view
+                canvas.drawRoundRect(Math.max(0, thumbnailWidth - mCornerRadius), topOffset,
+                        viewWidth, viewHeight,
+                        mCornerRadius, mCornerRadius, mBgFillPaint);
+            }
+            if (thumbnailHeight < viewHeight) {
+                // Landscape thumbnail on a portrait task view
+                canvas.drawRoundRect(0, Math.max(topOffset, thumbnailHeight - mCornerRadius),
+                        viewWidth, viewHeight,
+                        mCornerRadius, mCornerRadius, mBgFillPaint);
+            }
+
+            // Draw the thumbnail
+            canvas.drawRoundRect(0, topOffset, thumbnailWidth, thumbnailHeight,
+                    mCornerRadius, mCornerRadius, mDrawPaint);
+        } else {
+            canvas.drawRoundRect(0, 0, viewWidth, viewHeight, mCornerRadius, mCornerRadius,
+                    mBgFillPaint);
+        }
     }
 
     /** Sets the thumbnail to a given bitmap. */
-    void setThumbnail(Bitmap bm) {
+    void setThumbnail(Bitmap bm, ActivityManager.TaskThumbnailInfo thumbnailInfo) {
         if (bm != null) {
-            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
-                    Shader.TileMode.CLAMP);
+            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
-            mBitmapRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            mThumbnailInfo = thumbnailInfo;
             updateThumbnailScale();
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
+            mThumbnailRect.setEmpty();
+            mThumbnailInfo = null;
         }
-        updateThumbnailPaintFilter();
     }
 
     /** Updates the paint to draw the thumbnail. */
@@ -141,36 +182,89 @@ public class TaskViewThumbnail extends View {
         if (mInvisible) {
             return;
         }
-        int mul = (int) ((1.0f - mDimAlpha) * mThumbnailAlpha * 255);
-        int add = (int) ((1.0f - mDimAlpha) * (1 - mThumbnailAlpha) * 255);
+        int mul = (int) ((1.0f - mDimAlpha) * 255);
         if (mBitmapShader != null) {
-            mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
-            mLightingColorFilter.setColorAdd(Color.argb(0, add, add, add));
-            mDrawPaint.setColorFilter(mLightingColorFilter);
-            mDrawPaint.setColor(0xffffffff);
+            if (mDisabledInSafeMode) {
+                // Brightness: C-new = C-old*(1-amount) + amount
+                TMP_FILTER_COLOR_MATRIX.setSaturation(0);
+                float scale = 1f - mDimAlpha;
+                float[] mat = TMP_BRIGHTNESS_COLOR_MATRIX.getArray();
+                mat[0] = scale;
+                mat[6] = scale;
+                mat[12] = scale;
+                mat[4] = mDimAlpha * 255f;
+                mat[9] = mDimAlpha * 255f;
+                mat[14] = mDimAlpha * 255f;
+                TMP_FILTER_COLOR_MATRIX.preConcat(TMP_BRIGHTNESS_COLOR_MATRIX);
+                ColorMatrixColorFilter filter = new ColorMatrixColorFilter(TMP_FILTER_COLOR_MATRIX);
+                mDrawPaint.setColorFilter(filter);
+                mBgFillPaint.setColorFilter(filter);
+            } else {
+                mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
+                mDrawPaint.setColorFilter(mLightingColorFilter);
+                mDrawPaint.setColor(0xFFffffff);
+                mBgFillPaint.setColorFilter(mLightingColorFilter);
+            }
         } else {
-            int grey = mul + add;
+            int grey = mul;
             mDrawPaint.setColorFilter(null);
             mDrawPaint.setColor(Color.argb(255, grey, grey, grey));
         }
-        invalidate();
+        if (!mInvisible) {
+            invalidate();
+        }
     }
 
-    /** Updates the thumbnail shader's scale transform. */
-    void updateThumbnailScale() {
+    /**
+     * Updates the scale of the bitmap relative to this view.
+     */
+    public void updateThumbnailScale() {
+        mThumbnailScale = 1f;
         if (mBitmapShader != null) {
-            mScaleMatrix.setRectToRect(mBitmapRect, mLayoutRect, Matrix.ScaleToFit.FILL);
+            // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
+            // dragged into the stack from the freeform workspace
+            boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;
+            if (mTaskViewRect.isEmpty() || mThumbnailInfo == null ||
+                    mThumbnailInfo.taskWidth == 0 || mThumbnailInfo.taskHeight == 0) {
+                // If we haven't measured or the thumbnail is invalid, skip the thumbnail drawing
+                // and only draw the background color
+                mThumbnailScale = 0f;
+            } else if (isStackTask) {
+                float invThumbnailScale = 1f / mFullscreenThumbnailScale;
+                if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                    if (mThumbnailInfo.screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                        // If we are in the same orientation as the screenshot, just scale it to the
+                        // width of the task view
+                        mThumbnailScale = (float) mTaskViewRect.width() / mThumbnailRect.width();
+                    } else {
+                        // Scale the landscape thumbnail up to app size, then scale that to the task
+                        // view size to match other portrait screenshots
+                        mThumbnailScale = invThumbnailScale *
+                                ((float) mTaskViewRect.width() / mDisplayRect.width());
+                    }
+                } else {
+                    // Otherwise, scale the screenshot to fit 1:1 in the current orientation
+                    mThumbnailScale = invThumbnailScale;
+                }
+            } else {
+                // Otherwise, if this is a freeform task with task bounds, then scale the thumbnail
+                // to fit the entire bitmap into the task bounds
+                mThumbnailScale = Math.min(
+                        (float) mTaskViewRect.width() / mThumbnailRect.width(),
+                        (float) mTaskViewRect.height() / mThumbnailRect.height());
+            }
+            mScaleMatrix.setScale(mThumbnailScale, mThumbnailScale);
             mBitmapShader.setLocalMatrix(mScaleMatrix);
+        }
+        if (!mInvisible) {
+            invalidate();
         }
     }
 
     /** Updates the clip rect based on the given task bar. */
     void updateClipToTaskBar(View taskBar) {
         mTaskBar = taskBar;
-        int top = (int) Math.max(0, taskBar.getTranslationY() +
-                taskBar.getMeasuredHeight() - 1);
-        mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
-        setClipBounds(mClipRect);
+        invalidate();
     }
 
     /** Updates the visibility of the the thumbnail. */
@@ -181,7 +275,6 @@ public class TaskViewThumbnail extends View {
             if (!mInvisible) {
                 updateThumbnailPaintFilter();
             }
-            invalidate();
         }
     }
 
@@ -194,73 +287,34 @@ public class TaskViewThumbnail extends View {
         updateThumbnailPaintFilter();
     }
 
-    /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t) {
-        if (t.thumbnail != null) {
-            setThumbnail(t.thumbnail);
+    /**
+     * Binds the thumbnail view to the task.
+     */
+    void bindToTask(Task t, boolean disabledInSafeMode, int displayOrientation, Rect displayRect) {
+        mTask = t;
+        mDisabledInSafeMode = disabledInSafeMode;
+        mDisplayOrientation = displayOrientation;
+        mDisplayRect.set(displayRect);
+        if (t.colorBackground != 0) {
+            mBgFillPaint.setColor(t.colorBackground);
+        }
+    }
+
+    /**
+     * Called when the bound task's data has loaded and this view should update to reflect the
+     * changes.
+     */
+    void onTaskDataLoaded(ActivityManager.TaskThumbnailInfo thumbnailInfo) {
+        if (mTask.thumbnail != null) {
+            setThumbnail(mTask.thumbnail, thumbnailInfo);
         } else {
-            setThumbnail(null);
+            setThumbnail(null, null);
         }
     }
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
-        setThumbnail(null);
-    }
-
-    /** Handles focus changes. */
-    void onFocusChanged(boolean focused) {
-        if (focused) {
-            if (Float.compare(getAlpha(), 1f) != 0) {
-                startFadeAnimation(1f, 0, 150, null);
-            }
-        } else {
-            if (Float.compare(getAlpha(), mConfig.taskViewThumbnailAlpha) != 0) {
-                startFadeAnimation(mConfig.taskViewThumbnailAlpha, 0, 150, null);
-            }
-        }
-    }
-
-    /**
-     * Prepares for the enter recents animation, this gets called before the the view
-     * is first visible and will be followed by a startEnterRecentsAnimation() call.
-     */
-    void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask) {
-        if (isTaskViewLaunchTargetTask) {
-            mThumbnailAlpha = 1f;
-        } else {
-            mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
-        }
-        updateThumbnailPaintFilter();
-    }
-
-    /** Animates this task thumbnail as it enters Recents. */
-    void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
-        startFadeAnimation(mConfig.taskViewThumbnailAlpha, delay,
-                mConfig.taskViewEnterFromAppDuration, postAnimRunnable);
-    }
-
-    /** Animates this task thumbnail as it exits Recents. */
-    void startLaunchTaskAnimation(Runnable postAnimRunnable) {
-        startFadeAnimation(1f, 0, mConfig.taskViewExitToAppDuration, postAnimRunnable);
-    }
-
-    /** Starts a new thumbnail alpha animation. */
-    void startFadeAnimation(float finalAlpha, int delay, int duration, final Runnable postAnimRunnable) {
-        Utilities.cancelAnimationWithoutCallbacks(mThumbnailAlphaAnimator);
-        mThumbnailAlphaAnimator = ValueAnimator.ofFloat(mThumbnailAlpha, finalAlpha);
-        mThumbnailAlphaAnimator.setStartDelay(delay);
-        mThumbnailAlphaAnimator.setDuration(duration);
-        mThumbnailAlphaAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
-        mThumbnailAlphaAnimator.addUpdateListener(mThumbnailAlphaUpdateListener);
-        if (postAnimRunnable != null) {
-            mThumbnailAlphaAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    postAnimRunnable.run();
-                }
-            });
-        }
-        mThumbnailAlphaAnimator.start();
+        mTask = null;
+        setThumbnail(null, null);
     }
 }

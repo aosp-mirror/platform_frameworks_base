@@ -129,6 +129,10 @@ public final class PdfRenderer implements AutoCloseable {
      * <strong>Note:</strong> This class takes ownership of the passed in file descriptor
      * and is responsible for closing it when the renderer is closed.
      * </p>
+     * <p>
+     * If the file is from an untrusted source it is recommended to run the renderer in a separate,
+     * isolated process with minimal permissions to limit the impact of security exploits.
+     * </p>
      *
      * @param input Seekable file descriptor to read from.
      *

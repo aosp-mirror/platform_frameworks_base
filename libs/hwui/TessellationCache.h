@@ -17,18 +17,24 @@
 #ifndef ANDROID_HWUI_TESSELLATION_CACHE_H
 #define ANDROID_HWUI_TESSELLATION_CACHE_H
 
-#include <utils/LruCache.h>
-#include <utils/Mutex.h>
-#include <utils/Vector.h>
-
 #include "Debug.h"
+#include "Matrix.h"
+#include "Rect.h"
+#include "Vector.h"
+#include "VertexBuffer.h"
+#include "thread/TaskProcessor.h"
 #include "utils/Macros.h"
 #include "utils/Pair.h"
 
+#include <SkPaint.h>
+#include <SkPath.h>
+
+#include <utils/LruCache.h>
+#include <utils/Mutex.h>
+#include <utils/StrongPointer.h>
+
 class SkBitmap;
 class SkCanvas;
-class SkPaint;
-class SkPath;
 struct SkRect;
 
 namespace android {
@@ -46,10 +52,10 @@ public:
     typedef Pair<VertexBuffer*, VertexBuffer*> vertexBuffer_pair_t;
 
     struct Description {
-        DESCRIPTION_TYPE(Description);
-        enum Type {
-            kNone,
-            kRoundRect,
+        HASHABLE_TYPE(Description);
+        enum class Type {
+            None,
+            RoundRect,
         };
 
         Type type;
@@ -70,18 +76,50 @@ public:
 
         Description();
         Description(Type type, const Matrix4& transform, const SkPaint& paint);
-        hash_t hash() const;
         void setupMatrixAndPaint(Matrix4* matrix, SkPaint* paint) const;
     };
 
     struct ShadowDescription {
-        DESCRIPTION_TYPE(ShadowDescription);
-        const void* nodeKey;
+        HASHABLE_TYPE(ShadowDescription);
+        const SkPath* nodeKey;
         float matrixData[16];
 
         ShadowDescription();
-        ShadowDescription(const void* nodeKey, const Matrix4* drawTransform);
-        hash_t hash() const;
+        ShadowDescription(const SkPath* nodeKey, const Matrix4* drawTransform);
+    };
+
+    class ShadowTask : public Task<vertexBuffer_pair_t> {
+    public:
+        ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
+                const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
+                const Vector3& lightCenter, float lightRadius)
+            : drawTransform(*drawTransform)
+            , localClip(localClip)
+            , opaque(opaque)
+            , casterPerimeter(*casterPerimeter)
+            , transformXY(*transformXY)
+            , transformZ(*transformZ)
+            , lightCenter(lightCenter)
+            , lightRadius(lightRadius) {
+        }
+
+        /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
+         * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
+         * certain Allocators are destroyed before trim() is called to flush incomplete tasks.
+         *
+         * These deep copies could be avoided, long term, by canceling or flushing outstanding
+         * tasks before tearing down single-frame LinearAllocators.
+         */
+        const Matrix4 drawTransform;
+        const Rect localClip;
+        bool opaque;
+        const SkPath casterPerimeter;
+        const Matrix4 transformXY;
+        const Matrix4 transformZ;
+        const Vector3 lightCenter;
+        const float lightRadius;
+        VertexBuffer ambientBuffer;
+        VertexBuffer spotBuffer;
     };
 
     TessellationCache();
@@ -91,11 +129,6 @@ public:
      * Clears the cache. This causes all TessellationBuffers to be deleted.
      */
     void clear();
-
-    /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
     /**
      * Returns the maximum size of the cache in bytes.
      */
@@ -128,16 +161,21 @@ public:
     const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint,
             float width, float height, float rx, float ry);
 
+    // TODO: delete these when switching to HWUI_NEW_OPS
     void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
             const Matrix4* transformXY, const Matrix4* transformZ,
             const Vector3& lightCenter, float lightRadius);
-
     void getShadowBuffers(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
             const Matrix4* transformXY, const Matrix4* transformZ,
             const Vector3& lightCenter, float lightRadius,
             vertexBuffer_pair_t& outBuffers);
+
+    sp<ShadowTask> getShadowTask(const Matrix4* drawTransform, const Rect& localClip,
+            bool opaque, const SkPath* casterPerimeter,
+            const Matrix4* transformXY, const Matrix4* transformZ,
+            const Vector3& lightCenter, float lightRadius);
 
 private:
     class Buffer;
@@ -153,8 +191,7 @@ private:
 
     Buffer* getOrCreateBuffer(const Description& entry, Tessellator tessellator);
 
-    uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
 
     bool mDebugEnabled;
 
@@ -173,18 +210,25 @@ private:
     ///////////////////////////////////////////////////////////////////////////////
     // Shadow tessellation caching
     ///////////////////////////////////////////////////////////////////////////////
-    sp<TaskProcessor<vertexBuffer_pair_t*> > mShadowProcessor;
+    sp<TaskProcessor<vertexBuffer_pair_t> > mShadowProcessor;
 
     // holds a pointer, and implicit strong ref to each shadow task of the frame
-    LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*> mShadowCache;
-    class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t*>*> {
-        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t*>*& bufferPairTask) override {
+    LruCache<ShadowDescription, Task<vertexBuffer_pair_t>*> mShadowCache;
+    class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t>*> {
+        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t>*& bufferPairTask) override {
             bufferPairTask->decStrong(nullptr);
         }
     };
     BufferPairRemovedListener mBufferPairRemovedListener;
 
 }; // class TessellationCache
+
+void tessellateShadows(
+        const Matrix4* drawTransform, const Rect* localClip,
+        bool isCasterOpaque, const SkPath* casterPerimeter,
+        const Matrix4* casterTransformXY, const Matrix4* casterTransformZ,
+        const Vector3& lightCenter, float lightRadius,
+        VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer);
 
 }; // namespace uirenderer
 }; // namespace android

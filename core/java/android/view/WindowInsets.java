@@ -37,6 +37,13 @@ public final class WindowInsets {
     private Rect mTempRect;
     private boolean mIsRound;
 
+    /**
+     * In multi-window we force show the navigation bar. Because we don't want that the surface size
+     * changes in this mode, we instead have a flag whether the navigation bar size should always
+     * be consumed, so the app is treated like there is no virtual navigation bar at all.
+     */
+    private boolean mAlwaysConsumeNavBar;
+
     private boolean mSystemWindowInsetsConsumed = false;
     private boolean mWindowDecorInsetsConsumed = false;
     private boolean mStableInsetsConsumed = false;
@@ -52,12 +59,12 @@ public final class WindowInsets {
     public static final WindowInsets CONSUMED;
 
     static {
-        CONSUMED = new WindowInsets(null, null, null, false);
+        CONSUMED = new WindowInsets(null, null, null, false, false);
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, Rect stableInsets,
-            boolean isRound) {
+            boolean isRound, boolean alwaysConsumeNavBar) {
         mSystemWindowInsetsConsumed = systemWindowInsets == null;
         mSystemWindowInsets = mSystemWindowInsetsConsumed ? EMPTY_RECT : systemWindowInsets;
 
@@ -68,6 +75,7 @@ public final class WindowInsets {
         mStableInsets = mStableInsetsConsumed ? EMPTY_RECT : stableInsets;
 
         mIsRound = isRound;
+        mAlwaysConsumeNavBar = alwaysConsumeNavBar;
     }
 
     /**
@@ -83,11 +91,12 @@ public final class WindowInsets {
         mWindowDecorInsetsConsumed = src.mWindowDecorInsetsConsumed;
         mStableInsetsConsumed = src.mStableInsetsConsumed;
         mIsRound = src.mIsRound;
+        mAlwaysConsumeNavBar = src.mAlwaysConsumeNavBar;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, null, null, false);
+        this(systemWindowInsets, null, null, false, false);
     }
 
     /**
@@ -473,6 +482,13 @@ public final class WindowInsets {
         result.mStableInsets = EMPTY_RECT;
         result.mStableInsetsConsumed = true;
         return result;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldAlwaysConsumeNavBar() {
+        return mAlwaysConsumeNavBar;
     }
 
     @Override

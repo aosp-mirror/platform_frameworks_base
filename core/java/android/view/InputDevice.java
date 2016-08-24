@@ -775,6 +775,24 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Sets the current pointer type.
+     * @param pointerType the type of the pointer icon.
+     * @hide
+     */
+    public void setPointerType(int pointerType) {
+        InputManager.getInstance().setPointerIconType(pointerType);
+    }
+
+    /**
+     * Specifies the current custom pointer.
+     * @param icon the icon data.
+     * @hide
+     */
+    public void setCustomPointerIcon(PointerIcon icon) {
+        InputManager.getInstance().setCustomPointerIcon(icon);
+    }
+
+    /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
      * @see InputDevice#getMotionRange(int)

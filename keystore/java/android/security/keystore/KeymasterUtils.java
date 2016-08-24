@@ -96,7 +96,9 @@ public abstract class KeymasterUtils {
      */
     public static void addUserAuthArgs(KeymasterArguments args,
             boolean userAuthenticationRequired,
-            int userAuthenticationValidityDurationSeconds) {
+            int userAuthenticationValidityDurationSeconds,
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         if (!userAuthenticationRequired) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
             return;
@@ -116,23 +118,38 @@ public abstract class KeymasterUtils {
                         "At least one fingerprint must be enrolled to create keys requiring user"
                         + " authentication for every use");
             }
-            args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
-                    KeymasterArguments.toUint64(fingerprintOnlySid));
+
+            long sid;
+            if (invalidatedByBiometricEnrollment) {
+                // The fingerprint-only SID will change on fingerprint enrollment or removal of all,
+                // enrolled fingerprints, invalidating the key.
+                sid = fingerprintOnlySid;
+            } else {
+                // The root SID will *not* change on fingerprint enrollment, or removal of all
+                // enrolled fingerprints, allowing the key to remain valid.
+                sid = getRootSid();
+            }
+
+            args.addUnsignedLong(
+                    KeymasterDefs.KM_TAG_USER_SECURE_ID, KeymasterArguments.toUint64(sid));
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_FINGERPRINT);
+            if (userAuthenticationValidWhileOnBody) {
+                throw new ProviderException("Key validity extension while device is on-body is not "
+                        + "supported for keys requiring fingerprint authentication");
+            }
         } else {
             // The key is authorized for use for the specified amount of time after the user has
             // authenticated. Whatever unlocks the secure lock screen should authorize this key.
-            long rootSid = GateKeeper.getSecureUserId();
-            if (rootSid == 0) {
-                throw new IllegalStateException("Secure lock screen must be enabled"
-                        + " to create keys requiring user authentication");
-            }
+            long rootSid = getRootSid();
             args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
                     KeymasterArguments.toUint64(rootSid));
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_FINGERPRINT);
             args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     userAuthenticationValidityDurationSeconds);
+            if (userAuthenticationValidWhileOnBody) {
+                args.addBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
+            }
         }
     }
 
@@ -175,5 +192,14 @@ public abstract class KeymasterUtils {
                 args.addUnsignedInt(KeymasterDefs.KM_TAG_MIN_MAC_LENGTH, digestOutputSizeBits);
                 break;
         }
+    }
+
+    private static long getRootSid() {
+        long rootSid = GateKeeper.getSecureUserId();
+        if (rootSid == 0) {
+            throw new IllegalStateException("Secure lock screen must be enabled"
+                    + " to create keys requiring user authentication");
+        }
+        return rootSid;
     }
 }

@@ -89,6 +89,7 @@ public class RadioModule extends RadioTuner {
     static final int EVENT_METADATA = 4;
     static final int EVENT_TA = 5;
     static final int EVENT_AF_SWITCH = 6;
+    static final int EVENT_EA = 7;
     static final int EVENT_CONTROL = 100;
     static final int EVENT_SERVER_DIED = 101;
 
@@ -170,6 +171,10 @@ public class RadioModule extends RadioTuner {
                                 callback.onTrafficAnnouncement(msg.arg2 == 1);
                             }
                             break;
+                        case EVENT_EA:
+                            if (callback != null) {
+                                callback.onEmergencyAnnouncement(msg.arg2 == 1);
+                            }
                         case EVENT_CONTROL:
                             if (callback != null) {
                                 callback.onControlChanged(msg.arg2 == 1);

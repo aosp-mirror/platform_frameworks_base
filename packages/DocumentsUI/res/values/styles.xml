@@ -16,16 +16,21 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="DialogWhenReallyLarge" parent="@android:style/Theme.DeviceDefault.Light.DarkActionBar" />
+    <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
+    <style name="ActionBarPopupTheme" parent="@*android:style/ThemeOverlay.Material.Light" />
 
-    <style name="DocumentsTheme" parent="@style/DialogWhenReallyLarge">
-        <item name="android:actionBarWidgetTheme">@null</item>
-        <item name="android:actionBarTheme">@*android:style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="android:actionBarPopupTheme">@*android:style/ThemeOverlay.Material.Light</item>
+    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarTheme">@style/ActionBarTheme</item>
+        <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
 
-        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
-        <item name="android:colorPrimary">@*android:color/material_blue_grey_800</item>
-        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="colorActionMode">@color/action_mode</item>
+        <item name="android:queryBackground">@color/menu_search_background</item>
+        <item name="android:statusBarColor">@color/status_bar_color</item>
 
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
 
@@ -34,6 +39,12 @@
         <item name="android:windowNoTitle">true</item>
 
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
+    </style>
+
+    <style name="TrimmedHorizontalProgressBar" parent="android:Widget.Material.ProgressBar.Horizontal">
+        <item name="android:indeterminateDrawable">@drawable/progress_indeterminate_horizontal_material_trimmed</item>
+        <item name="android:minHeight">3dp</item>
+        <item name="android:maxHeight">3dp</item>
     </style>
 
 </resources>

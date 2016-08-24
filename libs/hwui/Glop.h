@@ -44,9 +44,14 @@ class Texture;
 
 namespace VertexAttribFlags {
     enum {
+        // Mesh is pure x,y vertex pairs
         None = 0,
+        // Mesh has texture coordinates embedded. Note that texture can exist without this flag
+        // being set, if coordinates passed to sampler are determined another way.
         TextureCoord = 1 << 0,
+        // Mesh has color embedded (to export to varying)
         Color = 1 << 1,
+        // Mesh has alpha embedded (to export to varying)
         Alpha = 1 << 2,
     };
 };
@@ -64,7 +69,7 @@ namespace TransformFlags {
 
         // Canvas transform isn't applied to the mesh at draw time,
         //since it's already built in.
-        MeshIgnoresCanvasTransform = 1 << 1,
+        MeshIgnoresCanvasTransform = 1 << 1, // TODO: remove for HWUI_NEW_OPS
     };
 };
 
@@ -81,8 +86,10 @@ namespace TransformFlags {
  * vertex/index/Texture/RoundRectClipState pointers prevent this from
  * being safe.
  */
-// TODO: PREVENT_COPY_AND_ASSIGN(...) or similar
 struct Glop {
+    PREVENT_COPY_AND_ASSIGN(Glop);
+public:
+    Glop() { }
     struct Mesh {
         GLuint primitiveMode; // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
 
@@ -135,10 +142,6 @@ struct Glop {
     } fill;
 
     struct Transform {
-        // Orthographic projection matrix for current FBO
-        // TODO: move out of Glop, since this is static per FBO
-        Matrix4 ortho;
-
         // modelView transform, accounting for delta between mesh transform and content of the mesh
         // often represents x/y offsets within command, or scaling for mesh unit size
         Matrix4 modelView;
@@ -153,7 +156,7 @@ struct Glop {
        }
     } transform;
 
-    const RoundRectClipState* roundRectClipState;
+    const RoundRectClipState* roundRectClipState = nullptr;
 
     /**
      * Blending to be used by this draw - both GL_NONE if blending is disabled.
@@ -165,11 +168,13 @@ struct Glop {
         GLenum dst;
     } blend;
 
+#if !HWUI_NEW_OPS
     /**
      * Bounds of the drawing command in layer space. Only mapped into layer
      * space once GlopBuilder::build() is called.
      */
-    Rect bounds;
+    Rect bounds; // TODO: remove for HWUI_NEW_OPS
+#endif
 
     /**
      * Additional render state to enumerate:

@@ -33,9 +33,10 @@ import java.util.zip.ZipFile;
 
 /**
  * Generate {@link ClassPathPackageInfo}s by scanning apk paths.
- * 
+ *
  * {@hide} Not needed for 1.0 SDK.
  */
+@Deprecated
 public class ClassPathPackageInfoSource {
 
     private static final String CLASS_EXTENSION = ".class";
@@ -82,7 +83,7 @@ public class ClassPathPackageInfoSource {
                 // Don't try to load classes that are generated. They usually aren't in test apks.
                 continue;
             }
-            
+
             try {
                 // We get errors in the emulator if we don't use the caller's class loader.
                 topLevelClasses.add(Class.forName(className, false,

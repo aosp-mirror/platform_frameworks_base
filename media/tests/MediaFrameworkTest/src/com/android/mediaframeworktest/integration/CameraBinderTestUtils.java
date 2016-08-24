@@ -18,10 +18,6 @@ public class CameraBinderTestUtils {
 
     static final String CAMERA_SERVICE_BINDER_NAME = "media.camera";
 
-    protected static final int USE_CALLING_UID = -1;
-    protected static final int BAD_VALUE = -EINVAL;
-    protected static final int INVALID_OPERATION = -ENOSYS;
-    protected static final int ALREADY_EXISTS = -EEXIST;
     public static final int NO_ERROR = 0;
     private final Context mContext;
 

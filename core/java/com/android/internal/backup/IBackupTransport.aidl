@@ -133,19 +133,16 @@ interface IBackupTransport {
      *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
-     * @param data The data stream that resulted from invoking the application's
+     * @param inFd Descriptor of file with data that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
-     * @param wipeAllFirst When true, <i>all</i> backed-up data for the current device/account
-     *   will be erased prior to the storage of the data provided here.  The purpose of this
-     *   is to provide a guarantee that no stale data exists in the restore set when the
-     *   device begins providing backups.
+     * @param flags Some of {@link BackupTransport#FLAG_USER_INITIATED}.
      * @return one of {@link BackupConstants#TRANSPORT_OK} (OK so far),
      *  {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure), or
      *  {@link BackupConstants#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
      *  become lost due to inactive expiry or some other reason and needs re-initializing)
      */
-    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd);
+    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd, int flags);
 
     /**
      * Erase the give application's data from the backup destination.  This clears
@@ -237,10 +234,30 @@ interface IBackupTransport {
     // full backup stuff
 
     long requestFullBackupTime();
-    int performFullBackup(in PackageInfo targetPackage, in ParcelFileDescriptor socket);
+    int performFullBackup(in PackageInfo targetPackage, in ParcelFileDescriptor socket, int flags);
     int checkFullBackupSize(long size);
     int sendBackupData(int numBytes);
     void cancelFullBackup();
+
+    /**
+     * Ask the transport whether this app is eligible for backup.
+     *
+     * @param targetPackage The identity of the application.
+     * @param isFullBackup If set, transport should check if app is eligible for full data backup,
+     *   otherwise to check if eligible for key-value backup.
+     * @return Whether this app is eligible for backup.
+     */
+    boolean isAppEligibleForBackup(in PackageInfo targetPackage, boolean isFullBackup);
+
+    /**
+     * Ask the transport about current quota for backup size of the package.
+     *
+     * @param packageName ID of package to provide the quota.
+     * @param isFullBackup If set, transport should return limit for full data backup, otherwise
+     *                     for key-value backup.
+     * @return Current limit on full data backup size in bytes.
+     */
+    long getBackupQuota(String packageName, boolean isFullBackup);
 
     // full restore stuff
 
@@ -289,5 +306,4 @@ interface IBackupTransport {
      *    operation will immediately be finished with no further attempts to restore app data.
      */
     int abortFullRestore();
-
 }

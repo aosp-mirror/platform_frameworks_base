@@ -19,6 +19,7 @@ package com.android.vpndialogs;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.IConnectivityManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
@@ -50,8 +51,8 @@ public class ManageDialog extends AlertActivity implements
     private Handler mHandler;
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if (getCallingPackage() != null) {
             Log.e(TAG, getCallingPackage() + " cannot start this activity");
@@ -108,11 +109,11 @@ public class ManageDialog extends AlertActivity implements
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
         if (!isFinishing()) {
             finish();
         }
+        super.onDestroy();
     }
 
     @Override

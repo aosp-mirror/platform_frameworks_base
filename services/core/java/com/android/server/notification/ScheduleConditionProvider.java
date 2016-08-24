@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -28,21 +29,22 @@ import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
-import android.util.ArraySet;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.TimeZone;
 
 /**
  * Built-in zen condition provider for daily scheduled time-based conditions.
  */
 public class ScheduleConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "ConditionProviders.SCP";
-    private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
+    static final String TAG = "ConditionProviders.SCP";
+    static final boolean DEBUG = true || Log.isLoggable("ConditionProviders", Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", ScheduleConditionProvider.class.getName());
@@ -53,8 +55,9 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     private static final String EXTRA_TIME = "time";
 
     private final Context mContext = this;
-    private final ArraySet<Uri> mSubscriptions = new ArraySet<Uri>();
+    private final ArrayMap<Uri, ScheduleCalendar> mSubscriptions = new ArrayMap<>();
 
+    private AlarmManager mAlarmManager;
     private boolean mConnected;
     private boolean mRegistered;
     private long mNextAlarmTime;
@@ -80,10 +83,12 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.println("      mSubscriptions=");
         final long now = System.currentTimeMillis();
-        for (Uri conditionId : mSubscriptions) {
+        for (Uri conditionId : mSubscriptions.keySet()) {
             pw.print("        ");
-            pw.print(meetsSchedule(conditionId, now) ? "* " : "  ");
+            pw.print(meetsSchedule(mSubscriptions.get(conditionId), now) ? "* " : "  ");
             pw.println(conditionId);
+            pw.print("            ");
+            pw.println(mSubscriptions.get(conditionId).toString());
         }
         dumpUpcomingTime(pw, "mNextAlarmTime", mNextAlarmTime, now);
     }
@@ -107,19 +112,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public void onRequestConditions(int relevance) {
-        if (DEBUG) Slog.d(TAG, "onRequestConditions relevance=" + relevance);
-        // does not advertise conditions
-    }
-
-    @Override
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         if (!ZenModeConfig.isValidScheduleConditionId(conditionId)) {
             notifyCondition(conditionId, Condition.STATE_FALSE, "badCondition");
             return;
         }
-        mSubscriptions.add(conditionId);
+        mSubscriptions.put(conditionId, toScheduleCalendar(conditionId));
         evaluateSubscriptions();
     }
 
@@ -141,15 +140,23 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     private void evaluateSubscriptions() {
+        if (mAlarmManager == null) {
+            mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        }
         setRegistered(!mSubscriptions.isEmpty());
         final long now = System.currentTimeMillis();
         mNextAlarmTime = 0;
-        for (Uri conditionId : mSubscriptions) {
-            final ScheduleCalendar cal = toScheduleCalendar(conditionId);
+        long nextUserAlarmTime = getNextAlarm();
+        for (Uri conditionId : mSubscriptions.keySet()) {
+            final ScheduleCalendar cal = mSubscriptions.get(conditionId);
             if (cal != null && cal.isInSchedule(now)) {
                 notifyCondition(conditionId, Condition.STATE_TRUE, "meetsSchedule");
+                cal.maybeSetNextAlarm(now, nextUserAlarmTime);
             } else {
                 notifyCondition(conditionId, Condition.STATE_FALSE, "!meetsSchedule");
+                if (nextUserAlarmTime == 0) {
+                    cal.maybeSetNextAlarm(now, nextUserAlarmTime);
+                }
             }
             if (cal != null) {
                 final long nextChangeTime = cal.getNextChangeTime(now);
@@ -181,8 +188,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         }
     }
 
-    private static boolean meetsSchedule(Uri conditionId, long time) {
-        final ScheduleCalendar cal = toScheduleCalendar(conditionId);
+    public long getNextAlarm() {
+        final AlarmManager.AlarmClockInfo info = mAlarmManager.getNextAlarmClock(
+                ActivityManager.getCurrentUser());
+        return info != null ? info.getTriggerTime() : 0;
+    }
+
+    private static boolean meetsSchedule(ScheduleCalendar cal, long time) {
         return cal != null && cal.isInSchedule(time);
     }
 
@@ -204,6 +216,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
+            filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
             registerReceiver(mReceiver, filter);
         } else {
             unregisterReceiver(mReceiver);
@@ -228,6 +241,14 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "onReceive " + intent.getAction());
+            if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+                for (Uri conditionId : mSubscriptions.keySet()) {
+                    final ScheduleCalendar cal = mSubscriptions.get(conditionId);
+                    if (cal != null) {
+                        cal.setTimeZone(Calendar.getInstance().getTimeZone());
+                    }
+                }
+            }
             evaluateSubscriptions();
         }
     };

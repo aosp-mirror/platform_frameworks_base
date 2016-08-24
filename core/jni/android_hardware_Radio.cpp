@@ -93,6 +93,7 @@ static struct {
     jfieldID mRds;
     jfieldID mTa;
     jfieldID mAf;
+    jfieldID mEa;
 } gRadioFmBandConfigFields;
 
 static const char* const kRadioAmBandConfigClassPathName =
@@ -117,6 +118,7 @@ static struct {
     jmethodID putIntFromNative;
     jmethodID putStringFromNative;
     jmethodID putBitmapFromNative;
+    jmethodID putClockFromNative;
 } gRadioMetadataMethods;
 
 static Mutex gLock;
@@ -171,7 +173,8 @@ static jint convertBandDescriptorFromNative(JNIEnv *env,
                                       nBandconfig->band.fm.stereo,
                                       nBandconfig->band.fm.rds != RADIO_RDS_NONE,
                                       nBandconfig->band.fm.ta,
-                                      nBandconfig->band.fm.af);
+                                      nBandconfig->band.fm.af,
+                                      nBandconfig->band.fm.ea);
     } else if (nBandconfig->band.type == RADIO_BAND_AM) {
         *jBandDescriptor = env->NewObject(gRadioAmBandDescriptorClass, gRadioAmBandDescriptorCstor,
                                       nBandconfig->region, nBandconfig->band.type,
@@ -205,7 +208,8 @@ static jint convertBandConfigFromNative(JNIEnv *env,
                                       nBandconfig->band.fm.stereo,
                                       nBandconfig->band.fm.rds != RADIO_RDS_NONE,
                                       nBandconfig->band.fm.ta,
-                                      nBandconfig->band.fm.af);
+                                      nBandconfig->band.fm.af,
+                                      nBandconfig->band.fm.ea);
     } else if (nBandconfig->band.type == RADIO_BAND_AM) {
         *jBandConfig = env->NewObject(gRadioAmBandConfigClass, gRadioAmBandConfigCstor,
                                       nBandconfig->region, nBandconfig->band.type,
@@ -284,6 +288,18 @@ static jint convertMetadataFromNative(JNIEnv *env,
                 }
                 env->DeleteLocalRef(jData);
             } break;
+            case RADIO_METADATA_TYPE_CLOCK: {
+                  ALOGV("%s RADIO_METADATA_TYPE_CLOCK %d", __FUNCTION__, key);
+                  radio_metadata_clock_t *clock = (radio_metadata_clock_t *) value;
+                  jStatus =
+                      env->CallIntMethod(*jMetadata,
+                                         gRadioMetadataMethods.putClockFromNative,
+                                         key, (jint) clock->utc_seconds_since_epoch,
+                                         (jint) clock->timezone_offset_in_minutes);
+                  if (jStatus == 0) {
+                      jCount++;
+                  }
+            } break;
         }
     }
     return jCount;
@@ -351,6 +367,7 @@ static jint convertBandConfigToNative(JNIEnv *env,
                                      nBandconfig->region);
         nBandconfig->band.fm.ta = env->GetBooleanField(jBandConfig, gRadioFmBandConfigFields.mTa);
         nBandconfig->band.fm.af = env->GetBooleanField(jBandConfig, gRadioFmBandConfigFields.mAf);
+        nBandconfig->band.fm.ea = env->GetBooleanField(jBandConfig, gRadioFmBandConfigFields.mEa);
     } else if (env->IsInstanceOf(jBandConfig, gRadioAmBandConfigClass)) {
         nBandconfig->band.am.stereo =
                 env->GetBooleanField(jBandConfig, gRadioAmBandConfigFields.mStereo);
@@ -518,6 +535,7 @@ void JNIRadioCallback::onEvent(struct radio_event *event)
             break;
         case RADIO_EVENT_ANTENNA:
         case RADIO_EVENT_TA:
+        case RADIO_EVENT_EA:
         case RADIO_EVENT_CONTROL:
             jArg2 = event->on ? 1 : 0;
             break;
@@ -878,7 +896,7 @@ int register_android_hardware_Radio(JNIEnv *env)
     jclass fmBandDescriptorClass = FindClassOrDie(env, kRadioFmBandDescriptorClassPathName);
     gRadioFmBandDescriptorClass = MakeGlobalRefOrDie(env, fmBandDescriptorClass);
     gRadioFmBandDescriptorCstor = GetMethodIDOrDie(env, fmBandDescriptorClass, "<init>",
-            "(IIIIIZZZZ)V");
+            "(IIIIIZZZZZ)V");
 
     jclass amBandDescriptorClass = FindClassOrDie(env, kRadioAmBandDescriptorClassPathName);
     gRadioAmBandDescriptorClass = MakeGlobalRefOrDie(env, amBandDescriptorClass);
@@ -894,11 +912,13 @@ int register_android_hardware_Radio(JNIEnv *env)
     jclass fmBandConfigClass = FindClassOrDie(env, kRadioFmBandConfigClassPathName);
     gRadioFmBandConfigClass = MakeGlobalRefOrDie(env, fmBandConfigClass);
     gRadioFmBandConfigCstor = GetMethodIDOrDie(env, fmBandConfigClass, "<init>",
-            "(IIIIIZZZZ)V");
+            "(IIIIIZZZZZ)V");
     gRadioFmBandConfigFields.mStereo = GetFieldIDOrDie(env, fmBandConfigClass, "mStereo", "Z");
     gRadioFmBandConfigFields.mRds = GetFieldIDOrDie(env, fmBandConfigClass, "mRds", "Z");
     gRadioFmBandConfigFields.mTa = GetFieldIDOrDie(env, fmBandConfigClass, "mTa", "Z");
     gRadioFmBandConfigFields.mAf = GetFieldIDOrDie(env, fmBandConfigClass, "mAf", "Z");
+    gRadioFmBandConfigFields.mEa =
+        GetFieldIDOrDie(env, fmBandConfigClass, "mEa", "Z");
 
 
     jclass amBandConfigClass = FindClassOrDie(env, kRadioAmBandConfigClassPathName);
@@ -924,6 +944,9 @@ int register_android_hardware_Radio(JNIEnv *env)
     gRadioMetadataMethods.putBitmapFromNative = GetMethodIDOrDie(env, metadataClass,
                                                                  "putBitmapFromNative",
                                                                  "(I[B)I");
+    gRadioMetadataMethods.putClockFromNative = GetMethodIDOrDie(env, metadataClass,
+                                                                "putClockFromNative",
+                                                                "(IJI)I");
 
 
     RegisterMethodsOrDie(env, kRadioManagerClassPathName, gMethods, NELEM(gMethods));

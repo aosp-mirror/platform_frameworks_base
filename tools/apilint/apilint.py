@@ -264,6 +264,9 @@ def verify_constants(clazz):
         if "static" in f.split and "final" in f.split:
             if re.match("[A-Z0-9_]+", f.name) is None:
                 error(clazz, f, "C2", "Constant field names must be FOO_NAME")
+            elif f.typ != "java.lang.String":
+                if f.name.startswith("MIN_") or f.name.startswith("MAX_"):
+                    warn(clazz, f, "C8", "If min/max could change in future, make them dynamic methods")
 
 
 def verify_enums(clazz):
@@ -416,6 +419,9 @@ def verify_parcelable(clazz):
 
         if len(creator) == 0 or len(write) == 0 or len(describe) == 0:
             error(clazz, None, "FW3", "Parcelable requires CREATOR, writeToParcel, and describeContents; missing one")
+
+        if " final class " not in clazz.raw:
+            error(clazz, None, "FW8", "Parcelable classes must be final")
 
 
 def verify_protected(clazz):
@@ -730,6 +736,13 @@ def verify_exception(clazz):
         if "throws java.lang.Exception" in m.raw or "throws java.lang.Throwable" in m.raw or "throws java.lang.Error" in m.raw:
             error(clazz, m, "S1", "Methods must not throw generic exceptions")
 
+        if "throws android.os.RemoteException" in m.raw:
+            if clazz.name == "android.content.ContentProviderClient": continue
+            if clazz.name == "android.os.Binder": continue
+            if clazz.name == "android.os.IBinder": continue
+
+            error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
+
 
 def verify_google(clazz):
     """Verifies that APIs never reference Google."""
@@ -946,6 +959,37 @@ def verify_resource_names(clazz):
             error(clazz, f, "C7", "Expected resource name in this class to be FooBar_Baz style")
 
 
+def verify_files(clazz):
+    """Verifies that methods accepting File also accept streams."""
+
+    has_file = set()
+    has_stream = set()
+
+    test = []
+    test.extend(clazz.ctors)
+    test.extend(clazz.methods)
+
+    for m in test:
+        if "java.io.File" in m.args:
+            has_file.add(m)
+        if "java.io.FileDescriptor" in m.args or "android.os.ParcelFileDescriptor" in m.args or "java.io.InputStream" in m.args or "java.io.OutputStream" in m.args:
+            has_stream.add(m.name)
+
+    for m in has_file:
+        if m.name not in has_stream:
+            warn(clazz, m, "M10", "Methods accepting File should also accept FileDescriptor or streams")
+
+
+def verify_manager_list(clazz):
+    """Verifies that managers return List<? extends Parcelable> instead of arrays."""
+
+    if not clazz.name.endswith("Manager"): return
+
+    for m in clazz.methods:
+        if m.typ.startswith("android.") and m.typ.endswith("[]"):
+            warn(clazz, m, None, "Methods should return List<? extends Parcelable> instead of Parcelable[] to support ParceledListSlice under the hood")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
     if clazz.pkg.name.startswith("java"): return
@@ -954,6 +998,7 @@ def examine_clazz(clazz):
     if clazz.pkg.name.startswith("org.xml"): return
     if clazz.pkg.name.startswith("org.json"): return
     if clazz.pkg.name.startswith("org.w3c"): return
+    if clazz.pkg.name.startswith("android.icu."): return
 
     verify_constants(clazz)
     verify_enums(clazz)
@@ -989,6 +1034,8 @@ def examine_clazz(clazz):
     verify_context_first(clazz)
     verify_listener_last(clazz)
     verify_resource_names(clazz)
+    verify_files(clazz)
+    verify_manager_list(clazz)
 
 
 def examine_stream(stream):

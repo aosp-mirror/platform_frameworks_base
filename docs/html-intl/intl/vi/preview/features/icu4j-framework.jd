@@ -1,0 +1,160 @@
+page.title=API Khuôn khổ Android ICU4J
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Trong tài liệu này:</h2>
+<ol>
+    <li><a href="#relation">Liên quan đến ICU4J</a></li>
+    <li><a href="#migration">Chuyển nhập từ ICU4J sang API android.icu</a></li>
+    <li><a href="#licence">Cấp phép</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+  <li>
+    <a class="external-link" href="http://userguide.icu-project.org">Tài liệu cho ICU4J</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="http://site.icu-project.org/#TOC-What-is-ICU-">Các tiêu chuẩn mới nhất được ICU4J
+   hỗ trợ</a>
+  </li>
+</ol>
+</div>
+</div>
+
+<p>
+  ICU4J là bộ thư viện Java mã nguồn mở được sử dụng rộng rãi để cung cấp hỗ trợ Unicode
+  và toàn cầu hóa cho các ứng dụng phần mềm. Android N
+  cung cấp một tập nhỏ các API ICU4J trong khuôn khổ Android cho các nhà phát triển ứng dụng
+   sử dụng trong gói {@code android.icu}. Các API này sử dụng
+   dữ liệu bản địa hóa có trong thiết bị. Do đó, bạn có thể giảm kích thước tệp APK
+   bằng cách không biên dịch các thư viện ICU4J vào tệp APK; thay vào đó bạn có thể
+  gọi chúng trong khuôn khổ một cách đơn giản. (Trong trường hợp này, bạn có thể muốn cung cấp
+   <a href="{@docRoot}google/play/publishing/multiple-apks.html">nhiều phiên bản
+   tệp APK</a> để những người dùng chạy phiên bản Android thấp hơn Android N
+  có thể tải phiên bản ứng dụng có chứa các thư viện ICU4J.)
+</p>
+
+<p>
+  Tài liệu này sẽ bắt đầu bằng việc cung cấp thông tin cơ bản về các mức Android API
+  tối thiểu cần để hỗ trợ các thư viện này. Sau đó tài liệu sẽ giải thích những gì
+   bạn cần để hiểu được công việc triển khai ICU4J liên quan cụ thể đến Android. Cuối cùng,
+    tài liệu sẽ cho bạn biết cách sử dụng các API ICU4J trong khuôn khổ Android.
+</p>
+
+<h2 id="relation">Liên quan đến ICU4J</h2>
+
+<p>
+  Android N cung cấp một tập nhỏ các API ICU4J thông qua
+  gói <code>android.icu</code> thay vì gói <code>com.ibm.icu</code>. 
+Khuôn khổ Android có thể chọn không
+   cung cấp các API ICU4J vì nhiều lý do; ví dụ, Android N không cung cấp
+   một số API bị loại bỏ hoặc những API chưa được đội ngũ ICU công bố là
+   bản ổn định. Vì nhóm ICU sẽ loại bỏ các API này trong tương lai do đó Android cũng sẽ đánh dấu
+   chúng là bị loại bỏ nhưng vẫn tiếp tục thêm vào.
+</p>
+
+<p class="table-caption"><strong>Bảng 1.</strong> Các phiên bản ICU và CLDR được sử dụng
+  trong Android N.</p>
+<table>
+<tr>
+<th>Mức Android API</th>
+<th>Phiên bản ICU</th>
+<th>Phiên bản CLDR</th>
+</tr>
+<tr>
+<td>Android N</td>
+<td>56</td>
+<td>28</td>
+</tr>
+</table>
+
+<p>Sau đây là một vài lưu ý quan trọng:</p>
+
+<ul>
+<li>Các API khuôn khổ Android ICU4J không có tất cả các API của ICU4J.</li>
+<li>Các nhà phát triển NDK cần biết rằng ICU4C Android không được hỗ trợ.</li>
+<li>Các API trong khuôn khổ Android không thay thế hỗ trợ của Android cho 
+<a href="{@docRoot}guide/topics/resources/localization.html">việc bản địa hóa bằng
+các tài nguyên</a>.</li>
+</ul>
+
+<h2 id="migration">Chuyển nhập sang gói android.icu từ com.ibm.icu</h2>
+
+<p>
+  Nếu bạn đã sử dụng các API ICU4J trong ứng dụng và 
+   các API <code>android.icu</code> đáp ứng yêu cầu của bạn thì việc chuyển nhập sang
+  các API của khuôn khổ đòi hỏi bạn phải thay đổi thành phần nhập vào của Java
+  từ <code>com.ibm.icu</code> sang <code>android.icu</code>. Khi đó bạn có thể
+  xóa các tệp ICU4J của bạn khỏi tệp APK.
+</p>
+
+<p class="note">
+  <b>Lưu ý</b>: Các API khuôn khổ ICU4J sử dụng không gian tên {@code android.icu}
+  thay vì {@code com.ibm.icu}. Điều này là để tránh xung đột
+  không gian tên trong các tệp APK có chứa các thư viện {@code com.ibm.icu} của riêng chúng.
+</p>
+
+<h3 id="migrate-from-android">
+  Chuyển nhập sang các API android.icu từ các API Android SDK khác
+</h3>
+
+<p>
+  Một số lớp trong gói <code>java</code> và<code>android</code> có
+  các lớp tương ứng với các lớp trong ICU4J. Tuy nhiên, ICU4J thường cung cấp hỗ trợ
+   rộng hơn cho các tiêu chuẩn và ngôn ngữ.
+</p>
+<p>Sau đây là một số ví dụ để giúp bạn bắt đầu:</p>
+<table>
+<tr>
+<th>Lớp</th>
+<th>Thay thế</th>
+</tr>
+<tr>
+<td><code>java.lang.Character</code> </td>
+<td><code>android.icu.lang.UCharacter</code> </td>
+</tr>
+<tr>
+<td><code>java.text.BreakIterator</code> </td>
+<td><code>android.icu.text.BreakIterator</code> </td>
+</tr>
+<tr>
+<td><code>java.text.DecimalFormat</code> </td>
+<td><code>android.icu.text.DecimalFormat</code> </td>
+</tr>
+<tr>
+<td><code>java.util.Calendar</code></td>
+<td>
+<code>android.icu.util.Calendar</code></td>
+</tr>
+<tr>
+<td><code>android.text.BidiFormatter</code>
+ </td>
+<td><code>android.icu.text.Bidi</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateFormat</code>
+ </td>
+<td><code>android.icu.text.DateFormat</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateUtils</code> </td>
+<td><code>android.icu.text.DateFormat</code>
+<code>android.icu.text.RelativeDateTimeFormatter</code>
+</td>
+</tr>
+</table>
+
+<h2 id="licence">Cấp phép</h2>
+
+<p>
+  ICU4J được phát hành theo giấy phép ICU. Hãy xem <a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">Hướng dẫn sử dụng
+  ICU</a> để biết thêm chi tiết.
+</p>

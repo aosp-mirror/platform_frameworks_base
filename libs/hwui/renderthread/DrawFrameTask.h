@@ -32,7 +32,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredLayerUpdater;
-class DisplayListData;
+class DisplayList;
 class RenderNode;
 
 namespace renderthread {
@@ -40,15 +40,18 @@ namespace renderthread {
 class CanvasContext;
 class RenderThread;
 
-enum SyncResult {
-    kSync_OK = 0,
-    kSync_UIRedrawRequired = 1 << 0,
-    kSync_LostSurfaceRewardIfFound = 1 << 1,
+namespace SyncResult {
+enum {
+    OK = 0,
+    UIRedrawRequired = 1 << 0,
+    LostSurfaceRewardIfFound = 1 << 1,
+    ContextIsStopped = 1 << 2,
 };
+}
 
 /*
  * This is a special Super Task. It is re-used multiple times by RenderProxy,
- * and contains state (such as layer updaters & new DisplayListDatas) that is
+ * and contains state (such as layer updaters & new DisplayLists) that is
  * tracked across many frames not just a single frame.
  * It is the sync-state task, and will kick off the post-sync draw
  */
@@ -57,12 +60,12 @@ public:
     DrawFrameTask();
     virtual ~DrawFrameTask();
 
-    void setContext(RenderThread* thread, CanvasContext* context);
+    void setContext(RenderThread* thread, CanvasContext* context, RenderNode* targetNode);
 
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
 
-    int drawFrame();
+    int drawFrame(TreeObserver* observer);
 
     int64_t* frameInfo() { return mFrameInfo; }
 
@@ -78,6 +81,7 @@ private:
 
     RenderThread* mRenderThread;
     CanvasContext* mContext;
+    RenderNode* mTargetNode = nullptr;
 
     /*********************************************
      *  Single frame data
@@ -86,6 +90,7 @@ private:
 
     int mSyncResult;
     int64_t mSyncQueued;
+    TreeObserver* mObserver;
 
     int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 };

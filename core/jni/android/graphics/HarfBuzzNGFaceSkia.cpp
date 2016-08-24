@@ -32,13 +32,13 @@
 
 #include "HarfBuzzNGFaceSkia.h"
 
+#include <stdlib.h>
 #include <cutils/log.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPoint.h>
 #include <SkRect.h>
 #include <SkTypeface.h>
-#include <SkUtils.h>
 
 #include <hb.h>
 
@@ -81,17 +81,16 @@ static void SkiaGetGlyphWidthAndExtents(SkPaint* paint, hb_codepoint_t codepoint
 static hb_bool_t harfbuzzGetGlyph(hb_font_t* hbFont, void* fontData, hb_codepoint_t unicode, hb_codepoint_t variationSelector, hb_codepoint_t* glyph, void* userData)
 {
     HarfBuzzFontData* hbFontData = reinterpret_cast<HarfBuzzFontData*>(fontData);
+    SkPaint* paint = hbFontData->m_paint;
+    paint->setTextEncoding(SkPaint::kUTF32_TextEncoding);
 
     if (unicode > 0x10ffff) {
         unicode = 0xfffd;
     }
-    SkPaint* paint = hbFontData->m_paint;
-    // It would be better to use kUTF32_TextEncoding directly
-    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+    SkUnichar unichar = unicode;
+
     uint16_t glyph16;
-    uint16_t unichar[2];
-    size_t size = SkUTF16_FromUnichar(unicode, unichar);
-    paint->textToGlyphs(unichar, size * sizeof(*unichar), &glyph16);
+    paint->textToGlyphs(&unichar, sizeof(unichar), &glyph16);
     *glyph = glyph16;
     return !!*glyph;
 }

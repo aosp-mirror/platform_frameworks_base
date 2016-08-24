@@ -6,7 +6,9 @@
     <application
             android:allowClearUserData="false"
             android:label="@string/app_label"
-            android:process="system">
+            android:process="system"
+            android:defaultToDeviceProtectedStorage="true"
+            android:directBootAware="true">
 
         <receiver android:name=".InputDeviceReceiver"
                 android:label="@string/keyboard_layouts_label">

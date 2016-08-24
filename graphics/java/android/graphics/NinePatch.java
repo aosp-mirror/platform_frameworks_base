@@ -45,15 +45,11 @@ public class NinePatch {
                 int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
                 float outlineRadius, int outlineAlpha, float decodeScale) {
             opticalRect = new Rect(opticalLeft, opticalTop, opticalRight, opticalBottom);
-            outlineRect = new Rect(outlineLeft, outlineTop, outlineRight, outlineBottom);
+            opticalRect.scale(decodeScale);
 
-            if (decodeScale != 1.0f) {
-                // if bitmap was scaled when decoded, scale the insets from the metadata values
-                opticalRect.scale(decodeScale);
+            outlineRect = scaleInsets(outlineLeft, outlineTop,
+                    outlineRight, outlineBottom, decodeScale);
 
-                // round inward while scaling outline, as the outline should always be conservative
-                outlineRect.scaleRoundIn(decodeScale);
-            }
             this.outlineRadius = outlineRadius * decodeScale;
             this.outlineAlpha = outlineAlpha / 255.0f;
         }
@@ -62,6 +58,23 @@ public class NinePatch {
         public final Rect outlineRect;
         public final float outlineRadius;
         public final float outlineAlpha;
+
+        /**
+         * Scales up the rect by the given scale, ceiling values, so actual outline Rect
+         * grows toward the inside.
+         */
+        public static Rect scaleInsets(int left, int top, int right, int bottom, float scale) {
+            if (scale == 1.0f) {
+                return new Rect(left, top, right, bottom);
+            }
+
+            Rect result = new Rect();
+            result.left = (int) Math.ceil(left * scale);
+            result.top = (int) Math.ceil(top * scale);
+            result.right = (int) Math.ceil(right * scale);
+            result.bottom = (int) Math.ceil(bottom * scale);
+            return  result;
+        }
     }
 
     private final Bitmap mBitmap;
@@ -199,16 +212,6 @@ public class NinePatch {
         canvas.drawPatch(this, location, paint);
     }
 
-    void drawSoftware(Canvas canvas, RectF location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
-                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
-    }
-
-    void drawSoftware(Canvas canvas, Rect location, Paint paint) {
-        nativeDraw(canvas.getNativeCanvasWrapper(), location, mBitmap, mNativeChunk,
-                paint != null ? paint.getNativeInstance() : 0, canvas.mDensity, mBitmap.mDensity);
-    }
-
     /**
      * Return the underlying bitmap's density, as per
      * {@link Bitmap#getDensity() Bitmap.getDensity()}.
@@ -274,9 +277,5 @@ public class NinePatch {
      */
     private static native long validateNinePatchChunk(byte[] chunk);
     private static native void nativeFinalize(long chunk);
-    private static native void nativeDraw(long canvas_instance, RectF loc, Bitmap bitmap_instance,
-            long c, long paint_instance_or_null, int destDensity, int srcDensity);
-    private static native void nativeDraw(long canvas_instance, Rect loc, Bitmap bitmap_instance,
-            long c, long paint_instance_or_null, int destDensity, int srcDensity);
     private static native long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location);
 }

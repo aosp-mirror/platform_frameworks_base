@@ -15,12 +15,10 @@
 -->
 
 <resources>
-    <bool name="show_as_dialog">true</bool>
-
-    <item type="dimen" name="dialog_width">85%</item>
-
-    <dimen name="grid_padding_horiz">24dp</dimen>
+    <dimen name="grid_padding_horiz">16dp</dimen>
     <dimen name="grid_padding_vert">16dp</dimen>
 
-    <dimen name="grid_item_padding">8dp</dimen>
+    <dimen name="list_item_padding">24dp</dimen>
+
+    <dimen name="max_drawer_width">320dp</dimen>
 </resources>

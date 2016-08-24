@@ -29,6 +29,8 @@ interface IPackageInstallerSession {
     ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes);
     ParcelFileDescriptor openRead(String name);
 
+    void removeSplit(String splitName);
+
     void close();
     void commit(in IntentSender statusReceiver);
     void abandon();

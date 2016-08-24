@@ -25,21 +25,17 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.NetworkRequest;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnInfo;
 import com.android.systemui.R;
 
 import java.io.FileDescriptor;
@@ -102,13 +98,13 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
-    public boolean hasDeviceOwner() {
-        return !TextUtils.isEmpty(mDevicePolicyManager.getDeviceOwner());
+    public boolean isDeviceManaged() {
+        return mDevicePolicyManager.isDeviceManaged();
     }
 
     @Override
     public String getDeviceOwnerName() {
-        return mDevicePolicyManager.getDeviceOwnerName();
+        return mDevicePolicyManager.getDeviceOwnerNameOnAnyUser();
     }
 
     @Override
@@ -118,8 +114,8 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getProfileOwnerName() {
-        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
-            String name = mDevicePolicyManager.getProfileOwnerNameAsUser(profile.id);
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mCurrentUserId)) {
+            String name = mDevicePolicyManager.getProfileOwnerNameAsUser(profileId);
             if (name != null) {
                 return name;
             }
@@ -139,13 +135,13 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public String getProfileVpnName() {
-        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
-            if (profile.id == mVpnUserId) {
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
+            if (profileId == mVpnUserId) {
                 continue;
             }
-            VpnConfig cfg = mCurrentVpns.get(profile.id);
+            VpnConfig cfg = mCurrentVpns.get(profileId);
             if (cfg != null) {
-                return getNameForVpnConfig(cfg, profile.getUserHandle());
+                return getNameForVpnConfig(cfg, UserHandle.of(profileId));
             }
         }
         return null;
@@ -153,12 +149,19 @@ public class SecurityControllerImpl implements SecurityController {
 
     @Override
     public boolean isVpnEnabled() {
-        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
-            if (mCurrentVpns.get(profile.id) != null) {
+        for (int profileId : mUserManager.getProfileIdsWithDisabled(mVpnUserId)) {
+            if (mCurrentVpns.get(profileId) != null) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isVpnRestricted() {
+        UserHandle currentUser = new UserHandle(mCurrentUserId);
+        return mUserManager.getUserInfo(mCurrentUserId).isRestricted()
+                || mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN, currentUser);
     }
 
     @Override
@@ -182,9 +185,10 @@ public class SecurityControllerImpl implements SecurityController {
     @Override
     public void onUserSwitched(int newUserId) {
         mCurrentUserId = newUserId;
-        if (mUserManager.getUserInfo(newUserId).isRestricted()) {
+        final UserInfo newUserInfo = mUserManager.getUserInfo(newUserId);
+        if (newUserInfo.isRestricted()) {
             // VPN for a restricted profile is routed through its owner user
-            mVpnUserId = UserHandle.USER_OWNER;
+            mVpnUserId = newUserInfo.restrictedProfileParentId;
         } else {
             mVpnUserId = mCurrentUserId;
         }

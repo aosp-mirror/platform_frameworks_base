@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
@@ -45,8 +46,8 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -59,24 +60,22 @@ import android.content.IntentSender;
  *  {@hide}
  */
 interface IPackageManager {
-    boolean isPackageFrozen(String packageName);
+    void checkPackageStartable(String packageName, int userId);
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
-    int getPackageUid(String packageName, int userId);
-    int getPackageUidEtc(String packageName, int flags, int userId);
-    int[] getPackageGids(String packageName, int userId);
-    int[] getPackageGidsEtc(String packageName, int flags, int userId);
+    int getPackageUid(String packageName, int flags, int userId);
+    int[] getPackageGids(String packageName, int flags, int userId);
 
     String[] currentToCanonicalPackageNames(in String[] names);
     String[] canonicalToCurrentPackageNames(in String[] names);
 
     PermissionInfo getPermissionInfo(String name, int flags);
 
-    List<PermissionInfo> queryPermissionsByGroup(String group, int flags);
+    ParceledListSlice queryPermissionsByGroup(String group, int flags);
 
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
 
-    List<PermissionGroupInfo> getAllPermissionGroups(int flags);
+    ParceledListSlice getAllPermissionGroups(int flags);
 
     ApplicationInfo getApplicationInfo(String packageName, int flags ,int userId);
 
@@ -121,6 +120,8 @@ interface IPackageManager {
 
     int checkUidSignatures(int uid1, int uid2);
 
+    List<String> getAllPackages();
+
     String[] getPackagesForUid(int uid);
 
     String getNameForUid(int uid);
@@ -139,24 +140,24 @@ interface IPackageManager {
 
     boolean canForwardTo(in Intent intent, String resolvedType, int sourceUserId, int targetUserId);
 
-    List<ResolveInfo> queryIntentActivities(in Intent intent,
+    ParceledListSlice queryIntentActivities(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentActivityOptions(
+    ParceledListSlice queryIntentActivityOptions(
             in ComponentName caller, in Intent[] specifics,
             in String[] specificTypes, in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentReceivers(in Intent intent,
+    ParceledListSlice queryIntentReceivers(in Intent intent,
             String resolvedType, int flags, int userId);
 
     ResolveInfo resolveService(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentServices(in Intent intent,
+    ParceledListSlice queryIntentServices(in Intent intent,
             String resolvedType, int flags, int userId);
 
-    List<ResolveInfo> queryIntentContentProviders(in Intent intent,
+    ParceledListSlice queryIntentContentProviders(in Intent intent,
             String resolvedType, int flags, int userId);
 
     /**
@@ -190,7 +191,7 @@ interface IPackageManager {
      * @return A List&lt;applicationInfo> containing one entry for each persistent
      *         application.
      */
-    List<ApplicationInfo> getPersistentApplications(int flags);
+    ParceledListSlice getPersistentApplications(int flags);
 
     ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
@@ -211,25 +212,17 @@ interface IPackageManager {
     InstrumentationInfo getInstrumentationInfo(
             in ComponentName className, int flags);
 
-    List<InstrumentationInfo> queryInstrumentation(
+    ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
 
-    void installPackage(in String originPath,
-            in IPackageInstallObserver2 observer,
-            int flags,
-            in String installerPackageName,
-            in VerificationParams verificationParams,
-            in String packageAbiOverride);
-
+    /** @deprecated Use PackageInstaller instead */
     void installPackageAsUser(in String originPath,
             in IPackageInstallObserver2 observer,
             int flags,
             in String installerPackageName,
-            in VerificationParams verificationParams,
-            in String packageAbiOverride,
             int userId);
 
-    void finishPackageInstall(int token);
+    void finishPackageInstall(int token, boolean didLaunch);
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
@@ -248,12 +241,6 @@ interface IPackageManager {
     void deletePackage(in String packageName, IPackageDeleteObserver2 observer, int userId, int flags);
 
     String getInstallerPackageName(in String packageName);
-
-    void addPackageToPreferred(String packageName);
-
-    void removePackageFromPreferred(String packageName);
-
-    List<PackageInfo> getPreferredPackages(int flags);
 
     void resetApplicationPreferences(int userId);
 
@@ -283,6 +270,9 @@ interface IPackageManager {
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
+    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended, int userId);
+    boolean isPackageSuspendedForUser(String packageName, int userId);
+
     /**
      * Backup/restore support - only the system uid may use these.
      */
@@ -292,12 +282,16 @@ interface IPackageManager {
     void restoreDefaultApps(in byte[] backup, int userId);
     byte[] getIntentFilterVerificationBackup(int userId);
     void restoreIntentFilterVerification(in byte[] backup, int userId);
+    byte[] getPermissionGrantBackup(int userId);
+    void restorePermissionGrants(in byte[] backup, int userId);
 
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
      * is the current "always use this one" setting.
      */
      ComponentName getHomeActivities(out List<ResolveInfo> outHomeCandidates);
+
+    void setHomeActivity(in ComponentName className, int userId);
 
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
@@ -320,6 +314,17 @@ interface IPackageManager {
      * As per {@link android.content.pm.PackageManager#getApplicationEnabledSetting}.
      */
     int getApplicationEnabledSetting(in String packageName, int userId);
+
+    /**
+     * Logs process start information (including APK hash) to the security log.
+     */
+    void logAppProcessStartIfNeeded(String processName, int uid, String seinfo, String apkFile,
+            int pid);
+
+    /**
+     * As per {@link android.content.pm.PackageManager#flushPackageRestrictionsAsUser}.
+     */
+    void flushPackageRestrictionsAsUser(in int userId);
 
     /**
      * Set whether the given package should be considered stopped, making
@@ -383,12 +388,28 @@ interface IPackageManager {
     void deleteApplicationCacheFiles(in String packageName, IPackageDataObserver observer);
 
     /**
+     * Delete all the cache files in an applications cache directory
+     * @param packageName The package name of the application whose cache
+     * files need to be deleted
+     * @param userId the user to delete application cache for
+     * @param observer a callback used to notify when the deletion is finished.
+     */
+    void deleteApplicationCacheFilesAsUser(in String packageName, int userId, IPackageDataObserver observer);
+
+    /**
      * Clear the user data directory of an application.
      * @param packageName The package name of the application whose cache
      * files need to be deleted
      * @param observer a callback used to notify when the operation is completed.
      */
     void clearApplicationUserData(in String packageName, IPackageDataObserver observer, int userId);
+
+    /**
+     * Clear the profile data of an application.
+     * @param packageName The package name of the application whose profile data
+     * need to be deleted
+     */
+    void clearApplicationProfileData(in String packageName);
 
    /**
      * Get package statistics including the code, data and cache size for
@@ -410,9 +431,9 @@ interface IPackageManager {
      * Get a list of features that are available on the
      * system.
      */
-    FeatureInfo[] getSystemAvailableFeatures();
+    ParceledListSlice getSystemAvailableFeatures();
 
-    boolean hasSystemFeature(String name);
+    boolean hasSystemFeature(String name, int version);
 
     void enterSafeMode();
     boolean isSafeMode();
@@ -420,23 +441,51 @@ interface IPackageManager {
     boolean hasSystemUidErrors();
 
     /**
-     * Ask the package manager to perform boot-time dex-opt of all
-     * existing packages.
+     * Ask the package manager to fstrim the disk if needed.
      */
-    void performBootDexOpt();
+    void performFstrimIfNeeded();
+
+    /**
+     * Ask the package manager to update packages if needed.
+     */
+    void updatePackagesIfNeeded();
+
+    /**
+     * Notify the package manager that a package is going to be used and why.
+     *
+     * See PackageManager.NOTIFY_PACKAGE_USE_* for reasons.
+     */
+    void notifyPackageUse(String packageName, int reason);
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given
-     * package and for the given instruction set if it already hasn't done
-     * so.
-     *
-     * If the supplied instructionSet is null, the package manager will use
-     * the packages default instruction set.
+     * package if it already hasn't done so.
      *
      * In most cases, apps are dexopted in advance and this function will
      * be a no-op.
      */
-    boolean performDexOptIfNeeded(String packageName, String instructionSet);
+    boolean performDexOptIfNeeded(String packageName);
+
+    /**
+     * Ask the package manager to perform a dex-opt for the given reason. The package
+     * manager will map the reason to a compiler filter according to the current system
+     * configuration.
+     */
+    boolean performDexOpt(String packageName, boolean checkProfiles,
+            int compileReason, boolean force);
+    /**
+     * Ask the package manager to perform a dex-opt with the given compiler filter.
+     *
+     * Note: exposed only for the shell command to allow moving packages explicitly to a
+     *       definite state.
+     */
+    boolean performDexOptMode(String packageName, boolean checkProfiles,
+            String targetCompilerFilter, boolean force);
+
+    /**
+     * Ask the package manager to dump profiles associated with a package.
+     */
+    void dumpProfiles(String packageName);
 
     void forceDexOpt(String packageName);
 
@@ -471,8 +520,8 @@ interface IPackageManager {
     void verifyIntentFilter(int id, int verificationCode, in List<String> failedDomains);
     int getIntentVerificationStatus(String packageName, int userId);
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
-    List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName);
-    List<IntentFilter> getAllIntentFilters(String packageName);
+    ParceledListSlice getIntentFilterVerifications(String packageName);
+    ParceledListSlice getAllIntentFilters(String packageName);
 
     boolean setDefaultBrowserPackageName(String packageName, int userId);
     String getDefaultBrowserPackageName(int userId);
@@ -509,4 +558,19 @@ interface IPackageManager {
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
     String getPermissionControllerPackageName();
+
+    ParceledListSlice getEphemeralApplications(int userId);
+    byte[] getEphemeralApplicationCookie(String packageName, int userId);
+    boolean setEphemeralApplicationCookie(String packageName, in byte[] cookie, int userId);
+    Bitmap getEphemeralApplicationIcon(String packageName, int userId);
+    boolean isEphemeralApplication(String packageName, int userId);
+
+    boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
+
+    String getServicesSystemSharedLibraryPackageName();
+    String getSharedSystemSharedLibraryPackageName();
+
+    boolean isPackageDeviceAdminOnAnyUser(String packageName);
+
+    List<String> getPreviousCodePaths(in String packageName);
 }

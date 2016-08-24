@@ -1,0 +1,217 @@
+page.title=Ngôn ngữ và Bản địa
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Trong tài liệu này:</h2>
+<ol>
+	  <li><a href="#preN">Thử thách phân giải tài nguyên ngôn ngữ</a></li>
+    <li><a href="#postN">Các cải tiến đối với Chiến lược phân giải tài nguyên</a></li>
+    <li><a href="#design">Thiết kế ứng dụng để hỗ trợ các bản địa
+      bổ sung</a></li>
+
+</ol>
+
+</div>
+</div>
+
+<p>Android N cung cấp hỗ trợ cải tiến cho người dùng sử dụng nhiều ngôn ngữ,
+cho phép họ chọn nhiều bản địa trong phần cài đặt. Android N
+cung cấp khả năng này bằng cách mở rộng số lượng lớn các bản địa được hỗ trợ
+và thay đổi cách hệ thống phân giải tài nguyên. Phương thức phân giải tài nguyên
+mới hoạt động mạnh mẽ hơn và được thiết kế để tương thích với các tệp APK có sẵn. Tuy nhiên
+bạn cần kiểm tra thêm để phát hiện mọi hành vi không mong muốn. Ví dụ, bạn
+cần kiểm thử để đảm bảo rằng ứng dụng của mình sẽ thiết lập mặc định cho ngôn ngữ mong muốn. Ngoài ra,
+nếu ứng dụng của bạn hỗ trợ đa ngôn ngữ thì bạn cần đảm bảo rằng việc hỗ trợ này hoạt động như
+dự kiến. Cuối cùng, bạn cần cố gắng đảm bảo rằng ứng dụng sẽ xử lý tinh tế
+những ngôn ngữ mà bạn không có ý định thiết kế ứng dụng để hỗ trợ.</p>
+
+<p>Tài liệu này sẽ bắt đầu bằng việc giải thích về chiến lược phân giải tài nguyên trong phiên bản trước
+Android N. Tiếp theo, tài liệu sẽ mô tả chiến lược phân giải tài nguyên
+được cải tiến của Android N. Cuối cùng, tài liệu sẽ giải thích cách sử dụng
+số lượng các bản địa được mở rộng để hỗ trợ thêm nhiều người dùng đa ngữ.</p>
+
+<h2 id="preN">Thử thách phân giải tài nguyên ngôn ngữ</h2>
+
+<p>Trước Android N, không phải lúc nào Android cũng có thể so khớp
+thành công ứng dụng với các bản địa của hệ thống. Ví dụ, giả sử ngôn ngữ mặc định của ứng dụng của bạn
+  là Tiếng Anh (Mỹ) nhưng ứng dụng cũng có các xâu văn bản Tiếng Tây Ban Nha được bản địa hóa trong các tệp tài nguyên {@code es_ES}
+.</p>
+<p>Khi mã nguồn Java tham chiếu đến các xâu đó thì nó sẽ phân giải các ngôn ngữ của xâu như
+sau:</p>
+<ul>
+<li>Nếu một thiết bị được đặt thành {@code es_MX} (Tiếng Tây Ban Nha-Mêxicô) thì Android sẽ tải
+xâu từ các tệp tài nguyên {@code es_ES}.</li>
+<li>Nếu thiết bị được đặt thành {@code en_AU} thì Android sẽ trả về {@code
+en_US}. Hệ thống cũng sẽ đặt mặc định thành {@code en_US} nếu người dùng chọn một
+ngôn ngữ mà ứng dụng không hỗ trợ chút nào, ví dụ như Tiếng Pháp.</li>
+</ul>
+
+
+<p>Các vấn đề phân giải này phát sinh bởi vì hệ thống sẽ gỡ mã quốc gia
+ khỏi bản địa nếu nó không tìm thấy sự trùng khớp tuyệt đối.  Ví dụ:</p>
+<p class="table-caption" id="t-resource-res">
+<strong>Bảng 1.</strong> Phân giải tài nguyên không có trùng khớp bản địa tuyệt đối.
+</p>
+<table>
+<tbody>
+<tr>
+<th>Cài đặt Người dùng</th>
+<th>Tài nguyên Ứng dụng</th>
+<th>Phân giải tài nguyên</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+mặc định (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+Thử fr_CH =&gt; Không được<br>
+Thử fr =&gt; Không được<br>
+Sử dụng mặc định (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>Trong ví dụ này, hệ thống hiển thị các xâu Tiếng Anh mà không
+xác định được liệu người dùng có biết Tiếng Anh hay không. Đây là hành vi khá phổ biến
+ngày nay. Android N cần phải giảm bớt đáng kể tần suất
+của những kết quả như vậy.</p>
+
+<h2 id="postN">Các cải tiến đối với Chiến lược phân giải tài nguyên</h2>
+<p>Android N mang đến cách thức phân giải tài nguyên mạnh mẽ hơn, và
+tìm các giải pháp thay thế hiệu quả hơn một cách tự động. Tuy nhiên, để tăng tốc việc phân giải và nâng cao
+khả năng bảo trì, bạn cần lưu trữ các tài nguyên trong những nhánh ngôn ngữ mẹ phổ biến nhất.
+ Ví dụ, nếu trước đây lưu tài nguyên Tiếng Tây Ban Nha trong thư mục {@code es-US}
+ thì hãy chuyển chúng vào trong thư mục {@code es-419}, nơi chứa Tiếng Tây Ban Nha Mỹ La-tinh.
+ Tương tự, nếu bạn có các xâu tài nguyên trong một thư mục có tên {@code en-GB} thì hãy đổi tên
+ thư mục đó thành {@code en-001} (Tiếng Anh quốc tế) bởi vì nhánh mẹ
+phổ biến nhất cho chuỗi <code>en-GB</code> là {@code en-001}.
+ Các ví dụ sau sẽ giải thích tại sao các thực hành này sẽ nâng cao hiệu năng và
+độ ổn định của việc phân giải tài nguyên.</p>
+
+<h3>Các ví dụ về phân giải tài nguyên</h3>
+
+<p>Với Android N, trường hợp được mô tả trong <strong>Bảng 1</strong> được phân giải
+theo cách khác:</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>Bảng 2.</strong> Một chiến lược phân giải cải tiến khi không có
+trùng khớp bản địa tuyệt đối.</p>
+<table>
+<tr>
+<th>Cài đặt Người dùng</th>
+<th>Tài nguyên Ứng dụng</th>
+<th>Phân giải tài nguyên</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+mặc định (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+Thử fr_CH =&gt; Không được<br>
+Thử fr =&gt; Không được<br>
+Thử nhánh con của fr =&gt; fr_FR<br>
+Sử dụng fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>Bây giờ thì người dùng sẽ nhận được tài nguyên Tiếng Pháp thay vì Tiếng Anh. Ví dụ này cũng cho thấy
+ lý do bạn nên lưu trữ các xâu Tiếng Pháp trong {@code fr} thay vì {@code fr_FR}
+ cho Android N. Phương pháp ở đây là ghép nhánh ngôn ngữ mẹ gần nhất,
+ giúp cho việc phân giải nhanh hơn và dễ dự đoán hơn.</p>
+
+<p>Ngoài lôgic phân giải được cải tiến này, Android giờ đây cung cấp thêm nhiều
+ngôn ngữ cho người dùng lựa chọn. Chúng ta hãy thử lại ví dụ trên với Tiếng Ý
+  được xác định là một ngôn ngữ người dùng bổ sung nhưng không được ứng dụng hỗ trợ cho Tiếng Pháp.  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>Bảng 3.</strong> Phân giải tài nguyên khi ứng dụng chỉ khớp
+với cài đặt bản địa được ưu tiên thứ hai của người dùng.</p>
+<table>
+<tr>
+<th>Cài đặt Người dùng</th>
+<th>Tài nguyên Ứng dụng</th>
+<th>Phân giải tài nguyên</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+mặc định (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+Thử fr_CH =&gt; Không được<br>
+Thử fr =&gt; Không được<br>
+Thử nhánh con của fr =&gt; Không được<br>
+Thử it_CH =&gt; Không được<br>
+Thử it =&gt; Không được<br>
+Thử nhánh con của it =&gt; it_IT<br>
+Sử dụng it_IT
+</td>
+
+</tr>
+
+</table>
+<p>Người dùng vẫn nhận được ngôn ngữ họ biết mặc dù ứng dụng không
+hỗ trợ Tiếng Pháp.</p>
+
+
+<h2 id="design">Thiết kế ứng dụng để hỗ trợ các bản địa bổ sung</h2>
+<h3>API LocaleList</h3>
+
+<p>Android N bổ sung thêm một API {@code LocaleList.GetDefault()}
+ mới cho phép các ứng dụng truy vấn trực tiếp danh sách các ngôn ngữ mà người dùng đã chỉ định. API này
+cho phép bạn tạo hành vi ứng dụng
+phức tạp hơn và hiển thị nội dung được tối ưu hóa tốt hơn. Ví dụ, Tìm kiếm
+  có thể hiển thị các kết quả bằng nhiều ngôn ngữ dựa trên cài đặt của người dùng.  Các ứng dụng trình duyệt
+  có thể tránh đề nghị dịch trang web sang một ngôn ngữ mà người dùng đó đã biết,
+ và các ứng dụng bàn phím có thể tự động bật tất cả các bố trí phù hợp. </p>
+
+<h3>Bộ định dạng</h3>
+
+<p>Tính tới Android 6.0 (API mức 23), Android 6.0 chỉ hỗ trợ một hoặc hai bản địa
+cho nhiều ngôn ngữ phổ biến
+(en, es, ar, fr, ru). Bởi vì chỉ có một vài biến thể của từng ngôn ngữ,
+các ứng dụng không gặp vấn đề gì với việc lưu trữ một số chữ số và ngày tháng dưới dạng xâu được chèn trực tiếp khi viết mã
+trong các tệp tài nguyên.  Tuy nhiên, với tập hợp mở rộng các bản địa được hỗ trợ bởi Android,
+có thể có
+nhiều khác biệt lớn về các định dạng ngày tháng, thời gian, tiền tệ và thông tin
+tương tự ngay cả trong một bản địa. Chèn trực tiếp các định dạng có thể khiến
+người dùng cuối bối rối.  Do đó, khi phát triển cho Android N
+hãy đảm bảo sử dụng các bộ định dạng thay vì các xâu chữ số và ngày tháng được chèn trực tiếp khi viết mã.</p>
+
+<p>Một ví dụ điển hình là Tiếng Ả-rập với được Android N hỗ trợ mở rộng từ
+một {@code ar_EG} tới 27 bản địa Tiếng Ả-rập. Các bản địa này có thể chia sẻ hầu hết các tài nguyên,
+nhưng một số bản địa ưu tiên chữ số ASCII trong khi những bản địa khác lại ưu tiên con số truyền thống. Ví dụ,
+khi bạn muốn soạn một câu có biến bằng số, như
+"Choose a 4 digit pin" thì bạn hãy sử dụng bộ định dạng như sau:</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

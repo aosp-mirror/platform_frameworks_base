@@ -1,0 +1,421 @@
+toc:
+- title: Introduction
+  path: /guide/index.html
+  section:
+  - title: App Fundamentals
+    path: /guide/components/fundamentals.html
+  - title: Device Compatibility
+    path: /guide/practices/compatibility.html
+  - title: System Permissions
+    path: /guide/topics/security/permissions.html
+
+- title: App Components
+  path: /guide/components/index.html
+  section:
+  - title: Intents and Intent Filters
+    path: /guide/components/intents-filters.html
+    section:
+    - title: Common Intents
+      path: /guide/components/intents-common.html
+  - title: Activities
+    path: /guide/components/activities.html
+    section:
+    - title: Fragments
+      path: /guide/components/fragments.html
+    - title: Loaders
+      path: /guide/components/loaders.html
+    - title: Tasks and Back Stack
+      path: /guide/components/tasks-and-back-stack.html
+    - title: Overview Screen
+      path: /guide/components/recents.html
+  - title: Services
+    path: /guide/components/services.html
+    section:
+    - title: Bound Services
+      path: /guide/components/bound-services.html
+    - title: AIDL
+      path: /guide/components/aidl.html
+  - title: Content Providers
+    path: /guide/topics/providers/content-providers.html
+    section:
+    - title: Content Provider Basics
+      path: /guide/topics/providers/content-provider-basics.html
+    - title: Creating a Content Provider
+      path: /guide/topics/providers/content-provider-creating.html
+    - title: Calendar Provider
+      path: /guide/topics/providers/calendar-provider.html
+    - title: Contacts Provider
+      path: /guide/topics/providers/contacts-provider.html
+    - title: Storage Access Framework
+      path: /guide/topics/providers/document-provider.html
+  - title: App Widgets
+    path: /guide/topics/appwidgets/index.html
+    section:
+    - title: App Widget Host
+      path: /guide/topics/appwidgets/host.html
+  - title: Processes and Threads
+    path: /guide/components/processes-and-threads.html
+
+- title: App Resources
+  path: /guide/topics/resources/index.html
+  section:
+  - title: Overview
+    path: /guide/topics/resources/overview.html
+  - title: Providing Resources
+    path: /guide/topics/resources/providing-resources.html
+  - title: Accessing Resources
+    path: /guide/topics/resources/accessing-resources.html
+  - title: Handling Runtime Changes
+    path: /guide/topics/resources/runtime-changes.html
+  - title: Localization
+    path: /guide/topics/resources/localization.html
+  - title: Resource Types
+    path: /guide/topics/resources/available-resources.html
+    section:
+    - title: Animation
+      path: /guide/topics/resources/animation-resource.html
+    - title: Color State List
+      path: /guide/topics/resources/color-list-resource.html
+    - title: Drawable
+      path: /guide/topics/resources/drawable-resource.html
+    - title: Layout
+      path: /guide/topics/resources/layout-resource.html
+    - title: Menu
+      path: /guide/topics/resources/menu-resource.html
+    - title: String
+      path: /guide/topics/resources/string-resource.html
+    - title: Style
+      path: /guide/topics/resources/style-resource.html
+    - title: More Types
+      path: /guide/topics/resources/more-resources.html
+
+- title: App Manifest
+  path: /guide/topics/manifest/manifest-intro.html
+  section:
+  - title: <action>
+    path: /guide/topics/manifest/action-element.html
+  - title: <activity>
+    path: /guide/topics/manifest/activity-element.html
+  - title: <activity-alias>
+    path: /guide/topics/manifest/activity-alias-element.html
+  - title: <application>
+    path: /guide/topics/manifest/application-element.html
+  - title: <category>
+    path: /guide/topics/manifest/category-element.html
+  - title: <compatible-screens>
+    path: /guide/topics/manifest/compatible-screens-element.html
+  - title: <data>
+    path: /guide/topics/manifest/data-element.html
+  - title: <grant-uri-permission>
+    path: /guide/topics/manifest/grant-uri-permission-element.html
+  - title: <instrumentation>
+    path: /guide/topics/manifest/instrumentation-element.html
+  - title: <intent-filter>
+    path: /guide/topics/manifest/intent-filter-element.html
+  - title: <manifest>
+    path: /guide/topics/manifest/manifest-element.html
+  - title: <meta-data>
+    path: /guide/topics/manifest/meta-data-element.html
+  - title: <path-permission>
+    path: /guide/topics/manifest/path-permission-element.html
+  - title: <permission>
+    path: /guide/topics/manifest/permission-element.html
+  - title: <permission-group>
+    path: /guide/topics/manifest/permission-group-element.html
+  - title: <permission-tree>
+    path: /guide/topics/manifest/permission-tree-element.html
+  - title: <provider>
+    path: /guide/topics/manifest/provider-element.html
+  - title: <receiver>
+    path: /guide/topics/manifest/receiver-element.html
+  - title: <service>
+    path: /guide/topics/manifest/service-element.html
+  - title: <supports-gl-texture>
+    path: /guide/topics/manifest/supports-gl-texture-element.html
+  - title: <supports-screens>
+    path: /guide/topics/manifest/supports-screens-element.html
+  - title: <uses-configuration>
+    path: /guide/topics/manifest/uses-configuration-element.html
+  - title: <uses-feature>
+    path: /guide/topics/manifest/uses-feature-element.html
+  - title: <uses-library>
+    path: /guide/topics/manifest/uses-library-element.html
+  - title: <uses-permission>
+    path: /guide/topics/manifest/uses-permission-element.html
+  - title: <uses-permission-sdk-23>
+    path: /guide/topics/manifest/uses-permission-sdk-23-element.html
+  - title: <uses-sdk>
+    path: /guide/topics/manifest/uses-sdk-element.html
+
+- title: User Interface
+  path: /guide/topics/ui/index.html
+  section:
+  - title: Overview
+    path: /guide/topics/ui/overview.html
+  - title: Layouts
+    path: /guide/topics/ui/declaring-layout.html
+    section:
+    - title: Linear Layout
+      path: /guide/topics/ui/layout/linear.html
+    - title: Relative Layout
+      path: /guide/topics/ui/layout/relative.html
+    - title: List View
+      path: /guide/topics/ui/layout/listview.html
+    - title: Grid View
+      path: /guide/topics/ui/layout/gridview.html
+  - title: Input Controls
+    path: /guide/topics/ui/controls.html
+    section:
+    - title: Buttons
+      path: /guide/topics/ui/controls/button.html
+    - title: Text Fields
+      path: /guide/topics/ui/controls/text.html
+    - title: Checkboxes
+      path: /guide/topics/ui/controls/checkbox.html
+    - title: Radio Buttons
+      path: /guide/topics/ui/controls/radiobutton.html
+    - title: Toggle Buttons
+      path: /guide/topics/ui/controls/togglebutton.html
+    - title: Spinners
+      path: /guide/topics/ui/controls/spinner.html
+    - title: Pickers
+      path: /guide/topics/ui/controls/pickers.html
+  - title: Input Events
+    path: /guide/topics/ui/ui-events.html
+  - title: Menus
+    path: /guide/topics/ui/menus.html
+  - title: Settings
+    path: /guide/topics/ui/settings.html
+  - title: Dialogs
+    path: /guide/topics/ui/dialogs.html
+  - title: Notifications
+    path: /guide/topics/ui/notifiers/notifications.html
+  - title: Toasts
+    path: /guide/topics/ui/notifiers/toasts.html
+  - title: Search
+    path: /guide/topics/search/index.html
+    section:
+    - title: Creating a Search Interface
+      path: /guide/topics/search/search-dialog.html
+    - title: Adding Recent Query Suggestions
+      path: /guide/topics/search/adding-recent-query-suggestions.html
+    - title: Adding Custom Suggestions
+      path: /guide/topics/search/adding-custom-suggestions.html
+    - title: Searchable Configuration
+      path: /guide/topics/search/searchable-config.html
+  - title: Drag and Drop
+    path: /guide/topics/ui/drag-drop.html
+  - title: Accessibility
+    path: /guide/topics/ui/accessibility/index.html
+    section:
+    - title: Making Applications Accessible
+      path: /guide/topics/ui/accessibility/apps.html
+    - title: Accessibility Developer Checklist
+      path: /guide/topics/ui/accessibility/checklist.html
+    - title: Building Accessibility Services
+      path: /guide/topics/ui/accessibility/services.html
+  - title: Styles and Themes
+    path: /guide/topics/ui/themes.html
+  - title: Custom Components
+    path: /guide/topics/ui/custom-components.html
+
+- title: Animation and Graphics
+  path: /guide/topics/graphics/index.html
+  section:
+  - title: Overview
+    path: /guide/topics/graphics/overview.html
+  - title: Property Animation
+    path: /guide/topics/graphics/prop-animation.html
+  - title: View Animation
+    path: /guide/topics/graphics/view-animation.html
+  - title: Drawable Animation
+    path: /guide/topics/graphics/drawable-animation.html
+  - title: Canvas and Drawables
+    path: /guide/topics/graphics/2d-graphics.html
+  - title: OpenGL ES
+    path: /guide/topics/graphics/opengl.html
+  - title: Hardware Acceleration
+    path: /guide/topics/graphics/hardware-accel.html
+
+- title: Computation
+  path: /guide/topics/renderscript/index.html
+  section:
+  - title: RenderScript
+    path: /guide/topics/renderscript/compute.html
+  - title: Advanced RenderScript
+    path: /guide/topics/renderscript/advanced.html
+  - title: Runtime API Reference
+    path: /guide/topics/renderscript/reference/overview.html
+    section:
+    - title: Numerical Types
+      path: /guide/topics/renderscript/reference/rs_value_types.html
+    - title: Object Types
+      path: /guide/topics/renderscript/reference/rs_object_types.html
+    - title: Conversion Functions
+      path: /guide/topics/renderscript/reference/rs_convert.html
+    - title: Mathematical Constants and Functions
+      path: /guide/topics/renderscript/reference/rs_math.html
+    - title: Vector Math Functions
+      path: /guide/topics/renderscript/reference/rs_vector_math.html
+    - title: Matrix Functions
+      path: /guide/topics/renderscript/reference/rs_matrix.html
+    - title: Quaternion Functions
+      path: /guide/topics/renderscript/reference/rs_quaternion.html
+    - title: Atomic Update Functions
+      path: /guide/topics/renderscript/reference/rs_atomic.html
+    - title: Time Functions and Types
+      path: /guide/topics/renderscript/reference/rs_time.html
+    - title: Allocation Data Access Functions
+      path: /guide/topics/renderscript/reference/rs_allocation_data.html
+    - title: Object Characteristics Functions
+      path: /guide/topics/renderscript/reference/rs_object_info.html
+    - title: Kernel Invocation Functions and Types
+      path: /guide/topics/renderscript/reference/rs_for_each.html
+    - title: Input/Output Functions
+      path: /guide/topics/renderscript/reference/rs_io.html
+    - title: Debugging Functions
+      path: /guide/topics/renderscript/reference/rs_debug.html
+    - title: Graphics Functions and Types
+      path: /guide/topics/renderscript/reference/rs_graphics.html
+    - title: Index
+      path: /guide/topics/renderscript/reference/index.html
+
+- title: Media and Camera
+  path: /guide/topics/media/index.html
+  section:
+  - title: Media Playback
+    path: /guide/topics/media/mediaplayer.html
+  - title: Media Router
+    path: /guide/topics/media/mediarouter.html
+  - title: Media Route Provider
+    path: /guide/topics/media/mediarouteprovider.html
+  - title: ExoPlayer
+    path: /guide/topics/media/exoplayer.html
+  - title: Supported Media Formats
+    path: /guide/appendix/media-formats.html
+  - title: Audio Capture
+    path: /guide/topics/media/audio-capture.html
+  - title: JetPlayer
+    path: /guide/topics/media/jetplayer.html
+  - title: Camera
+    path: /guide/topics/media/camera.html
+
+- title: Location and Sensors
+  path: /guide/topics/sensors/index.html
+  section:
+  - title: Location and Maps
+    path: /guide/topics/location/index.html
+  - title: Location Strategies
+    path: /guide/topics/location/strategies.html
+  - title: Sensors Overview
+    path: /guide/topics/sensors/sensors_overview.html
+  - title: Motion Sensors
+    path: /guide/topics/sensors/sensors_motion.html
+  - title: Position Sensors
+    path: /guide/topics/sensors/sensors_position.html
+  - title: Environment Sensors
+    path: /guide/topics/sensors/sensors_environment.html
+
+- title: Connectivity
+  path: /guide/topics/connectivity/index.html
+  section:
+  - title: Bluetooth
+    path: /guide/topics/connectivity/bluetooth.html
+    section:
+    - title: Bluetooth Low Energy
+      path: /guide/topics/connectivity/bluetooth-le.html
+  - title: NFC
+    path: /guide/topics/connectivity/nfc/index.html
+    section:
+    - title: NFC Basics
+      path: /guide/topics/connectivity/nfc/nfc.html
+    - title: Advanced NFC
+      path: /guide/topics/connectivity/nfc/advanced-nfc.html
+    - title: Host-based Card Emulation
+      path: /guide/topics/connectivity/nfc/hce.html
+  - title: Wi-Fi P2P
+    path: /guide/topics/connectivity/wifip2p.html
+  - title: USB
+    path: /guide/topics/connectivity/usb/index.html
+    section:
+    - title: Accessory
+      path: /guide/topics/connectivity/usb/accessory.html
+    - title: Host
+      path: /guide/topics/connectivity/usb/host.html
+  - title: SIP
+    path: /guide/topics/connectivity/sip.html
+
+- title: Text and Input
+  path: /guide/topics/text/index.html
+  section:
+  - title: Copy and Paste
+    path: /guide/topics/text/copy-paste.html
+  - title: Creating an IME
+    path: /guide/topics/text/creating-input-method.html
+  - title: Spelling Checker
+    path: /guide/topics/text/spell-checker-framework.html
+
+- title: Data Storage
+  path: /guide/topics/data/index.html
+  section:
+  - title: Storage Options
+    path: /guide/topics/data/data-storage.html
+  - title: Data Backup
+    path: /guide/topics/data/backup.html
+  - title: App Install Location
+    path: /guide/topics/data/install-location.html
+
+- title: Libraries
+  path: /topic/libraries/index.html
+  section:
+  - include: /topic/libraries/_book.yaml
+
+- title: Administration
+  path: /guide/topics/admin/index.html
+  section:
+  - title: Device Policies
+    path: /guide/topics/admin/device-admin.html
+
+- title: Web Apps
+  path: /guide/webapps/index.html
+  section:
+  - title: Supporting Different Screens in Web Apps
+    path: /guide/webapps/targeting.html
+  - title: Building Web Apps in WebView
+    path: /guide/webapps/webview.html
+  - title: Migrating to WebView in Android 4.4
+    path: /guide/webapps/migrating.html
+  - title: Debugging Web Apps
+    path: /guide/webapps/debugging.html
+  - title: Best Practices for Web Apps
+    path: /guide/webapps/best-practices.html
+
+- title: Best Practices
+  path: /guide/practices/index.html
+  path_attributes:
+  - name: de-lang
+    value: Bewährte Verfahren
+  - name: es-lang
+    value: Prácticas recomendadas
+  - name: fr-lang
+    value: Meilleures pratiques
+  - name: it-lang
+    value: Best practice
+  - name: ja-lang
+    value: ベスト プラクティス
+  - name: zh-cn-lang
+    value: 最佳实践
+  - name: zh-tw-lang
+    value: 最佳實務
+  section:
+  - title: Supporting Multiple Screens
+    path: /guide/practices/screens_support.html
+    section:
+    - title: Distributing to Specific Screens
+      path: /guide/practices/screens-distribution.html
+    - title: Screen Compatibility Mode
+      path: /guide/practices/screen-compat-mode.html
+  - title: Supporting Tablets and Handsets
+    path: /guide/practices/tablets-and-handsets.html
+  - title: Verifying App Behavior on ART
+    path: /guide/practices/verifying-apps-art.html

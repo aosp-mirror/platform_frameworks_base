@@ -54,7 +54,7 @@ dependencies {
   handheld app with the wearable app embedded in it automatically into your project's root folder.
 
   <p>Alternatively, you can sign both apps from the command line using the
-  <a href="{@docRoot}sdk/installing/studio-build.html#gradleWrapper">Gradle wrapper</a>. Both apps
+  <a href="{@docRoot}studio/build/index.html#gradleWrapper">Gradle wrapper</a>. Both apps
   must be signed to have the automatic pushing of the wearable app work.</p>
 
   <p>Store your key file location and credentials in environment variables and run the Gradle

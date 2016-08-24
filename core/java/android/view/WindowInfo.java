@@ -44,6 +44,8 @@ public class WindowInfo implements Parcelable {
     public boolean focused;
     public final Rect boundsInScreen = new Rect();
     public List<IBinder> childTokens;
+    public CharSequence title;
+    public int accessibilityIdOfAnchor = View.NO_ID;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -65,6 +67,8 @@ public class WindowInfo implements Parcelable {
         window.parentToken = other.parentToken;
         window.focused = other.focused;
         window.boundsInScreen.set(other.boundsInScreen);
+        window.title = other.title;
+        window.accessibilityIdOfAnchor = other.accessibilityIdOfAnchor;
 
         if (other.childTokens != null && !other.childTokens.isEmpty()) {
             if (window.childTokens == null) {
@@ -95,6 +99,8 @@ public class WindowInfo implements Parcelable {
         parcel.writeStrongBinder(parentToken);
         parcel.writeInt(focused ? 1 : 0);
         boundsInScreen.writeToParcel(parcel, flags);
+        parcel.writeCharSequence(title);
+        parcel.writeInt(accessibilityIdOfAnchor);
 
         if (childTokens != null && !childTokens.isEmpty()) {
             parcel.writeInt(1);
@@ -108,13 +114,15 @@ public class WindowInfo implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("WindowInfo[");
-        builder.append("type=").append(type);
+        builder.append("title=").append(title);
+        builder.append(", type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
         builder.append(", bounds=").append(boundsInScreen);
         builder.append(", parent=").append(parentToken);
         builder.append(", focused=").append(focused);
         builder.append(", children=").append(childTokens);
+        builder.append(", accessibility anchor=").append(accessibilityIdOfAnchor);
         builder.append(']');
         return builder.toString();
     }
@@ -126,6 +134,8 @@ public class WindowInfo implements Parcelable {
         parentToken = parcel.readStrongBinder();
         focused = (parcel.readInt() == 1);
         boundsInScreen.readFromParcel(parcel);
+        title = parcel.readCharSequence();
+        accessibilityIdOfAnchor = parcel.readInt();
 
         final boolean hasChildren = (parcel.readInt() == 1);
         if (hasChildren) {

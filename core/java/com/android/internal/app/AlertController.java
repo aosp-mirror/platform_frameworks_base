@@ -43,7 +43,6 @@ import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -115,6 +114,8 @@ public class AlertController {
     private int mSingleChoiceItemLayout;
     private int mListItemLayout;
 
+    private boolean mShowTitle;
+
     private int mButtonPanelLayoutHint = AlertDialog.LAYOUT_HINT_NONE;
 
     private Handler mHandler;
@@ -150,7 +151,7 @@ public class AlertController {
         private WeakReference<DialogInterface> mDialog;
 
         public ButtonHandler(DialogInterface dialog) {
-            mDialog = new WeakReference<DialogInterface>(dialog);
+            mDialog = new WeakReference<>(dialog);
         }
 
         @Override
@@ -200,8 +201,12 @@ public class AlertController {
         mListItemLayout = a.getResourceId(
                 R.styleable.AlertDialog_listItemLayout,
                 R.layout.select_dialog_item);
+        mShowTitle = a.getBoolean(R.styleable.AlertDialog_showTitle, true);
 
         a.recycle();
+
+        /* We use a custom title so never request a window title */
+        window.requestFeature(Window.FEATURE_NO_TITLE);
     }
 
     static boolean canTextInput(View v) {
@@ -227,12 +232,9 @@ public class AlertController {
     }
 
     public void installContent() {
-        /* We use a custom title so never request a window title */
-        mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         int contentView = selectContentView();
         mWindow.setContentView(contentView);
         setupView();
-        setupDecor();
     }
 
     private int selectContentView() {
@@ -359,6 +361,7 @@ public class AlertController {
 
         if (mIconView != null) {
             if (resId != 0) {
+                mIconView.setVisibility(View.VISIBLE);
                 mIconView.setImageResource(mIconId);
             } else {
                 mIconView.setVisibility(View.GONE);
@@ -377,6 +380,7 @@ public class AlertController {
 
         if (mIconView != null) {
             if (icon != null) {
+                mIconView.setVisibility(View.VISIBLE);
                 mIconView.setImageDrawable(icon);
             } else {
                 mIconView.setVisibility(View.GONE);
@@ -425,27 +429,6 @@ public class AlertController {
     @SuppressWarnings({"UnusedDeclaration"})
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return mScrollView != null && mScrollView.executeKeyEvent(event);
-    }
-
-    private void setupDecor() {
-        final View decor = mWindow.getDecorView();
-        final View parent = mWindow.findViewById(R.id.parentPanel);
-        if (parent != null && decor != null) {
-            decor.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                @Override
-                public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
-                    if (insets.isRound()) {
-                        // TODO: Get the padding as a function of the window size.
-                        int roundOffset = mContext.getResources().getDimensionPixelOffset(
-                                R.dimen.alert_dialog_round_padding);
-                        parent.setPadding(roundOffset, roundOffset, roundOffset, roundOffset);
-                    }
-                    return insets.consumeSystemWindowInsets();
-                }
-            });
-            decor.setFitsSystemWindows(true);
-            decor.requestApplyInsets();
-        }
     }
 
     /**
@@ -533,9 +516,15 @@ public class AlertController {
             }
 
             // Only show the divider if we have a title.
-            final View divider;
+            View divider = null;
             if (mMessage != null || mListView != null || hasCustomPanel) {
-                divider = topPanel.findViewById(R.id.titleDivider);
+                if (!hasCustomPanel) {
+                    divider = topPanel.findViewById(R.id.titleDividerNoCustom);
+                }
+                if (divider == null) {
+                    divider = topPanel.findViewById(R.id.titleDivider);
+                }
+
             } else {
                 divider = topPanel.findViewById(R.id.titleDividerTop);
             }
@@ -543,6 +532,17 @@ public class AlertController {
             if (divider != null) {
                 divider.setVisibility(View.VISIBLE);
             }
+        } else {
+            if (contentPanel != null) {
+                final View spacer = contentPanel.findViewById(R.id.textSpacerNoTitle);
+                if (spacer != null) {
+                    spacer.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+        if (mListView instanceof RecycleListView) {
+            ((RecycleListView) mListView).setHasDecor(hasTopPanel, hasButtonPanel);
         }
 
         // Update scroll indicators as needed.
@@ -598,21 +598,21 @@ public class AlertController {
     }
 
     private void setupTitle(ViewGroup topPanel) {
-        if (mCustomTitleView != null) {
+        if (mCustomTitleView != null && mShowTitle) {
             // Add the custom title view directly to the topPanel layout
-            LayoutParams lp = new LayoutParams(
+            final LayoutParams lp = new LayoutParams(
                     LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
             topPanel.addView(mCustomTitleView, 0, lp);
 
             // Hide the title template
-            View titleTemplate = mWindow.findViewById(R.id.title_template);
+            final View titleTemplate = mWindow.findViewById(R.id.title_template);
             titleTemplate.setVisibility(View.GONE);
         } else {
             mIconView = (ImageView) mWindow.findViewById(R.id.icon);
 
             final boolean hasTextTitle = !TextUtils.isEmpty(mTitle);
-            if (hasTextTitle) {
+            if (hasTextTitle && mShowTitle) {
                 // Display the title if a title is supplied, else hide it.
                 mTitleView = (TextView) mWindow.findViewById(R.id.alertTitle);
                 mTitleView.setText(mTitle);
@@ -878,23 +878,34 @@ public class AlertController {
     }
 
     public static class RecycleListView extends ListView {
+        private final int mPaddingTopNoTitle;
+        private final int mPaddingBottomNoButtons;
+
         boolean mRecycleOnMeasure = true;
 
         public RecycleListView(Context context) {
-            super(context);
+            this(context, null);
         }
 
         public RecycleListView(Context context, AttributeSet attrs) {
             super(context, attrs);
+
+            final TypedArray ta = context.obtainStyledAttributes(
+                    attrs, R.styleable.RecycleListView);
+            mPaddingBottomNoButtons = ta.getDimensionPixelOffset(
+                    R.styleable.RecycleListView_paddingBottomNoButtons, -1);
+            mPaddingTopNoTitle = ta.getDimensionPixelOffset(
+                    R.styleable.RecycleListView_paddingTopNoTitle, -1);
         }
 
-        public RecycleListView(Context context, AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
-        }
-
-        public RecycleListView(
-                Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-            super(context, attrs, defStyleAttr, defStyleRes);
+        public void setHasDecor(boolean hasTitle, boolean hasButtons) {
+            if (!hasButtons || !hasTitle) {
+                final int paddingLeft = getPaddingLeft();
+                final int paddingTop = hasTitle ? getPaddingTop() : mPaddingTopNoTitle;
+                final int paddingRight = getPaddingRight();
+                final int paddingBottom = hasButtons ? getPaddingBottom() : mPaddingBottomNoButtons;
+                setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+            }
         }
 
         @Override

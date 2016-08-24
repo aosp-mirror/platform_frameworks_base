@@ -45,6 +45,7 @@ public class VoiceInteractionServiceInfo {
     private String mSettingsActivity;
     private boolean mSupportsAssist;
     private boolean mSupportsLaunchFromKeyguard;
+    private boolean mSupportsLocalInteraction;
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
             throws PackageManager.NameNotFoundException {
@@ -52,9 +53,25 @@ public class VoiceInteractionServiceInfo {
     }
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
-            throws PackageManager.NameNotFoundException, RemoteException {
-        this(pm, AppGlobals.getPackageManager().getServiceInfo(comp,
-                PackageManager.GET_META_DATA, userHandle));
+            throws PackageManager.NameNotFoundException {
+        this(pm, getServiceInfoOrThrow(comp, userHandle));
+    }
+
+    static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
+            throws PackageManager.NameNotFoundException {
+        try {
+            ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(comp,
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    userHandle);
+            if (si != null) {
+                return si;
+            }
+        } catch (RemoteException e) {
+        }
+        throw new PackageManager.NameNotFoundException(comp.toString());
     }
 
     public VoiceInteractionServiceInfo(PackageManager pm, ServiceInfo si) {
@@ -106,6 +123,8 @@ public class VoiceInteractionServiceInfo {
             mSupportsLaunchFromKeyguard = array.getBoolean(com.android.internal.
                     R.styleable.VoiceInteractionService_supportsLaunchVoiceAssistFromKeyguard,
                     false);
+            mSupportsLocalInteraction = array.getBoolean(com.android.internal.
+                    R.styleable.VoiceInteractionService_supportsLocalInteraction, false);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
@@ -159,5 +178,9 @@ public class VoiceInteractionServiceInfo {
 
     public boolean getSupportsLaunchFromKeyguard() {
         return mSupportsLaunchFromKeyguard;
+    }
+
+    public boolean getSupportsLocalInteraction() {
+        return mSupportsLocalInteraction;
     }
 }

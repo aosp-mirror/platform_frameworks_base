@@ -1,0 +1,2909 @@
+page.title=Support Library Revision History
+page.metaDescription=This page provides details about the Support Library package releases.
+
+@jd:body
+
+<p>This page provides details about the Support Library package releases.</p>
+
+<div class="toggle-content opened">
+  <p id="rev24-0-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 24.0.0</a>
+    <em>(June 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+          <ul>
+            <li>Added <code>Fragment.commitNow()</code>
+            for synchronous commit
+            </li>
+
+            <li>Added <code>NotificationCompat.MessagingStyle</code>
+            for multi-party conversations
+            </li>
+
+            <li>Added <code>NotificationManagerCompat.areNotificationsEnabled()</code>
+            and <code>getImportance()</code>
+            </li>
+
+            <li>{@link android.support.v4.media.session.MediaSessionCompat}
+            now mirrors the functionality of {@link
+            android.media.session.MediaSession} and no longer calls {@link
+            android.media.session.MediaSession#setMediaButtonReceiver
+            setMediaButtonReceiver()} automatically
+            </li>
+          </ul>
+          <p class="note">
+            <strong>Note:</strong> Only <a href=
+            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
+            ><code>MediaBrowserServiceCompat</code></a> in version 24.0.0 is
+            forward-compatible with future versions of Android beyond API 24.
+            If you are using previous versions, update to this version to
+            ensure compatibility.
+
+          </p>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added support for referencing themed {@link
+            android.content.res.ColorStateList} objects from XML
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Improvements to {@link android.support.design.widget.AppBarLayout}
+            handling of elevation using {@link
+            android.animation.StateListAnimator}
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}topic/libraries/support-library/features.html#v17-leanback"
+        >v17 Leanback library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added <code>OnboardingFragment</code> to provide first-run welcome
+            and setup flow
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}topic/libraries/support-library/features.html#custom-tabs"
+        >custom tabs</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added support for providing a {@link android.widget.RemoteViews}
+            hierarchy for the secondary toolbar</li>
+          <li>Added <code>CustomTabsClient.connectAndInitialize()</code>
+            for one-line warm up</li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+<!-- end of collapsible section: 24.0.0 -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23-4-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 23.4.0</a>
+    <em>(May 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed issue where fragments were added in the wrong order.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=206901">Issue
+          206901</a>)
+          </li>
+
+          <li>Fixed issue where app bar wasn't drawn after being scrolled
+          offscreen. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=178037">Issue
+          178037</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added
+            {@link android.support.v7.app.AppCompatDelegate#setCompatVectorFromResourcesEnabled
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled()}
+            method to re-enable usage of vector drawables in {@link
+            android.graphics.drawable.DrawableContainer} objects on devices
+            running Android 4.4 (API level 19) and lower. See <a href=
+            "https://medium.com/@chrisbanes/appcompat-v23-2-age-of-the-vectors-91cbafa87c88#.44uulkfal"
+            class="external-link">AppCompat v23.2 — Age of the vectors</a> for
+            more information.
+          </li>
+
+          <li>Fixed an issue in API 23 with <a href=
+          "{@docRoot}reference/android/support/v7/app/AppCompatDelegate.html#setDefaultNightMode(int)">
+            <code>AppCompatDelegate.setDefaultNightMode()</code></a> not
+            loading correct resources in API level 23. (<a class=
+            "external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=206573">Issue
+            206573</a>)
+          </li>
+
+          <li>Fixed issue that could cause {@link
+          java.lang.NullPointerException}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=207638">Issue
+          207638</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue where {@link
+          android.support.design.widget.TextInputLayout} doesn't clear error
+          tint after {@link
+          android.support.design.widget.TextInputLayout#setErrorEnabled
+          setErrorEnabled(false)} on API level 21 - 22 (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202829">Issue
+          202829</a>)
+          </li>
+
+          <li>Fixed an issue where {@link
+          android.support.design.widget.FloatingActionButton} does not return
+          when animations are disabled. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=206416">Issue
+          206416</a>)
+          </li>
+
+          <li>Fixed issue in {@link android.support.design.widget.AppBarLayout}
+          snap functionality when used with <code>{@link
+                    android.support.design.R.id#scroll}|{@link
+                    android.support.design.R.id#enterAlways}|{@link
+                    android.support.design.R.id#enterAlwaysCollapsed}|{@link
+                    android.support.design.R.id#snap}</code> scroll flags.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=207398">Issue
+          207398</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <!-- TODO: Add link -->Vector Drawable library:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where {@link
+            android.support.graphics.drawable.VectorDrawableCompat} does
+            not render correctly in
+            {@link android.widget.TextView} on API level 23. (<a class=
+            "external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=206227">Issue
+            206227</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<!-- end of collapsible section: 23.4.0 -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23-3-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+    alt="">Android Support Library, revision 23.3.0</a> <em>(April
+    2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added <code>AppLaunchChecker</code> to help track how your app
+          has been launched by the user in the past.
+          <code>hasStartedFromLauncher()</code> lets you know if the user has
+          launched your app from the home screen before, or if it has only
+          been started by other means (for example, to view specific web
+          URLs).
+          </li>
+
+          <li>Fixed a memory leak in
+          <code>MediaBrowserServiceCompat.mConnections</code>. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=205220">Issue
+          205220</a>)
+          </li>
+
+          <li>Fixed issue where {@link android.support.v4.view.ViewPager}
+          does not account for page margins when flipping page. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203816">Issue
+          203816</a>)
+          </li>
+          <li>{@link android.support.v4.app.Fragment#onRequestPermissionsResult
+            Fragment.onRequestPermissionsResult()} is now delivered to child
+            fragments.
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue in {@link
+          android.support.v7.widget.AppCompatSpinner} that could cause
+          multiple popups to appear. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=205052">Issue
+          205052</a>)
+          </li>
+
+          <li>Fixed an issue with how borderless buttons were colored.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202967">Issue
+          202967</a>)
+          </li>
+
+          <li>Fixed a compatibility issue between {@link
+          android.support.v7.app.AppCompatDialogFragment } and {@link
+          android.support.v7.app.AlertDialog}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=204805">Issue
+            204805</a>)
+          </li>
+
+          <li>Reverted changes to <code>TintResources</code> that were causing
+            memory and configuration issues.  (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=205236">Issue
+            205236</a>)</li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-mediarouter">v7
+        mediarouter library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed {@link android.support.v7.app.MediaRouteControllerDialog}
+          volume slider’s behavior. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202299">Issue
+          202299</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href="features.html#v7-preference">v7 Preference</a>
+        library:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed issue where {@link
+          android.support.v7.preference.PreferenceFragmentCompat} would crash
+          if <code>dividerHeight</code> is specified. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=204778">Issue
+          204778</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-recyclerview">v7
+        recyclerview library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where {@link
+          android.support.v7.widget.RecyclerView} would not invoke scroll
+          callbacks if the range of visible items shrank. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=200987">Issue
+          200987</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.v7.widget.RecyclerView} would freeze if it was in
+          linear layout, was weighted, and contained images. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203276">Issue
+          203276</a>)
+          </li>
+
+          <li>Fixed a crash in {@link
+          android.support.v7.widget.OrientationHelper#getStartAfterPadding
+          OrientationHelper.getStartAfterPadding()}. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=180521">Issue
+          180521</a>)
+          </li>
+
+          <li>Fixed a crash with usages of
+          <code>android:nestedScrollingEnabled</code>. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=197932">Issue
+          197932</a>)
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where a hidden bottom sheet would handle touch
+          events. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203654">Issue
+          203654</a>)
+          </li>
+
+          <li>Fixed a layout issue with <code>BottomSheetBehavior</code> when
+          <code>fitsSystemWindows</code> is true. (<a class="external-link"
+          href=
+          "https://code.google.com/p/android/issues/detail?id=203057">Issue
+          203057</a>)
+          </li>
+
+          <li>Fixed an accessibility issue with {@link
+          android.support.design.widget.Snackbar}. (<a class="external-link"
+          href=
+          "https://code.google.com/p/android/issues/detail?id=182145">Issue
+          182145</a>)
+          </li>
+
+          <li>Fixed a crash on {@link android.support.design.widget.Snackbar}
+          swipe. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203924">Issue
+          203924</a>)
+          </li>
+
+          <li>Fixed a bug in {@link
+          android.support.design.widget.AppBarLayout} with
+          <code>enterAlways</code>. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203661">Issue
+          203661</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.design.widget.TextInputLayout} unnecessarily clears
+          {@link android.widget.EditText} object's background color filter.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=203357">Issue
+          203357</a>)
+          </li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+<!-- end of collapsible section: 23.3.0 -->
+
+<div class="toggle-content closed">
+  <p id="rev23-2-1">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+    alt="">Android Support Library, revision 23.2.1</a> <em>(March
+    2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an exception in {@link
+          android.support.v4.graphics.drawable.DrawableCompat#wrap
+          DrawableCompat.wrap()} and {@link android.graphics.drawable.LayerDrawable} on
+          API levels 17 to 19. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201817">Issue 201817</a>)
+          </li>
+
+          <li>Fixed an {@code ArrayIndexOutOfBoundsException} in {@link
+          android.support.v4.widget.ViewDragHelper#shouldInterceptTouchEvent
+          ViewDragHelper.shouldInterceptTouchEvent()}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=182262">Issue
+            182262</a>)
+          </li>
+
+          <li>Fixed a bug in {@link android.support.v4.view.ViewPager} related to
+          scroll calculation for size changes.
+          </li>
+
+          <li>Fixed a {@code NullPointerException} when {@code
+          DrawerLayout.removeDrawerListener()} is called without a set {@link
+          android.support.v4.widget.DrawerLayout.DrawerListener
+          DrawerLayout.DrawerListener}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202478">Issue 202478</a>)
+          </li>
+
+          <li>Fixed a bug where {@link android.support.v4.view.ViewPager} does not set
+          {@link android.view.accessibility.AccessibilityEvent} parameters properly
+          when scrolling.
+          </li>
+
+          <li>Fixed an issue that caused lag during device rotation when using
+          {@link android.support.v4.graphics.drawable.DrawableCompat#wrap
+          Drawable.wrap()}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201924">Issue 201924</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Reverted dependency on vector assets so that developers using the
+            <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">appcompat
+            library</a> are not forced to use {@link
+            android.graphics.drawable.VectorDrawable} and its associated build flags.
+          </li>
+
+          <li>Fixed a compatibility issue with Night Mode and API level 23.
+            (<a class="external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=201910">Issue
+            201910</a>)
+          </li>
+
+          <li>Fixed a compatibility issue with {@link
+          android.support.v7.widget.SwitchCompat} and API level 7. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201942">Issue 201942</a>)
+          </li>
+
+          <li>Fixed an issue with propagating configuration values in Resources objects
+          <a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201928">Issue 201928</a>
+          </li>
+
+          <li>Fixed a compatibility issue where the {@link
+          android.support.v7.app.NotificationCompat.MediaStyle
+          NotificationCompat.MediaStyle} cancel button becomes invisible on API level
+          21 and below. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202156">Issue 202156</a>)
+          </li>
+
+          <li>Fixed a compatibility crash with {@link
+          android.support.v7.widget.AppCompatSpinner} on API level 21 and below.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202246">Issue 202246</a>)
+          </li>
+
+          <li>Fixed an issue where the {@code app:textAllCaps = "false"} style did not
+          work. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202117">Issue 202117</a>)
+          </li>
+
+          <li>Fixed a crash when restoring {@link android.widget.SearchView}.
+            (<a class="external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=201836">Issue
+            201836</a>)
+          </li>
+
+          <li>Fixed a memory leak that occurs when tinting drawable resources using
+          AppCompat. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202379">Issue 202379</a>)
+          </li>
+
+          <li>Fixed an issue with {@link android.view.KeyEvent} on API level 11 and
+          lower. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202939">Issue 202939</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-cardview">v7 cardview
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added Night Mode support for {@link
+          android.support.v7.widget.CardView}. (<a class="external-link"
+            href="https://code.google.com/p/android/issues/detail?id=194497">Issue
+            194497</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-recyclerview">v7
+        recyclerview library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed bugs related to various measure-spec methods. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201856">Issue
+          201856</a>)
+          </li>
+
+          <li>Reduced the lockdown period in which {@link
+          android.support.v7.widget.RecyclerView} does not allow adapter
+          changes while calculating a layout or scroll. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202046">Issue
+          202046</a>)
+          </li>
+
+          <li>Fixed a crash when calling {@link
+          android.support.v7.widget.RecyclerView.Adapter#notifyItemChanged
+          notifyItemChanged()} on an item that is out of view. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202136">Issue
+          202136</a>)
+          </li>
+
+          <li>Fixed a crash that occurs when {@link
+          android.support.v7.widget.RecyclerView.LayoutManager
+          RecyclerView.LayoutManager} adds and removes a view in the same
+          measurement pass. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=193958">Issue
+          193958</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-mediarouter">v7
+        mediarouter library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a crash that occurs when calling {@link
+          android.support.v7.media.MediaRouter#getInstance
+          MediaRouter.getInstance()} on API level 17. (<a class="external-link"
+            href=
+            "https://code.google.com/p/android/issues/detail?id=180654">Issue
+            180654</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v17-leanback">v17
+        Leanback Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue with {@code GridLayout.onAddFocusables()} that
+          caused the wrong item to be selected.
+          </li>
+
+          <li>Fixed issue with {@link
+          android.support.v17.leanback.app.GuidedStepFragment} actions
+          disappearing after an action was collapsed.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a {@link android.support.design.widget.TabLayout} crash
+          caused by tab-pooling. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201827">Issue
+          201827</a>)
+          </li>
+
+          <li>Fixed a bug in {@link
+          android.support.design.widget.NavigationView} that caused the wrong
+          color to be selected. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201951">Issue
+          201951</a>)
+          </li>
+
+          <li>Fixed a bug where {@link
+          android.support.design.widget.FloatingActionButton#setBackgroundTintList
+          setBackgroundTintList()} was no longer able to change the background
+          color. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201873">Issue
+          201873</a>)
+          </li>
+
+          <li>Fixed an issue where {@link
+          android.support.design.widget.AppBarLayout} did not completely scroll
+          out of view when used with {@code android:fitsSystemWindows = “true”}.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201822">Issue
+          201822</a>)
+          </li>
+
+          <li>Fixed an issue where {@code BottomSheetDialog} did not display
+          short content views correctly. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201793">Issue
+          201793</a>)
+          </li>
+
+          <li>Fixed an issue where {@code BottomSheetDialogFragment} moved
+          sporadically when content inside was changed. (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202125">Issue
+          202125</a>)
+          </li>
+
+          <li>Fixed a crash in TextInputLayout counter <a class="external-link"
+            href=
+            "https://code.google.com/p/android/issues/detail?id=202051">link</a>
+          </li>
+
+          <li>Fixed a crash that occured when {@link
+          android.support.design.widget.TextInputLayout#getCounterMaxLength
+          TextInputLayout.getCounterMaxLength()} restored a saved state.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202375">Issue
+          202375</a>)
+          </li>
+
+          <li>Fixed a {@code ClassCastException} that occurred when restoring a
+          {@link android.support.design.widget.CoordinatorLayout} using the
+          saved state of a view that was not a {@link
+          android.support.design.widget.CoordinatorLayout}.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for VectorDrawableCompat:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where the wrong variable was read for {@code
+          android:tintMode}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=201907">Issue
+          201907</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+<!-- end of collapsible section: 23.2.1 -->
+
+<div class="toggle-content closed">
+  <p id="rev23-2-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
+    alt="">Android Support Library, revision 23.2.0</a> <em>(February
+    2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href="features.html#v4">v4 Support library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added {@code MediaBrowserCompat} for {@link
+          android.media.browse.MediaBrowser} support, and {@code
+          MediaBrowserServiceCompat} for {@link
+          android.service.media.MediaBrowserService} support. This is useful
+          when connecting a media app’s background service with UI components,
+          and integrating with Android Auto and Android Wear without requiring
+          API level 21 or higher.
+          </li>
+
+          <li>The system now calls {@link
+          android.support.v4.app.FragmentActivity#onActivityResult onActivityResult()} for a
+          nested {@link android.support.v4.app.FragmentActivity}.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href="features.html#v7-appcompat">v7 AppCompat
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added Night Mode functionality to API level 14 and higher. Switch
+          between <a href="{@docRoot}training/material/theme.html">Material
+          Light and Material Dark Themes</a> based on the time of day or
+          app-specific setting.
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>Day and night themes can be found here: {@code
+              &lt;sdk&gt;/extras/android/support/v7/appcompat/res/values/themes_daynight.xml}
+              </li>
+
+              <li>{@code AppCompatDelegate.setDefaultNightMode()}: sets the
+              app’s default mode by passing one of the following constants:
+              </li>
+
+              <li style="list-style: none; display: inline">
+                <ul>
+                  <li>{@code MODE_NIGHT_AUTO}
+                  </li>
+
+                  <li>{@code MODE_NIGHT_NO}
+                  </li>
+
+                  <li>{@code MODE_NIGHT_YES}
+                  </li>
+
+                  <li>{@code MODE_NIGHT_FOLLOW_SYSTEM}
+                  </li>
+                </ul>
+              </li>
+
+              <li>{@code AppCompatDelegate.setLocalNightMode()}: overrides
+              the night mode setting for the local app component.
+              </li>
+
+              <li>{@code AppCompatDelegate.getDefaultNightMode()}: returns
+              the default night mode.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href="features.html#v7-mediarouter">v7 mediarouter
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>{@link android.support.v7.app.MediaRouteControllerDialog} now
+          correctly applies custom app theme colors.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href="features.html#design">Design support library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added support for <a href=
+          "https://www.google.com/design/spec/components/bottom-sheets.html">bottom
+          sheets</a>. An interaction plugin, {@code
+          BottomSheetBehavior}, allows a child view of a {@link
+          android.support.design.widget.CoordinatorLayout} to act as
+          a bottom sheet. The base class, {@code BottomSheetCallback}, provides
+          callbacks to monitor bottom sheet events.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for the <a href="features.html#custom-tabs">CustomTabs support
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>
+            <a href=
+            "https://developer.chrome.com/multidevice/android/customtabs">Chrome
+            Custom Tabs</a> now allows apps to include a bottom bar with action
+            buttons in addition to the existing top action button.
+          </li>
+
+          <li>{@code CustomTabsIntent.Builder.addToolBarItem()}: adds an action
+          button to a custom tab. You can use this to add multiple buttons.
+          </li>
+
+          <li>{@code CustomTabsSession.setToolBarItem()}: updates the visuals
+          for toolbar items. This method will only succeed if it is given a
+          valid id and the browser session is in the foreground.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Added VectorDrawable support library:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added Classes:
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>{@code VectorDrawableCompat}
+              </li>
+
+              <li>{@code AnimatedVectorDrawableCompat}
+              </li>
+            </ul>
+          </li>
+
+          <li>Adds support for {@link
+          android.graphics.drawable.VectorDrawable} assets to apps
+          running on API level 7 or higher. {@link
+          android.graphics.drawable.AnimatedVectorDrawable} assets
+          are also supported on API level 11 or higher. Vector assets can be
+          considerably smaller than image assets and should help reduce app
+          size by reducing the amount of assets required to support multiple
+          device screens.
+          </li>
+
+          <li>This library is now a dependency of the <a href=
+          "features.html#v7-appcompat">v7 AppCompat library</a>, allowing
+          developers and <a href="features.html#v7-appcompat">AppCompat </a>
+          to easily use vector drawables. To use {@code
+          VectorDrawableCompat} within an {@link android.widget.ImageButton} or
+          {@link android.widget.ImageView}, use the {@code app:srcCompat} XML
+          attribute or {@code setImageResource()}
+          method.
+          </li>
+
+          <li>To keep referencing attribute IDs on API level 20 or
+          lower, add the following {@code appt} flag to your {@code
+          build,gradle} file:
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>If you are building with Android Plugin for Gradle 1.5.0 or
+              lower, add the following to your {@code build.gradle} file:
+              </li>
+
+              <li style="list-style: none; display: inline">
+                <pre>
+android {
+  defaultConfig {
+    // Stops the Gradle’s automatic rasterization of vectors
+    generatedDensities = []
+  }
+   // Flag that tells aapt to keep the attribute ids
+  aaptOptions {
+    additionalParameters "--no-version-vectors"
+  }
+}
+</pre>
+              </li>
+
+              <li>If you are building with Android Plugin for Gradle 2.0.0 or
+              higher, add the following to your {@code build.gradle} file:
+              </li>
+
+              <li style="list-style: none; display: inline">
+                <pre>
+android {
+  defaultConfig {
+    vectorDrawables.useSupportLibrary = true
+  }
+}
+</pre>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href="features.html#v17-leanback">v17 Leanback
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added new capabilities to {@link android.support.v17.leanback.app.GuidedStepFragment},
+          which is a component that guides users through a decision or series of decisions:
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>Added button actions to {@link
+              android.support.v17.leanback.widget.GuidedAction}:
+              </li>
+
+                <ul>
+                  <li>{@code GuidedStepFragment.setButtonActions()}: sets a list of
+                  {@link android.support.v17.leanback.widget.GuidedAction} buttons that
+                  the user may select from the Actions view.
+                  </li>
+                </ul>
+              </li>
+
+              <li>Description fields are now editable:
+              </li>
+
+              <li style="list-style: none; display: inline">
+                <ul>
+                  <li>{@code GuidedAction.Builder.descriptionEditable()}: when passing
+                  {@code true}, sets the action’s description to be editable.
+                  </li>
+
+                  <li>{@code GuidedAction.getEditDescription()}: returns the editable
+                  description as a {@code CharSequence}.
+                  </li>
+                </ul>
+              </li>
+
+              <li>Added drop-down lists of sub-actions:
+              </li>
+
+              <li style="list-style: none; display: inline">
+                <ul>
+                  <li>{@code GuidedAction.setSubActions()}: sets a {@link
+                  android.support.v17.leanback.widget.GuidedAction} list as a drop-down
+                  menu of sub-actions.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+
+          <li>Added the {@code GuidedDatePickerAction} widget for {@link
+          android.widget.DatePicker} functionality:
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>The date is selected using year, month, and day columns and has a
+              customizable range.
+              </li>
+
+              <li>{@code GuidedDatePickerAction.Builder}: builder class for the {@code
+              GuidedDatePickerAction} object.
+              </li>
+
+              <li>{@code GuidedDatePickerAction.Builder.datePickerFormat(String
+              datePickerFormat)}: set the desired date format by passing the
+              appropriate three-character {@code String}, e.g. {@code “YMD”} or {@code
+              “MDY”}. Alternatively, use the {@code datePickerFormat} XML attribute.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>
+        Changes for <a href="features.html#v7-recyclerview">v7 RecyclerView
+        library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>{@link android.support.v7.widget.RecyclerView} now has an opt-in
+          feature called <em>AutoMeasure</em> which allows {@link
+          android.support.v7.widget.RecyclerView.LayoutManager} to easily wrap
+          content or handle various measurement specifications provided by the
+          parent of the {@link android.support.v7.widget.RecyclerView}. It
+          supports all existing animation capabilities of the {@link
+          android.support.v7.widget.RecyclerView}.
+          </li>
+
+          <li style="list-style: none; display: inline">
+            <ul>
+              <li>If you have a custom {@link
+              android.support.v7.widget.RecyclerView.LayoutManager},
+              call {@code setAutoMeasureEnabled(true)} to start using the new
+              AutoMeasure API. All built-in {@link
+              android.support.v7.widget.RecyclerView.LayoutManager} objects
+              enable auto-measure by default.
+              </li>
+
+              <li>{@link android.support.v7.widget.RecyclerView.LayoutManager}
+              no longer ignores some {@link
+              android.support.v7.widget.RecyclerView.LayoutParams} settings,
+              such as {@code MATCH_PARENT} in the scroll direction.
+                <p class="note">
+                  <strong>Note:</strong> These lifted restrictions may cause
+                  unexpected behavior in your layouts. Make sure you specify
+                  the correct layout parameters.
+                </p>
+              </li>
+            </ul>
+          </li>
+
+          <li>When updating a {@link
+          android.support.v7.widget.RecyclerView.ViewHolder} with payload
+          information, {@link android.support.v7.widget.DefaultItemAnimator}
+          now disables change animations.
+          </li>
+
+          <li>You can now modify the {@link
+          android.support.v7.widget.helper.ItemTouchHelper} escape velocity to
+          control swipe sensitivity. To make it easier or harder to swipe,
+          override {@code getSwipeEscapeVelocity(float defaultValue)} and modify {@code defaultValue}.
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+<!-- end of collapsible section: 23.2.0 -->
+
+<div class="toggle-content closed">
+  <p id="rev23-1-1"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23.1.1</a> <em>(November 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed a crash that occurs when you perform a swipe-to-dismiss action that the
+            {@code ItemTouchHelper} utility class provides, and then add an item.
+            (<a href="http://b.android.com/190500">Issue 190500</a>)</li>
+         </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-preference">v7 preference library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed an issue with ProGuard usage.
+          (<a href="http://b.android.com/183261">Issue 183261</a>)</li>
+         </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 Leanback Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed a number of internal issues in this library.</li>
+         </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the <code>getHeaderView</code> method to the <code>NavigationView</code> class.</li>
+          <li>Fixed a transparent background issue for a <code>FloatingActionButton</code> object on
+          devices running Android 4.0 (API level 15) and lower.
+          (<a href="http://b.android.com/183315">Issue 183315</a>)</li>
+         </ul>
+       </dd>
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev23-1-0"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23.1.0</a> <em>(October 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 Support library:</a></dt>
+       <dd>
+        <ul>
+           <li>Added <code>OnScrollChangedListener</code> interface support to the
+            <code>NestedScrollView</code> widget. It
+            allows you to receive callbacks when the scroll X or Y positions change.</li>
+          <li>Added a <code>MediaButtonReceiver</code> class to forward received playback controls
+            to a service that’s managing the <code>MediaSessionCompat</code> class. The
+            <code>MediaSessionCompat</code> class has a
+            constructor that can automatically find a media button receiver in the manifest. A
+            media button receiver is a key part to <a href=
+          "http://developer.android.com/training/managing-audio/volume-playback.html#PlaybackControls">handling
+          playback controls</a> from hardware or bluetooth controls.</li>
+        </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library:</a></dt>
+       <dd>
+        <ul>
+          <li>Added material design <code>Seekbar</code> and <code>ImageButton</code> widgets.</li>
+          <li>Updated the <code>ImageView</code> widget to support the tint feature.</li>
+          <li>Updated the look-and-feel of the <code>SwitchCompat</code> widget.</li>
+         </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-mediarouter">v7 mediarouter library:</a></dt>
+       <dd>
+        <ul>
+        <li>Added the following features to the <code>MediaRouteChooserDialog</code> class:</li>
+        <ul>
+          <li>Displays a loading page while discovering media route providers.</li>
+          <li>Includes a device type icon for easier device identification.</li>
+          <li>Sorts the routes according to frequency of use in the current app.</li>
+          <li>Supports landscape mode.</li>
+        </ul>
+        </ul>
+        <ul>
+        <li>Added the following features to the <code>MediaRouteControllerDialog</code> class:</li>
+        <ul>
+           <li>Recognizes screen casting and provides a proper description.</li>
+           <li>Supports various album art sizes and aspect ratios, and loads the art asynchronously.</li>
+           <li>Automatically selects the content color based on the primary color of the app.</li>
+           <li>Adjusts the dialog layout based on available screen space on the device.</li>
+           <li>Supports landscape mode.</li>
+        </ul>
+        </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-palette">v7 palette library:</a></dt>
+       <dd>
+        <ul>
+          <li>Added the <code>setRegion()</code> method to support extracting color from a specific
+            region of a <code>Bitmap</code> object.</li>
+         </ul>
+       </dd>
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library:</a></dt>
+       <dd>
+        <ul>
+        <li>Added an improved animation API to the <code>ItemAnimator</code> class for better
+          customizations:</li>
+           <ul>
+           <li>Change animations no longer enforce two copies of the <code>ViewHolder</code> object,
+            which enables item content animations. Also, the <code>ItemAnimator</code> object
+            decides whether it wants to reuse the same <code>ViewHolder</code> object or create a
+            new one.</li>
+           <li>The new information record API gives the <code>ItemAnimator</code> class the flexibility
+            to collect data at the correct point in the layout lifecycle. This information is later
+            passed into the animate callbacks.</li>
+            </ul>
+         </ul>
+          <ul>
+          <li>Provided an easy transition plan for this backward-incompatible API change:</li>
+           <ul>
+           <li>If you’ve previously extended the <code>ItemAnimator</code> class, you can change
+            your base class to <code>SimpleItemAnimator</code> and your code should work as before.
+            The <code>SimpleItemAnimator</code> class provides the old API by wrapping the new API.</li>
+           <li>Some methods were removed from the <code>ItemAnimator</code> class. The following
+            code will no longer compile:</li>
+           <pre>recyclerView.getItemAnimator().setSupportsChangeAnimations(false)</pre>
+           <p>You can replace it with:</p>
+           <pre>
+ItemAnimator animator = recyclerView.getItemAnimator();
+if (animator instanceof SimpleItemAnimator) {
+   ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+}
+           </pre>
+          </ul>
+         </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-preference">v7</a>,
+          <a href="features.html#v14-preference">v14</a>, and
+          <a href="features.html#v17-preference">v17</a> Preference Support library:</dt>
+       <dd>
+        <ul>
+          <li>Removed APIs for controlling <code>EditText</code> dialogs.</li>
+         </ul>
+       </dd>
+
+     <dt>Changes for <a href="features.html#v17-leanback">v17 Leanback Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added a version of the <code>GuidedStepFragment</code> class for the Support library
+            (extends <code>android.support.v4.app.Fragment</code>), and improved animations and
+            transitions.</li>
+          <li>Updated the <code>GuidedStepFragment</code> class so it can be placed on top of
+            existing content.</li>
+          <li>Added the ability to annotate different types of search completions to the
+          <code>SearchFragment</code> class.</li>
+          <li>Added staggered slide transition support to the <code>VerticalGridFragment</code>
+            class.</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added <a href=
+  "https://www.google.com/design/spec/components/text-fields.html#text-fields-character-counter">
+          character counting</a> support to the <code>TextInputLayout</code> widget.</li>
+          <li>Added edge snapping support to the <code>AppBarLayout</code> class by adding the
+            <code>SCROLL_FLAG_SNAP</code> constant. When scrolling ends, if the view is only
+            partially visible, the view is snapped and scrolled to its closest edge.</li>
+          <li>Added support for custom views to the <code>NavigationView</code> class by using the
+            <code>app:actionLayout</code> attribute or <code>MenuItemCompat.setActionView()</code>
+            method.</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#custom-tabs">Custom Tabs Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the <code>enableUrlBarHiding()</code> method to the <code>CustomTabsIntent</code>
+            class. It lets the client customize whether the URL bar should be hidden automatically
+            on scroll down.</li>
+          <li>Added the <code>setActionButton()</code> method to the <code>CustomTabsSession</code>
+            class. It lets the client
+            change the icon for a custom action button in an already launched custom tab.</li>
+          <li>Added the <code>TAB_SHOWN</code> and <code>TAB_HIDDEN</code> constants as new events
+            for the <code>onNavigationEvent</code> method of the <code>CustomTabsCallback</code>
+            class.</li>
+         </ul>
+       </dd>
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23-0-1"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23.0.1</a> <em>(September 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v7-preference">v7</a> and
+          <a href="features.html#v14-preference">v14</a> Preference Support library:</dt>
+       <dd>
+        <ul>
+          <li>Added the material design layout and style files.
+          (<a href="http://b.android.com/183376">Issue 183376</a>)</li>
+         </ul>
+       </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library:</a></dt>
+       <dd>
+        <ul>
+          <li>Fixed crash issues for the {@link android.app.Fragment} class by limiting the use of
+              hardware layers to Android 4.1 (API level 16) and higher.
+          (<a href="http://b.android.com/183896">Issue 183896</a>)</li>
+          <li>Fixed an issue where hardware buttons did not work when an activity had set the
+            {@link android.widget.Toolbar} class to act as the
+            {@link android.app.ActionBar} by using the <code>setSupportActionBar()</code> method.
+          (<a href="http://b.android.com/183334">Issue 183334</a>)</li>
+          <li>Updated the {@link android.support.v7.app.AppCompatDialogFragment} class so it
+            no longer throws the {@code Windows feature must be requested before adding content}
+            error.
+          (<a href="http://b.android.com/183186">Issue 183186</a>)</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Fixed the
+            {@link android.support.design.widget.AppBarLayout} class so it now draws correctly after
+            rotation.
+          (<a href="http://b.android.com/183109">Issue 183109</a>)</li>
+          <li>Fixed the
+            {@link android.support.design.widget.TabLayout} class so it now behaves correctly when a
+            user clicks after a swipe.
+          (<a href="http://b.android.com/183123">Issue 183123</a>)</li>
+         </ul>
+       </dd>
+
+
+     <dt>Changes for <a href="features.html#custom-tabs">Custom Tabs Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Lowered the
+          <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>minSdkVersion</code></a>
+              value from 16 to 15 for version support.</li>
+          <li>Added a way to generate a
+            {@link android.support.customtabs.CustomTabsSessionToken} from an intent.</li>
+         </ul>
+       </dd>
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+<div class="toggle-content closed">
+  <p id="rev23"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 23</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+     <dt>Added new support libraries:</a></dt>
+      <dd>
+        <ul>
+          <li><a href="features.html#custom-tabs">Custom Tabs Support library</a></li>
+          <li><a href="features.html#percent">Percent Support library</a></li>
+          <li><a href="features.html#recommendation">App Recommendation Support library for TV</a></li>
+          <li><a href="features.html#v7-preference">v7 Preference Support library</a></li>
+          <li><a href="features.html#v14-preference">v14 Preference Support library</a></li>
+          <li><a href="features.html#v17-preference">v17 Preference Support library for TV</a></li>
+         </ul>
+       </dd>
+
+    </dl>
+
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/23/changes.html">Support
+    Library API Differences Report</a>.  </p>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev22-2-1"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.2.1</a> <em>(July 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the {@code hide()} and {@code show()} methods to the
+            {@link android.support.design.widget.FloatingActionButton} class for programmatic
+            triggering of animations.  </li>
+          <li>Added the {@code LENGTH_INDEFINITE} constant to the
+            {@link android.support.design.widget.Snackbar} class for showing a snackbar
+            until it is dismissed or another snackbar is shown. Also, added the
+            {@link android.support.design.widget.Snackbar#setActionTextColor(int)} and
+            {@link android.support.design.widget.Snackbar#setActionTextColor(ColorStateList)}
+            methods.  </li>
+          <li>Added the {@code getSelectedTabPosition()} method to the
+            {@link android.support.design.widget.TabLayout} class for retrieving the currently
+            selected tab. </li>
+          <li>Provided a fully fluent API for the
+            {@link android.support.v7.app.NotificationCompat.MediaStyle} class for method
+            chaining.  </li>
+           <li>Added convenience methods to the
+             {@link android.support.v7.widget.RecyclerView} for batch insertion of items. </li>
+         </ul>
+       </dd>
+    </dl>
+
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/22.2.0/changes.html">Support
+    Library API Differences Report</a>.  </p>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.2.0</a> <em>(May 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Added <a href="features.html#design">Design Support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.design.widget.TextInputLayout} for showing
+            {@link android.widget.EditText} hint and error text as floating labels.
+          </li>
+          <li>Added {@link android.support.design.widget.FloatingActionButton} for implementing a
+            primary action on your interface as a
+            floating action button, supporting either default or mini sizes.
+          </li>
+          <li>Added {@link android.support.design.widget.Snackbar} for providing lightweight
+            feedback with an optional action in an animated snackbar.
+          </li>
+          <li>Added {@link android.support.design.widget.TabLayout} for implementing fixed and
+            scrollable
+           <a href="{@docRoot}design/building-blocks/tabs.html">tabs</a> as well as easy
+             integration with
+             {@link android.support.v4.view.ViewPager}.
+          </li>
+          <li>Added {@link android.support.design.widget.NavigationView} for implementing
+            <a href="{@docRoot}design/patterns/navigation-drawer.html">navigation drawer</a>
+             contents, including the ability to inflate menu items via a
+             <a href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a>.
+          </li>
+          <li>Added {@link android.support.design.widget.CoordinatorLayout}, a general purpose
+            layout, used for building dependencies between
+            sibling views and allowing easy scrolling reactions between components via
+            {@link android.support.design.widget.CoordinatorLayout.Behavior}. Many of the Design
+            Library components rely on being a child of a
+            {@link android.support.design.widget.CoordinatorLayout}.
+          </li>
+          <li>Added {@link android.support.design.widget.AppBarLayout}, a container for a
+            {@link android.widget.Toolbar}
+            and other views (such as {@link android.support.design.widget.TabLayout}) for
+            reacting to scrolling events by scrolling off the screen, becoming visible in reaction
+            to a downward scroll, or collapsing/uncollapsing before scrolling off/onto the screen.
+          </li>
+          <li>Added {@link android.support.design.widget.CollapsingToolbarLayout} for controlling
+            how a {@link android.widget.Toolbar} collapses. A toolbar may collapse by:
+            pinning components to the top of the screen while it collapses, introducing
+            parallax scrolling of components such as an {@link android.widget.ImageView},
+            or adding a content scrim color when the view is partially collapsed.
+          </li>
+       </ul>
+      </dt>
+
+
+
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+         <ul>
+
+          <li>Added the
+{@link android.support.v4.view.accessibility.AccessibilityEventCompat#getContentChangeTypes getContentChangeTypes()}
+            and
+{@link android.support.v4.view.accessibility.AccessibilityEventCompat#setContentChangeTypes setContentChangeTypes()}
+            methods and related change type
+            fields to the
+            {@link android.support.v4.view.accessibility.AccessibilityEventCompat}
+            class for accessibility event handling.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat#getActiveQueueItemId getActiveQueueItemId()},
+{@link android.support.v4.media.session.PlaybackStateCompat#getCustomActions getCustomActions()},
+            and
+            {@link android.support.v4.media.session.PlaybackStateCompat#getExtras getExtras()}
+            methods with related state fields to the
+            {@link android.support.v4.media.session.PlaybackStateCompat} class for
+            getting custom actions from the queue.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat.Builder#addCustomAction addCustomAction()},
+{@link android.support.v4.media.session.PlaybackStateCompat.Builder#setActiveQueueItemId setActiveQueueItemId()},
+            and
+            {@link android.support.v4.media.session.PlaybackStateCompat.Builder#setExtras setExtras()}
+            methods to the
+            {@link android.support.v4.media.session.PlaybackStateCompat.Builder} class for adding
+            custom actions to a playback state.
+          </li>
+          <li>Added the
+{@link android.support.v4.media.session.PlaybackStateCompat.CustomAction#fromCustomAction fromCustomAction()} and
+{@link android.support.v4.media.session.PlaybackStateCompat.CustomAction#getCustomAction getCustomAction()} methods
+            to the
+            {@link android.support.v4.media.session.PlaybackStateCompat.CustomAction} class
+            for getting custom actions from the queue.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewCompat#isAttachedToWindow isAttachedToWindow()},
+            {@link android.support.v4.view.ViewCompat#offsetLeftAndRight offsetLeftAndRight()}, and
+            {@link android.support.v4.view.ViewCompat#offsetTopAndBottom offsetTopAndBottom()}
+            methods to the {@link android.support.v4.view.ViewCompat} class for working with views.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewPager#addOnPageChangeListener addOnPageChangeListener()},
+            {@link android.support.v4.view.ViewPager#clearOnPageChangeListeners clearOnPageChangeListeners()}, and
+            {@link android.support.v4.view.ViewPager#removeOnPageChangeListener removeOnPageChangeListener()}
+            methods to the {@link android.support.v4.view.ViewPager} class for responding to page
+            changes.
+            <p>Deprecated the
+            {@link android.support.v4.view.ViewPager#setOnPageChangeListener setOnPageChangeListener()} method.</p>
+          </li>
+          <li>Added the
+{@link android.support.v4.view.ViewParentCompat#notifySubtreeAccessibilityStateChanged notifySubtreeAccessibilityStateChanged()} method to
+            the {@link android.support.v4.view.ViewParentCompat} class for notifying a view parent
+            that the accessibility state of one of its descendants has changed.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewPropertyAnimatorCompat#translationZ translationZ()},
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#translationZBy translationZBy()},
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#z z()}, and
+            {@link android.support.v4.view.ViewPropertyAnimatorCompat#zBy zBy()}
+            methods to the {@link android.support.v4.view.ViewPropertyAnimatorCompat} class for
+            adding animation.
+          </li>
+       </ul>
+      </dd>
+
+
+
+<dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+<ul>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatActivity#onWindowStartingSupportActionMode onWindowStartingSupportActionMode()}
+            method to the
+            {@link android.support.v7.app.AppCompatActivity},
+            {@link android.support.v7.app.AppCompatCallback}, and
+            {@link android.support.v7.app.AppCompatDialog} classes for handling action modes
+            started from the current window.
+          </li>
+
+          <li>Added the
+{@link android.support.v7.app.AppCompatDelegate#isHandleNativeActionModesEnabled isHandleNativeActionModesEnabled()} and
+{@link android.support.v7.app.AppCompatDelegate#setHandleNativeActionModesEnabled setHandleNativeActionModesEnabled()}
+           methods to the
+           {@link android.support.v7.app.AppCompatDelegate} class for handling native action modes.
+          </li>
+       </ul>
+      </dd>
+
+    <p>For a complete list of the Support Library changes, see the
+    <a href="{@docRoot}sdk/support_api_diff/22.2.0/changes.html">Support
+    Library API Differences Report</a>.  </p>
+
+    </dl>
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22.1.0</a> <em>(April 2015)</em>
+  </p>
+
+
+
+  <div class="toggle-content-toggleme">
+    <dl>
+
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#annotations">annotations library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added the Annotations library to provide support for enhanced code inspections.
+            Annotations are added as metadata tags that you attach to variables, parameters,
+            and return values to inspect method return values, passed parameters, and local
+            variables and fields.
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+
+          <li>Added the {@link android.support.v4.graphics.ColorUtils ColorUtils} class
+            to provide a set of color-related utility methods.
+          </li>
+          <li>Added the {@link android.support.v4.graphics.drawable.DrawableCompat#unwrap unwrap()} and
+            {@link android.support.v4.graphics.drawable.DrawableCompat#wrap wrap()} methods to the
+            {@link android.support.v4.graphics.drawable.DrawableCompat} class , allowing you to use
+            {@link android.support.v4.graphics.drawable.DrawableCompat#setTint setTint()},
+            {@link android.support.v4.graphics.drawable.DrawableCompat#setTintList setTintList()},
+            and {@link android.support.v4.graphics.drawable.DrawableCompat#setTintMode setTintMode()}
+            on all API level 4 or higher devices.
+          </li>
+          <li>Added the {@link android.support.v4.os.TraceCompat} class to
+            write trace events to the system trace buffer, which can then be collected and
+            visualized using the <a href="{@docRoot}tools/help/systrace.html">Systrace</a> tool.
+          </li>
+          <li>Added the {@link android.support.v4.util.CircularIntArray} class
+            to create circular integer array data structures.
+          </li>
+          <li>Added the {@link android.support.v4.util.CircularArray#clear clear()},
+            {@link android.support.v4.util.CircularArray#removeFromStart removeFromStart()},
+            and {@link android.support.v4.util.CircularArray#removeFromEnd removeFromEnd()}
+            methods to the {@link android.support.v4.util.CircularArray} class. Also, changed the
+            existing methods in this class to be non-final.
+          </li>
+          <li>Added the {@link android.support.v4.view.InputDeviceCompat}
+            as a helper class to access data in the
+            {@link android.support.v4.view.InputDeviceCompat} class.
+          </li>
+          <li>Added the {@link android.support.v4.view.LayoutInflaterCompat}
+            class as a helper class to access data in the
+            {@link android.support.v4.view.LayoutInflaterCompat} class
+            and added the {@link android.support.v4.view.LayoutInflaterFactory} interface.
+          </li>
+          <li>Added classes, methods, and interfaces to support nested scrolling.
+             <ul>
+               <li>Added the {@link android.support.v4.view.NestedScrollingChildHelper}
+               and {@link android.support.v4.view.NestedScrollingParentHelper}
+               helper classes for implementing nested scrolling parent and child views.</li>
+               <li>Added the {@link android.support.v4.view.NestedScrollingChild}
+               interface to be implemented by {@link android.view.View} subclasses.</li>
+               <li>Added the {@link android.support.v4.view.NestedScrollingParent}
+               and {@link android.support.v4.view.ScrollingView} interfaces to support
+               scrolling operations and provide scroll related APIs.</li>
+               <li>Added the
+                {@link android.support.v4.view.ViewGroupCompat#getNestedScrollAxes
+                getNestedScrollAxes()} method to the {@link android.support.v4.view.ViewGroupCompat}
+                class.</li>
+               <li>Added methods to the {@link android.support.v4.view.ViewParentCompat} class to
+                support nested scrolling.
+               </li>
+               <li>Added the {@link android.support.v4.widget.NestedScrollView}
+                 class to support nested scrolling parent and child on both new and old versions of
+                 Android.
+               </li>
+              </ul>
+          </li>
+          <li>Added methods and constants to the {@link android.support.v4.view.MotionEventCompat}
+            class for getting axis values and event source.
+         </li>
+         <li>Updated the {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+          class to add methods for errors, content invalidation and labels.
+         </li>
+         <li>Added the following interpolation classes for animation:
+           {@link android.support.v4.view.animation.FastOutLinearInInterpolator},
+           {@link android.support.v4.view.animation.FastOutSlowInInterpolator},
+           {@link android.support.v4.view.animation.LinearOutSlowInInterpolator},
+           {@link android.support.v4.view.animation.LinearOutSlowInInterpolator}, and
+           {@link android.support.v4.view.animation.PathInterpolatorCompat}.
+         </li>
+         <li>Added the {@link android.support.v4.widget.Space} class to create gaps between
+           components in general purpose layouts. This class is deprecated in the gridlayout library.
+         </li>
+         <li>Added the {@link android.support.v4.widget.TextViewCompat} class for accessing
+           features in a {@link android.widget.TextView}.
+         </li>
+         <li>Added a displacement parameter to the
+           {@link android.support.v4.widget.EdgeEffectCompat#onPull onPull()} method in the
+           {@link android.support.v4.widget.EdgeEffectCompat} class.
+         </li>
+
+       </ul>
+      </dd>
+
+
+  <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added tint support to appcompat widgets, including
+            {@link android.support.v7.widget.AppCompatAutoCompleteTextView},
+            {@link android.support.v7.widget.AppCompatButton},
+            {@link android.support.v7.widget.AppCompatCheckBox},
+            {@link android.support.v7.widget.AppCompatCheckedTextView},
+            {@link android.support.v7.widget.AppCompatEditText},
+            {@link android.support.v7.widget.AppCompatMultiAutoCompleteTextView},
+            {@link android.support.v7.widget.AppCompatRadioButton},
+            {@link android.support.v7.widget.AppCompatRatingBar},
+            {@link android.support.v7.widget.AppCompatSpinner}, and
+            {@link android.support.v7.widget.AppCompatTextView}.
+          </li>
+          <li>Updated the {@link android.support.v7.app.AppCompatActivity} as the base
+            class for activities that use the support library action bar features. This class
+            replaces the deprecated {@link android.support.v7.app.ActionBarActivity}.
+          </li>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatCallback} interface
+            to be implemented for AppCompat to be able to perform callbacks.
+          </li>
+            <li>Added the
+            {@link android.support.v7.app.AppCompatDelegate} abstract class
+            as a delegate you can use to extend AppCompat's support to any activity.
+          </li>
+          <li>Added the
+            {@link android.support.v7.app.AppCompatDialog} class
+            as the base class for AppCompat themed dialogs.
+          </li>
+          <li>Added the spinner style
+            {@link android.support.v7.app.AlertDialog} and
+            {@link android.support.v7.app.AlertDialog.Builder} classes to provide an AppCompat
+            themed {@link android.app.AlertDialog}.
+          </li>
+          <li>Added the {@link android.support.v7.graphics.Palette.Builder} class
+            for generating {@link android.support.v7.graphics.Palette} instances.
+            <ul>
+              <li>Added the
+                {@link android.support.v7.graphics.Palette#from}
+                method to the {@link android.support.v7.graphics.Palette} class to
+                start generating a Palette with the returned
+                {@link android.support.v7.graphics.Palette.Builder} instance.
+              </li>
+              <li>Deprecated the {@link android.support.v7.graphics.Palette#generate generate()} and
+                {@link android.support.v7.graphics.Palette#generateAsync generateAsync()} methods.
+              </li>
+             </ul>
+           </li>
+
+           <li>Added the
+             {@link android.support.v7.widget.GridLayout.Spec#getAbsoluteAlignment
+             getAbsoluteAlignment()} method to the {@link android.support.v7.widget.GridLayout.Spec}
+             class.
+           </li>
+           <li>Deprecated use of <code>app:theme</code> for styling
+             {@link android.support.v7.widget.Toolbar}. You can now use
+             <code>android:theme</code> for toolbars on all API level 7 and higher devices and
+             <code>android:theme</code> support for all widgets on API level 11 and higher devices.
+           </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li> Added {@link android.support.v17.leanback.app.GuidedStepFragment},
+            {@link android.support.v17.leanback.widget.GuidanceStylist} and
+            {@link android.support.v17.leanback.widget.GuidedActionsStylist} to support
+            creating multi-step decision flows.
+          </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library</a>:</dt>
+      <dd>
+        <ul>
+           <li>Added {@link android.support.v7.util.SortedList} classes to display items in
+             a list order and provide notification of changes to the list.
+           </li>
+           <li>Added the {@link android.support.v7.widget.util.SortedListAdapterCallback} class
+             that can bind a sorted list to a
+             {@link android.support.v7.widget.RecyclerView.Adapter} class.
+           </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v8-renderscript">v8 renderscript library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v8.renderscript.ScriptIntrinsicHistogram} class for
+            use as a histogram filter.</li>
+          <li>Added the {@link android.support.v8.renderscript.ScriptIntrinsicResize} class for
+            performing a resize of a 2D allocation.
+          </li>
+        </ul>
+      </dd>
+
+    </dl>
+
+
+  </div>
+</div> <!-- end of collapsible section -->
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22</a> <em>(March 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Updated the {@link android.support.v4.content.res.ResourcesCompat#getDrawable
+            getDrawable()} method to return a drawable object for a specified specific resource ID,
+            screen density, and theme.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewCompat#setImportantForAccessibility
+            setImportantForAccessibility()} method so you can indicate if a view should trigger
+            accessibility events.
+          </li>
+          <li>Added the {@link android.support.v4.widget.DrawerLayout#getStatusBarBackgroundDrawable
+            getStatusBarBackgroundDrawable()} method so you can get the status bar background
+            drawable.
+          </li>
+          <li>Added methods to the
+            {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation}
+            class so Android Auto messaging apps can retrieve additional notification data.
+          </li>
+          <li>Added the {@link android.support.v4.widget.SwipeRefreshLayout#getProgressCircleDiameter
+            getProgressCircleDiameter()} method to return the diameter of a circle layout.
+          </li>
+          <li>Changed the default {@link android.support.v4.widget.DrawerLayout DrawerLayout}
+            status bar color to {@link android.R.attr#colorPrimaryDark}.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the spinner style
+            {@link android.support.v7.appcompat.R.style#Base_Widget_AppCompat_Spinner_Underlined}.</li>
+          <li>Added tinted widgets styles with
+            {@link android.support.v7.appcompat.R.style#Widget_AppCompat_AutoCompleteTextView},
+            {@link android.widget.MultiAutoCompleteTextView},
+            {@link android.support.v7.appcompat.R.style#TextAppearance_AppCompat_Button}, and
+            {@link android.support.v7.appcompat.R.style#Base_Widget_AppCompat_RatingBar}.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v17.leanback.widget.ListRowPresenter#getRecycledPoolSize
+            getRecycledPoolSize()} and
+            {@link android.support.v17.leanback.widget.ListRowPresenter#setRecycledPoolSize
+            setRecycledPoolSize()} methods to allow customized recycled pool sizes.</li>
+          <li>Added the {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} attribute to the
+            layout width setting to support wrapped content for title icons.</li>
+          <li>Defined {@link android.support.v17.leanback.R.transition} in XML to
+            improve transition updates.  </li>
+          <li>Enabled support for right to left layouts.</li>
+          <li>Added the play and pause media key events support to the
+            {@link android.support.v17.leanback.app.PlaybackOverlayFragment} class.</li>
+          <li>Added enter and return transitions to the
+            {@link android.support.v17.leanback.app.BrowseFragment} class and the
+            {@link android.support.v17.leanback.app.DetailsFragment} class.</li>
+          <li>Added the {@link android.support.v17.leanback.widget.ArrayObjectAdapter#replace
+            replace()} method to replace items in an object’s adapter array. </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-mediarouter">v7 mediarouter library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Updated Google Cast icons to use the
+            <a href="{@docRoot}training/material/index.html">material design</a> style.</li>
+          <li>Updated all the icons used in the {@link android.media.MediaRouter} dialogs to use the
+            <a href="{@docRoot}training/material/index.html">material design</a> style.</li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.RecyclerView.ViewHolder#getLayoutPosition
+            getlayoutPosition()}
+            and {@link android.support.v7.widget.RecyclerView.ViewHolder#getAdapterPosition
+            getadapterPosition()} methods to the {@link android.support.v7.widget.RecyclerView}
+            class.</li>
+          <li>Deprecated the <code>classgetChildPosition()</code> and
+            <code>findViewHolderForPosition()</code> methods in the
+            {@link android.support.v7.widget.RecyclerView} class. </li>
+          <li>Deprecated the <code>getPosition()</code> method in the
+            {@link android.support.v7.widget.RecyclerView.ViewHolder} class. </li>
+          <li>Deprecated the <code>getViewPosition()</code> method in the
+            {@link android.support.v7.widget.RecyclerView.LayoutParams} class. </li>
+        </ul>
+      </dd>
+
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.3</a> <em>(December 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added several {@link android.support.v4.app.NotificationCompat.WearableExtender}
+          methods to improve the display of barcodes in notifications on wearable devices.
+             <ul>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#getHintScreenTimeout getHintScreenTimeout()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintScreenTimeout setHintScreenTimeout()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#getHintAvoidBackgroundClipping getHintAvoidBackgroundClipping()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintAvoidBackgroundClipping setHintAvoidBackgroundClipping()}</li>
+             </ul>
+          </li>
+        </ul>
+      </dd>
+
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.2</a> <em>(November 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.app.NotificationCompat.CarExtender}
+          class to support Android Auto extensions to notifications.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.PopupMenu} constructor to support new popup
+          menus.</li>
+          <li>Added support for a Collapse icon description in the {@link android.support.v7.widget.Toolbar}
+          class.</li>
+          <li>Updated the {@link android.support.v7.widget.SearchView} widget to support displaying
+          the {@link android.support.v7.appcompat.R.attr#commitIcon}. </li>
+          <li>Removed the <code>buttonGravity</code> attribute from the
+          {@link android.support.v7.widget.Toolbar} class. </li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-cardview">v7 cardview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.CardView#setCardBackgroundColor} API to
+          support changing the background color of the {@link android.support.v7.widget.CardView}.</li>
+          <li>Changed the {@link android.support.v7.widget.CardView} to more accurately report its
+          opacity value as {@link android.graphics.PixelFormat#TRANSLUCENT}.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.RecyclerView#TOUCH_SLOP_DEFAULT} and
+          {@link android.support.v7.widget.RecyclerView#TOUCH_SLOP_PAGING} constants
+          to the {@link android.support.v7.widget.RecyclerView} class
+          to support touch slop configurations for paging.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support to generate v4 code fragments. </li>
+          <li>Changed the secondary text color on {@link android.support.v7.widget.CardView}. </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.1</a> <em>(November 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Added <a href="{@docRoot}tools/support-library/features.html#multidex">
+      multidex support library</a> to support multiple
+      <a href="https://source.android.com/devices/tech/dalvik/">Dalvik</a> Executable (DEX) files
+      for multi-dex file support prior to Android 5.0.
+      </dt>
+    </dl>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21</a> <em>(October 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added support for {@link android.support.v4.app.Fragment}
+              transitions for devices running Android 5.0 (API level 21).
+              Be aware that transitions have no effect on devices running
+              Android 4.4 and lower.
+          </li>
+          <li>Added {@link android.support.v4.provider.DocumentFile} to ease
+              the transition from {@link java.io.File}
+              while working with document trees. However, this class demands
+              more processing overhead compared to the platform's
+              {@link android.provider.DocumentsContract} API added in
+              Android 4.4 (API level 19). So you should switch to using {@link
+              android.provider.DocumentsContract} when running on Android 4.4
+              and higher.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support for <a href="{@docRoot}design/material/">material
+              design</a> user interfaces.</li>
+          <li>Added {@link android.support.v7.widget.Toolbar}, which generalizes
+              the functionality of {@link android.support.v7.app.ActionBar} for
+              use within app layouts.</li>
+          <li>Updated {@link android.support.v7.app.ActionBarDrawerToggle},
+              which contains the menu-to-arrow animation</li>
+          <li>Updated common user interface widgets to allow tinting via theme
+              attributes when running on pre-Android 5.0 devices</li>
+          <li>Added {@link android.support.v7.widget.SwitchCompat}, a backport
+              of the {@link android.widget.Switch} widget that was added in
+              Android 4.0 (API level 14).</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-cardview">v7 cardview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.CardView} widget, which
+            provides a material design-compatible implementation for displaying
+            data items.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-recyclerview">v7 recyclerview
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.RecyclerView} widget,
+            which provides a flexible list view for providing a limited window
+            into a large data set.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v7-palette">v7 palette library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.graphics.Palette} class,
+          which lets you extract prominent colors from an image.</li>
+        </ul>
+      </dd>
+      <dt>New <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support for building TV user interfaces, including
+            {@link android.support.v17.leanback.app.BrowseFragment},
+            {@link android.support.v17.leanback.app.DetailsFragment}, and
+            {@link android.support.v17.leanback.app.PlaybackOverlayFragment}.
+            For more information about using these user interface widgets,
+            see <a href="{@docRoot}training/tv/playback/index.html">Building TV
+            Playback Apps</a>.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 20</a> <em>(July 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added extended notification support for Android Wear in
+            {@link android.support.v4.app.NotificationCompat.WearableExtender}, which allows you
+            to specify wearable-specific features in your notifications.</li>
+          <li>Added {@link android.support.v4.app.NotificationCompat.Action.WearableExtender},
+            which allows actions to be added on wearable notifications.</li>
+          <li>Added {@link android.support.v4.app.NotificationManagerCompat}, which allows you
+            to issue notifications that properly support wearable features.</li>
+          <li>Added {@link android.support.v4.app.RemoteInput}, which allows a handheld device
+            to receive voice input from a notification that appears on a wearable device.</li>
+          <li>Improved the handling of touch feedback in
+            {@link android.support.v4.widget.SwipeRefreshLayout}.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19.1.0</a> <em>(March 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v4.widget.SwipeRefreshLayout} class,
+              which enables users to refresh the contents of a view with a vertical
+              swipe gesture.</li>
+          <li>Fixed accessibility issues with navigation drawers.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 appcompat library:</dt>
+      <dd>
+        <ul>
+          <li>Fixed background issues with the action bar.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19.0.1</a> <em>(December 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Improved {@link android.support.v4.print.PrintHelper} by adding asynchronous
+            handling of printing.</li>
+          <li>Fixed the {@link android.support.v4.widget.DrawerLayout} class approximation of
+            the {@link android.view.View#addChildrenForAccessibility addChildrenForAccessibility()}
+            method.</li>
+          <li>Fixed slide drawable mirroring in {@link
+            android.support.v4.app.ActionBarDrawerToggle}.</li>
+          <li>Fixed off-by-one issue when removing an item from a collection iterator.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 mediarouter library:</dt>
+      <dd>
+        <ul>
+          <li>Improved route identification by using full component name in the {@link
+            android.support.v7.media.MediaRouteProvider.ProviderMetadata}.</li>
+          <li>Updated {@link android.support.v7.app.MediaRouteChooserDialog} to hide disabled
+            routes.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v8-renderscript">v8 renderscript library</a></dt>
+      <dd>
+        <ul>
+          <li>Added error propagation for the RenderScript thunking layer.</li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 19</a> <em>(October 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for external Storage APIs with the
+            {@link android.support.v4.content.ContextCompat#getObbDirs getObbDirs()},
+            {@link android.support.v4.content.ContextCompat#getExternalFilesDirs getExternalFilesDirs()},
+            {@link android.support.v4.content.ContextCompat#getExternalCacheDirs getExternalCacheDirs()},
+            and {@link android.support.v4.os.EnvironmentCompat#getStorageState getStorageState()}.
+            These helper methods always return a single file object on devices running Android
+            4.3 (API level 18) and earlier. When running on Android 4.4 (API level 19) and higher,
+            these methods may return more than one file object.</li>
+          <li>Added {@link android.support.v4.print.PrintHelper} class that works with the
+            Print APIs to print images with a minimum of code.</li>
+          <li>Added drag-to-open user interface support for pop-up menus. For more information, see
+            {@link android.support.v4.widget.PopupMenuCompat} and
+            {@link android.support.v4.widget.ListPopupWindowCompat}.</li>
+          <li>Improved accessibility support with the addition of a
+            {@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat#findFocus
+            findFocus()} method in
+            {@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat} and the
+            {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat#getLiveRegion
+            getLiveRegion()} method in
+            {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}.</li>
+          <li>Added helper class {@link android.support.v4.view.ScaleGestureDetectorCompat} for
+            accessing new scaling gesture methods.</li>
+          <li>Fixed problem with {@link android.support.v4.app.ActionBarDrawerToggle} in
+            right-to-left language displays.</li>
+          <li>Modified {@link android.support.v4.widget.AutoScrollHelper} option to consume
+            touch events or allow them to be passed through to other views.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for v7 mediarouter library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for media playback queuing, setting HTTP header values and media
+            playback duration.</li>
+          <li>Added explicit start, get, and end session actions for explicitly managing media
+            playback sessions with media router.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 18</a> <em>(July 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+      <ul>
+        <li>User interface
+          <ul>
+            <li>Added {@link android.support.v4.text.BidiFormatter} for handling
+              text strings that combine right to left and left to right-formatted text.</li>
+            <li>Modified {@link android.support.v4.view.ViewPager} to better handle cases where the
+              pager has a measured width of zero in the initial layout processing.</li>
+            <li>Modified {@link android.support.v4.widget.DrawerLayout} and
+              {@link android.support.v4.widget.SlidingPaneLayout} to not throw exceptions for
+              measurement while the project code is being edited.</li>
+          </ul>
+        </li>
+
+        <li>Accessibility
+          <ul>
+            <li>Added {@link android.support.v4.widget.ExploreByTouchHelper} to simplify the
+              implementation of accessibility for custom views.</li>
+            <li>Fixed a problem with {@link android.support.v4.view.ViewPager} incorrectly
+              populating {@link
+              android.support.v4.view.accessibility.AccessibilityEventCompat#TYPE_VIEW_SCROLLED
+              TYPE_VIEW_SCROLLED} accessibility events.</li>
+            <li>Fixed a null pointer exception in {@link android.support.v4.view.ViewPager} when
+              populating an accessibility event.</li>
+            <li>Simplified {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+              by changing {@link java.lang.CharSequence} inputs to {@link java.lang.String} objects.
+              </li>
+            <li>Deprecated an {@link android.support.v4.view.accessibility.AccessibilityRecordCompat}
+              constructor that used an {@link java.lang.Object} as input.</li>
+          </ul>
+        </li>
+
+        <li>Media
+          <ul>
+            <li>Added {@link android.support.v4.media.TransportMediator} helper class to manage
+              media transport control, such as play, pause, skip and other media actions.</li>
+            <li>Added {@link android.support.v4.hardware.display.DisplayManagerCompat} for managing
+              display output to one or more device displays.</li>
+          </ul>
+        </li>
+
+        <li>Other changes
+        <ul>
+            <li>Added {@link android.support.v4.content.WakefulBroadcastReceiver} helper class for
+              implementing a common pattern of detecting a device wakeup event and passing work off
+              to a {@link android.app.Service} while ensuring that the device does not go back to
+              sleep before the handoff is complete.</li>
+            <li>Added two new APIs,
+              {@link android.support.v4.content.AsyncTaskLoader#commitContentChanged
+              commitContentChanged()} and
+              {@link android.support.v4.content.AsyncTaskLoader#rollbackContentChanged
+              rollbackContentChanged()}, to {@link android.support.v4.content.AsyncTaskLoader} to
+              help deal with background updates for data changes that are subsequently canceled.
+              </li>
+          </ul>
+        </li>
+      </ul>
+      </dd>
+
+      <dt>New v7 appcompat library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.app.ActionBar} to allow implementation of the
+            action bar user interface <a href="{@docRoot}design/patterns/actionbar.html">design
+            pattern</a> back to Android 2.1 (API level 7) and higher. Use of this class requires
+            that you implement your activity by extending the new
+            {@link android.support.v7.app.ActionBarActivity} class.</li>
+        </ul>
+      </dd>
+
+      <dt>New v7 mediarouter library:</dt>
+      <dd>
+        <p>Added a new mediarouter library that provides support for the <a
+        href="https://developers.google.com/cast/">Google Cast developer preview</a>.
+        The v7 mediarouter library APIs provide a means of controlling the routing of
+        media channels and streams from the current device to external screens,
+        speakers, and other destination devices, with compatibility back to Android 2.1
+        (API level 7). See <a
+        href="{@docRoot}tools/support-library/features.html#v7-mediarouter">V7
+        mediarouter library</a> for more information. </p>
+
+        <p class="caution">The v7 mediarouter library APIs introduced in Support
+        Library r18 are subject to change in later revisions of the Support
+        Library. At this time, we recommend using the library only in connection
+        with the <a href="https://developers.google.com/cast/">Google Cast
+        developer preview</a>.</p>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 13</a> <em>(May 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.widget.DrawerLayout} for creating a
+            <a href="{@docRoot}training/implementing-navigation/nav-drawer.html">Navigation
+            Drawer</a> that can be pulled in from the edge of a window.</li>
+          <li>Added {@link android.support.v4.widget.SlidingPaneLayout} widget for creating linked
+            summary and detail views that appropriately adapt to various screen sizes.</li>
+          <li>Added {@link android.support.v4.app.ActionBarDrawerToggle} as a way to tie
+            together the functions of {@link android.support.v4.widget.DrawerLayout} and {@link
+            android.app.ActionBar}.</li>
+          <li>Added {@link android.support.v4.widget.ViewDragHelper} as a new common component
+            for dragging views within a parent view.</li>
+          <li>Added {@link android.support.v4.widget.ScrollerCompat} to provide {@link
+            android.widget.Scroller} and {@link android.widget.OverScroller} compatibility support.
+            </li>
+          <li>Added {@link android.support.v4.content.FileProvider} to allow sharing of private
+            files between applications.</li>
+          <li>Updated {@link android.support.v4.view.ViewPager} to throw an exception if the
+            associated {@link android.support.v4.view.PagerAdapter} class is modified without a
+            call to {@link android.support.v4.view.PagerAdapter#notifyDataSetChanged
+            notifyDataSetChanged()}.
+            </li>
+          <li>Fixed an issue with {@link android.support.v4.view.ViewPager} children drawing sort
+            order.</li>
+          <li>Fixed {@link android.support.v4.view.GestureDetectorCompat} to dispatch missing
+            {@link android.view.GestureDetector.SimpleOnGestureListener#onSingleTapConfirmed} calls
+            between tap timeout and long press events.</li>
+        </ul>
+      </dd>
+
+      <dt>New v7 gridlayout library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.GridLayout} to provide support for the
+            {@link android.widget.GridLayout} layout object.</li>
+          <li>Added {@link android.support.v7.widget.Space} which can be used to create blank areas
+            within a {@link android.support.v7.widget.GridLayout} layout object.</li>
+        </ul>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 12</a> <em>(February 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Improved interaction behavior for {@link android.support.v4.view.ViewPager}.</li>
+          <li>Fixed a bug that could cause {@link android.support.v4.view.ViewPager} to select the
+            wrong page.</li>
+          <li>Fixed use of {@link android.support.v4.view.ViewPager#removeView removeView()} method
+            during layout for {@link android.support.v4.view.ViewPager}.</li>
+          <li>Fixed issue with {@link android.support.v4.widget.SearchViewCompat} where using the
+            back button to dismiss does not clear the search text. This fix only applies to
+            host API levels 14 and higher.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 11</a> <em>(November 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>User Interface
+            <ul>
+              <li>Added support for nested {@link android.support.v4.app.Fragment} classes.</li>
+              <li>Added improvements to {@link android.support.v4.app.FragmentManager} debugging.
+                </li>
+              <li>Fixed problem in {@link android.support.v4.app.FragmentTabHost} where fragment
+                and tab interaction could result in a {@link android.widget.ListView} state loss.
+                </li>
+              <li>Fixed issue with user-visible hint in
+                {@link android.support.v4.app.FragmentStatePagerAdapter}.</li>
+              <li>Added {@link android.support.v4.view.ViewPager.PageTransformer PageTransformer}
+                interface to {@link android.support.v4.view.ViewPager} to allow applications to
+                supply a custom transition behavior for scrolling.</li>
+              <li>Added new features and fixes to {@link android.support.v4.app.TaskStackBuilder}
+                from current release.</li>
+              <li>Fixed {@link android.support.v4.view.PagerTitleStrip} to correctly track the
+                {@link android.support.v4.view.PagerAdapter} currently in use.</li>
+              <li>Fixed display flickering, positioning, and text clipping problems with
+                {@link android.support.v4.view.PagerTitleStrip}.</li>
+              <li>Fixed {@link android.support.v4.view.PagerTabStrip} to properly respect padding
+                when drawing an underline.</li>
+            </ul>
+          </li>
+          <li>Accessibility
+            <ul>
+              <li>Added support for new accessibility gesture and touch event types in
+                {@link android.support.v4.view.accessibility.AccessibilityEventCompat}.</li>
+              <li>Added support for new accessibility APIs in
+                {@link android.support.v4.view.ViewCompat}.</li>
+              <li>Added support for {@link android.support.v4.view.ViewCompat#performAccessibilityAction
+                performAccessibilityAction()} method to {@link android.support.v4.view.ViewCompat}.
+                </li>
+            </ul>
+          </li>
+          <li>Added support for gestures with {@link android.support.v4.view.GestureDetectorCompat}.
+            </li>
+          <li>Added support for performing atomic operations on files using a new
+            {@link android.support.v4.util.AtomicFile} class.</li>
+          <li>Added support for the full set of {@code make} methods in
+            {@link android.support.v4.content.IntentCompat}.</li>
+          <li>Added {@link android.support.v4.util.LruCache#trimToSize trimToSize()} method in
+            {@link android.support.v4.util.LruCache} utility class.</li>
+          <li>Updated {@link android.support.v4.net.ConnectivityManagerCompat} to get NetworkInfo
+            from a {@link android.net.ConnectivityManager#CONNECTIVITY_ACTION}
+            broadcast.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 10</a> <em>(August 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added support for notification features introduced in Android 4.1 (API level 16) with
+          additions to {@link android.support.v4.app.NotificationCompat}.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 9</a> <em>(June 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+
+          <li>User Interface Support
+            <ul>
+              <li>Added {@link android.support.v4.view.PagerTabStrip} support, providing enhanced
+functionality beyond {@link android.support.v4.view.PagerTitleStrip}.</li>
+              <li>Fixed various bugs for {@link android.support.v4.view.PagerTitleStrip} and
+{@link android.support.v4.view.PagerTabStrip}, including {@link
+android.widget.TextView#setAllCaps setAllCaps} option, title alignment,
+appearance improvements, minimum width constraints and touch navigation issues.</li>
+              <li>Added support for {@link android.support.v4.view.ViewPager} page gutters, which
+helps the {@link android.support.v4.view.ViewPager} class provide paging support for content with
+a large horizontal scroll range, such as a map.</li>
+              <li>Fixed numerous bugs for {@link android.support.v4.view.ViewPager}, including size
+and data set change problems, page positioning, user interaction, scroll tracking and keyboard
+navigation problems.</li>
+              <li>Fixed many bugs for {@link android.support.v4.app.Fragment}, including proper
+handling of {@link android.support.v4.app.Fragment#onActivityResult onActivityResult()} when
+the target fragment no longer exists, dispatching selection events to invisible fragments, improved
+{@link android.support.v4.app.FragmentTransaction#replace FragmentTransaction.replace()} behavior
+and added better state handling for fragments being moved out of view.</li>
+              <li>Added support for the {@link
+android.support.v4.view.ViewCompat postOnAnimation()} method in {@link
+android.support.v4.view.ViewCompat}.</li>
+              <li>Updated {@link android.support.v4.app.NavUtils} to use Android 4.1 (API level 16)
+<em>Up</em> navigation functionality when available.</li>
+            </ul>
+          </li>
+
+          <li>Accessibility
+            <ul>
+              <li>Updated accessibility support classes, including {@link
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}, to follow fixes made in Android
+4.1 (API level 16).</li>
+              <li>Added support for accessibility scroll actions in {@link
+android.support.v4.view.ViewPager}.</li>
+            </ul>
+          </li>
+
+          <li>General improvements
+            <ul>
+              <li>Updated {@link android.support.v4.app.TaskStackBuilder} to reflect API changes in
+Android 4.1 (API level 16).</li>
+              <li>Enhanced {@link android.support.v4.app.TaskStackBuilder} to allow it to be used
+from a Service.</li>
+              <li>Added support for {@link android.support.v4.content.IntentCompat EXTRA_HTML_TEXT}
+to {@link android.support.v4.app.ShareCompat}.</li>
+              <li>Updated {@link android.support.v4.app.NotificationCompat.Builder} to support the
+{@link android.support.v4.app.NotificationCompat.Builder#setNumber setNumber()} method.</li>
+              <li>Added support in {@link android.support.v4.net.ConnectivityManagerCompat} for the
+{@link android.support.v4.net.ConnectivityManagerCompat#isActiveNetworkMetered
+isActiveNetworkMetered()} method.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 8</a> <em>(April 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Fixed intent flags for {@link android.app.PendingIntent} objects generated
+            by {@link android.support.v4.app.TaskStackBuilder}.</li>
+          <li>Removed unused attributes from the gridlayout library projects to make sure
+            the library can be built with API level 7 and higher.</li>
+          <li>Added {@code .classpath} and {@code .project} files for the gridlayout
+            library project.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 7</a> <em>(March 2012)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.app.ShareCompat}, which provides helper classes
+for sending and receiving content for social sharing applications, including new metadata for
+attributing shared data to the source app. This class also provides compatible integration with the
+new {@link android.widget.ShareActionProvider} in Android 4.0.</li>
+          <li>Added {@link android.support.v4.app.NavUtils} and {@link
+android.support.v4.app.TaskStackBuilder} to provide support for implementing the
+<a href="{@docRoot}design/index.html">Android Design</a> guidelines for navigation. These
+additions include a way to implement the action bar's <em>Up</em> button across versions.
+For an example implementation of this pattern, see the AppNavigation sample in
+({@code <em>&lt;sdk&gt;</em>/samples/<em>&lt;platform&gt;</em>/AppNavigation}).</li>
+          <li>Added {@link android.support.v4.app.NotificationCompat.Builder} to provide a
+compatibility implementation of Android 3.0's {@link android.app.Notification.Builder} helper class
+for creating standardized system notifications.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 6</a> <em>(December 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+
+    <p class="note"><strong>Note:</strong> Reference for support library APIs are now available with
+    the framework references, for example: {@link android.support.v4.app}.</p>
+<dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Changes to ViewPager:
+            <ul>
+              <li>Added extra decorative view support for {@link android.support.v4.view.ViewPager}.
+                Decorative views may be supplied as child views of a pager in XML layout.</li>
+              <li>Added {@link android.support.v4.view.PagerAdapter#getPageTitle
+                PagerAdapter.getPageTitle()} to supply title strings for pages, which defaults to no
+                title for each page.</li>
+              <li>Added {@link android.support.v4.view.PagerTitleStrip}, a non-interactive title
+                strip, that can be added as a child of ViewPager. Developers can supply text
+                appearance and color, as well as layout sizing and gravity information.</li>
+              <li>Updated {@link android.support.v4.view.PagerAdapter} methods to take ViewGroup
+                objects, rather than View to avoid class casting in adapter implementations.</li>
+              <li>Updated {@link android.support.v4.view.ViewPager} to use Launcher-style
+                fling behavior.</li>
+              <li>Bug fixes for user interface interaction and test automation.</li>
+            </ul>
+          </li>
+
+          <li>Support for Fragments:
+            <ul>
+              <li>Changed {@code setStartDeferred()} method to {@link
+                android.support.v4.app.Fragment#setUserVisibleHint}.</li>
+              <li>Added deferred start for off-screen pages to improve performance.</li>
+            </ul>
+          </li>
+
+          <li>Support for Accessiblity APIs:
+            <ul>
+              <li>Updated {@link android.support.v4.view.AccessibilityDelegateCompat} methods
+                to return empty lists instead of null.</li>
+              <li>Added new APIs needed by the v4 samples.</li>
+            </ul>
+          </li>
+
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 5</a> <em>(December 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Support for Accessiblity APIs:
+            <ul>
+              <li>Added {@link android.support.v4.view.AccessibilityDelegateCompat}
+              to support {@link android.view.View.AccessibilityDelegate}.</li>
+
+              <li>Added {@link android.support.v4.view.accessibility.AccessibilityEventCompat}
+              to support {@link android.view.accessibility.AccessibilityEvent}.</li>
+
+              <li>Added {@link android.support.v4.view.accessibility.AccessibilityManagerCompat}
+              to support {@link android.view.accessibility.AccessibilityManager}.</li>
+
+              <li>Added {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+              to support {@link android.view.accessibility.AccessibilityNodeInfo}.</li>
+
+              <li>Added {@link android.support.v4.view.accessibility.AccessibilityRecordCompat}
+              to support {@link android.view.accessibility.AccessibilityRecord}.</li>
+
+              <li>Added {@link
+              android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat}
+              to support {@link android.accessibilityservice.AccessibilityServiceInfo}.</li>
+
+              <li>Added {@link android.support.v4.view.ViewGroupCompat}
+              to support accessibility features in {@link android.view.ViewGroup}.
+              </li>
+
+              <li>Modified {@link android.support.v4.view.ViewCompat}
+              to support accessibility features in {@link android.view.View}.</li>
+            </ul>
+          </li>
+
+          <li>Changes to ViewPager:
+            <ul>
+              <li>Added support for margins between pages.
+              An optional {@link android.graphics.drawable.Drawable} can be provided
+              to fill the margins.</li>
+              <li>Added support for {@link android.widget.EdgeEffect}.</li>
+              <li>Added support for keyboard navigation</li>
+              <li>Added support to control how many pages are kept to either side
+              of the current page.</li>
+              <li>Improved touch physics.</li>
+              <li>Bug fixes for user interface behavior.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 4</a> <em>(October 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Added <code>EdgeEffectCompat</code> to
+          support {@link android.widget.EdgeEffect}.</li>
+
+          <li>Added <code>LocalBroadcastManager</code> to allow applications to easily
+            register for and receive intents within a single application without
+            broadcasting them globally.</li>
+
+          <li>Added support in <code>ViewCompat</code> to check for and set overscroll
+          modes for {@link android.view.View}s on Android 2.3 and later.</li>
+          <li>Changes to Fragment APIs:
+            <ul>
+              <li>Added new APIs to control the visibility of new menus.</li>
+              <li>Added custom animation APIs.</li>
+              <li>Added APIs in <code>FragmentActivity</code> to retain custom,
+              non-configuration instance data.</li>
+              <li>Various bug fixes.</li>
+            </ul>
+          </li>
+
+          <li>Fixed a {@link android.content.Loader} bug that caused issues in
+          canceling {@link android.os.AsyncTask}s when running on Froyo and older
+          versions of the platform. The support
+          code now uses its own version of {@link android.os.AsyncTask} to keep the same
+          behavior on all platform versions.</li>
+
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 3</a> <em>(July 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+        <ul>
+          <li>Adds support for {@link android.app.Fragment.SavedState}</li>
+          <li>Adds {@code MotionEventCompat} to support newer {@link
+android.view.MotionEvent} APIs</li>
+          <li>Adds {@code VelocityTrackerCompat} to support a newer {@link
+android.view.VelocityTracker} APIs</li>
+          <li>Adds {@code ViewConfigurationCompat} to support a newer {@link
+android.view.ViewConfiguration} APIs</li>
+          <li>All new APIs (available only in the support library) that allow you to create UIs
+with horizontal paging, allowing users to swipe left and right between content views. Classes to
+support this include:
+            <ul>
+              <li>{@code ViewPager}: A {@link android.view.ViewGroup} that manages the
+layout for the child views, which the user can swipe between.</li>
+              <li>{@code PagerAdapter}: An adapter that populates the {@code ViewPager} with the
+views that represent each page.</li>
+              <li>{@code FragmentPagerAdapter}: An extension of {@code PagerAdapter} for flipping
+between fragments.</li>
+              <li>{@code FragmentStatePagerAdapter}: An extension of {@code PagerAdapter} for
+flipping between fragments that uses the library's support for {@link
+android.app.Fragment.SavedState}.</li>
+            </ul>
+          </li>
+        </ul>
+      </dd>
+      <dt>New v13 support library:</dt>
+      <dd>
+        <ul>
+          <li>Includes the {@code FragmentPagerAdapter} and {@code FragmentStatePagerAdapter}
+to support the horizontal paging.
+          <p>These are exactly the same as the APIs added to the v4 support library, but rely on
+other platform components in Android 3.2. Use this library instead of v4 if you're developing for
+Android 3.2 and higher (all other APIs in the v4 library are already available with API level
+13).</p>
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 2</a> <em>(May 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+    <dt>Changes for v4 library:</dt>
+    <dd>
+      <ul>
+        <li>Support for fragment animations</li>
+        <li>Fix {@link android.support.v4.app.Fragment#onActivityResult Fragment.onActivityResult()}
+          bug</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 1</a> <em>(March 2011)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+      <p>Initial release with the v4 library.</p>
+  </div>
+</div>
+

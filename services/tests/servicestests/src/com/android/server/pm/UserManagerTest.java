@@ -26,19 +26,24 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** Test {@link UserManager} functionality. */
 public class UserManagerTest extends AndroidTestCase {
-
+    private static final int REMOVE_CHECK_INTERVAL = 500;
+    private static final int REMOVE_TIMEOUT = 60 * 1000;
     private UserManager mUserManager = null;
     private final Object mUserLock = new Object();
     private List<Integer> usersToRemove;
 
     @Override
     public void setUp() throws Exception {
-        mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+        super.setUp();
+        mUserManager = UserManager.get(getContext());
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         getContext().registerReceiver(new BroadcastReceiver() {
             @Override
@@ -64,14 +69,18 @@ public class UserManagerTest extends AndroidTestCase {
     private void removeExistingUsers() {
         List<UserInfo> list = mUserManager.getUsers();
         for (UserInfo user : list) {
-            if (user.id != UserHandle.USER_OWNER) {
+            // Keep system and primary user.
+            // We do not have to keep primary user, but in split system user mode, we need it
+            // until http://b/22976637 is fixed.  Right now in split system user mode, you need to
+            // switch to primary user and run tests under primary user.
+            if (user.id != UserHandle.USER_SYSTEM && !user.isPrimary()) {
                 removeUser(user.id);
             }
         }
     }
 
-    public void testHasPrimary() throws Exception {
-        assertTrue(findUser(0));
+    public void testHasSystemUser() throws Exception {
+        assertTrue(findUser(UserHandle.USER_SYSTEM));
     }
 
     public void testAddUser() throws Exception {
@@ -122,10 +131,11 @@ public class UserManagerTest extends AndroidTestCase {
 
     // Make sure only one managed profile can be created
     public void testAddManagedProfile() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed 1",
-                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
         UserInfo userInfo2 = createProfileForUser("Managed 2",
-                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
         assertNotNull(userInfo1);
         assertNull(userInfo2);
         // Verify that current user is not a managed profile
@@ -133,17 +143,18 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testGetUserCreationTime() throws Exception {
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo profile = createProfileForUser("Managed 1",
-                UserInfo.FLAG_MANAGED_PROFILE, UserHandle.USER_OWNER);
+                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
         assertNotNull(profile);
         assertTrue("creationTime must be set when the profile is created",
                 profile.creationTime > 0);
         assertEquals(profile.creationTime, mUserManager.getUserCreationTime(
                 new UserHandle(profile.id)));
 
-        long ownerCreationTime = mUserManager.getUserInfo(UserHandle.USER_OWNER).creationTime;
+        long ownerCreationTime = mUserManager.getUserInfo(primaryUserId).creationTime;
         assertEquals(ownerCreationTime, mUserManager.getUserCreationTime(
-                new UserHandle(UserHandle.USER_OWNER)));
+                new UserHandle(primaryUserId)));
 
         try {
             int noSuchUserId = 100500;
@@ -177,15 +188,26 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testSerialNumber() {
-        UserInfo user1 = createUser("User 1", UserInfo.FLAG_RESTRICTED);
+        UserInfo user1 = createUser("User 1", 0);
         int serialNumber1 = user1.serialNumber;
         assertEquals(serialNumber1, mUserManager.getUserSerialNumber(user1.id));
         assertEquals(user1.id, mUserManager.getUserHandle(serialNumber1));
-        UserInfo user2 = createUser("User 2", UserInfo.FLAG_RESTRICTED);
+        UserInfo user2 = createUser("User 2", 0);
         int serialNumber2 = user2.serialNumber;
         assertFalse(serialNumber1 == serialNumber2);
         assertEquals(serialNumber2, mUserManager.getUserSerialNumber(user2.id));
         assertEquals(user2.id, mUserManager.getUserHandle(serialNumber2));
+    }
+
+    public void testGetSerialNumbersOfUsers() {
+        UserInfo user1 = createUser("User 1", 0);
+        UserInfo user2 = createUser("User 2", 0);
+        long[] serialNumbersOfUsers = mUserManager.getSerialNumbersOfUsers(false);
+        String errMsg = "Array " + Arrays.toString(serialNumbersOfUsers) + " should contain ";
+        assertTrue(errMsg + user1.serialNumber,
+                ArrayUtils.contains(serialNumbersOfUsers, user1.serialNumber));
+        assertTrue(errMsg + user2.serialNumber,
+                ArrayUtils.contains(serialNumbersOfUsers, user2.serialNumber));
     }
 
     public void testMaxUsers() {
@@ -203,26 +225,33 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     public void testRestrictions() {
-        List<UserInfo> users = mUserManager.getUsers();
-        if (users.size() > 1) {
-            Bundle restrictions = new Bundle();
-            restrictions.putBoolean(UserManager.DISALLOW_INSTALL_APPS, true);
-            restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, false);
-            mUserManager.setUserRestrictions(restrictions, new UserHandle(users.get(1).id));
-            Bundle stored = mUserManager.getUserRestrictions(new UserHandle(users.get(1).id));
-            assertEquals(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI), false);
-            assertEquals(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS), false);
-            assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
-        }
+        UserInfo testUser = createUser("User 1", 0);
+
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_INSTALL_APPS, true, new UserHandle(testUser.id));
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_CONFIG_WIFI, false, new UserHandle(testUser.id));
+
+        Bundle stored = mUserManager.getUserRestrictions(new UserHandle(testUser.id));
+        // Note this will fail if DO already sets those restrictions.
+        assertEquals(stored.getBoolean(UserManager.DISALLOW_CONFIG_WIFI), false);
+        assertEquals(stored.getBoolean(UserManager.DISALLOW_UNINSTALL_APPS), false);
+        assertEquals(stored.getBoolean(UserManager.DISALLOW_INSTALL_APPS), true);
     }
 
     private void removeUser(int userId) {
         synchronized (mUserLock) {
             mUserManager.removeUser(userId);
+            long time = System.currentTimeMillis();
             while (mUserManager.getUserInfo(userId) != null) {
                 try {
-                    mUserLock.wait(500);
+                    mUserLock.wait(REMOVE_CHECK_INTERVAL);
                 } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                if (System.currentTimeMillis() - time > REMOVE_TIMEOUT) {
+                    fail("Timeout waiting for removeUser. userId = " + userId);
                 }
             }
         }

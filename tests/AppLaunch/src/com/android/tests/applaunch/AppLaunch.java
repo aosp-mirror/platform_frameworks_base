@@ -60,7 +60,10 @@ public class AppLaunch extends InstrumentationTestCase {
     // optional parameter: comma separated list of required account types before proceeding
     // with the app launch
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
-    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 7500; //7.5s to allow app to idle
+    private static final String KEY_SKIP_INITIAL_LAUNCH = "skip_initial_launch";
+    private static final String WEARABLE_ACTION_GOOGLE =
+            "com.google.android.wearable.action.GOOGLE";
+    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 60000; //60s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; //750ms idle for non initial launches
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 2000; //2s between launching apps
 
@@ -72,6 +75,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private int mLaunchIterations = 10;
     private Bundle mResult = new Bundle();
     private Set<String> mRequiredAccounts;
+    private boolean mSkipInitialLaunch = false;
 
     @Override
     protected void setUp() throws Exception {
@@ -95,20 +99,22 @@ public class AppLaunch extends InstrumentationTestCase {
         parseArgs(args);
         checkAccountSignIn();
 
-        // do initial app launch, without force stopping
-        for (String app : mNameToResultKey.keySet()) {
-            long launchTime = startApp(app, false);
-            if (launchTime <= 0) {
-                mNameToLaunchTime.put(app, -1L);
-                // simply pass the app if launch isn't successful
-                // error should have already been logged by startApp
-                continue;
-            } else {
-                mNameToLaunchTime.put(app, launchTime);
+        if (!mSkipInitialLaunch) {
+            // do initial app launch, without force stopping
+            for (String app : mNameToResultKey.keySet()) {
+                long launchTime = startApp(app, false);
+                if (launchTime <= 0) {
+                    mNameToLaunchTime.put(app, -1L);
+                    // simply pass the app if launch isn't successful
+                    // error should have already been logged by startApp
+                    continue;
+                } else {
+                    mNameToLaunchTime.put(app, launchTime);
+                }
+                sleep(INITIAL_LAUNCH_IDLE_TIMEOUT);
+                closeApp(app, false);
+                sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
             }
-            sleep(INITIAL_LAUNCH_IDLE_TIMEOUT);
-            closeApp(app, false);
-            sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
         }
         // do the real app launch now
         for (int i = 0; i < mLaunchIterations; i++) {
@@ -158,7 +164,7 @@ public class AppLaunch extends InstrumentationTestCase {
         for (String pair : appNames) {
             String[] parts = pair.split("\\^");
             if (parts.length != 2) {
-                Log.e(TAG, "The apps key is incorectly formatted");
+                Log.e(TAG, "The apps key is incorrectly formatted");
                 fail();
             }
 
@@ -172,6 +178,11 @@ public class AppLaunch extends InstrumentationTestCase {
                 mRequiredAccounts.add(accountType);
             }
         }
+        mSkipInitialLaunch = "true".equals(args.getString(KEY_SKIP_INITIAL_LAUNCH));
+    }
+
+    private boolean hasLeanback(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
     private void createMappings() {
@@ -181,8 +192,18 @@ public class AppLaunch extends InstrumentationTestCase {
         PackageManager pm = getInstrumentation().getContext()
                 .getPackageManager();
         Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
-        intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+        intentToResolve.addCategory(hasLeanback(getInstrumentation().getContext()) ?
+                Intent.CATEGORY_LEANBACK_LAUNCHER :
+                Intent.CATEGORY_LAUNCHER);
         List<ResolveInfo> ris = pm.queryIntentActivities(intentToResolve, 0);
+        resolveLoop(ris, intentToResolve, pm);
+        // For Wear
+        intentToResolve = new Intent(WEARABLE_ACTION_GOOGLE);
+        ris = pm.queryIntentActivities(intentToResolve, 0);
+        resolveLoop(ris, intentToResolve, pm);
+    }
+
+    private void resolveLoop(List<ResolveInfo> ris, Intent intentToResolve, PackageManager pm) {
         if (ris == null || ris.isEmpty()) {
             Log.i(TAG, "Could not find any apps");
         } else {
@@ -223,7 +244,7 @@ public class AppLaunch extends InstrumentationTestCase {
         // report error if any of the following is true:
         // * launch thread is alive
         // * result is not null, but:
-        //   * result is not START_SUCESS
+        //   * result is not START_SUCCESS
         //   * or in case of no force stop, result is not TASK_TO_FRONT either
         if (t.isAlive() || (result != null
                 && ((result.result != ActivityManager.START_SUCCESS)

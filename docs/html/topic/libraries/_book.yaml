@@ -1,0 +1,19 @@
+toc:
+- title: Support Library
+  path: /topic/libraries/support-library/index.html
+  section:
+  - title: Features
+    path: /topic/libraries/support-library/features.html
+  - title: Setup
+    path: /topic/libraries/support-library/setup.html
+  - title: Revision History
+    path: /topic/libraries/support-library/revisions.html
+
+- title: Data Binding Library
+  path: /topic/libraries/data-binding/index.html
+
+- title: Testing Support Library
+  path: /topic/libraries/testing-support-library/index.html
+  section:
+  - title: API Reference
+    path: /reference/android/support/test/package-summary.html

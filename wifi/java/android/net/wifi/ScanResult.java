@@ -18,7 +18,9 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Describes information about a detected access point. In addition
@@ -41,6 +43,24 @@ public class ScanResult implements Parcelable {
      * The address of the access point.
      */
     public String BSSID;
+
+    /**
+     * The HESSID from the beacon.
+     * @hide
+     */
+    public long hessid;
+
+    /**
+     * The ANQP Domain ID from the Hotspot 2.0 Indication element, if present.
+     * @hide
+     */
+    public int anqpDomainId;
+
+    /*
+     * This field is equivalent to the |flags|, rather than the |capabilities| field
+     * of the per-BSS scan results returned by WPA supplicant. See the definition of
+     * |struct wpa_bss| in wpa_supplicant/bss.h for more details.
+     */
     /**
      * Describes the authentication, key management, and encryption schemes
      * supported by the access point.
@@ -145,21 +165,6 @@ public class ScanResult implements Parcelable {
         }
     }
 
-    /** @hide */
-    public static final int ENABLED                                          = 0;
-    /** @hide */
-    public static final int AUTO_ROAM_DISABLED                               = 16;
-    /** @hide */
-    public static final int AUTO_JOIN_DISABLED                               = 32;
-    /** @hide */
-    public static final int AUTHENTICATION_ERROR                              = 128;
-
-    /**
-     * Status: indicating join status
-     * @hide
-     */
-    public int autoJoinStatus;
-
     /**
      * num IP configuration failures
      * @hide
@@ -171,17 +176,6 @@ public class ScanResult implements Parcelable {
      * Last time we blacklisted the ScanResult
      */
     public long blackListTimestamp;
-
-    /** @hide **/
-    public void setAutoJoinStatus(int status) {
-        if (status < 0) status = 0;
-        if (status == 0) {
-            blackListTimestamp = 0;
-        }  else if (status > autoJoinStatus) {
-            blackListTimestamp = System.currentTimeMillis();
-        }
-        autoJoinStatus = status;
-    }
 
     /**
      * Status: indicating the scan result is not a result
@@ -222,6 +216,10 @@ public class ScanResult implements Parcelable {
     /** {@hide} */
     public static final long FLAG_80211mc_RESPONDER               = 0x0000000000000002;
 
+    /*
+     * These flags are specific to the ScanResult class, and are not related to the |flags|
+     * field of the per-BSS scan results from WPA supplicant.
+     */
     /**
      * Defines flags; such as {@link #FLAG_PASSPOINT_NETWORK}.
      * {@hide}
@@ -301,6 +299,12 @@ public class ScanResult implements Parcelable {
 
     /**
      *  @hide
+     * anqp lines from supplicant BSS response
+     */
+    public List<String> anqpLines;
+
+    /**
+     *  @hide
      * storing the raw bytes of full result IEs
      **/
     public byte[] bytes;
@@ -309,6 +313,20 @@ public class ScanResult implements Parcelable {
      * @hide
      */
     public static class InformationElement {
+        public static final int EID_SSID = 0;
+        public static final int EID_SUPPORTED_RATES = 1;
+        public static final int EID_TIM = 5;
+        public static final int EID_BSS_LOAD = 11;
+        public static final int EID_ERP = 42;
+        public static final int EID_RSN = 48;
+        public static final int EID_EXTENDED_SUPPORTED_RATES = 50;
+        public static final int EID_HT_OPERATION = 61;
+        public static final int EID_INTERWORKING = 107;
+        public static final int EID_ROAMING_CONSORTIUM = 111;
+        public static final int EID_EXTENDED_CAPS = 127;
+        public static final int EID_VHT_OPERATION = 192;
+        public static final int EID_VSA = 221;
+
         public int id;
         public byte[] bytes;
 
@@ -324,14 +342,27 @@ public class ScanResult implements Parcelable {
     /** information elements found in the beacon
      * @hide
      */
-    public InformationElement informationElements[];
+    public InformationElement[] informationElements;
+
+    /** ANQP response elements.
+     * @hide
+     */
+    public AnqpInformationElement[] anqpElements;
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
-            long tsf) {
+    public ScanResult(WifiSsid wifiSsid, String BSSID, long hessid, int anqpDomainId,
+            byte[] osuProviders, String caps, int level, int frequency, long tsf) {
         this.wifiSsid = wifiSsid;
         this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
         this.BSSID = BSSID;
+        this.hessid = hessid;
+        this.anqpDomainId = anqpDomainId;
+        if (osuProviders != null) {
+            this.anqpElements = new AnqpInformationElement[1];
+            this.anqpElements[0] =
+                    new AnqpInformationElement(AnqpInformationElement.HOTSPOT20_VENDOR_ID,
+                            AnqpInformationElement.HS_OSU_PROVIDERS, osuProviders);
+        }
         this.capabilities = caps;
         this.level = level;
         this.frequency = frequency;
@@ -363,11 +394,14 @@ public class ScanResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ScanResult(String Ssid, String BSSID, String caps, int level, int frequency,
+    public ScanResult(String Ssid, String BSSID, long hessid, int anqpDomainId, String caps,
+            int level, int frequency,
             long tsf, int distCm, int distSdCm, int channelWidth, int centerFreq0, int centerFreq1,
             boolean is80211McRTTResponder) {
         this.SSID = Ssid;
         this.BSSID = BSSID;
+        this.hessid = hessid;
+        this.anqpDomainId = anqpDomainId;
         this.capabilities = caps;
         this.level = level;
         this.frequency = frequency;
@@ -385,11 +419,12 @@ public class ScanResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, String caps, int level,
+    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, long hessid, int anqpDomainId,
+                  String caps, int level,
                   int frequency, long tsf, int distCm, int distSdCm, int channelWidth,
                   int centerFreq0, int centerFreq1, boolean is80211McRTTResponder) {
-        this(Ssid, BSSID, caps,level, frequency, tsf, distCm, distSdCm, channelWidth, centerFreq0,
-                centerFreq1, is80211McRTTResponder);
+        this(Ssid, BSSID, hessid, anqpDomainId, caps, level, frequency, tsf, distCm,
+                distSdCm, channelWidth, centerFreq0, centerFreq1, is80211McRTTResponder);
         this.wifiSsid = wifiSsid;
     }
 
@@ -399,6 +434,10 @@ public class ScanResult implements Parcelable {
             wifiSsid = source.wifiSsid;
             SSID = source.SSID;
             BSSID = source.BSSID;
+            hessid = source.hessid;
+            anqpDomainId = source.anqpDomainId;
+            informationElements = source.informationElements;
+            anqpElements = source.anqpElements;
             capabilities = source.capabilities;
             level = source.level;
             frequency = source.frequency;
@@ -409,7 +448,6 @@ public class ScanResult implements Parcelable {
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
-            autoJoinStatus = source.autoJoinStatus;
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
@@ -453,9 +491,6 @@ public class ScanResult implements Parcelable {
 
         sb.append(", passpoint: ");
         sb.append(((flags & FLAG_PASSPOINT_NETWORK) != 0) ? "yes" : "no");
-        if (autoJoinStatus != 0) {
-            sb.append(", status: ").append(autoJoinStatus);
-        }
         sb.append(", ChannelBandwidth: ").append(channelWidth);
         sb.append(", centerFreq0: ").append(centerFreq0);
         sb.append(", centerFreq1: ").append(centerFreq1);
@@ -479,6 +514,8 @@ public class ScanResult implements Parcelable {
         }
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeLong(hessid);
+        dest.writeInt(anqpDomainId);
         dest.writeString(capabilities);
         dest.writeInt(level);
         dest.writeInt(frequency);
@@ -489,7 +526,6 @@ public class ScanResult implements Parcelable {
         dest.writeInt(centerFreq0);
         dest.writeInt(centerFreq1);
         dest.writeLong(seen);
-        dest.writeInt(autoJoinStatus);
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
@@ -509,6 +545,27 @@ public class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+
+        if (anqpLines != null) {
+            dest.writeInt(anqpLines.size());
+            for (int i = 0; i < anqpLines.size(); i++) {
+                dest.writeString(anqpLines.get(i));
+            }
+        }
+        else {
+            dest.writeInt(0);
+        }
+        if (anqpElements != null) {
+            dest.writeInt(anqpElements.length);
+            for (AnqpInformationElement element : anqpElements) {
+                dest.writeInt(element.getVendorId());
+                dest.writeInt(element.getElementId());
+                dest.writeInt(element.getPayload().length);
+                dest.writeByteArray(element.getPayload());
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -520,23 +577,25 @@ public class ScanResult implements Parcelable {
                     wifiSsid = WifiSsid.CREATOR.createFromParcel(in);
                 }
                 ScanResult sr = new ScanResult(
-                    wifiSsid,
-                    in.readString(),                    /* SSID  */
-                    in.readString(),                    /* BSSID */
-                    in.readString(),                    /* capabilities */
-                    in.readInt(),                       /* level */
-                    in.readInt(),                       /* frequency */
-                    in.readLong(),                      /* timestamp */
-                    in.readInt(),                       /* distanceCm */
-                    in.readInt(),                       /* distanceSdCm */
-                    in.readInt(),                       /* channelWidth */
-                    in.readInt(),                       /* centerFreq0 */
-                    in.readInt(),                       /* centerFreq1 */
-                    false                               /* rtt responder, fixed with flags below */
+                        wifiSsid,
+                        in.readString(),                    /* SSID  */
+                        in.readString(),                    /* BSSID */
+                        in.readLong(),                      /* HESSID */
+                        in.readInt(),                       /* ANQP Domain ID */
+                        in.readString(),                    /* capabilities */
+                        in.readInt(),                       /* level */
+                        in.readInt(),                       /* frequency */
+                        in.readLong(),                      /* timestamp */
+                        in.readInt(),                       /* distanceCm */
+                        in.readInt(),                       /* distanceSdCm */
+                        in.readInt(),                       /* channelWidth */
+                        in.readInt(),                       /* centerFreq0 */
+                        in.readInt(),                       /* centerFreq1 */
+                        false                               /* rtt responder,
+                                                               fixed with flags below */
                 );
 
                 sr.seen = in.readLong();
-                sr.autoJoinStatus = in.readInt();
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
@@ -554,6 +613,27 @@ public class ScanResult implements Parcelable {
                         int len = in.readInt();
                         sr.informationElements[i].bytes = new byte[len];
                         in.readByteArray(sr.informationElements[i].bytes);
+                    }
+                }
+
+                n = in.readInt();
+                if (n != 0) {
+                    sr.anqpLines = new ArrayList<String>();
+                    for (int i = 0; i < n; i++) {
+                        sr.anqpLines.add(in.readString());
+                    }
+                }
+                n = in.readInt();
+                if (n != 0) {
+                    sr.anqpElements = new AnqpInformationElement[n];
+                    for (int i = 0; i < n; i++) {
+                        int vendorId = in.readInt();
+                        int elementId = in.readInt();
+                        int len = in.readInt();
+                        byte[] payload = new byte[len];
+                        in.readByteArray(payload);
+                        sr.anqpElements[i] =
+                                new AnqpInformationElement(vendorId, elementId, payload);
                     }
                 }
                 return sr;

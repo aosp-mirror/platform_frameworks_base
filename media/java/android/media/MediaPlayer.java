@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -34,8 +33,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
@@ -55,7 +53,7 @@ import android.media.SubtitleData;
 import android.media.SubtitleTrack.RenderingWidget;
 import android.media.SyncParams;
 
-import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoBridge;
 import libcore.io.Libcore;
@@ -64,7 +62,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Runnable;
@@ -72,7 +69,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.util.BitSet;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -480,10 +476,10 @@ import java.lang.ref.WeakReference;
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
+ *     <td>{Initialized, Prepared, Started, Paused, PlaybackCompleted, Error}</p></td>
+ *     <td>{Idle, Stopped} </p></td>
+ *     <td>This method will change state in some cases, depending on when it's called.
+ *         </p></td></tr>
  * <tr><td>setScreenOnWhilePlaying</></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
@@ -559,7 +555,8 @@ import java.lang.ref.WeakReference;
  * thread by default has a Looper running).
  *
  */
-public class MediaPlayer implements SubtitleController.Listener
+public class MediaPlayer extends PlayerBase
+                         implements SubtitleController.Listener
 {
     /**
        Constant to retrieve only the new metadata since the last
@@ -613,7 +610,6 @@ public class MediaPlayer implements SubtitleController.Listener
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
-    private final IAppOpsService mAppOps;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
     private boolean mBypassInterruptionPolicy;
@@ -626,6 +622,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * result in an exception.</p>
      */
     public MediaPlayer() {
+        super(new AudioAttributes.Builder().build());
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -638,8 +635,6 @@ public class MediaPlayer implements SubtitleController.Listener
 
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
-        IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
-        mAppOps = IAppOpsService.Stub.asInterface(b);
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -714,6 +709,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * played.
      *
      * @param sh the SurfaceHolder to use for video display
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized or has been released.
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
@@ -744,6 +741,8 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @param surface The {@link Surface} to be used for the video portion of
      * the media.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized or has been released.
      */
     public void setSurface(Surface surface) {
         if (mScreenOnWhilePlaying && surface != null) {
@@ -963,8 +962,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param uri the Content URI of the data you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void setDataSource(Context context, Uri uri)
-        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(@NonNull Context context, @NonNull Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         setDataSource(context, uri, null);
     }
 
@@ -980,47 +979,46 @@ public class MediaPlayer implements SubtitleController.Listener
      *                to disallow or allow cross domain redirection.
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(@NonNull Context context, @NonNull Uri uri,
+            @Nullable Map<String, String> headers) throws IOException, IllegalArgumentException,
+                    SecurityException, IllegalStateException {
+        final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             setDataSource(uri.getPath());
             return;
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                 && Settings.AUTHORITY.equals(uri.getAuthority())) {
-            // Redirect ringtones to go directly to underlying provider
-            uri = RingtoneManager.getActualDefaultRingtoneUri(context,
-                    RingtoneManager.getDefaultType(uri));
-            if (uri == null) {
-                throw new FileNotFoundException("Failed to resolve default ringtone");
-            }
-        }
-
-        AssetFileDescriptor fd = null;
-        try {
-            ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openAssetFileDescriptor(uri, "r");
-            if (fd == null) {
+            // Try cached ringtone first since the actual provider may not be
+            // encryption aware, or it may be stored on CE media storage
+            final int type = RingtoneManager.getDefaultType(uri);
+            final Uri cacheUri = RingtoneManager.getCacheForType(type);
+            final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
+            if (attemptDataSource(resolver, cacheUri)) {
                 return;
-            }
-            // Note: using getDeclaredLength so that our behavior is the same
-            // as previous versions when the content provider is returning
-            // a full file.
-            if (fd.getDeclaredLength() < 0) {
-                setDataSource(fd.getFileDescriptor());
+            } else if (attemptDataSource(resolver, actualUri)) {
+                return;
             } else {
-                setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
+                setDataSource(uri.toString(), headers);
             }
-            return;
-        } catch (SecurityException | IOException ex) {
-            Log.w(TAG, "Couldn't open file on client side; trying server side: " + ex);
-        } finally {
-            if (fd != null) {
-                fd.close();
+        } else {
+            // Try requested Uri locally first, or fallback to media server
+            if (attemptDataSource(resolver, uri)) {
+                return;
+            } else {
+                setDataSource(uri.toString(), headers);
             }
         }
+    }
 
-        setDataSource(uri.toString(), headers);
+    private boolean attemptDataSource(ContentResolver resolver, Uri uri) {
+        try (AssetFileDescriptor afd = resolver.openAssetFileDescriptor(uri, "r")) {
+            setDataSource(afd);
+            return true;
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open " + uri + ": " + ex);
+            return false;
+        }
     }
 
     /**
@@ -1101,11 +1099,36 @@ public class MediaPlayer implements SubtitleController.Listener
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
 
     /**
+     * Sets the data source (AssetFileDescriptor) to use. It is the caller's
+     * responsibility to close the file descriptor. It is safe to do so as soon
+     * as this call returns.
+     *
+     * @param afd the AssetFileDescriptor for the file you want to play
+     * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if afd is not a valid AssetFileDescriptor
+     * @throws IOException if afd can not be read
+     */
+    public void setDataSource(@NonNull AssetFileDescriptor afd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        Preconditions.checkNotNull(afd);
+        // Note: using getDeclaredLength so that our behavior is the same
+        // as previous versions when the content provider is returning
+        // a full file.
+        if (afd.getDeclaredLength() < 0) {
+            setDataSource(afd.getFileDescriptor());
+        } else {
+            setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getDeclaredLength());
+        }
+    }
+
+    /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
      *
      * @param fd the FileDescriptor for the file you want to play
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if fd is not a valid FileDescriptor
+     * @throws IOException if fd can not be read
      */
     public void setDataSource(FileDescriptor fd)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -1122,6 +1145,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if fd is not a valid FileDescriptor
+     * @throws IOException if fd can not be read
      */
     public void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -1136,6 +1161,7 @@ public class MediaPlayer implements SubtitleController.Listener
      *
      * @param dataSource the MediaDataSource for the media you want to play
      * @throws IllegalStateException if it is called in an invalid state
+     * @throws IllegalArgumentException if dataSource is not a valid MediaDataSource
      */
     public void setDataSource(MediaDataSource dataSource)
             throws IllegalArgumentException, IllegalStateException {
@@ -1182,29 +1208,13 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void start() throws IllegalStateException {
-        if (isRestricted()) {
-            _setVolume(0, 0);
-        }
+        baseStart();
         stayAwake(true);
         _start();
     }
 
     private native void _start() throws IllegalStateException;
 
-    private boolean isRestricted() {
-        if (mBypassInterruptionPolicy) {
-            return false;
-        }
-        try {
-            final int usage = mUsage != -1 ? mUsage
-                    : AudioAttributes.usageForLegacyStreamType(getAudioStreamType());
-            final int mode = mAppOps.checkAudioOperation(AppOpsManager.OP_PLAY_AUDIO, usage,
-                    Process.myUid(), ActivityThread.currentPackageName());
-            return mode != AppOpsManager.MODE_ALLOWED;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
 
     private int getAudioStreamType() {
         if (mStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
@@ -1260,6 +1270,13 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public void setWakeMode(Context context, int mode) {
         boolean washeld = false;
+
+        /* Disable persistant wakelocks in media player based on property */
+        if (SystemProperties.getBoolean("audio.offload.ignore_setawake", false) == true) {
+            Log.w(TAG, "IGNORING setWakeMode " + mode);
+            return;
+        }
+
         if (mWakeLock != null) {
             if (mWakeLock.isHeld()) {
                 washeld = true;
@@ -1432,12 +1449,18 @@ public class MediaPlayer implements SubtitleController.Listener
     }
 
     /**
-     * Sets playback rate using {@link PlaybackParams}.
+     * Sets playback rate using {@link PlaybackParams}. The object sets its internal
+     * PlaybackParams to the input, except that the object remembers previous speed
+     * when input speed is zero. This allows the object to resume at previous speed
+     * when start() is called. Calling it before the object is prepared does not change
+     * the object state. After the object is prepared, calling it with zero speed is
+     * equivalent to calling pause(). After the object is prepared, calling it with
+     * non-zero speed is equivalent to calling start().
      *
      * @param params the playback params.
      *
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
+     * initialized or has been released.
      * @throws IllegalArgumentException if params is not supported.
      */
     public native void setPlaybackParams(@NonNull PlaybackParams params);
@@ -1651,6 +1674,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * at the same time.
      */
     public void release() {
+        baseRelease();
         stayAwake(false);
         updateSurfaceScreenOn();
         mOnPreparedListener = null;
@@ -1720,6 +1744,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @see android.media.AudioManager
      */
     public void setAudioStreamType(int streamtype) {
+        baseUpdateAudioAttributes(
+                new AudioAttributes.Builder().setInternalLegacyStreamType(streamtype).build());
         _setAudioStreamType(streamtype);
         mStreamType = streamtype;
     }
@@ -1749,6 +1775,7 @@ public class MediaPlayer implements SubtitleController.Listener
             final String msg = "Cannot set AudioAttributes to null";
             throw new IllegalArgumentException(msg);
         }
+        baseUpdateAudioAttributes(attributes);
         mUsage = attributes.getUsage();
         mBypassInterruptionPolicy = (attributes.getAllFlags()
                 & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
@@ -1790,9 +1817,11 @@ public class MediaPlayer implements SubtitleController.Listener
      * to be set independently.
      */
     public void setVolume(float leftVolume, float rightVolume) {
-        if (isRestricted()) {
-            return;
-        }
+        baseSetVolume(leftVolume, rightVolume);
+    }
+
+    @Override
+    void playerSetVolume(float leftVolume, float rightVolume) {
         _setVolume(leftVolume, rightVolume);
     }
 
@@ -1862,10 +1891,13 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param level send level scalar
      */
     public void setAuxEffectSendLevel(float level) {
-        if (isRestricted()) {
-            return;
-        }
+        baseSetAuxEffectSendLevel(level);
+    }
+
+    @Override
+    int playerSetAuxEffectSendLevel(float level) {
         _setAuxEffectSendLevel(level);
+        return AudioSystem.SUCCESS;
     }
 
     private native void _setAuxEffectSendLevel(float level);
@@ -2119,6 +2151,12 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
 
+    /**
+     * MIME type for CEA-708 closed caption data.
+     * @hide
+     */
+    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
+
     /*
      * A helper function to check if the mime type is supported by media framework.
      */
@@ -2248,6 +2286,8 @@ public class MediaPlayer implements SubtitleController.Listener
             Log.w(TAG, "addSubtitleSource called with null InputStream");
         }
 
+        getMediaTimeProvider();
+
         // process each subtitle in its own thread
         final HandlerThread thread = new HandlerThread("SubtitleReadThread",
               Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE);
@@ -2274,7 +2314,12 @@ public class MediaPlayer implements SubtitleController.Listener
                 synchronized (mIndexTrackPairs) {
                     mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
                 }
-                track.onData(contents.getBytes(), true /* eos */, ~0 /* runID: keep forever */);
+                Handler h = mTimeProvider.mEventHandler;
+                int what = TimeProvider.NOTIFY;
+                int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, contents.getBytes());
+                Message m = h.obtainMessage(what, arg1, 0, trackData);
+                h.sendMessage(m);
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 
@@ -2473,6 +2518,8 @@ public class MediaPlayer implements SubtitleController.Listener
             mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
         }
 
+        getMediaTimeProvider();
+
         final long offset2 = offset;
         final long length2 = length;
         final HandlerThread thread = new HandlerThread(
@@ -2496,7 +2543,12 @@ public class MediaPlayer implements SubtitleController.Listener
                             total += bytes;
                         }
                     }
-                    track.onData(bos.toByteArray(), true /* eos */, ~0 /* runID: keep forever */);
+                    Handler h = mTimeProvider.mEventHandler;
+                    int what = TimeProvider.NOTIFY;
+                    int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                    Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, bos.toByteArray());
+                    Message m = h.obtainMessage(what, arg1, 0, trackData);
+                    h.sendMessage(m);
                     return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -2749,7 +2801,10 @@ public class MediaPlayer implements SubtitleController.Listener
     private native final int native_setRetransmitEndpoint(String addrString, int port);
 
     @Override
-    protected void finalize() { native_finalize(); }
+    protected void finalize() {
+        baseRelease();
+        native_finalize();
+    }
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!
@@ -2807,13 +2862,17 @@ public class MediaPlayer implements SubtitleController.Listener
                             MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
                     sendMessage(msg2);
                 }
-                if (mOnPreparedListener != null)
-                    mOnPreparedListener.onPrepared(mMediaPlayer);
+                OnPreparedListener onPreparedListener = mOnPreparedListener;
+                if (onPreparedListener != null)
+                    onPreparedListener.onPrepared(mMediaPlayer);
                 return;
 
             case MEDIA_PLAYBACK_COMPLETE:
-                if (mOnCompletionListener != null)
-                    mOnCompletionListener.onCompletion(mMediaPlayer);
+                {
+                    OnCompletionListener onCompletionListener = mOnCompletionListener;
+                    if (onCompletionListener != null)
+                        onCompletionListener.onCompletion(mMediaPlayer);
+                }
                 stayAwake(false);
                 return;
 
@@ -2837,13 +2896,15 @@ public class MediaPlayer implements SubtitleController.Listener
                 break;
 
             case MEDIA_BUFFERING_UPDATE:
-                if (mOnBufferingUpdateListener != null)
-                    mOnBufferingUpdateListener.onBufferingUpdate(mMediaPlayer, msg.arg1);
+                OnBufferingUpdateListener onBufferingUpdateListener = mOnBufferingUpdateListener;
+                if (onBufferingUpdateListener != null)
+                    onBufferingUpdateListener.onBufferingUpdate(mMediaPlayer, msg.arg1);
                 return;
 
             case MEDIA_SEEK_COMPLETE:
-                if (mOnSeekCompleteListener != null) {
-                    mOnSeekCompleteListener.onSeekComplete(mMediaPlayer);
+                OnSeekCompleteListener onSeekCompleteListener = mOnSeekCompleteListener;
+                if (onSeekCompleteListener != null) {
+                    onSeekCompleteListener.onSeekComplete(mMediaPlayer);
                 }
                 // fall through
 
@@ -2857,8 +2918,9 @@ public class MediaPlayer implements SubtitleController.Listener
                 return;
 
             case MEDIA_SET_VIDEO_SIZE:
-                if (mOnVideoSizeChangedListener != null) {
-                    mOnVideoSizeChangedListener.onVideoSizeChanged(
+                OnVideoSizeChangedListener onVideoSizeChangedListener = mOnVideoSizeChangedListener;
+                if (onVideoSizeChangedListener != null) {
+                    onVideoSizeChangedListener.onVideoSizeChanged(
                         mMediaPlayer, msg.arg1, msg.arg2);
                 }
                 return;
@@ -2866,11 +2928,15 @@ public class MediaPlayer implements SubtitleController.Listener
             case MEDIA_ERROR:
                 Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 boolean error_was_handled = false;
-                if (mOnErrorListener != null) {
-                    error_was_handled = mOnErrorListener.onError(mMediaPlayer, msg.arg1, msg.arg2);
+                OnErrorListener onErrorListener = mOnErrorListener;
+                if (onErrorListener != null) {
+                    error_was_handled = onErrorListener.onError(mMediaPlayer, msg.arg1, msg.arg2);
                 }
-                if (mOnCompletionListener != null && ! error_was_handled) {
-                    mOnCompletionListener.onCompletion(mMediaPlayer);
+                {
+                    OnCompletionListener onCompletionListener = mOnCompletionListener;
+                    if (onCompletionListener != null && ! error_was_handled) {
+                        onCompletionListener.onCompletion(mMediaPlayer);
+                    }
                 }
                 stayAwake(false);
                 return;
@@ -2906,47 +2972,52 @@ public class MediaPlayer implements SubtitleController.Listener
                     break;
                 }
 
-                if (mOnInfoListener != null) {
-                    mOnInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
+                OnInfoListener onInfoListener = mOnInfoListener;
+                if (onInfoListener != null) {
+                    onInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
                 }
                 // No real default action so far.
                 return;
             case MEDIA_TIMED_TEXT:
-                if (mOnTimedTextListener == null)
+                OnTimedTextListener onTimedTextListener = mOnTimedTextListener;
+                if (onTimedTextListener == null)
                     return;
                 if (msg.obj == null) {
-                    mOnTimedTextListener.onTimedText(mMediaPlayer, null);
+                    onTimedTextListener.onTimedText(mMediaPlayer, null);
                 } else {
                     if (msg.obj instanceof Parcel) {
                         Parcel parcel = (Parcel)msg.obj;
                         TimedText text = new TimedText(parcel);
                         parcel.recycle();
-                        mOnTimedTextListener.onTimedText(mMediaPlayer, text);
+                        onTimedTextListener.onTimedText(mMediaPlayer, text);
                     }
                 }
                 return;
 
             case MEDIA_SUBTITLE_DATA:
-                if (mOnSubtitleDataListener == null) {
+                OnSubtitleDataListener onSubtitleDataListener = mOnSubtitleDataListener;
+                if (onSubtitleDataListener == null) {
                     return;
                 }
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
                     SubtitleData data = new SubtitleData(parcel);
                     parcel.recycle();
-                    mOnSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
+                    onSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
                 }
                 return;
 
             case MEDIA_META_DATA:
-                if (mOnTimedMetaDataAvailableListener == null) {
+                OnTimedMetaDataAvailableListener onTimedMetaDataAvailableListener =
+                    mOnTimedMetaDataAvailableListener;
+                if (onTimedMetaDataAvailableListener == null) {
                     return;
                 }
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
                     TimedMetaData data = TimedMetaData.createTimedMetaDataFromParcel(parcel);
                     parcel.recycle();
-                    mOnTimedMetaDataAvailableListener.onTimedMetaDataAvailable(mMediaPlayer, data);
+                    onTimedMetaDataAvailableListener.onTimedMetaDataAvailable(mMediaPlayer, data);
                 }
                 return;
 
@@ -3477,6 +3548,7 @@ public class MediaPlayer implements SubtitleController.Listener
         private static final int REFRESH_AND_NOTIFY_TIME = 1;
         private static final int NOTIFY_STOP = 2;
         private static final int NOTIFY_SEEK = 3;
+        private static final int NOTIFY_TRACK_DATA = 4;
         private HandlerThread mHandlerThread;
 
         /** @hide */
@@ -3614,6 +3686,12 @@ public class MediaPlayer implements SubtitleController.Listener
                 mPausing = true;  // special handling if player disappeared
                 notifyTimedEvent(false /* refreshTime */);
             }
+        }
+
+        private synchronized void notifyTrackData(Pair<SubtitleTrack, byte[]> trackData) {
+            SubtitleTrack track = trackData.first;
+            byte[] data = trackData.second;
+            track.onData(data, true /* eos */, ~0 /* runID: keep forever */);
         }
 
         private synchronized void notifyStop() {
@@ -3847,6 +3925,9 @@ public class MediaPlayer implements SubtitleController.Listener
                         break;
                     case NOTIFY_SEEK:
                         notifySeek();
+                        break;
+                    case NOTIFY_TRACK_DATA:
+                        notifyTrackData((Pair<SubtitleTrack, byte[]>)msg.obj);
                         break;
                     }
                 }

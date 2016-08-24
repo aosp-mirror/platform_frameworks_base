@@ -17,6 +17,7 @@
 package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
+
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -36,13 +37,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Representation of a clipped data on the clipboard.
  *
- * <p>ClippedData is a complex type containing one or Item instances,
+ * <p>ClipData is a complex type containing one or more Item instances,
  * each of which can hold one or more representations of an item of data.
- * For display to the user, it also has a label and iconic representation.</p>
+ * For display to the user, it also has a label.</p>
  *
  * <p>A ClipData contains a {@link ClipDescription}, which describes
  * important meta-data about the clip.  In particular, its
@@ -67,7 +69,7 @@ import java.util.ArrayList;
  * <a name="ImplementingPaste"></a>
  * <h3>Implementing Paste or Drop</h3>
  *
- * <p>To implement a paste or drop of a ClippedData object into an application,
+ * <p>To implement a paste or drop of a ClipData object into an application,
  * the application must correctly interpret the data for its use.  If the {@link Item}
  * it contains is simple text or an Intent, there is little to be done: text
  * can only be interpreted as text, and an Intent will typically be used for
@@ -81,7 +83,7 @@ import java.util.ArrayList;
  * since any clip item can always be converted to a string.
  *
  * <p>More complicated exchanges will be done through URIs, in particular
- * "content:" URIs.  A content URI allows the recipient of a ClippedData item
+ * "content:" URIs.  A content URI allows the recipient of a ClipData item
  * to interact closely with the ContentProvider holding the data in order to
  * negotiate the transfer of that data.  The clip must also be filled in with
  * the available MIME types; {@link #newUri(ContentResolver, CharSequence, Uri)}
@@ -112,7 +114,7 @@ import java.util.ArrayList;
  * <a name="ImplementingCopy"></a>
  * <h3>Implementing Copy or Drag</h3>
  *
- * <p>To be the source of a clip, the application must construct a ClippedData
+ * <p>To be the source of a clip, the application must construct a ClipData
  * object that any recipient can interpret best for their context.  If the clip
  * is to contain a simple text, Intent, or URI, this is easy: an {@link Item}
  * containing the appropriate data type can be constructed and used.
@@ -159,13 +161,13 @@ public class ClipData implements Parcelable {
         ClipDescription.MIMETYPE_TEXT_INTENT };
 
     final ClipDescription mClipDescription;
-    
+
     final Bitmap mIcon;
 
     final ArrayList<Item> mItems;
 
     /**
-     * Description of a single item in a ClippedData.
+     * Description of a single item in a ClipData.
      *
      * <p>The types than an individual item can currently contain are:</p>
      *
@@ -347,7 +349,7 @@ public class ClipData implements Parcelable {
 
                 } catch (IOException e) {
                     // Something bad has happened.
-                    Log.w("ClippedData", "Failure loading text", e);
+                    Log.w("ClipData", "Failure loading text", e);
                     return e.toString();
 
                 } finally {
@@ -461,7 +463,12 @@ public class ClipData implements Parcelable {
                 // Check to see what data representations the content
                 // provider supports.  We would like HTML text, but if that
                 // is not possible we'll live with plan text.
-                String[] types = context.getContentResolver().getStreamTypes(mUri, "text/*");
+                String[] types = null;
+                try {
+                    types = context.getContentResolver().getStreamTypes(mUri, "text/*");
+                } catch (SecurityException e) {
+                    // No read permission for mUri, assume empty stream types list.
+                }
                 boolean hasHtml = false;
                 boolean hasText = false;
                 if (types != null) {
@@ -525,7 +532,7 @@ public class ClipData implements Parcelable {
 
                     } catch (IOException e) {
                         // Something bad has happened.
-                        Log.w("ClippedData", "Failure loading text", e);
+                        Log.w("ClipData", "Failure loading text", e);
                         return Html.escapeHtml(e.toString());
 
                     } finally {
@@ -733,20 +740,15 @@ public class ClipData implements Parcelable {
         if ("content".equals(uri.getScheme())) {
             String realType = resolver.getType(uri);
             mimeTypes = resolver.getStreamTypes(uri, "*/*");
-            if (mimeTypes == null) {
-                if (realType != null) {
-                    mimeTypes = new String[] { realType, ClipDescription.MIMETYPE_TEXT_URILIST };
-                }
-            } else {
-                String[] tmp = new String[mimeTypes.length + (realType != null ? 2 : 1)];
-                int i = 0;
-                if (realType != null) {
+            if (realType != null) {
+                if (mimeTypes == null) {
+                    mimeTypes = new String[] { realType };
+                } else {
+                    String[] tmp = new String[mimeTypes.length + 1];
                     tmp[0] = realType;
-                    i++;
+                    System.arraycopy(mimeTypes, 0, tmp, 1, mimeTypes.length);
+                    mimeTypes = tmp;
                 }
-                System.arraycopy(mimeTypes, 0, tmp, i, mimeTypes.length);
-                tmp[i + mimeTypes.length] = ClipDescription.MIMETYPE_TEXT_URILIST;
-                mimeTypes = tmp;
             }
         }
         if (mimeTypes == null) {
@@ -778,9 +780,14 @@ public class ClipData implements Parcelable {
     public ClipDescription getDescription() {
         return mClipDescription;
     }
-    
+
     /**
      * Add a new Item to the overall ClipData container.
+     * <p> This method will <em>not</em> update the list of available MIME types in the
+     * {@link ClipDescription}. It should be used only when adding items which do not add new
+     * MIME types to this clip. If this is not the case, {@link #ClipData(CharSequence, String[],
+     * Item)} should be used with a complete list of MIME types.
+     * @param item Item to be added.
      */
     public void addItem(Item item) {
         if (item == null) {
@@ -814,15 +821,26 @@ public class ClipData implements Parcelable {
      *
      * @hide
      */
-    public void prepareToLeaveProcess() {
+    public void prepareToLeaveProcess(boolean leavingPackage) {
         final int size = mItems.size();
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
-                item.mIntent.prepareToLeaveProcess();
+                item.mIntent.prepareToLeaveProcess(leavingPackage);
             }
-            if (item.mUri != null && StrictMode.vmFileUriExposureEnabled()) {
+            if (item.mUri != null && StrictMode.vmFileUriExposureEnabled() && leavingPackage) {
                 item.mUri.checkFileUriExposed("ClipData.Item.getUri()");
+            }
+        }
+    }
+
+    /** {@hide} */
+    public void prepareToEnterProcess() {
+        final int size = mItems.size();
+        for (int i = 0; i < size; i++) {
+            final Item item = mItems.get(i);
+            if (item.mIntent != null) {
+                item.mIntent.prepareToEnterProcess();
             }
         }
     }
@@ -910,6 +928,27 @@ public class ClipData implements Parcelable {
             mItems.get(0).toShortString(b);
             if (mItems.size() > 1) {
                 b.append(" ...");
+            }
+        }
+    }
+
+    /** @hide */
+    public void collectUris(List<Uri> out) {
+        for (int i = 0; i < mItems.size(); ++i) {
+            ClipData.Item item = getItemAt(i);
+
+            if (item.getUri() != null) {
+                out.add(item.getUri());
+            }
+
+            Intent intent = item.getIntent();
+            if (intent != null) {
+                if (intent.getData() != null) {
+                    out.add(intent.getData());
+                }
+                if (intent.getClipData() != null) {
+                    intent.getClipData().collectUris(out);
+                }
             }
         }
     }

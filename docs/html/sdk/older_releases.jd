@@ -9,14 +9,14 @@ informational and archival purposes only</strong>.</p>
 
 <div class="special">
 <p>If you are just starting to develop applications for Android, please
-download the current <a href="{@docRoot}sdk/index.html">Android
+download the current <a href="{@docRoot}studio/index.html">Android
 SDK</a>. With the current Android SDK, you can add any current and previous
 version of the Android platform as a component and use it for
 development and testing.</p>
 <p>If you already have an Android SDK for platform version 1.6 or newer, then
 you do not need to install a new SDK&mdash;especially not one from this page.
 You should install older platforms as components of your existing SDK.
-See <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+See <a href="{@docRoot}studio/intro/update.html">Exploring the SDK</a>.</p>
 </div>
 
 
@@ -30,7 +30,7 @@ version-neutral Android SDK to download each version of
 the Android platfrom as an individual component.</p>
 
 <p>Please download the current <a
-href="http://developer.android.com/sdk/index.html">Android SDK</a>.</p>
+href="http://developer.android.com/studio/index.html">Android SDK</a>.</p>
 
 
 <h3>Release 1.6 r1</h3>

@@ -53,6 +53,7 @@
     <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_LOGS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -110,7 +111,7 @@
     <!-- accessibility test permissions -->
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
 
-    <application android:theme="@style/Theme">
+    <application android:theme="@style/Theme" android:supportsRtl="true">
         <uses-library android:name="android.test.runner" />
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <meta-data
@@ -133,6 +134,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.UNIT_TEST"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.TextViewActivity"
+                android:label="TextViewActivity"
+                android:screenOrientation="portrait"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.DatePickerActivity"
+                android:label="DatePickerActivity"
+                android:screenOrientation="portrait"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
 
@@ -1072,7 +1093,12 @@
             </intent-filter>
         </activity>
 
-
+        <activity android:name="android.view.ViewCaptureTestActivity" android:label="ViewCaptureTestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
 
         <!-- Activity-level metadata -->
         <meta-data android:name="com.android.frameworks.coretests.isApp" android:value="true" />
@@ -1260,6 +1286,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.animation.AnimatorSetActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.content.res.ResourceCacheActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1267,9 +1300,29 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.print.PrintTestActivity"/>
+
+        <service
+            android:name="android.print.mockservice.MockPrintService"
+            android:permission="android.permission.BIND_PRINT_SERVICE">
+            <intent-filter>
+                <action android:name="android.printservice.PrintService" />
+            </intent-filter>
+            <meta-data
+               android:name="android.printservice"
+               android:resource="@xml/printservice">
+            </meta-data>
+        </service>
+
+        <activity
+            android:name="android.print.mockservice.SettingsActivity"
+            android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
+            android:exported="true">
+        </activity>
+
     </application>
 
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
             android:targetPackage="com.android.frameworks.coretests"
             android:label="Frameworks Core Tests" />
     <key-sets>

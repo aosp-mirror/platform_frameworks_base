@@ -13,10 +13,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetTop="@dimen/notification_material_rounded_rect_radius_negative">
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
         <solid android:color="@color/system_primary_color"/>
-        <corners android:radius="@dimen/notification_material_rounded_rect_radius"/>
     </shape>
 </inset>

@@ -17,27 +17,31 @@
 package com.android.server.statusbar;
 
 import android.app.StatusBarManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.util.ArrayMap;
 import android.util.Slog;
-
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
+import com.android.internal.util.FastPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +60,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private Handler mHandler = new Handler();
     private NotificationDelegate mNotificationDelegate;
     private volatile IStatusBar mBar;
-    private StatusBarIconList mIcons = new StatusBarIconList();
+    private ArrayMap<String, StatusBarIcon> mIcons = new ArrayMap<>();
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
@@ -64,9 +68,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     // encompasses lights-out mode and other flags defined on View
     private int mSystemUiVisibility = 0;
+    private int mFullscreenStackSysUiVisibility;
+    private int mDockedStackSysUiVisibility;
+    private final Rect mFullscreenStackBounds = new Rect();
+    private final Rect mDockedStackBounds = new Rect();
     private boolean mMenuVisible = false;
     private int mImeWindowVis = 0;
     private int mImeBackDisposition;
@@ -95,9 +103,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     public StatusBarManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-
-        final Resources res = context.getResources();
-        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
     }
@@ -148,10 +153,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void showScreenPinningRequest() {
+        public void showScreenPinningRequest(int taskId) {
             if (mBar != null) {
                 try {
-                    mBar.showScreenPinningRequest();
+                    mBar.showScreenPinningRequest(taskId);
                 } catch (RemoteException e) {
                 }
             }
@@ -186,6 +191,155 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 }
             }
         }
+
+        @Override
+        public void topAppWindowChanged(boolean menuVisible) {
+            StatusBarManagerService.this.topAppWindowChanged(menuVisible);
+        }
+
+        @Override
+        public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+                int mask,
+                Rect fullscreenBounds, Rect dockedBounds, String cause) {
+            StatusBarManagerService.this.setSystemUiVisibility(vis, fullscreenStackVis,
+                    dockedStackVis, mask, fullscreenBounds, dockedBounds, cause);
+        }
+
+        @Override
+        public void toggleSplitScreen() {
+            enforceStatusBarService();
+            if (mBar != null) {
+                try {
+                    mBar.toggleSplitScreen();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        public void appTransitionFinished() {
+            enforceStatusBarService();
+            if (mBar != null) {
+                try {
+                    mBar.appTransitionFinished();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void toggleRecentApps() {
+            if (mBar != null) {
+                try {
+                    mBar.toggleRecentApps();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void setCurrentUser(int newUserId) {
+            if (SPEW) Slog.d(TAG, "Setting current user to user " + newUserId);
+            mCurrentUserId = newUserId;
+        }
+
+
+        @Override
+        public void preloadRecentApps() {
+            if (mBar != null) {
+                try {
+                    mBar.preloadRecentApps();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void cancelPreloadRecentApps() {
+            if (mBar != null) {
+                try {
+                    mBar.cancelPreloadRecentApps();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+            if (mBar != null) {
+                try {
+                    mBar.showRecentApps(triggeredFromAltTab, fromHome);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+            if (mBar != null) {
+                try {
+                    mBar.hideRecentApps(triggeredFromAltTab, triggeredFromHomeKey);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void dismissKeyboardShortcutsMenu() {
+            if (mBar != null) {
+                try {
+                    mBar.dismissKeyboardShortcutsMenu();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void toggleKeyboardShortcutsMenu(int deviceId) {
+            if (mBar != null) {
+                try {
+                    mBar.toggleKeyboardShortcutsMenu(deviceId);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void showTvPictureInPictureMenu() {
+            if (mBar != null) {
+                try {
+                    mBar.showTvPictureInPictureMenu();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void setWindowState(int window, int state) {
+            if (mBar != null) {
+                try {
+                    mBar.setWindowState(window, state);
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void appTransitionPending() {
+            if (mBar != null) {
+                try {
+                    mBar.appTransitionPending();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void appTransitionCancelled() {
+            if (mBar != null) {
+                try {
+                    mBar.appTransitionCancelled();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
+        public void appTransitionStarting(long statusBarAnimationsStartTime,
+                long statusBarAnimationsDuration) {
+            if (mBar != null) {
+                try {
+                    mBar.appTransitionStarting(
+                            statusBarAnimationsStartTime, statusBarAnimationsDuration);
+                } catch (RemoteException ex) {}
+            }
+        }
     };
 
     // ================================================================================
@@ -216,12 +370,45 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void expandSettingsPanel() {
+    public void expandSettingsPanel(String subPanel) {
         enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpandSettingsPanel();
+                mBar.animateExpandSettingsPanel(subPanel);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void addTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.addQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void remTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.remQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void clickTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.clickQsTile(component);
             } catch (RemoteException ex) {
             }
         }
@@ -300,20 +487,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
-            StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.OWNER, iconId,
-                    iconLevel, 0,
-                    contentDescription);
+            StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
+                    iconLevel, 0, contentDescription);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
-            mIcons.setIcon(index, icon);
+            mIcons.put(slot, icon);
 
             if (mBar != null) {
                 try {
-                    mBar.setIcon(index, icon);
+                    mBar.setIcon(slot, icon);
                 } catch (RemoteException ex) {
                 }
             }
@@ -321,26 +502,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void setIconVisibility(String slot, boolean visible) {
+    public void setIconVisibility(String slot, boolean visibility) {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
-            StatusBarIcon icon = mIcons.getIcon(index);
+            StatusBarIcon icon = mIcons.get(slot);
             if (icon == null) {
                 return;
             }
-
-            if (icon.visible != visible) {
-                icon.visible = visible;
+            if (icon.visible != visibility) {
+                icon.visible = visibility;
 
                 if (mBar != null) {
                     try {
-                        mBar.setIcon(index, icon);
+                        mBar.setIcon(slot, icon);
                     } catch (RemoteException ex) {
                     }
                 }
@@ -353,16 +528,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
-            mIcons.removeIcon(index);
+            mIcons.remove(slot);
 
             if (mBar != null) {
                 try {
-                    mBar.removeIcon(index);
+                    mBar.removeIcon(slot);
                 } catch (RemoteException ex) {
                 }
             }
@@ -374,8 +544,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
      * response to a window with {@link android.view.WindowManager.LayoutParams#needsMenuKey} set
      * to {@link android.view.WindowManager.LayoutParams#NEEDS_MENU_SET_TRUE}.
      */
-    @Override
-    public void topAppWindowChanged(final boolean menuVisible) {
+    private void topAppWindowChanged(final boolean menuVisible) {
         enforceStatusBar();
 
         if (SPEW) Slog.d(TAG, (menuVisible?"showing":"hiding") + " MENU key");
@@ -383,15 +552,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         synchronized(mLock) {
             mMenuVisible = menuVisible;
             mHandler.post(new Runnable() {
-                    public void run() {
-                        if (mBar != null) {
-                            try {
-                                mBar.topAppWindowChanged(menuVisible);
-                            } catch (RemoteException ex) {
-                            }
+                public void run() {
+                    if (mBar != null) {
+                        try {
+                            mBar.topAppWindowChanged(menuVisible);
+                        } catch (RemoteException ex) {
                         }
                     }
-                });
+                }
+            });
         }
     }
 
@@ -427,13 +596,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void setSystemUiVisibility(int vis, int mask, String cause) {
+        setSystemUiVisibility(vis, 0, 0, mask, mFullscreenStackBounds, mDockedStackBounds, cause);
+    }
+
+    private void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
+            Rect fullscreenBounds, Rect dockedBounds, String cause) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
         if (SPEW) Slog.d(TAG, "setSystemUiVisibility(0x" + Integer.toHexString(vis) + ")");
 
         synchronized (mLock) {
-            updateUiVisibilityLocked(vis, mask);
+            updateUiVisibilityLocked(vis, fullscreenStackVis, dockedStackVis, mask,
+                    fullscreenBounds, dockedBounds);
             disableLocked(
                     mCurrentUserId,
                     vis & StatusBarManager.DISABLE_MASK,
@@ -442,14 +617,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
-    private void updateUiVisibilityLocked(final int vis, final int mask) {
-        if (mSystemUiVisibility != vis) {
+    private void updateUiVisibilityLocked(final int vis,
+            final int fullscreenStackVis, final int dockedStackVis, final int mask,
+            final Rect fullscreenBounds, final Rect dockedBounds) {
+        if (mSystemUiVisibility != vis
+                || mFullscreenStackSysUiVisibility != fullscreenStackVis
+                || mDockedStackSysUiVisibility != dockedStackVis
+                || !mFullscreenStackBounds.equals(fullscreenBounds)
+                || !mDockedStackBounds.equals(dockedBounds)) {
             mSystemUiVisibility = vis;
+            mFullscreenStackSysUiVisibility = fullscreenStackVis;
+            mDockedStackSysUiVisibility = dockedStackVis;
+            mFullscreenStackBounds.set(fullscreenBounds);
+            mDockedStackBounds.set(dockedBounds);
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mBar != null) {
                             try {
-                                mBar.setSystemUiVisibility(vis, mask);
+                                mBar.setSystemUiVisibility(vis, fullscreenStackVis, dockedStackVis,
+                                        mask, fullscreenBounds, dockedBounds);
                             } catch (RemoteException ex) {
                             }
                         }
@@ -458,102 +644,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
-    @Override
-    public void toggleRecentApps() {
-        if (mBar != null) {
-            try {
-                mBar.toggleRecentApps();
-            } catch (RemoteException ex) {}
+    private void enforceStatusBarOrShell() {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
         }
-    }
-
-    @Override
-    public void preloadRecentApps() {
-        if (mBar != null) {
-            try {
-                mBar.preloadRecentApps();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void cancelPreloadRecentApps() {
-        if (mBar != null) {
-            try {
-                mBar.cancelPreloadRecentApps();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void showRecentApps(boolean triggeredFromAltTab) {
-        if (mBar != null) {
-            try {
-                mBar.showRecentApps(triggeredFromAltTab);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        if (mBar != null) {
-            try {
-                mBar.hideRecentApps(triggeredFromAltTab, triggeredFromHomeKey);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void setCurrentUser(int newUserId) {
-        if (SPEW) Slog.d(TAG, "Setting current user to user " + newUserId);
-        mCurrentUserId = newUserId;
-    }
-
-    @Override
-    public void setWindowState(int window, int state) {
-        if (mBar != null) {
-            try {
-                mBar.setWindowState(window, state);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void appTransitionPending() {
-        if (mBar != null) {
-            try {
-                mBar.appTransitionPending();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void appTransitionCancelled() {
-        if (mBar != null) {
-            try {
-                mBar.appTransitionCancelled();
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void appTransitionStarting(long statusBarAnimationsStartTime,
-            long statusBarAnimationsDuration) {
-        if (mBar != null) {
-            try {
-                mBar.appTransitionStarting(
-                        statusBarAnimationsStartTime, statusBarAnimationsDuration);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
-    public void startAssist(Bundle args) {
-        if (mBar != null) {
-            try {
-                mBar.startAssist(args);
-            } catch (RemoteException ex) {}
-        }
+        enforceStatusBar();
     }
 
     private void enforceStatusBar() {
@@ -575,14 +670,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // Callbacks from the status bar service.
     // ================================================================================
     @Override
-    public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
-            int switches[], List<IBinder> binders) {
+    public void registerStatusBar(IStatusBar bar, List<String> iconSlots,
+            List<StatusBarIcon> iconList, int switches[], List<IBinder> binders,
+            Rect fullscreenStackBounds, Rect dockedStackBounds) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         synchronized (mIcons) {
-            iconList.copyFrom(mIcons);
+            for (String slot : mIcons.keySet()) {
+                iconSlots.add(slot);
+                iconList.add(mIcons.get(slot));
+            }
         }
         synchronized (mLock) {
             switches[0] = gatherDisableActionsLocked(mCurrentUserId, 1);
@@ -592,7 +691,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             switches[4] = mImeBackDisposition;
             switches[5] = mShowImeSwitcher ? 1 : 0;
             switches[6] = gatherDisableActionsLocked(mCurrentUserId, 2);
+            switches[7] = mFullscreenStackSysUiVisibility;
+            switches[8] = mDockedStackSysUiVisibility;
             binders.add(mImeToken);
+            fullscreenStackBounds.set(mFullscreenStackBounds);
+            dockedStackBounds.set(mDockedStackBounds);
         }
     }
 
@@ -729,6 +832,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        (new StatusBarShellCommand(this)).exec(
+                this, in, out, err, args, resultReceiver);
+    }
+
     // ================================================================================
     // Can be called from any thread
     // ================================================================================
@@ -804,10 +914,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             return;
         }
 
-        synchronized (mIcons) {
-            mIcons.dump(pw);
-        }
-
         synchronized (mLock) {
             pw.println("  mDisabled1=0x" + Integer.toHexString(mDisabled1));
             pw.println("  mDisabled2=0x" + Integer.toHexString(mDisabled2));
@@ -821,6 +927,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                                 + " pkg=" + tok.pkg
                                 + " token=" + tok.token);
             }
+            pw.println("  mCurrentUserId=" + mCurrentUserId);
         }
     }
 }

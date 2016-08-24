@@ -25,13 +25,17 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -46,6 +50,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +82,10 @@ public class StorageManager {
     public static final String PROP_HAS_ADOPTABLE = "vold.has_adoptable";
     /** {@hide} */
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
+    /** {@hide} */
+    public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
+    /** {@hide} */
+    public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -85,9 +94,27 @@ public class StorageManager {
 
     /** {@hide} */
     public static final int DEBUG_FORCE_ADOPTABLE = 1 << 0;
+    /** {@hide} */
+    public static final int DEBUG_EMULATE_FBE = 1 << 1;
+    /** {@hide} */
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
+    /** {@hide} */
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
+
+    // NOTE: keep in sync with installd
+    /** {@hide} */
+    public static final int FLAG_STORAGE_DE = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_STORAGE_CE = 1 << 1;
 
     /** {@hide} */
-    public static final int FLAG_FOR_WRITE = 1 << 0;
+    public static final int FLAG_FOR_WRITE = 1 << 8;
+    /** {@hide} */
+    public static final int FLAG_REAL_STATE = 1 << 9;
+    /** {@hide} */
+    public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
+
+    private static volatile IMountService sMountService = null;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -287,7 +314,7 @@ public class StorageManager {
     /**
      * Constructs a StorageManager object through which an application can
      * can communicate with the systems mount service.
-     * 
+     *
      * @param tgtLooper The {@link android.os.Looper} which events will be received on.
      *
      * <p>Applications can get instance of this class by calling
@@ -320,7 +347,7 @@ public class StorageManager {
             try {
                 mMountService.registerListener(delegate);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
             mDelegates.add(delegate);
         }
@@ -341,7 +368,7 @@ public class StorageManager {
                     try {
                         mMountService.unregisterListener(delegate);
                     } catch (RemoteException e) {
-                        throw e.rethrowAsRuntimeException();
+                        throw e.rethrowFromSystemServer();
                     }
                     i.remove();
                 }
@@ -403,7 +430,7 @@ public class StorageManager {
      * file matches a package ID that is owned by the calling program's UID.
      * That is, shared UID applications can attempt to mount any other
      * application's OBB that shares its UID.
-     * 
+     *
      * @param rawPath the path to the OBB file
      * @param key secret used to encrypt the OBB; may be <code>null</code> if no
      *            encryption was used on the OBB.
@@ -422,10 +449,8 @@ public class StorageManager {
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to mount OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -441,7 +466,7 @@ public class StorageManager {
      * That is, shared UID applications can obtain access to any other
      * application's OBB that shares its UID.
      * <p>
-     * 
+     *
      * @param rawPath path to the OBB file
      * @param force whether to kill any programs using this in order to unmount
      *            it
@@ -457,15 +482,13 @@ public class StorageManager {
             mMountService.unmountObb(rawPath, force, mObbActionListener, nonce);
             return true;
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to mount OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
      * Check whether an Opaque Binary Blob (OBB) is mounted or not.
-     * 
+     *
      * @param rawPath path to OBB image
      * @return true if OBB is mounted; false if not mounted or on error
      */
@@ -475,17 +498,15 @@ public class StorageManager {
         try {
             return mMountService.isObbMounted(rawPath);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to check if OBB is mounted", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
      * Check the mounted path of an Opaque Binary Blob (OBB) file. This will
      * give you the path to where you can obtain access to the internals of the
      * OBB.
-     * 
+     *
      * @param rawPath path to OBB image
      * @return absolute path to mounted OBB image data or <code>null</code> if
      *         not mounted or exception encountered trying to read status
@@ -496,10 +517,8 @@ public class StorageManager {
         try {
             return mMountService.getMountedObbPath(rawPath);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to find mounted path for OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return null;
     }
 
     /** {@hide} */
@@ -507,7 +526,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getDisks());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -593,7 +612,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getVolumes(0));
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -608,7 +627,7 @@ public class StorageManager {
             }
             return res;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -617,7 +636,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getVolumeRecords(0));
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -660,7 +679,7 @@ public class StorageManager {
         try {
             mMountService.mount(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -669,7 +688,7 @@ public class StorageManager {
         try {
             mMountService.unmount(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -678,7 +697,7 @@ public class StorageManager {
         try {
             mMountService.format(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -687,7 +706,7 @@ public class StorageManager {
         try {
             return mMountService.benchmark(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -696,7 +715,7 @@ public class StorageManager {
         try {
             mMountService.partitionPublic(diskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -705,7 +724,7 @@ public class StorageManager {
         try {
             mMountService.partitionPrivate(diskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -714,7 +733,7 @@ public class StorageManager {
         try {
             mMountService.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -747,7 +766,7 @@ public class StorageManager {
         try {
             mMountService.setVolumeNickname(fsUuid, nickname);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -757,7 +776,7 @@ public class StorageManager {
             mMountService.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
                     VolumeRecord.USER_FLAG_INITED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -767,7 +786,7 @@ public class StorageManager {
             mMountService.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
                     VolumeRecord.USER_FLAG_SNOOZED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -776,7 +795,7 @@ public class StorageManager {
         try {
             mMountService.forgetVolume(fsUuid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -790,7 +809,7 @@ public class StorageManager {
         try {
             return mMountService.getPrimaryStorageUuid();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -804,11 +823,13 @@ public class StorageManager {
         try {
             mMountService.setPrimaryStorageUuid(volumeUuid, callback);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
-    /** {@hide} */
+    /**
+     * Return the {@link StorageVolume} that contains the given file, or {@code null} if none.
+     */
     public @Nullable StorageVolume getStorageVolume(File file) {
         return getStorageVolume(getVolumeList(), file);
     }
@@ -820,9 +841,13 @@ public class StorageManager {
 
     /** {@hide} */
     private static @Nullable StorageVolume getStorageVolume(StorageVolume[] volumes, File file) {
+        if (file == null) {
+            return null;
+        }
         try {
             file = file.getCanonicalFile();
         } catch (IOException ignored) {
+            Slog.d(TAG, "Could not get canonical path for " + file);
             return null;
         }
         for (StorageVolume volume : volumes) {
@@ -853,7 +878,32 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Return the list of shared/external storage volumes available to the
+     * current user. This includes both the primary shared storage device and
+     * any attached external volumes including SD cards and USB drives.
+     *
+     * @see Environment#getExternalStorageDirectory()
+     * @see StorageVolume#createAccessIntent(String)
+     */
+    public @NonNull List<StorageVolume> getStorageVolumes() {
+        final ArrayList<StorageVolume> res = new ArrayList<>();
+        Collections.addAll(res,
+                getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
+        return res;
+    }
+
+    /**
+     * Return the primary shared/external storage volume available to the
+     * current user. This volume is the same storage device returned by
+     * {@link Environment#getExternalStorageDirectory()} and
+     * {@link Context#getExternalFilesDir(String)}.
+     */
+    public @NonNull StorageVolume getPrimaryStorageVolume() {
+        return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+    }
+
+    /** @removed */
     public @NonNull StorageVolume[] getVolumeList() {
         return getVolumeList(mContext.getUserId(), 0);
     }
@@ -876,13 +926,14 @@ public class StorageManager {
                 }
                 packageName = packageNames[0];
             }
-            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName, userId);
+            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
+                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             if (uid <= 0) {
                 return new StorageVolume[0];
             }
             return mountService.getVolumeList(uid, packageName, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -901,7 +952,7 @@ public class StorageManager {
         return paths;
     }
 
-    /** {@hide} */
+    /** @removed */
     public @NonNull StorageVolume getPrimaryVolume() {
         return getPrimaryVolume(getVolumeList());
     }
@@ -960,21 +1011,204 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void createNewUserDir(int userHandle, File path) {
+    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
         try {
-            mMountService.createNewUserDir(userHandle, path.getAbsolutePath());
+            mMountService.createUserKey(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /** {@hide} */
-    public void deleteUserKey(int userHandle) {
+    public void destroyUserKey(int userId) {
         try {
-            mMountService.deleteUserKey(userHandle);
+            mMountService.destroyUserKey(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+        try {
+            mMountService.unlockUserKey(userId, serialNumber, token, secret);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public void lockUserKey(int userId) {
+        try {
+            mMountService.lockUserKey(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
+        try {
+            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public void destroyUserStorage(String volumeUuid, int userId, int flags) {
+        try {
+            mMountService.destroyUserStorage(volumeUuid, userId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public static boolean isUserKeyUnlocked(int userId) {
+        if (sMountService == null) {
+            sMountService = IMountService.Stub
+                    .asInterface(ServiceManager.getService("mount"));
+        }
+        if (sMountService == null) {
+            Slog.w(TAG, "Early during boot, assuming locked");
+            return false;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return sMountService.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
+    }
+
+    /**
+     * Return if data stored at or under the given path will be encrypted while
+     * at rest. This can help apps avoid the overhead of double-encrypting data.
+     */
+    public boolean isEncrypted(File file) {
+        if (FileUtils.contains(Environment.getDataDirectory(), file)) {
+            return isEncrypted();
+        } else if (FileUtils.contains(Environment.getExpandDirectory(), file)) {
+            return true;
+        }
+        // TODO: extend to support shared storage
+        return false;
+    }
+
+    /** {@hide}
+     * Is this device encryptable or already encrypted?
+     * @return true for encryptable or encrypted
+     *         false not encrypted and not encryptable
+     */
+    public static boolean isEncryptable() {
+        final String state = SystemProperties.get("ro.crypto.state", "unsupported");
+        return !"unsupported".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device already encrypted?
+     * @return true for encrypted. (Implies isEncryptable() == true)
+     *         false not encrypted
+     */
+    public static boolean isEncrypted() {
+        final String state = SystemProperties.get("ro.crypto.state", "");
+        return "encrypted".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device file encrypted?
+     * @return true for file encrypted. (Implies isEncrypted() == true)
+     *         false not encrypted or block encrypted
+     */
+    public static boolean isFileEncryptedNativeOnly() {
+        if (!isEncrypted()) {
+            return false;
+        }
+
+        final String status = SystemProperties.get("ro.crypto.type", "");
+        return "file".equalsIgnoreCase(status);
+    }
+
+    /** {@hide}
+     * Is this device block encrypted?
+     * @return true for block encrypted. (Implies isEncrypted() == true)
+     *         false not encrypted or file encrypted
+     */
+    public static boolean isBlockEncrypted() {
+        if (!isEncrypted()) {
+            return false;
+        }
+        final String status = SystemProperties.get("ro.crypto.type", "");
+        return "block".equalsIgnoreCase(status);
+    }
+
+    /** {@hide}
+     * Is this device block encrypted with credentials?
+     * @return true for crediential block encrypted.
+     *         (Implies isBlockEncrypted() == true)
+     *         false not encrypted, file encrypted or default block encrypted
+     */
+    public static boolean isNonDefaultBlockEncrypted() {
+        if (!isBlockEncrypted()) {
+            return false;
+        }
+
+        try {
+            IMountService mountService = IMountService.Stub.asInterface(
+                    ServiceManager.getService("mount"));
+            return mountService.getPasswordType() != CRYPT_TYPE_DEFAULT;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error getting encryption type");
+            return false;
+        }
+    }
+
+    /** {@hide}
+     * Is this device in the process of being block encrypted?
+     * @return true for encrypting.
+     *         false otherwise
+     * Whether device isEncrypted at this point is undefined
+     * Note that only system services and CryptKeeper will ever see this return
+     * true - no app will ever be launched in this state.
+     * Also note that this state will not change without a teardown of the
+     * framework, so no service needs to check for changes during their lifespan
+     */
+    public static boolean isBlockEncrypting() {
+        final String state = SystemProperties.get("vold.encrypt_progress", "");
+        return !"".equalsIgnoreCase(state);
+    }
+
+    /** {@hide}
+     * Is this device non default block encrypted and in the process of
+     * prompting for credentials?
+     * @return true for prompting for credentials.
+     *         (Implies isNonDefaultBlockEncrypted() == true)
+     *         false otherwise
+     * Note that only system services and CryptKeeper will ever see this return
+     * true - no app will ever be launched in this state.
+     * Also note that this state will not change without a teardown of the
+     * framework, so no service needs to check for changes during their lifespan
+     */
+    public static boolean inCryptKeeperBounce() {
+        final String status = SystemProperties.get("vold.decrypt");
+        return "trigger_restart_min_framework".equals(status);
+    }
+
+    /** {@hide} */
+    public static boolean isFileEncryptedEmulatedOnly() {
+        return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
+    }
+
+    /** {@hide}
+     * Is this device running in a file encrypted mode, either native or emulated?
+     * @return true for file encrypted, false otherwise
+     */
+    public static boolean isFileEncryptedNativeOrEmulated() {
+        return isFileEncryptedNativeOnly()
+               || isFileEncryptedEmulatedOnly();
     }
 
     /** {@hide} */
@@ -993,9 +1227,19 @@ public class StorageManager {
                     }
                 }
             }
-        } catch (RemoteException ignored) {
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
         return path;
+    }
+
+    /** {@hide} */
+    public ParcelFileDescriptor mountAppFuse(String name) {
+        try {
+            return mMountService.mountAppFuse(name);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /// Consts to match the password types in cryptfs.h

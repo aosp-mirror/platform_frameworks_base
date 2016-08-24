@@ -21,4 +21,5 @@
     android:sessionService="com.android.test.voiceinteraction.MainInteractionSessionService"
     android:recognitionService="com.android.test.voiceinteraction.MainRecognitionService"
     android:settingsActivity="com.android.test.voiceinteraction.SettingsActivity"
-    android:supportsAssist="true" />
+    android:supportsAssist="true" 
+    android:supportsLocalInteraction="true" />

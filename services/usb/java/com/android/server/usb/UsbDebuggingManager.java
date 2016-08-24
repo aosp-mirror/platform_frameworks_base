@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -323,21 +324,21 @@ public class UsbDebuggingManager {
 
     private void startConfirmation(String key, String fingerprints) {
         int currentUserId = ActivityManager.getCurrentUser();
-        UserHandle userHandle =
-                UserManager.get(mContext).getUserInfo(currentUserId).getUserHandle();
+        UserInfo userInfo = UserManager.get(mContext).getUserInfo(currentUserId);
         String componentString;
-        if (currentUserId == UserHandle.USER_OWNER) {
+        if (userInfo.isAdmin()) {
             componentString = Resources.getSystem().getString(
                     com.android.internal.R.string.config_customAdbPublicKeyConfirmationComponent);
         } else {
-            // If the current foreground user is not the primary user we send a different
+            // If the current foreground user is not the admin user we send a different
             // notification specific to secondary users.
             componentString = Resources.getSystem().getString(
                     R.string.config_customAdbPublicKeyConfirmationSecondaryUserComponent);
         }
         ComponentName componentName = ComponentName.unflattenFromString(componentString);
-        if (startConfirmationActivity(componentName, userHandle, key, fingerprints)
-                || startConfirmationService(componentName, userHandle, key, fingerprints)) {
+        if (startConfirmationActivity(componentName, userInfo.getUserHandle(), key, fingerprints)
+                || startConfirmationService(componentName, userInfo.getUserHandle(),
+                        key, fingerprints)) {
             return;
         }
         Slog.e(TAG, "unable to start customAdbPublicKeyConfirmation[SecondaryUser]Component "

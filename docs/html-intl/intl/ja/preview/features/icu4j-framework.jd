@@ -1,0 +1,159 @@
+page.title=ICU4J Android フレームワーク API
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>このドキュメントの内容:</h2>
+<ol>
+    <li><a href="#relation">ICU4J との関係</a></li>
+    <li><a href="#migration">ICU4J から android.icu API に移行する</a></li>
+    <li><a href="#licence">ライセンス</a></li>
+</ol>
+
+<h2>関連ドキュメント</h2>
+<ol>
+  <li>
+    <a class="external-link" href="http://userguide.icu-project.org">ICU4J のドキュメント</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="http://site.icu-project.org/#TOC-What-is-ICU-">ICU4J でサポートされている最新の標準</a>
+
+  </li>
+</ol>
+</div>
+</div>
+
+<p>
+  ICU4J は幅広く使用されている、オープンソースの Java ライブラリのセットで、Unicode のほか、ソフトウェア アプリのグローバル化のサポートを提供しています。
+Android N では、アプリのデベロッパー向けの Android フレームワーク内で ICU4J API のサブセットを公開しており、{@code android.icu} パッケージ内で使用できます。
+
+これらの API は、端末上のローカライズ データを使用します。
+そのため、ICU4J ライブラリを APK にコンパイルせず、フレームワーク内にあるライブラリを呼び出せばよいので、APK のフットプリントを削減できます
+
+（この場合、Android N より前のバージョンの Android を実行しているユーザーも、ICU4J ライブラリを含むバージョンのアプリをダウンロードできるようにするには、<a href="{@docRoot}google/play/publishing/multiple-apks.html">APK を複数のバージョン</a>用意する必要があります）。
+
+
+
+</p>
+
+<p>
+  ここではまず、これらのライブラリをサポートするために必要な最低限の Android API レベルについて基本的な情報を説明します。
+次に、Android 固有の ICU4J の実装に必要な情報を説明します。
+最後に、Android フレームワーク内で ICU4J API を使用する方法について説明します。
+
+</p>
+
+<h2 id="relation">ICU4J との関係</h2>
+
+<p>
+  Android N では、<code>com.ibm.icu</code> ではなく 
+<code>android.icu</code> パッケージを介して ICU4J API のサブセットを公開しています。Android フレームワークでは、さまざまな理由により ICU4J API を公開しないという選択も考えられます。たとえば、Android N で廃止された API を公開しないため、または ICU チームからまだ安定版の発表がないため、などの理由があります。
+
+
+
+ICU チームが今後 API を廃止した場合、Android でも廃止と見なすことになりますが、引き続きそれらの API を含める予定です。
+
+</p>
+
+<p class="table-caption"><strong>表 1.</strong> Android N で使用される ICU および CLDR のバージョン
+</p>
+<table>
+<tr>
+<th>Android API レベル</th>
+<th>ICU バージョン</th>
+<th>CLDR バージョン</th>
+</tr>
+<tr>
+<td>Android N</td>
+<td>56</td>
+<td>28</td>
+</tr>
+</table>
+
+<p>いくつか注意事項があります。</p>
+
+<ul>
+<li>ICU4J Android フレームワーク API には、すべての ICU4J API が含まれているわけではありません。</li>
+<li>NDK デベロッパーは、Android ICU4C がサポートされていない点にご注意ください。</li>
+<li>Android フレームワーク内の API は、Android の<a href="{@docRoot}guide/topics/resources/localization.html">リソースを使用したローカライズ</a>に対するサポートに代わるものではありません。
+
+</li>
+</ul>
+
+<h2 id="migration">com.ibm.icu から android.icu パッケージに移行する</h2>
+
+<p>
+  アプリ内で既に ICU4J API を使用しており、
+<code>android.icu</code> API がその要件を満たしている場合、このフレームワーク API に移行するには、Java のインポートを <code>com.ibm.icu</code> から <code>android.icu</code> に変更します。
+
+次に、APK から ICU4J ファイルのコピーを削除します。
+
+</p>
+
+<p class="note">
+  <b>注</b>:ICU4J フレームワーク API では、名前空間に {@code com.ibm.icu} ではなく{@code android.icu} を使用します。
+これは、独自の {@code com.ibm.icu} ライブラリを含む APK で名前空間が競合しないようにするためです。
+
+</p>
+
+<h3 id="migrate-from-android">
+  その他の Android SDK API から android.icu API に移行する
+</h3>
+
+<p>
+  <code>java</code> および <code>android</code> パッケージには、ICU4J にあるクラスと同等のクラスが一部含まれています。
+しかし多くの場合、ICU4J では、より幅広い標準と言語のサポートを提供しています。
+
+</p>
+<p>次に、すぐに利用できる例をいくつか示します。</p>
+<table>
+<tr>
+<th>クラス</th>
+<th>代替クラス</th>
+</tr>
+<tr>
+<td><code>java.lang.Character</code> </td>
+<td><code>android.icu.lang.UCharacter</code> </td>
+</tr>
+<tr>
+<td><code>java.text.BreakIterator</code> </td>
+<td><code>android.icu.text.BreakIterator</code> </td>
+</tr>
+<tr>
+<td><code>java.text.DecimalFormat</code> </td>
+<td><code>android.icu.text.DecimalFormat</code> </td>
+</tr>
+<tr>
+<td><code>java.util.Calendar</code></td>
+<td>
+<code>android.icu.util.Calendar</code></td>
+</tr>
+<tr>
+<td><code>android.text.BidiFormatter</code>
+ </td>
+<td><code>android.icu.text.Bidi</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateFormat</code>
+ </td>
+<td><code>android.icu.text.DateFormat</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateUtils</code> </td>
+<td><code>android.icu.text.DateFormat</code>
+<code>android.icu.text.RelativeDateTimeFormatter</code>
+</td>
+</tr>
+</table>
+
+<h2 id="licence">ライセンス</h2>
+
+<p>
+  ICU4J は ICU ライセンスでリリースされています。詳細については、<a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU ユーザーガイド</a>をご覧ください。
+
+</p>

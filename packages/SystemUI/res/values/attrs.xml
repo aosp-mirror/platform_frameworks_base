@@ -28,9 +28,6 @@
     <declare-styleable name="NotificationLinearLayout">
         <attr name="insetLeft" format="dimension" />
     </declare-styleable>
-    <declare-styleable name="NotificationRowLayout">
-        <attr name="rowHeight" format="dimension" />
-    </declare-styleable>
     <declare-styleable name="RecentsPanelView">
         <attr name="recentItemLayout" format="reference" />
     </declare-styleable>
@@ -56,10 +53,14 @@
         <enum name="vertical" value="1" />
     </attr>
     <declare-styleable name="UserAvatarView">
+        <attr name="avatarPadding" format="dimension" />
         <attr name="frameWidth" format="dimension" />
         <attr name="framePadding" format="dimension" />
+        <!-- {@deprecated Use a statelist in frameColor instead.} -->
         <attr name="activeFrameColor" format="color" />
-        <attr name="frameColor" />
+        <attr name="frameColor" format="color" />
+        <attr name="badgeDiameter" format="dimension" />
+        <attr name="badgeMargin" format="dimension" />
     </declare-styleable>
     <declare-styleable name="UserDetailItemView">
         <attr name="regularFontFamily" format="string" />
@@ -88,8 +89,21 @@
         <attr name="ignoreRightInset" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="AlphaOptimizedImageView">
+    <declare-styleable name="AnimatedImageView">
         <attr name="hasOverlappingRendering" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="TunerSwitch">
+        <attr name="defValue" format="boolean" />
+        <attr name="metricsAction" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="AutoReinflateContainer">
+        <attr name="android:layout" />
+    </declare-styleable>
+
+    <declare-styleable name="AutoSizingList">
+        <attr name="itemHeight" format="dimension" />
     </declare-styleable>
 </resources>
 

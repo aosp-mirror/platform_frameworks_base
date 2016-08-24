@@ -46,7 +46,7 @@ import java.util.ArrayList;
  * transition on the affected view targets:</p>
  * <pre>
  *     &lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
- *             android:ordering="sequential"&gt;
+ *             android:transitionOrdering="sequential"&gt;
  *         &lt;fade/&gt;
  *         &lt;changeBounds/&gt;
  *     &lt;/transitionSet&gt;
@@ -315,15 +315,6 @@ public class TransitionSet extends Transition {
         super.setPathMotion(pathMotion);
         for (int i = 0; i < mTransitions.size(); i++) {
             mTransitions.get(i).setPathMotion(pathMotion);
-        }
-    }
-
-    /** @hide */
-    @Override
-    public void forceVisibility(int visibility, boolean isStartValue) {
-        int numTransitions = mTransitions.size();
-        for (int i = 0; i < numTransitions; i++) {
-            mTransitions.get(i).forceVisibility(visibility, isStartValue);
         }
     }
 

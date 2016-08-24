@@ -16,8 +16,6 @@
 
 package android.app;
 
-import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,35 +29,45 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.Os;
+import android.system.OsConstants;
+import android.system.ErrnoException;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.DisplayAdjustments;
 import android.view.Display;
-import android.os.SystemProperties;
+import android.view.DisplayAdjustments;
 
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
+
+import libcore.io.IoUtils;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     public IntentReceiverLeaked(String msg) {
@@ -82,22 +90,25 @@ public final class LoadedApk {
     private static final String TAG = "LoadedApk";
 
     private final ActivityThread mActivityThread;
-    private ApplicationInfo mApplicationInfo;
     final String mPackageName;
-    private final String mAppDir;
-    private final String mResDir;
-    private final String[] mSplitAppDirs;
-    private final String[] mSplitResDirs;
-    private final String[] mOverlayDirs;
-    private final String[] mSharedLibraries;
-    private final String mDataDir;
-    private final String mLibDir;
-    private final File mDataDirFile;
+    private ApplicationInfo mApplicationInfo;
+    private String mAppDir;
+    private String mResDir;
+    private String[] mSplitAppDirs;
+    private String[] mSplitResDirs;
+    private String[] mOverlayDirs;
+    private String[] mSharedLibraries;
+    private String mDataDir;
+    private String mLibDir;
+    private File mDataDirFile;
+    private File mDeviceProtectedDataDirFile;
+    private File mCredentialProtectedDataDirFile;
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
     private final boolean mRegisterPackage;
     private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
+    /** WARNING: This may change. Don't hold external references to it. */
     Resources mResources;
     private ClassLoader mClassLoader;
     private Application mApplication;
@@ -126,21 +137,10 @@ public final class LoadedApk {
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
             CompatibilityInfo compatInfo, ClassLoader baseLoader,
             boolean securityViolation, boolean includeCode, boolean registerPackage) {
-        final int myUid = Process.myUid();
-        aInfo = adjustNativeLibraryPaths(aInfo);
 
         mActivityThread = activityThread;
-        mApplicationInfo = aInfo;
+        setApplicationInfo(aInfo);
         mPackageName = aInfo.packageName;
-        mAppDir = aInfo.sourceDir;
-        mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
-        mSplitAppDirs = aInfo.splitSourceDirs;
-        mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
-        mOverlayDirs = aInfo.resourceDirs;
-        mSharedLibraries = aInfo.sharedLibraryFiles;
-        mDataDir = aInfo.dataDir;
-        mDataDirFile = mDataDir != null ? new File(mDataDir) : null;
-        mLibDir = aInfo.nativeLibraryDir;
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
@@ -192,6 +192,8 @@ public final class LoadedApk {
         mSharedLibraries = null;
         mDataDir = null;
         mDataDirFile = null;
+        mDeviceProtectedDataDirFile = null;
+        mCredentialProtectedDataDirFile = null;
         mLibDir = null;
         mBaseClassLoader = null;
         mSecurityViolation = false;
@@ -216,6 +218,10 @@ public final class LoadedApk {
 
     public ApplicationInfo getApplicationInfo() {
         return mApplicationInfo;
+    }
+
+    public int getTargetSdkVersion() {
+        return mApplicationInfo.targetSdkVersion;
     }
 
     public boolean isSecurityViolation() {
@@ -245,7 +251,7 @@ public final class LoadedApk {
             ai = ActivityThread.getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES, UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw new AssertionError(e);
+            throw e.rethrowFromSystemServer();
         }
 
         if (ai == null) {
@@ -255,151 +261,258 @@ public final class LoadedApk {
         return ai.sharedLibraryFiles;
     }
 
-    public ClassLoader getClassLoader() {
+    public void updateApplicationInfo(ApplicationInfo aInfo, List<String> oldPaths) {
+        setApplicationInfo(aInfo);
+
+        final List<String> newPaths = new ArrayList<>();
+        makePaths(mActivityThread, aInfo, newPaths, null /*libPaths*/);
+        final List<String> addedPaths = new ArrayList<>(newPaths.size());
+
+        if (oldPaths != null) {
+            for (String path : newPaths) {
+                final String apkName = path.substring(path.lastIndexOf(File.separator));
+                boolean match = false;
+                for (String oldPath : oldPaths) {
+                    final String oldApkName = oldPath.substring(path.lastIndexOf(File.separator));
+                    if (apkName.equals(oldApkName)) {
+                        match = true;
+                        break;
+                    }
+                }
+                if (!match) {
+                    addedPaths.add(path);
+                }
+            }
+        } else {
+            addedPaths.addAll(newPaths);
+        }
         synchronized (this) {
-            if (mClassLoader != null) {
-                return mClassLoader;
+            createOrUpdateClassLoaderLocked(addedPaths);
+            if (mResources != null) {
+                mResources = mActivityThread.getTopLevelResources(mResDir, mSplitResDirs,
+                        mOverlayDirs, mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
+                        this);
             }
+        }
+    }
 
-            if (mPackageName.equals("android")) {
-                if (mBaseClassLoader == null) {
-                    mClassLoader = ClassLoader.getSystemClassLoader();
-                } else {
-                    mClassLoader = mBaseClassLoader;
-                }
-                return mClassLoader;
+    private void setApplicationInfo(ApplicationInfo aInfo) {
+        final int myUid = Process.myUid();
+        aInfo = adjustNativeLibraryPaths(aInfo);
+        mApplicationInfo = aInfo;
+        mAppDir = aInfo.sourceDir;
+        mResDir = aInfo.uid == myUid ? aInfo.sourceDir : aInfo.publicSourceDir;
+        mSplitAppDirs = aInfo.splitSourceDirs;
+        mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
+        mOverlayDirs = aInfo.resourceDirs;
+        mSharedLibraries = aInfo.sharedLibraryFiles;
+        mDataDir = aInfo.dataDir;
+        mLibDir = aInfo.nativeLibraryDir;
+        mDataDirFile = FileUtils.newFileOrNull(aInfo.dataDir);
+        mDeviceProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.deviceProtectedDataDir);
+        mCredentialProtectedDataDirFile = FileUtils.newFileOrNull(aInfo.credentialProtectedDataDir);
+    }
+
+    public static void makePaths(ActivityThread activityThread, ApplicationInfo aInfo,
+            List<String> outZipPaths, List<String> outLibPaths) {
+        final String appDir = aInfo.sourceDir;
+        final String[] splitAppDirs = aInfo.splitSourceDirs;
+        final String libDir = aInfo.nativeLibraryDir;
+        final String[] sharedLibraries = aInfo.sharedLibraryFiles;
+
+        outZipPaths.clear();
+        outZipPaths.add(appDir);
+        if (splitAppDirs != null) {
+            Collections.addAll(outZipPaths, splitAppDirs);
+        }
+
+        if (outLibPaths != null) {
+            outLibPaths.clear();
+        }
+
+        /*
+         * The following is a bit of a hack to inject
+         * instrumentation into the system: If the app
+         * being started matches one of the instrumentation names,
+         * then we combine both the "instrumentation" and
+         * "instrumented" app into the path, along with the
+         * concatenation of both apps' shared library lists.
+         */
+
+        String instrumentationPackageName = activityThread.mInstrumentationPackageName;
+        String instrumentationAppDir = activityThread.mInstrumentationAppDir;
+        String[] instrumentationSplitAppDirs = activityThread.mInstrumentationSplitAppDirs;
+        String instrumentationLibDir = activityThread.mInstrumentationLibDir;
+
+        String instrumentedAppDir = activityThread.mInstrumentedAppDir;
+        String[] instrumentedSplitAppDirs = activityThread.mInstrumentedSplitAppDirs;
+        String instrumentedLibDir = activityThread.mInstrumentedLibDir;
+        String[] instrumentationLibs = null;
+
+        if (appDir.equals(instrumentationAppDir)
+                || appDir.equals(instrumentedAppDir)) {
+            outZipPaths.clear();
+            outZipPaths.add(instrumentationAppDir);
+            if (instrumentationSplitAppDirs != null) {
+                Collections.addAll(outZipPaths, instrumentationSplitAppDirs);
             }
-
-            // Avoid the binder call when the package is the current application package.
-            // The activity manager will perform ensure that dexopt is performed before
-            // spinning up the process.
-            if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-                final String isa = VMRuntime.getRuntime().vmInstructionSet();
-                try {
-                    ActivityThread.getPackageManager().performDexOptIfNeeded(mPackageName, isa);
-                } catch (RemoteException re) {
-                    // Ignored.
-                }
-            }
-
-            final List<String> zipPaths = new ArrayList<>();
-            final List<String> apkPaths = new ArrayList<>();
-            final List<String> libPaths = new ArrayList<>();
-
-            if (mRegisterPackage) {
-                try {
-                    ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
-                } catch (RemoteException e) {
-                }
-            }
-
-            zipPaths.add(mAppDir);
-            if (mSplitAppDirs != null) {
-                Collections.addAll(zipPaths, mSplitAppDirs);
-            }
-
-            libPaths.add(mLibDir);
-
-            /*
-             * The following is a bit of a hack to inject
-             * instrumentation into the system: If the app
-             * being started matches one of the instrumentation names,
-             * then we combine both the "instrumentation" and
-             * "instrumented" app into the path, along with the
-             * concatenation of both apps' shared library lists.
-             */
-
-            String instrumentationPackageName = mActivityThread.mInstrumentationPackageName;
-            String instrumentationAppDir = mActivityThread.mInstrumentationAppDir;
-            String[] instrumentationSplitAppDirs = mActivityThread.mInstrumentationSplitAppDirs;
-            String instrumentationLibDir = mActivityThread.mInstrumentationLibDir;
-
-            String instrumentedAppDir = mActivityThread.mInstrumentedAppDir;
-            String[] instrumentedSplitAppDirs = mActivityThread.mInstrumentedSplitAppDirs;
-            String instrumentedLibDir = mActivityThread.mInstrumentedLibDir;
-            String[] instrumentationLibs = null;
-
-            if (mAppDir.equals(instrumentationAppDir)
-                    || mAppDir.equals(instrumentedAppDir)) {
-                zipPaths.clear();
-                zipPaths.add(instrumentationAppDir);
-                if (instrumentationSplitAppDirs != null) {
-                    Collections.addAll(zipPaths, instrumentationSplitAppDirs);
-                }
-                zipPaths.add(instrumentedAppDir);
+            if (!instrumentationAppDir.equals(instrumentedAppDir)) {
+                outZipPaths.add(instrumentedAppDir);
                 if (instrumentedSplitAppDirs != null) {
-                    Collections.addAll(zipPaths, instrumentedSplitAppDirs);
-                }
-
-                libPaths.clear();
-                libPaths.add(instrumentationLibDir);
-                libPaths.add(instrumentedLibDir);
-
-                if (!instrumentedAppDir.equals(instrumentationAppDir)) {
-                    instrumentationLibs = getLibrariesFor(instrumentationPackageName);
+                    Collections.addAll(outZipPaths, instrumentedSplitAppDirs);
                 }
             }
 
-            apkPaths.addAll(zipPaths);
-
-            if (mSharedLibraries != null) {
-                for (String lib : mSharedLibraries) {
-                    if (!zipPaths.contains(lib)) {
-                        zipPaths.add(0, lib);
-                    }
+            if (outLibPaths != null) {
+                outLibPaths.add(instrumentationLibDir);
+                if (!instrumentationLibDir.equals(instrumentedLibDir)) {
+                    outLibPaths.add(instrumentedLibDir);
                 }
             }
 
-            if (instrumentationLibs != null) {
-                for (String lib : instrumentationLibs) {
-                    if (!zipPaths.contains(lib)) {
-                        zipPaths.add(0, lib);
-                    }
-                }
+            if (!instrumentedAppDir.equals(instrumentationAppDir)) {
+                instrumentationLibs = getLibrariesFor(instrumentationPackageName);
+            }
+        }
+
+        if (outLibPaths != null) {
+            if (outLibPaths.isEmpty()) {
+                outLibPaths.add(libDir);
             }
 
-            final String zip = mIncludeCode ? TextUtils.join(File.pathSeparator, zipPaths) : "";
-
-            // Add path to libraries in apk for current abi
-            if (mApplicationInfo.primaryCpuAbi != null) {
+            // Add path to libraries in apk for current abi. Do this now because more entries
+            // will be added to zipPaths that shouldn't be part of the library path.
+            if (aInfo.primaryCpuAbi != null) {
                 // Add fake libs into the library search path if we target prior to N.
-                if (mApplicationInfo.targetSdkVersion <= 23) {
-                    libPaths.add("/system/fake-libs" +
-                        (VMRuntime.is64BitAbi(mApplicationInfo.primaryCpuAbi) ? "64" : ""));
+                if (aInfo.targetSdkVersion <= 23) {
+                    outLibPaths.add("/system/fake-libs" +
+                        (VMRuntime.is64BitAbi(aInfo.primaryCpuAbi) ? "64" : ""));
                 }
-                for (String apk : apkPaths) {
-                  libPaths.add(apk + "!/lib/" + mApplicationInfo.primaryCpuAbi);
+                for (String apk : outZipPaths) {
+                    outLibPaths.add(apk + "!/lib/" + aInfo.primaryCpuAbi);
                 }
             }
 
-            String libraryPermittedPath = mDataDir;
-            boolean isBundledApp = false;
-
-            if (mApplicationInfo.isSystemApp()) {
-                isBundledApp = true;
+            if (aInfo.isSystemApp() && !aInfo.isUpdatedSystemApp()) {
                 // Add path to system libraries to libPaths;
                 // Access to system libs should be limited
                 // to bundled applications; this is why updated
                 // system apps are not included.
-                libPaths.add(System.getProperty("java.library.path"));
+                outLibPaths.add(System.getProperty("java.library.path"));
+            }
+        }
 
-                // This is necessary to grant bundled apps access to
-                // libraries located in subdirectories of /system/lib
-                libraryPermittedPath += File.pathSeparator +
-                                        System.getProperty("java.library.path");
+        if (sharedLibraries != null) {
+            for (String lib : sharedLibraries) {
+                if (!outZipPaths.contains(lib)) {
+                    outZipPaths.add(0, lib);
+                }
+            }
+        }
+
+        if (instrumentationLibs != null) {
+            for (String lib : instrumentationLibs) {
+                if (!outZipPaths.contains(lib)) {
+                    outZipPaths.add(0, lib);
+                }
+            }
+        }
+    }
+
+    private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
+        if (mPackageName.equals("android")) {
+            // Note: This branch is taken for system server and we don't need to setup
+            // jit profiling support.
+            if (mClassLoader != null) {
+                // nothing to update
+                return;
             }
 
-            final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
+            if (mBaseClassLoader != null) {
+                mClassLoader = mBaseClassLoader;
+            } else {
+                mClassLoader = ClassLoader.getSystemClassLoader();
+            }
 
-            /*
-             * With all the combination done (if necessary, actually
-             * create the class loader.
-             */
+            return;
+        }
 
-            if (ActivityThread.localLOGV)
-                Slog.v(ActivityThread.TAG, "Class path: " + zip +
-                        ", JNI path: " + librarySearchPath);
+        // Avoid the binder call when the package is the current application package.
+        // The activity manager will perform ensure that dexopt is performed before
+        // spinning up the process.
+        if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
+            VMRuntime.getRuntime().vmInstructionSet();
+            try {
+                ActivityThread.getPackageManager().notifyPackageUse(mPackageName,
+                        PackageManager.NOTIFY_PACKAGE_USE_CROSS_PACKAGE);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
 
+        if (mRegisterPackage) {
+            try {
+                ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        // Lists for the elements of zip/code and native libraries.
+        //
+        // Both lists are usually not empty. We expect on average one APK for the zip component,
+        // but shared libraries and splits are not uncommon. We expect at least three elements
+        // for native libraries (app-based, system, vendor). As such, give both some breathing
+        // space and initialize to a small value (instead of incurring growth code).
+        final List<String> zipPaths = new ArrayList<>(10);
+        final List<String> libPaths = new ArrayList<>(10);
+        makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
+
+        final boolean isBundledApp = mApplicationInfo.isSystemApp()
+                && !mApplicationInfo.isUpdatedSystemApp();
+
+        String libraryPermittedPath = mDataDir;
+        if (isBundledApp) {
+            // This is necessary to grant bundled apps access to
+            // libraries located in subdirectories of /system/lib
+            libraryPermittedPath += File.pathSeparator +
+                                    System.getProperty("java.library.path");
+        }
+
+        final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
+
+        // If we're not asked to include code, we construct a classloader that has
+        // no code path included. We still need to set up the library search paths
+        // and permitted path because NativeActivity relies on it (it attempts to
+        // call System.loadLibrary() on a classloader from a LoadedApk with
+        // mIncludeCode == false).
+        if (!mIncludeCode) {
+            if (mClassLoader == null) {
+                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(
+                    "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
+                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+
+            return;
+        }
+
+        /*
+         * With all the combination done (if necessary, actually create the java class
+         * loader and set up JIT profiling support if necessary.
+         *
+         * In many cases this is a single APK, so try to avoid the StringBuilder in TextUtils.
+         */
+        final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
+                TextUtils.join(File.pathSeparator, zipPaths);
+
+        if (ActivityThread.localLOGV)
+            Slog.v(ActivityThread.TAG, "Class path: " + zip +
+                    ", JNI path: " + librarySearchPath);
+
+        boolean needToSetupJitProfiles = false;
+        if (mClassLoader == null) {
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
@@ -409,8 +522,80 @@ public final class LoadedApk {
                     libraryPermittedPath, mBaseClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
+            // Setup the class loader paths for profiling.
+            needToSetupJitProfiles = true;
+        }
+
+        if (addedPaths != null && addedPaths.size() > 0) {
+            final String add = TextUtils.join(File.pathSeparator, addedPaths);
+            ApplicationLoaders.getDefault().addPath(mClassLoader, add);
+            // Setup the new code paths for profiling.
+            needToSetupJitProfiles = true;
+        }
+
+        // Setup jit profile support.
+        //
+        // It is ok to call this multiple times if the application gets updated with new splits.
+        // The runtime only keeps track of unique code paths and can handle re-registration of
+        // the same code path. There's no need to pass `addedPaths` since any new code paths
+        // are already in `mApplicationInfo`.
+        //
+        // It is NOT ok to call this function from the system_server (for any of the packages it
+        // loads code from) so we explicitly disallow it there.
+        if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
+            setupJitProfileSupport();
+        }
+    }
+
+    public ClassLoader getClassLoader() {
+        synchronized (this) {
+            if (mClassLoader == null) {
+                createOrUpdateClassLoaderLocked(null /*addedPaths*/);
+            }
             return mClassLoader;
         }
+    }
+
+    // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
+    private static File getPrimaryProfileFile(String packageName) {
+        File profileDir = Environment.getDataProfilesDePackageDirectory(
+                UserHandle.myUserId(), packageName);
+        return new File(profileDir, "primary.prof");
+    }
+
+    private void setupJitProfileSupport() {
+        if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
+            return;
+        }
+        // Only set up profile support if the loaded apk has the same uid as the
+        // current process.
+        // Currently, we do not support profiling across different apps.
+        // (e.g. application's uid might be different when the code is
+        // loaded by another app via createApplicationContext)
+        if (mApplicationInfo.uid != Process.myUid()) {
+            return;
+        }
+
+        final List<String> codePaths = new ArrayList<>();
+        if ((mApplicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            codePaths.add(mApplicationInfo.sourceDir);
+        }
+        if (mApplicationInfo.splitSourceDirs != null) {
+            Collections.addAll(codePaths, mApplicationInfo.splitSourceDirs);
+        }
+
+        if (codePaths.isEmpty()) {
+            // If there are no code paths there's no need to setup a profile file and register with
+            // the runtime,
+            return;
+        }
+
+        final File profileFile = getPrimaryProfileFile(mPackageName);
+        final File foreignDexProfilesFile =
+                Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
+
+        VMRuntime.registerAppInfo(profileFile.getPath(), mApplicationInfo.dataDir,
+                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesFile.getPath());
     }
 
     /**
@@ -440,10 +625,10 @@ public final class LoadedApk {
         IPackageManager pm = ActivityThread.getPackageManager();
         android.content.pm.PackageInfo pi;
         try {
-            pi = pm.getPackageInfo(mPackageName, 0, UserHandle.myUserId());
+            pi = pm.getPackageInfo(mPackageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw new IllegalStateException("Unable to get package info for "
-                    + mPackageName + "; is system dying?", e);
+            throw e.rethrowFromSystemServer();
         }
         if (pi == null) {
             throw new IllegalStateException("Unable to get package info for "
@@ -564,6 +749,14 @@ public final class LoadedApk {
         return mDataDirFile;
     }
 
+    public File getDeviceProtectedDataDirFile() {
+        return mDeviceProtectedDataDirFile;
+    }
+
+    public File getCredentialProtectedDataDirFile() {
+        return mCredentialProtectedDataDirFile;
+    }
+
     public AssetManager getAssets(ActivityThread mainThread) {
         return getResources(mainThread).getAssets();
     }
@@ -571,7 +764,7 @@ public final class LoadedApk {
     public Resources getResources(ActivityThread mainThread) {
         if (mResources == null) {
             mResources = mainThread.getTopLevelResources(mResDir, mSplitResDirs, mOverlayDirs,
-                    mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, null, this);
+                    mApplicationInfo.sharedLibraryFiles, Display.DEFAULT_DISPLAY, this);
         }
         return mResources;
     }
@@ -581,6 +774,8 @@ public final class LoadedApk {
         if (mApplication != null) {
             return mApplication;
         }
+
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
 
         Application app = null;
 
@@ -592,7 +787,10 @@ public final class LoadedApk {
         try {
             java.lang.ClassLoader cl = getClassLoader();
             if (!mPackageName.equals("android")) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "initializeJavaContextClassLoader");
                 initializeJavaContextClassLoader();
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
             app = mActivityThread.mInstrumentation.newApplication(
@@ -600,6 +798,7 @@ public final class LoadedApk {
             appContext.setOuterContext(app);
         } catch (Exception e) {
             if (!mActivityThread.mInstrumentation.onException(app, e)) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 throw new RuntimeException(
                     "Unable to instantiate application " + appClass
                     + ": " + e.toString(), e);
@@ -613,6 +812,7 @@ public final class LoadedApk {
                 instrumentation.callApplicationOnCreate(app);
             } catch (Exception e) {
                 if (!instrumentation.onException(app, e)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     throw new RuntimeException(
                         "Unable to create application " + app.getClass().getName()
                         + ": " + e.toString(), e);
@@ -632,6 +832,8 @@ public final class LoadedApk {
 
             rewriteRValues(getClassLoader(), packageIdentifiers.valueAt(i), id);
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return app;
     }
@@ -692,7 +894,7 @@ public final class LoadedApk {
                         ActivityManagerNative.getDefault().unregisterReceiver(
                                 rd.getIIntentReceiver());
                     } catch (RemoteException e) {
-                        // system crashed, nothing we can do
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -718,7 +920,7 @@ public final class LoadedApk {
                         ActivityManagerNative.getDefault().unbindService(
                                 sd.getIServiceConnection());
                     } catch (RemoteException e) {
-                        // system crashed, nothing we can do
+                        throw e.rethrowFromSystemServer();
                     }
                     sd.doForget();
                 }
@@ -818,13 +1020,21 @@ public final class LoadedApk {
                 mDispatcher = new WeakReference<LoadedApk.ReceiverDispatcher>(rd);
                 mStrongRef = strong ? rd : null;
             }
+
+            @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                LoadedApk.ReceiverDispatcher rd = mDispatcher.get();
+                final LoadedApk.ReceiverDispatcher rd;
+                if (intent == null) {
+                    Log.wtf(TAG, "Null intent received");
+                    rd = null;
+                } else {
+                    rd = mDispatcher.get();
+                }
                 if (ActivityThread.DEBUG_BROADCAST) {
                     int seq = intent.getIntExtra("seq", -1);
-                    Slog.i(ActivityThread.TAG, "Receiving broadcast " + intent.getAction() + " seq=" + seq
-                            + " to " + (rd != null ? rd.mReceiver : null));
+                    Slog.i(ActivityThread.TAG, "Receiving broadcast " + intent.getAction()
+                            + " seq=" + seq + " to " + (rd != null ? rd.mReceiver : null));
                 }
                 if (rd != null) {
                     rd.performReceive(intent, resultCode, data, extras,
@@ -843,7 +1053,7 @@ public final class LoadedApk {
                         }
                         mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
                     } catch (RemoteException e) {
-                        Slog.w(ActivityThread.TAG, "Couldn't finish broadcast to unregistered receiver");
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -862,6 +1072,7 @@ public final class LoadedApk {
         final class Args extends BroadcastReceiver.PendingResult implements Runnable {
             private Intent mCurIntent;
             private final boolean mOrdered;
+            private boolean mDispatched;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
@@ -886,9 +1097,13 @@ public final class LoadedApk {
                 
                 final IActivityManager mgr = ActivityManagerNative.getDefault();
                 final Intent intent = mCurIntent;
+                if (intent == null) {
+                    Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched);
+                }
+
                 mCurIntent = null;
-                
-                if (receiver == null || mForgotten) {
+                mDispatched = true;
+                if (receiver == null || intent == null || mForgotten) {
                     if (mRegistered && ordered) {
                         if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                                 "Finishing null broadcast to " + mReceiver);
@@ -901,6 +1116,7 @@ public final class LoadedApk {
                 try {
                     ClassLoader cl =  mReceiver.getClass().getClassLoader();
                     intent.setExtrasClassLoader(cl);
+                    intent.prepareToEnterProcess();
                     setExtrasClassLoader(cl);
                     receiver.setPendingResult(this);
                     receiver.onReceive(mContext, intent);
@@ -980,14 +1196,18 @@ public final class LoadedApk {
 
         public void performReceive(Intent intent, int resultCode, String data,
                 Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-            if (ActivityThread.DEBUG_BROADCAST) {
-                int seq = intent.getIntExtra("seq", -1);
-                Slog.i(ActivityThread.TAG, "Enqueueing broadcast " + intent.getAction() + " seq=" + seq
-                        + " to " + mReceiver);
-            }
-            Args args = new Args(intent, resultCode, data, extras, ordered,
+            final Args args = new Args(intent, resultCode, data, extras, ordered,
                     sticky, sendingUser);
-            if (!mActivityThread.post(args)) {
+            if (intent == null) {
+                Log.wtf(TAG, "Null intent received");
+            } else {
+                if (ActivityThread.DEBUG_BROADCAST) {
+                    int seq = intent.getIntExtra("seq", -1);
+                    Slog.i(ActivityThread.TAG, "Enqueueing broadcast " + intent.getAction()
+                            + " seq=" + seq + " to " + mReceiver);
+                }
+            }
+            if (intent == null || !mActivityThread.post(args)) {
                 if (mRegistered && ordered) {
                     IActivityManager mgr = ActivityManagerNative.getDefault();
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
@@ -1081,7 +1301,6 @@ public final class LoadedApk {
 
         private RuntimeException mUnbindLocation;
 
-        private boolean mDied;
         private boolean mForgotten;
 
         private static class ConnectionInfo {
@@ -1180,7 +1399,6 @@ public final class LoadedApk {
             ServiceDispatcher.ConnectionInfo old;
 
             synchronized (this) {
-                mDied = true;
                 old = mActiveConnections.remove(name);
                 if (old == null || old.binder != service) {
                     // Death for someone different than who we last
@@ -1215,7 +1433,6 @@ public final class LoadedApk {
 
                 if (service != null) {
                     // A new service is being connected... set it all up.
-                    mDied = false;
                     info = new ConnectionInfo();
                     info.binder = service;
                     info.deathMonitor = new DeathMonitor(name, service);

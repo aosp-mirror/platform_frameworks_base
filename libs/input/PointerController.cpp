@@ -42,15 +42,14 @@ namespace android {
 static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL = 15 * 1000 * 1000000LL; // 15 seconds
 static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_SHORT = 3 * 1000 * 1000000LL; // 3 seconds
 
-// Time to wait between animation frames.
-static const nsecs_t ANIMATION_FRAME_INTERVAL = 1000000000LL / 60;
-
 // Time to spend fading out the spot completely.
 static const nsecs_t SPOT_FADE_DURATION = 200 * 1000000LL; // 200 ms
 
 // Time to spend fading out the pointer completely.
 static const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
 
+// The number of events to be read at once for DisplayEventReceiver.
+static const int EVENT_BUFFER_SIZE = 100;
 
 // --- PointerController ---
 
@@ -58,6 +57,13 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
         const sp<Looper>& looper, const sp<SpriteController>& spriteController) :
         mPolicy(policy), mLooper(looper), mSpriteController(spriteController) {
     mHandler = new WeakMessageHandler(this);
+
+    if (mDisplayEventReceiver.initCheck() == NO_ERROR) {
+        mLooper->addFd(mDisplayEventReceiver.getFd(), Looper::POLL_CALLBACK,
+                       Looper::EVENT_INPUT, this, nullptr);
+    } else {
+        ALOGE("Failed to initialize DisplayEventReceiver.");
+    }
 
     AutoMutex _l(mLock);
 
@@ -78,10 +84,21 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
+    mLocked.requestedPointerType= mPolicy->getDefaultPointerIconId();
+
+    mLocked.animationFrameIndex = 0;
+    mLocked.lastFrameUpdatedTime = 0;
 
     mLocked.buttonState = 0;
 
+    mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+
     loadResources();
+
+    if (mLocked.pointerIcon.isValid()) {
+        mLocked.pointerIconChanged = true;
+        updatePointerLocked();
+    }
 }
 
 PointerController::~PointerController() {
@@ -231,6 +248,11 @@ void PointerController::unfade(Transition transition) {
 void PointerController::setPresentation(Presentation presentation) {
     AutoMutex _l(mLock);
 
+    if (presentation == PRESENTATION_POINTER && mLocked.additionalMouseResources.empty()) {
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                              &mLocked.animationResources);
+    }
+
     if (mLocked.presentation != presentation) {
         mLocked.presentation = presentation;
         mLocked.presentationChanged = true;
@@ -308,6 +330,23 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
         mLocked.inactivityTimeout = inactivityTimeout;
         resetInactivityTimeoutLocked();
     }
+}
+
+void PointerController::reloadPointerResources() {
+    AutoMutex _l(mLock);
+
+    loadResources();
+
+    if (mLocked.presentation == PRESENTATION_POINTER) {
+        mLocked.additionalMouseResources.clear();
+        mLocked.animationResources.clear();
+        mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+        mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
+                                              &mLocked.animationResources);
+    }
+
+    mLocked.presentationChanged = true;
+    updatePointerLocked();
 }
 
 void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_t orientation) {
@@ -391,32 +430,80 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
     updatePointerLocked();
 }
 
-void PointerController::setPointerIcon(const SpriteIcon& icon) {
+void PointerController::updatePointerIcon(int32_t iconId) {
+    AutoMutex _l(mLock);
+    if (mLocked.requestedPointerType != iconId) {
+        mLocked.requestedPointerType = iconId;
+        mLocked.presentationChanged = true;
+        updatePointerLocked();
+    }
+}
+
+void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
     AutoMutex _l(mLock);
 
-    mLocked.pointerIcon = icon.copy();
-    mLocked.pointerIconChanged = true;
+    const int32_t iconId = mPolicy->getCustomPointerIconId();
+    mLocked.additionalMouseResources[iconId] = icon;
+    mLocked.requestedPointerType = iconId;
+    mLocked.presentationChanged = true;
 
     updatePointerLocked();
 }
 
 void PointerController::handleMessage(const Message& message) {
     switch (message.what) {
-    case MSG_ANIMATE:
-        doAnimate();
-        break;
     case MSG_INACTIVITY_TIMEOUT:
         doInactivityTimeout();
         break;
     }
 }
 
-void PointerController::doAnimate() {
+int PointerController::handleEvent(int /* fd */, int events, void* /* data */) {
+    if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
+        ALOGE("Display event receiver pipe was closed or an error occurred.  "
+              "events=0x%x", events);
+        return 0; // remove the callback
+    }
+
+    if (!(events & Looper::EVENT_INPUT)) {
+        ALOGW("Received spurious callback for unhandled poll event.  "
+              "events=0x%x", events);
+        return 1; // keep the callback
+    }
+
+    bool gotVsync = false;
+    ssize_t n;
+    nsecs_t timestamp;
+    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+    while ((n = mDisplayEventReceiver.getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+        for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
+            if (buf[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
+                timestamp = buf[i].header.timestamp;
+                gotVsync = true;
+            }
+        }
+    }
+    if (gotVsync) {
+        doAnimate(timestamp);
+    }
+    return 1;  // keep the callback
+}
+
+void PointerController::doAnimate(nsecs_t timestamp) {
     AutoMutex _l(mLock);
 
-    bool keepAnimating = false;
     mLocked.animationPending = false;
-    nsecs_t frameDelay = systemTime(SYSTEM_TIME_MONOTONIC) - mLocked.animationTime;
+
+    bool keepFading = doFadingAnimationLocked(timestamp);
+    bool keepBitmapFlipping = doBitmapAnimationLocked(timestamp);
+    if (keepFading || keepBitmapFlipping) {
+        startAnimationLocked();
+    }
+}
+
+bool PointerController::doFadingAnimationLocked(nsecs_t timestamp) {
+    bool keepAnimating = false;
+    nsecs_t frameDelay = timestamp - mLocked.animationTime;
 
     // Animate pointer fade.
     if (mLocked.pointerFadeDirection < 0) {
@@ -453,10 +540,32 @@ void PointerController::doAnimate() {
             }
         }
     }
+    return keepAnimating;
+}
 
-    if (keepAnimating) {
-        startAnimationLocked();
+bool PointerController::doBitmapAnimationLocked(nsecs_t timestamp) {
+    std::map<int32_t, PointerAnimation>::const_iterator iter = mLocked.animationResources.find(
+            mLocked.requestedPointerType);
+    if (iter == mLocked.animationResources.end()) {
+        return false;
     }
+
+    if (timestamp - mLocked.lastFrameUpdatedTime > iter->second.durationPerFrame) {
+        mSpriteController->openTransaction();
+
+        int incr = (timestamp - mLocked.lastFrameUpdatedTime) / iter->second.durationPerFrame;
+        mLocked.animationFrameIndex += incr;
+        mLocked.lastFrameUpdatedTime += iter->second.durationPerFrame * incr;
+        while (mLocked.animationFrameIndex >= iter->second.animationFrames.size()) {
+            mLocked.animationFrameIndex -= iter->second.animationFrames.size();
+        }
+        mLocked.pointerSprite->setIcon(iter->second.animationFrames[mLocked.animationFrameIndex]);
+
+        mSpriteController->closeTransaction();
+    }
+
+    // Keep animating.
+    return true;
 }
 
 void PointerController::doInactivityTimeout() {
@@ -467,7 +576,7 @@ void PointerController::startAnimationLocked() {
     if (!mLocked.animationPending) {
         mLocked.animationPending = true;
         mLocked.animationTime = systemTime(SYSTEM_TIME_MONOTONIC);
-        mLooper->sendMessageDelayed(ANIMATION_FRAME_INTERVAL, mHandler, Message(MSG_ANIMATE));
+        mDisplayEventReceiver.requestNextVsync();
     }
 }
 
@@ -497,8 +606,29 @@ void PointerController::updatePointerLocked() {
     }
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
-        mLocked.pointerSprite->setIcon(mLocked.presentation == PRESENTATION_POINTER
-                ? mLocked.pointerIcon : mResources.spotAnchor);
+        if (mLocked.presentation == PRESENTATION_POINTER) {
+            if (mLocked.requestedPointerType== mPolicy->getDefaultPointerIconId()) {
+                mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
+            } else {
+                std::map<int32_t, SpriteIcon>::const_iterator iter =
+                    mLocked.additionalMouseResources.find(mLocked.requestedPointerType);
+                if (iter != mLocked.additionalMouseResources.end()) {
+                    std::map<int32_t, PointerAnimation>::const_iterator anim_iter =
+                            mLocked.animationResources.find(mLocked.requestedPointerType);
+                    if (anim_iter != mLocked.animationResources.end()) {
+                        mLocked.animationFrameIndex = 0;
+                        mLocked.lastFrameUpdatedTime = systemTime(SYSTEM_TIME_MONOTONIC);
+                        startAnimationLocked();
+                    }
+                    mLocked.pointerSprite->setIcon(iter->second);
+                } else {
+                    ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerType);
+                    mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
+                }
+            }
+        } else {
+            mLocked.pointerSprite->setIcon(mResources.spotAnchor);
+        }
         mLocked.pointerIconChanged = false;
         mLocked.presentationChanged = false;
     }

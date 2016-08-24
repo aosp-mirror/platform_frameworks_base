@@ -16,7 +16,6 @@
 
 package android.ddm;
 
-import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewDebug;
@@ -41,9 +40,6 @@ import java.nio.ByteBuffer;
  * Support for these features are advertised via {@link DdmHandleHello}.
  */
 public class DdmHandleViewDebug extends ChunkHandler {
-    /** Enable/Disable tracing of OpenGL calls. */
-    public static final int CHUNK_VUGL = type("VUGL");
-
     /** List {@link ViewRootImpl}'s of this process. */
     private static final int CHUNK_VULW = type("VULW");
 
@@ -97,7 +93,6 @@ public class DdmHandleViewDebug extends ChunkHandler {
     private DdmHandleViewDebug() {}
 
     public static void register() {
-        DdmServer.registerHandler(CHUNK_VUGL, sInstance);
         DdmServer.registerHandler(CHUNK_VULW, sInstance);
         DdmServer.registerHandler(CHUNK_VURT, sInstance);
         DdmServer.registerHandler(CHUNK_VUOP, sInstance);
@@ -115,9 +110,7 @@ public class DdmHandleViewDebug extends ChunkHandler {
     public Chunk handleChunk(Chunk request) {
         int type = request.type;
 
-        if (type == CHUNK_VUGL) {
-            return handleOpenGlTrace(request);
-        } else if (type == CHUNK_VULW) {
+        if (type == CHUNK_VULW) {
             return listWindows();
         }
 
@@ -163,12 +156,6 @@ public class DdmHandleViewDebug extends ChunkHandler {
         } else {
             throw new RuntimeException("Unknown packet " + ChunkHandler.name(type));
         }
-    }
-
-    private Chunk handleOpenGlTrace(Chunk request) {
-        ByteBuffer in = wrapChunk(request);
-        GLUtils.setTracingLevel(in.getInt());
-        return null;    // empty response
     }
 
     /** Returns the list of windows owned by this client. */

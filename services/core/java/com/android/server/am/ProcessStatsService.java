@@ -28,8 +28,11 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
-import com.android.internal.app.IProcessStats;
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.DumpUtils;
+import com.android.internal.app.procstats.IProcessStats;
+import com.android.internal.app.procstats.ProcessState;
+import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BackgroundThread;
 
 import java.io.File;
@@ -107,12 +110,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
-    public ProcessStats.ProcessState getProcessStateLocked(String packageName,
+    public ProcessState getProcessStateLocked(String packageName,
             int uid, int versionCode, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
-    public ProcessStats.ServiceState getServiceStateLocked(String packageName, int uid,
+    public ServiceState getServiceStateLocked(String packageName, int uid,
             int versionCode, String processName, String className) {
         return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
                 className);
@@ -143,22 +146,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     final SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
                     for (int iver=vers.size()-1; iver>=0; iver--) {
                         final ProcessStats.PackageState pkg = vers.valueAt(iver);
-                        final ArrayMap<String, ProcessStats.ServiceState> services = pkg.mServices;
+                        final ArrayMap<String, ServiceState> services = pkg.mServices;
                         for (int isvc=services.size()-1; isvc>=0; isvc--) {
-                            final ProcessStats.ServiceState service = services.valueAt(isvc);
-                            if (service.isRestarting()) {
-                                service.setRestarting(true, memFactor, now);
-                            } else if (service.isInUse()) {
-                                if (service.mStartedState != ProcessStats.STATE_NOTHING) {
-                                    service.setStarted(true, memFactor, now);
-                                }
-                                if (service.mBoundState != ProcessStats.STATE_NOTHING) {
-                                    service.setBound(true, memFactor, now);
-                                }
-                                if (service.mExecState != ProcessStats.STATE_NOTHING) {
-                                    service.setExecuting(true, memFactor, now);
-                                }
-                            }
+                            final ServiceState service = services.valueAt(isvc);
+                            service.setMemFactor(memFactor, now);
                         }
                     }
                 }
@@ -294,12 +285,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (stats.mReadError != null) {
                 Slog.w(TAG, "Ignoring existing stats; " + stats.mReadError);
                 if (DEBUG) {
-                    ArrayMap<String, SparseArray<ProcessStats.ProcessState>> procMap
-                            = stats.mProcesses.getMap();
+                    ArrayMap<String, SparseArray<ProcessState>> procMap = stats.mProcesses.getMap();
                     final int NPROC = procMap.size();
                     for (int ip=0; ip<NPROC; ip++) {
                         Slog.w(TAG, "Process: " + procMap.keyAt(ip));
-                        SparseArray<ProcessStats.ProcessState> uids = procMap.valueAt(ip);
+                        SparseArray<ProcessState> uids = procMap.valueAt(ip);
                         final int NUID = uids.size();
                         for (int iu=0; iu<NUID; iu++) {
                             Slog.w(TAG, "  Uid " + uids.keyAt(iu) + ": " + uids.valueAt(iu));
@@ -387,13 +377,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     boolean dumpFilteredProcessesCsvLocked(PrintWriter pw, String header,
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {
-        ArrayList<ProcessStats.ProcessState> procs = mProcessStats.collectProcessesLocked(
+        ArrayList<ProcessState> procs = mProcessStats.collectProcessesLocked(
                 screenStates, memStates, procStates, procStates, now, reqPackage, false);
         if (procs.size() > 0) {
             if (header != null) {
                 pw.println(header);
             }
-            ProcessStats.dumpProcessListCsv(pw, procs, sepScreenStates, screenStates,
+            DumpUtils.dumpProcessListCsv(pw, procs, sepScreenStates, screenStates,
                     sepMemStates, memStates, sepProcStates, procStates, now);
             return true;
         }
@@ -668,8 +658,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                     boolean[] sep = new boolean[1];
                     String[] error = new String[1];
-                    csvScreenStats = parseStateList(ProcessStats.ADJ_SCREEN_NAMES_CSV, ProcessStats.ADJ_SCREEN_MOD,
-                            args[i], sep, error);
+                    csvScreenStats = parseStateList(DumpUtils.ADJ_SCREEN_NAMES_CSV,
+                            ProcessStats.ADJ_SCREEN_MOD, args[i], sep, error);
                     if (csvScreenStats == null) {
                         pw.println("Error in \"" + args[i] + "\": " + error[0]);
                         dumpHelp(pw);
@@ -685,7 +675,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                     boolean[] sep = new boolean[1];
                     String[] error = new String[1];
-                    csvMemStats = parseStateList(ProcessStats.ADJ_MEM_NAMES_CSV, 1, args[i], sep, error);
+                    csvMemStats = parseStateList(DumpUtils.ADJ_MEM_NAMES_CSV, 1, args[i],
+                            sep, error);
                     if (csvMemStats == null) {
                         pw.println("Error in \"" + args[i] + "\": " + error[0]);
                         dumpHelp(pw);
@@ -701,7 +692,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                     boolean[] sep = new boolean[1];
                     String[] error = new String[1];
-                    csvProcStats = parseStateList(ProcessStats.STATE_NAMES_CSV, 1, args[i], sep, error);
+                    csvProcStats = parseStateList(DumpUtils.STATE_NAMES_CSV, 1, args[i],
+                            sep, error);
                     if (csvProcStats == null) {
                         pw.println("Error in \"" + args[i] + "\": " + error[0]);
                         dumpHelp(pw);
@@ -839,19 +831,19 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (!csvSepScreenStats) {
                 for (int i=0; i<csvScreenStats.length; i++) {
                     pw.print(" ");
-                    ProcessStats.printScreenLabelCsv(pw, csvScreenStats[i]);
+                    DumpUtils.printScreenLabelCsv(pw, csvScreenStats[i]);
                 }
             }
             if (!csvSepMemStats) {
                 for (int i=0; i<csvMemStats.length; i++) {
                     pw.print(" ");
-                    ProcessStats.printMemLabelCsv(pw, csvMemStats[i]);
+                    DumpUtils.printMemLabelCsv(pw, csvMemStats[i]);
                 }
             }
             if (!csvSepProcStats) {
                 for (int i=0; i<csvProcStats.length; i++) {
                     pw.print(" ");
-                    pw.print(ProcessStats.STATE_NAMES_CSV[csvProcStats[i]]);
+                    pw.print(DumpUtils.STATE_NAMES_CSV[csvProcStats[i]]);
                 }
             }
             pw.println();

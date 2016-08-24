@@ -33,8 +33,8 @@ interface IAppWidgetService {
     //
     // for AppWidgetHost
     //
-    int[] startListening(IAppWidgetHost host, String callingPackage, int hostId,
-            out List<RemoteViews> updatedViews);
+    ParceledListSlice startListening(IAppWidgetHost host, String callingPackage, int hostId,
+            in int[] appWidgetIds, out int[] updatedIds);
     void stopListening(String callingPackage, int hostId);
     int allocateAppWidgetId(String callingPackage, int hostId);
     void deleteAppWidgetId(String callingPackage, int appWidgetId);

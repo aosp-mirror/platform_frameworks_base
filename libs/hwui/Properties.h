@@ -18,8 +18,6 @@
 #define ANDROID_HWUI_PROPERTIES_H
 
 #include <cutils/properties.h>
-#include <stdlib.h>
-#include <utils/Singleton.h>
 
 /**
  * This file contains the list of system properties used to configure
@@ -32,12 +30,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Compile-time properties
 ///////////////////////////////////////////////////////////////////////////////
-
-// If turned on, text is interpreted as glyphs instead of UTF-16
-#define RENDER_TEXT_AS_GLYPHS 1
-
-// Indicates whether to remove the biggest layers first, or the smaller ones
-#define LAYER_REMOVE_BIGGEST_FIRST 0
 
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
@@ -85,12 +77,6 @@ enum DebugLevel {
  * The default value is "false".
  */
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
-
-/**
- * Used to enable/disable PerfHUD ES profiling. The accepted values
- * are "true" and "false". The default value is "false".
- */
-#define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
 
 /**
  *  System property used to enable or disable hardware rendering profiling.
@@ -151,13 +137,21 @@ enum DebugLevel {
 #define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
 
 /**
- * Setting this property will enable usage of EGL_KHR_swap_buffers_with_damage
- * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
- * Default is "false" temporarily
- * TODO: Change to "true", make sure to remove the log in EglManager::swapBuffers
- * before changing this to default to true!
+ * Controls whether or not HWUI will use the EGL_EXT_buffer_age extension
+ * to do partial invalidates. Setting this to "false" will fall back to
+ * using BUFFER_PRESERVED instead
+ * Default is "true"
  */
-#define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
+#define PROPERTY_USE_BUFFER_AGE "debug.hwui.use_buffer_age"
+
+/**
+ * Setting this to "false" will force HWUI to always do full-redraws of the surface.
+ * This will disable the use of EGL_EXT_buffer_age and BUFFER_PRESERVED.
+ * Default is "true"
+ */
+#define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.enable_partial_updates"
+
+#define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
@@ -204,30 +198,8 @@ enum DebugLevel {
 #define PROPERTY_TEXT_LARGE_CACHE_WIDTH "ro.hwui.text_large_cache_width"
 #define PROPERTY_TEXT_LARGE_CACHE_HEIGHT "ro.hwui.text_large_cache_height"
 
-// Indicates whether gamma correction should be applied in the shaders
-// or in lookup tables. Accepted values:
-//
-//     - "lookup3", correction based on lookup tables. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "lookup", correction based on a single lookup table
-//
-//     - "shader3", correction applied by a GLSL shader. Gamma correction
-//        is different for black and white text (see thresholds below)
-//
-//     - "shader", correction applied by a GLSL shader
-//
-// See PROPERTY_TEXT_GAMMA, PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD and
-// PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD for more control.
-#define PROPERTY_TEXT_GAMMA_METHOD "hwui.text_gamma_correction"
-#define DEFAULT_TEXT_GAMMA_METHOD "lookup"
-
 // Gamma (>= 1.0, <= 10.0)
 #define PROPERTY_TEXT_GAMMA "hwui.text_gamma"
-// Luminance threshold below which black gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD "hwui.text_gamma.black_threshold"
-// Lumincance threshold above which white gamma correction is applied. Range: [0..255]
-#define PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD "hwui.text_gamma.white_threshold"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Default property values
@@ -238,7 +210,7 @@ enum DebugLevel {
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
 #define DEFAULT_PATH_CACHE_SIZE 4.0f
 #define DEFAULT_VERTEX_CACHE_SIZE 1.0f
-#define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
+#define DEFAULT_PATCH_CACHE_SIZE 128.0f // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
 #define DEFAULT_DROP_SHADOW_CACHE_SIZE 2.0f
 #define DEFAULT_FBO_CACHE_SIZE 0
@@ -246,8 +218,6 @@ enum DebugLevel {
 #define DEFAULT_TEXTURE_CACHE_FLUSH_RATE 0.6f
 
 #define DEFAULT_TEXT_GAMMA 1.4f
-#define DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD 64
-#define DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD 192
 
 // cap to 256 to limite paths in the path cache
 #define DEFAULT_PATH_TEXTURE_CAP 256
@@ -294,8 +264,21 @@ public:
     static bool showDirtyRegions;
     // TODO: Remove after stabilization period
     static bool skipEmptyFrames;
-    // TODO: Remove after stabilization period
-    static bool swapBuffersWithDamage;
+    static bool useBufferAge;
+    static bool enablePartialUpdates;
+
+    static float textGamma;
+
+    static int fboCacheSize;
+    static int gradientCacheSize;
+    static int layerPoolSize;
+    static int patchCacheSize;
+    static int pathCacheSize;
+    static int renderBufferCacheSize;
+    static int tessellationCacheSize;
+    static int textDropShadowCacheSize;
+    static int textureCacheSize;
+    static float textureCacheFlushRate;
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;
@@ -312,6 +295,13 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
+
+    // Should be used only by test apps
+    static bool waitForGpuCompletion;
+
+    // Should only be set by automated tests to try and filter out
+    // any overhead they add
+    static bool filterOutTestOverhead;
 
 private:
     static ProfileType sProfileType;

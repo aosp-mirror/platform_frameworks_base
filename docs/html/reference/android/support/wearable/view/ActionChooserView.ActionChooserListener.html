@@ -1,0 +1,486 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+
+    <meta name="top_category" value="develop" />
+
+    <meta name="subcategory" value="reference" />
+
+
+      <meta name="book_path" value="/reference/android/support/wearable/_book.yaml" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<title>ActionChooserView.ActionChooserListener</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+
+
+
+
+</div>
+
+
+
+
+<div class="sum-details-links">
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">ActionChooserView.ActionChooserListener</h1>
+<p>
+<code class="api-signature">
+  public
+  static
+
+
+  interface
+  ActionChooserView.ActionChooserListener
+</code>
+<br>
+
+
+<code class="api-signature">
+
+
+
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.wearable.view.ActionChooserView.ActionChooserListener
+    </td>
+  </tr>
+
+
+</table>
+
+
+
+
+<br><hr>
+
+
+  <p>Interface for receiving callbacks about options chosen from an <code><a href="/reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></code>.
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+
+  <tr class="api apilevel-" >
+
+
+    <td><code>
+        abstract
+
+
+
+
+        void</code>
+    </td>
+
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html#onOptionChosen(int)">onOptionChosen</a>(int option)
+      </code>
+
+        <p>Called when an option has been chosen.
+
+
+</p>
+
+    </td>
+  </tr>
+
+
+
+  <tr class="api apilevel-" >
+
+
+    <td><code>
+        abstract
+
+
+
+
+        void</code>
+    </td>
+
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html#onOptionProgress(float)">onOptionProgress</a>(float percent)
+      </code>
+
+        <p>Called to update the percentage an item has been selected
+
+
+</p>
+
+    </td>
+  </tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="onOptionChosen(int)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">onOptionChosen</h3>
+    <div class="api-level">
+      <div></div>
+
+
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void onOptionChosen (int option)</pre>
+
+
+
+
+  <p>Called when an option has been chosen.</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>option</code></td>
+        <td width="100%">
+          <code>int</code>:
+          the option chosen. see <code><a href="/reference/android/support/wearable/view/ActionChooserView.html#OPTION_START">OPTION_START</a></code> and <code><a href="/reference/android/support/wearable/view/ActionChooserView.html#OPTION_END">OPTION_END</a></code>.
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="onOptionProgress(float)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">onOptionProgress</h3>
+    <div class="api-level">
+      <div></div>
+
+
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void onOptionProgress (float percent)</pre>
+
+
+
+
+  <p>Called to update the percentage an item has been selected</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>percent</code></td>
+        <td width="100%">
+          <code>float</code>:
+          the progress of an item being selected, ranging from 0 to 1.
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+
+  <ul data-reference-resources>
+
+
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="selected api apilevel-"><a href="/reference/android/support/wearable/view/ActionChooserView.ActionChooserListener.html">ActionChooserView.ActionChooserListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/DelayedConfirmationView.DelayedConfirmationListener.html">DelayedConfirmationView.DelayedConfirmationListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridPageOptions.html">GridPageOptions</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridPageOptions.BackgroundListener.html">GridPageOptions.BackgroundListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridViewPager.OnAdapterChangeListener.html">GridViewPager.OnAdapterChangeListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridViewPager.OnPageChangeListener.html">GridViewPager.OnPageChangeListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WatchViewStub.OnLayoutInflatedListener.html">WatchViewStub.OnLayoutInflatedListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.ClickListener.html">WearableListView.ClickListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.OnCenterProximityListener.html">WearableListView.OnCenterProximityListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.OnCentralPositionChangedListener.html">WearableListView.OnCentralPositionChangedListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.OnScrollListener.html">WearableListView.OnScrollListener</a></li>
+      </ul>
+    </li>
+
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/ActionChooserView.html">ActionChooserView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/ActionLabel.html">ActionLabel</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/ActionPage.html">ActionPage</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/BoxInsetLayout.html">BoxInsetLayout</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/BoxInsetLayout.LayoutParams.html">BoxInsetLayout.LayoutParams</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CardFragment.html">CardFragment</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CardFrame.html">CardFrame</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CardScrollView.html">CardScrollView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CircledImageView.html">CircledImageView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CircularButton.html">CircularButton</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/CrossfadeDrawable.html">CrossfadeDrawable</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/DelayedConfirmationView.html">DelayedConfirmationView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/DismissOverlayView.html">DismissOverlayView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/DotsPageIndicator.html">DotsPageIndicator</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/FragmentGridPagerAdapter.html">FragmentGridPagerAdapter</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridPagerAdapter.html">GridPagerAdapter</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridViewPager.html">GridViewPager</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/GridViewPager.LayoutParams.html">GridViewPager.LayoutParams</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/ProgressSpinner.html">ProgressSpinner</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/SimpleAnimatorListener.html">SimpleAnimatorListener</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WatchViewStub.html">WatchViewStub</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableFrameLayout.html">WearableFrameLayout</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableFrameLayout.LayoutParams.html">WearableFrameLayout.LayoutParams</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.html">WearableListView</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.Adapter.html">WearableListView.Adapter</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/wearable/view/WearableListView.ViewHolder.html">WearableListView.ViewHolder</a></li>
+      </ul>
+    </li>
+
+
+
+  </ul>
+
+</div>
+
+
+
+</body>
+</html>

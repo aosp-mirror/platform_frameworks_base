@@ -19,13 +19,16 @@
     <style name="Theme.DeviceDefault.Dialog" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.InputMethod" parent="Theme.Micro.InputMethod"  />
+    <style name="Theme.DeviceDefault.Panel" parent="Theme.Micro.Panel"  />
     <style name="Theme.DeviceDefault.Light" parent="Theme.Micro.Light" />
     <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Micro.Light" />
     <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Micro.Light" />
     <style name="Theme.DeviceDefault.Light.Dialog" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.Light.Panel" parent="Theme.Micro.Light.Panel"  />
+    <style name="Theme.DeviceDefault.Settings" parent="Theme.Micro" />
     <style name="Theme.DeviceDefault.Wallpaper" parent="Theme.Micro" />
-
 </resources>
 

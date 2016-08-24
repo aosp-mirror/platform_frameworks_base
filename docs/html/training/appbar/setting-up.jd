@@ -1,0 +1,181 @@
+page.title=Setting Up the App Bar
+page.tags="appbar","actionbar", "toolbar"
+helpoutsWidget=true
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>This lesson teaches you to</h2>
+
+    <ol>
+      <li><a href="#add-toolbar">Add a Toolbar to an Activity</a></li>
+      <li><a href="#utility">Use App Bar Utility Methods</a></li>
+    </ol>
+
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="{@docRoot}tools/support-library/setup.html"
+    >Setting Up the Support Library</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<p>
+  In its most basic form, the action bar displays the title for the activity on
+  one side and an <em>overflow menu</em> on the other. Even in this simple
+  form, the app bar provides useful information to the users, and helps to give
+  Android apps a consistent look and feel.
+</p>
+
+<img src="{@docRoot}images/training/appbar/appbar_basic_2x.png"
+    srcset="{@docRoot}images/training/appbar/appbar_basic.png 1x,
+        {@docRoot}images/training/appbar/appbar_basic_2x.png 2x"
+    width="400" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> An app bar with the app
+title and overflow menu.</a>
+
+<p>
+  Beginning with Android 3.0 (API level 11), all
+  activities that use the default theme have an {@link android.app.ActionBar}
+  as an app bar. However, app bar features have gradually been added to the
+  native {@link android.app.ActionBar} over various Android releases. As a
+  result, the native {@link android.app.ActionBar} behaves differently
+  depending on what version of the Android system a device may be using. By
+  contrast, the most recent features are added to the support library's version
+  of {@link android.support.v7.widget.Toolbar}, and they are available on any
+  device that can use the support library.
+</p>
+
+<p>
+  For this reason, you should use the support library's {@link
+  android.support.v7.widget.Toolbar} class to implement your activities' app
+  bars. Using the support library's toolbar helps ensure that your app will
+  have consistent behavior across the widest range of devices. For example, the
+  {@link android.support.v7.widget.Toolbar} widget provides a <a href=
+  "{@docRoot}design/material/index.html">material design</a> experience on
+  devices running Android 2.1 (API level 7) or later, but the native action
+  bar doesn't support material design unless the device is running Android 5.0
+  (API level 21) or later.
+</p>
+
+<h2 id="add-toolbar">Add a Toolbar to an Activity</h2>
+
+These steps describe how to set up a {@link android.support.v7.widget.Toolbar}
+as your activity's app bar:
+
+<ol>
+  <li>Add the
+  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> support library to your project, as described in <a href=
+  "{@docRoot}tools/support-library/setup.html">Support Library Setup</a>.
+  </li>
+
+  <li>Make sure the activity extends {@link
+  android.support.v7.app.AppCompatActivity}:
+
+    <pre>
+public class MyActivity extends AppCompatActivity {
+  // ...
+}
+</pre>
+    <p class="note">
+      <strong>Note:</strong> Make this change for every activity in your app
+      that uses a {@link android.support.v7.widget.Toolbar} as an app bar.
+    </p>
+  </li>
+
+  <li>In the app manifest, set the <a href=
+  "{@docRoot}guide/topics/manifest/application-element.html"><code>&lt;application&gt;</code></a>
+  element to use one of appcompat's {@link
+  android.support.v7.appcompat.R.style#Theme_AppCompat_NoActionBar NoActionBar}
+  themes. Using one of these themes prevents the app from using the native
+  {@link android.app.ActionBar} class to provide the app bar. For example:
+
+    <pre>
+&lt;application
+    android:theme="&#64;style/Theme.AppCompat.Light.NoActionBar"
+    /&gt;
+</pre>
+  </li>
+
+  <li>Add a {@link android.support.v7.widget.Toolbar} to the activity's layout.
+  For example, the following layout code adds a {@link
+  android.support.v7.widget.Toolbar} and gives it the appearance of floating
+  above the activity:
+
+    <pre>
+&lt;android.support.v7.widget.Toolbar
+   android:id="&#64;+id/my_toolbar"
+   android:layout_width="match_parent"
+   android:layout_height="?attr/actionBarSize"
+   android:background="?attr/colorPrimary"
+   android:elevation="4dp"
+   android:theme="&#64;style/ThemeOverlay.AppCompat.ActionBar"
+   app:popupTheme="&#64;style/ThemeOverlay.AppCompat.Light"/&gt;
+</pre>
+    <p>
+      The <a href=
+      "https://www.google.com/design/spec/what-is-material/elevation-shadows.html#elevation-shadows-shadows">
+      Material Design specification</a> recommends that app bars have an
+      elevation of 4 dp.
+    </p>
+
+    <p>
+      Position the toolbar at the top of the activity's
+      <a href="{@docRoot}guide/topics/ui/declaring-layout.html">layout</a>,
+      since you are using it as an app bar.
+    </p>
+  </li>
+
+  <li>In the activity's {@link android.app.Activity#onCreate onCreate()}
+  method, call the activity's {@link
+  android.support.v7.app.AppCompatActivity#setSupportActionBar
+  setSupportActionBar()} method, and pass the activity's toolbar. This method
+  sets the toolbar as the app bar for the activity. For example:
+
+    <pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_my);
+    <strong>Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+    setSupportActionBar(myToolbar);</strong>
+    }
+</pre>
+  </li>
+</ol>
+
+<p>
+  Your app now has a basic action bar. By default, the action bar contains just
+  the name of the app and an overflow menu. The options menu initially contains
+  just the <strong>Settings</strong> item. You can add more actions to the
+  action bar and the overflow menu, as described in <a href=
+  "actions.html">Adding and Handling Actions</a>.
+</p>
+
+<h2 id="utility">Use App Bar Utility Methods</h2>
+
+<p>
+  Once you set the toolbar as an activity's app bar, you have access to the
+  various utility methods provided by the
+  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> support library's {@link
+  android.support.v7.app.ActionBar} class. This approach lets you do a number of useful
+  things, like hide and show the app bar.
+</p>
+
+<p>
+  To use the {@link android.support.v7.app.ActionBar} utility methods, call the
+  activity's {@link
+  android.support.v7.app.AppCompatActivity#getSupportActionBar
+  getSupportActionBar()} method. This method returns a reference to an
+  appcompat {@link android.support.v7.app.ActionBar} object.
+  Once you have that reference, you can call any of the {@link
+  android.support.v7.app.ActionBar} methods to adjust the app bar. For example,
+  to hide the app bar, call {@link android.support.v7.app.ActionBar#hide
+  ActionBar.hide()}.
+</p>

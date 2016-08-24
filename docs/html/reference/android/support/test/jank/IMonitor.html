@@ -1,0 +1,519 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+  
+    <meta name="top_category" value="develop" />
+    
+    <meta name="subcategory" value="reference" />
+
+    
+      <meta name="book_path" value="/reference/android/support/test/_book.yaml" />
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<title>IMonitor</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+  
+  
+  
+
+</div>
+
+
+
+
+<div class="sum-details-links">
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">IMonitor</h1>
+<p>
+<code class="api-signature">
+  public
+  
+  
+  
+  interface
+  IMonitor
+</code>
+<br>
+
+
+<code class="api-signature">
+  
+  
+  
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+    
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.test.jank.IMonitor
+    </td>
+  </tr>
+  
+
+</table>
+  
+
+    
+
+<br><hr>
+
+
+  <p>An interface used to define a class that monitors test methods and collects metrics.
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        Bundle</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/IMonitor.html#getMetrics()">getMetrics</a>()
+      </code>
+      
+        <p>Get the summary results accross all iterations.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/IMonitor.html#startIteration()">startIteration</a>()
+      </code>
+      
+        <p>Begin monitoring a test method.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        Bundle</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/jank/IMonitor.html#stopIteration()">stopIteration</a>()
+      </code>
+      
+        <p>Stop monitoring a test method and return intermediate results for this iteration.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="getMetrics()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getMetrics</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+Bundle getMetrics ()</pre>
+    
+    
+
+    
+  <p>Get the summary results accross all iterations.
+</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>Bundle</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="startIteration()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">startIteration</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void startIteration ()</pre>
+    
+    
+
+    
+  <p>Begin monitoring a test method.
+</p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Throwable</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="stopIteration()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">stopIteration</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+Bundle stopIteration ()</pre>
+    
+    
+
+    
+  <p>Stop monitoring a test method and return intermediate results for this iteration.</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>Bundle</code></td>
+        <td width="100%">A <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> of test results.
+</td>
+      </tr>
+    </table>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>Throwable</code></td>
+          <td width="100%"></td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+  
+  <ul data-reference-resources>
+    
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/GfxMonitor.html">GfxMonitor</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/JankTest.html">JankTest</a></li>
+      </ul>
+    </li>
+    
+    <li><h2>Interfaces</h2>
+      <ul>
+          <li class="selected api apilevel-"><a href="/reference/android/support/test/jank/IMonitor.html">IMonitor</a></li>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/IMonitorFactory.html">IMonitorFactory</a></li>
+      </ul>
+    </li>
+    
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="api apilevel-"><a href="/reference/android/support/test/jank/JankTestBase.html">JankTestBase</a></li>
+      </ul>
+    </li>
+    
+    
+    
+  </ul>
+  
+</div>
+
+
+
+</body>
+</html>

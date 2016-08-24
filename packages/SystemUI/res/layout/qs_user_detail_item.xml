@@ -33,19 +33,36 @@
 
     <com.android.systemui.statusbar.phone.UserAvatarView
             android:id="@+id/user_picture"
-            android:layout_width="@dimen/max_avatar_size"
-            android:layout_height="@dimen/max_avatar_size"
-            android:layout_marginBottom="10dp"
+            android:layout_width="@dimen/framed_avatar_size"
+            android:layout_height="@dimen/framed_avatar_size"
+            android:layout_marginBottom="7dp"
+            android:backgroundTint="@color/qs_user_detail_avatar_tint"
+            android:backgroundTintMode="src_atop"
             systemui:frameWidth="2dp"
-            systemui:framePadding="6dp"
-            systemui:activeFrameColor="@color/current_user_border_color"/>
+            systemui:framePadding="2.5dp"
+            systemui:badgeDiameter="18dp"
+            systemui:badgeMargin="1dp"
+            systemui:frameColor="@color/qs_user_detail_avatar_frame"/>
 
-    <TextView
-            android:id="@+id/user_name"
+    <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/qs_detail_item_secondary_text_size"
-            android:textColor="@color/qs_user_detail_name"
-            android:gravity="center_horizontal" />
+            android:layout_height="wrap_content">
+        <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/qs_detail_item_secondary_text_size"
+                android:textColor="@color/qs_user_detail_name"
+                android:gravity="center_horizontal" />
+        <ImageView
+                android:id="@+id/restricted_padlock"
+                android:layout_width="@dimen/qs_detail_item_secondary_text_size"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:src="@drawable/ic_info"
+                android:layout_marginLeft="@dimen/restricted_padlock_pading"
+                android:scaleType="centerInside"
+                android:visibility="gone" />
+    </LinearLayout>
 
 </com.android.systemui.qs.tiles.UserDetailItemView>

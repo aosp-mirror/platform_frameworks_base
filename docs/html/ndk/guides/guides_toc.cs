@@ -63,6 +63,44 @@
       </ul>
    </li>
 
+   <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>ndk/guides/audio/index.html">
+      <span class="en">Audio</span></a></div>
+      <ul>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/basics.html">Basics</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/opensl-for-android.html">OpenSL ES for
+      Android</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/input-latency.html">Audio Input
+      Latency</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/output-latency.html">Audio Output
+      Latency</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/floating-point.html">Floating-Point
+      Audio</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/sample-rates.html">Sample Rates
+      </a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/audio/opensl-prog-notes.html">OpenSL ES Programming Notes
+      </a></li>
+      </ul>
+   </li>
+
+      <li class="nav-section">
+      <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>ndk/guides/graphics/index.html">
+      <span class="en">Vulkan</span></a></div>
+      <ul>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/getting-started.html">
+      Getting Started</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/design-notes.html">
+      Design Guidelines</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/shader-compilers.html">
+      Shader Compilers</a></li>
+      <li><a href="<?cs var:toroot ?>ndk/guides/graphics/validation-layer.html">
+      Validation Layers</a></li>
+      </ul>
+      </ul>
+   </li>
+
+
 </ul>
 
 

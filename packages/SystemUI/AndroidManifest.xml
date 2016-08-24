@@ -58,6 +58,7 @@
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
@@ -81,12 +82,14 @@
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
+    <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
 
     <!-- WindowManager -->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
     <uses-permission android:name="android.permission.MANAGE_APP_TOKENS" />
+    <uses-permission android:name="android.permission.REGISTER_WINDOW_MANAGER_LISTENERS" />
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
@@ -135,6 +138,33 @@
             android:protectionLevel="signature" />
     <uses-permission android:name="com.android.systemui.permission.SELF" />
 
+    <!-- Adding Quick Settings tiles -->
+    <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
+
+    <!-- Block notifications inline notifications -->
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
+
+    <!-- Access battery information -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
+    <!-- DevicePolicyManager get user restrictions -->
+    <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
+
+    <!-- Needed for passing extras with intent ACTION_SHOW_ADMIN_SUPPORT_DETAILS -->
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+
+    <!-- TV picture-in-picture -->
+    <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
+
+    <!-- DND access -->
+    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
+
+    <!-- It's like, reality, but, you know, virtual -->
+    <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
+
+    <!-- the ability to rename notifications posted by other apps -->
+    <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -145,7 +175,9 @@
         android:icon="@drawable/icon"
         android:process="com.android.systemui"
         android:supportsRtl="true"
-        android:theme="@style/systemui_theme">
+        android:theme="@style/systemui_theme"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -158,11 +190,28 @@
             android:exported="true"
             />
 
+        <!-- Recents depends on every user having their own SystemUI process, so on user switch,
+             ensure that the process is created by starting this service.
+             -->
+        <service android:name="SystemUISecondaryUserService"
+            android:exported="true"
+            android:permission="com.android.systemui.permission.SELF" />
+
+
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
         <service android:name=".screenshot.TakeScreenshotService"
             android:process=":screenshot"
             android:exported="false" />
+
+        <!-- Called from PhoneWindowManager -->
+        <receiver android:name=".screenshot.ScreenshotServiceErrorReceiver"
+            android:process=":screenshot"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
+            </intent-filter>
+        </receiver>
 
         <service android:name=".LoadAverageService"
                 android:exported="true" />
@@ -171,28 +220,16 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
-        <receiver android:name=".BootReceiver" androidprv:primaryUserOnly="true">
+        <receiver android:name=".BootReceiver" androidprv:systemUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".qs.tiles.HotspotTile$APChangedReceiver"
-                androidprv:primaryUserOnly="true">
-            <intent-filter>
-                <action android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <activity android:name=".usb.UsbStorageActivity"
-                  android:label="@*android:string/usb_storage_activity_title"
-                  android:excludeFromRecents="true">
-        </activity>
-
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"
-                  android:theme="@android:style/Theme.Material.Settings"
+                  android:theme="@style/TunerSettings"
                   android:label="@string/system_ui_tuner"
                   android:process=":tuner"
                   android:exported="true">
@@ -204,6 +241,24 @@
                     android:value="com.android.settings.category.system" />
         </activity>
 
+        <activity-alias android:name=".DemoMode"
+                  android:targetActivity=".tuner.TunerActivity"
+                  android:icon="@drawable/tuner"
+                  android:theme="@style/TunerSettings"
+                  android:label="@string/demo_mode"
+                  android:process=":tuner"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.settings.action.DEMO_MODE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Service used by secondary users to register themselves with the system user. -->
+        <service android:name=".recents.RecentsSystemUserService"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF" />
+
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
@@ -213,22 +268,36 @@
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
                   android:screenOrientation="behind"
-                  android:theme="@style/config_recents_activity_theme">
+                  android:resizeableActivity="true"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+                  android:theme="@style/RecentsTheme.Wallpaper">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>
         </activity>
 
-        <receiver android:name=".recents.RecentsUserEventProxyReceiver"
-                  android:exported="false">
+        <activity android:name=".recents.tv.RecentsTvActivity"
+                  android:label="@string/accessibility_desc_recent_apps"
+                  android:exported="false"
+                  android:launchMode="singleInstance"
+                  android:excludeFromRecents="true"
+                  android:stateNotNeeded="true"
+                  android:resumeWhilePausing="true"
+                  android:screenOrientation="behind"
+                  android:theme="@style/RecentsTvTheme.Wallpaper">
             <intent-filter>
-                <action android:name="com.android.systemui.recents.action.SHOW_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.HIDE_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.TOGGLE_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.PRELOAD_RECENTS_FOR_USER" />
-                <action android:name="com.android.systemui.recents.action.CONFIG_CHANGED_FOR_USER" />
+                <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>
-        </receiver>
+        </activity>
+
+        <activity
+            android:name=".stackdivider.ForcedResizableInfoActivity"
+            android:theme="@style/ForcedResizableTheme"
+            android:excludeFromRecents="true"
+            android:stateNotNeeded="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false">
+        </activity>
 
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
@@ -309,6 +378,34 @@
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
 
+        <!-- started from PipUI -->
+        <activity
+            android:name="com.android.systemui.tv.pip.PipMenuActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            androidprv:alwaysFocusable="true"
+            android:excludeFromRecents="true" />
+        <activity
+            android:name="com.android.systemui.tv.pip.PipOverlayActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:taskAffinity=""
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:excludeFromRecents="true" />
+        <activity
+            android:name="com.android.systemui.tv.pip.PipOnboardingActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true" />
+
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"
@@ -339,7 +436,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.android.internal.category.PLATLOGO" />
             </intent-filter>
         </activity>
 
@@ -409,6 +505,14 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.android.systemui.action.CLEAR_TUNER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".statusbar.KeyboardShortcutsReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
+                <action android:name="android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
             </intent-filter>
         </receiver>
     </application>

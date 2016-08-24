@@ -137,7 +137,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
         super(c);
         setFocusableInTouchMode(true);
 
-        mIm = (InputManager)c.getSystemService(Context.INPUT_SERVICE);
+        mIm = c.getSystemService(InputManager.class);
 
         mVC = ViewConfiguration.get(c);
         mTextPaint = new Paint();

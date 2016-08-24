@@ -350,24 +350,24 @@ public class ScrollView extends FrameLayout {
 
         if (getChildCount() > 0) {
             final View child = getChildAt(0);
-            final int height = getMeasuredHeight();
-            if (child.getMeasuredHeight() < height) {
-                final int widthPadding;
-                final int heightPadding;
-                final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
-                if (targetSdkVersion >= VERSION_CODES.M) {
-                    widthPadding = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin;
-                    heightPadding = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin;
-                } else {
-                    widthPadding = mPaddingLeft + mPaddingRight;
-                    heightPadding = mPaddingTop + mPaddingBottom;
-                }
+            final int widthPadding;
+            final int heightPadding;
+            final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+            final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if (targetSdkVersion >= VERSION_CODES.M) {
+                widthPadding = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin;
+                heightPadding = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin;
+            } else {
+                widthPadding = mPaddingLeft + mPaddingRight;
+                heightPadding = mPaddingTop + mPaddingBottom;
+            }
 
+            final int desiredHeight = getMeasuredHeight() - heightPadding;
+            if (child.getMeasuredHeight() < desiredHeight) {
                 final int childWidthMeasureSpec = getChildMeasureSpec(
                         widthMeasureSpec, widthPadding, lp.width);
                 final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        height - heightPadding, MeasureSpec.EXACTLY);
+                        desiredHeight, MeasureSpec.EXACTLY);
                 child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
             }
         }
@@ -489,6 +489,10 @@ public class ScrollView extends FrameLayout {
             return true;
         }
 
+        if (super.onInterceptTouchEvent(ev)) {
+            return true;
+        }
+
         /*
          * Don't try to intercept touch if we can't scroll anyway.
          */
@@ -557,10 +561,12 @@ public class ScrollView extends FrameLayout {
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(ev);
                 /*
-                * If being flinged and user touches the screen, initiate drag;
-                * otherwise don't.  mScroller.isFinished should be false when
-                * being flinged.
+                 * If being flinged and user touches the screen, initiate drag;
+                 * otherwise don't. mScroller.isFinished should be false when
+                 * being flinged. We need to call computeScrollOffset() first so that
+                 * isFinished() is correct.
                 */
+                mScroller.computeScrollOffset();
                 mIsBeingDragged = !mScroller.isFinished();
                 if (mIsBeingDragged && mScrollStrictSpan == null) {
                     mScrollStrictSpan = StrictMode.enterCriticalSpan("ScrollView-scroll");
@@ -1262,9 +1268,10 @@ public class ScrollView extends FrameLayout {
 
         childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec, mPaddingLeft
                 + mPaddingRight, lp.width);
-
+        final int verticalPadding = mPaddingTop + mPaddingBottom;
         childHeightMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
-                MeasureSpec.getSize(parentHeightMeasureSpec), MeasureSpec.UNSPECIFIED);
+                Math.max(0, MeasureSpec.getSize(parentHeightMeasureSpec) - verticalPadding),
+                MeasureSpec.UNSPECIFIED);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
@@ -1277,8 +1284,11 @@ public class ScrollView extends FrameLayout {
         final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
                 mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin
                         + widthUsed, lp.width);
+        final int usedTotal = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin +
+                heightUsed;
         final int childHeightMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
-                MeasureSpec.getSize(parentHeightMeasureSpec), MeasureSpec.UNSPECIFIED);
+                Math.max(0, MeasureSpec.getSize(parentHeightMeasureSpec) - usedTotal),
+                MeasureSpec.UNSPECIFIED);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }

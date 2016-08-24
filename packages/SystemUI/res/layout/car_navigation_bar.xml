@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2016, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<com.android.systemui.statusbar.car.CarNavigationBarView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@drawable/system_bar_background">
+
+    <!-- phone.NavigationBarView has rot0 and rot90 but we expect the car head unit to have a fixed
+         rotation so skip this level of the heirarchy.
+    -->
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:id="@+id/nav_buttons"
+        android:animateLayoutChanges="true">
+
+        <!-- Buttons get populated here from a car_arrays.xml. -->
+    </LinearLayout>
+
+    <!-- lights out layout to match exactly -->
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:id="@+id/lights_out"
+        android:visibility="gone">
+        <!-- Must match nav_buttons. -->
+    </LinearLayout>
+
+</com.android.systemui.statusbar.car.CarNavigationBarView>

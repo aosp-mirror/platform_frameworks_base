@@ -1,4 +1,5 @@
 page.title=System Permissions
+page.tags=permissions
 @jd:body
 
 <div id="qv-wrapper">
@@ -10,16 +11,59 @@ page.title=System Permissions
 <li><a href="#signing">Application Signing</a></li>
 <li><a href="#userid">User IDs and File Access</a></li>
 <li><a href="#permissions">Using Permissions</a></li>
-<li><a href="#declaring">Declaring and Enforcing Permissions</a>
+<li><a href="#normal-dangerous">Normal and Dangerous Permissions</a>
+  <ol>
+    <li><a href="#perm-groups">Permission Groups</a></li>
+  </ol>
+</li>
+<li><a href="#defining">Defining and Enforcing Permissions</a>
 	<ol>
+  <li><a href="#custom-recommendations">Custom permission recommendations</a></li>
 	<li><a href="#manifest">...in AndroidManifest.xml</a></li>
 	<li><a href="#broadcasts">...when Sending Broadcasts</a></li>
 	<li><a href="#enforcement">Other Permission Enforcement</a></li>
 	</ol></li>
 <li><a href="#uri">URI Permissions</a></li>
 </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.Manifest.permission}</li>
+    <li>{@link android.Manifest.permission_group}</li>
+  </ol>
+
+  <h2>See Also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/permissions/index.html">Working with System
+        Permissions</a></li>
+  </ol>
+
+<!--
+  <h2>See also</h2>
+  <ol>
+    <li></li>
+  </ol>
+-->
 </div>
 </div>
+
+<a class="notice-designers"
+    href="https://www.google.com/design/spec/patterns/permissions.html">
+  <div>
+    <h3>Design Patterns</h3>
+    <p>Permissions</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video"
+    href="https://www.youtube.com/watch?v=f17qe9vZ8RM">
+<div>
+    <h3>Video</h3>
+    <p>Google I/O 2015—Android M Permissions: Best Practices for
+      Developers</p>
+</div>
+</a>
 
 <p>Android is a privilege-separated operating system, in which each
 application runs with a distinct system identity (Linux user ID and group
@@ -33,7 +77,8 @@ ad hoc access to specific pieces of data.</p>
 
 <p>This document describes how application developers can use the
 security features provided by Android.  A more general <a
-href="http://source.android.com/tech/security/index.html"> Android Security
+href="http://source.android.com/tech/security/index.html"
+class="external-link">Android Security
 Overview</a> is provided in the Android Open Source Project.</p>
 
 
@@ -51,12 +96,11 @@ network access, keeping the device awake, and so on.</p>
 must explicitly share resources and data. They do this by declaring the
 <em>permissions</em> they need for additional capabilities not provided by
 the basic sandbox. Applications statically declare the permissions they
-require, and the Android system prompts the user for consent at the time the
-application is installed.</p>
+require, and the Android system prompts the user for consent.</p>
 
 <p>The application sandbox does not depend on the technology used to build
 an application. In particular the Dalvik VM is not a security boundary, and
-any app can run native code (see <a href="/sdk/ndk/index.html">the Android
+any app can run native code (see <a href="{@docRoot}tools/sdk/ndk/index.html">the Android
 NDK</a>). All types of applications &mdash; Java, native, and hybrid &mdash;
 are sandboxed in the same way and have the same degree of security from each
 other.</p>
@@ -72,9 +116,9 @@ signed by a certificate authority; it is perfectly allowable, and typical,
 for Android applications to use self-signed certificates. The purpose of
 certificates in Android is to distinguish application authors. This allows
 the system to grant or deny applications access to <a
-href="/guide/topics/manifest/permission-element.html#plevel">signature-level
+href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">signature-level
 permissions</a> and to grant or deny an application's <a
-href="/guide/topics/manifest/manifest-element.html#uid">request to be given
+href="{@docRoot}guide/topics/manifest/manifest-element.html#uid">request to be given
 the same Linux identity</a> as another application.</p>
 
 <a name="userid"></a>
@@ -110,15 +154,16 @@ owned by your application, but its global read and/or write permissions have
 been set appropriately so any other application can see it.</p>
 
 
-<a name="permissions"></a>
-<h2>Using Permissions</h2>
+<h2 id="permissions">Using Permissions</h2>
 
 <p>A basic Android application has no permissions associated with it by default,
 meaning it cannot do anything that would adversely impact the user experience
 or any data on the device.  To make use of protected features of the device,
-you must include in your <code>AndroidManifest.xml</code> one or more
-<code>{@link android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}</code>
-tags declaring the permissions that your application needs.</p>
+you must include one or more
+<a href="{@docRoot}guide/topics/manifest/uses-permission-element.html"
+    ><code>&lt;uses-permission&gt;</code></a>
+tags in your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">app
+manifest</a>.</p>
 
 <p>For example, an application that needs to monitor incoming SMS messages would
 specify:</p>
@@ -129,14 +174,50 @@ specify:</p>
     ...
 &lt;/manifest&gt;</pre>
 
-<p>At application install time, permissions requested by the application are
-granted to it by the package installer, based on checks against the
-signatures of the applications declaring those permissions and/or interaction
-with the user. <em>No</em> checks with the user
-are done while an application is running; the app is either granted a particular
-permission when installed, and can use that feature as desired, or the
-permission is not granted and any attempt to use the feature fails
-without prompting the user.</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Permission Levels</h3>
+  <p>For more information about the different protection levels for
+    permissions, see <a href="#normal-dangerous">Normal and Dangerous
+    Permissions</a>.</p>
+</div>
+</div>
+
+<p>
+  If your app lists <em>normal</em> permissions in its manifest (that is,
+  permissions that don't pose much risk to the user's privacy or the device's
+  operation), the system automatically grants those permissions.
+  If your app lists <em>dangerous</em> permissions in its manifest (that is,
+  permissions that could potentially affect the user's privacy or the device's
+  normal operation), the system asks the user to explicitly grant those
+  permissions. The way Android makes the requests depends on the system
+  version, and the system version targeted by your app:
+</p>
+
+<ul>
+  <li>If the device is running Android 6.0 (API level 23) or higher,
+  <em>and</em> the app's <a
+  href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+  ><code>targetSdkVersion</code></a>
+  is 23 or higher, the app requests permissions from the user at run-time.
+  The user can revoke the permissions at any time, so the app needs to
+  check whether it has the permissions every time it runs.
+  For more information about requesting permissions in your app, see the
+  <a href="{@docRoot}training/permissions/index.html">Working with System
+  Permissions</a> training guide.
+  </li>
+
+  <li>If the device is running Android 5.1 (API level 22) or lower, <em>or</em>
+  the app's <a
+  href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+  ><code>targetSdkVersion</code></a>
+  is 22 or lower, the system asks the user to grant the permissions when the
+  user installs the app. If you add a new permission to an updated version of
+  the app, the system asks the user to grant that permission when the user
+  updates the app. Once the user installs the app, the only way they can
+  revoke the permission is by uninstalling the app.
+  </li>
+</ul>
 
 <p>Often times a permission failure will result in a {@link
 java.lang.SecurityException} being thrown back to the application. However,
@@ -145,12 +226,6 @@ android.content.Context#sendBroadcast} method checks permissions as data is
 being delivered to each receiver, after the method call has returned, so you
 will not receive an exception if there are permission failures. In almost all
 cases, however, a permission failure will be printed to the system log.</p>
-
-<p>However, in a normal user situation (such as when the app is installed
-from Google Play Store), an app cannot be installed if the user does not grant the app
-each of the requested permissions. So you generally don't need to worry about runtime failures
-caused by missing permissions because the mere fact that the app is installed at all
-means that your app has been granted its desired permissions.</p>
 
 <p>The permissions provided by the Android system can be found at {@link
 android.Manifest.permission}. Any application may also define and enforce its
@@ -171,10 +246,9 @@ your broadcast or who can send a broadcast to you.</li>
 <li>Binding to or starting a service.</li>
 </ul>
 
+<h3 id="auto-adjustments">Automatic permission adjustments</h3>
 
-
-<div class="caution">
-<p><strong>Caution:</strong> Over time,
+<p> Over time,
 new restrictions may be added to the platform such that, in order
 to use certain APIs, your app must request a permission that it previously did not need.
 Because existing apps assume access to those APIs is freely available,
@@ -189,30 +263,297 @@ Android adds the permission.</p>
 added in API level 4 to restrict access to the shared storage space. If your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 is 3 or lower, this permission is added to your app on newer versions of Android.</p>
-<p>Beware that if this happens to your app, your app listing on Google Play will show these
-required permissions even though your app might not actually require them.</p>
+
+<p class="caution">
+  <strong>Caution:</strong> If a permission is automatically added to your app,
+  your app listing on Google Play lists these additional permissions even
+  though your app might not actually require them.
+</p>
+
 <p>To avoid this and remove the default permissions you don't need, always update your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 to be as high as possible. You can see which permissions were added with each release in the
 {@link android.os.Build.VERSION_CODES} documentation.</p>
 </div>
 
+<h2 id="normal-dangerous">Normal and Dangerous Permissions</h2>
+
+<p>
+  System permissions are divided into several protection levels. The two most
+  important protection levels to know about are <em>normal</em> and
+  <em>dangerous</em> permissions:
+</p>
+
+<ul>
+  <li>
+    <em>Normal</em> permissions cover areas where your app needs to access data
+    or resources outside the app's sandbox, but where there's very little risk
+    to the user's privacy or the operation of other apps. For example,
+    permission to set the time zone is a normal permission. If an app
+    declares that it needs a normal permission, the system automatically grants
+    the permission to the app. For a full listing of the current normal
+    permissions, see <a href="normal-permissions.html">Normal permissions</a>.
+  </li>
+
+  <li>
+    <em>Dangerous</em> permissions cover areas where the app wants data or
+    resources that involve the user's private information, or could potentially
+    affect the user's stored data or the operation of other apps. For example,
+    the ability to read the user's contacts is a dangerous permission. If an
+    app declares that it needs a dangerous permission, the user has to
+    explicitly grant the permission to the app.
+  </li>
+</ul>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3 id="special_permissions">Special Permissions</h3>
+  <p>
+    There are a couple of permissions that don't behave like normal and
+    dangerous permissions. {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW
+    SYSTEM_ALERT_WINDOW} and {@link android.Manifest.permission#WRITE_SETTINGS
+    WRITE_SETTINGS} are particularly sensitive, so most apps should not use
+    them. If an app needs one of these permissions, it must declare the
+    permission in the manifest, <em>and</em> send an intent requesting the
+    user's authorization. The system responds to the intent by showing a
+    detailed management screen to the user.
+  </p>
+
+  <p>
+    For details on how to request these permissions, see the {@link
+    android.Manifest.permission#SYSTEM_ALERT_WINDOW SYSTEM_ALERT_WINDOW} and
+    {@link android.Manifest.permission#WRITE_SETTINGS WRITE_SETTINGS} reference
+    entries.
+  </p>
+</div>
+</div>
+
+<h3 id="perm-groups">Permission groups</h3>
+
+<p>
+  All dangerous Android system permissions belong to permission groups.
+  If the device is running Android 6.0 (API level 23) and the app's <a href=
+  "{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+  ><code>targetSdkVersion</code></a> is 23 or higher, the following system
+  behavior applies when your app requests a dangerous permission:
+</p>
+
+<ul>
+  <li>If an app requests a dangerous permission listed in its manifest, and the app
+  does not currently have any permissions in the permission group, the system
+  shows a dialog box to the user describing the permission group that the app
+  wants access to. The dialog box does not describe the specific permission
+  within that group. For example, if an app requests the {@link
+  android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission, the
+  system dialog box just says the app needs access to the device's contacts. If
+  the user grants approval, the system gives the app just the permission it
+  requested.
+  </li>
+
+  <li>If an app requests a dangerous permission listed in its manifest, and the app
+  already has another dangerous permission in the same permission group, the
+  system immediately grants the permission without any interaction with the
+  user. For example, if an app had previously requested and been granted the
+  {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS} permission,
+  and it then requests {@link android.Manifest.permission#WRITE_CONTACTS
+  WRITE_CONTACTS}, the system immediately grants that permission.
+  </li>
+</ul>
+
+<p class="aside">
+  Any permission can belong to a permission group, including normal permissions
+  and permissions defined by your app.
+  However, a permission's group only affects the user experience if the
+  permission is dangerous. You can ignore the permission group for normal
+  permissions.
+</p>
+
+<p>
+  If the device is running Android 5.1 (API level 22) or lower, or the app's
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
+  ><code>targetSdkVersion</code></a> is 22 or lower, the system asks the user
+  to grant the permissions at install time. Once again, the system just tells
+  the user what permission <em>groups</em> the app needs, not the individual
+  permissions.
+</p>
+
+<p class="table-caption" id="permission-groups">
+  <strong>Table 1.</strong> Dangerous permissions and permission groups.</p>
+<table>
+  <tr>
+    <th scope="col">Permission Group</th>
+    <th scope="col">Permissions</th>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#CALENDAR CALENDAR}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#READ_CALENDAR READ_CALENDAR}
+        </li>
+      </ul>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#WRITE_CALENDAR WRITE_CALENDAR}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#CAMERA CAMERA}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#CAMERA CAMERA}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#CONTACTS CONTACTS}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}
+        </li>
+        <li>
+          {@link android.Manifest.permission#WRITE_CONTACTS WRITE_CONTACTS}
+        </li>
+        <li>
+          {@link android.Manifest.permission#GET_ACCOUNTS GET_ACCOUNTS}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#LOCATION LOCATION}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
+        </li>
+        <li>
+          {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#MICROPHONE MICROPHONE}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#RECORD_AUDIO RECORD_AUDIO}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#PHONE PHONE}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+        </li>
+        <li>
+          {@link android.Manifest.permission#CALL_PHONE CALL_PHONE}
+        </li>
+        <li>
+          {@link android.Manifest.permission#READ_CALL_LOG READ_CALL_LOG}
+        </li>
+        <li>
+          {@link android.Manifest.permission#WRITE_CALL_LOG WRITE_CALL_LOG}
+        </li>
+        <li>
+          {@link android.Manifest.permission#ADD_VOICEMAIL ADD_VOICEMAIL}
+        </li>
+        <li>
+          {@link android.Manifest.permission#USE_SIP USE_SIP}
+        </li>
+        <li>
+          {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS PROCESS_OUTGOING_CALLS}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#SENSORS SENSORS}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#BODY_SENSORS BODY_SENSORS}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>{@link android.Manifest.permission_group#SMS SMS}</td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#SEND_SMS SEND_SMS}
+        </li>
+        <li>
+          {@link android.Manifest.permission#RECEIVE_SMS RECEIVE_SMS}
+        </li>
+        <li>
+          {@link android.Manifest.permission#READ_SMS READ_SMS}
+        </li>
+        <li>
+          {@link android.Manifest.permission#RECEIVE_WAP_PUSH RECEIVE_WAP_PUSH}
+        </li>
+        <li>
+          {@link android.Manifest.permission#RECEIVE_MMS RECEIVE_MMS}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      {@link android.Manifest.permission_group#STORAGE STORAGE}
+    </td>
+    <td>
+      <ul>
+        <li>
+          {@link android.Manifest.permission#READ_EXTERNAL_STORAGE
+              READ_EXTERNAL_STORAGE}
+        </li>
+        <li>
+          {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE
+              WRITE_EXTERNAL_STORAGE}
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+</table>
 
 
 <a name="declaring"></a>
-<h2>Declaring and Enforcing Permissions</h2>
+<h2 id="defining">Defining and Enforcing Permissions</h2>
 
-<p>To enforce your own permissions, you must first declare them in your
-<code>AndroidManifest.xml</code> using one or more
-<code>{@link android.R.styleable#AndroidManifestPermission &lt;permission&gt;}</code>
-tags.</p>
+<p>
+  To enforce your own permissions, you must first declare them in your
+  <code>AndroidManifest.xml</code> using one or more <a href=
+  "{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a>
+  elements.
+</p>
 
 <p>For example, an application that wants to control who can start one
 of its activities could declare a permission for this operation as follows:</p>
 
 <pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    package=&quot;com.me.app.myapp&quot; &gt;
-    &lt;permission android:name=&quot;com.me.app.myapp.permission.DEADLY_ACTIVITY&quot;
+    package=&quot;com.example.myapp&quot; &gt;
+    &lt;permission android:name=&quot;com.example.myapp.permission.DEADLY_ACTIVITY&quot;
         android:label=&quot;&#64;string/permlab_deadlyActivity&quot;
         android:description=&quot;&#64;string/permdesc_deadlyActivity&quot;
         android:permissionGroup=&quot;android.permission-group.COST_MONEY&quot;
@@ -220,50 +561,65 @@ of its activities could declare a permission for this operation as follows:</p>
     ...
 &lt;/manifest&gt;</pre>
 
+<p class="note">
+  <strong>Note:</strong> The system does not allow multiple packages to declare
+  a permission with the same name, unless all the packages are signed with the
+  same certificate. If a package declares a permission, the system does not permit
+  the user to install other packages with the same permission name, unless
+  those packages are signed with the same certificate as the first package. To
+  avoid naming collisions, we recommend using reverse-domain-style naming for custom
+  permissions, for example <code>com.example.myapp.ENGAGE_HYPERSPACE</code>.
+</p>
+
 <p>The {@link android.R.styleable#AndroidManifestPermission_protectionLevel
-&lt;protectionLevel&gt;} attribute is required, telling the system how the
+protectionLevel} attribute is required, telling the system how the
 user is to be informed of applications requiring the permission, or who is
 allowed to hold that permission, as described in the linked documentation.</p>
 
-<p>The {@link android.R.styleable#AndroidManifestPermission_permissionGroup
-&lt;permissionGroup&gt;} attribute is optional, and only used to help the system display
-permissions to the user.  You will usually want to set this to either a standard
-system group (listed in {@link android.Manifest.permission_group
-android.Manifest.permission_group}) or in more rare cases to one defined by
-yourself.  It is preferred to use an existing group, as this simplifies the
-permission UI shown to the user.</p>
+<p>
+  The <a href=
+  "{@docRoot}guide/topics/manifest/permission-group-element.html"
+  ><code>android:permissionGroup</code></a>
+  attribute is optional, and only used to help the system display permissions
+  to the user. In most cases you will want to set this to a standard system
+  group (listed in {@link android.Manifest.permission_group
+  android.Manifest.permission_group}), although you can define a group yourself.
+  It is preferable to use an existing group, as this simplifies the
+  permission UI shown to the user.
+</p>
 
-<p>Note that both a label and description should be supplied for the
-permission. These are string resources that can be displayed to the user when
+<p>You need to supply both a label and description for the
+permission. These are string resources that the user can see when
 they are viewing a list of permissions
 (<code>{@link android.R.styleable#AndroidManifestPermission_label android:label}</code>)
 or details on a single permission (
 <code>{@link android.R.styleable#AndroidManifestPermission_description android:description}</code>).
-The label should be short, a few words
+The label should be short; a few words
 describing the key piece of functionality the permission is protecting. The
-description should be a couple sentences describing what the permission allows
-a holder to do. Our convention for the description is two sentences, the first
-describing the permission, the second warning the user of what bad things
-can happen if an application is granted the permission.</p>
+description should be a couple of sentences describing what the permission allows
+a holder to do. Our convention is a two-sentence description:
+the first sentence describes the permission, and the second sentence warns the
+user of the type of things that can go wrong if an application is granted the
+permission.</p>
 
 <p>Here is an example of a label and description for the CALL_PHONE
 permission:</p>
 
 <pre>
-    &lt;string name=&quot;permlab_callPhone&quot;&gt;directly call phone numbers&lt;/string&gt;
-    &lt;string name=&quot;permdesc_callPhone&quot;&gt;Allows the application to call
-        phone numbers without your intervention. Malicious applications may
-        cause unexpected calls on your phone bill. Note that this does not
-        allow the application to call emergency numbers.&lt;/string&gt;
+&lt;string name=&quot;permlab_callPhone&quot;&gt;directly call phone numbers&lt;/string&gt;
+&lt;string name=&quot;permdesc_callPhone&quot;&gt;Allows the application to call
+    phone numbers without your intervention. Malicious applications may
+    cause unexpected calls on your phone bill. Note that this does not
+    allow the application to call emergency numbers.&lt;/string&gt;
 </pre>
 
-<p>You can look at the permissions currently defined in the system with the
+<p>You can view at the permissions currently defined in the system using the
 Settings app and the shell command <code>adb shell pm list permissions</code>.
-To use the Settings app, go to Settings &gt; Applications.  Pick an app and
+To use the Settings app, go to <b>Settings</b> &gt; <b>Applications</b>.  Pick an app and
 scroll down to see the permissions that the app uses. For developers, the adb '-s'
 option displays the permissions in a form similar to how the user will see them:</p>
 
-<pre>
+<pre class="no-pretty-print">
 $ adb shell pm list permissions -s
 All Permissions:
 
@@ -277,14 +633,53 @@ Services that cost you money: send SMS messages, directly call phone numbers
 
 ...</pre>
 
+<h3 id="custom-recommendations">
+  Custom permission recommendations
+</h3>
+
+<p>
+  Apps can define their own custom permissions and request custom permissions
+  from other apps by defining <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html"><code
+  >&lt;uses-permission&gt;</code></a> elements.
+  However, you should carefully assess whether it is necessary for your app to
+  do so.
+</p>
+
+<ul>
+  <li>If you are designing a suite of apps that expose functionality to one
+  another, try to design the apps so that each permission is defined only once.
+  You must do this if the apps are not all signed with the same certificate.
+  Even if the apps are all signed with the same certificate, it's a
+  best practice to define each permission once only.
+  </li>
+
+  <li>If the functionality is only available to apps signed with the same
+  signature as the providing app, you may be able to avoid defining custom
+  permissions by using signature checks. When one of your apps makes a request
+  of another of your apps, the second app can verify that both apps are signed
+  with the same certificate before complying with the request.
+  </li>
+
+  <li>If you are developing a suite of apps runs only on your own
+  devices, you should develop and install a package that
+  manages permissions for all the apps in the suite. This package does not need
+  to provide any services itself. It just declares all the permissions, and the
+  other apps in the suite request those permissions with the <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html"><code
+  >&lt;uses-permission&gt;</code></a>
+  element.
+  </li>
+</ul>
+
 <a name="manifest"></a>
 <h3>Enforcing Permissions in AndroidManifest.xml</h3>
 
-<p>High-level permissions restricting access to entire components of the
-system or application can be applied through your
-<code>AndroidManifest.xml</code>. All that this requires is including an {@link
+<p>TYou can apply high-level permissions restricting access to entire components
+of the system or application through your
+<code>AndroidManifest.xml</code>. To do this, include an {@link
 android.R.attr#permission android:permission} attribute on the desired
-component, naming the permission that will be used to control access to
+component, naming the permission that controls access to
 it.</p>
 
 <p><strong>{@link android.app.Activity}</strong> permissions
@@ -439,10 +834,6 @@ android:grantUriPermissions} attribute or
 {@link android.content.Context#checkUriPermission Context.checkUriPermission()}
 methods.</p>
 
-
-
-
-
 <div class="next-docs">
 <div class="col-6">
   <h2 class="norule">Continue reading about:</h2>
@@ -467,7 +858,7 @@ methods.</p>
     <dd>Information about Android works on different types of devices and an introduction
     to how you can optimize your app for each device or restrict your app's availability
     to different devices.</dd>
-    <dt><a href="{@docRoot}http://source.android.com/devices/tech/security/index.html"
+    <dt><a href="http://source.android.com/devices/tech/security/index.html"
         class="external-link">Android Security Overview</a></dt>
     <dd>A detailed discussion about the Android platform's security model.</dd>
   </dl>

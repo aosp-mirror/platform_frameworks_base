@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 import android.app.backup.IBackupManager;
+import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.content.Context;
@@ -53,7 +54,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     public Trampoline(Context context) {
         mContext = context;
-        File dir = new File(Environment.getSecureDataDirectory(), "backup");
+        File dir = new File(Environment.getDataDirectory(), "backup");
         dir.mkdirs();
         mSuppressFile = new File(dir, BACKUP_SUPPRESS_FILENAME);
         mGlobalDisable = SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
@@ -62,7 +63,8 @@ public class Trampoline extends IBackupManager.Stub {
     // internal control API
     public void initialize(final int whichUser) {
         // Note that only the owner user is currently involved in backup/restore
-        if (whichUser == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (whichUser == UserHandle.USER_SYSTEM) {
             // Does this product support backup/restore at all?
             if (mGlobalDisable) {
                 Slog.i(TAG, "Backup/restore not supported");
@@ -91,8 +93,8 @@ public class Trampoline extends IBackupManager.Stub {
             Slog.i(TAG, "Backup/restore not supported");
             return;
         }
-
-        if (userHandle == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (userHandle == UserHandle.USER_SYSTEM) {
             synchronized (this) {
                 if (makeActive != isBackupServiceActive(userHandle)) {
                     Slog.i(TAG, "Making backup "
@@ -120,7 +122,8 @@ public class Trampoline extends IBackupManager.Stub {
      * @return true if the service is active.
      */
     public boolean isBackupServiceActive(final int userHandle) {
-        if (userHandle == UserHandle.USER_OWNER) {
+        // TODO: http://b/22388012
+        if (userHandle == UserHandle.USER_SYSTEM) {
             synchronized (this) {
                 return mService != null;
             }
@@ -272,6 +275,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public String[] getTransportWhitelist() {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.getTransportWhitelist() : null;
+    }
+
+    @Override
     public String selectBackupTransport(String transport) throws RemoteException {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.selectBackupTransport(transport) : null;
@@ -320,6 +329,18 @@ public class Trampoline extends IBackupManager.Stub {
     public long getAvailableRestoreToken(String packageName) {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.getAvailableRestoreToken(packageName) : 0;
+    }
+
+    @Override
+    public boolean isAppEligibleForBackup(String packageName) {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.isAppEligibleForBackup(packageName) : false;
+    }
+
+    @Override
+    public int requestBackup(String[] packages, IBackupObserver observer) throws RemoteException {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.requestBackup(packages, observer) : null;
     }
 
     @Override

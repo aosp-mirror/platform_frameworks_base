@@ -15,8 +15,19 @@
  */
 #include "renderstate/TextureState.h"
 
+#include "Caches.h"
+#include "utils/TraceUtils.h"
+
+#include <GLES3/gl3.h>
+#include <memory>
+#include <SkCanvas.h>
+#include <SkBitmap.h>
+
 namespace android {
 namespace uirenderer {
+
+// Width of mShadowLutTexture, defines how accurate the shadow alpha lookup table is
+static const int SHADOW_LUT_SIZE = 128;
 
 // Must define as many texture units as specified by kTextureUnitsCount
 const GLenum kTextureUnits[] = {
@@ -35,6 +46,42 @@ TextureState::TextureState()
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     LOG_ALWAYS_FATAL_IF(maxTextureUnits < kTextureUnitsCount,
             "At least %d texture units are required!", kTextureUnitsCount);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+}
+
+TextureState::~TextureState() {
+    if (mShadowLutTexture != nullptr) {
+        mShadowLutTexture->deleteTexture();
+    }
+}
+
+/**
+ * Maps shadow geometry 'alpha' varying (1 for darkest, 0 for transparent) to
+ * darkness at that spot. Input values of 0->1 should be mapped within the same
+ * range, but can affect the curve for a different visual falloff.
+ *
+ * This is used to populate the shadow LUT texture for quick lookup in the
+ * shadow shader.
+ */
+static float computeShadowOpacity(float ratio) {
+    // exponential falloff function provided by UX
+    float val = 1 - ratio;
+    return exp(-val * val * 4.0) - 0.018;
+}
+
+void TextureState::constructTexture(Caches& caches) {
+    if (mShadowLutTexture == nullptr) {
+        mShadowLutTexture.reset(new Texture(caches));
+
+        unsigned char bytes[SHADOW_LUT_SIZE];
+        for (int i = 0; i < SHADOW_LUT_SIZE; i++) {
+            float inputRatio = i / (SHADOW_LUT_SIZE - 1.0f);
+            bytes[i] = computeShadowOpacity(inputRatio) * 255;
+        }
+        mShadowLutTexture->upload(GL_ALPHA, SHADOW_LUT_SIZE, 1, GL_ALPHA, GL_UNSIGNED_BYTE, &bytes);
+        mShadowLutTexture->setFilter(GL_LINEAR);
+        mShadowLutTexture->setWrap(GL_CLAMP_TO_EDGE);
+    }
 }
 
 void TextureState::activateTexture(GLuint textureUnit) {

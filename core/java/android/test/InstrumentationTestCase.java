@@ -32,7 +32,13 @@ import junit.framework.TestCase;
 
 /**
  * A test case that has access to {@link Instrumentation}.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+ * InstrumentationRegistry</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class InstrumentationTestCase extends TestCase {
 
     private Instrumentation mInstrumentation;
@@ -40,7 +46,7 @@ public class InstrumentationTestCase extends TestCase {
     /**
      * Injects instrumentation into this test case. This method is
      * called by the test runner during test setup.
-     * 
+     *
      * @param instrumentation the instrumentation to use with this instance
      */
     public void injectInstrumentation(Instrumentation instrumentation) {

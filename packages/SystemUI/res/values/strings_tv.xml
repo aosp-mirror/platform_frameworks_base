@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2016, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Picture-in-Picture (PIP) menu -->
+    <eat-comment />
+    <!-- Button to close picture-in-picture (PIP) in PIP menu [CHAR LIMIT=30] -->
+    <string name="pip_close">Close PIP</string>
+    <!-- Button to move picture-in-picture (PIP) screen to the fullscreen in PIP menu [CHAR LIMIT=30] -->
+    <string name="pip_fullscreen">Full screen</string>
+    <!-- Button to play the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_play">Play</string>
+    <!-- Button to pause the current media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
+    <string name="pip_pause">Pause</string>
+    <!-- Overlay text on picture-in-picture (PIP) to indicate that longpress HOME key to control PIP [CHAR LIMIT=52] -->
+    <string name="pip_hold_home">Hold <b>HOME</b> to control PIP</string>
+    <!-- Picture-in-Picture (PIP) onboarding screen -->
+    <eat-comment />
+    <!-- Title for picture-in-picture (PIP) onboarding screen to indicate that an user is in PIP mode. [CHAR LIMIT=NONE] -->
+    <string name="pip_onboarding_title">Picture-in-picture</string>
+    <!-- Description for picture-in-picture (PIP) onboarding screen to indicate that longpress HOME key to control PIP. [CHAR LIMIT=NONE] -->
+    <string name="pip_onboarding_description">This keeps your video in view until you play another one. Press and hold <b>HOME</b> to control it.</string>
+    <!-- Button to close picture-in-picture (PIP) onboarding screen. -->
+    <string name="pip_onboarding_button">Got it</string>
+    <!-- Dismiss icon description -->
+    <string name="recents_tv_dismiss">Dismiss</string>
+    <!-- Font for Recents -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="font_roboto_regular" translatable="false">sans-serif</string>
+    <!-- DO NOT TRANSLATE -->
+    <string name="font_roboto_light" translatable="false">sans-serif-light</string>
+    <!-- Package names to be blacklisted in Recents, add package names into overlay as needed -->
+    <string-array name="recents_tv_blacklist_array">
+    </string-array>
+
+</resources>

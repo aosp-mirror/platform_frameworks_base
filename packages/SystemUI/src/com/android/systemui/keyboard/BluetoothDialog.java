@@ -16,11 +16,9 @@
 
 package com.android.systemui.keyboard;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.WindowManager;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 public class BluetoothDialog extends SystemUIDialog {

@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.graphics.Color;
 
@@ -45,31 +46,83 @@ import java.util.Arrays;
 /**
  *
  * Lets you map {@link android.view.View} state sets to colors.
- *
+ * <p>
  * {@link android.content.res.ColorStateList}s are created from XML resource files defined in the
- * "color" subdirectory directory of an application's resource directory.  The XML file contains
- * a single "selector" element with a number of "item" elements inside.  For example:
- *
+ * "color" subdirectory directory of an application's resource directory. The XML file contains
+ * a single "selector" element with a number of "item" elements inside. For example:
  * <pre>
  * &lt;selector xmlns:android="http://schemas.android.com/apk/res/android"&gt;
- *   &lt;item android:state_focused="true" android:color="@color/testcolor1"/&gt;
- *   &lt;item android:state_pressed="true" android:state_enabled="false" android:color="@color/testcolor2" /&gt;
- *   &lt;item android:state_enabled="false" android:color="@color/testcolor3" /&gt;
- *   &lt;item android:color="@color/testcolor5"/&gt;
+ *   &lt;item android:state_focused="true"
+ *           android:color="@color/sample_focused" /&gt;
+ *   &lt;item android:state_pressed="true"
+ *           android:state_enabled="false"
+ *           android:color="@color/sample_disabled_pressed" /&gt;
+ *   &lt;item android:state_enabled="false"
+ *           android:color="@color/sample_disabled_not_pressed" /&gt;
+ *   &lt;item android:color="@color/sample_default" /&gt;
  * &lt;/selector&gt;
  * </pre>
  *
  * This defines a set of state spec / color pairs where each state spec specifies a set of
  * states that a view must either be in or not be in and the color specifies the color associated
- * with that spec.  The list of state specs will be processed in order of the items in the XML file.
- * An item with no state spec is considered to match any set of states and is generally useful as
- * a final item to be used as a default.  Note that if you have such an item before any other items
- * in the list then any subsequent items will end up being ignored.
- * <p>For more information, see the guide to <a
- * href="{@docRoot}guide/topics/resources/color-list-resource.html">Color State
- * List Resource</a>.</p>
+ * with that spec.
+ *
+ * <a name="StateSpec"></a>
+ * <h3>State specs</h3>
+ * <p>
+ * Each item defines a set of state spec and color pairs, where the state spec is a series of
+ * attributes set to either {@code true} or {@code false} to represent inclusion or exclusion. If
+ * an attribute is not specified for an item, it may be any value.
+ * <p>
+ * For example, the following item will be matched whenever the focused state is set; any other
+ * states may be set or unset:
+ * <pre>
+ * &lt;item android:state_focused="true"
+ *         android:color="@color/sample_focused" /&gt;
+ * </pre>
+ * <p>
+ * Typically, a color state list will reference framework-defined state attributes such as
+ * {@link android.R.attr#state_focused android:state_focused} or
+ * {@link android.R.attr#state_enabled android:state_enabled}; however, app-defined attributes may
+ * also be used.
+ * <p>
+ * <strong>Note:</strong> The list of state specs will be matched against in the order that they
+ * appear in the XML file. For this reason, more-specific items should be placed earlier in the
+ * file. An item with no state spec is considered to match any set of states and is generally
+ * useful as a final item to be used as a default.
+ * <p>
+ * If an item with no state spec if placed before other items, those items
+ * will be ignored.
+ *
+ * <a name="ItemAttributes"></a>
+ * <h3>Item attributes</h3>
+ * <p>
+ * Each item must define an {@link android.R.attr#color android:color} attribute, which may be
+ * an HTML-style hex color, a reference to a color resource, or -- in API 23 and above -- a theme
+ * attribute that resolves to a color.
+ * <p>
+ * Starting with API 23, items may optionally define an {@link android.R.attr#alpha android:alpha}
+ * attribute to modify the base color's opacity. This attribute takes a either floating-point value
+ * between 0 and 1 or a theme attribute that resolves as such. The item's overall color is
+ * calculated by multiplying by the base color's alpha channel by the {@code alpha} value. For
+ * example, the following item represents the theme's accent color at 50% opacity:
+ * <pre>
+ * &lt;item android:state_enabled="false"
+ *         android:color="?android:attr/colorAccent"
+ *         android:alpha="0.5" /&gt;
+ * </pre>
+ *
+ * <a name="DeveloperGuide"></a>
+ * <h3>Developer guide</h3>
+ * <p>
+ * For more information, see the guide to
+ * <a href="{@docRoot}guide/topics/resources/color-list-resource.html">Color State
+ * List Resource</a>.
+ *
+ * @attr ref android.R.styleable#ColorStateListItem_alpha
+ * @attr ref android.R.styleable#ColorStateListItem_color
  */
-public class ColorStateList implements Parcelable {
+public class ColorStateList extends ComplexColor implements Parcelable {
     private static final String TAG = "ColorStateList";
 
     private static final int DEFAULT_COLOR = Color.RED;
@@ -82,7 +135,7 @@ public class ColorStateList implements Parcelable {
     private ColorStateListFactory mFactory;
 
     private int[][] mThemeAttrs;
-    private int mChangingConfigurations;
+    private @Config int mChangingConfigurations;
 
     private int[][] mStateSpecs;
     private int[] mColors;
@@ -209,7 +262,7 @@ public class ColorStateList implements Parcelable {
      * @return A new color state list for the current tag.
      */
     @NonNull
-    private static ColorStateList createFromXmlInner(@NonNull Resources r,
+    static ColorStateList createFromXmlInner(@NonNull Resources r,
             @NonNull XmlPullParser parser, @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         final String name = parser.getName();
@@ -251,7 +304,7 @@ public class ColorStateList implements Parcelable {
         int depth;
         int type;
 
-        int changingConfigurations = 0;
+        @Config int changingConfigurations = 0;
         int defaultColor = DEFAULT_COLOR;
 
         boolean hasUnresolvedAttrs = false;
@@ -340,6 +393,7 @@ public class ColorStateList implements Parcelable {
      * @return whether a theme can be applied to this color state list
      * @hide only for resource preloading
      */
+    @Override
     public boolean canApplyTheme() {
         return mThemeAttrs != null;
     }
@@ -419,6 +473,7 @@ public class ColorStateList implements Parcelable {
      *         attributes
      * @hide only for resource preloading
      */
+    @Override
     public ColorStateList obtainForTheme(Theme t) {
         if (t == null || !canApplyTheme()) {
             return this;
@@ -438,8 +493,8 @@ public class ColorStateList implements Parcelable {
      *
      * @see android.content.pm.ActivityInfo
      */
-    public int getChangingConfigurations() {
-        return mChangingConfigurations;
+    public @Config int getChangingConfigurations() {
+        return super.getChangingConfigurations() | mChangingConfigurations;
     }
 
     private int modulateColorAlpha(int baseColor, float alphaMod) {
@@ -460,6 +515,7 @@ public class ColorStateList implements Parcelable {
      *         otherwise.
      * @see #getColorForState(int[], int)
      */
+    @Override
     public boolean isStateful() {
         return mStateSpecs.length > 1;
     }
@@ -602,14 +658,14 @@ public class ColorStateList implements Parcelable {
      * @return a factory that can create new instances of this ColorStateList
      * @hide only for resource preloading
      */
-    public ConstantState<ColorStateList> getConstantState() {
+    public ConstantState<ComplexColor> getConstantState() {
         if (mFactory == null) {
             mFactory = new ColorStateListFactory(this);
         }
         return mFactory;
     }
 
-    private static class ColorStateListFactory extends ConstantState<ColorStateList> {
+    private static class ColorStateListFactory extends ConstantState<ComplexColor> {
         private final ColorStateList mSrc;
 
         public ColorStateListFactory(ColorStateList src) {
@@ -617,7 +673,7 @@ public class ColorStateList implements Parcelable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mSrc.mChangingConfigurations;
         }
 
@@ -628,7 +684,7 @@ public class ColorStateList implements Parcelable {
 
         @Override
         public ColorStateList newInstance(Resources res, Theme theme) {
-            return mSrc.obtainForTheme(theme);
+            return (ColorStateList) mSrc.obtainForTheme(theme);
         }
     }
 

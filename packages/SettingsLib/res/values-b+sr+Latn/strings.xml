@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/*
+**
+** Copyright 2015 The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nije moguće skenirati mreže"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Nema"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"Sačuvano"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
+    <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfiguracija je otkazala"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Wi-Fi veza je otkazala"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem sa potvrdom autentičnosti"</string>
+    <string name="wifi_not_in_range" msgid="1136191511238508967">"Nije u opsegu"</string>
+    <string name="wifi_no_internet" msgid="9151470775868728896">"Pristup internetu nije otkriven, automatsko povezivanje nije moguće."</string>
+    <string name="saved_network" msgid="4352716707126620811">"Sačuvao/la je <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"Povezano preko Wi‑Fi pomoćnika"</string>
+    <string name="connected_via_passpoint" msgid="2826205693803088747">"Veza je uspostavljena preko pristupne tačke %1$s"</string>
+    <string name="available_via_passpoint" msgid="1617440946846329613">"Dostupna je preko pristupne tačke %1$s"</string>
+    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Veza je uspostavljena, nema interneta"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Veza je prekinuta"</string>
+    <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Prekidanje veze..."</string>
+    <string name="bluetooth_connecting" msgid="8555009514614320497">"Povezivanje…"</string>
+    <string name="bluetooth_connected" msgid="6038755206916626419">"Povezano"</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Uparivanje..."</string>
+    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Povezano (bez telefona)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Povezano (bez medija)"</string>
+    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Povezano je (nema pristupa porukama)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Povezano (bez telefona ili medija)"</string>
+    <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvuk medija"</string>
+    <string name="bluetooth_profile_headset" msgid="8658779596261212609">"Zvuk telefona"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos datoteke"</string>
+    <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Ulazni uređaj"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Pristup Internetu"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Deljenje kontakata"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Koristite za deljenje kontakata"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deljenje internet veze"</string>
+    <string name="bluetooth_profile_map" msgid="5465271250454324383">"Pristup porukama"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Pristup SIM kartici"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Povezano sa zvukom medija"</string>
+    <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Povezano sa zvukom telefona"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezano sa serverom za prenos datoteka"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Povezano je sa mapom"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Veza sa tačkom pristupa uslugama je uspostavljena"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Nije povezano sa serverom za prenos datoteka"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Povezan sa ulaznim uređajem"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Povez. sa uređ. radi pristupa Internetu"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Lokalna internet veza se deli sa uređajem"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Koristi za pristup Internetu"</string>
+    <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Koristi se za mapu"</string>
+    <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Koristi za pristup SIM kartici"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Korišćenje za zvuk medija"</string>
+    <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Korišćenje za audio telefona"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Korišćenje za prenos datoteka"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Koristi za ulaz"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Upari"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"UPARI"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Otkaži"</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Uparivanje omogućava pristup kontaktima i istoriji poziva nakon povezivanja."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog koda."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Nije moguće komunicirati sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> je odbio/la uparivanje"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi je isključen."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi veza je prekinuta."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi signal ima jednu crtu."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi signal ima dve crte."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi signal ima tri crte."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi signal je najjači."</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Uklonjene aplikacije"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Uklonjene aplikacije i korisnici"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB Internet povezivanje"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prenosni hotspot"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth privezivanje"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Povezivanje sa internetom"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Povezivanje i prenosni hotspot"</string>
+    <string name="managed_user_title" msgid="8101244883654409696">"Profil za posao"</string>
+    <string name="user_guest" msgid="8475274842845401871">"Gost"</string>
+    <string name="unknown" msgid="1592123443519355854">"Nepoznato"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"Korisnik: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Podešene su neke podrazumevane vrednosti"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"Nisu podešene podrazumevane vrednosti"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Podešavanja prelaska iz teksta u govor"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Izlaz za pretvaranje teksta u govor"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina izgovaranja teksta"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Jezik"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Koristi jezik sistema"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Jezik nije izabran"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Podešava glas specifičan za jezik namenjen govornom tekstu"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Poslušaj primer"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Puštanje kratke demonstracije sinteze govora"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instaliraj glasovne podatke"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instaliranje govornih podataka potrebnih za sintezu govora"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ova tehnologija za sintezu govora možda može da prikuplja sav tekst koji će biti izgovoren, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. To potiče iz tehnologije <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Želite li da omogućite korišćenje ove tehnologije za sintezu govora?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Za ovaj jezik je potrebna ispravna mrežna veza za pretvaranje teksta u govor."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"Ovo je primer sinteze govora"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Status podrazumevanog jezika"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> je podržan u potpunosti"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> zahteva vezu sa mrežom"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> nije podržan"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Proverava se..."</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Podešavanja za <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Pokreni podešavanja mašine"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Željena mašina"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Opšte"</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Veoma sporo"</item>
+    <item msgid="4795095314303559268">"Sporo"</item>
+    <item msgid="8903157781070679765">"Normalno"</item>
+    <item msgid="164347302621392996">"Brzo"</item>
+    <item msgid="5794028588101562009">"Brže"</item>
+    <item msgid="7163942783888652942">"Veoma brzo"</item>
+    <item msgid="7831712693748700507">"Ubrzano"</item>
+    <item msgid="5194774745031751806">"Veoma ubrzano"</item>
+    <item msgid="9085102246155045744">"Najbrže"</item>
+  </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Izaberite profil"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Lično"</string>
+    <string name="category_work" msgid="8699184680584175622">"Posao"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opcije za programera"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Omogući opcije za programera"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"Podešavanje opcija za programiranje aplikacije"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije za programere nisu dostupne za ovog korisnika"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Podešavanja VPN-a nisu dostupna za ovog korisnika"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Podešavanja privezivanja nisu dostupna za ovog korisnika"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Podešavanja naziva pristupne tačke nisu dostupna za ovog korisnika"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Otklanjanje USB grešaka"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Režim otklanjanja grešaka kada je USB povezan"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Opozivanje odobrenja za uklanjanje USB grešaka"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Prečica za izveštaj o greškama"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Prikaži dugme u meniju napajanja za pravljenje izveštaja o greškama"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Ne zaključavaj"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Omogući snoop evidenciju za Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Snimi sve Bluetooth HCI pakete u datoteci"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"Otključavanje OEM-a"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dozvoli otključavanje funkcije za pokretanje"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li da dozvolite otključavanje proizvođača originalne opreme (OEM)?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: Funkcije za zaštitu uređaja neće funkcionisati na ovom uređaju dok je ovo podešavanje uključeno."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Izaberi aplikaciju za lažnu lokaciju"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Aplikacija za lažnu lokaciju nije podešena"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Sertifikacija bežičnog ekrana"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agresivan prelaz sa Wi‑Fi mreže na mobilnu"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvek dozvoli skeniranje Wi‑Fi-ja u romingu"</string>
+    <string name="legacy_dhcp_client" msgid="694426978909127287">"Koristi zastareli DHCP klijent"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Podaci za mobilne uređaje su uvek aktivni"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kada se omogući, Wi‑Fi će biti agresivniji pri prebacivanju mreže za prenos podataka na Mobilnu, kada je Wi‑Fi signal slab"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/zabrani skeniranje Wi-Fi-ja u romingu na osnovu prisutnog protoka podataka na interfejsu"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera podataka u programu za evidentiranje"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izaberite veličine po baferu evidencije"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Izaberite konfiguraciju USB-a"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Izaberite konfiguraciju USB-a"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući proveru atributa za pregled"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Koristite DHCP klijent iz Lollipop-a umesto novog Android DHCP klijenta."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka podaci za mobilne uređaje uvek budu aktivni, čak i kada je Wi‑Fi aktivan (radi brze promene mreže)."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Dozvoli otklanjanje USB grešaka?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje USB grešaka namenjeno je samo za svrhe programiranja. Koristite ga za kopiranje podataka sa računara na uređaj i obrnuto, instaliranje aplikacija na uređaju bez obaveštenja i čitanje podataka iz evidencije."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Želite li da opozovete pristup otklanjanju USB grešaka sa svih računara koje ste prethodno odobrili?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Želite li da omogućite programerska podešavanja?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ova podešavanja su namenjena samo za programiranje. Mogu da izazovu prestanak funkcionisanja ili neočekivano ponašanje uređaja i aplikacija na njemu."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikuj aplikacije preko USB-a"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Proverava da li su aplikacije instalirane preko ADB-a/ADT-a štetne."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplik. terminala za pristup lokalnom komandnom okruženju"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provera"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Podešavanje ponašanja HDCP provere"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Otklanjanje grešaka"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Izaberite aplikaciju za otklanjanje grešaka"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Nema podešenih aplikacija za otklanjanje grešaka"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Aplikacija za otklanjanje grešaka: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Biranje aplikacije"</string>
+    <string name="no_application" msgid="2813387563129153880">"Nijedna"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Sačekaj program za otklanjanje grešaka"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija čeka program za otklanjanje grešaka da priloži pre izvršavanja"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Unos"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Crtanje"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardverski ubrzano prikazivanje"</string>
+    <string name="media_category" msgid="4388305075496848353">"Mediji"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Nadgledanje"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Omogućen je strogi režim"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Neka ekran treperi kada aplikacije obavljaju duge operacije na glavnoj niti"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Lokacija pokazivača"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Postav. element sa trenutnim podacima o dodiru"</string>
+    <string name="show_touches" msgid="1356420386500834339">"Prikaži dodire"</string>
+    <string name="show_touches_summary" msgid="6684407913145150041">"Prikaži vizuelne povratne informacije za dodire"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Prikaži ažuriranja površine"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Osvetli sve površine prozora kada se ažuriraju"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Prikaži ažur. GPU prikaza"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Osvetli prikaze u prozor. kada se crta sa GPU-om"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži ažuriranja hardverskih slojeva"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardverski slojevi trepere zeleno kada se ažuriraju"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkloni greške GPU preklapanja"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Onemog. HW post. elemente"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvek koristi GPU za komponovanje ekrana"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simuliraj prostor boje"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Omogući OpenGL tragove"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Onemogući USB preusm. zvuka"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući automat. preusmer. na USB audio periferne uređaje"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Prikaži granice rasporeda"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Prikaži granice klipa, margine itd."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Nametni smer rasporeda zdesna nalevo"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Nametni smer rasporeda ekrana zdesna nalevo za sve lokalitete"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"Prik. upotrebu procesora"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Postav. element sa trenutnom upotrebom procesora"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Prinudni prikaz pom. GPU"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Prinudno koristi GPU za 2D crtanje"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Nametni 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Omogući 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni greške u vezi sa radnjama za isecanje oblasti koje nisu pravougaonog oblika"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Prikaži profil pomoću GPU"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Razmera animacije prozora"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Razmera animacije prelaza"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatorova razmera trajanja"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simuliraj sekundarne ekrane"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacije"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ne čuvaj aktivnosti"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Uništi svaku aktivnost čim je korisnik napusti"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje pozadinskih procesa"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Prikaži sve ANR-ove"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Prikaži dijalog Aplikacija ne reaguje za aplikacije u pozadini"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Prinudno dozvoli aplikacije u spoljnoj"</string>
+    <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Omogućava upisivanje svih aplikacija u spoljnu memoriju, bez obzira na vrednosti manifesta"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Prinudno omogući promenu veličine aktivnosti"</string>
+    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Omogućava promenu veličine svih aktivnosti za režim sa više prozora, bez obzira na vrednosti manifesta."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Omogući prozore proizvoljnog formata"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Omogućava podršku za eksperimentalne prozore proizvoljnog formata."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Lozinka rezervne kopije za računar"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Rezervne kopije čitavog sistema trenutno nisu zaštićene"</string>
+    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Dodirnite da biste promenili ili uklonili lozinku za pravljenje rezervnih kopija čitavog sistema na računaru"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Postavljena je nova lozinka rezervne kopije"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nova lozinka i njena potvrda se ne podudaraju"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Postavljanje lozinke rezervne kopije nije uspelo"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Živopisan (podrazumevano)"</item>
+    <item msgid="8446070607501413455">"Prirodan"</item>
+    <item msgid="6553408765810699025">"Standardan"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Poboljšane boje"</item>
+    <item msgid="8280754435979370728">"Prirodne boje nalik onima koje registruje oko"</item>
+    <item msgid="5363960654009010371">"Boje optimizovane za digitalni sadržaj"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Neaktivne aplikacije"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Neaktivna. Dodirnite da biste je aktivirali."</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktivna. Dodirnite da biste je deaktivirali."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Prikaz i kontrola trenutno pokrenutih usluga"</string>
+    <string name="night_mode_title" msgid="2594133148531256513">"Noćni režim"</string>
+    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
+    <string name="night_mode_no" msgid="9171772244775838901">"Onemogućeno"</string>
+    <string name="night_mode_yes" msgid="2218157265997633432">"Uvek uključeno"</string>
+    <string name="night_mode_auto" msgid="7508348175804304327">"Automatski"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Primena WebView-a"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Podesite primenu WebView-a"</string>
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Izabrana primena WebView-a je onemogućena, a mora da bude omogućena radi korišćenja. Želite li da je omogućite?"</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Konvertuj u šifrovanje datoteka"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertuj..."</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Već se koristi šifrovanje datoteka"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Konvertovanje u šifrovanje pojedinačnih datoteka"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konvertujte šifrovanje particije podataka u šifrovanje pojedinačnih datoteka.\n !!Upozorenje!! Time brišete sve podatke.\n Ovo je alfa verzija funkcije i verovatno neće funkcionisati ispravno.\n Pritisnite „Izbriši i konvertuj...“ da biste nastavili."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Izbriši i konvertuj..."</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Režim boja slika"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Koristi sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Onemogućeno je"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Jednobojnost"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomalija (crveno-zeleno)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalija (crveno-zeleno)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalija (plavo-žuto)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korekcija boja"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova funkcija je eksperimentalna i može da utiče na performanse."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Zamenjuje ga <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – preostalo oko <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> dok se ne napuni"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> dok se ne napuni punjačem"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> dok se ne napuni preko USB-a"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> dok se ne napuni bežično"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"Nepoznato"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Punjenje"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Punjenje preko punjača"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Punjenje preko USB-a"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Bežično punjenje"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"Ne puni se"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ne puni se"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Puno"</string>
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Onemogućio je administrator"</string>
+</resources>

@@ -120,11 +120,16 @@ public abstract class NetworkAgent extends Handler {
      * either a bad network configuration (no internet link) or captive portal.
      *
      * arg1 = either {@code VALID_NETWORK} or {@code INVALID_NETWORK}
+     * obj = Bundle containing map from {@code REDIRECT_URL_KEY} to {@code String}
+     *       representing URL that Internet probe was redirect to, if it was redirected,
+     *       or mapping to {@code null} otherwise.
      */
     public static final int CMD_REPORT_NETWORK_STATUS = BASE + 7;
 
     public static final int VALID_NETWORK = 1;
     public static final int INVALID_NETWORK = 2;
+
+    public static String REDIRECT_URL_KEY = "redirect URL";
 
      /**
      * Sent by the NetworkAgent to ConnectivityService to indicate this network was
@@ -283,11 +288,12 @@ public abstract class NetworkAgent extends Handler {
                 break;
             }
             case CMD_REPORT_NETWORK_STATUS: {
+                String redirectUrl = ((Bundle)msg.obj).getString(REDIRECT_URL_KEY);
                 if (VDBG) {
                     log("CMD_REPORT_NETWORK_STATUS(" +
-                            (msg.arg1 == VALID_NETWORK ? "VALID)" : "INVALID)"));
+                            (msg.arg1 == VALID_NETWORK ? "VALID, " : "INVALID, ") + redirectUrl);
                 }
-                networkStatus(msg.arg1);
+                networkStatus(msg.arg1, redirectUrl);
                 break;
             }
             case CMD_SAVE_ACCEPT_UNVALIDATED: {
@@ -443,8 +449,12 @@ public abstract class NetworkAgent extends Handler {
      *
      * This may be called multiple times as the network status changes and may
      * generate false negatives if we lose ip connectivity before the link is torn down.
+     *
+     * @param status one of {@code VALID_NETWORK} or {@code INVALID_NETWORK}.
+     * @param redirectUrl If the Internet probe was redirected, this is the destination it was
+     *         redirected to, otherwise {@code null}.
      */
-    protected void networkStatus(int status) {
+    protected void networkStatus(int status, String redirectUrl) {
     }
 
     /**

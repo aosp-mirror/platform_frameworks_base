@@ -1,0 +1,113 @@
+page.title=Get real user feedback with beta tests
+page.metaDescription=Run alpha and beta tests from the developer console, and make improvements and correct issues before you release.
+page.image=images/cards/distribute/engage/beta.jpg
+page.tags="beta, alpha, release channels"
+Xnonavpage=true
+
+@jd:body
+
+<p>
+  With alpha or beta tests run from the Developer Console you can collect user
+  feedback on early versions of your app, then make improvements and correct
+  issues before you release to the full Play Store audience.
+</p>
+
+<img src="{@docRoot}images/distribute/googleplay/dev-console_running-a-beta-test.png"
+  srcset="{@docRoot}images/distribute/googleplay/dev-console_running-a-beta-test.png 1x,
+      {@docRoot}images/distribute/googleplay/dev-console_running-a-beta-test_2x.png 2x"
+  width="500">
+
+<p>Testing your app with a select group of users will give you a chance to fix any technical or user experience issues before you release it widely, so that you can be confident about releasing the best version of your app to the majority of your users. Feedback from your test users won't affect your app’s public rating.</p>
+
+<p>
+  Learn more about <a href=
+  "https://support.google.com/googleplay/android-developer/answer/3131213"
+  class="external-link">how to run a beta test.</a>
+</p>
+
+<h2 id="how-to">How to Do It</h2>
+
+<ul>
+
+<ul>
+  <li>
+    <strong>Open beta —</strong> Use an open beta when you want any user who
+    has the link to be able to join your beta with just one click. One of the
+    advantages of an open beta is that it allows you to scale to a large number
+    of testers. However, you can also limit the maximum number of users who can
+    join.
+  </li>
+
+  <li>
+    <strong>Closed beta using email addresses —</strong> If you want to
+    restrict which users can access your beta, you have a new option: you can
+    now set up a closed beta using lists of individual email addresses which
+    you can add individually or upload as a .csv file. These users will be able
+    to join your beta via a one-click opt-in link.
+  </li>
+
+  <li>
+    <strong>Closed beta with Google+ community or Google Group —</strong> You
+    can continue to use betas with Google+ communities or Google Groups. You
+    can also move closed betas to an open beta while maintaining your existing
+    testers.
+  </li>
+</ul>
+
+<h2 id="tips">Tips</h2>
+
+<ul>
+  <li>Your testers will need to have a Google Account (<code>@gmail.com</code>)
+  or a Google Apps account to join a test.
+  </li>
+
+  <li>Use alpha tests for early experimental versions of your app that might
+  contain incomplete or unstable functionality, and use beta tests for apps
+  that should be complete and stable.
+  </li>
+
+  <li>Start testing with a small group of more trusted testers in an alpha
+  test, then expand your test to a larger group of testers in a beta test.
+  </li>
+
+  <li>Testers can't leave public reviews for alpha/beta apps on Google Play, so
+  include a feedback channel or provide the option to send feedback by email,
+  website, or a message forum.
+  </li>
+
+  <li>For an APK to be available to alpha testers it must have a higher version
+  number than your beta or production version, and for beta testers the APK
+  must have a higher version number than your production version.
+  </li>
+
+  <li>Alpha testers receive the alpha, beta, or production version of your app
+  with the highest version code that is compatible with their device, while
+  beta testers receive the beta or production version of your app with the
+  highest version code that is compatible with their device. This also means
+  that posting a higher version number APK cancels earlier tests of earlier
+  versions, so posting a production 2.0 version would cancel a beta test of
+  version 1.9 and that beta test would have canceled an alpha test of version
+  1.8.
+  </li>
+
+  <li>Also consider using <a href=
+  "https://www.google.com/insights/consumersurveys/" class=
+  "external-link">Google Consumer Surveys</a> to conduct market research and
+  gather user feedback at scale.
+  </li>
+</ul>
+
+<p style="clear:both">
+</p>
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/beta"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="6"></div>
+  </div>

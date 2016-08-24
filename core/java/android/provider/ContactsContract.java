@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
@@ -393,6 +394,35 @@ public final class ContactsContract {
                 Uri.withAppendedPath(AUTHORITY_URI, "directories");
 
         /**
+         * URI used for getting all directories from primary and managed profile.
+         * It supports the same semantics as {@link #CONTENT_URI} and returns the same columns.
+         * If the device has no managed profile that is linked to the current profile, it behaves
+         * in the exact same way as {@link #CONTENT_URI}.
+         * If there is a managed profile linked to the current profile, it will merge
+         * managed profile and current profile's results and return.
+         *
+         * Note: this query returns primary profile results before managed profile results,
+         * and this order is not affected by sorting parameter.
+         *
+         */
+        public static final Uri ENTERPRISE_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "directories_enterprise");
+
+        /**
+         * Access file provided by remote directory. It allows both personal and work remote
+         * directory, but not local and invisible diretory.
+         *
+         * It's supported only by a few specific places for referring to contact pictures in the
+         * remote directory. Contact picture URIs, e.g.
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}, may contain this kind of URI.
+         *
+         * @hide
+         */
+        public static final Uri ENTERPRISE_FILE_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "directory_file_enterprise");
+
+
+        /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
          * contact directories.
          */
@@ -414,6 +444,18 @@ public final class ContactsContract {
          * _ID of the directory that represents locally stored invisible contacts.
          */
         public static final long LOCAL_INVISIBLE = 1;
+
+        /**
+         * _ID of the work profile default directory, which represents locally stored contacts.
+         */
+        public static final long ENTERPRISE_DEFAULT = Directory.ENTERPRISE_DIRECTORY_ID_BASE
+                + DEFAULT;
+
+        /**
+         * _ID of the work profile directory that represents locally stored invisible contacts.
+         */
+        public static final long ENTERPRISE_LOCAL_INVISIBLE = Directory.ENTERPRISE_DIRECTORY_ID_BASE
+                + LOCAL_INVISIBLE;
 
         /**
          * The name of the package that owns this directory. Contacts Provider
@@ -469,6 +511,15 @@ public final class ContactsContract {
          * <p>TYPE: text</p>
          */
         public static final String ACCOUNT_NAME = "accountName";
+
+        /**
+         * Mimimal ID for corp directory returned from
+         * {@link Directory#CORP_CONTENT_URI}.
+         *
+         * @hide
+         */
+        // slightly smaller than 2 ** 30
+        public static final long ENTERPRISE_DIRECTORY_ID_BASE = 1000000000;
 
         /**
          * One of {@link #EXPORT_SUPPORT_NONE}, {@link #EXPORT_SUPPORT_ANY_ACCOUNT},
@@ -552,6 +603,34 @@ public final class ContactsContract {
          * can produce thumbnails as well as full-size contact photos.
          */
         public static final int PHOTO_SUPPORT_FULL = 3;
+
+        /**
+         * Return TRUE if it is a remote stored directory.
+         */
+        public static boolean isRemoteDirectoryId(long directoryId) {
+            return directoryId != Directory.DEFAULT
+                    && directoryId != Directory.LOCAL_INVISIBLE
+                    && directoryId != Directory.ENTERPRISE_DEFAULT
+                    && directoryId != Directory.ENTERPRISE_LOCAL_INVISIBLE;
+        }
+
+        /**
+         * Return TRUE if it is a remote stored directory. TODO: Remove this method once all
+         * internal apps are not using this API.
+         *
+         * @hide
+         */
+        public static boolean isRemoteDirectory(long directoryId) {
+            return isRemoteDirectoryId(directoryId);
+        }
+
+        /**
+         * Return TRUE if a directory ID is from the contacts provider on the enterprise profile.
+         *
+         */
+        public static boolean isEnterpriseDirectoryId(long directoryId) {
+            return directoryId >= ENTERPRISE_DIRECTORY_ID_BASE;
+        }
 
         /**
          * Notifies the system of a change in the list of directories handled by
@@ -1588,6 +1667,14 @@ public final class ContactsContract {
                 CONTENT_URI, "filter");
 
         /**
+         * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+         * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in parameters,
+         * otherwise it will throw IllegalArgumentException.
+         */
+        public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                CONTENT_URI, "filter_enterprise");
+
+        /**
          * The content:// style URI for this table joined with useful data from
          * {@link ContactsContract.Data}, filtered to include only starred contacts
          * and the most frequently contacted contacts.
@@ -2002,10 +2089,11 @@ public final class ContactsContract {
             if (preferHighres) {
                 final Uri displayPhotoUri = Uri.withAppendedPath(contactUri,
                         Contacts.Photo.DISPLAY_PHOTO);
-                InputStream inputStream;
                 try {
                     AssetFileDescriptor fd = cr.openAssetFileDescriptor(displayPhotoUri, "r");
-                    return fd.createInputStream();
+                    if (fd != null) {
+                        return fd.createInputStream();
+                    }
                 } catch (IOException e) {
                     // fallback to the thumbnail code
                 }
@@ -2219,8 +2307,6 @@ public final class ContactsContract {
          * This id is provided by its own data source, and can be used to backup metadata
          * to the server.
          * This should be unique within each set of account_name/account_type/data_set
-         *
-         * @hide
          */
         public static final String BACKUP_ID = "backup_id";
 
@@ -2280,6 +2366,13 @@ public final class ContactsContract {
          * personal profile entry.
          */
         public static final String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
+
+        /**
+         * Flag indicating that a raw contact's metadata has changed, and its metadata
+         * needs to be synchronized by the server.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String METADATA_DIRTY = "metadata_dirty";
     }
 
     /**
@@ -4899,6 +4992,17 @@ public final class ContactsContract {
      */
     protected interface PhoneLookupColumns {
         /**
+         *  The ID of the data row.
+         *  <P>Type: INTEGER</P>
+         */
+        public static final String DATA_ID = "data_id";
+        /**
+         * A reference to the {@link ContactsContract.Contacts#_ID} that this
+         * data belongs to.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String CONTACT_ID = "contact_id";
+        /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
          */
@@ -4970,6 +5074,18 @@ public final class ContactsContract {
      * <td>{@link #_ID}</td>
      * <td>read-only</td>
      * <td>Contact ID.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #CONTACT_ID}</td>
+     * <td>read-only</td>
+     * <td>Contact ID.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #DATA_ID}</td>
+     * <td>read-only</td>
+     * <td>Data ID.</td>
      * </tr>
      * <tr>
      * <td>String</td>
@@ -5078,6 +5194,10 @@ public final class ContactsContract {
          *     </li>
          *     <li>
          *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
+         *     </li>
+         *     <li>
+         *     Returned work contact IDs and lookup keys are not accepted in places that not
+         *     explicitly say to accept them.
          *     </li>
          * </ul>
          * <p>
@@ -5647,7 +5767,6 @@ public final class ContactsContract {
             /**
              * The alphabet used for capturing the phonetic name.
              * See ContactsContract.PhoneticNameStyle.
-             * @hide
              */
             public static final String PHONETIC_NAME_STYLE = DATA11;
         }
@@ -5849,6 +5968,14 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
+
+            /**
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw IllegalArgumentException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
 
             /**
              * A boolean query parameter that can be used with {@link #CONTENT_FILTER_URI}.
@@ -6081,6 +6208,10 @@ public final class ContactsContract {
              *     <li>
              *     Corp contacts will get artificial {@link #LOOKUP_KEY}s too.
              *     </li>
+             *     <li>
+             *     Returned work contact IDs and lookup keys are not accepted in places that not
+             *     explicitly say to accept them.
+             *     </li>
              * </ul>
              * <p>
              * A contact lookup URL built by
@@ -6117,6 +6248,14 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
+
+            /**
+             * It supports the similar semantics as {@link #CONTENT_FILTER_URI} and returns the same
+             * columns. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw IllegalArgumentException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
 
             /**
              * The email address.
@@ -6687,7 +6826,6 @@ public final class ContactsContract {
             /**
              * The alphabet used for capturing the phonetic name.
              * See {@link ContactsContract.PhoneticNameStyle}.
-             * @hide
              */
             public static final String PHONETIC_NAME_STYLE = DATA10;
 
@@ -7332,6 +7470,14 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
+
+            /**
+             * Similar to {@link Phone#ENTERPRISE_CONTENT_FILTER_URI}, but allows users to filter
+             * callable data. This URI requires {@link ContactsContract#DIRECTORY_PARAM_KEY} in
+             * parameters, otherwise it will throw IllegalArgumentException.
+             */
+            public static final Uri ENTERPRISE_CONTENT_FILTER_URI = Uri.withAppendedPath(
+                    CONTENT_URI, "filter_enterprise");
         }
 
         /**
@@ -8297,10 +8443,20 @@ public final class ContactsContract {
          * @hide
          */
         public static Intent rebuildManagedQuickContactsIntent(String lookupKey, long contactId,
-                Intent originalIntent) {
+                boolean isContactIdIgnored, long directoryId, Intent originalIntent) {
             final Intent intent = new Intent(ACTION_QUICK_CONTACT);
             // Rebuild the URI from a lookup key and a contact ID.
-            intent.setData(Contacts.getLookupUri(contactId, lookupKey));
+            Uri uri = null;
+            if (!TextUtils.isEmpty(lookupKey)) {
+                uri = isContactIdIgnored
+                        ? Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey)
+                        : Contacts.getLookupUri(contactId, lookupKey);
+            }
+            if (uri != null && directoryId != Directory.DEFAULT) {
+                uri = uri.buildUpon().appendQueryParameter(
+                        ContactsContract.DIRECTORY_PARAM_KEY, String.valueOf(directoryId)).build();
+            }
+            intent.setData(uri);
 
             // Copy flags and always set NEW_TASK because it won't have a parent activity.
             intent.setFlags(originalIntent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -8328,7 +8484,9 @@ public final class ContactsContract {
          *            around this {@link View}.
          * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
          *            {@link #MODE_LARGE}, indicating the desired dialog size,
          *            when supported.
@@ -8362,7 +8520,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
          *            {@link #MODE_LARGE}, indicating the desired dialog size,
          *            when supported.
@@ -8393,7 +8553,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
          *            to exclude when showing this dialog. For example, when
          *            already viewing the contact details card, this can be used
@@ -8431,7 +8593,9 @@ public final class ContactsContract {
          * @param lookupUri A
          *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
-         *            in this dialog.
+         *            in this dialog. A work lookup uri is supported here,
+         *            see {@link CommonDataKinds.Email#ENTERPRISE_CONTENT_LOOKUP_URI} and
+         *            {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}.
          * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
          *            to exclude when showing this dialog. For example, when
          *            already viewing the contact details card, this can be used
@@ -8588,6 +8752,163 @@ public final class ContactsContract {
          */
         public static final String SHOW_OR_CREATE_CONTACT =
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
+
+        /**
+         * Activity Action: Initiate a message to someone by voice. The message could be text,
+         * audio, video or image(photo). This action supports messaging with a specific contact
+         * regardless of the underlying messaging protocol used.
+         * <p>
+         * The action could be originated from the Voice Assistant as a voice interaction. In such
+         * case, a receiving activity that supports {@link android.content.Intent#CATEGORY_VOICE}
+         * could check return value of {@link android.app.Activity#isVoiceInteractionRoot} before
+         * proceeding. By doing this check the activity verifies that the action indeed was
+         * initiated by Voice Assistant and could send a message right away, without any further
+         * input from the user. This allows for a smooth user experience when sending a message by
+         * voice. Note: this activity must also support the {@link
+         * android.content.Intent#CATEGORY_DEFAULT} so it can be found by {@link
+         * android.service.voice.VoiceInteractionSession#startVoiceActivity}.
+         * <p>
+         * When the action was not initiated by Voice Assistant or when the receiving activity does
+         * not support {@link android.content.Intent#CATEGORY_VOICE}, the activity must confirm
+         * with the user before sending the message (because in this case it is unknown which app
+         * sent the intent, it could be malicious).
+         * <p>
+         * To allow the Voice Assistant to help users with contacts disambiguation, the messaging
+         * app may choose to integrate with the Contacts Provider. You will need to specify a new
+         * MIME type in order to store your app’s unique contact IDs and optional human readable
+         * labels in the Data table. The Voice Assistant needs to know this MIME type and {@link
+         * RawContacts#ACCOUNT_TYPE} that you are using in order to provide the smooth contact
+         * disambiguation user experience. The following convention should be met when performing
+         * such integration:
+         * <ul>
+         * <li>This activity should have a string meta-data field associated with it, {@link
+         * #METADATA_ACCOUNT_TYPE}, which defines {@link RawContacts#ACCOUNT_TYPE} for your Contacts
+         * Provider implementation. The account type should be globally unique, for example you can
+         * use your app package name as the account type.</li>
+         * <li>This activity should have a string meta-data field associated with it, {@link
+         * #METADATA_MIMETYPE}, which defines {@link DataColumns#MIMETYPE} for your Contacts
+         * Provider implementation. For example, you can use
+         * "vnd.android.cursor.item/vnd.{$app_package_name}.profile" as MIME type.</li>
+         * <li>When filling Data table row for METADATA_MIMETYPE, column {@link DataColumns#DATA1}
+         * should store the unique contact ID as understood by the app. This value will be used in
+         * the {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID}.</li>
+         * <li>Optionally, when filling Data table row for METADATA_MIMETYPE, column {@link
+         * DataColumns#DATA3} could store a human readable label for the ID. For example it could be
+         * phone number or human readable username/user_id like "a_super_cool_user_name". This label
+         * may be shown below the Contact Name by the Voice Assistant as the user completes the
+         * voice action. If DATA3 is empty, the ID in DATA1 may be shown instead.</li>
+         * <li><em>Note: Do not use DATA3 to store the Contact Name. The Voice Assistant will
+         * already get the Contact Name from the RawContact’s display_name.</em></li>
+         * <li><em>Note: Some apps may choose to use phone number as the unique contact ID in DATA1.
+         * If this applies to you and you’d like phone number to be shown below the Contact Name by
+         * the Voice Assistant, then you may choose to leave DATA3 empty.</em></li>
+         * <li><em>Note: If your app also uses DATA3 to display contact details in the Contacts App,
+         * make sure it does not include prefix text such as "Message +<phone>" or "Free Message
+         * +<phone>", etc. If you must show the prefix text in the Contacts App, please use a
+         * different DATA# column, and update your contacts.xml to point to this new column. </em>
+         * </li>
+         * <li>Everytime the user sends a message to a contact, your app may choose to update the
+         * {@link ContactOptionsColumns#TIMES_CONTACTED} entry through DataUsageFeedback class.
+         * Doing this will allow Voice Assistant to bias speech recognition to contacts frequently
+         * contacted, this is particularly useful for contact names that are hard to pronounce.</li>
+         * </ul>
+         * If the app chooses not to integrate with the Contacts Provider (in particular, when
+         * either METADATA_ACCOUNT_TYPE or METADATA_MIMETYPE field is missing), Voice Assistant
+         * will use existing phone number entries as contact ID's for such app.
+         * <p>
+         * Input: {@link android.content.Intent#getType} is the MIME type of the data being sent.
+         * The intent sender will always put the concrete mime type in the intent type, like
+         * "text/plain" or "audio/wav" for example. If the MIME type is "text/plain", message to
+         * sent will be provided via {@link android.content.Intent#EXTRA_TEXT} as a styled
+         * CharSequence. Otherwise, the message content will be supplied through {@link
+         * android.content.Intent#setClipData(ClipData)} as a content provider URI(s). In the latter
+         * case, EXTRA_TEXT could still be supplied optionally; for example, for audio messages
+         * ClipData will contain URI of a recording and EXTRA_TEXT could contain the text
+         * transcription of this recording.
+         * <p>
+         * The message can have n recipients. The n-th recipient of the message will be provided as
+         * n-th elements of {@link #EXTRA_RECIPIENT_CONTACT_URI}, {@link
+         * #EXTRA_RECIPIENT_CONTACT_CHAT_ID} and {@link #EXTRA_RECIPIENT_CONTACT_NAME} (as a
+         * consequence, EXTRA_RECIPIENT_CONTACT_URI, EXTRA_RECIPIENT_CONTACT_CHAT_ID and
+         * EXTRA_RECIPIENT_CONTACT_NAME should all be of length n). If neither of these 3 elements
+         * is provided (e.g. all 3 are null) for the recipient or if the information provided is
+         * ambiguous then the activity should prompt the user for the recipient to send the message
+         * to.
+         * <p>
+         * Output: nothing
+         *
+         * @see #EXTRA_RECIPIENT_CONTACT_URI
+         * @see #EXTRA_RECIPIENT_CONTACT_CHAT_ID
+         * @see #EXTRA_RECIPIENT_CONTACT_NAME
+         * @see #METADATA_ACCOUNT_TYPE
+         * @see #METADATA_MIMETYPE
+         */
+        public static final String ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS =
+                "android.provider.action.VOICE_SEND_MESSAGE_TO_CONTACTS";
+
+        /**
+         * This extra specifies a content provider uri(s) for the contact(s) (if the contacts were
+         * located in the Contacts Provider), used with {@link
+         * #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient(s). The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID} and
+         * {@link #EXTRA_RECIPIENT_CONTACT_NAME}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * <em>Note: one contact may have multiple accounts (e.g. Chat IDs) on a specific messaging
+         * platform, so this may be ambiguous. E.g., one contact “John Smith” could have two
+         * accounts on the same messaging app.</em>
+         * <p>
+         * <em>Example value: {"content://com.android.contacts/contacts/16"}</em>
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_URI =
+                "android.provider.extra.RECIPIENT_CONTACT_URI";
+
+        /**
+         * This extra specifies a messaging app’s unique ID(s) for the contact(s), used with {@link
+         * #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient(s). The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_URI} and {@link
+         * #EXTRA_RECIPIENT_CONTACT_NAME}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * The value of the elements comes from the {@link DataColumns#DATA1} column in Contacts
+         * Provider with {@link DataColumns#MIMETYPE} from {@link #METADATA_MIMETYPE} (if both
+         * {@link #METADATA_ACCOUNT_TYPE} and {@link #METADATA_MIMETYPE} are specified by the app;
+         * otherwise, the value will be a phone number), and should be the unambiguous contact
+         * endpoint. This value is app-specific, it could be some proprietary ID or a phone number.
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_CHAT_ID =
+                "android.provider.extra.RECIPIENT_CONTACT_CHAT_ID";
+
+        /**
+         * This extra specifies the contact name (full name from the Contacts Provider), used with
+         * {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient. The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_URI} and {@link
+         * #EXTRA_RECIPIENT_CONTACT_CHAT_ID}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * The value of the elements comes from RawContact's display_name column.
+         * <p>
+         * <em>Example value: {"Jane Doe"}</em>
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_NAME =
+                "android.provider.extra.RECIPIENT_CONTACT_NAME";
+
+        /**
+         * A string associated with an {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} activity
+         * describing {@link RawContacts#ACCOUNT_TYPE} for the corresponding Contacts Provider
+         * implementation.
+         */
+        public static final String METADATA_ACCOUNT_TYPE = "android.provider.account_type";
+
+        /**
+         * A string associated with an {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} activity
+         * describing {@link DataColumns#MIMETYPE} for the corresponding Contacts Provider
+         * implementation.
+         */
+        public static final String METADATA_MIMETYPE = "android.provider.mimetype";
 
         /**
          * Starts an Activity that lets the user select the multiple phones from a
@@ -8951,5 +9272,215 @@ public final class ContactsContract {
              */
             public static final String EXTRA_DATA_SET = "android.provider.extra.DATA_SET";
         }
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    protected interface MetadataSyncColumns {
+
+        /**
+         * The raw contact backup id.
+         * A reference to the {@link ContactsContract.RawContacts#BACKUP_ID} that save the
+         * persistent unique id for each raw contact within its source system.
+         */
+        public static final String RAW_CONTACT_BACKUP_ID = "raw_contact_backup_id";
+
+        /**
+         * The account type to which the raw_contact of this item is associated. See
+         * {@link RawContacts#ACCOUNT_TYPE}
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * The account name to which the raw_contact of this item is associated. See
+         * {@link RawContacts#ACCOUNT_NAME}
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The data set within the account that the raw_contact of this row belongs to. This allows
+         * multiple sync adapters for the same account type to distinguish between
+         * each others' data.
+         * {@link RawContacts#DATA_SET}
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
+         * A text column contains the Json string got from People API. The Json string contains
+         * all the metadata related to the raw contact, i.e., all the data fields and
+         * aggregation exceptions.
+         *
+         * Here is an example of the Json string got from the actual schema.
+         * <pre>
+         *     {
+         *       "unique_contact_id": {
+         *         "account_type": "CUSTOM_ACCOUNT",
+         *         "custom_account_type": "facebook",
+         *         "account_name": "android-test",
+         *         "contact_id": "1111111",
+         *         "data_set": "FOCUS"
+         *       },
+         *       "contact_prefs": {
+         *         "send_to_voicemail": true,
+         *         "starred": false,
+         *         "pinned": 2
+         *       },
+         *       "aggregation_data": [
+         *         {
+         *           "type": "TOGETHER",
+         *           "contact_ids": [
+         *             {
+         *               "account_type": "GOOGLE_ACCOUNT",
+         *               "account_name": "android-test2",
+         *               "contact_id": "2222222",
+         *               "data_set": "GOOGLE_PLUS"
+         *             },
+         *             {
+         *               "account_type": "GOOGLE_ACCOUNT",
+         *               "account_name": "android-test3",
+         *               "contact_id": "3333333",
+         *               "data_set": "CUSTOM",
+         *               "custom_data_set": "custom type"
+         *             }
+         *           ]
+         *         }
+         *       ],
+         *       "field_data": [
+         *         {
+         *           "field_data_id": "1001",
+         *           "field_data_prefs": {
+         *             "is_primary": true,
+         *             "is_super_primary": true
+         *           },
+         *           "usage_stats": [
+         *             {
+         *               "usage_type": "CALL",
+         *               "last_time_used": 10000001,
+         *               "usage_count": 10
+         *             }
+         *           ]
+         *         }
+         *       ]
+         *     }
+         * </pre>
+         */
+        public static final String DATA = "data";
+
+        /**
+         * The "deleted" flag: "0" by default, "1" if the row has been marked
+         * for deletion. When {@link android.content.ContentResolver#delete} is
+         * called on a raw contact, updating MetadataSync table to set the flag of the raw contact
+         * as "1", then metadata sync adapter deletes the raw contact metadata on the server.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DELETED = "deleted";
+    }
+
+    /**
+     * Constants for the metadata sync table. This table is used to cache the metadata_sync data
+     * from server before it is merged into other CP2 tables.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class MetadataSync implements BaseColumns, MetadataSyncColumns {
+
+        /** The authority for the contacts metadata */
+        public static final String METADATA_AUTHORITY = "com.android.contacts.metadata";
+
+        /** A content:// style uri to the authority for the contacts metadata */
+        public static final Uri METADATA_AUTHORITY_URI = Uri.parse(
+                "content://" + METADATA_AUTHORITY);
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private MetadataSync() {
+        }
+
+        /**
+         * The content:// style URI for this table.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(METADATA_AUTHORITY_URI,
+                "metadata_sync");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of contact metadata
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single contact metadata.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
+    }
+
+    /**
+     * @hide
+     */
+    @SystemApi
+    protected interface MetadataSyncStateColumns {
+
+        /**
+         * A reference to the name of the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * A reference to the type of the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * A reference to the data set within the account to which this state belongs
+         * <P>Type: STRING</P>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
+         * The sync state associated with this account.
+         * <P>Type: Blob</P>
+         */
+        public static final String STATE = "state";
+    }
+
+    /**
+     * Constants for the metadata_sync_state table. This table is used to store the metadata
+     * sync state for a set of accounts.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class MetadataSyncState implements BaseColumns, MetadataSyncStateColumns {
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private MetadataSyncState() {
+        }
+
+        /**
+         * The content:// style URI for this table.
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(MetadataSync.METADATA_AUTHORITY_URI, "metadata_sync_state");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of contact metadata sync
+         * states.
+         */
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/contact_metadata_sync_state";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single contact metadata sync
+         * state.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/contact_metadata_sync_state";
     }
 }

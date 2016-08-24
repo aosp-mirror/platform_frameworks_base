@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!--
+     Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,121 +15,120 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.ListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/item_doc_list_background">
+    android:background="@color/item_doc_background"
+    android:focusable="true"
+    android:orientation="horizontal" >
+
+    <View
+        android:id="@+id/focus_indicator"
+        android:layout_width="4dp"
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/list_item_height"
-        android:paddingStart="@dimen/list_item_padding"
-        android:paddingEnd="@dimen/list_item_padding"
+        android:baselineAligned="false"
         android:gravity="center_vertical"
+        android:minHeight="@dimen/list_item_height"
         android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:paddingEnd="@dimen/list_item_padding"
+        android:paddingStart="@dimen/list_item_padding" >
 
         <FrameLayout
             android:id="@android:id/icon"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_marginEnd="16dp">
+            android:layout_width="@dimen/list_item_thumbnail_size"
+            android:layout_height="@dimen/list_item_thumbnail_size"
+            android:layout_marginEnd="16dp" >
 
             <ImageView
                 android:id="@+id/icon_mime"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:scaleType="centerInside"
-                android:contentDescription="@null" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:scaleType="centerInside" />
 
             <ImageView
                 android:id="@+id/icon_thumb"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="@null" />
+                android:contentDescription="@null"
+                android:scaleType="centerCrop" />
 
+            <ImageView
+                android:id="@+id/icon_check"
+                android:layout_width="@dimen/check_icon_size"
+                android:layout_height="@dimen/check_icon_size"
+                android:layout_gravity="center"
+                android:alpha="0"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_check_circle" />
         </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <TextView
-                    android:id="@android:id/title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:singleLine="true"
-                    android:ellipsize="middle"
-                    android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-                    android:textColor="?android:attr/textColorPrimary" />
-
-                <ImageView
-                    android:id="@android:id/icon1"
-                    android:layout_width="@dimen/root_icon_size"
-                    android:layout_height="@dimen/root_icon_size"
-                    android:layout_marginStart="8dp"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@null" />
-
-            </LinearLayout>
+            <TextView
+                android:id="@android:id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAlignment="viewStart"
+                android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+                android:textColor="@color/item_title" />
 
             <LinearLayout
                 android:id="@+id/line2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:baselineAligned="false"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:orientation="horizontal" >
 
                 <TextView
                     android:id="@+id/date"
                     android:layout_width="90dp"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
                     android:ellipsize="end"
+                    android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
 
                 <TextView
                     android:id="@+id/size"
                     android:layout_width="90dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:singleLine="true"
                     android:ellipsize="end"
+                    android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
 
                 <TextView
                     android:id="@android:id/summary"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:singleLine="true"
+                    android:layout_weight="1"
                     android:ellipsize="end"
+                    android:singleLine="true"
                     android:textAlignment="viewStart"
-                    android:textAppearance="@android:style/TextAppearance.Material.Body1"
-                    android:textColor="?android:attr/textColorSecondary" />
-
+                    android:textAppearance="@android:style/TextAppearance.Material.Caption"
+                    android:textColor="@color/item_details" />
             </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
 
-</FrameLayout>
+</com.android.documentsui.ListItem>

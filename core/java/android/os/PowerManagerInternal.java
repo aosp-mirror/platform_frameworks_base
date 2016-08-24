@@ -55,12 +55,16 @@ public abstract class PowerManagerInternal {
 
 
     /**
-     * Power hint: The user is interacting with the device. The corresponding data field must be
+     * Power hint:
+     * Interaction: The user is interacting with the device. The corresponding data field must be
      * the expected duration of the fling, or 0 if unknown.
      *
-     * This must be kept in sync with the values in hardware/libhardware/include/hardware/power.h
+     * Sustained Performance Mode: Enable/Disables Sustained Performance Mode.
+     *
+     * These must be kept in sync with the values in hardware/libhardware/include/hardware/power.h
      */
     public static final int POWER_HINT_INTERACTION = 2;
+    public static final int POWER_HINT_SUSTAINED_PERFORMANCE_MODE = 6;
 
     public static String wakefulnessToString(int wakefulness) {
         switch (wakefulness) {
@@ -148,7 +152,9 @@ public abstract class PowerManagerInternal {
         public void onLowPowerModeChanged(boolean enabled);
     }
 
-    public abstract void setDeviceIdleMode(boolean enabled);
+    public abstract boolean setDeviceIdleMode(boolean enabled);
+
+    public abstract boolean setLightDeviceIdleMode(boolean enabled);
 
     public abstract void setDeviceIdleWhitelist(int[] appids);
 

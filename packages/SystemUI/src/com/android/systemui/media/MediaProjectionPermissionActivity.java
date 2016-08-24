@@ -23,24 +23,23 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.media.projection.MediaProjectionManager;
-import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionManager;
+import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.BidiFormatter;
-import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+
 import com.android.systemui.R;
 
 public class MediaProjectionPermissionActivity extends Activity

@@ -16,6 +16,8 @@
 
 package android.animation;
 
+import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ConstantState;
 
 import java.util.ArrayList;
@@ -26,6 +28,10 @@ import java.util.ArrayList;
  */
 public abstract class Animator implements Cloneable {
 
+    /**
+     * The value used to indicate infinite duration (e.g. when Animators repeat infinitely).
+     */
+    public static final long DURATION_INFINITE = -1;
     /**
      * The set of listeners to be sent events through the life of an animation.
      */
@@ -46,7 +52,7 @@ public abstract class Animator implements Cloneable {
      * A set of flags which identify the type of configuration changes that can affect this
      * Animator. Used by the Animator cache.
      */
-    int mChangingConfigurations = 0;
+    @Config int mChangingConfigurations = 0;
 
     /**
      * If this animator is inflated from a constant state, keep a reference to it so that
@@ -182,6 +188,23 @@ public abstract class Animator implements Cloneable {
      * @return The length of the animation, in milliseconds.
      */
     public abstract long getDuration();
+
+    /**
+     * Gets the total duration of the animation, accounting for animation sequences, start delay,
+     * and repeating. Return {@link #DURATION_INFINITE} if the duration is infinite.
+     *
+     * @return  Total time an animation takes to finish, starting from the time {@link #start()}
+     *          is called. {@link #DURATION_INFINITE} will be returned if the animation or any
+     *          child animation repeats infinite times.
+     */
+    public long getTotalDuration() {
+        long duration = getDuration();
+        if (duration == DURATION_INFINITE) {
+            return DURATION_INFINITE;
+        } else {
+            return getStartDelay() + duration;
+        }
+    }
 
     /**
      * The time interpolator used in calculating the elapsed fraction of the
@@ -323,7 +346,7 @@ public abstract class Animator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return mChangingConfigurations;
     }
 
@@ -337,7 +360,7 @@ public abstract class Animator implements Cloneable {
      * @see android.content.pm.ActivityInfo
      * @hide
      */
-    public void setChangingConfigurations(int configs) {
+    public void setChangingConfigurations(@Config int configs) {
         mChangingConfigurations = configs;
     }
 
@@ -347,7 +370,7 @@ public abstract class Animator implements Cloneable {
      * This method is called while loading the animator.
      * @hide
      */
-    public void appendChangingConfigurations(int configs) {
+    public void appendChangingConfigurations(@Config int configs) {
         mChangingConfigurations |= configs;
     }
 
@@ -414,10 +437,14 @@ public abstract class Animator implements Cloneable {
      * operate on target objects (for example, {@link ValueAnimator}, but this method
      * is on the superclass for the convenience of dealing generically with those subclasses
      * that do handle targets.
+     * <p>
+     * <strong>Note:</strong> The target is stored as a weak reference internally to avoid leaking
+     * resources by having animators directly reference old targets. Therefore, you should
+     * ensure that animator targets always have a hard reference elsewhere.
      *
      * @param target The object being animated
      */
-    public void setTarget(Object target) {
+    public void setTarget(@Nullable Object target) {
     }
 
     // Hide reverse() and canReverse() for now since reverse() only work for simple
@@ -543,7 +570,7 @@ public abstract class Animator implements Cloneable {
     private static class AnimatorConstantState extends ConstantState<Animator> {
 
         final Animator mAnimator;
-        int mChangingConf;
+        @Config int mChangingConf;
 
         public AnimatorConstantState(Animator animator) {
             mAnimator = animator;
@@ -553,7 +580,7 @@ public abstract class Animator implements Cloneable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConf;
         }
 

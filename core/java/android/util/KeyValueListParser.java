@@ -63,6 +63,24 @@ public class KeyValueListParser {
     }
 
     /**
+     * Get the value for key as an int.
+     * @param key The key to lookup.
+     * @param def The value to return if the key was not found, or the value was not a long.
+     * @return the int value associated with the key.
+     */
+    public int getInt(String key, int def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                // fallthrough
+            }
+        }
+        return def;
+    }
+
+    /**
      * Get the value for key as a long.
      * @param key The key to lookup.
      * @param def The value to return if the key was not found, or the value was not a long.

@@ -1,0 +1,147 @@
+page.title=Bridging Mode for Notifications
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+
+@jd:body
+
+    <div id="qv-wrapper">
+      <div id="qv">
+        <ol>
+          <li>
+            <a href=
+            "#preventing_bridging_with_the_bridging_mode_feature">Preventing
+            Bridging with the Bridging Mode Feature</a>
+          </li>
+
+          <li>
+            <a href=
+            "#using_a_dismissal_id_to_sync_notification_dismissals">Using a
+            Dismissal ID to Sync Notification Dismissals</a>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <p>
+      By default, notifications <a href=
+      "{@docRoot}training/wearables/notifications/index.html">are bridged
+      (shared)</a> from an app on a companion phone to the watch. If you build
+      a standalone watch app and have a companion phone app, they may duplicate
+      notifications. The Android Wear 2.0 Preview includes a Bridging mode
+      feature to handle this problem of repeated notifications.
+    </p>
+
+    <p>
+      With the Android Wear 2.0 Preview, developers can change the
+      behavior of notifications with the following:
+    </p>
+
+    <ul>
+      <li>Specifying in the standalone app's Android manifest file that
+      notifications from the corresponding phone app should not be
+      bridged to the watch
+      </li>
+
+      <li>Setting a dismissal ID so notification dismissals are synced across
+      devices
+      </li>
+    </ul>
+
+    <h2 id="preventing_bridging_with_the_bridging_mode_feature">
+      Preventing Bridging with the Bridging Mode Feature
+    </h2>
+
+    <p>
+      To prevent bridging of notifications from a phone app, you can use an
+      entry in the manifest file of the watch app (e.g. the standalone watch
+      app), as follows:
+    </p>
+
+    <pre>
+com.google.android.wearable.notificationBridgeMode
+    </pre>
+
+    <p>
+      Setting that entry to <code>NO_BRIDGING</code> will prevent bridging:
+    </p>
+
+    <pre>
+&lt;meta-data android:name="com.google.android.wearable.notificationBridgeMode"
+                   android:value="NO_BRIDGING" /&gt;
+</pre>
+    <p>
+      The default bridging behavior occurs if you do not include the entry or
+      if you specify a value of <code>BRIDGING</code> instead of
+      <code>NO_BRIDGING</code>.
+    </p>
+
+    <h3 id="existing_method_of_preventing_bridging">
+      Existing method of preventing bridging
+    </h3>
+
+    <p>
+      An existing way to prevent bridging is with the
+      <code>Notification.Builder</code> class; specify <code>true</code> in the
+      <a href=
+      "{@docRoot}reference/android/app/Notification.Builder.html#setLocalOnly(boolean)">
+      setLocalOnly</a> method.
+    </p>
+
+    <p>
+      However, this way to prevent bridging may not be preferable. For example,
+      if a user installs a phone app but not the corresponding watch app, the
+      <code>setLocalOnly</code> method could prevent the bridging of helpful
+      notifications. Additionally, users may have multiple paired watches and
+      the watch app may not be installed on all of them.
+    </p>
+
+    <p>
+      Thus, if bridging should be prevented when the watch app
+      is installed, use the <a href=
+      "#preventing_bridging_with_the_bridging_mode_feature">Bridging mode
+      feature</a>.
+    </p>
+
+    <h2 id="using_a_dismissal_id_to_sync_notification_dismissals">
+      Using a Dismissal ID to Sync Notification Dismissals
+    </h2>
+
+    <p>
+      If you prevent bridging with the Bridging mode feature, dismissals
+      (cancellations) of notifications are not synced across a user's devices.
+      However, the following methods of the <a href=
+      "{@docRoot}reference/android/support/v4/app/NotificationCompat.WearableExtender.html">
+      NotificationCompat.WearableExtender</a> class enable you to use dismissal
+      IDs:
+    </p>
+
+    <pre>
+public WearableExtender setDismissalId(String dismissalId)
+public String getDismissalId()
+    </pre>
+    <p>
+      To enable a dismissal to be synced, use the <code>setDismissalId()</code>
+      method. For each notification, pass a globally unique ID, as a string,
+      when you call the <code>setDismissalId()</code> method. When the
+      notification is dismissed, all other notifications with the same
+      dismissal ID are dismissed on the watch(es) and on the companion phone.
+      To retrieve a dismissal ID, use <code>getDismissalId()</code>.
+    </p>
+
+    <p>
+      In the following example, syncing of dismissals is enabled because a
+      globally unique ID is specified for a new notification:
+    </p>
+
+    <pre>
+NotificationCompat.WearableExtender wearableExtender =
+new NotificationCompat.WearableExtender().setDismissalId(“abc123”);
+Notification notification = new NotificationCompat.Builder(context)
+&lt;set other fields&gt;
+.extend(wearableExtender)
+.build();
+    </pre>
+    <p>
+      Dismissal IDs work if a watch is paired to an Android phone, but not if a
+      watch is paired to an iPhone.
+    </p>

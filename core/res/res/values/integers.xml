@@ -23,4 +23,7 @@
     <integer name="button_pressed_animation_delay">100</integer>
     <integer name="disabled_alpha_animation_duration">100</integer>
     <integer name="dock_enter_exit_duration">250</integer>
+
+    <integer name="date_picker_mode">1</integer>
+    <integer name="time_picker_mode">1</integer>
 </resources>

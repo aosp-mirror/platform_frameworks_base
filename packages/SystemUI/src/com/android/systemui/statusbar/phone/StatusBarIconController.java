@@ -20,25 +20,29 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -53,34 +57,36 @@ import java.util.ArrayList;
  * limited to: notification icons, signal cluster, additional status icons, and clock in the status
  * bar.
  */
-public class StatusBarIconController implements Tunable {
+public class StatusBarIconController extends StatusBarIconList implements Tunable {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
-
     public static final String ICON_BLACKLIST = "icon_blacklist";
+    public static final int DEFAULT_ICON_TINT = Color.WHITE;
 
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
-    private Interpolator mLinearOutSlowIn;
-    private Interpolator mFastOutSlowIn;
     private DemoStatusIcons mDemoStatusIcons;
-    private NotificationColorUtil mNotificationColorUtil;
 
     private LinearLayout mSystemIconArea;
     private LinearLayout mStatusIcons;
     private SignalClusterView mSignalCluster;
     private LinearLayout mStatusIconsKeyguard;
-    private IconMerger mNotificationIcons;
-    private View mNotificationIconArea;
-    private ImageView mMoreIcon;
+
+    private NotificationIconAreaController mNotificationIconAreaController;
+    private View mNotificationIconAreaInner;
+
     private BatteryMeterView mBatteryMeterView;
+    private BatteryMeterView mBatteryMeterViewKeyguard;
     private TextView mClock;
 
     private int mIconSize;
     private int mIconHPadding;
 
-    private int mIconTint = Color.WHITE;
+    private int mIconTint = DEFAULT_ICON_TINT;
     private float mDarkIntensity;
+    private final Rect mTintArea = new Rect();
+    private static final Rect sTmpRect = new Rect();
+    private static final int[] sTmpInt2 = new int[2];
 
     private boolean mTransitionPending;
     private boolean mTintChangePending;
@@ -108,27 +114,59 @@ public class StatusBarIconController implements Tunable {
             PhoneStatusBar phoneStatusBar) {
         mContext = context;
         mPhoneStatusBar = phoneStatusBar;
-        mNotificationColorUtil = NotificationColorUtil.getInstance(context);
         mSystemIconArea = (LinearLayout) statusBar.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout) statusBar.findViewById(R.id.statusIcons);
         mSignalCluster = (SignalClusterView) statusBar.findViewById(R.id.signal_cluster);
-        mNotificationIconArea = statusBar.findViewById(R.id.notification_icon_area_inner);
-        mNotificationIcons = (IconMerger) statusBar.findViewById(R.id.notificationIcons);
-        mMoreIcon = (ImageView) statusBar.findViewById(R.id.moreIcon);
-        mNotificationIcons.setOverflowIndicator(mMoreIcon);
+
+        mNotificationIconAreaController = SystemUIFactory.getInstance()
+                .createNotificationIconAreaController(context, phoneStatusBar);
+        mNotificationIconAreaInner =
+                mNotificationIconAreaController.getNotificationInnerAreaView();
+
+        ViewGroup notificationIconArea =
+                (ViewGroup) statusBar.findViewById(R.id.notification_icon_area);
+        notificationIconArea.addView(mNotificationIconAreaInner);
+
         mStatusIconsKeyguard = (LinearLayout) keyguardStatusBar.findViewById(R.id.statusIcons);
+
         mBatteryMeterView = (BatteryMeterView) statusBar.findViewById(R.id.battery);
+        mBatteryMeterViewKeyguard = (BatteryMeterView) keyguardStatusBar.findViewById(R.id.battery);
+        scaleBatteryMeterViews(context);
+
         mClock = (TextView) statusBar.findViewById(R.id.clock);
-        mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear_out_slow_in);
-        mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_slow_in);
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
-        updateResources();
+        defineSlots();
+        loadDimens();
 
         TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
+    }
+
+    public void setSignalCluster(SignalClusterView signalCluster) {
+        mSignalCluster = signalCluster;
+    }
+
+    /**
+     * Looks up the scale factor for status bar icons and scales the battery view by that amount.
+     */
+    private void scaleBatteryMeterViews(Context context) {
+        Resources res = context.getResources();
+        TypedValue typedValue = new TypedValue();
+
+        res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        float iconScaleFactor = typedValue.getFloat();
+
+        int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
+        int batteryWidth = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+        int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
+
+        LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
+                (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
+        scaledLayoutParams.setMarginsRelative(0, 0, 0, marginBottom);
+
+        mBatteryMeterView.setLayoutParams(scaledLayoutParams);
+        mBatteryMeterViewKeyguard.setLayoutParams(scaledLayoutParams);
     }
 
     @Override
@@ -145,28 +183,37 @@ public class StatusBarIconController implements Tunable {
         }
         // Remove all the icons.
         for (int i = views.size() - 1; i >= 0; i--) {
-            removeSystemIcon(views.get(i).getSlot(), i, i);
+            removeIcon(views.get(i).getSlot());
         }
         // Add them all back
         for (int i = 0; i < views.size(); i++) {
-            addSystemIcon(views.get(i).getSlot(), i, i, views.get(i).getStatusBarIcon());
+            setIcon(views.get(i).getSlot(), views.get(i).getStatusBarIcon());
         }
-    };
-
-    public void updateResources() {
+    }
+    private void loadDimens() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
         mIconHPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
-        FontSizeUtils.updateFontSize(mClock, R.dimen.status_bar_clock_size);
     }
 
-    public void addSystemIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
+    public void defineSlots() {
+        defineSlots(mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_statusBarIcons));
+    }
+
+    private void addSystemIcon(int index, StatusBarIcon icon) {
+        String slot = getSlot(index);
+        int viewIndex = getViewIndex(index);
         boolean blocked = mIconBlacklist.contains(slot);
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
-        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+        lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
+        mStatusIcons.addView(view, viewIndex, lp);
+
         view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
         mStatusIconsKeyguard.addView(view, viewIndex, new LinearLayout.LayoutParams(
@@ -174,8 +221,90 @@ public class StatusBarIconController implements Tunable {
         applyIconTint();
     }
 
-    public void updateSystemIcon(String slot, int index, int viewIndex,
-            StatusBarIcon old, StatusBarIcon icon) {
+    public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
+        int index = getSlotIndex(slot);
+        StatusBarIcon icon = getIcon(index);
+        if (icon == null) {
+            icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                    Icon.createWithResource(mContext, resourceId), 0, 0, contentDescription);
+            setIcon(slot, icon);
+        } else {
+            icon.icon = Icon.createWithResource(mContext, resourceId);
+            icon.contentDescription = contentDescription;
+            handleSet(index, icon);
+        }
+    }
+
+    public void setExternalIcon(String slot) {
+        int viewIndex = getViewIndex(getSlotIndex(slot));
+        int height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.status_bar_icon_drawing_size);
+        ImageView imageView = (ImageView) mStatusIcons.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+        setHeightAndCenter(imageView, height);
+        imageView = (ImageView) mStatusIconsKeyguard.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+        setHeightAndCenter(imageView, height);
+    }
+
+    private void setHeightAndCenter(ImageView imageView, int height) {
+        ViewGroup.LayoutParams params = imageView.getLayoutParams();
+        params.height = height;
+        if (params instanceof LinearLayout.LayoutParams) {
+            ((LinearLayout.LayoutParams) params).gravity = Gravity.CENTER_VERTICAL;
+        }
+        imageView.setLayoutParams(params);
+    }
+
+    public void setIcon(String slot, StatusBarIcon icon) {
+        setIcon(getSlotIndex(slot), icon);
+    }
+
+    public void removeIcon(String slot) {
+        int index = getSlotIndex(slot);
+        removeIcon(index);
+    }
+
+    public void setIconVisibility(String slot, boolean visibility) {
+        int index = getSlotIndex(slot);
+        StatusBarIcon icon = getIcon(index);
+        if (icon == null || icon.visible == visibility) {
+            return;
+        }
+        icon.visible = visibility;
+        handleSet(index, icon);
+    }
+
+    @Override
+    public void removeIcon(int index) {
+        if (getIcon(index) == null) {
+            return;
+        }
+        super.removeIcon(index);
+        int viewIndex = getViewIndex(index);
+        mStatusIcons.removeViewAt(viewIndex);
+        mStatusIconsKeyguard.removeViewAt(viewIndex);
+    }
+
+    @Override
+    public void setIcon(int index, StatusBarIcon icon) {
+        if (icon == null) {
+            removeIcon(index);
+            return;
+        }
+        boolean isNew = getIcon(index) == null;
+        super.setIcon(index, icon);
+        if (isNew) {
+            addSystemIcon(index, icon);
+        } else {
+            handleSet(index, icon);
+        }
+    }
+
+    private void handleSet(int index, StatusBarIcon icon) {
+        int viewIndex = getViewIndex(index);
         StatusBarIconView view = (StatusBarIconView) mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
         view = (StatusBarIconView) mStatusIconsKeyguard.getChildAt(viewIndex);
@@ -183,66 +312,8 @@ public class StatusBarIconController implements Tunable {
         applyIconTint();
     }
 
-    public void removeSystemIcon(String slot, int index, int viewIndex) {
-        mStatusIcons.removeViewAt(viewIndex);
-        mStatusIconsKeyguard.removeViewAt(viewIndex);
-    }
-
     public void updateNotificationIcons(NotificationData notificationData) {
-        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                mIconSize + 2*mIconHPadding, mPhoneStatusBar.getStatusBarHeight());
-
-        ArrayList<NotificationData.Entry> activeNotifications =
-                notificationData.getActiveNotifications();
-        final int N = activeNotifications.size();
-        ArrayList<StatusBarIconView> toShow = new ArrayList<>(N);
-
-        // Filter out ambient notifications and notification children.
-        for (int i = 0; i < N; i++) {
-            NotificationData.Entry ent = activeNotifications.get(i);
-            if (notificationData.isAmbient(ent.key)
-                    && !NotificationData.showNotificationEvenIfUnprovisioned(ent.notification)) {
-                continue;
-            }
-            if (!PhoneStatusBar.isTopLevelChild(ent)) {
-                continue;
-            }
-            toShow.add(ent.icon);
-        }
-
-        ArrayList<View> toRemove = new ArrayList<>();
-        for (int i=0; i<mNotificationIcons.getChildCount(); i++) {
-            View child = mNotificationIcons.getChildAt(i);
-            if (!toShow.contains(child)) {
-                toRemove.add(child);
-            }
-        }
-
-        final int toRemoveCount = toRemove.size();
-        for (int i = 0; i < toRemoveCount; i++) {
-            mNotificationIcons.removeView(toRemove.get(i));
-        }
-
-        for (int i=0; i<toShow.size(); i++) {
-            View v = toShow.get(i);
-            if (v.getParent() == null) {
-                mNotificationIcons.addView(v, i, params);
-            }
-        }
-
-        // Resort notification icons
-        final int childCount = mNotificationIcons.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View actual = mNotificationIcons.getChildAt(i);
-            StatusBarIconView expected = toShow.get(i);
-            if (actual == expected) {
-                continue;
-            }
-            mNotificationIcons.removeView(expected);
-            mNotificationIcons.addView(expected, i);
-        }
-
-        applyNotificationIconsTint();
+        mNotificationIconAreaController.updateNotificationIcons(notificationData);
     }
 
     public void hideSystemIconArea(boolean animate) {
@@ -254,11 +325,11 @@ public class StatusBarIconController implements Tunable {
     }
 
     public void hideNotificationIconArea(boolean animate) {
-        animateHide(mNotificationIconArea, animate);
+        animateHide(mNotificationIconAreaInner, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
-        animateShow(mNotificationIconArea, animate);
+        animateShow(mNotificationIconAreaInner, animate);
     }
 
     public void setClockVisibility(boolean visible) {
@@ -295,7 +366,7 @@ public class StatusBarIconController implements Tunable {
                 .alpha(0f)
                 .setDuration(160)
                 .setStartDelay(0)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -317,7 +388,7 @@ public class StatusBarIconController implements Tunable {
         v.animate()
                 .alpha(1f)
                 .setDuration(320)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .setInterpolator(Interpolators.ALPHA_IN)
                 .setStartDelay(50)
 
                 // We need to clean up any pending end action from animateHide if we call
@@ -329,10 +400,29 @@ public class StatusBarIconController implements Tunable {
         if (mPhoneStatusBar.isKeyguardFadingAway()) {
             v.animate()
                     .setDuration(mPhoneStatusBar.getKeyguardFadingAwayDuration())
-                    .setInterpolator(mLinearOutSlowIn)
+                    .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                     .setStartDelay(mPhoneStatusBar.getKeyguardFadingAwayDelay())
                     .start();
         }
+    }
+
+    /**
+     * Sets the dark area so {@link #setIconsDark} only affects the icons in the specified area.
+     *
+     * @param darkArea the area in which icons should change it's tint, in logical screen
+     *                 coordinates
+     */
+    public void setIconsDarkArea(Rect darkArea) {
+        if (darkArea == null && mTintArea.isEmpty()) {
+            return;
+        }
+        if (darkArea == null) {
+            mTintArea.setEmpty();
+        } else {
+            mTintArea.set(darkArea);
+        }
+        applyIconTint();
+        mNotificationIconAreaController.setTintArea(darkArea);
     }
 
     public void setIconsDark(boolean dark, boolean animate) {
@@ -366,7 +456,7 @@ public class StatusBarIconController implements Tunable {
         });
         mTintAnimator.setDuration(duration);
         mTintAnimator.setStartDelay(delay);
-        mTintAnimator.setInterpolator(mFastOutSlowIn);
+        mTintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mTintAnimator.start();
     }
 
@@ -374,6 +464,7 @@ public class StatusBarIconController implements Tunable {
         mDarkIntensity = darkIntensity;
         mIconTint = (int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
                 mLightModeIconColorSingleTone, mDarkModeIconColorSingleTone);
+        mNotificationIconAreaController.setIconTint(mIconTint);
         applyIconTint();
     }
 
@@ -385,37 +476,60 @@ public class StatusBarIconController implements Tunable {
         mPendingDarkIntensity = darkIntensity;
     }
 
+    /**
+     * @return the tint to apply to {@param view} depending on the desired tint {@param color} and
+     *         the screen {@param tintArea} in which to apply that tint
+     */
+    public static int getTint(Rect tintArea, View view, int color) {
+        if (isInArea(tintArea, view)) {
+            return color;
+        } else {
+            return DEFAULT_ICON_TINT;
+        }
+    }
+
+    /**
+     * @return the dark intensity to apply to {@param view} depending on the desired dark
+     *         {@param intensity} and the screen {@param tintArea} in which to apply that intensity
+     */
+    public static float getDarkIntensity(Rect tintArea, View view, float intensity) {
+        if (isInArea(tintArea, view)) {
+            return intensity;
+        } else {
+            return 0f;
+        }
+    }
+
+    /**
+     * @return true if more than half of the {@param view} area are in {@param area}, false
+     *         otherwise
+     */
+    private static boolean isInArea(Rect area, View view) {
+        if (area.isEmpty()) {
+            return true;
+        }
+        sTmpRect.set(area);
+        view.getLocationOnScreen(sTmpInt2);
+        int left = sTmpInt2[0];
+
+        int intersectStart = Math.max(left, area.left);
+        int intersectEnd = Math.min(left + view.getWidth(), area.right);
+        int intersectAmount = Math.max(0, intersectEnd - intersectStart);
+
+        boolean coversFullStatusBar = area.top <= 0;
+        boolean majorityOfWidth = 2 * intersectAmount > view.getWidth();
+        return majorityOfWidth && coversFullStatusBar;
+    }
+
     private void applyIconTint() {
         for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) mStatusIcons.getChildAt(i);
-            v.setImageTintList(ColorStateList.valueOf(mIconTint));
+            v.setImageTintList(ColorStateList.valueOf(getTint(mTintArea, v, mIconTint)));
         }
-        mSignalCluster.setIconTint(mIconTint, mDarkIntensity);
-        mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
-        mBatteryMeterView.setDarkIntensity(mDarkIntensity);
-        mClock.setTextColor(mIconTint);
-        applyNotificationIconsTint();
-    }
-
-    private void applyNotificationIconsTint() {
-        for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
-            StatusBarIconView v = (StatusBarIconView) mNotificationIcons.getChildAt(i);
-            boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
-            boolean colorize = !isPreL || isGrayscale(v);
-            if (colorize) {
-                v.setImageTintList(ColorStateList.valueOf(mIconTint));
-            }
-        }
-    }
-
-    private boolean isGrayscale(StatusBarIconView v) {
-        Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
-        if (isGrayscale != null) {
-            return Boolean.TRUE.equals(isGrayscale);
-        }
-        boolean grayscale = mNotificationColorUtil.isGrayscaleIcon(v.getDrawable());
-        v.setTag(R.id.icon_is_grayscale, grayscale);
-        return grayscale;
+        mSignalCluster.setIconTint(mIconTint, mDarkIntensity, mTintArea);
+        mBatteryMeterView.setDarkIntensity(
+                isInArea(mTintArea, mBatteryMeterView) ? mDarkIntensity : 0);
+        mClock.setTextColor(getTint(mTintArea, mClock, mIconTint));
     }
 
     public void appTransitionPending() {
@@ -452,14 +566,46 @@ public class StatusBarIconController implements Tunable {
 
     public static ArraySet<String> getIconBlacklist(String blackListStr) {
         ArraySet<String> ret = new ArraySet<String>();
-        if (blackListStr != null) {
-            String[] blacklist = blackListStr.split(",");
-            for (String slot : blacklist) {
-                if (!TextUtils.isEmpty(slot)) {
-                    ret.add(slot);
-                }
+        if (blackListStr == null) {
+            blackListStr = "rotate,headset";
+        }
+        String[] blacklist = blackListStr.split(",");
+        for (String slot : blacklist) {
+            if (!TextUtils.isEmpty(slot)) {
+                ret.add(slot);
             }
         }
         return ret;
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        loadDimens();
+        mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
+        updateClock();
+        for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
+            View child = mStatusIcons.getChildAt(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+            lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
+            child.setLayoutParams(lp);
+        }
+        for (int i = 0; i < mStatusIconsKeyguard.getChildCount(); i++) {
+            View child = mStatusIconsKeyguard.getChildAt(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+            child.setLayoutParams(lp);
+        }
+        scaleBatteryMeterViews(mContext);
+    }
+
+    private void updateClock() {
+        FontSizeUtils.updateFontSize(mClock, R.dimen.status_bar_clock_size);
+        mClock.setPaddingRelative(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_starting_padding),
+                0,
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_end_padding),
+                0);
     }
 }

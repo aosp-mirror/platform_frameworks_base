@@ -1,0 +1,27 @@
+page.title=NDK High-Performance Audio
+@jd:body
+
+<p>The NDK package includes an Android-specific implementation of the
+<a class="external-link" href="https://www.khronos.org/opensles/">OpenSL ES™</a> API
+specification from the <a class="external-link" href="https://www.khronos.org">Khronos Group</a>.
+This library allows you to use C or C++ to implement high-performance, low-latency audio, whether
+you are writing a synthesizer, digital audio workstation, karaoke, game,
+ or other real-time app.</p>
+
+<p>This section begins by providing some
+<a href="{@docRoot}ndk/guides/audio/basics.html">basic information</a> about the API, including
+typical use cases and how to incorporate it into your app. It then explains what you need to know
+about the <a href="{@docRoot}ndk/guides/audio/opensl-for-android.html">Android-specific
+implementation</a> of OpenSL ES, focusing on the differences between this implementation and the
+reference specification. Next, you'll learn how to minimze
+ <a href="{@docRoot}ndk/guides/audio/input-latency.html">input latency</a>
+ when using built-in or external microphones
+and some actions that you can take to minimize
+ <a href="{@docRoot}ndk/guides/audio/output-latency.html">output latency</a>.
+ It describes the reasons that you should use
+ <a href="{@docRoot}ndk/guides/audio/floating-point.html">floating-point</a>
+ numbers to represent your audio data, and it provides information that will help you choose the
+optimal <a href="{@docRoot}ndk/guides/audio/sample-rates.html">sample rate</a>. This section
+ concludes with some supplemental <a href="{@docRoot}ndk/guides/audio/opensl-prog-notes.html">
+ programming notes</a> to ensure proper implementation of OpenSL ES.
+ </p>

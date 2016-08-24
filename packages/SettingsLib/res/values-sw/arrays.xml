@@ -48,4 +48,124 @@
     <item msgid="5660739516542454527">"Imezuiwa"</item>
     <item msgid="1805837518286731242">"Inaepuka kwa muda muunganisho mbovu"</item>
   </string-array>
+  <string-array name="hdcp_checking_titles">
+    <item msgid="441827799230089869">"Katu usikague"</item>
+    <item msgid="6042769699089883931">"Chunguza maudhui ya DRM pekee"</item>
+    <item msgid="9174900380056846820">"Kagua kila wakati"</item>
+  </string-array>
+  <string-array name="hdcp_checking_summaries">
+    <item msgid="505558545611516707">"Katu usitumie kikaguaji cha HDCP"</item>
+    <item msgid="3878793616631049349">"Tumia ukaguaji wa HDCP kwa maudhui ya DRM pekee"</item>
+    <item msgid="45075631231212732">"Kila wakati tumia ukakuaji wa HDCP"</item>
+  </string-array>
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"Imezimwa"</item>
+    <item msgid="1593289376502312923">"K64"</item>
+    <item msgid="487545340236145324">"K256"</item>
+    <item msgid="2423528675294333831">"M1"</item>
+    <item msgid="180883774509476541">"M4"</item>
+    <item msgid="2803199102589126938">"M16"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"Imezimwa"</item>
+    <item msgid="4622460333038586791">"K64"</item>
+    <item msgid="2212125625169582330">"K256"</item>
+    <item msgid="1704946766699242653">"M1"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"Imezimwa"</item>
+    <item msgid="2969458029344750262">"K64 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="1342285115665698168">"K256 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="1314234299552254621">"M1 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="3606047780792894151">"M4 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="5431354956856655120">"M16 kwa kila akiba ya kumbukumbu"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Yamezimwa"</item>
+    <item msgid="3054662377365844197">"Zote"</item>
+    <item msgid="688870735111627832">"Zote isipokuwa redio"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Imezimwa"</item>
+    <item msgid="172978079776521897">"Akiba ya kumbukumbu zote"</item>
+    <item msgid="3873873912383879240">"Zote isipokuwa akiba ya kumbukumbu za redio"</item>
+  </string-array>
+  <string-array name="window_animation_scale_entries">
+    <item msgid="8134156599370824081">"Haiwani imezimwa"</item>
+    <item msgid="6624864048416710414">"Skeli .5x ya haiwani"</item>
+    <item msgid="2219332261255416635">"Skeli 1x ya haiwani"</item>
+    <item msgid="3544428804137048509">"Skeli 1.5x ya haiwani"</item>
+    <item msgid="3110710404225974514">"Skeli 2x ya haiwani"</item>
+    <item msgid="4402738611528318731">"Skeli 5x ya haiwani"</item>
+    <item msgid="6189539267968330656">"Skeli 10x ya haiwani"</item>
+  </string-array>
+  <string-array name="transition_animation_scale_entries">
+    <item msgid="8464255836173039442">"Haiwani imezimwa"</item>
+    <item msgid="3375781541913316411">"Skeli .5x ya haiwani"</item>
+    <item msgid="1991041427801869945">"Skeli 1x ya haiwani"</item>
+    <item msgid="4012689927622382874">"Skeli 1.5x ya haiwani"</item>
+    <item msgid="3289156759925947169">"Skeli 2x ya haiwani"</item>
+    <item msgid="7705857441213621835">"Skeli 5x ya haiwani"</item>
+    <item msgid="6660750935954853365">"Skeli ya 10x ya uhuishaji"</item>
+  </string-array>
+  <string-array name="animator_duration_scale_entries">
+    <item msgid="6039901060648228241">"Uhuishaji umezimwa"</item>
+    <item msgid="1138649021950863198">"Mizani .5x ya uhuishaji"</item>
+    <item msgid="4394388961370833040">"Mizani 1x ya uhuishaji"</item>
+    <item msgid="8125427921655194973">"Mizani 1.5x ya uhuishaji"</item>
+    <item msgid="3334024790739189573">"Mizani 2x ya uhuishaji"</item>
+    <item msgid="3170120558236848008">"Mizani 5x ya uhuishaji"</item>
+    <item msgid="1069584980746680398">"Mizani 10x ya uhuishaji"</item>
+  </string-array>
+  <string-array name="overlay_display_devices_entries">
+    <item msgid="1606809880904982133">"Hamna"</item>
+    <item msgid="9033194758688161545">"480p"</item>
+    <item msgid="1025306206556583600">"480p (salama)"</item>
+    <item msgid="1853913333042744661">"720p"</item>
+    <item msgid="3414540279805870511">"720p (salama)"</item>
+    <item msgid="9039818062847141551">"1080p"</item>
+    <item msgid="4939496949750174834">"1080p (salama)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (salama)"</item>
+    <item msgid="3547211260846843098">"4k (iliyoboreshwa)"</item>
+    <item msgid="5411365648951414254">"4K (iliyoboreshwa, salama)"</item>
+    <item msgid="1311305077526792901">"720p, 1080p (skrini mbili)"</item>
+  </string-array>
+  <string-array name="enable_opengl_traces_entries">
+    <item msgid="3191973083884253830">"Hamna"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
+    <item msgid="5397807424362304288">"Systrace (Michoro)"</item>
+    <item msgid="1340692776955662664">"Simu imekwama kwenye glGetError"</item>
+  </string-array>
+  <string-array name="show_non_rect_clip_entries">
+    <item msgid="993742912147090253">"Imezimwa"</item>
+    <item msgid="675719912558941285">"Chora eneo la klipu lisilo mstatili kwa rangi ya bluu"</item>
+    <item msgid="1064373276095698656">"Angazia amri za michoro iliyojaribiwa kwa rangi ya kijani"</item>
+  </string-array>
+  <string-array name="track_frame_time_entries">
+    <item msgid="2193584639058893150">"Imezimwa"</item>
+    <item msgid="2751513398307949636">"Kwenye skrini kama pau"</item>
+    <item msgid="1851438178120770973">"Katika adb shell dumpsys gfxinfo"</item>
+  </string-array>
+  <string-array name="debug_hw_overdraw_entries">
+    <item msgid="8190572633763871652">"Zima"</item>
+    <item msgid="7688197031296835369">"Onyesha maeneo yaliyoondolewa"</item>
+    <item msgid="2290859360633824369">"Onyesha sehemu za Upofu Rangi Kijani"</item>
+  </string-array>
+  <string-array name="app_process_limit_entries">
+    <item msgid="3401625457385943795">"Kiwango cha wastani"</item>
+    <item msgid="4071574792028999443">"Hakuna mchakato wa mandari nyuma"</item>
+    <item msgid="4810006996171705398">"Angalau mchakato 1"</item>
+    <item msgid="8586370216857360863">"Angalau michakato 2"</item>
+    <item msgid="836593137872605381">"Angalau michakato 3"</item>
+    <item msgid="7899496259191969307">"Angalau michakato 4"</item>
+  </string-array>
+  <string-array name="usb_configuration_titles">
+    <item msgid="488237561639712799">"Inachaji"</item>
+    <item msgid="5220695614993094977">"MTP (Itifaki ya Kuhamisha Maudhui)"</item>
+    <item msgid="2086000968159047375">"PTP (Itifaki ya Kuhamisha Picha)"</item>
+    <item msgid="7398830860950841822">"RNDIS (Ethaneti ya USB)"</item>
+    <item msgid="1718924214939774352">"Chanzo cha Sauti"</item>
+    <item msgid="8126315616613006284">"MIDI"</item>
+  </string-array>
 </resources>

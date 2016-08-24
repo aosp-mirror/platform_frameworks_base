@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.icu.util.Calendar;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -37,7 +38,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Calendar;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;
@@ -404,7 +404,7 @@ class CalendarViewLegacyDelegate extends CalendarView.AbstractCalendarViewDelega
 
     @Override
     public int getUnfocusedMonthDateColor() {
-        return mFocusedMonthDateColor;
+        return mUnfocusedMonthDateColor;
     }
 
     @Override

@@ -18,8 +18,12 @@ package android.location;
 
 /**
  * This class represents the current state of a GPS satellite.
+ *
  * This class is used in conjunction with the {@link GpsStatus} class.
+ *
+ * @deprecated use {@link GnssStatus} and {@link GnssStatus.Callback}.
  */
+@Deprecated
 public final class GpsSatellite {
     /* These package private values are modified by the GpsStatus class */
     boolean mValid;

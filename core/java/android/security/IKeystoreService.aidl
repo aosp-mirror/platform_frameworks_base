@@ -19,6 +19,7 @@ package android.security;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.OperationResult;
 import android.security.KeystoreArguments;
@@ -31,7 +32,7 @@ import android.security.KeystoreArguments;
  */
 interface IKeystoreService {
     int getState(int userId);
-    byte[] get(String name);
+    byte[] get(String name, int uid);
     int insert(String name, in byte[] item, int uid, int flags);
     int del(String name, int uid);
     int exist(String name, int uid);
@@ -49,7 +50,7 @@ interface IKeystoreService {
     byte[] get_pubkey(String name);
     int grant(String name, int granteeUid);
     int ungrant(String name, int granteeUid);
-    long getmtime(String name);
+    long getmtime(String name, int uid);
     int duplicate(String srcKey, int srcUid, String destKey, int destUid);
     int is_hardware_backed(String string);
     int clear_uid(long uid);
@@ -59,13 +60,13 @@ interface IKeystoreService {
     int generateKey(String alias, in KeymasterArguments arguments, in byte[] entropy, int uid,
         int flags, out KeyCharacteristics characteristics);
     int getKeyCharacteristics(String alias, in KeymasterBlob clientId, in KeymasterBlob appId,
-        out KeyCharacteristics characteristics);
+        int uid, out KeyCharacteristics characteristics);
     int importKey(String alias, in KeymasterArguments arguments, int format,
         in byte[] keyData, int uid, int flags, out KeyCharacteristics characteristics);
     ExportResult exportKey(String alias, int format, in KeymasterBlob clientId,
-        in KeymasterBlob appId);
+        in KeymasterBlob appId, int uid);
     OperationResult begin(IBinder appToken, String alias, int purpose, boolean pruneable,
-        in KeymasterArguments params, in byte[] entropy);
+        in KeymasterArguments params, in byte[] entropy, int uid);
     OperationResult update(IBinder token, in KeymasterArguments params, in byte[] input);
     OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature,
         in byte[] entropy);
@@ -74,4 +75,5 @@ interface IKeystoreService {
     int addAuthToken(in byte[] authToken);
     int onUserAdded(int userId, int parentId);
     int onUserRemoved(int userId);
+    int attestKey(String alias, in KeymasterArguments params, out KeymasterCertificateChain chain);
 }

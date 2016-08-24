@@ -39,14 +39,26 @@
   <item name="dsp.video">0.1</item> <!-- ~50mA -->
   <item name="camera.flashlight">0.1</item> <!-- Avg. power for camera flash, ~160mA -->
   <item name="camera.avg">0.1</item> <!-- Avg. power use of camera in standard usecases, ~550mA -->
+  <item name="gps.on">0.1</item> <!-- ~50mA -->
+
+  <!-- Radio related values. For modems without energy reporting support in firmware, use
+       radio.active, radio.scanning, and radio.on. -->
   <item name="radio.active">0.1</item> <!-- ~200mA -->
   <item name="radio.scanning">0.1</item> <!-- cellular radio scanning for signal, ~10mA -->
-  <item name="gps.on">0.1</item> <!-- ~50mA -->
   <!-- Current consumed by the radio at different signal strengths, when paging -->
   <array name="radio.on"> <!-- Strength 0 to BINS-1 -->
       <value>0.2</value> <!-- ~2mA -->
       <value>0.1</value> <!-- ~1mA -->
   </array>
+
+
+  <!-- Radio related values. For modems WITH energy reporting support in firmware, use
+       modem.controller.idle, modem.controller.tx, modem.controller.rx, modem.controller.voltage.
+       -->
+  <item name="modem.controller.idle">0</item>
+  <item name="modem.controller.rx">0</item>
+  <item name="modem.controller.tx">0</item>
+  <item name="modem.controller.voltage">0</item>
 
   <!-- A list of heterogeneous CPU clusters, where the value for each cluster represents the
        number of CPU cores for that cluster.
@@ -82,11 +94,27 @@
   <!-- This is the battery capacity in mAh (measured at nominal voltage) -->
   <item name="battery.capacity">1000</item>
 
-  <array name="wifi.batchedscan"> <!-- mA -->
-      <value>.0002</value> <!-- 1-8/hr -->
-      <value>.002</value>  <!-- 9-64/hr -->
-      <value>.02</value>   <!-- 65-512/hr -->
-      <value>.2</value>    <!-- 513-4,096/hr -->
-      <value>2</value>    <!-- 4097-/hr -->
+  <!-- Wifi related values. -->
+  <!-- Idle Receive current for wifi radio in mA. 0 by default-->
+  <item name="wifi.controller.idle">0</item>
+  <!-- Rx current for wifi radio in mA. 0 by default-->
+  <item name="wifi.controller.rx">0</item>
+  <!-- Tx current for wifi radio in mA. 0 by default-->
+  <item name="wifi.controller.tx">0</item>
+  <!-- Current at each of the wifi Tx levels in mA. The number of tx levels varies per device
+       and is available only of wifi chipsets which support the tx level reporting. Use
+        wifi.tx for other chipsets. none by default -->
+  <array name="wifi.controller.tx_levels"> <!-- mA -->
   </array>
+  <!-- Operating volatage for wifi radio in mV. 0 by default-->
+  <item name="wifi.controller.voltage">0</item>
+
+  <array name="wifi.batchedscan"> <!-- mA -->
+    <value>.0002</value> <!-- 1-8/hr -->
+    <value>.002</value>  <!-- 9-64/hr -->
+    <value>.02</value>   <!-- 65-512/hr -->
+    <value>.2</value>    <!-- 513-4,096/hr -->
+    <value>2</value>    <!-- 4097-/hr -->
+  </array>
+
 </device>

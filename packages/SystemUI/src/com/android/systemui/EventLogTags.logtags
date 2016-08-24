@@ -51,3 +51,13 @@ option java_package com.android.systemui;
 # SearchPanelView.java
 # ---------------------------
 36050 sysui_searchpanel_touch (type|1),(x|1),(y|1)
+
+# ---------------------------
+# Recents.java, RecentsSystemUser.java
+# ---------------------------
+## type: 1: USER_BIND_SERVICE        Secondary user tries binding to the system sysui service
+##       2: USER_SYSTEM_BOUND        Secondary user is bound to the system sysui service
+##       3: USER_SYSTEM_UNBOUND      Secondary user loses connection after system sysui has died
+##       4: SYSTEM_REGISTER_USER     System sysui registers user's callbacks
+##       5: SYSTEM_UNREGISTER_USER   System sysui unregisters user's callbacks (after death)
+36060 sysui_recents_connection (type|1),(user|1)

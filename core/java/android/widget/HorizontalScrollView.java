@@ -325,16 +325,24 @@ public class HorizontalScrollView extends FrameLayout {
 
         if (getChildCount() > 0) {
             final View child = getChildAt(0);
-            int width = getMeasuredWidth();
-            if (child.getMeasuredWidth() < width) {
-                final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            final int widthPadding;
+            final int heightPadding;
+            final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+            if (targetSdkVersion >= Build.VERSION_CODES.M) {
+                widthPadding = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin;
+                heightPadding = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin;
+            } else {
+                widthPadding = mPaddingLeft + mPaddingRight;
+                heightPadding = mPaddingTop + mPaddingBottom;
+            }
 
-                int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec, mPaddingTop
-                        + mPaddingBottom, lp.height);
-                width -= mPaddingLeft;
-                width -= mPaddingRight;
-                int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
-
+            int desiredWidth = getMeasuredWidth() - widthPadding;
+            if (child.getMeasuredWidth() < desiredWidth) {
+                final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        desiredWidth, MeasureSpec.EXACTLY);
+                final int childHeightMeasureSpec = getChildMeasureSpec(
+                        heightMeasureSpec, heightPadding, lp.height);
                 child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
             }
         }
@@ -451,6 +459,10 @@ public class HorizontalScrollView extends FrameLayout {
         */
         final int action = ev.getAction();
         if ((action == MotionEvent.ACTION_MOVE) && (mIsBeingDragged)) {
+            return true;
+        }
+
+        if (super.onInterceptTouchEvent(ev)) {
             return true;
         }
 
@@ -1231,17 +1243,17 @@ public class HorizontalScrollView extends FrameLayout {
     }
 
     @Override
-    protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
+    protected void measureChild(View child, int parentWidthMeasureSpec,
+            int parentHeightMeasureSpec) {
         ViewGroup.LayoutParams lp = child.getLayoutParams();
 
-        int childWidthMeasureSpec;
-        int childHeightMeasureSpec;
+        final int horizontalPadding = mPaddingLeft + mPaddingRight;
+        final int childWidthMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
+                Math.max(0, MeasureSpec.getSize(parentWidthMeasureSpec) - horizontalPadding),
+                MeasureSpec.UNSPECIFIED);
 
-        childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec, mPaddingTop
-                + mPaddingBottom, lp.height);
-
-        childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-
+        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+                mPaddingTop + mPaddingBottom, lp.height);
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
@@ -1253,8 +1265,11 @@ public class HorizontalScrollView extends FrameLayout {
         final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
                 mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin
                         + heightUsed, lp.height);
-        final int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                lp.leftMargin + lp.rightMargin, MeasureSpec.UNSPECIFIED);
+        final int usedTotal = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin +
+                widthUsed;
+        final int childWidthMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
+                Math.max(0, MeasureSpec.getSize(parentWidthMeasureSpec) - usedTotal),
+                MeasureSpec.UNSPECIFIED);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }

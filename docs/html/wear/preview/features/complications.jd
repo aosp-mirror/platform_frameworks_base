@@ -1,0 +1,813 @@
+page.title=Watch Face Complications
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=/wear/preview/images/complications-main-image.png
+@jd:body
+
+    <div id="qv-wrapper">
+      <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+          <li>
+            <a href="#adding_complications_to_a_watch_face">Adding
+            Complications to a Watch Face</a>
+          </li>
+          <li>
+            <a href="#exposing_data_to_complications">Exposing Data to
+            Complications</a>
+          </li>
+          <li>
+            <a href="#using_complication_types">Using Complication Types</a>
+          </li>
+          <li>
+            <a href="#using_fields_for_complication_data">Using Fields for
+            Complication Data</a>
+          </li>
+          <li>
+            <a href="#api_additions">API Additions</a>
+          </li>
+      </ol>
+    <h2>See Also</h2>
+      <ol>
+        <li><a class="external-link"
+          href="https://github.com/googlesamples/android-WatchFace">Watch
+          Face sample app with complications</a></li>
+      </ol>
+      </div>
+    </div>
+
+    <p>
+      A complication is any feature in a watch face that displays <a href=
+      "https://en.wikipedia.org/wiki/Complication_(horology)">more than hours and
+      minutes</a>. For example, a battery indicator is a complication. The
+      Complications API is for both watch faces and data provider apps.
+    </p>
+
+    <div class="col-4of10">
+      <img src="../images/complications-main-image.png" alt="Complications"
+      id="img-split-screen">
+    </div>
+
+    <p>
+      Watch faces can display extra information without needing code for
+      getting the underlying data. Data providers can supply data (such as
+      battery level, weather, or step-count data) to any watch face using the
+      API.
+    </p>
+
+    <p>
+      Along with reviewing this page, download the Android Wear 2.0 Preview
+      Reference (see the Complications API <a href=
+      "#api_additions">additions</a>) and review the Javadoc for complications.
+    </p>
+
+    <p>
+      Apps that provide data to watch faces for complications are called
+      "complication data providers." These apps are not responsible for controlling
+      how their data is rendered on the watch face.
+      This allows a watch face to integrate the data naturally with the
+      watch face design.
+      The consuming watch faces are responsible for drawing
+      the complications.
+    </p>
+
+    <p>
+      Watch faces can receive complication data of
+      <a href="#using_complication_types">various types</a> (e.g. small text
+      data or icon data) and then display it.
+    </p>
+
+    <p>
+      As indicated in the diagram below, Android Wear mediates the flow of data
+      from providers to watch faces.
+    </p>
+
+    <img src="../images/complications-data-flow.png" width="" alt=
+    "Complications data flow" title="Complications data flow">
+
+    <p>
+      For creating or modifying watch faces, see <a href=
+      "#adding_complications_to_a_watch_face">Adding complications to a watch
+      face</a>.
+    </p>
+
+    <p>
+      For writing apps that provide data to watch faces, see <a href=
+      "#exposing_data_to_complications">Exposing data to complications</a>.
+    </p>
+
+    <h2 id="adding_complications_to_a_watch_face">
+      Adding Complications to a Watch Face
+    </h2>
+
+    <p>
+      Watch face developers can receive complication data and enable users to
+      select providers for that data. Additionally, Android Wear provides a
+      <a href="#allowing_users_to_choose_data_providers">user interface for
+      data source selection</a>.
+    </p>
+
+    <h3 id="receiving_data_and_rendering_complications">
+      Receiving data and rendering complications
+    </h3>
+
+    <p>
+      To start receiving complication data, a watch face calls
+      <code>setActiveComplications</code> within the
+      <code>WatchFaceService.Engine</code> class with a list of watch face
+      complication IDs. A watch face creates these IDs to uniquely identify
+      slots on the watch face where complications can appear, and passes them
+      to the <code>createProviderChooserIntent</code> method (of the
+      <code>ProviderChooserIntent</code> class) to allow the user to decide
+      which complication should go in which slot.
+    </p>
+
+    <p>
+      Complication data is delivered via the
+      <code>onComplicationDataUpdate</code> (of
+      <code>WatchFaceService.Engine</code>) callback.
+    </p>
+
+    <p>
+      The watch face may render the data as desired as long as the expected
+      fields are represented; the required fields should always be included and
+      the data should be represented in some way. Depending on the type, some
+      of the optional fields should also be included (see the Notes column in
+      the <a href="#types_and_fields">table</a> below).
+    </p>
+
+    <p>
+      We provide design guidelines for our style, as a suggestion for standard
+      complications, but developers can use their own styles or incorporate the
+      data into the watch face in different ways.
+    </p>
+
+    <h3 id="allowing_users_to_choose_data_providers">
+      Allowing users to choose data providers
+    </h3>
+
+    <p>
+      Android Wear provides a user interface (via an Activity) that enables
+      users to choose providers for a particular complication. Watch faces can
+      call the <code>createProviderChooserIntent</code> method to obtain an
+      intent that can be used to show the chooser interface.
+    </p>
+
+    <p>
+      This intent must be used with <code>startActivityForResult</code>. When a
+      watch face calls <code>createProviderChooserIntent</code>, the watch face
+      supplies a watch face complication ID and a list of supported types. The
+      types should be listed in order of preference, usually with types
+      offering more information, such as ranged value, given higher preference.
+    </p>
+
+    <p>
+      When the user selects a data provider, the configuration is saved
+      automatically; nothing more is required from the watch face.
+    </p>
+
+    <h3 id="user_interactions_with_complications">
+      User interactions with complications
+    </h3>
+
+    <p>
+      Providers can specify an action that occurs if the user taps on a
+      complication, so it should be possible for most complications to be
+      tappable. This action will be specified as a <code>PendingIntent</code>
+      included in the <code>ComplicationData</code> object. The watch face is
+      responsible for detecting taps on complications, and should fire the
+      pending intent when a tap occurs.
+    </p>
+
+    <p>
+      It may be infeasible to make some complications tappable (e.g., in the
+      case of a complication that fills the entire background of the watch
+      face), but it is expected that watch faces accept taps on complications
+      where possible.
+    </p>
+
+    <h2 id="exposing_data_to_complications">
+      Exposing Data to Complications
+    </h2>
+
+    <p>
+      A complication data provider is a service that extends
+      <code>ComplicationProviderService</code>. To respond to update requests
+      from the system, your data provider must implement the
+      <code>onComplicationUpdate</code> method of the
+      <code>ComplicationProviderService</code> class. This method will be
+      called when the system wants data from your provider - this could be when
+      a complication using your provider becomes active, or when a fixed amount
+      of time has passed. A <code>ComplicationManager</code> object is passed
+      as a parameter to the <code>onComplicationUpdate</code> method, and can
+      be used to send data back to the system.
+    </p>
+
+    <p>
+      In your app's manifest, declare the service and add an intent filter for
+      the following:
+    </p>
+
+    <pre>
+android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST
+</pre>
+    <p>
+      The service's manifest entry should also include an
+      <code>android:icon</code> attribute. The provided icon should be a
+      single-color white icon. Vector drawables are recommended for the icons.
+      An icon should represent the provider and will be shown in the provider
+      chooser.
+    </p>
+
+    <p>
+      Include metadata to specify the supported types, update period, and
+      configuration action, if required; for details, download the Android Wear
+      2.0 Preview Reference and see the keys listed for the
+      <code>ComplicationProviderService</code> class (in the Javadoc; see
+      <a href="#api_additions">API Additions</a>).
+    </p>
+
+    <h3 id="update_period">
+      Update period
+    </h3>
+
+    <p>
+      Your provider can specify an update period using the following metadata
+      key in the manifest:
+    </p>
+
+    <pre>
+android.support.wearable.complications.UPDATE_PERIOD_SECONDS
+</pre>
+    <p>
+      This should be set to as long a time as possible, as updating too
+      frequently may impact battery life. Note that update requests are not
+      guaranteed to be sent with this frequency. The system does apply a
+      minimum update period, and in particular, updates requests may come less
+      often when the device is in ambient mode or is not being worn.
+    </p>
+
+    <p>
+      You can alternatively use a "push style" to send updates, rather than
+      requesting updates on a fixed schedule. To do so, you can set the update
+      period to 0 so scheduled update requests do not occur (or set it to a
+      non-zero value) and use a <code>ProviderUpdateRequester</code> to trigger
+      calls to <code>onComplicationUpdate</code> as required.
+    </p>
+
+    <h3 id="provider_configuration">
+      Provider configuration
+    </h3>
+
+    <p>
+      If required, a provider can include a configuration activity that is
+      shown to the user when the user chooses a data provider. To include the
+      configuration activity, include a metadata item in the provider service
+      declaration in the manifest with a key of the following:
+    </p>
+
+    <p>
+      <code>android.support.wearable.complications.PROVIDER_CONFIG_ACTION</code>
+    </p>
+
+    <p>
+      The value can be an action of your choice.
+    </p>
+
+    <p>
+      Then create the configuration activity with an intent filter for that
+      action. The configuration activity must reside in the same package as the
+      provider. The configuration activity must return <code>RESULT_OK</code> or
+      <code>RESULT_CANCELED</code>, to tell the system whether the provider
+      should be set.
+    </p>
+
+    <p>
+      The configuration activity may also be used as an opportunity to request
+      any permissions required by the provider.
+    </p>
+
+    <p>
+      For details, download the Android Wear 2.0 Preview Reference (see
+      <a href="#api_additions">API Additions</a>), containing the Javadoc, and
+      see the following in the <code>ComplicationProviderService</code> class:
+    </p>
+
+    <pre>
+METADATA_KEY_PROVIDER_CONFIG_ACTION
+    </pre>
+
+    <h2 id="using_complication_types">
+      Using Complication Types
+    </h2>
+
+    <p>
+      Complication types determine the kinds of data shown in a complication.
+      For example, the <code>SHORT_TEXT</code> type is available when the key
+      data is a short string. In the example of the <code>SHORT_TEXT</code>
+      type, optional data are an icon and a short title.
+    </p>
+
+    <p>
+      Data providers use these complication types differently from the way
+      watch face providers use these types:
+    </p>
+
+    <ul>
+      <li>A data provider chooses the types of complication data to supply. For
+      example, a step count provider might support the
+      <code>RANGED_VALUE</code> and <code>SHORT_TEXT</code> types, whereas a
+      "next meeting" provider might support the <code>SHORT_TEXT</code> and
+      <code>LONG_TEXT</code> types. The data provider also chooses which
+      optional fields of those types to include.
+      </li>
+
+      <li>A watch face provider chooses how many complication types to support.
+      For example, a round complication on a watch face might support the
+      <code>SHORT_TEXT</code>, <code>ICON</code> and <code>RANGED_VALUE</code>
+      types, whereas a gauge on the watch face might support only the
+      <code>RANGED_VALUE</code> type.
+      </li>
+    </ul>
+
+    <p>
+      A <code>ComplicationData</code> object will always have a single
+      complication type. Each complication type has required and optional
+      fields. Generally, a required field represents the primary piece of data;
+      most types take their name from the required field.
+    </p>
+
+    <p>
+      A given type may include different sets of fields. For example,
+      <code>SHORT_TEXT</code> may be just a single piece of text, or a title
+      and text, or an icon and text. A complication that supports a given type
+      must be able to display all the expected variants. However, some optional
+      fields do not need to be displayed (see the <em>Notes</em> column of the
+      table below). For example, the Short title field of the
+      <code>RANGED_VALUE</code> type is not required so that, for example,
+      gauges can be shown without including text.
+    </p>
+
+    <h3 id="examples_of_complication_types">
+      Examples of Complication Types
+    </h3>
+
+    <p>
+      The following shows examples of complication types:
+    </p>
+    <img src="../images/complication-type-exs.png" width="" alt=
+    "Complication types" title="Complications types - examples">
+
+
+    <h3 id="types_and_fields">
+      Types and fields
+    </h3>
+
+    <p>
+      The following table describes the types and fields of the
+      <code>ComplicationData</code> object.
+    </p>
+
+    <table>
+      <tr>
+        <th style="width:175px">
+          Type
+        </th>
+        <th style="width:175px">
+          Required fields
+        </th>
+        <th style="width:175px">
+          Optional fields
+        </th>
+        <th>
+          Notes
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          SHORT_TEXT
+        </td>
+        <td>
+          Short text
+        </td>
+        <td>
+          Icon<br>
+          Short title
+        </td>
+        <td>
+          Exactly one of Icon/Short title is expected to be shown if either or
+          both are provided.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          ICON
+        </td>
+        <td>
+          Icon
+        </td>
+        <td>
+        </td>
+        <td>
+          Used when text is not needed.The icon is expected to be single-color,
+          and may be tinted by the watch face.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          RANGED_VALUE
+        </td>
+        <td>
+          Value<br>
+          Min value<br>
+          Max value
+        </td>
+        <td>
+          Icon<br>
+          Short text<br>
+          Short title
+        </td>
+        <td>
+          Optional fields are not guaranteed to be displayed.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          LONG_TEXT
+        </td>
+        <td>
+          Long text
+        </td>
+        <td>
+          Long title<br>
+          Icon<br>
+          Small image
+        </td>
+        <td>
+          Title is expected to be shown if provided.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          SMALL_IMAGE
+        </td>
+        <td>
+          Small image
+        </td>
+        <td>
+        </td>
+        <td>
+          A small image has one of two styles: <em>photo style</em> or <em>icon
+          style</em>. Photo style means it should fill the space and can be
+          cropped; icon style means it should not be cropped and may be padded.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          LARGE_IMAGE
+        </td>
+        <td>
+          Large image
+        </td>
+        <td>
+        </td>
+        <td>
+          This image is expected to be large enough to fill the watch face.
+        </td>
+      </tr>
+    </table>
+
+    <p>
+      In addition, the following two types have no fields. These two types may
+      be sent for any complication slot and do not need to be included in a
+      list of supported types:
+    </p>
+
+    <table>
+      <tr>
+        <th style="width:175px">
+          Type
+        </th>
+        <th style="width:175px">
+          Required fields
+        </th>
+        <th style="width:175px">
+          Optional fields
+        </th>
+        <th>
+          Notes
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          NOT_CONFIGURED
+        </td>
+        <td>
+          None
+        </td>
+        <td>
+          None
+        </td>
+        <td>
+          Sent when a provider has not yet been chosen for a complication.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          EMPTY
+        </td>
+        <td>
+          None
+        </td>
+        <td>
+          None
+        </td>
+        <td>
+          Sent by a provider when there is no data to display in a
+          complication, or sent by the system when nothing should be shown in a
+          complication.
+        </td>
+      </tr>
+    </table>
+
+    <h2 id="using_fields_for_complication_data">
+      Using Fields for Complication Data
+    </h2>
+
+    <p>
+      The fields of a <code>ComplicationData</code> object have different
+      functions. For example, a text field contains the primary data while a
+      title field is descriptive; a step count complication might have a text
+      field value of "2,543" with a title field value of "steps."
+    </p>
+
+    <p>
+      The following table contains descriptions of the fields in a
+      <code>ComplicationData</code> object. The fields may or may not be
+      populated, depending on the complication type.
+    </p>
+
+    <table>
+      <tr>
+        <th style="width:175px">
+          Field
+        </th>
+        <th>
+          Description
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          Short text
+        </td>
+        <td>
+          Primary text field for small complications. Should not exceed 7
+          characters.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Icon
+        </td>
+        <td>
+          A single-color image representing the data or the source of the data.
+          Must be tintable. Vector drawables are recommended for this field.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Short title
+        </td>
+        <td>
+          Descriptive field for small complications. Should not exceed 7
+          characters. May only be meaningful in combination with <em>Short
+          text</em>.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Long text
+        </td>
+        <td>
+          Primary data field for large, text-based complications.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Long title
+        </td>
+        <td>
+          Descriptive field for large, text-based complications. May only be
+          meaningful in combination with <em>Long text</em>.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Value
+        </td>
+        <td>
+          A numerical (float) representation of the data. Expected to be
+          depicted relative to the bounds the <em>Min value</em> and <em>Max
+          value</em> fields (but not required to be between those bounds).
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Min value
+        </td>
+        <td>
+          The lower bound for the range within which <em>Value</em> should be
+          depicted. Only meaningful in combination with <em>Value</em> and
+          <em>Max value</em>.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Max value
+        </td>
+        <td>
+          The upper bound for the range within which <em>value</em> should be
+          depicted. Only meaningful in combination with <em>Value</em> and
+          <em>Min value</em>.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Small image
+        </td>
+        <td>
+          A small image to represent the data or the source of the data. May be
+          full color. Not expected to fill the entire watch face.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Large image
+        </td>
+        <td>
+          An image with sufficient resolution to fill the watch face. May be
+          full color.
+        </td>
+      </tr>
+    </table>
+
+    <h3 id="providing_time-dependent_values">
+      Providing time-dependent values
+    </h3>
+
+    <p>
+      Some complications need to display a value that relates to the current
+      time. Examples include the current date, the time until the next meeting,
+      or the time in another time zone.
+    </p>
+
+    <p>
+      Providers of such data should not need to update a complication every
+      second/minute to keep those values up to date. Instead, they can specify
+      the values as relative to the current date or time.
+    </p>
+
+    <p>
+      Providers can use the builders in the <code>ComplicationText</code> class
+      to create these time-dependent values.
+    </p>
+
+    <h2 id="api_additions">
+      API Additions
+    </h2>
+
+    <p>
+      The Complications API includes new classes in the Wearable Support
+      Library. For more information, download the <a href=
+      "{@docRoot}wear/preview/start.html#get_the_preview_reference_documentation">
+      Android Wear 2.0 Preview Reference</a>.
+    </p>
+
+    <ul>
+      <li>
+        <code>ComplicationData</code>
+        <ul>
+          <li>Parcelable (using a Bundle internally); immutable
+          </li>
+
+          <li>Represents all types of complication data
+          </li>
+
+          <li>Includes a Builder for instance creation
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ComplicationText</code>
+        <ul>
+          <li>Used to supply text-based values in a
+          <code>ComplicationData</code> object
+          </li>
+
+          <li>Includes options for time-dependent values, whose text value
+          depends on the current time
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ComplicationProviderService</code>
+        <ul>
+          <li>Extends <code>Service</code> and includes callback methods to
+          respond to the complication system
+          </li>
+
+          <li>Callback methods are all called on the main thread
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ComplicationManager</code>
+        <ul>
+          <li>A wrapper for the complication manager service, for use by
+          providers
+          </li>
+
+          <li>Allows providers to send complication data to the system
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ProviderChooserIntent</code>
+        <ul>
+          <li>Non-instantiable utility class
+          </li>
+
+          <li>Includes a method that a watch face can call for starting a
+          provider chooser (to allow a user to configure complications)
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ProviderInfoRetriever</code>
+        <ul>
+          <li>Can be used (by watch face configuration activities) to retrieve
+          the current data provider information (app, provider name, icon) for
+          all complications belonging to a watch face
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ProviderUpdateRequester</code>
+        <ul>
+          <li>Can be used by data provider apps to trigger calls to
+          <code>onComplicationUpdated</code> in their provider service, to
+          enable the push of updates
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <p>
+      Additionally, the <code>WatchFaceService.Engine</code> class contains the
+      following new methods:
+    </p>
+
+    <ul>
+      <li>
+        <code>setActiveComplications</code>
+        <ul>
+          <li>Should be called by the watch face to tell the
+          <code>ComplicationManager</code> object what complication slots are
+          available and what types are supported
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>onComplicationDataUpdate</code>
+        <ul>
+          <li>Called by the <code>ComplicationManager</code> object to send
+          complication data to the watch face
+          </li>
+        </ul>
+      </li>
+    </ul>

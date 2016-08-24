@@ -254,7 +254,7 @@ widget in your layout:</p>
 <p>The {@link android.support.v7.widget.RecyclerView} and {@link android.support.v7.widget.CardView}
 widgets are part of the <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support
 Libraries</a>. To use these widgets in your project, add these
-<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle dependencies</a> to your
+<a href="{@docRoot}studio/build/index.html#dependencies">Gradle dependencies</a> to your
 app's module:</p>
 
 <pre>

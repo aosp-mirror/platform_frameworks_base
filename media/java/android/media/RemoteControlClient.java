@@ -349,16 +349,6 @@ import java.lang.IllegalArgumentException;
      */
     public RemoteControlClient(PendingIntent mediaButtonIntent) {
         mRcMediaIntent = mediaButtonIntent;
-
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-            Log.e(TAG, "RemoteControlClient() couldn't find main application thread");
-        }
     }
 
     /**
@@ -378,8 +368,6 @@ import java.lang.IllegalArgumentException;
      */
     public RemoteControlClient(PendingIntent mediaButtonIntent, Looper looper) {
         mRcMediaIntent = mediaButtonIntent;
-
-        mEventHandler = new EventHandler(this, looper);
     }
 
     /**
@@ -707,39 +695,6 @@ import java.lang.IllegalArgumentException;
         }
     }
 
-    // TODO investigate if we still need position drift checking
-    private void onPositionDriftCheck() {
-        if (DEBUG) { Log.d(TAG, "onPositionDriftCheck()"); }
-        synchronized(mCacheLock) {
-            if ((mEventHandler == null) || (mPositionProvider == null) || !mNeedsPositionSync) {
-                return;
-            }
-            if ((mPlaybackPositionMs < 0) || (mPlaybackSpeed == 0.0f)) {
-                if (DEBUG) { Log.d(TAG, " no valid position or 0 speed, no check needed"); }
-                return;
-            }
-            long estPos = mPlaybackPositionMs + (long)
-                    ((SystemClock.elapsedRealtime() - mPlaybackStateChangeTimeMs) / mPlaybackSpeed);
-            long actPos = mPositionProvider.onGetPlaybackPosition();
-            if (actPos >= 0) {
-                if (Math.abs(estPos - actPos) > POSITION_DRIFT_MAX_MS) {
-                    // drift happened, report the new position
-                    if (DEBUG) { Log.w(TAG, " drift detected: actual=" +actPos +"  est=" +estPos); }
-                    setPlaybackState(mPlaybackState, actPos, mPlaybackSpeed);
-                } else {
-                    if (DEBUG) { Log.d(TAG, " no drift: actual=" + actPos +"  est=" + estPos); }
-                    // no drift, schedule the next drift check
-                    mEventHandler.sendMessageDelayed(
-                            mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
-                            getCheckPeriodFromSpeed(mPlaybackSpeed));
-                }
-            } else {
-                // invalid position (negative value), can't check for drift
-                mEventHandler.removeMessages(MSG_POSITION_DRIFT_CHECK);
-            }
-        }
-    }
-
     /**
      * Sets the flags for the media transport control buttons that this client supports.
      * @param transportControlFlags A combination of the following flags:
@@ -856,14 +811,6 @@ import java.lang.IllegalArgumentException;
     public void setOnGetPlaybackPositionListener(OnGetPlaybackPositionListener l) {
         synchronized(mCacheLock) {
             mPositionProvider = l;
-            if ((mPositionProvider != null) && (mEventHandler != null)
-                    && playbackPositionShouldMove(mPlaybackState)) {
-                // playback position is already moving, but now we have a position provider,
-                // so schedule a drift check right now
-                mEventHandler.sendMessageDelayed(
-                        mEventHandler.obtainMessage(MSG_POSITION_DRIFT_CHECK),
-                        0 /*check now*/);
-            }
         }
     }
 
@@ -1000,26 +947,6 @@ import java.lang.IllegalArgumentException;
             }
         }
     };
-
-    private EventHandler mEventHandler;
-    private final static int MSG_POSITION_DRIFT_CHECK = 11;
-
-    private class EventHandler extends Handler {
-        public EventHandler(RemoteControlClient rcc, Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-                case MSG_POSITION_DRIFT_CHECK:
-                    onPositionDriftCheck();
-                    break;
-                default:
-                    Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
-            }
-        }
-    }
 
     //===========================================================
     // Message handlers

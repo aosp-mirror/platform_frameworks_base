@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<com.android.systemui.recents.tv.views.TaskCardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:clipToPadding="false"
+        android:orientation="vertical" >
+    <include layout="@layout/recents_tv_card_info_field"/>
+    <LinearLayout
+            android:id="@+id/card_view_thumbnail"
+            android:layout_width="@dimen/recents_tv_card_width"
+            android:layout_height="@dimen/recents_tv_screenshot_height"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/recents_tv_card_thumbnail_background"
+            android:layout_centerHorizontal="true" >
+
+        <ImageView
+                android:id="@+id/card_view_banner_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:scaleType="centerCrop"
+                android:gravity="center" />
+
+    </LinearLayout>
+    <ImageView
+            android:id="@+id/dismiss_icon"
+            android:layout_width="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_height="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/recents_tv_dismiss_icon_top_margin"
+            android:layout_marginBottom="@dimen/recents_tv_dismiss_icon_bottom_margin"
+            android:alpha="@integer/dismiss_unselected_alpha"
+            android:src="@drawable/recents_tv_dismiss_icon" />
+    <TextView
+            android:id="@+id/card_dismiss_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/recents_tv_dismiss_text_size"
+            android:fontFamily="@string/font_roboto_light"
+            android:textColor="@color/recents_tv_dismiss_text_color"
+            android:text="@string/recents_tv_dismiss"
+            android:alpha="0.0"
+            android:layout_gravity="center_horizontal" />
+</com.android.systemui.recents.tv.views.TaskCardView>

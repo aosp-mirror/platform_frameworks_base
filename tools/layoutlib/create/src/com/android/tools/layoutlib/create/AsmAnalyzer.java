@@ -438,7 +438,8 @@ public class AsmAnalyzer {
 
             try {
                 // exclude classes that are part of the default JRE (the one executing this program)
-                if (getClass().getClassLoader().loadClass(className) != null) {
+                if (className.startsWith("java.") ||
+                        getClass().getClassLoader().loadClass(className) != null) {
                     return;
                 }
             } catch (ClassNotFoundException e) {

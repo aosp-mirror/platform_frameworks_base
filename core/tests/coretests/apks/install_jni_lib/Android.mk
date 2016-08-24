@@ -22,6 +22,8 @@ LOCAL_SRC_FILES := \
 LOCAL_SHARED_LIBRARIES := \
     libnativehelper
 
+LOCAL_CFLAGS += -Wall -Werror
+
 LOCAL_MODULE := libframeworks_coretests_jni
 
 # this does not prevent build system

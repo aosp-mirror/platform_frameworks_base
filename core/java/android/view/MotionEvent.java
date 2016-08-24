@@ -417,6 +417,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_WINDOW_IS_OBSCURED = 0x1;
 
     /**
+     * This flag indicates that the window that received this motion event is partly
+     * or wholly obscured by another visible window above it.  This flag is set to true
+     * even if the event did not directly pass through the obscured area.
+     * A security sensitive application can check this flag to identify situations in which
+     * a malicious application may have covered up part of its content for the purpose
+     * of misleading the user or hijacking touches.  An appropriate response might be
+     * to drop the suspect touches or to take additional precautions to confirm the user's
+     * actual intent.
+     *
+     * Unlike FLAG_WINDOW_IS_OBSCURED, this is actually true.
+     * @hide
+     */
+    public static final int FLAG_WINDOW_IS_PARTIALLY_OBSCURED = 0x2;
+
+    /**
      * Private flag that indicates when the system has detected that this motion event
      * may be inconsistent with respect to the sequence of previously delivered motion events,
      * such as when a pointer move event is sent but the pointer is not down.
@@ -978,6 +993,37 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int AXIS_SCROLL = 26;
 
     /**
+     * Axis constant: The movement of x position of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a mouse, reports a difference of x position between the previous position.
+     * This is useful when pointer is captured, in that case the mouse pointer doesn't change
+     * the location but this axis reports the difference which allows the app to see
+     * how the mouse is moved.
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int, int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RELATIVE_X = 27;
+
+    /**
+     * Axis constant: The movement of y position of a motion event.
+     * <p>
+     * This is similar to {@link #AXIS_RELATIVE_X} but for y-axis.
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int, int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RELATIVE_Y = 28;
+
+    /**
      * Axis constant: Generic 1 axis of a motion event.
      * The interpretation of a generic axis is device-specific.
      *
@@ -1188,6 +1234,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_DISTANCE, "AXIS_DISTANCE");
         names.append(AXIS_TILT, "AXIS_TILT");
         names.append(AXIS_SCROLL, "AXIS_SCROLL");
+        names.append(AXIS_RELATIVE_X, "AXIS_REALTIVE_X");
+        names.append(AXIS_RELATIVE_Y, "AXIS_REALTIVE_Y");
         names.append(AXIS_GENERIC_1, "AXIS_GENERIC_1");
         names.append(AXIS_GENERIC_2, "AXIS_GENERIC_2");
         names.append(AXIS_GENERIC_3, "AXIS_GENERIC_3");
@@ -2019,7 +2067,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     
     /**
      * Return the pointer identifier associated with a particular pointer
-     * data index is this event.  The identifier tells you the actual pointer
+     * data index in this event.  The identifier tells you the actual pointer
      * number associated with the data, accounting for individual pointers
      * going up and down since the start of the current gesture.
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0

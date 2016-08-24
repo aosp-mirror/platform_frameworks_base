@@ -72,10 +72,20 @@ public class Hyphenator {
                 return result;
             }
 
-            // TODO: Convert this a proper locale-fallback system
+            // If there's a variant, fall back to language+variant only, if available
+            final String variant = locale.getVariant();
+            if (!variant.isEmpty()) {
+                final Locale languageAndVariantOnlyLocale =
+                        new Locale(locale.getLanguage(), "", variant);
+                result = sMap.get(languageAndVariantOnlyLocale);
+                if (result != null) {
+                    sMap.put(locale, result);
+                    return result;
+                }
+            }
 
             // Fall back to language-only, if available
-            Locale languageOnlyLocale = new Locale(locale.getLanguage());
+            final Locale languageOnlyLocale = new Locale(locale.getLanguage());
             result = sMap.get(languageOnlyLocale);
             if (result != null) {
                 sMap.put(locale, result);
@@ -83,9 +93,9 @@ public class Hyphenator {
             }
 
             // Fall back to script-only, if available
-            String script = locale.getScript();
+            final String script = locale.getScript();
             if (!script.equals("")) {
-                Locale scriptOnlyLocale = new Locale.Builder()
+                final Locale scriptOnlyLocale = new Locale.Builder()
                         .setLanguage("und")
                         .setScript(script)
                         .build();
@@ -142,8 +152,19 @@ public class Hyphenator {
         {"en-UM", "en-US"}, // English (United States Minor Outlying Islands)
         {"en-VI", "en-US"}, // English (Virgin Islands)
 
+        // All English locales other than those falling back to en-US are mapped to en-GB.
+        {"en", "en-GB"},
+
+        // For German, we're assuming the 1996 (and later) orthography by default.
+        {"de", "de-1996"},
+        // Liechtenstein uses the Swiss hyphenation rules for the 1901 orthography.
+        {"de-LI-1901", "de-CH-1901"},
+
         // Norwegian is very probably Norwegian Bokmål.
         {"no", "nb"},
+
+        // Use mn-Cyrl. According to CLDR's likelySubtags.xml, mn is most likely to be mn-Cyrl.
+        {"mn", "mn-Cyrl"}, // Mongolian
 
         // Fall back to Ethiopic script for languages likely to be written in Ethiopic.
         // Data is from CLDR's likelySubtags.xml.
@@ -166,7 +187,38 @@ public class Hyphenator {
         sMap.put(null, null);
 
         // TODO: replace this with a discovery-based method that looks into /system/usr/hyphen-data
-        String[] availableLanguages = {"en-US", "eu", "hu", "hy", "nb", "nn", "und-Ethi"};
+        String[] availableLanguages = {
+            "as",
+            "bn",
+            "cy",
+            "da",
+            "de-1901", "de-1996", "de-CH-1901",
+            "en-GB", "en-US",
+            "es",
+            "et",
+            "eu",
+            "fr",
+            "ga",
+            "gu",
+            "hi",
+            "hr",
+            "hu",
+            "hy",
+            "kn",
+            "ml",
+            "mn-Cyrl",
+            "mr",
+            "nb",
+            "nn",
+            "or",
+            "pa",
+            "pt",
+            "sl",
+            "ta",
+            "te",
+            "tk",
+            "und-Ethi",
+        };
         for (int i = 0; i < availableLanguages.length; i++) {
             String languageTag = availableLanguages[i];
             Hyphenator h = loadHyphenator(languageTag);

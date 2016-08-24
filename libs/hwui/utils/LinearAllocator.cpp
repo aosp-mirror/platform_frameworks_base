@@ -32,7 +32,7 @@
 
 
 // The ideal size of a page allocation (these need to be multiples of 8)
-#define INITIAL_PAGE_SIZE ((size_t)4096) // 4kb
+#define INITIAL_PAGE_SIZE ((size_t)512) // 512b
 #define MAX_PAGE_SIZE ((size_t)131072) // 128kb
 
 // The maximum amount of wasted space we can have per page
@@ -40,7 +40,7 @@
 // If this is too low, we will malloc too much
 // Too high, and we may waste too much space
 // Must be smaller than INITIAL_PAGE_SIZE
-#define MAX_WASTE_SIZE ((size_t)1024)
+#define MAX_WASTE_RATIO (0.5f)
 
 #if ALIGN_DOUBLE
 #define ALIGN_SZ (sizeof(double))
@@ -52,8 +52,8 @@
 #define ALIGN_PTR(p) ((void*)(ALIGN((size_t)(p))))
 
 #if LOG_NDEBUG
-#define ADD_ALLOCATION(size)
-#define RM_ALLOCATION(size)
+#define ADD_ALLOCATION()
+#define RM_ALLOCATION()
 #else
 #include <utils/Thread.h>
 #include <utils/Timers.h>
@@ -65,25 +65,21 @@ static void _logUsageLocked() {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
     if (now > s_nextLog) {
         s_nextLog = now + milliseconds_to_nanoseconds(10);
-        ALOGV("Total memory usage: %zu kb", s_totalAllocations / 1024);
+        ALOGV("Total pages allocated: %zu", s_totalAllocations);
     }
 }
 
-static void _addAllocation(size_t size) {
+static void _addAllocation(int count) {
     android::AutoMutex lock(s_mutex);
-    s_totalAllocations += size;
+    s_totalAllocations += count;
     _logUsageLocked();
 }
 
-#define ADD_ALLOCATION(size) _addAllocation(size);
-#define RM_ALLOCATION(size) _addAllocation(-size);
+#define ADD_ALLOCATION(size) _addAllocation(1);
+#define RM_ALLOCATION(size) _addAllocation(-1);
 #endif
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
-
-void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la) {
-    return la.alloc(size);
-}
 
 namespace android {
 namespace uirenderer {
@@ -114,7 +110,7 @@ private:
 
 LinearAllocator::LinearAllocator()
     : mPageSize(INITIAL_PAGE_SIZE)
-    , mMaxAllocSize(MAX_WASTE_SIZE)
+    , mMaxAllocSize(INITIAL_PAGE_SIZE * MAX_WASTE_RATIO)
     , mNext(0)
     , mCurrentPage(0)
     , mPages(0)
@@ -134,13 +130,13 @@ LinearAllocator::~LinearAllocator(void) {
         Page* next = p->next();
         p->~Page();
         free(p);
-        RM_ALLOCATION(mPageSize);
+        RM_ALLOCATION();
         p = next;
     }
 }
 
 void* LinearAllocator::start(Page* p) {
-    return ALIGN_PTR(((size_t*)p) + sizeof(Page));
+    return ALIGN_PTR((size_t)p + sizeof(Page));
 }
 
 void* LinearAllocator::end(Page* p) {
@@ -156,6 +152,7 @@ void LinearAllocator::ensureNext(size_t size) {
 
     if (mCurrentPage && mPageSize < MAX_PAGE_SIZE) {
         mPageSize = min(MAX_PAGE_SIZE, mPageSize * 2);
+        mMaxAllocSize = mPageSize * MAX_WASTE_RATIO;
         mPageSize = ALIGN(mPageSize);
     }
     mWastedSpace += mPageSize;
@@ -170,7 +167,7 @@ void LinearAllocator::ensureNext(size_t size) {
     mNext = start(mCurrentPage);
 }
 
-void* LinearAllocator::alloc(size_t size) {
+void* LinearAllocator::allocImpl(size_t size) {
     size = ALIGN(size);
     if (size > mMaxAllocSize && !fitsInCurrentPage(size)) {
         ALOGV("Exceeded max size %zu > %zu", size, mMaxAllocSize);
@@ -195,7 +192,7 @@ void LinearAllocator::addToDestructionList(Destructor dtor, void* addr) {
                   "DestructorNode must have standard layout");
     static_assert(std::is_trivially_destructible<DestructorNode>::value,
                   "DestructorNode must be trivially destructable");
-    auto node = new (*this) DestructorNode();
+    auto node = new (allocImpl(sizeof(DestructorNode))) DestructorNode();
     node->dtor = dtor;
     node->addr = addr;
     node->next = mDtorList;
@@ -237,7 +234,7 @@ void LinearAllocator::rewindIfLastAlloc(void* ptr, size_t allocSize) {
 
 LinearAllocator::Page* LinearAllocator::newPage(size_t pageSize) {
     pageSize = ALIGN(pageSize + sizeof(LinearAllocator::Page));
-    ADD_ALLOCATION(pageSize);
+    ADD_ALLOCATION();
     mTotalAllocated += pageSize;
     mPageCount++;
     void* buf = malloc(pageSize);

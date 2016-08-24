@@ -27,7 +27,6 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * named constants. If the {@link #flag()} attribute is set to true,
  * multiple constants can be combined.
  * <p>
- * Example:
  * <pre><code>
  *  &#64;Retention(SOURCE)
  *  &#64;IntDef({NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
@@ -43,7 +42,7 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * For a flag, set the flag attribute:
  * <pre><code>
  *  &#64;IntDef(
- *      flag = true
+ *      flag = true,
  *      value = {NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
  * </code></pre>
  *

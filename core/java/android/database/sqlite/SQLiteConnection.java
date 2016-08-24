@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
 import android.util.LruCache;
@@ -1311,7 +1312,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                         operation.mBindArgs.clear();
                     }
                 }
-                operation.mStartTime = System.currentTimeMillis();
+                operation.mStartWallTime = System.currentTimeMillis();
+                operation.mStartTime = SystemClock.uptimeMillis();
                 operation.mKind = kind;
                 operation.mSql = sql;
                 if (bindArgs != null) {
@@ -1376,7 +1378,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
                             operation.mCookie);
                 }
-                operation.mEndTime = System.currentTimeMillis();
+                operation.mEndTime = SystemClock.uptimeMillis();
                 operation.mFinished = true;
                 return SQLiteDebug.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
                                 operation.mEndTime - operation.mStartTime);
@@ -1454,8 +1456,9 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // marker for us, potentially losing metadata in the process).
         private static final int MAX_TRACE_METHOD_NAME_LEN = 256;
 
-        public long mStartTime;
-        public long mEndTime;
+        public long mStartWallTime; // in System.currentTimeMillis()
+        public long mStartTime; // in SystemClock.uptimeMillis();
+        public long mEndTime; // in SystemClock.uptimeMillis();
         public String mKind;
         public String mSql;
         public ArrayList<Object> mBindArgs;
@@ -1468,7 +1471,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mFinished) {
                 msg.append(" took ").append(mEndTime - mStartTime).append("ms");
             } else {
-                msg.append(" started ").append(System.currentTimeMillis() - mStartTime)
+                msg.append(" started ").append(System.currentTimeMillis() - mStartWallTime)
                         .append("ms ago");
             }
             msg.append(" - ").append(getStatus());
@@ -1519,7 +1522,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             //       relatively expensive to create during preloading. This method is only used
             //       when dumping a connection, which is a rare (mainly error) case. So:
             //       DO NOT CACHE.
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(mStartTime));
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date(mStartWallTime));
         }
     }
 }

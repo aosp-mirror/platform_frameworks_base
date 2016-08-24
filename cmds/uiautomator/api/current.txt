@@ -1,6 +1,6 @@
 package com.android.uiautomator.core {
 
-  public final class Configurator {
+  public final deprecated class Configurator {
     method public long getActionAcknowledgmentTimeout();
     method public static com.android.uiautomator.core.Configurator getInstance();
     method public long getKeyInjectionDelay();
@@ -14,7 +14,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.Configurator setWaitForSelectorTimeout(long);
   }
 
-  public class UiCollection extends com.android.uiautomator.core.UiObject {
+  public deprecated class UiCollection extends com.android.uiautomator.core.UiObject {
     ctor public UiCollection(com.android.uiautomator.core.UiSelector);
     method public com.android.uiautomator.core.UiObject getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String) throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public com.android.uiautomator.core.UiObject getChildByInstance(com.android.uiautomator.core.UiSelector, int) throws com.android.uiautomator.core.UiObjectNotFoundException;
@@ -22,7 +22,7 @@ package com.android.uiautomator.core {
     method public int getChildCount(com.android.uiautomator.core.UiSelector);
   }
 
-  public class UiDevice {
+  public deprecated class UiDevice {
     method public void clearLastTraversedText();
     method public boolean click(int, int);
     method public boolean drag(int, int, int, int, int);
@@ -77,7 +77,7 @@ package com.android.uiautomator.core {
     method public void wakeUp() throws android.os.RemoteException;
   }
 
-  public class UiObject {
+  public deprecated class UiObject {
     ctor public UiObject(com.android.uiautomator.core.UiSelector);
     method public void clearTextField() throws com.android.uiautomator.core.UiObjectNotFoundException;
     method public boolean click() throws com.android.uiautomator.core.UiObjectNotFoundException;
@@ -130,13 +130,13 @@ package com.android.uiautomator.core {
     field protected static final long WAIT_FOR_WINDOW_TMEOUT = 5500L; // 0x157cL
   }
 
-  public class UiObjectNotFoundException extends java.lang.Exception {
+  public deprecated class UiObjectNotFoundException extends java.lang.Exception {
     ctor public UiObjectNotFoundException(java.lang.String);
     ctor public UiObjectNotFoundException(java.lang.String, java.lang.Throwable);
     ctor public UiObjectNotFoundException(java.lang.Throwable);
   }
 
-  public class UiScrollable extends com.android.uiautomator.core.UiCollection {
+  public deprecated class UiScrollable extends com.android.uiautomator.core.UiCollection {
     ctor public UiScrollable(com.android.uiautomator.core.UiSelector);
     method protected boolean exists(com.android.uiautomator.core.UiSelector);
     method public boolean flingBackward() throws com.android.uiautomator.core.UiObjectNotFoundException;
@@ -165,7 +165,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiScrollable setSwipeDeadZonePercentage(double);
   }
 
-  public class UiSelector {
+  public deprecated class UiSelector {
     ctor public UiSelector();
     method public com.android.uiautomator.core.UiSelector checkable(boolean);
     method public com.android.uiautomator.core.UiSelector checked(boolean);
@@ -198,7 +198,7 @@ package com.android.uiautomator.core {
     method public com.android.uiautomator.core.UiSelector textStartsWith(java.lang.String);
   }
 
-  public abstract interface UiWatcher {
+  public abstract deprecated interface UiWatcher {
     method public abstract boolean checkForCondition();
   }
 
@@ -206,11 +206,11 @@ package com.android.uiautomator.core {
 
 package com.android.uiautomator.testrunner {
 
-  public abstract interface IAutomationSupport {
+  public abstract deprecated interface IAutomationSupport {
     method public abstract void sendStatus(int, android.os.Bundle);
   }
 
-  public class UiAutomatorTestCase extends junit.framework.TestCase {
+  public deprecated class UiAutomatorTestCase extends junit.framework.TestCase {
     ctor public UiAutomatorTestCase();
     method public com.android.uiautomator.testrunner.IAutomationSupport getAutomationSupport();
     method public android.os.Bundle getParams();

@@ -1,0 +1,197 @@
+page.title=Java 8 の言語機能
+page.keywords="android N", "Java 8", "Jack"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <ol>
+      <li>
+        <a href="#supported-features">サポートされる Java 8 の言語機能と API</a>
+      </li>
+      <li>
+        <a href="#configuration">Java 8 の機能と Jack ツールチェーンの有効化</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>Android N 向けのアプリを開発する際は、Java 8 の言語機能をご利用いただけます。このページでは Android N Preview でサポートしている Java 8 の新言語機能や、それらを利用するためのプロジェクトの正しい設定方法、想定される既知の問題についてご紹介します。
+
+
+
+
+</p>
+
+<p>これらの機能を使うには、Android Studio 2.1 と Android N Preview SDK をダウンロードしてセットアップし、Jack ツールチェーンと最新の Gradle 用の Android Plugin を準備する必要があります。
+
+Android N Preview SDK をインストールしていない場合は、<a href="{@docRoot}preview/setup-sdk.html">Android N 向けの開発準備</a>をご覧ください。
+</p>
+
+
+
+<p class="note">
+  <strong>注:</strong>Android N プラットフォーム向けのアプリを開発する際は、必ずしも Java 8 の新言語機能を使う必要はありません。
+Java 8 の言語機能を使用せずにコーディングしたい場合は、プロジェクトのソースを保持して、ターゲットの互換性の指定を Java 7 にしておくこともできます。ただし、Android N プラットフォームでビルドするときは、必ず JDK 8 を使用してコンパイルしてください。
+
+
+
+</p>
+
+<h2 id="supported-features">
+  サポートされる Java 8 の言語機能と API
+</h2>
+
+<p>
+  Android ではまだ Java 8 の全言語機能はサポートしていません。現時点で Android N Preview 向けのアプリを開発する際にご利用いただける機能は、以下のとおりです。
+
+
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html">デフォルトおよび静的インターフェースのメソッド</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">ラムダ式</a>（API レベル 23 以前でも利用可能）
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">反復アノテーション</a>
+
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">メソッド参照</a>（API レベル 23 以前でも利用可能）
+
+  </li>
+</ul>
+
+<p class="note">
+  <strong>注:</strong>以前のバージョンの Android でラムダ式とメソッド参照をテストするには、{@code build.gradle} ファイルに移動し、{@code compileSdkVersion} と {@code targetSdkVersion} を 23 以前に設定します。
+
+
+これらの Java 8 機能を使用するには、<a href="#configuration">Jack ツールチェーンを有効にする</a>必要があります。
+
+</p>
+
+<p>
+  さらに以下の Java 8 言語機能の API もご利用いただけます。
+</p>
+
+<ul>
+  <li>リフレクションおよび言語関連の API
+    <ul>
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html">
+        {@code java.lang.FunctionalInterface}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Repeatable.html">
+        {@code java.lang.annotation.Repeatable}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html#isDefault--">
+        {@code java.lang.reflect.Method.isDefault()}</a>
+      </li>
+
+      <li>以下のような反復アノテーション関連のリフレクション API
+      <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
+        {@code AnnotatedElement.getAnnotationsByType(Class)}</a>
+      </li>
+    </ul>
+  </li>
+
+  <li>ユーティリティ API
+    <ul>
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">
+        {@code java.util.function}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html">
+        {@code java.util.stream}</a>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="configuration">
+  Java 8 の機能と Jack ツールチェーンの有効化
+</h2>
+
+<p>
+  Java 8 の新言語機能を使うには、新しい <a class="external-link" href="https://source.android.com/source/jack.html">Jack ツールチェーン</a>も必要です。
+この新しい Android ツールチェーンは、Java 言語のソースを Android で判別可能な dex バイトコードにコンパイルします。さらにこのツールには独自の {@code .jack} ライブラリ フォーマットがあり、再パッケージ化、縮小、難読化、Multidex など、ほとんどのツールチェーン機能に対応しています。
+
+
+
+
+</p>
+
+<p>以下は、Android の DEX ファイルのビルドに使用する 2 つのツールチェーンの比較です。</p>
+<ul>
+  <li>以前の javac ツールチェーン<br>
+  <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
+  .class} --&gt; {@code .dex})
+  </li>
+
+  <li>新しい Jack ツールチェーン<br>
+  <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
+  </li>
+</ul>
+
+<h3>
+  Gradle の設定
+</h3>
+
+<p>
+  プロジェクトで Java 8 の言語機能と Jack を有効にするには、モジュール レベルの {@code build.gradle} ファイルに以下の内容を記載します。
+
+</p>
+
+<pre>
+android {
+  ...
+  defaultConfig {
+    ...
+    jackOptions {
+      enabled true
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+</pre>
+
+<h3 id="known-issues">
+  既知の問題
+</h3>
+
+<p>
+  <a href="{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a> は、現段階では Jack と併用できません。そのため新しいツールチェーンの使用中は無効になります。
+
+
+</p>
+
+<p>Jack はアプリのコンパイル中に中間クラスファイルを生成しないため、中間ファイルに依存するツールは現在 Jack と併用できません。
+このようなツールの例は以下のとおりです。
+</p>
+
+<ul>
+  <li>クラスファイルに作用する Lint Detector
+  </li>
+
+  <li>アプリのクラスファイルを必要とするツールやライブラリ（JaCoCo での計測テストなど）
+
+  </li>
+</ul>
+
+<p>Jack の使用についてその他の不具合がありましたら、<a href="http://tools.android.com/filing-bugs">バグの報告</a>をお願いします。</p>

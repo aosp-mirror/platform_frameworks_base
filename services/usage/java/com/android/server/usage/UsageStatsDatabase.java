@@ -25,6 +25,10 @@ import android.util.TimeUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -38,6 +42,14 @@ import java.util.List;
  */
 class UsageStatsDatabase {
     private static final int CURRENT_VERSION = 3;
+
+    // Current version of the backup schema
+    static final int BACKUP_VERSION = 1;
+
+    // Key under which the payload blob is stored
+    // same as UsageStatsBackupHelper.KEY_USAGE_STATS
+    static final String KEY_USAGE_STATS = "usage_stats";
+
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -350,23 +362,6 @@ class UsageStatsDatabase {
     }
 
     /**
-     * Get the time at which the latest stats begin for this interval type.
-     */
-    public long getLatestUsageStatsBeginTime(int intervalType) {
-        synchronized (mLock) {
-            if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
-                throw new IllegalArgumentException("Bad interval type " + intervalType);
-            }
-
-            final int statsFileCount = mSortedStatFiles[intervalType].size();
-            if (statsFileCount > 0) {
-                return mSortedStatFiles[intervalType].keyAt(statsFileCount - 1);
-            }
-            return -1;
-        }
-    }
-
-    /**
      * Figures out what to extract from the given IntervalStats object.
      */
     interface StatCombiner<T> {
@@ -540,6 +535,7 @@ class UsageStatsDatabase {
      * Update the stats in the database. They may not be written to disk immediately.
      */
     public void putUsageStats(int intervalType, IntervalStats stats) throws IOException {
+        if (stats == null) return;
         synchronized (mLock) {
             if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
                 throw new IllegalArgumentException("Bad interval type " + intervalType);
@@ -555,5 +551,208 @@ class UsageStatsDatabase {
             UsageStatsXml.write(f, stats);
             stats.lastTimeSaved = f.getLastModifiedTime();
         }
+    }
+
+
+    /* Backup/Restore Code */
+    byte[] getBackupPayload(String key) {
+        synchronized (mLock) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            if (KEY_USAGE_STATS.equals(key)) {
+                prune(System.currentTimeMillis());
+                DataOutputStream out = new DataOutputStream(baos);
+                try {
+                    out.writeInt(BACKUP_VERSION);
+
+                    out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size());
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].valueAt(i));
+                    }
+
+                    out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size());
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].valueAt(i));
+                    }
+
+                    out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size());
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].valueAt(i));
+                    }
+
+                    out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size());
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].valueAt(i));
+                    }
+                    if (DEBUG) Slog.i(TAG, "Written " + baos.size() + " bytes of data");
+                } catch (IOException ioe) {
+                    Slog.d(TAG, "Failed to write data to output stream", ioe);
+                    baos.reset();
+                }
+            }
+            return baos.toByteArray();
+        }
+
+    }
+
+    void applyRestoredPayload(String key, byte[] payload) {
+        synchronized (mLock) {
+            if (KEY_USAGE_STATS.equals(key)) {
+                // Read stats files for the current device configs
+                IntervalStats dailyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_DAILY);
+                IntervalStats weeklyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_WEEKLY);
+                IntervalStats monthlyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_MONTHLY);
+                IntervalStats yearlyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_YEARLY);
+
+                try {
+                    DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
+                    int backupDataVersion = in.readInt();
+
+                    // Can't handle this backup set
+                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) return;
+
+                    // Delete all stats files
+                    // Do this after reading version and before actually restoring
+                    for (int i = 0; i < mIntervalDirs.length; i++) {
+                        deleteDirectoryContents(mIntervalDirs[i]);
+                    }
+
+                    int fileCount = in.readInt();
+                    for (int i = 0; i < fileCount; i++) {
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        stats = mergeStats(stats, dailyConfigSource);
+                        putUsageStats(UsageStatsManager.INTERVAL_DAILY, stats);
+                    }
+
+                    fileCount = in.readInt();
+                    for (int i = 0; i < fileCount; i++) {
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        stats = mergeStats(stats, weeklyConfigSource);
+                        putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, stats);
+                    }
+
+                    fileCount = in.readInt();
+                    for (int i = 0; i < fileCount; i++) {
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        stats = mergeStats(stats, monthlyConfigSource);
+                        putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, stats);
+                    }
+
+                    fileCount = in.readInt();
+                    for (int i = 0; i < fileCount; i++) {
+                        IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
+                        stats = mergeStats(stats, yearlyConfigSource);
+                        putUsageStats(UsageStatsManager.INTERVAL_YEARLY, stats);
+                    }
+                    if (DEBUG) Slog.i(TAG, "Completed Restoring UsageStats");
+                } catch (IOException ioe) {
+                    Slog.d(TAG, "Failed to read data from input stream", ioe);
+                } finally {
+                    indexFilesLocked();
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the Configuration Statistics from the current device statistics and merge them
+     * with the backed up usage statistics.
+     */
+    private IntervalStats mergeStats(IntervalStats beingRestored, IntervalStats onDevice) {
+        if (onDevice == null) return beingRestored;
+        if (beingRestored == null) return null;
+        beingRestored.activeConfiguration = onDevice.activeConfiguration;
+        beingRestored.configurations.putAll(onDevice.configurations);
+        beingRestored.events = onDevice.events;
+        return beingRestored;
+    }
+
+    private void writeIntervalStatsToStream(DataOutputStream out, AtomicFile statsFile)
+            throws IOException {
+        IntervalStats stats = new IntervalStats();
+        try {
+            UsageStatsXml.read(statsFile, stats);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read usage stats file", e);
+            out.writeInt(0);
+            return;
+        }
+        sanitizeIntervalStatsForBackup(stats);
+        byte[] data = serializeIntervalStats(stats);
+        out.writeInt(data.length);
+        out.write(data);
+    }
+
+    private static byte[] getIntervalStatsBytes(DataInputStream in) throws IOException {
+        int length = in.readInt();
+        byte[] buffer = new byte[length];
+        in.read(buffer, 0, length);
+        return buffer;
+    }
+
+    private static void sanitizeIntervalStatsForBackup(IntervalStats stats) {
+        if (stats == null) return;
+        stats.activeConfiguration = null;
+        stats.configurations.clear();
+        if (stats.events != null) stats.events.clear();
+    }
+
+    private static byte[] serializeIntervalStats(IntervalStats stats) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        try {
+            out.writeLong(stats.beginTime);
+            UsageStatsXml.write(out, stats);
+        } catch (IOException ioe) {
+            Slog.d(TAG, "Serializing IntervalStats Failed", ioe);
+            baos.reset();
+        }
+        return baos.toByteArray();
+    }
+
+    private static IntervalStats deserializeIntervalStats(byte[] data) {
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        DataInputStream in = new DataInputStream(bais);
+        IntervalStats stats = new IntervalStats();
+        try {
+            stats.beginTime = in.readLong();
+            UsageStatsXml.read(in, stats);
+        } catch (IOException ioe) {
+            Slog.d(TAG, "DeSerializing IntervalStats Failed", ioe);
+            stats = null;
+        }
+        return stats;
+    }
+
+    private static void deleteDirectoryContents(File directory) {
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            deleteDirectory(file);
+        }
+    }
+
+    private static void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                } else {
+                    deleteDirectory(file);
+                }
+            }
+        }
+        directory.delete();
     }
 }

@@ -1,0 +1,221 @@
+page.title=Bahasa dan Lokal
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Dalam dokumen ini:</h2>
+<ol>
+	  <li><a href="#preN">Tantangan dalam Mengatasi Masalah Sumber Daya Bahasa</a></li>
+    <li><a href="#postN">Peningkatan pada Strategi Resolusi Sumber Daya</a></li>
+    <li><a href="#design">Mendesain Aplikasi Anda untuk Mendukung Lokal
+      Tambahan</a></li>
+
+</ol>
+
+</div>
+</div>
+
+<p>Android N memberikan dukungan yang disempurnakan untuk pengguna multibahasa,
+yang memungkinkan mereka memilih beberapa lokal dalam setelan. Android N
+menyediakan kemampuan ini dengan memperbanyak jumlah lokal yang didukung
+dan mengubah cara sistem mengatasi masalah sumber daya. Metode baru mengatasi
+masalah sumber daya ini lebih tangguh dan didesain agar kompatibel dengan APK yang ada, namun
+Anda harus ekstra hati-hati terhadap perilaku tak terduga. Misalnya, Anda
+harus menguji untuk memastikan aplikasi Anda secara default diatur ke bahasa yang diinginkan. Juga,
+jika aplikasi Anda mendukung beberapa bahasa, Anda harus memastikan dukungan ini berfungsi
+sebagaimana diinginkan. Terakhir, Anda harus mencoba memastikan aplikasi Anda dengan lancar menangani
+bahasa yang tidak secara eksplisit Anda dukung dalam desain.</p>
+
+<p>Dokumen ini diawali dengan menjelaskan strategi resolusi sumber daya sebelum
+Android N. Berikutnya, akan dijelaskan strategi
+resolusi sumber daya Android N yang telah ditingkatkan. Terakhir, akan djelaskan cara memanfaatkan
+jumlah lokal yang telah diperbanyak untuk mendukung lebih banyak pengguna multibahasa.</p>
+
+<h2 id="preN">Tantangan dalam Mengatasi Masalah Sumber Daya Bahasa</h2>
+
+<p>Sebelum Android N, Android tidak selalu
+ berhasil mencocokkan lokal aplikasi dan lokal sistem.</p>
+
+ <p>Misalnya, anggaplah Anda menghadapi situasi berikut:</p>
+ <ul>
+ <li>Bahasa default aplikasi Anda adalah {@code en_US} (US English), dan aplikasi juga
+  berisi string bahasa Spanyol yang telah dilokalkan di file sumber daya {@code es_ES}.
+</li>
+ <li> Perangkat telah disetel ke {@code es_MX} </li>
+
+<p>Bila kode Java Anda merujuk ke string, sistem akan memuat
+string dari file sumber daya default ({@code en_US}), sekalipun aplikasi memiliki
+sumber daya bahasa Spanyol yang dilokalkan pada {@code es_ES}. Hal ini karena bila sistem
+  tidak bisa menemukan hasil yang persis, sistem akan terus mencari sumber daya dengan menghilangkan
+  kode negara dari lokal tersebut. Akhirnya, jika tidak ada hasil yang ditemukan, sistem akan mengembalikan
+ ke default, yakni {@code en_US}. </p>
+
+
+<p>Sistem juga akan default ke {@code en_US} jika pengguna memilih
+bahasa yang sama sekali tidak didukung oleh aplikasi, seperti bahasa Prancis. Misalnya:</p>
+
+<p class="table-caption" id="t-resource-res">
+<strong>Tabel 1.</strong> Resolusi sumber daya tanpa lokal yang persis sama.
+</p>
+<table>
+<tbody>
+<tr>
+<th>Setelan Pengguna</th>
+<th>Sumber Daya Aplikasi</th>
+<th>Resolusi Sumber Daya</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+Coba fr_CH =&gt; Gagal<br>
+Coba fr =&gt; Gagal<br>
+Gunakan default (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>Dalam contoh ini, sistem menampilkan string bahasa Inggris
+tanpa mengetahui apakah pengguna memahami bahasa Inggris. Perilaku ini sudah sangat umum
+sekarang. Android N harus mengurangi frekuensi
+hasil seperti ini secara substansial.</p>
+
+<h2 id="postN">Peningkatan pada Strategi Resolusi Sumber Daya</h2>
+<p>Android N menghadirkan resolusi sumber daya yang lebih handal, dan
+secara otomatis menemukan solusi yang lebih baik. Akan tetapi, untuk mempercepat resolusi dan meningkatkan
+kemudahan pemeliharaan, Anda harus menyimpan sumber daya dalam dialek induk yang paling umum.
+ Misalnya, jika sebelumnya Anda telah menyimpan sumber daya bahasa Spanyol di direktori {@code es-US}
+, pindahkan ke direktori {@code es-419}, yang berisi bahasa Spanyol Amerika Latin.
+ Demikian pula, jika Anda memiliki string sumber daya dalam folder bernama {@code en-GB}, ganti nama
+ folder itu menjadi {@code en-001} (bahasa Inggris internasional), karena induk yang paling umum
+ untuk string <code>en-GB</code> adalah {@code en-001}.
+ Contoh berikut menjelaskan mengapa praktik-praktik ini meningkatkan kinerja dan
+reliabilitas resolusi sumber daya.</p>
+
+<h3>Contoh resolusi sumber daya</h3>
+
+<p>Dengan Android N, kasus yang dijelaskan dalam <strong>Tabel 1</strong> diatasi
+secara berbeda:</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>Tabel 2.</strong> Strategi resolusi yang ditingkatkan bila tidak ada
+lokal yang sama persis.</p>
+<table>
+<tr>
+<th>Setelan Pengguna</th>
+<th>Sumber Daya Aplikasi</th>
+<th>Resolusi Sumber Daya</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+Coba fr_CH =&gt; Gagal<br>
+Coba fr =&gt; Gagal<br>
+Coba anak dari fr =&gt; fr_FR<br>
+Gunakan fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>Sekarang pengguna mendapatkan sumber daya bahasa Prancis sebagai ganti bahasa Inggris. Contoh ini juga menunjukkan
+ mengapa Anda harus menyimpan string bahasa Prancis di {@code fr} bukan pada {@code fr_FR}
+ untuk Android N. Arah aksi di sini adalah untuk mencocokkan dengan induk dialek terdekat,
+ membuat resolusi lebih cepat dan lebih dapat diprediksi.</p>
+
+<p>Selain logika resolusi yang diperbaiki ini, Android sekarang menawarkan lebih banyak
+pilihan bahasa untuk pengguna. Mari kita coba lagi contoh di atas dengan menetapkan bahasa Italia
+ sebagai bahasa pengguna tambahan, tetapi tanpa dukungan aplikasi untuk bahasa Prancis.  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>Tabel 3.</strong> Resolusi sumber daya bila aplikasi hanya mencocokkan
+setelan lokal yang disukai kedua oleh pengguna.</p>
+<table>
+<tr>
+<th>Setelan Pengguna</th>
+<th>Sumber Daya Aplikasi</th>
+<th>Resolusi Sumber Daya</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+default (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+Coba fr_CH =&gt; Gagal<br>
+Coba fr =&gt; Gagal<br>
+Coba anak dari fr =&gt; Gagal<br>
+Coba it_CH =&gt; Gagal<br>
+Coba it =&gt; Gagal<br>
+Coba anak dari it =&gt; it_IT<br>
+Gunakan it_IT
+</td>
+
+</tr>
+
+</table>
+<p>Pengguna tetap mendapatkan bahasa yang mereka pahami, meskipun aplikasi tidak
+mendukung bahasa Prancis.</p>
+
+
+<h2 id="design">Mendesain Aplikasi Anda untuk Mendukung Lokal Tambahan</h2>
+<h3>LocaleList API</h3>
+
+<p>Android N menambahkan API baru {@code LocaleList.getDefault()}
+yang memungkinkan aplikasi langsung kueri daftar bahasa yang telah ditetapkan pengguna. API ini
+memungkinkan Anda membuat
+ perilaku aplikasi yang lebih canggih dan tampilan materi yang lebih optimal. Misalnya, Telusur
+  bisa menampilkan hasil dalam beberapa bahasa berdasarkan setelan pengguna.  Aplikasi browser
+  bisa menghindari penawaran menerjemahkan halaman dalam bahasa yang sudah diketahui pengguna,
+  dan aplikasi keyboard bisa mengaktifkan otomatis semua layout yang sesuai. </p>
+
+<h3>Formatter</h3>
+
+<p>Hingga Android 6.0 (API level 23), Android hanya mendukung satu atau dua lokal
+ untuk banyak bahasa umum
+(en, es, ar, fr, ru). Karena hanya ada beberapa varian dari setiap bahasa,
+aplikasi bisa menghindar dengan menyimpan beberapa nomor dan tanggal sebagai string hard-code
+dalam file sumber daya.  Akan tetapi, dengan perluasan set lokal yang didukung Android,
+maka akan ada
+perbedaan format yang signifikan untuk tanggal, waktu, mata uang, dan informasi
+serupa bahkan dalam lokal tunggal. Menjadikan format Anda sebagai hard-code bisa menghasilkan
+pengalaman yang membingungkan bagi pengguna akhir.  Karena itu, saat mengembangkan untuk Android N
+pastikan menggunakan formatter sebagai ganti menjadikan string angka dan tanggal sebagai hard-code.</p>
+
+<p>Contoh terbaik adalah bahasa Arab, yang mendukung Android N berkembang dari
+satu {@code ar_EG} menjadi 27 lokal bahasa Arab. Bahasa lokal ini bisa berbagi hampir semua sumber daya,
+namun sebagian lebih memilih digit ASCII, sementara yang lain memilih digit asli. Misalnya,
+bila Anda ingin membuat kalimat dengan variabel digit, seperti
+"Pilih PIN 4 digit", gunakan formatter seperti yang ditampilkan di bawah ini:</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

@@ -125,7 +125,7 @@ public class VpnProfile implements Cloneable, Parcelable {
 
             VpnProfile profile = new VpnProfile(key);
             profile.name = values[0];
-            profile.type = Integer.valueOf(values[1]);
+            profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
                 return null;
             }

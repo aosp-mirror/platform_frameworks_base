@@ -16,7 +16,7 @@
 
 package com.android.documentsui.model;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.Shared.TAG;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;

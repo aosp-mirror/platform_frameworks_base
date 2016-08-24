@@ -23,13 +23,14 @@ class ResourceTable;
 enum {
     XML_COMPILE_STRIP_COMMENTS = 1<<0,
     XML_COMPILE_ASSIGN_ATTRIBUTE_IDS = 1<<1,
-    XML_COMPILE_COMPACT_WHITESPACE = 1<<2,
-    XML_COMPILE_STRIP_WHITESPACE = 1<<3,
-    XML_COMPILE_STRIP_RAW_VALUES = 1<<4,
-    XML_COMPILE_UTF8 = 1<<5,
+    XML_COMPILE_PARSE_VALUES = 1 << 2,
+    XML_COMPILE_COMPACT_WHITESPACE = 1<<3,
+    XML_COMPILE_STRIP_WHITESPACE = 1<<4,
+    XML_COMPILE_STRIP_RAW_VALUES = 1<<5,
+    XML_COMPILE_UTF8 = 1<<6,
 
     XML_COMPILE_STANDARD_RESOURCE =
-            XML_COMPILE_STRIP_COMMENTS | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
+            XML_COMPILE_STRIP_COMMENTS | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS | XML_COMPILE_PARSE_VALUES
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES
 };
 
@@ -83,6 +84,8 @@ struct CompileResourceWorkItem {
     String16 resourceName;
     String8 resPath;
     sp<AaptFile> file;
+    sp<XMLNode> xmlRoot;
+    bool needsCompiling = true;
 };
 
 class ResourceTable : public ResTable::Accessor
@@ -205,6 +208,12 @@ public:
                              const String16& resourceName,
                              const sp<AaptFile>& file,
                              const sp<XMLNode>& root);
+
+    status_t processBundleFormat(const Bundle* bundle,
+                                 const String16& resourceName,
+                                 const sp<AaptFile>& file,
+                                 const sp<XMLNode>& parent);
+
 
     sp<AaptFile> flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
             const bool isBase);
@@ -562,6 +571,18 @@ public:
 
     void getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources);
 
+    /**
+     * Make an attribute with the specified format. If another attribute with the same name but
+     * different format exists, this method returns false. If the name is not taken, or if the
+     * format is identical, this returns true.
+     */
+    bool makeAttribute(const String16& package,
+                       const String16& name,
+                       const SourcePos& source,
+                       int32_t format,
+                       const String16& comment,
+                       bool appendComment);
+
 private:
     void writePublicDefinitions(const String16& package, FILE* fp, bool pub);
     sp<Package> getPackage(const String16& package);
@@ -586,6 +607,11 @@ private:
                       Res_value* outValue);
     int getPublicAttributeSdkLevel(uint32_t attrId) const;
 
+    status_t processBundleFormatImpl(const Bundle* bundle,
+                                     const String16& resourceName,
+                                     const sp<AaptFile>& file,
+                                     const sp<XMLNode>& parent,
+                                     Vector<sp<XMLNode> >* namespaces);
 
     String16 mAssetsPackage;
     PackageType mPackageType;

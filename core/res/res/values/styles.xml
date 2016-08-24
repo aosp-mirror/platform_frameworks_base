@@ -496,6 +496,8 @@ please see styles_device_defaults.xml.
         <item name="textEditSidePasteWindowLayout">?attr/textEditSidePasteWindowLayout</item>
         <item name="textEditSideNoPasteWindowLayout">?attr/textEditSideNoPasteWindowLayout</item>
         <item name="textEditSuggestionItemLayout">?attr/textEditSuggestionItemLayout</item>
+        <item name="textEditSuggestionContainerLayout">?attr/textEditSuggestionContainerLayout</item>
+        <item name="textEditSuggestionHighlightStyle">?attr/textEditSuggestionHighlightStyle</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
         <item name="breakStrategy">high_quality</item>
         <item name="hyphenationFrequency">normal</item>
@@ -954,10 +956,10 @@ please see styles_device_defaults.xml.
         <item name="dividerPadding">6dip</item>
     </style>
 
-     <style name="TextAppearance.SuggestionHighlight">
-         <item name="textSize">18sp</item>
-         <item name="textColor">@color/suggestion_highlight_text</item>
-     </style>
+    <style name="TextAppearance.SuggestionHighlight">
+        <item name="textSize">18sp</item>
+        <item name="textColor">@color/suggestion_highlight_text</item>
+    </style>
 
     <!-- Preference Styles -->
 
@@ -1197,13 +1199,6 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/fast_fade_out</item>
     </style>
 
-    <!-- Style for the popup window that contains text suggestions. -->
-    <style name="Widget.TextSuggestionsPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_background</item>
-        <item name="popupBackground">@drawable/text_edit_suggestions_window</item>
-        <item name="dropDownWidth">wrap_content</item>
-    </style>
-
     <style name="Widget.ActionBar">
         <item name="background">@drawable/action_bar_background</item>
         <item name="displayOptions">useLogo|showHome|showTitle</item>
@@ -1232,13 +1227,14 @@ please see styles_device_defaults.xml.
         <item name="titleTextAppearance">@style/TextAppearance.Widget.Toolbar.Title</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.Widget.Toolbar.Subtitle</item>
         <item name="minHeight">?attr/actionBarSize</item>
-        <item name="titleMargins">4dp</item>
-        <item name="maxButtonHeight">56dp</item>
+        <item name="titleMargin">4dp</item>
+        <item name="maxButtonHeight">@dimen/action_bar_default_height_material</item>
         <item name="buttonGravity">top</item>
         <item name="navigationButtonStyle">@style/Widget.Toolbar.Button.Navigation</item>
         <item name="collapseIcon">?attr/homeAsUpIndicator</item>
         <item name="collapseContentDescription">@string/toolbar_collapse_description</item>
         <item name="contentInsetStart">16dp</item>
+        <item name="contentInsetStartWithNavigation">@dimen/action_bar_content_inset_with_nav</item>
         <item name="touchscreenBlocksFocus">true</item>
     </style>
 
@@ -1336,6 +1332,84 @@ please see styles_device_defaults.xml.
         <item name="pointerIconSpotHover">@drawable/pointer_spot_hover_icon</item>
         <item name="pointerIconSpotTouch">@drawable/pointer_spot_touch_icon</item>
         <item name="pointerIconSpotAnchor">@drawable/pointer_spot_anchor_icon</item>
+        <item name="pointerIconHand">@drawable/pointer_hand_icon</item>
+        <item name="pointerIconContextMenu">@drawable/pointer_context_menu_icon</item>
+        <item name="pointerIconHelp">@drawable/pointer_help_icon</item>
+        <item name="pointerIconWait">@drawable/pointer_wait_icon</item>
+        <item name="pointerIconCell">@drawable/pointer_cell_icon</item>
+        <item name="pointerIconCrosshair">@drawable/pointer_crosshair_icon</item>
+        <item name="pointerIconText">@drawable/pointer_text_icon</item>
+        <item name="pointerIconVerticalText">@drawable/pointer_vertical_text_icon</item>
+        <item name="pointerIconAlias">@drawable/pointer_alias_icon</item>
+        <item name="pointerIconCopy">@drawable/pointer_copy_icon</item>
+        <item name="pointerIconAllScroll">@drawable/pointer_all_scroll_icon</item>
+        <item name="pointerIconNodrop">@drawable/pointer_nodrop_icon</item>
+        <item name="pointerIconHorizontalDoubleArrow">
+            @drawable/pointer_horizontal_double_arrow_icon
+        </item>
+        <item name="pointerIconVerticalDoubleArrow">
+            @drawable/pointer_vertical_double_arrow_icon
+        </item>
+        <item name="pointerIconTopRightDiagonalDoubleArrow">
+            @drawable/pointer_top_right_diagonal_double_arrow_icon
+        </item>
+        <item name="pointerIconTopLeftDiagonalDoubleArrow">
+            @drawable/pointer_top_left_diagonal_double_arrow_icon
+        </item>
+        <item name="pointerIconZoomIn">@drawable/pointer_zoom_in_icon</item>
+        <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_icon</item>
+        <item name="pointerIconGrab">@drawable/pointer_grab_icon</item>
+        <item name="pointerIconGrabbing">@drawable/pointer_grabbing_icon</item>
+    </style>
+
+    <style name="LargePointer">
+        <item name="pointerIconArrow">@drawable/pointer_arrow_large_icon</item>
+        <item name="pointerIconSpotHover">@drawable/pointer_spot_hover_icon</item>
+        <item name="pointerIconSpotTouch">@drawable/pointer_spot_touch_icon</item>
+        <item name="pointerIconSpotAnchor">@drawable/pointer_spot_anchor_icon</item>
+        <item name="pointerIconHand">@drawable/pointer_hand_large_icon</item>
+        <item name="pointerIconContextMenu">@drawable/pointer_context_menu_large_icon</item>
+        <item name="pointerIconHelp">@drawable/pointer_help_large_icon</item>
+        <!-- TODO: create large wait icon. -->
+        <item name="pointerIconWait">@drawable/pointer_wait_icon</item>
+        <item name="pointerIconCell">@drawable/pointer_cell_large_icon</item>
+        <item name="pointerIconCrosshair">@drawable/pointer_crosshair_large_icon</item>
+        <item name="pointerIconText">@drawable/pointer_text_large_icon</item>
+        <item name="pointerIconVerticalText">@drawable/pointer_vertical_text_large_icon</item>
+        <item name="pointerIconAlias">@drawable/pointer_alias_large_icon</item>
+        <item name="pointerIconCopy">@drawable/pointer_copy_large_icon</item>
+        <item name="pointerIconAllScroll">@drawable/pointer_all_scroll_large_icon</item>
+        <item name="pointerIconNodrop">@drawable/pointer_nodrop_large_icon</item>
+        <item name="pointerIconHorizontalDoubleArrow">
+            @drawable/pointer_horizontal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconVerticalDoubleArrow">
+            @drawable/pointer_vertical_double_arrow_large_icon
+        </item>
+        <item name="pointerIconTopRightDiagonalDoubleArrow">
+            @drawable/pointer_top_right_diagonal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconTopLeftDiagonalDoubleArrow">
+            @drawable/pointer_top_left_diagonal_double_arrow_large_icon
+        </item>
+        <item name="pointerIconZoomIn">@drawable/pointer_zoom_in_large_icon</item>
+        <item name="pointerIconZoomOut">@drawable/pointer_zoom_out_large_icon</item>
+        <item name="pointerIconGrab">@drawable/pointer_grab_large_icon</item>
+        <item name="pointerIconGrabbing">@drawable/pointer_grabbing_large_icon</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="aerr_list_item" parent="Widget.Material.Light.Button.Borderless">
+        <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
+        <item name="textAppearance">?attr/textAppearanceListItemSmall</item>
+        <item name="textColor">?attr/textColorAlertDialogListItem</item>
+        <item name="gravity">center_vertical</item>
+        <item name="paddingStart">?attr/dialogPreferredPadding</item>
+        <item name="paddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="background">?attr/selectableItemBackground</item>
+        <item name="drawablePadding">32dp</item>
+        <item name="drawableTint">@color/accent_material_light</item>
+        <item name="drawableTintMode">src_atop</item>
     </style>
 
     <!-- Wifi dialog styles -->

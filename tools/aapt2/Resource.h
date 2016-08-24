@@ -17,12 +17,16 @@
 #ifndef AAPT_RESOURCE_H
 #define AAPT_RESOURCE_H
 
-#include "StringPiece.h"
+#include "ConfigDescription.h"
+#include "Source.h"
+
+#include "util/StringPiece.h"
 
 #include <iomanip>
 #include <limits>
 #include <string>
 #include <tuple>
+#include <vector>
 
 namespace aapt {
 
@@ -43,7 +47,6 @@ enum class ResourceType {
     kFraction,
     kId,
     kInteger,
-    kIntegerArray,
     kInterpolator,
     kLayout,
     kMenu,
@@ -74,10 +77,11 @@ struct ResourceName {
     ResourceType type;
     std::u16string entry;
 
+    ResourceName() : type(ResourceType::kRaw) {}
+    ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e);
+
     bool isValid() const;
-    bool operator<(const ResourceName& rhs) const;
-    bool operator==(const ResourceName& rhs) const;
-    bool operator!=(const ResourceName& rhs) const;
+    std::u16string toString() const;
 };
 
 /**
@@ -102,10 +106,6 @@ struct ResourceNameRef {
 
     ResourceName toResourceName() const;
     bool isValid() const;
-
-    bool operator<(const ResourceNameRef& rhs) const;
-    bool operator==(const ResourceNameRef& rhs) const;
-    bool operator!=(const ResourceNameRef& rhs) const;
 };
 
 /**
@@ -125,15 +125,62 @@ struct ResourceId {
     ResourceId();
     ResourceId(const ResourceId& rhs);
     ResourceId(uint32_t resId);  // NOLINT(implicit)
-    ResourceId(size_t p, size_t t, size_t e);
+    ResourceId(uint8_t p, uint8_t t, uint16_t e);
 
     bool isValid() const;
     uint8_t packageId() const;
     uint8_t typeId() const;
     uint16_t entryId() const;
-    bool operator<(const ResourceId& rhs) const;
-    bool operator==(const ResourceId& rhs) const;
 };
+
+struct SourcedResourceName {
+    ResourceName name;
+    size_t line;
+};
+
+struct ResourceFile {
+    // Name
+    ResourceName name;
+
+    // Configuration
+    ConfigDescription config;
+
+    // Source
+    Source source;
+
+    // Exported symbols
+    std::vector<SourcedResourceName> exportedSymbols;
+};
+
+/**
+ * Useful struct used as a key to represent a unique resource in associative containers.
+ */
+struct ResourceKey {
+    ResourceName name;
+    ConfigDescription config;
+};
+
+bool operator<(const ResourceKey& a, const ResourceKey& b);
+
+/**
+ * Useful struct used as a key to represent a unique resource in associative containers.
+ * Holds a reference to the name, so that name better live longer than this key!
+ */
+struct ResourceKeyRef {
+    ResourceNameRef name;
+    ConfigDescription config;
+
+    ResourceKeyRef() = default;
+    ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c) : name(n), config(c) {
+    }
+
+    /**
+     * Prevent taking a reference to a temporary. This is bad.
+     */
+    ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
+};
+
+bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
 
 //
 // ResourceId implementation.
@@ -148,17 +195,7 @@ inline ResourceId::ResourceId(const ResourceId& rhs) : id(rhs.id) {
 inline ResourceId::ResourceId(uint32_t resId) : id(resId) {
 }
 
-inline ResourceId::ResourceId(size_t p, size_t t, size_t e) : id(0) {
-    if (p > std::numeric_limits<uint8_t>::max() ||
-            t > std::numeric_limits<uint8_t>::max() ||
-            e > std::numeric_limits<uint16_t>::max()) {
-        // This will leave the ResourceId in an invalid state.
-        return;
-    }
-
-    id = (static_cast<uint8_t>(p) << 24) |
-         (static_cast<uint8_t>(t) << 16) |
-         static_cast<uint16_t>(e);
+inline ResourceId::ResourceId(uint8_t p, uint8_t t, uint16_t e) : id((p << 24) | (t << 16) | e) {
 }
 
 inline bool ResourceId::isValid() const {
@@ -177,16 +214,23 @@ inline uint16_t ResourceId::entryId() const {
     return static_cast<uint16_t>(id);
 }
 
-inline bool ResourceId::operator<(const ResourceId& rhs) const {
-    return id < rhs.id;
+inline bool operator<(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id < rhs.id;
 }
 
-inline bool ResourceId::operator==(const ResourceId& rhs) const {
-    return id == rhs.id;
+inline bool operator>(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id > rhs.id;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-        const ResourceId& resId) {
+inline bool operator==(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id == rhs.id;
+}
+
+inline bool operator!=(const ResourceId& lhs, const ResourceId& rhs) {
+    return lhs.id != rhs.id;
+}
+
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& resId) {
     std::ios_base::fmtflags oldFlags = out.flags();
     char oldFill = out.fill();
     out << "0x" << std::internal << std::setfill('0') << std::setw(8)
@@ -208,23 +252,35 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) 
 // ResourceName implementation.
 //
 
+inline ResourceName::ResourceName(const StringPiece16& p, ResourceType t, const StringPiece16& e) :
+        package(p.toString()), type(t), entry(e.toString()) {
+}
+
 inline bool ResourceName::isValid() const {
     return !package.empty() && !entry.empty();
 }
 
-inline bool ResourceName::operator<(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator<(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             < std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceName::operator==(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator==(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             == std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceName::operator!=(const ResourceName& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator!=(const ResourceName& lhs, const ResourceName& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
+}
+
+inline std::u16string ResourceName::toString() const {
+    std::u16string result;
+    if (!package.empty()) {
+        result = package + u":";
+    }
+    return result + aapt::toString(type).toString() + u"/" + entry;
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
@@ -263,18 +319,18 @@ inline bool ResourceNameRef::isValid() const {
     return !package.empty() && !entry.empty();
 }
 
-inline bool ResourceNameRef::operator<(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator<(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             < std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceNameRef::operator==(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator==(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             == std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline bool ResourceNameRef::operator!=(const ResourceNameRef& rhs) const {
-    return std::tie(package, type, entry)
+inline bool operator!=(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
+    return std::tie(lhs.package, lhs.type, lhs.entry)
             != std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
@@ -283,6 +339,18 @@ inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNameRef& na
         out << name.package << ":";
     }
     return out << name.type << "/" << name.entry;
+}
+
+inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
+    return ResourceNameRef(lhs) < b;
+}
+
+inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
+    return ResourceNameRef(lhs) != rhs;
+}
+
+inline bool operator==(const SourcedResourceName& lhs, const SourcedResourceName& rhs) {
+    return lhs.name == rhs.name && lhs.line == rhs.line;
 }
 
 } // namespace aapt

@@ -50,8 +50,8 @@ public:
     virtual ~LayerRenderer();
 
     virtual void onViewportInitialized() override { /* do nothing */ }
-    virtual void prepareDirty(float left, float top, float right, float bottom,
-            bool opaque) override;
+    virtual void prepareDirty(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque) override;
     virtual void clear(float left, float top, float right, float bottom, bool opaque) override;
     virtual bool finish() override;
 
@@ -59,7 +59,7 @@ public:
     static Layer* createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height);
     static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
     static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-            bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform);
+            bool isOpaque, bool forceFilter, GLenum renderTarget, const float* textureTransform);
     static void destroyLayer(Layer* layer);
     static bool copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap);
 

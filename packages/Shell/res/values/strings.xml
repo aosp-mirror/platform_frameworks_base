@@ -13,24 +13,67 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label">Shell</string>
 
+    <!-- Title of notification indicating a bugreport is being generated. [CHAR LIMIT=50] -->
+    <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
-    <string name="bugreport_finished_title">Bug report captured</string>
+    <string name="bugreport_finished_title">Bug report <xliff:g id="id">#%d</xliff:g> captured</string>
+    <!-- Title of notification indicating a bugreport is being updated before it can be shared. [CHAR LIMIT=50] -->
+    <string name="bugreport_updating_title">Adding details to the bug report</string>
+    <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
+    <string name="bugreport_updating_wait">Please wait\u2026</string>
 
     <!-- Text of notification indicating that swipe left will share the captured bugreport. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="watch">Swipe left to share your bug report</string>
-    <!-- Text of notification indicating that touching will share the captured bugreport. [CHAR LIMIT=100] -->
-    <string name="bugreport_finished_text" product="default">Touch to share your bug report</string>
-
+    <!-- Text of notification indicating that tapping will share the captured bugreport. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_text" product="default">Tap to share your bug report</string>
+    <!-- Text of notification indicating that swipe left will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_pending_screenshot_text" product="watch">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
+    <!-- Text of notification indicating that tapping will share the captured bugreport, but giving user the option to wait for the screenshot. [CHAR LIMIT=100] -->
+    <string name="bugreport_finished_pending_screenshot_text" product="default">Tap to share your bug report without a screenshot or wait for the screenshot to finish</string>
 
     <!-- Body of dialog informing user about contents of a bugreport. [CHAR LIMIT=NONE] -->
-    <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, including personal and private information.  Only share bug reports with apps and people you trust.</string>
-    <!-- Checkbox that indicates this dialog should be shown again when the next bugreport is taken. [CHAR LIMIT=50] -->
-    <string name="bugreport_confirm_repeat">Show this message next time</string>
+    <string name="bugreport_confirm">Bug reports contain data from the system\'s various log files, which may include data you consider sensitive (such as app-usage and location data). Only share bug reports with people and apps you trust.</string>
+    <!-- Checkbox that indicates this dialog should not be shown again when the next bugreport is taken. [CHAR LIMIT=50] -->
+    <string name="bugreport_confirm_dont_repeat">Don\'t show again</string>
 
     <!-- Title for documents backend that offers bugreports. -->
     <string name="bugreport_storage_title">Bug reports</string>
+
+    <!-- Toast message sent when the bugreport file could be read. -->
+    <string name="bugreport_unreadable_text">Bug report file could not be read</string>
+    <!-- Toast message sent when the bugreport details could not be added to the zip file. -->
+    <string name="bugreport_add_details_to_zip_failed">Couldn\'t add bug report details to zip file</string>
+
+    <!-- Title for bug reports received from dumpstate without a name. [CHAR LIMIT=30]-->
+    <string name="bugreport_unnamed">unnamed</string>
+
+    <!-- Title of the notification action that opens the dialog for the user-defined bug report details. -->
+    <string name="bugreport_info_action">Details</string>
+
+    <!-- Title of the notification action that takes aditional screenshots. -->
+    <string name="bugreport_screenshot_action">Screenshot</string>
+
+    <!-- Toast message sent when the a screenshot for the bug report was taken successfully. -->
+    <string name="bugreport_screenshot_taken">Screenshot taken successfully.</string>
+    <!-- Toast message sent when the a screenshot for the bug report was not taken due to an error. -->
+    <string name="bugreport_screenshot_failed">Screenshot could not be taken.</string>
+
+    <!--  Title of the dialog asking for user-defined bug report details like name, title, and description. -->
+    <string name="bugreport_info_dialog_title">Bug report <xliff:g id="id">#%d</xliff:g> details</string>
+
+    <!-- Text of the label identifying the bug report name, which when set will define a suffix in the
+         bug report file names. [CHAR LIMIT=30] -->
+    <string name="bugreport_info_name">Filename</string>
+    <!-- Text of the label identifying the bug report title, which when set will define the
+         Subject of the email message. [CHAR LIMIT=60] -->
+    <string name="bugreport_info_title">Bug title</string>
+    <!-- Text of the label identifying the bug report description, which when set will describe
+         what the bug report is about. [CHAR LIMIT=NONE] -->
+    <string name="bugreport_info_description">Bug summary</string>
+
+    <!-- Label of button that save bugreport details.  -->
+    <string name="save">Save</string>
 </resources>

@@ -30,6 +30,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -70,6 +71,32 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
 
     /**
+     * The window is being resized by dragging on the docked divider. The client should render
+     * at (0, 0) and extend its background to the background frame passed into
+     * {@link IWindow#resized}.
+     */
+    public static final int RELAYOUT_RES_DRAG_RESIZING_DOCKED = 0x8;
+
+    /**
+     * The window is being resized by dragging one of the window corners,
+     * in this case the surface would be fullscreen-sized. The client should
+     * render to the actual frame location (instead of (0,curScrollY)).
+     */
+    public static final int RELAYOUT_RES_DRAG_RESIZING_FREEFORM = 0x10;
+
+    /**
+     * The window manager has changed the size of the surface from the last call.
+     */
+    public static final int RELAYOUT_RES_SURFACE_RESIZED = 0x20;
+
+    /**
+     * In multi-window we force show the navigation bar. Because we don't want that the surface size
+     * changes in this mode, we instead have a flag whether the navigation bar size should always be
+     * consumed, so the app is treated like there is no virtual navigation bar at all.
+     */
+    public static final int RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR = 0x40;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.
@@ -86,6 +113,11 @@ public final class WindowManagerGlobal {
 
     public static final int ADD_FLAG_APP_VISIBLE = 0x2;
     public static final int ADD_FLAG_IN_TOUCH_MODE = RELAYOUT_RES_IN_TOUCH_MODE;
+
+    /**
+     * Like {@link #RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR}, but as a "hint" when adding the window.
+     */
+    public static final int ADD_FLAG_ALWAYS_CONSUME_NAV_BAR = 0x4;
 
     public static final int ADD_OKAY = 0;
     public static final int ADD_BAD_APP_TOKEN = -1;
@@ -138,7 +170,7 @@ public final class WindowManagerGlobal {
                     sWindowManagerService = getWindowManagerService();
                     ValueAnimator.setDurationScale(sWindowManagerService.getCurrentAnimatorScale());
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to get WindowManagerService, cannot set animator scale", e);
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return sWindowManagerService;
@@ -160,7 +192,7 @@ public final class WindowManagerGlobal {
                             },
                             imm.getClient(), imm.getInputContext());
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to open window session", e);
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return sWindowSession;
@@ -359,17 +391,34 @@ public final class WindowManagerGlobal {
         }
     }
 
+    /**
+     * Remove all roots with specified token.
+     *
+     * @param token app or window token.
+     * @param who name of caller, used in logs.
+     * @param what type of caller, used in logs.
+     */
     public void closeAll(IBinder token, String who, String what) {
+        closeAllExceptView(token, null /* view */, who, what);
+    }
+
+    /**
+     * Remove all roots with specified token, except maybe one view.
+     *
+     * @param token app or window token.
+     * @param view view that should be should be preserved along with it's root.
+     *             Pass null if everything should be removed.
+     * @param who name of caller, used in logs.
+     * @param what type of caller, used in logs.
+     */
+    public void closeAllExceptView(IBinder token, View view, String who, String what) {
         synchronized (mLock) {
             int count = mViews.size();
-            //Log.i("foo", "Closing all windows of " + token);
             for (int i = 0; i < count; i++) {
-                //Log.i("foo", "@ " + i + " token " + mParams[i].token
-                //        + " view " + mRoots[i].getView());
-                if (token == null || mParams.get(i).token == token) {
+                if ((view == null || mViews.get(i) != view)
+                        && (token == null || mParams.get(i).token == token)) {
                     ViewRootImpl root = mRoots.get(i);
 
-                    //Log.i("foo", "Force closing " + root);
                     if (who != null) {
                         WindowLeaked leak = new WindowLeaked(
                                 what + " " + who + " has leaked window "
@@ -413,7 +462,7 @@ public final class WindowManagerGlobal {
                 mDyingViews.remove(view);
             }
         }
-        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             doTrimForeground();
         }
     }
@@ -440,7 +489,7 @@ public final class WindowManagerGlobal {
     }
 
     public void trimMemory(int level) {
-        if (HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.isAvailable()) {
             if (shouldDestroyEglContext(level)) {
                 // Destroy all hardware surfaces and resources associated to
                 // known windows
@@ -453,16 +502,16 @@ public final class WindowManagerGlobal {
                 level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             }
 
-            HardwareRenderer.trimMemory(level);
+            ThreadedRenderer.trimMemory(level);
 
-            if (HardwareRenderer.sTrimForeground) {
+            if (ThreadedRenderer.sTrimForeground) {
                 doTrimForeground();
             }
         }
     }
 
     public static void trimForeground() {
-        if (HardwareRenderer.sTrimForeground && HardwareRenderer.isAvailable()) {
+        if (ThreadedRenderer.sTrimForeground && ThreadedRenderer.isAvailable()) {
             WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
             wm.doTrimForeground();
         }
@@ -482,7 +531,7 @@ public final class WindowManagerGlobal {
             }
         }
         if (!hasVisibleWindows) {
-            HardwareRenderer.trimMemory(
+            ThreadedRenderer.trimMemory(
                     ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
         }
     }
@@ -501,7 +550,7 @@ public final class WindowManagerGlobal {
                     String name = getWindowName(root);
                     pw.printf("\n\t%s (visibility=%d)", name, root.getHostVisibility());
 
-                    HardwareRenderer renderer =
+                    ThreadedRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
                         renderer.dumpGfxInfo(pw, fd, args);

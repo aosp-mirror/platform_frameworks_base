@@ -18,7 +18,7 @@ package android.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
+import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -125,5 +125,15 @@ public class SeekBar extends AbsSeekBar {
     @Override
     public CharSequence getAccessibilityClassName() {
         return SeekBar.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+
+        if (canUserSetProgress()) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
+        }
     }
 }

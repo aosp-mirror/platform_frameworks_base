@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
+#include "LayerCache.h"
 
-#include <GLES2/gl2.h>
+#include "Caches.h"
+#include "Properties.h"
 
 #include <utils/Log.h>
 
-#include "Caches.h"
-#include "LayerCache.h"
-#include "Properties.h"
+#include <GLES2/gl2.h>
 
 namespace android {
 namespace uirenderer {
@@ -31,15 +30,9 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-LayerCache::LayerCache(): mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting layer cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
-    }
-}
+LayerCache::LayerCache()
+        : mSize(0)
+        , mMaxSize(Properties::layerPoolSize) {}
 
 LayerCache::~LayerCache() {
     clear();
@@ -83,15 +76,14 @@ void LayerCache::deleteLayer(Layer* layer) {
         LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
                 layer->getFbo());
         mSize -= layer->getWidth() * layer->getHeight() * 4;
-        layer->state = Layer::kState_DeletedFromCache;
+        layer->state = Layer::State::DeletedFromCache;
         layer->decStrong(nullptr);
     }
 }
 
 void LayerCache::clear() {
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        deleteLayer(mCache.itemAt(i).mLayer);
+    for (auto entry : mCache) {
+        deleteLayer(entry.mLayer);
     }
     mCache.clear();
 }
@@ -100,27 +92,26 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
     Layer* layer = nullptr;
 
     LayerEntry entry(width, height);
-    ssize_t index = mCache.indexOf(entry);
+    auto iter = mCache.find(entry);
 
-    if (index >= 0) {
-        entry = mCache.itemAt(index);
-        mCache.removeAt(index);
+    if (iter != mCache.end()) {
+        entry = *iter;
+        mCache.erase(iter);
 
         layer = entry.mLayer;
-        layer->state = Layer::kState_RemovedFromCache;
+        layer->state = Layer::State::RemovedFromCache;
         mSize -= layer->getWidth() * layer->getHeight() * 4;
 
         LAYER_LOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
     } else {
         LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
-        layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
+        layer = new Layer(Layer::Type::DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
         layer->generateTexture();
         layer->bindTexture();
         layer->setFilter(GL_NEAREST);
         layer->setWrap(GL_CLAMP_TO_EDGE, false);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 #if DEBUG_LAYERS
         dump();
@@ -131,9 +122,7 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
 }
 
 void LayerCache::dump() {
-    size_t size = mCache.size();
-    for (size_t i = 0; i < size; i++) {
-        const LayerEntry& entry = mCache.itemAt(i);
+    for (auto entry : mCache) {
         ALOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
     }
 }
@@ -146,13 +135,9 @@ bool LayerCache::put(Layer* layer) {
     if (size < mMaxSize) {
         // TODO: Use an LRU
         while (mSize + size > mMaxSize) {
-            size_t position = 0;
-#if LAYER_REMOVE_BIGGEST_FIRST
-            position = mCache.size() - 1;
-#endif
-            Layer* victim = mCache.itemAt(position).mLayer;
+            Layer* victim = mCache.begin()->mLayer;
             deleteLayer(victim);
-            mCache.removeAt(position);
+            mCache.erase(mCache.begin());
 
             LAYER_LOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
                     victim->layer.getHeight());
@@ -162,14 +147,14 @@ bool LayerCache::put(Layer* layer) {
 
         LayerEntry entry(layer);
 
-        mCache.add(entry);
+        mCache.insert(entry);
         mSize += size;
 
-        layer->state = Layer::kState_InCache;
+        layer->state = Layer::State::InCache;
         return true;
     }
 
-    layer->state = Layer::kState_FailedToCache;
+    layer->state = Layer::State::FailedToCache;
     return false;
 }
 

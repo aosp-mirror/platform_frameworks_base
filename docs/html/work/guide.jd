@@ -1,0 +1,534 @@
+page.title=Android for Work Developer Guide
+page.tags="work", "android for work", "afw", "developer", "android"
+page.metaDescription=Android for Work provides organizations with a secure, flexible, and unified Android mobility platform combining devices, applications, and management.
+page.image=images/work/cards/android-studio_600px.png
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ul>
+      <li><a href="#managed-profiles">Managed Profiles</a></li>
+      <li><a href="#managed-configurations">Implementing Managed Configurations</a></li>
+      <li><a href="#cosu">COSU Devices</a></li>
+      <li><a href="#sso">Set up Single Sign-on with Chrome Custom Tabs</a></li>
+      <li><a href="#testing">Test Your App</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  Android for Work provides organizations with a secure, flexible, and
+  unified Android mobility platform—combining devices, applications,
+  and management. By default, Android apps are compatible with Android
+  for Work. However, there are additional features you can use to make
+  your Android app work best on a managed device:
+</p>
+
+<ul>
+  <li>
+    <a href="#managed-profiles">Managed profile compatibility</a>—Modify your Android
+    app so it functions best on an Android device with a work profile.
+  </li>
+  <li>
+    <a href="#managed-configurations">Managed configurations</a>—Modify
+    your app to allow IT administrators the option to specify custom
+    settings for your apps.
+  </li>
+  <li>
+    <a href="#cosu">Corporate-owned, single-use (COSU)</a>—Optimize your
+    app so that it can be deployed on an Android device as a kiosk.
+  </li>
+  <li>
+    <a href="#sso">Single Sign-On (SSO)</a>—Simplify the sign-on process
+    for users signing in to different apps on their Android device
+    running Android for Work.
+  </li>
+</ul>
+
+<h3>Prerequisites</h3>
+
+<ol>
+  <li>You’ve created an Android app.</li>
+  <li>You’re ready to modify your app so that it works best with
+    Android for Work.</li>
+  <li>Minimum version: Android 5.0 Lollipop recommended version:
+    Android 6.0 Marshmallow and later.</li>
+</ol>
+
+<p>
+  <strong>Note:</strong> Android for Work functions natively on most
+  Android 5.0 devices; however, Android 6.0 and later offers
+  additional features for Android for Work, especially with regard to
+  COSU.
+</p>
+
+<h2 id="managed-profiles">Manage Profiles</h2>
+
+<p>
+  You can manage a user’s business data and applications through a
+  work profile. A work profile is a managed corporate profile
+  associated with the primary user account on an Android device. A
+  work profile securely isolates work apps and data from personal apps
+  and data. This work profile is in a separate container from the
+  personal profile, which your user controls. These separate profiles
+  allow organizations to manage the business data they care about, but
+  leave everything else on a user’s device under the user’s control.
+  For a deep dive into best practices, see the
+  <a href="{@docRoot}work/managed-profiles.html">Set up Managed Profiles</a>
+  guide. For an overview of those best practices, see below.
+</p>
+
+<h3>Key features of a managed profile</h3>
+
+<ul>
+  <li>Separate and secure profile</li>
+  <li>Google Play for Work for application distribution</li>
+  <li>Separate badged work applications</li>
+  <li>Profile-only management capabilities controlled by an administrator</li>
+</ul>
+
+<h3>Managed profile benefits on Android 5.0+</h3>
+
+<ul>
+  <li>Full device encryption</li>
+  <li>One Android application package (APK) for both profiles when
+    there’s a personal profile and a work profile present on the device</li>
+  <li><a href="https://support.google.com/work/android/answer/6192678"
+      >Device policy controller</a> (DPC) is limited to the managed profile</li>
+  <li>Device administration via the
+    <a href="{@docRoot}reference/android/app/admin/DevicePolicyManager.html"
+    >DevicePolicyManager</a> class</li>
+</ul>
+
+<h3>Considerations for managed profiles</h3>
+<ul>
+  <li>The Android system prevents intents
+    <a href="{@docRoot}reference/android/app/admin/DevicePolicyManager.html#clearCrossProfileIntentFilters(android.content.ComponentName)"
+    >from crossing profiles</a> and IT administrators can
+    <a href="{@docRoot}reference/android/app/admin/DevicePolicyManager.html#enableSystemApp(android.content.ComponentName,%20java.lang.String)"
+    >enable or disable system apps</a>.</li>
+  <li>A file path (Uniform Resource Identifier [URI]) that’s valid on
+    one profile may not be valid on the other.</li>
+</ul>
+
+<h3>Prevent intents from failing between profiles</h3>
+<p>
+  It’s difficult to know which intents can cross between profiles, and
+  which ones are blocked. The only way to know for sure is by testing.
+  Before your app starts an activity, you should verify that the
+  request is resolved by calling
+  <a href="{@docRoot}reference/android/content/Intent.html#resolveActivity(android.content.pm.PackageManager)"
+  ><code>Intent.resolveActivity()</code></a>.
+  <ul>
+    <li>If it returns <code>null</code>, the request doesn’t resolve.</li>
+    <li>If it returns something, it shows that the intent resolves,
+      and it’s safe to send the intent.</li>
+  </ul>
+</p>
+<p>
+  <strong>Note</strong>: For detailed testing instructions, see
+  <a href="{@docRoot}work/managed-profiles.html#prevent_failed_intents"
+  >Prevent Failed Intents</a>.
+</p>
+
+<h3>Share files across profiles</h3>
+<p>
+  Some developers use URIs to mark file paths in Android. However,
+  with Android for Work, because there are separate profiles, we
+  recommend:
+</p>
+
+<table>
+  <tr>
+    <td style="white-space:nowrap;">
+      <strong>Use:</strong><br/>
+      Content URIs
+    </td>
+    <td>
+      <ul>
+        <li>
+          The <a href="{@docRoot}reference/android/content/ContentUris.html"
+          >content URIs</a> contain the authority, path, and ID for a
+          specific file. You can generate this using
+          <a href="{@docRoot}reference/android/support/v4/content/FileProvider.html"
+          >FileProvider</a> subclass.
+          <a href="{@docRoot}training/secure-file-sharing/index.html">Learn more</a>
+        </li>
+        <li>
+          Share and grant permissions to access the content URI using
+          an Intent. Permissions can only be passed across the profile
+          boundary using Intents. If you grant another app access rights
+          to your file using
+          <a href="{@docRoot}reference/android/content/Context.html#grantUriPermission(java.lang.String,%20android.net.Uri,%20int)"
+          ><code>Context.grantUriPermission()</code></a>, it only is granted for
+          that app in the same profile.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td style="white-space:nowrap;">
+      <strong>Don't use:</strong><br/>
+      File URI
+    </td>
+    <td>
+      <ul>
+        <li>Contains the absolute path of the file on the device’s
+          storage.</li>
+        <li>A file path URI that’s valid on one profile isn’t valid on
+          the other.</li>
+        <li>If you attach a file URI to an intent, a handler is unable
+          to access the file in another profile.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<p>
+  <strong>Next steps</strong>: Once your app supports managed
+  profiles, test it in a work profile. See
+  <a href="#testing">Test your app with Android for Work</a>.
+</p>
+
+<h2 id="managed-configurations">Implementing Managed Configurations</h2>
+
+<p>
+  Managed configurations are a set of instructions that IT administrators
+  can use to manage their users’ mobile devices in a specific way.
+  These instructions are universal and work across any EMM, allowing
+  administrators to remotely configure applications on their users’
+  phones.
+</p>
+
+<p>
+  If you’re developing apps for business or government, you may need
+  to satisfy your industry’s specific set of requirements. Using
+  managed configurations, the IT administrator can remotely specify
+  settings and enforce policies for their users’ Android apps; for
+  example:
+</p>
+
+<ul>
+  <li>Configure if an app can sync data via cellular/3G, or only Wi-Fi</li>
+  <li>Whitelist or blacklist URLs on a web browser</li>
+  <li>Configure an app's email settings</li>
+  <li>Enable or disable printing</li>
+  <li>Manage bookmarks</li>
+</ul>
+
+<h3>Best practices for implementing managed configurations</h3>
+
+<p>
+  The <a href="{@docRoot}work/managed-configurations.html">Set up Managed Configurations</a>
+  guide is the key source for information on how to build and deploy
+  managed configurations. After you’ve reviewed this documentation, see
+  recommendations below for additional guidance.
+</p>
+
+<h4>When first launching the app</h4>
+<p>
+  As soon as you launch an application, you can see if managed
+  configurations are already set for this app in <code>onStart()</code> or
+  <code>onResume()</code>. Additionally, you can find out if your
+  application is managed or unmanaged. For example, if
+  <a href="{@docRoot}reference/android/content/RestrictionsManager.html#getApplicationRestrictions()"
+  ><code>getApplicationRestrictions()</code></a> returns:
+  <ul>
+    <li><strong>A set of application-specific restrictions</strong>—You
+      can configure the managed configurations silently (without requiring
+      user input).</li>
+    <li><strong>An empty bundle</strong>—Your application acts like
+      it’s unmanaged (for example, how the app behaves in a personal
+      profile).</li>
+    <li><strong>A bundle with a single key value pair with
+      <a href="{@docRoot}reference/android/os/UserManager.html#KEY_RESTRICTIONS_PENDING"
+      ><code>KEY_RESTRICTIONS_PENDING</code></a> set to true</strong>—your
+      application is being managed, but the DPC isn’t configured
+      correctly. You should block this user from your app, and direct
+      them to their IT administrator.</li>
+  </ul>
+</p>
+
+<h4>Listen for changes to managed configurations</h4>
+<p>
+  IT administrators can change managed configurations and what
+  policies they want to enforce on their users at any time. Because of
+  this, we recommend you ensure that your app can accept new
+  restrictions for your managed configuration as follows:
+</p>
+
+<ul>
+  <li><strong>Fetch restrictions on launch</strong>—Your app should
+    call <code>getApplicationRestrictions()</code> in <code>onStart()</code>
+    and <code>onResume()</code>, and compare against old restrictions
+    to see if changes are required.</li>
+  <li><strong>Listen while running</strong>—Dynamically register
+    <a href="{@docRoot}reference/android/content/Intent.html#ACTION_APPLICATION_RESTRICTIONS_CHANGED"
+    ><code>ACTION_APPLICATION_RESTRICTIONS_CHANGED</code></a> in your
+    running activities or services, after you’ve checked for new
+    restrictions. This intent is sent only to listeners that are
+    dynamically registered, and not to listeners declared in the app
+    manifest.</li>
+  <li><strong>Unregister while not running</strong>—In <code>onPause()</code>,
+    you should unregister for the broadcast of
+    <code>ACTION_APPLICATION_RESTRICTIONS_CHANGED</code>.</li>
+</ul>
+
+<h2 id="cosu">COSU Devices</h2>
+
+<p>
+  Corporate-owned, single-use devices (COSU) are kiosk devices used
+  for a single purpose, such as digital signage displays, ticket
+  printing kiosks, or checkout registers.
+</p>
+<p>
+  When an Android device is configured as a COSU device, the user sees
+  an application locked to the screen with no Home or Recent Apps
+  buttons to escape the app. COSU can also be configured to show a set
+  of applications, such as a library kiosk with an app for the library
+  catalog and a web browser.
+</p>
+<p>
+  For instructions, see
+  <a href="{@docRoot}work/cosu.html">Set up Single-Purpose Devices</a>.
+</p>
+
+<h2 id="sso">Set up Single Sign-on with Chrome Custom Tabs</h2>
+
+<p>
+  Enterprise users often have multiple apps on their device, and they
+  prefer to sign in once to access all of their work applications.
+  Typically, users sign in through a
+  <a href="https://developer.chrome.com/multidevice/webview/overview">WebView</a>;
+  however, there are a couple reasons why this isn’t ideal:
+</p>
+<ol>
+  <li>
+    Users often need to sign in multiple times with the same
+    credentials. The WebView solution often isn’t a true Single
+    Sign-On (SSO) experience.
+  </li>
+  <li>
+    There can be security risks, including malicious applications
+    inspecting cookies or injecting JavaScript® to access a user’s
+    credentials. Even trusted developers are at risk if they rely on
+    potentially malicious third-party SDKs.
+  </li>
+</ol>
+
+<p>
+  A solution to both problems is to authenticate users using browser
+  Custom Tabs, instead of WebView. This ensures that authentication:
+</p>
+<ul>
+  <li>
+    Occurs in a secure context (the system browser) where the host app
+    cannot inspect contents.
+  </li>
+  <li>
+    Has a shared cookie state, ensuring the user has to sign in only
+    once.
+  </li>
+</ul>
+
+<h3>Requirements</h3>
+
+<p>
+  <a href="https://developer.android.com/topic/libraries/support-library/features.html#custom-tabs"
+  >Custom Tabs</a> are supported back to API level 15 (Android 4.0.3).
+  To use Custom Tabs you need a supported browser, such as Chrome.
+  Chrome 45 and later implement this feature as
+  <a href="https://developer.chrome.com/multidevice/android/customtabs">Chrome Custom Tabs</a>.
+</p>
+
+<h3>How do I implement SSO with Custom Tabs?</h3>
+
+<p>
+  Google has open sourced an OAuth client library that uses Custom
+  Tabs, contributing it to the OpenID Connect working group of the
+  OpenID Foundation. To set up Custom Tabs for SSO with the
+  AppAuth library, see the <a href="https://github.com/openid/AppAuth-Android"
+  >documentation and sample code on GitHub</a>, or try
+  <a href="https://codelabs.developers.google.com/codelabs/appauth-android-codelab/"
+  >the codelab</a>.
+</p>
+
+<h2 id="testing">Test your App with Android for Work</h2>
+
+<p>
+  Once you’ve developed your app, you’ll want to test it in a work
+  profile—both as a profile owner and device owner. See the
+  instructions below.
+</p>
+
+<h3>Use TestDPC to test your Android app</h3>
+
+<p>
+  TestDPC is a tool you can use to test your Android app in a variety
+  of Android for Work environments. You can configure it as a profile
+  owner or a device owner to launch management APIs on your device,
+  using one of these methods:
+</p>
+<ul>
+  <li>Download the source code for TestDPC from
+    <a href="https://github.com/googlesamples/android-testdpc">GitHub</a>.</li>
+  <li>Install TestDPC directly from
+    <a href="https://play.google.com/store/apps/details?id=com.afwsamples.testdpc"
+    >Google Play</a>.</li>
+</ul>
+<p>
+  For more information on how to configure TestDPC, see the
+  instructions below and the
+  <a href="https://github.com/googlesamples/android-testdpc">TestDPC User Guide</a>.
+</p>
+
+<p>
+  <strong>REQUIRED</strong>: Your test Android device needs to run
+  Android 5.0 or later and be able to natively support Android for Work.
+</p>
+
+<h3>Provision a profile owner</h3>
+
+<p>
+  To test your app in a work profile, you need to first provision a
+  profile owner on the TestDPC app:
+</p>
+
+<ol>
+  <li>Launch the TestDPC app and click <strong>Set up profile</strong>.</li>
+  <li>When prompted, click <strong>Set up</strong>, ensuring the
+    TestDPC’s logo is highlighted on the screen.</li>
+  <li>If your device isn’t encrypted, you need to encrypt your device.
+    Follow the briefcase notification after reboot to continue
+    provisioning.<br/>
+    Once you’ve provisioned the profile owner correctly, badged
+    applications appear at the end of your app tray. Install your app
+    on the device and test to see how it runs in the work profile.
+  </li>
+  <li>
+    Install your app on the device and test to see how it runs in the
+    work profile.
+  </li>
+</ol>
+
+<h3>Provision a device owner</h3>
+
+<p>
+  Testing your app as a device owner requires more steps than testing
+  as a profile owner. You first need to provision the device owner on
+  your test device using the
+  <a href="{@docRoot}samples/NfcProvisioning/index.html"
+  >NfcProvisioning sample app</a>. For complete instructions to
+  provision TestDPC in device owner mode using the NfcProvisioning
+  app, see the <a href="https://github.com/googlesamples/android-testdpc"
+  >TestDPC User Guide</a>.
+</p>
+
+<ol>
+  <li>Download the <a href="{@docRoot}samples/NfcProvisioning/index.html"
+    >NfcProvisioning</a> app sample files to your development environment.</li>
+  <li>Unpack the project, open your shell, and <code>cd</code> to the project directory.</li>
+  <li>Add a file to the directory with the <code>local.properties</code> name
+    and the following content:
+    <pre>sdk.dir=/path/to/your/android/sdk</pre>
+  </li>
+  <li>While in the project directory, enter these commands to build the NfcProvisioning APK:
+    <pre>./gradlew init
+./gradlew build</pre>
+    The NfcProvisioning APK you need is now located in <code>./Application/build/outputs/apk</code>.
+  </li>
+  <li>Install the APK on your programmer device, which you can use to provision other devices.</li>
+  <li>Create a text file called <code>nfcprovisioning.txt</code> and
+    include the following information:
+    <pre>android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME=com.afwsamples.testdpc
+android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION=https://testdpc-latest-apk.appspot.com
+android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM=gJD2YwtOiWJHkSMkkIfLRlj-quNqG1fb6v100QmzM9w=
+# note: checksum must be URL-safe
+android.app.extra.PROVISIONING_LOCALE=en_US
+android.app.extra.PROVISIONING_TIME_ZONE=America/New_York</pre>
+    <p>
+      <strong>Note:</strong> If you’re developing for Android 5.0
+      Lollipop, see the instructions in the
+      <a href="https://github.com/googlesamples/android-testdpc"
+      >TestDPC User Guide</a>.
+    </p>
+  </li>
+  <li>Push that text file to your programmer device by entering:
+    <pre>adb push &lt;path-to-nfcprovisioning.txt&gt; /sdcard/</pre>
+  </li>
+  <li>
+    Ensure that the programmer device is connected to Wi-Fi on either
+    an unsecured or WPA2 secured network.
+    <p>
+      The NFC Provisioning app will automatically pass those Wi-Fi
+      credentials onto the target device.
+    </p>
+  </li>
+  <li>Open the NFC Provisioning app and ensure <code>com.google.android.testdpc</code>
+    is auto-populated.</li>
+  <li>Bump the devices to transfer the data.</li>
+  <li>Follow the onscreen instructions to set up your target device.</li>
+  <li>Once you’ve completed provisioning the device owner, you can test your app on that device. You
+    should specifically test how
+    <a href="{@docRoot}work/managed-configurations.html">managed configurations</a>,
+    <a href="{@docRoot}work/managed-profiles.html#sharing_files">URIs</a>, and
+    <a href="{@docRoot}work/managed-profiles.html#prevent_failed_intents">intents</a>
+    work on that device.</li>
+</ol>
+
+<h3>End-to-end testing</h3>
+
+<p>
+  After you’ve finished testing your app in the environments above,
+  you’ll likely want to test your app in an end-to-end production
+  environment. This process includes the steps a customer needs to
+  take to deploy your app in their organization, including:
+</p>
+
+<ul>
+  <li>App distribution through Play</li>
+  <li>Server-side managed configuration</li>
+  <li>Server-side profile policy control</li>
+</ul>
+
+<p>
+  You need to access an EMM console to complete the end-to-end
+  testing. The easiest way to get one is to request a testing console
+  from your EMM. Once you have access, complete these tasks:
+</p>
+
+<ol>
+  <li>Create a test version of your application with a
+    <a href="http://tools.android.com/tech-docs/new-build-system/applicationid-vs-packagename"
+    >new ApplicationId</a>.</li>
+  <li>Claim a <a href="https://support.google.com/work/android/answer/6174056"
+    >managed Google domain</a> and bind it to your EMM. If you
+    already have a testing domain that’s bound to an EMM, you may need
+    to unbind it to test it with your preferred EMM. Please consult your
+    EMM for the specific unbinding steps.</li>
+  <li><a href="https://support.google.com/a/answer/2494992"
+    >Publish your application to the private channel</a> for their
+    managed Google domain.</li>
+  <li>Use the EMM console and EMM application to:
+    <ol>
+      <li>Set up work devices.</li>
+      <li>Distribute your application.</li>
+      <li>Set managed configuration.</li>
+      <li>Set device policies.</li>
+    </ol>
+</ol>
+
+<p>
+  This process will differ based on your EMM. Please consult your
+  EMM’s documentation for further details. Congrats! You’ve completed
+  these steps and verified that your app works well with Android for
+  Work.
+</p>
+
+<p>
+  <a href="https://www.google.com/work/android/developers/applyDevHub/">
+    <span class="dac-sprite dac-auto-chevron"></span>
+    Learn about the Android for Work DevHub.
+  </a>
+</p>

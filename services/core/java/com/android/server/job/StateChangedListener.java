@@ -37,4 +37,6 @@ public interface StateChangedListener {
      *                  indicates to the scheduler that any ready jobs should be flushed.</strong>
      */
     public void onRunJobNow(JobStatus jobStatus);
+
+    public void onDeviceIdleStateChanged(boolean deviceIdle);
 }

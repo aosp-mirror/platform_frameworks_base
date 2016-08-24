@@ -17,19 +17,63 @@
 #ifndef AAPT_NAME_MANGLER_H
 #define AAPT_NAME_MANGLER_H
 
+#include "Resource.h"
+
+#include "util/Maybe.h"
+
+#include <set>
 #include <string>
 
 namespace aapt {
 
-struct NameMangler {
+struct NameManglerPolicy {
     /**
-     * Mangles the name in `outName` with the `package` and stores the mangled
-     * result in `outName`. The mangled name should contain symbols that are
-     * illegal to define in XML, so that there will never be name mangling
-     * collisions.
+     * Represents the package we are trying to build. References pointing
+     * to this package are not mangled, and mangled references inherit this package name.
      */
-    static void mangle(const std::u16string& package, std::u16string* outName) {
-        *outName = package + u"$" + *outName;
+    std::u16string targetPackageName;
+
+    /**
+     * We must know which references to mangle, and which to keep (android vs. com.android.support).
+     */
+    std::set<std::u16string> packagesToMangle;
+};
+
+class NameMangler {
+private:
+    NameManglerPolicy mPolicy;
+
+public:
+    NameMangler(NameManglerPolicy policy) : mPolicy(policy) {
+    }
+
+    Maybe<ResourceName> mangleName(const ResourceName& name) {
+        if (mPolicy.targetPackageName == name.package ||
+                mPolicy.packagesToMangle.count(name.package) == 0) {
+            return {};
+        }
+
+        return ResourceName{
+                mPolicy.targetPackageName,
+                name.type,
+                mangleEntry(name.package, name.entry)
+        };
+    }
+
+    bool shouldMangle(const std::u16string& package) const {
+        if (package.empty() || mPolicy.targetPackageName == package) {
+            return false;
+        }
+        return mPolicy.packagesToMangle.count(package) != 0;
+    }
+
+    /**
+     * Returns a mangled name that is a combination of `name` and `package`.
+     * The mangled name should contain symbols that are illegal to define in XML,
+     * so that there will never be name mangling collisions.
+     */
+    static std::u16string mangleEntry(const std::u16string& package, const std::u16string& name) {
+        return package + u"$" + name;
     }
 
     /**

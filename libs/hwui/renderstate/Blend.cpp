@@ -30,6 +30,26 @@ struct Blender {
     GLenum dst;
 };
 
+// assumptions made by lookup tables in either this file or ProgramCache
+static_assert(0 == SkXfermode::kClear_Mode, "SkXfermode enums have changed");
+static_assert(1 == SkXfermode::kSrc_Mode, "SkXfermode enums have changed");
+static_assert(2 == SkXfermode::kDst_Mode, "SkXfermode enums have changed");
+static_assert(3 == SkXfermode::kSrcOver_Mode, "SkXfermode enums have changed");
+static_assert(4 == SkXfermode::kDstOver_Mode, "SkXfermode enums have changed");
+static_assert(5 == SkXfermode::kSrcIn_Mode, "SkXfermode enums have changed");
+static_assert(6 == SkXfermode::kDstIn_Mode, "SkXfermode enums have changed");
+static_assert(7 == SkXfermode::kSrcOut_Mode, "SkXfermode enums have changed");
+static_assert(8 == SkXfermode::kDstOut_Mode, "SkXfermode enums have changed");
+static_assert(9 == SkXfermode::kSrcATop_Mode, "SkXfermode enums have changed");
+static_assert(10 == SkXfermode::kDstATop_Mode, "SkXfermode enums have changed");
+static_assert(11 == SkXfermode::kXor_Mode, "SkXfermode enums have changed");
+static_assert(12 == SkXfermode::kPlus_Mode, "SkXfermode enums have changed");
+static_assert(13 == SkXfermode::kModulate_Mode, "SkXfermode enums have changed");
+static_assert(14 == SkXfermode::kScreen_Mode, "SkXfermode enums have changed");
+static_assert(15 == SkXfermode::kOverlay_Mode, "SkXfermode enums have changed");
+static_assert(16 == SkXfermode::kDarken_Mode, "SkXfermode enums have changed");
+static_assert(17 == SkXfermode::kLighten_Mode, "SkXfermode enums have changed");
+
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
 const Blender kBlends[] = {
@@ -78,20 +98,6 @@ Blend::Blend()
     // gl blending off by default
 }
 
-void Blend::enable(SkXfermode::Mode mode, ModeOrderSwap modeUsage) {
-    GLenum srcMode;
-    GLenum dstMode;
-    getFactors(mode, modeUsage, &srcMode, &dstMode);
-    setFactors(srcMode, dstMode);
-}
-
-void Blend::disable() {
-    if (mEnabled) {
-        glDisable(GL_BLEND);
-        mEnabled = false;
-    }
-}
-
 void Blend::invalidate() {
     syncEnabled();
     mSrcMode = mDstMode = GL_ZERO;
@@ -112,8 +118,13 @@ void Blend::getFactors(SkXfermode::Mode mode, ModeOrderSwap modeUsage, GLenum* o
 
 void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
     if (srcMode == GL_ZERO && dstMode == GL_ZERO) {
-        disable();
+        // disable blending
+        if (mEnabled) {
+            glDisable(GL_BLEND);
+            mEnabled = false;
+        }
     } else {
+        // enable blending
         if (!mEnabled) {
             glEnable(GL_BLEND);
             mEnabled = true;

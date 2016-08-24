@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -220,7 +221,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     /** @hide */
-    protected void setBitmap(Bitmap bitmap) {
+    public void setBitmap(Bitmap bitmap) {
         if (mBitmapState.mBitmap != bitmap) {
             mBitmapState.mBitmap = bitmap;
             computeBitmapSize();
@@ -454,7 +455,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mBitmapState.getChangingConfigurations();
     }
 
@@ -641,16 +642,22 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public void setTintList(ColorStateList tint) {
-        mBitmapState.mTint = tint;
-        mTintFilter = updateTintFilter(mTintFilter, tint, mBitmapState.mTintMode);
-        invalidateSelf();
+        final BitmapState state = mBitmapState;
+        if (state.mTint != tint) {
+            state.mTint = tint;
+            mTintFilter = updateTintFilter(mTintFilter, tint, mBitmapState.mTintMode);
+            invalidateSelf();
+        }
     }
 
     @Override
     public void setTintMode(PorterDuff.Mode tintMode) {
-        mBitmapState.mTintMode = tintMode;
-        mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, tintMode);
-        invalidateSelf();
+        final BitmapState state = mBitmapState;
+        if (state.mTintMode != tintMode) {
+            state.mTintMode = tintMode;
+            mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, tintMode);
+            invalidateSelf();
+        }
     }
 
     /**
@@ -812,8 +819,7 @@ public class BitmapDrawable extends Drawable {
             setTileModeY(parseTileMode(tileModeY));
         }
 
-        final int densityDpi = r.getDisplayMetrics().densityDpi;
-        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+        state.mTargetDensity = Drawable.resolveDensity(r, 0);
     }
 
     @Override
@@ -830,7 +836,7 @@ public class BitmapDrawable extends Drawable {
             try {
                 updateStateFromTypedArray(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }
@@ -905,7 +911,7 @@ public class BitmapDrawable extends Drawable {
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mAutoMirrored = false;
 
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         boolean mRebuildShader;
 
         BitmapState(Bitmap bitmap) {
@@ -953,7 +959,7 @@ public class BitmapDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
@@ -975,13 +981,7 @@ public class BitmapDrawable extends Drawable {
      * after inflating or applying a theme.
      */
     private void updateLocalState(Resources res) {
-        if (res != null) {
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-        } else {
-            mTargetDensity = mBitmapState.mTargetDensity;
-        }
-
+        mTargetDensity = resolveDensity(res, mBitmapState.mTargetDensity);
         mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, mBitmapState.mTintMode);
         computeBitmapSize();
     }

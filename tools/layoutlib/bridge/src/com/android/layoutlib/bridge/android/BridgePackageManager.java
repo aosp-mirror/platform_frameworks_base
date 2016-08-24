@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import android.annotation.NonNull;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -23,7 +24,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ContainerEncryptionParams;
+import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -32,7 +33,6 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
-import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -42,7 +42,6 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -50,6 +49,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 import java.util.List;
@@ -61,6 +61,12 @@ import java.util.List;
 public class BridgePackageManager extends PackageManager {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags) throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
         return null;
     }
 
@@ -90,7 +96,22 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public int getPackageUid(String packageName, int userHandle) throws NameNotFoundException {
+    public int[] getPackageGids(String packageName, int flags) throws NameNotFoundException {
+        return new int[0];
+    }
+
+    @Override
+    public int getPackageUid(String packageName, int flags) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, int userHandle) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, int flags, int userHandle) throws NameNotFoundException {
         return 0;
     }
 
@@ -118,6 +139,12 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
+            throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
         return null;
     }
@@ -157,7 +184,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
+    public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         return null;
     }
 
@@ -245,8 +272,48 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public List<EphemeralApplicationInfo> getEphemeralApplications() {
+        return null;
+    }
+
+    @Override
+    public Drawable getEphemeralApplicationIcon(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte[] getEphemeralCookie() {
+        return new byte[0];
+    }
+
+    @Override
+    public boolean isEphemeralApplication() {
+        return false;
+    }
+
+    @Override
+    public int getEphemeralCookieMaxSizeBytes() {
+        return 0;
+    }
+
+    @Override
+    public boolean setEphemeralCookie(@NonNull byte[] cookie) {
+        return false;
+    }
+
+    @Override
     public String[] getSystemSharedLibraryNames() {
         return new String[0];
+    }
+
+    @Override
+    public String getServicesSystemSharedLibraryPackageName() {
+        return null;
+    }
+
+    @Override
+    public @NonNull String getSharedSystemSharedLibraryPackageName() {
+        return null;
     }
 
     @Override
@@ -256,6 +323,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public boolean hasSystemFeature(String name) {
+        return false;
+    }
+
+    @Override
+    public boolean hasSystemFeature(String name, int version) {
         return false;
     }
 
@@ -291,7 +363,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
         return null;
     }
 
@@ -418,6 +490,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getManagedUserBadgedDrawable(Drawable drawable, Rect badgeLocation,
+        int badgeDensity) {
+        return null;
+    }
+
+    @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         return null;
     }
@@ -430,6 +508,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public Drawable getUserBadgeForDensity(UserHandle user, int density) {
+        return null;
+    }
+
+    @Override
+    public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
         return null;
     }
 
@@ -482,36 +565,18 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer, int flags,
             String installerPackageName) {
     }
 
     @Override
-    public void installPackageWithVerification(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
     public int installExistingPackage(String packageName) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
+    public int installExistingPackageAsUser(String packageName, int userId)
+            throws NameNotFoundException {
         return 0;
     }
 
@@ -530,12 +595,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public int getIntentVerificationStatus(String packageName, int userId) {
+    public int getIntentVerificationStatusAsUser(String packageName, int userId) {
         return 0;
     }
 
     @Override
-    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+    public boolean updateIntentVerificationStatusAsUser(String packageName, int status, int userId) {
         return false;
     }
 
@@ -550,12 +615,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public String getDefaultBrowserPackageName(int userId) {
+    public String getDefaultBrowserPackageNameAsUser(int userId) {
         return null;
     }
 
     @Override
-    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+    public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         return false;
     }
 
@@ -565,6 +630,11 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public void deletePackage(String packageName, IPackageDeleteObserver observer, int flags) {
+    }
+
+    @Override
+    public void deletePackageAsUser(String packageName, IPackageDeleteObserver observer, int flags,
+            int userId) {
     }
 
     @Override
@@ -581,6 +651,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void deleteApplicationCacheFilesAsUser(String packageName, int userId,
+            IPackageDataObserver observer) {
+    }
+
+    @Override
     public void freeStorageAndNotify(String volumeUuid, long freeStorageSize,
             IPackageDataObserver observer) {
     }
@@ -590,7 +665,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public void getPackageSizeInfo(String packageName, int userHandle,
+    public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
     }
 
@@ -651,6 +726,10 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public void flushPackageRestrictionsAsUser(int userId) {
+    }
+
+    @Override
     public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
             UserHandle userHandle) {
         return false;
@@ -691,6 +770,17 @@ public class BridgePackageManager extends PackageManager {
 
     @Override
     public boolean isSignedByExactly(String packageName, KeySet ks) {
+        return false;
+    }
+
+    @Override
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
+            int userId) {
+        return new String[]{};
+    }
+
+    @Override
+    public boolean isPackageSuspendedForUser(String packageName, int userId) {
         return false;
     }
 

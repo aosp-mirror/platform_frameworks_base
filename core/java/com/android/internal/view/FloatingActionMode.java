@@ -24,6 +24,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
@@ -165,7 +167,18 @@ public class FloatingActionMode extends ActionMode {
         checkToolbarInitialized();
 
         mContentRectOnScreen.set(mContentRect);
-        mContentRectOnScreen.offset(mViewPositionOnScreen[0], mViewPositionOnScreen[1]);
+
+        // Offset the content rect into screen coordinates, taking into account any transformations
+        // that may be applied to the originating view or its ancestors.
+        final ViewParent parent = mOriginatingView.getParent();
+        if (parent instanceof ViewGroup) {
+            ((ViewGroup) parent).getChildVisibleRect(
+                    mOriginatingView, mContentRectOnScreen,
+                    null /* offset */, true /* forceParentCheck */);
+            mContentRectOnScreen.offset(mRootViewPositionOnScreen[0], mRootViewPositionOnScreen[1]);
+        } else {
+            mContentRectOnScreen.offset(mViewPositionOnScreen[0], mViewPositionOnScreen[1]);
+        }
 
         if (isContentRectWithinBounds()) {
             mFloatingToolbarVisibilityHelper.setOutOfBounds(false);

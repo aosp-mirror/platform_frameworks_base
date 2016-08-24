@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -53,6 +54,8 @@ public class UsbManager {
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
      * <ul>
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
+     * <li> {@link #USB_HOST_CONNECTED} boolean indicating whether USB is connected or
+     *     disconnected as host.
      * <li> {@link #USB_CONFIGURED} boolean indicating whether USB is configured.
      * currently zero if not configured, one for configured.
      * <li> {@link #USB_FUNCTION_ADB} boolean extra indicating whether the
@@ -70,6 +73,8 @@ public class UsbManager {
      * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
      * MIDI function is enabled
      * </ul>
+     * If the sticky intent has not been found, that indicates USB is disconnected,
+     * USB is not configued, MTP function is enabled, and all the other functions are disabled.
      *
      * {@hide}
      */
@@ -147,6 +152,14 @@ public class UsbManager {
      * {@hide}
      */
     public static final String USB_CONNECTED = "connected";
+
+    /**
+     * Boolean extra indicating whether USB is connected or disconnected as host.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     *
+     * {@hide}
+     */
+    public static final String USB_HOST_CONNECTED = "host_connected";
 
     /**
      * Boolean extra indicating whether USB is configured.
@@ -299,8 +312,7 @@ public class UsbManager {
             }
             return result;
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getDeviceList", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -344,8 +356,7 @@ public class UsbManager {
                 return new UsbAccessory[] { accessory };
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getAccessoryList", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -359,8 +370,7 @@ public class UsbManager {
         try {
             return mService.openAccessory(accessory);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openAccessory", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -377,8 +387,7 @@ public class UsbManager {
         try {
             return mService.hasDevicePermission(device);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in hasPermission", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -395,8 +404,7 @@ public class UsbManager {
         try {
             return mService.hasAccessoryPermission(accessory);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in hasPermission", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -422,7 +430,7 @@ public class UsbManager {
         try {
             mService.requestDevicePermission(device, mContext.getPackageName(), pi);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in requestPermission", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -448,7 +456,22 @@ public class UsbManager {
         try {
             mService.requestAccessoryPermission(accessory, mContext.getPackageName(), pi);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in requestPermission", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grants permission for USB device without showing system dialog.
+     * Only system components can call this function.
+     * @param device to request permissions for
+     *
+     * {@hide}
+     */
+    public void grantPermission(UsbDevice device) {
+        try {
+            mService.grantDevicePermission(device, Process.myUid());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -468,8 +491,7 @@ public class UsbManager {
         try {
             return mService.isFunctionEnabled(function);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setCurrentFunction", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -499,7 +521,7 @@ public class UsbManager {
         try {
             mService.setCurrentFunction(function);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setCurrentFunction", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -515,7 +537,7 @@ public class UsbManager {
         try {
             mService.setUsbDataUnlocked(unlocked);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setUsbDataUnlocked", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -536,9 +558,8 @@ public class UsbManager {
         try {
             return mService.getPorts();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getPorts", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -555,9 +576,8 @@ public class UsbManager {
         try {
             return mService.getPortStatus(port.getId());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getPortStatus", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -586,13 +606,13 @@ public class UsbManager {
         try {
             mService.setPortRoles(port.getId(), powerRole, dataRole);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setPortRole", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /** @hide */
     public static String addFunction(String functions, String function) {
-        if ("none".equals(functions)) {
+        if (USB_FUNCTION_NONE.equals(functions)) {
             return function;
         }
         if (!containsFunction(functions, function)) {
@@ -613,7 +633,7 @@ public class UsbManager {
             }
         }
         if (split.length == 1 && split[0] == null) {
-            return "none";
+            return USB_FUNCTION_NONE;
         }
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < split.length; i++) {

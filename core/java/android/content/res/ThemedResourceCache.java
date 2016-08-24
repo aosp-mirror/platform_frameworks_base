@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;
 import android.util.LongSparseArray;
@@ -115,7 +116,7 @@ abstract class ThemedResourceCache<T> {
      *
      * @param configChanges a bitmask of configuration changes
      */
-    public void onConfigurationChange(int configChanges) {
+    public void onConfigurationChange(@Config int configChanges) {
         prune(configChanges);
     }
 
@@ -192,7 +193,7 @@ abstract class ThemedResourceCache<T> {
      *                      simply prune missing weak references
      * @return {@code true} if the cache is completely empty after pruning
      */
-    private boolean prune(int configChanges) {
+    private boolean prune(@Config int configChanges) {
         synchronized (this) {
             if (mThemedEntries != null) {
                 for (int i = mThemedEntries.size() - 1; i >= 0; i--) {
@@ -211,7 +212,7 @@ abstract class ThemedResourceCache<T> {
     }
 
     private boolean pruneEntriesLocked(@Nullable LongSparseArray<WeakReference<T>> entries,
-            int configChanges) {
+            @Config int configChanges) {
         if (entries == null) {
             return true;
         }
@@ -226,7 +227,7 @@ abstract class ThemedResourceCache<T> {
         return entries.size() == 0;
     }
 
-    private boolean pruneEntryLocked(@Nullable T entry, int configChanges) {
+    private boolean pruneEntryLocked(@Nullable T entry, @Config int configChanges) {
         return entry == null || (configChanges != 0
                 && shouldInvalidateEntry(entry, configChanges));
     }

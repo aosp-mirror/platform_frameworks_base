@@ -22,8 +22,6 @@
 
     <color name="print_preview_background_color">#F2F1F2</color>
 
-    <color name="promoted_action_background_color">#FF80CBC4</color>
-
     <color name="material_grey_500">#ffa3a3a3</color>
 
 </resources>

@@ -15,37 +15,21 @@
  */
 package com.android.internal.logging;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.view.View;
+
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 /**
  * Log all the things.
  *
  * @hide
  */
-public class MetricsLogger implements MetricsConstants {
-    // Temporary constants go here, to await migration to MetricsConstants.
-    // next value is 239;
-    public static final int ACTION_ASSIST_LONG_PRESS = 239;
-    public static final int FINGERPRINT_ENROLLING = 240;
-    public static final int FINGERPRINT_FIND_SENSOR = 241;
-    public static final int FINGERPRINT_ENROLL_FINISH = 242;
-    public static final int FINGERPRINT_ENROLL_INTRO = 243;
-    public static final int FINGERPRINT_ENROLL_ONBOARD = 244;
-    public static final int FINGERPRINT_ENROLL_SIDECAR = 245;
-    public static final int FINGERPRINT_ENROLLING_SETUP = 246;
-    public static final int FINGERPRINT_FIND_SENSOR_SETUP = 247;
-    public static final int FINGERPRINT_ENROLL_FINISH_SETUP = 248;
-    public static final int FINGERPRINT_ENROLL_INTRO_SETUP = 249;
-    public static final int FINGERPRINT_ENROLL_ONBOARD_SETUP = 250;
-    public static final int ACTION_FINGERPRINT_ENROLL = 251;
-    public static final int ACTION_FINGERPRINT_AUTH = 252;
-    public static final int ACTION_FINGERPRINT_DELETE = 253;
-    public static final int ACTION_FINGERPRINT_RENAME = 254;
-    public static final int ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE = 255;
-    public static final int ACTION_WIGGLE_CAMERA_GESTURE = 256;
+public class MetricsLogger {
+    // define metric categories in frameworks/base/proto/src/metrics_constants.proto.
+
+    public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {

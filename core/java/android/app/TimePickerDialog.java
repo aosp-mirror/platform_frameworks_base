@@ -23,10 +23,8 @@ import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.TimePicker.OnTimeChangedListener;
-import android.widget.TimePicker.ValidationCallback;
 
 import com.android.internal.R;
 
@@ -64,7 +62,7 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
          * @param hourOfDay the hour that was set
          * @param minute the minute that was set
          */
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute);
+        void onTimeSet(TimePicker view, int hourOfDay, int minute);
     }
 
     /**
@@ -115,7 +113,6 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
 
         final TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.timePickerDialogTheme, outValue, true);
-        final int layoutResId = outValue.resourceId;
 
         final LayoutInflater inflater = LayoutInflater.from(themeContext);
         final View view = inflater.inflate(R.layout.time_picker_dialog, null);
@@ -129,7 +126,6 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         mTimePicker.setCurrentHour(mInitialHourOfDay);
         mTimePicker.setCurrentMinute(mInitialMinute);
         mTimePicker.setOnTimeChangedListener(this);
-        mTimePicker.setValidationCallback(mValidationCallback);
     }
 
     @Override
@@ -181,14 +177,4 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
         mTimePicker.setCurrentHour(hour);
         mTimePicker.setCurrentMinute(minute);
     }
-
-    private final ValidationCallback mValidationCallback = new ValidationCallback() {
-        @Override
-        public void onValidationChanged(boolean valid) {
-            final Button positive = getButton(BUTTON_POSITIVE);
-            if (positive != null) {
-                positive.setEnabled(valid);
-            }
-        }
-    };
 }

@@ -49,6 +49,13 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_ISOLATED_PROCESS = 0x0002;
 
     /**
+     * Bit in {@link #flags}: If set, the service can be bound and run in the
+     * calling application's package, rather than the package in which it is
+     * declared.  Set from {@link android.R.attr#externalService} attribute.
+     */
+    public static final int FLAG_EXTERNAL_SERVICE = 0x0004;
+
+    /**
      * Bit in {@link #flags}: If set, a single instance of the service will
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.
@@ -74,9 +81,15 @@ public class ServiceInfo extends ComponentInfo
     }
 
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "permission=" + permission);
         pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
+        super.dumpBack(pw, prefix, flags);
     }
     
     public String toString() {

@@ -21,6 +21,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.internal.R;
 
 /**
@@ -331,5 +332,20 @@ public class RatingBar extends AbsSeekBar {
     @Override
     public CharSequence getAccessibilityClassName() {
         return RatingBar.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+
+        if (canUserSetProgress()) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
+        }
+    }
+
+    @Override
+    boolean canUserSetProgress() {
+        return super.canUserSetProgress() && !isIndicator();
     }
 }

@@ -19,6 +19,9 @@ page.image=auto/images/assets/icons/media_app_playback.png
     <ol>
       <li><a href="#overview">Provide Audio Services</a></li>
       <li><a href="#config_manifest">Configure Your Manifest</a></li>
+      <li><a href="#isconnected">Determine if Your App is Connected</a></li>
+      <li><a href="#alarm">Handle Alarms</a></li>
+      <li><a href="#mediaadv">Handle Media Advertisements</a></li>
       <li><a href="#implement_browser">Build a Browser Service</a></li>
       <li><a href="#implement_callback">Implement Play Controls</a></li>
       <li><a href="#support_voice">Support Voice Actions</a></li>
@@ -29,8 +32,8 @@ page.image=auto/images/assets/icons/media_app_playback.png
     <ul>
       <li><a href="{@docRoot}samples/MediaBrowserService/index.html">
         MediaBrowserService</a></li>
-      <li><a href="//github.com/googlesamples/android-UniversalMusicPlayer">Universal Media
-      Player</a></li>
+      <li><a href="//github.com/googlesamples/android-UniversalMusicPlayer"
+        class="external-link">Universal Media Player</a></li>
     </ul>
 
     <h2>See Also</h2>
@@ -210,6 +213,99 @@ href="https://www.youtube.com/watch?v=Q96Sw6v4ULg">
 <p class="note"><strong>Note:</strong> The icon you provide should have transparency enabled, so the
 icon's background gets filled in with the app's primary color.</p>
 
+<h2 id="isconnected">Determine if Your App is Connected</h2>
+<p>
+It is possible to determine if your app is selected as the current media app.</p>
+<p>
+Android Auto broadcasts an intent with <code>com.google.android.gms.car.media.STATUS</code>
+action when a user connects or disconnects from a media app. The broadcast intent is
+scoped to the package name of the media app selected. You can register a broadcast receiver in your
+app, preferably in your <a href="{@docRoot}reference/android/service/media/MediaBrowserService.html">
+MediaBrowserService</a> implementation and listen for this intent
+and adjust advertisements, metadata, and UI buttons in your app to operate safely in a vehicle.</p>
+
+<p>The broadcasted intent has a String extra <code>media_connection_status</code>, that
+contains either <code>media_connected</code> or <code>media_disconnected</code> string that represents
+ the current connection status. </p>
+
+<pre>
+IntentFilter filter = new IntentFilter("com.google.android.gms.car.media.STATUS");
+BroadcastReceiver receiver = new BroadcastReceiver() {
+    ...
+    public void onReceive(Context context, Intent intent) {
+        String status = intent.getStringExtra("media_connection_status");
+        boolean isConnectedToCar = "media_connected".equals(status);
+        // adjust settings based on the connection status
+    }
+};
+registerReceiver(receiver, filter);
+</pre>
+
+<h2 id="alarm">Handle Alarms</h2>
+<p>
+To prevent user distraction, Android Auto media apps must not start playing audio
+ through the car speakers unless a user consciously starts playback (such as
+ when the user presses play in your app). Even a user-scheduled alarm from the
+ media app must not start playing music through the car speakers.
+ If your media app has an alarm feature, the app should determine if the phone
+ is in
+<a href="{@docRoot}reference/android/content/res/Configuration.html#UI_MODE_TYPE_CAR">car mode</a>
+before playing any audio. Your app can do this by calling
+<a href="{@docRoot}reference/android/app/UiModeManager.html">UiModeManager.getCurrentModeType()</a>,
+ which checks whether the device is running in car mode.
+</p>
+
+<p>
+If the device is in car mode, media apps that support alarms must do one of the
+following things:
+
+<ul>
+<li>Disable the alarm.</li>
+<li>Play the alarm over
+<a href="{@docRoot}reference/android/media/AudioManager.html#STREAM_ALARM">STREAM_ALARM</a>,
+ and provide a UI on the phone screen to disable the alarm.</li>
+</ul>
+
+The following code snippet checks whether an app is running in car mode:
+<pre>
+ public static boolean isCarUiMode(Context c) {
+      UiModeManager uiModeManager = (UiModeManager) c.getSystemService(Context.UI_MODE_SERVICE);
+      if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR) {
+            LogHelper.d(TAG, "Running in Car mode");
+            return true;
+      } else {
+          LogHelper.d(TAG, "Running on a non-Car mode");
+          return false;
+        }
+  }
+</pre>
+
+<h2 id="mediaadv">Handle Media Advertisements</h2>
+<p>By default, Android Auto displays a notification when
+the media metadata changes during an audio playback session. When a media
+app switches from playing music to running an advertisement, it is distracting
+(and unnecessary) to display a notification to the user. To prevent Android Auto
+from displaying a notification in this case, you must set the media metadata
+key {@code android.media.metadata.ADVERTISEMENT} to 1, as shown in the code
+snippet below:
+
+<pre>
+
+&#64;Override
+public static final String EXTRA_METADATA_ADVERTISEMENT =
+            "android.media.metadata.ADVERTISEMENT";
+
+public void onPlayFromMediaId(String mediaId, Bundle extras) {
+    MediaMetadata.Builder builder = new MediaMetadata.Builder();
+    // ...
+    if (isAd(mediaId)) {
+        builder.putLong(EXTRA_METADATA_ADVERTISEMENT, 1);
+    }
+    // ...
+    mediaSession.setMetadata(builder.build());
+}
+
+</pre>
 
 <h2 id="implement_browser">Build a Browser Service</h2>
 
@@ -290,13 +386,20 @@ Auto Audio Apps</a> guidelines.</p>
 
 <p>Your implementation of {@link android.service.media.MediaBrowserService#onGetRoot
 onGetRoot()} returns information about the root node of the menu
-hierarchy. This root node is the parent of the top items your browse hierarchy.
+hierarchy. This root node is the parent of the top items of your browse hierarchy.
 The method is passed information about the calling client. You can use this
 information to decide if the client should have access to your content at all.
 For example, if you want to limit your app's content to a list of approved
-clients, you can compare the passed {@code clientPackageName} to your whitelist.
-If the caller isn't an approved package, you can return null to deny access to
-your content.</p>
+clients, you can compare the passed {@code clientPackageName} to your whitelist
+and verify the certificate used to sign the caller's APK.
+If the caller can't be verified to be an approved package, return null to deny access to
+your content. For an example of an app that validates that the caller is an
+approved app, see the
+<a href="https://github.com/googlesamples/android-UniversalMusicPlayer/blob/master/mobile/src/main/java/com/example/android/uamp/PackageValidator.java"
+class="external-link"><code>PackageValidator</code></a> class in the
+<a href="https://github.com/googlesamples/android-UniversalMusicPlayer"
+class="external-link">Universal Android Music Player</a> sample app.
+</p>
 
 <p>A typical implementation of {@link
 android.service.media.MediaBrowserService#onGetRoot onGetRoot()} might
@@ -307,28 +410,23 @@ look like this:</p>
 public BrowserRoot onGetRoot(String clientPackageName, int clientUid,
     Bundle rootHints) {
 
-    // To ensure you are not allowing any arbitrary app to browse your app's
-    // contents, you need to check the origin:
-    if (!PackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
+    // Verify that the specified package is allowed to access your
+    // content! You'll need to write your own logic to do this.
+    if (!isValid(clientPackageName, clientUid)) {
         // If the request comes from an untrusted package, return null.
         // No further calls will be made to other media browsing methods.
-        LogHelper.w(TAG, "OnGetRoot: IGNORING request from untrusted package "
-                + clientPackageName);
+
         return null;
     }
-    if (ANDROID_AUTO_PACKAGE_NAME.equals(clientPackageName)) {
-        // Optional: if your app needs to adapt ads, music library or anything
-        // else that needs to run differently when connected to the car, this
-        // is where you should handle it.
-    }
-    return new BrowserRoot(MEDIA_ID_ROOT, null);
+
+    return new BrowserRoot(MY_MEDIA_ROOT_ID, null);
 }
 </pre>
 
 <p>
   The Auto device client builds the top-level menu by calling {@link
   android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()}
-  with the root node object and getting it's children. The client builds
+  with the root node object and getting its children. The client builds
   submenus by calling the same method with other child nodes. The following
   example code shows a simple implementation of {@link
   android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()} method:
@@ -341,21 +439,30 @@ public void onLoadChildren(final String parentMediaId,
 
     // Assume for example that the music catalog is already loaded/cached.
 
-    List&lt;MediaBrowser.MediaItem&gt; mediaItems = new ArrayList&lt;&gt;();
+    List&lt;MediaItem&gt; mediaItems = new ArrayList&lt;&gt;();
 
     // Check if this is the root menu:
-    if (MEDIA_BROWSER_ROOT.equals(parentMediaId)) {
+    if (MY_MEDIA_ROOT_ID.equals(parentMediaId)) {
 
         // build the MediaItem objects for the top level,
-        // and put them in the &lt;result&gt; list
+        // and put them in the mediaItems list
     } else {
 
         // examine the passed parentMediaId to see which submenu we're at,
-        // and put the children of that menu in the &lt;result&gt; list
+        // and put the children of that menu in the mediaItems list
     }
+    result.sendResult(mediaItems);
 }
 </pre>
 
+<p>
+  For examples of how to implement {@link
+  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()},
+  see the <a href="{@docRoot}samples/MediaBrowserService/index.html">
+  MediaBrowserService</a> and
+  <a href="https://github.com/googlesamples/android-UniversalMusicPlayer"
+  class="external-link">Universal Android Music Player</a> sample apps.
+</p>
 
 <h2 id="implement_callback">Enable Playback Control</h2>
 
@@ -480,7 +587,13 @@ to be played over the car's speakers.</p>
 <a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
 <a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>
 
-
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/watch?v=xc2HZSwPcwM">
+<div>
+    <h3>Video</h3>
+    <p>Devbytes: Android Auto Voice Actions</p>
+</div>
+</a>
 <h2 id="support_voice">Support Voice Actions</h2>
 
 <p>To reduce driver distractions, you can add voice actions in your audio playback app. With voice

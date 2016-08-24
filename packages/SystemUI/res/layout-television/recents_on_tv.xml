@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<com.android.systemui.recents.tv.views.RecentsTvView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/recents_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:background="@drawable/recents_tv_background_gradient">
+
+    <com.android.systemui.recents.tv.views.TaskStackHorizontalGridView
+        android:id="@+id/task_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:descendantFocusability="beforeDescendants"
+        android:layout_marginTop="@dimen/recents_tv_gird_row_top_margin"
+        android:focusable="true"
+        android:layoutDirection="rtl" />
+
+    <!-- Placeholder view to give focus to the PIP menus in talkback mode -->
+    <View
+        android:id="@+id/pip"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <!-- Placeholder to dismiss during talkback. -->
+    <ImageView
+            android:id="@+id/dismiss_placeholder"
+            android:layout_width="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_height="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="50dp"
+            android:src="@drawable/ic_cancel_white_24dp"
+            android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
+            android:focusable="true"
+            android:visibility="gone" />
+
+</com.android.systemui.recents.tv.views.RecentsTvView>

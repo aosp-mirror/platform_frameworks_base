@@ -19,6 +19,8 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+
 /**
  * Record of energy and activity information from controller and
  * underlying bt stack state.Timestamp the record with system
@@ -27,11 +29,12 @@ import android.os.Parcelable;
  */
 public final class BluetoothActivityEnergyInfo implements Parcelable {
     private final long mTimestamp;
-    private final int mBluetoothStackState;
-    private final long mControllerTxTimeMs;
-    private final long mControllerRxTimeMs;
-    private final long mControllerIdleTimeMs;
-    private final long mControllerEnergyUsed;
+    private int mBluetoothStackState;
+    private long mControllerTxTimeMs;
+    private long mControllerRxTimeMs;
+    private long mControllerIdleTimeMs;
+    private long mControllerEnergyUsed;
+    private UidTraffic[] mUidTraffic;
 
     public static final int BT_STACK_STATE_INVALID = 0;
     public static final int BT_STACK_STATE_STATE_ACTIVE = 1;
@@ -48,6 +51,17 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         mControllerEnergyUsed = energyUsed;
     }
 
+    @SuppressWarnings("unchecked")
+    BluetoothActivityEnergyInfo(Parcel in) {
+        mTimestamp = in.readLong();
+        mBluetoothStackState = in.readInt();
+        mControllerTxTimeMs = in.readLong();
+        mControllerRxTimeMs = in.readLong();
+        mControllerIdleTimeMs = in.readLong();
+        mControllerEnergyUsed = in.readLong();
+        mUidTraffic = in.createTypedArray(UidTraffic.CREATOR);
+    }
+
     @Override
     public String toString() {
         return "BluetoothActivityEnergyInfo{"
@@ -57,26 +71,22 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
             + " mControllerRxTimeMs=" + mControllerRxTimeMs
             + " mControllerIdleTimeMs=" + mControllerIdleTimeMs
             + " mControllerEnergyUsed=" + mControllerEnergyUsed
+            + " mUidTraffic=" + Arrays.toString(mUidTraffic)
             + " }";
     }
 
     public static final Parcelable.Creator<BluetoothActivityEnergyInfo> CREATOR =
             new Parcelable.Creator<BluetoothActivityEnergyInfo>() {
         public BluetoothActivityEnergyInfo createFromParcel(Parcel in) {
-            long timestamp = in.readLong();
-            int stackState = in.readInt();
-            long txTime = in.readLong();
-            long rxTime = in.readLong();
-            long idleTime = in.readLong();
-            long energyUsed = in.readLong();
-            return new BluetoothActivityEnergyInfo(timestamp, stackState,
-                    txTime, rxTime, idleTime, energyUsed);
+            return new BluetoothActivityEnergyInfo(in);
         }
+
         public BluetoothActivityEnergyInfo[] newArray(int size) {
             return new BluetoothActivityEnergyInfo[size];
         }
     };
 
+    @SuppressWarnings("unchecked")
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mTimestamp);
         out.writeInt(mBluetoothStackState);
@@ -84,6 +94,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         out.writeLong(mControllerRxTimeMs);
         out.writeLong(mControllerIdleTimeMs);
         out.writeLong(mControllerEnergyUsed);
+        out.writeTypedArray(mUidTraffic, flags);
     }
 
     public int describeContents() {
@@ -133,12 +144,20 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
         return mTimestamp;
     }
 
+    public UidTraffic[] getUidTraffic() {
+        return mUidTraffic;
+    }
+
+    public void setUidTraffic(UidTraffic[] traffic) {
+        mUidTraffic = traffic;
+    }
+
     /**
      * @return if the record is valid
      */
     public boolean isValid() {
-        return ((mControllerTxTimeMs !=0) ||
-                (mControllerRxTimeMs !=0) ||
-                (mControllerIdleTimeMs !=0));
+        return ((mControllerTxTimeMs >=0) &&
+                (mControllerRxTimeMs >=0) &&
+                (mControllerIdleTimeMs >=0));
     }
 }

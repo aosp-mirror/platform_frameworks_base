@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.IntDef;
 import android.content.res.Configuration;
+import android.content.res.Configuration.NativeConfig;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -67,7 +68,7 @@ public class ActivityInfo extends ComponentInfo
      * The launch mode style requested by the activity.  From the
      * {@link android.R.attr#launchMode} attribute, one of
      * {@link #LAUNCH_MULTIPLE},
-     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or 
+     * {@link #LAUNCH_SINGLE_TOP}, {@link #LAUNCH_SINGLE_TASK}, or
      * {@link #LAUNCH_SINGLE_INSTANCE}.
      */
     public int launchMode;
@@ -140,7 +141,7 @@ public class ActivityInfo extends ComponentInfo
      * Activity.  From the "permission" attribute.
      */
     public String permission;
-    
+
     /**
      * The affinity this activity has for another task in the system.  The
      * string here is the name of the task, often the package name of the
@@ -148,13 +149,54 @@ public class ActivityInfo extends ComponentInfo
      * {@link android.R.attr#taskAffinity} attribute.
      */
     public String taskAffinity;
-    
+
     /**
      * If this is an activity alias, this is the real activity class to run
      * for it.  Otherwise, this is null.
      */
     public String targetActivity;
-    
+
+    /**
+     * Activity can not be resized and always occupies the fullscreen area with all windows fully
+     * visible.
+     * @hide
+     */
+    public static final int RESIZE_MODE_UNRESIZEABLE = 0;
+    /**
+     * Activity can not be resized and always occupies the fullscreen area with all windows cropped
+     * to either the task or stack bounds.
+     * @hide
+     */
+    public static final int RESIZE_MODE_CROP_WINDOWS = 1;
+    /**
+     * Activity is resizeable.
+     * @hide
+     */
+    public static final int RESIZE_MODE_RESIZEABLE = 2;
+    /**
+     * Activity is resizeable and supported picture-in-picture mode.
+     * @hide
+     */
+    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
+    /**
+     * Activity is does not support resizing, but we are forcing it to be resizeable.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZEABLE = 4;
+    /**
+     * Value indicating if the resizing mode the activity supports.
+     * See {@link android.R.attr#resizeableActivity}.
+     * @hide
+     */
+    public int resizeMode = RESIZE_MODE_RESIZEABLE;
+
+    /**
+     * Name of the VrListenerService component to run for this activity.
+     * @see android.R.attr#enableVrMode
+     * @hide
+     */
+    public String requestedVrComponent;
+
     /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
@@ -276,11 +318,26 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_RESUME_WHILE_PAUSING = 0x4000;
     /**
-     * @hide Bit in {@link #flags}: If set, this component will only be seen
-     * by the primary user.  Only works with broadcast receivers.  Set from the
-     * android.R.attr#primaryUserOnly attribute.
+     * Bit in {@link #flags} indicating that this activity should be run with VR mode enabled.
+     *
+     * {@see android.app.Activity#setVrMode(boolean)}.
      */
-    public static final int FLAG_PRIMARY_USER_ONLY = 0x20000000;
+    public static final int FLAG_ENABLE_VR_MODE = 0x8000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is always focusable regardless of if it is
+     * in a task/stack whose activities are normally not focusable.
+     * See android.R.attr#alwaysFocusable.
+     * @hide
+     */
+    public static final int FLAG_ALWAYS_FOCUSABLE = 0x40000;
+
+    /**
+     * @hide Bit in {@link #flags}: If set, this component will only be seen
+     * by the system user.  Only works with broadcast receivers.  Set from the
+     * android.R.attr#systemUserOnly attribute.
+     */
+    public static final int FLAG_SYSTEM_USER_ONLY = 0x20000000;
     /**
      * Bit in {@link #flags}: If set, a single instance of the receiver will
      * run for all users on the device.  Set from the
@@ -292,7 +349,7 @@ public class ActivityInfo extends ComponentInfo
     /**
      * @hide Bit in {@link #flags}: If set, this activity may be launched into an
      * owned ActivityContainer such as that within an ActivityView. If not set and
-     * this activity is launched into such a container a SecurityExcception will be
+     * this activity is launched into such a container a SecurityException will be
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
@@ -362,7 +419,7 @@ public class ActivityInfo extends ComponentInfo
      * the {@link android.R.attr#screenOrientation} attribute.
      */
     public static final int SCREEN_ORIENTATION_SENSOR = 4;
-  
+
     /**
      * Constant corresponding to <code>nosensor</code> in
      * the {@link android.R.attr#screenOrientation} attribute.
@@ -427,7 +484,7 @@ public class ActivityInfo extends ComponentInfo
      * The preferred screen orientation this activity would like to run in.
      * From the {@link android.R.attr#screenOrientation} attribute, one of
      * {@link #SCREEN_ORIENTATION_UNSPECIFIED},
-     * {@link #SCREEN_ORIENTATION_LANDSCAPE}, 
+     * {@link #SCREEN_ORIENTATION_LANDSCAPE},
      * {@link #SCREEN_ORIENTATION_PORTRAIT},
      * {@link #SCREEN_ORIENTATION_USER},
      * {@link #SCREEN_ORIENTATION_BEHIND},
@@ -445,7 +502,29 @@ public class ActivityInfo extends ComponentInfo
      */
     @ScreenOrientation
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-    
+
+    /** @hide */
+    @IntDef(flag = true,
+            value = {
+                    CONFIG_MCC,
+                    CONFIG_MNC,
+                    CONFIG_LOCALE,
+                    CONFIG_TOUCHSCREEN,
+                    CONFIG_KEYBOARD,
+                    CONFIG_KEYBOARD_HIDDEN,
+                    CONFIG_NAVIGATION,
+                    CONFIG_ORIENTATION,
+                    CONFIG_SCREEN_LAYOUT,
+                    CONFIG_UI_MODE,
+                    CONFIG_SCREEN_SIZE,
+                    CONFIG_SMALLEST_SCREEN_SIZE,
+                    CONFIG_DENSITY,
+                    CONFIG_LAYOUT_DIRECTION,
+                    CONFIG_FONT_SCALE,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Config {}
+
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the IMSI MCC.  Set from the
@@ -552,7 +631,7 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
-    
+
     /** @hide
      * Unfortunately the constants for config changes in native code are
      * different from ActivityInfo. :(  Here are the values we should use for the
@@ -580,7 +659,7 @@ public class ActivityInfo extends ComponentInfo
      *
      * @hide
      */
-    public static int activityInfoConfigToNative(int input) {
+    public static @NativeConfig int activityInfoConfigJavaToNative(@Config int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
             if ((input & (1 << i)) != 0) {
@@ -595,7 +674,7 @@ public class ActivityInfo extends ComponentInfo
      *
      * @hide
      */
-    public static int activityInfoConfigNativeToJava(int input) {
+    public static @Config int activityInfoConfigNativeToJava(@NativeConfig int input) {
         int output = 0;
         for (int i = 0; i < CONFIG_NATIVE_BITS.length; i++) {
             if ((input & CONFIG_NATIVE_BITS[i]) != 0) {
@@ -627,9 +706,9 @@ public class ActivityInfo extends ComponentInfo
      * {@link #CONFIG_MCC}, {@link #CONFIG_MNC},
      * {@link #CONFIG_LOCALE}, {@link #CONFIG_TOUCHSCREEN},
      * {@link #CONFIG_KEYBOARD}, {@link #CONFIG_NAVIGATION},
-     * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT} and
-     * {@link #CONFIG_LAYOUT_DIRECTION}.  Set from the {@link android.R.attr#configChanges}
-     * attribute.
+     * {@link #CONFIG_ORIENTATION}, {@link #CONFIG_SCREEN_LAYOUT},
+     * {@link #CONFIG_DENSITY}, and {@link #CONFIG_LAYOUT_DIRECTION}.
+     * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public int configChanges;
 
@@ -664,13 +743,6 @@ public class ActivityInfo extends ComponentInfo
      */
     public String parentActivityName;
 
-    /**
-     * Value indicating if the activity is resizeable to any dimension.
-     * See {@link android.R.attr#resizeableActivity}.
-     * @hide
-     */
-    public boolean resizeable;
-
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
     /** @hide */
@@ -702,6 +774,12 @@ public class ActivityInfo extends ComponentInfo
      */
     public int lockTaskLaunchMode;
 
+    /**
+     * Information about desired position and size of activity on the display when
+     * it is first started.
+     */
+    public WindowLayout windowLayout;
+
     public ActivityInfo() {
     }
 
@@ -720,8 +798,10 @@ public class ActivityInfo extends ComponentInfo
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
-        resizeable = orig.resizeable;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
+        windowLayout = orig.windowLayout;
+        resizeMode = orig.resizeMode;
+        requestedVrComponent = orig.requestedVrComponent;
     }
 
     /**
@@ -744,14 +824,62 @@ public class ActivityInfo extends ComponentInfo
         }
     }
 
+    /**
+     * Returns true if the activity's orientation is fixed.
+     * @hide
+     */
+    boolean isFixedOrientation() {
+        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
+    /** @hide */
+    public static boolean isResizeableMode(int mode) {
+        return mode == RESIZE_MODE_RESIZEABLE
+                || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
+                || mode == RESIZE_MODE_FORCE_RESIZEABLE;
+    }
+
+    /** @hide */
+    public static String resizeModeToString(int mode) {
+        switch (mode) {
+            case RESIZE_MODE_UNRESIZEABLE:
+                return "RESIZE_MODE_UNRESIZEABLE";
+            case RESIZE_MODE_CROP_WINDOWS:
+                return "RESIZE_MODE_CROP_WINDOWS";
+            case RESIZE_MODE_RESIZEABLE:
+                return "RESIZE_MODE_RESIZEABLE";
+            case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
+                return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
+            case RESIZE_MODE_FORCE_RESIZEABLE:
+                return "RESIZE_MODE_FORCE_RESIZEABLE";
+            default:
+                return "unknown=" + mode;
+        }
+    }
+
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, DUMP_FLAG_ALL);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, int flags) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
-        pw.println(prefix + "taskAffinity=" + taskAffinity
-                + " targetActivity=" + targetActivity
-                + " persistableMode=" + persistableModeToString());
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "taskAffinity=" + taskAffinity
+                    + " targetActivity=" + targetActivity
+                    + " persistableMode=" + persistableModeToString());
+        }
         if (launchMode != 0 || flags != 0 || theme != 0) {
             pw.println(prefix + "launchMode=" + launchMode
                     + " flags=0x" + Integer.toHexString(flags)
@@ -766,11 +894,22 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        pw.println(prefix + "resizeable=" + resizeable + " lockTaskLaunchMode="
-                + lockTaskLaunchModeToString(lockTaskLaunchMode));
-        super.dumpBack(pw, prefix);
+        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+            pw.println(prefix + "lockTaskLaunchMode="
+                    + lockTaskLaunchModeToString(lockTaskLaunchMode));
+        }
+        if (windowLayout != null) {
+            pw.println(prefix + "windowLayout=" + windowLayout.width + "|"
+                    + windowLayout.widthFraction + ", " + windowLayout.height + "|"
+                    + windowLayout.heightFraction + ", " + windowLayout.gravity);
+        }
+        pw.println(prefix + "resizeMode=" + resizeModeToString(resizeMode));
+        if (requestedVrComponent != null) {
+            pw.println(prefix + "requestedVrComponent=" + requestedVrComponent);
+        }
+        super.dumpBack(pw, prefix, flags);
     }
-    
+
     public String toString() {
         return "ActivityInfo{"
             + Integer.toHexString(System.identityHashCode(this))
@@ -797,8 +936,21 @@ public class ActivityInfo extends ComponentInfo
         dest.writeString(parentActivityName);
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
-        dest.writeInt(resizeable ? 1 : 0);
         dest.writeInt(lockTaskLaunchMode);
+        if (windowLayout != null) {
+            dest.writeInt(1);
+            dest.writeInt(windowLayout.width);
+            dest.writeFloat(windowLayout.widthFraction);
+            dest.writeInt(windowLayout.height);
+            dest.writeFloat(windowLayout.heightFraction);
+            dest.writeInt(windowLayout.gravity);
+            dest.writeInt(windowLayout.minWidth);
+            dest.writeInt(windowLayout.minHeight);
+        } else {
+            dest.writeInt(0);
+        }
+        dest.writeInt(resizeMode);
+        dest.writeString(requestedVrComponent);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -827,7 +979,110 @@ public class ActivityInfo extends ComponentInfo
         parentActivityName = source.readString();
         persistableMode = source.readInt();
         maxRecents = source.readInt();
-        resizeable = (source.readInt() == 1);
         lockTaskLaunchMode = source.readInt();
+        if (source.readInt() == 1) {
+            windowLayout = new WindowLayout(source);
+        }
+        resizeMode = source.readInt();
+        requestedVrComponent = source.readString();
+    }
+
+    /**
+     * Contains information about position and size of the activity on the display.
+     *
+     * Used in freeform mode to set desired position when activity is first launched.
+     * It describes how big the activity wants to be in both width and height,
+     * the minimal allowed size, and the gravity to be applied.
+     *
+     * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+     * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+     * @attr ref android.R.styleable#AndroidManifestLayout_gravity
+     * @attr ref android.R.styleable#AndroidManifestLayout_minWidth
+     * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
+     */
+    public static final class WindowLayout {
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction, int gravity,
+                int minWidth, int minHeight) {
+            this.width = width;
+            this.widthFraction = widthFraction;
+            this.height = height;
+            this.heightFraction = heightFraction;
+            this.gravity = gravity;
+            this.minWidth = minWidth;
+            this.minHeight = minHeight;
+        }
+
+        WindowLayout(Parcel source) {
+            width = source.readInt();
+            widthFraction = source.readFloat();
+            height = source.readInt();
+            heightFraction = source.readFloat();
+            gravity = source.readInt();
+            minWidth = source.readInt();
+            minHeight = source.readInt();
+        }
+
+        /**
+         * Width of activity in pixels.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+         */
+        public final int width;
+
+        /**
+         * Width of activity as a fraction of available display width.
+         * If both {@link #width} and this value are set this one will be preferred.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
+         */
+        public final float widthFraction;
+
+        /**
+         * Height of activity in pixels.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+         */
+        public final int height;
+
+        /**
+         * Height of activity as a fraction of available display height.
+         * If both {@link #height} and this value are set this one will be preferred.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
+         */
+        public final float heightFraction;
+
+        /**
+         * Gravity of activity.
+         * Currently {@link android.view.Gravity#TOP}, {@link android.view.Gravity#BOTTOM},
+         * {@link android.view.Gravity#LEFT} and {@link android.view.Gravity#RIGHT} are supported.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_gravity
+         */
+        public final int gravity;
+
+        /**
+         * Minimal width of activity in pixels to be able to display its content.
+         *
+         * <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         * activities launched in the task. That is if the root activity of a task set minimal
+         * width, then the system will set the same minimal width on all other activities in the
+         * task. It will also ignore any other minimal width attributes of non-root activities.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_minWidth
+         */
+        public final int minWidth;
+
+        /**
+         * Minimal height of activity in pixels to be able to display its content.
+         *
+         * <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         * activities launched in the task. That is if the root activity of a task set minimal
+         * height, then the system will set the same minimal height on all other activities in the
+         * task. It will also ignore any other minimal height attributes of non-root activities.
+         *
+         * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
+         */
+        public final int minHeight;
     }
 }

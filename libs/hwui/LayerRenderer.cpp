@@ -43,8 +43,8 @@ LayerRenderer::LayerRenderer(RenderState& renderState, Layer* layer)
 LayerRenderer::~LayerRenderer() {
 }
 
-void LayerRenderer::prepareDirty(float left, float top, float right, float bottom,
-        bool opaque) {
+void LayerRenderer::prepareDirty(int viewportWidth, int viewportHeight,
+        float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
     mRenderState.bindFramebuffer(mLayer->getFbo());
@@ -58,13 +58,14 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
         mLayer->region.clear();
         dirty.set(0.0f, 0.0f, width, height);
     } else {
-        dirty.intersect(0.0f, 0.0f, width, height);
+        dirty.doIntersect(0.0f, 0.0f, width, height);
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }
     mLayer->clipRect.set(dirty);
 
-    OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+    OpenGLRenderer::prepareDirty(viewportWidth, viewportHeight,
+            dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 }
 
 void LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
@@ -188,7 +189,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
-    GLuint fbo = caches.fboCache.get();
+    GLuint fbo = renderState.createFramebuffer();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");
         return nullptr;
@@ -203,7 +204,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
 
     // We first obtain a layer before comparing against the max texture size
     // because layers are not allocated at the exact desired size. They are
-    // always created slighly larger to improve recycling
+    // always created slightly larger to improve recycling
     const uint32_t maxTextureSize = caches.maxTextureSize;
     if (layer->getWidth() > maxTextureSize || layer->getHeight() > maxTextureSize) {
         ALOGW("Layer exceeds max. dimensions supported by the GPU (%dx%d, max=%dx%d)",
@@ -272,7 +273,7 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
 Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
-    Layer* layer = new Layer(Layer::kType_Texture, renderState, 0, 0);
+    Layer* layer = new Layer(Layer::Type::Texture, renderState, 0, 0);
     layer->setCacheable(false);
     layer->layer.set(0.0f, 0.0f, 0.0f, 0.0f);
     layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);
@@ -286,7 +287,7 @@ Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
 }
 
 void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-        bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform) {
+        bool isOpaque, bool forceFilter, GLenum renderTarget, const float* textureTransform) {
     if (layer) {
         layer->setBlend(!isOpaque);
         layer->setForceFilter(forceFilter);
@@ -352,11 +353,11 @@ void LayerRenderer::flushLayer(RenderState& renderState, Layer* layer) {
 
 bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap) {
     Caches& caches = Caches::getInstance();
-    if (layer
+    if (layer && layer->isRenderable()
             && bitmap->width() <= caches.maxTextureSize
             && bitmap->height() <= caches.maxTextureSize) {
 
-        GLuint fbo = caches.fboCache.get();
+        GLuint fbo = renderState.createFramebuffer();
         if (!fbo) {
             ALOGW("Could not obtain an FBO");
             return false;
@@ -372,7 +373,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         GLenum format;
         GLenum type;
 
-        GLenum error = GL_NO_ERROR;
         bool status = false;
 
         switch (bitmap->colorType()) {
@@ -407,7 +407,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         renderState.bindFramebuffer(fbo);
 
         glGenTextures(1, &texture);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         caches.textureState().activateTexture(0);
         caches.textureState().bindTexture(texture);
@@ -422,23 +421,18 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
                 0, format, type, nullptr);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, texture, 0);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         {
             LayerRenderer renderer(renderState, layer);
-            renderer.setViewport(bitmap->width(), bitmap->height());
-            renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
-                    bitmap->width(), bitmap->height(), !layer->isBlend());
+            renderer.OpenGLRenderer::prepareDirty(bitmap->width(), bitmap->height(),
+                    0.0f, 0.0f, bitmap->width(), bitmap->height(), !layer->isBlend());
 
             renderState.scissor().setEnabled(false);
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
-
-            if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
             {
                 Rect bounds;
@@ -448,25 +442,19 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
                 glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
                         type, bitmap->getPixels());
 
-                if ((error = glGetError()) != GL_NO_ERROR) goto error;
             }
 
             status = true;
         }
 
-error:
-#if DEBUG_OPENGL
-        if (error != GL_NO_ERROR) {
-            ALOGD("GL error while copying layer into bitmap = 0x%x", error);
-        }
-#endif
-
         renderState.bindFramebuffer(previousFbo);
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
         caches.textureState().deleteTexture(texture);
-        caches.fboCache.put(fbo);
+        renderState.deleteFramebuffer(fbo);
         renderState.setViewport(previousViewportWidth, previousViewportHeight);
+
+        GL_CHECKPOINT(MODERATE);
 
         return status;
     }

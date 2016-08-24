@@ -50,6 +50,7 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
         addMediaScannerUnitTests(suite);
         addCameraUnitTests(suite);
         addImageReaderTests(suite);
+        addExifInterfaceTests(suite);
         return suite;
     }
 
@@ -59,10 +60,7 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
     }
 
     private void addCameraUnitTests(TestSuite suite) {
-        suite.addTestSuite(CameraUtilsDecoratorTest.class);
-        suite.addTestSuite(CameraUtilsRuntimeExceptionTest.class);
         suite.addTestSuite(CameraUtilsUncheckedThrowTest.class);
-        suite.addTestSuite(CameraUtilsBinderDecoratorTest.class);
         suite.addTestSuite(CameraUtilsTypeReferenceTest.class);
         suite.addTestSuite(CameraMetadataTest.class);
     }
@@ -108,5 +106,9 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
 
     private void addMediaScannerUnitTests(TestSuite suite) {
         suite.addTestSuite(MediaInserterTest.class);
+    }
+
+    private void addExifInterfaceTests(TestSuite suite) {
+        suite.addTestSuite(ExifInterfaceTest.class);
     }
 }

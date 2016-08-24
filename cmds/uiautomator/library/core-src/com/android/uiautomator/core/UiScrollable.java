@@ -24,7 +24,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * for items in scrollable layout elements. This class can be used with
  * horizontally or vertically scrollable controls.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiScrollable extends UiCollection {
     private static final String LOG_TAG = UiScrollable.class.getSimpleName();
 

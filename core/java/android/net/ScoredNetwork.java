@@ -43,6 +43,16 @@ public class ScoredNetwork implements Parcelable {
     public final RssiCurve rssiCurve;
 
     /**
+     * A boolean value that indicates whether or not the network is believed to be metered.
+     *
+     * <p>A network can be classified as metered if the user would be
+     * sensitive to heavy data usage on that connection due to monetary costs,
+     * data limitations or battery/performance issues. A typical example would
+     * be a wifi connection where the user would be charged for usage.
+     */
+    public final boolean meteredHint;
+
+    /**
      * Construct a new {@link ScoredNetwork}.
      *
      * @param networkKey the {@link NetworkKey} uniquely identifying this network.
@@ -54,8 +64,26 @@ public class ScoredNetwork implements Parcelable {
      *     the scorer may choose to issue an out-of-band update at any time.
      */
     public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve) {
+        this(networkKey, rssiCurve, false /* meteredHint */);
+    }
+
+    /**
+     * Construct a new {@link ScoredNetwork}.
+     *
+     * @param networkKey the {@link NetworkKey} uniquely identifying this network.
+     * @param rssiCurve the {@link RssiCurve} representing the scores for this network based on the
+     *     RSSI. This field is optional, and may be skipped to represent a network which the scorer
+     *     has opted not to score at this time. Passing a null value here is strongly preferred to
+     *     not returning any {@link ScoredNetwork} for a given {@link NetworkKey} because it
+     *     indicates to the system not to request scores for this network in the future, although
+     *     the scorer may choose to issue an out-of-band update at any time.
+     * @param meteredHint A boolean value indicating whether or not the network is believed to be
+     *     metered.
+     */
+    public ScoredNetwork(NetworkKey networkKey, RssiCurve rssiCurve, boolean meteredHint) {
         this.networkKey = networkKey;
         this.rssiCurve = rssiCurve;
+        this.meteredHint = meteredHint;
     }
 
     private ScoredNetwork(Parcel in) {
@@ -65,6 +93,7 @@ public class ScoredNetwork implements Parcelable {
         } else {
             rssiCurve = null;
         }
+        meteredHint = in.readByte() != 0;
     }
 
     @Override
@@ -81,6 +110,7 @@ public class ScoredNetwork implements Parcelable {
         } else {
             out.writeByte((byte) 0);
         }
+        out.writeByte((byte) (meteredHint ? 1 : 0));
     }
 
     @Override
@@ -90,18 +120,20 @@ public class ScoredNetwork implements Parcelable {
 
         ScoredNetwork that = (ScoredNetwork) o;
 
-        return Objects.equals(networkKey, that.networkKey) &&
-                Objects.equals(rssiCurve, that.rssiCurve);
+        return Objects.equals(networkKey, that.networkKey)
+            && Objects.equals(rssiCurve, that.rssiCurve)
+            && Objects.equals(meteredHint, that.meteredHint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(networkKey, rssiCurve);
+        return Objects.hash(networkKey, rssiCurve, meteredHint);
     }
 
     @Override
     public String toString() {
-        return "ScoredNetwork[key=" + networkKey + ",score=" + rssiCurve + "]";
+        return "ScoredNetwork[key=" + networkKey + ",score=" + rssiCurve
+            + ",meteredHint=" + meteredHint + "]";
     }
 
     public static final Parcelable.Creator<ScoredNetwork> CREATOR =

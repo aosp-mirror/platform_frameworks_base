@@ -16,8 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +23,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,7 +54,7 @@ public class BatteryController extends StateController {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new BatteryController(taskManagerService,
-                        taskManagerService.getContext());
+                        taskManagerService.getContext(), taskManagerService.getLock());
             }
         }
         return sController;
@@ -69,32 +68,29 @@ public class BatteryController extends StateController {
     @VisibleForTesting
     public static BatteryController getForTesting(StateChangedListener stateChangedListener,
                                            Context context) {
-        return new BatteryController(stateChangedListener, context);
+        return new BatteryController(stateChangedListener, context, new Object());
     }
 
-    private BatteryController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private BatteryController(StateChangedListener stateChangedListener, Context context,
+            Object lock) {
+        super(stateChangedListener, context, lock);
         mChargeTracker = new ChargingTracker();
         mChargeTracker.startTracking();
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus) {
+    public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         final boolean isOnStablePower = mChargeTracker.isOnStablePower();
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mTrackedTasks) {
-                mTrackedTasks.add(taskStatus);
-                taskStatus.chargingConstraintSatisfied.set(isOnStablePower);
-            }
+            mTrackedTasks.add(taskStatus);
+            taskStatus.setChargingConstraintSatisfied(isOnStablePower);
         }
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mTrackedTasks) {
-                mTrackedTasks.remove(taskStatus);
-            }
+            mTrackedTasks.remove(taskStatus);
         }
     }
 
@@ -104,9 +100,9 @@ public class BatteryController extends StateController {
             Slog.d(TAG, "maybeReportNewChargingState: " + stablePower);
         }
         boolean reportChange = false;
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             for (JobStatus ts : mTrackedTasks) {
-                boolean previous = ts.chargingConstraintSatisfied.getAndSet(stablePower);
+                boolean previous = ts.setChargingConstraintSatisfied(stablePower);
                 if (previous != stablePower) {
                     reportChange = true;
                 }
@@ -199,17 +195,21 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
-        pw.println("Batt.");
-        pw.println("Stable power: " + mChargeTracker.isOnStablePower());
-        synchronized (mTrackedTasks) {
-            Iterator<JobStatus> it = mTrackedTasks.iterator();
-            if (it.hasNext()) {
-                pw.print(String.valueOf(it.next().hashCode()));
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
+        pw.print("Battery: stable power = ");
+        pw.println(mChargeTracker.isOnStablePower());
+        pw.print("Tracking ");
+        pw.print(mTrackedTasks.size());
+        pw.println(":");
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.get(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
             }
-            while (it.hasNext()) {
-                pw.print("," + String.valueOf(it.next().hashCode()));
-            }
+            pw.print("  #");
+            js.printUniqueId(pw);
+            pw.print(" from ");
+            UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
     }

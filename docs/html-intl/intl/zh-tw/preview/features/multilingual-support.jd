@@ -1,0 +1,217 @@
+page.title=語言和地區設定
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>此文件內容：</h2>
+<ol>
+	  <li><a href="#preN">解析語言資源中的挑戰</a></li>
+    <li><a href="#postN">對資源解析策略所做的改進</a></li>
+    <li><a href="#design">設計您的應用程式支援其他地區設定</a>
+</li>
+
+</ol>
+
+</div>
+</div>
+
+<p>Android N 增強對多語言使用者的支援，讓他們可在設定中選取多個地區設定。
+Android N 藉由擴充支援的地區設定數量和改變系統解析資源的方式來提供多語言支援。
+
+解析資源的新方法更加健全，而且它的設計是與現有 APK 相容，但是您應該特別注意任何未預期的行為。
+
+例如，您應該進行測試，確認應用程式預設在預期的語言。
+此外，如果您的應用程式支援多個語言，則應該確保這項支援也能如預定方式運作。
+
+最後，您應該試著確認應用程式可以順暢地處理沒有明確設計要支援的語言。
+</p>
+
+<p>本文件一開始會先說明在 Android N 之前的資源解析策略。接下來，它會描述 Android N 的已改進的資源解析策略。
+
+最後，它會說明如何利用擴充的地區設定數量來支援更多的多語言使用者。
+</p>
+
+<h2 id="preN">解析語言資源中的挑戰</h2>
+
+<p>在 Android N 之前，Android 並不總能成功地對應應用程式與系統地區設定。
+舉例來說，假設您應用程式的預設語言的是 US English，但是它的 {@code es_ES} 資源檔案中也包含當地語言化的西班牙文字串。
+
+</p>
+<p>當您的 Java 程式碼參考這些字串時，它會以下列方式來解析字串語言：
+</p>
+<ul>
+<li>如果裝置設定為 {@code es_MX} (Spanish-Mexico)，Android 會從 {@code es_ES} 資源檔案載入字串。
+</li>
+<li>如果裝置設定為 {@code en_AU}，Android 會返回使用 {@code
+en_US}。如果使用者選擇應用程式完全不支援的語言 (如法文)，系統也會預設成 {@code en_US}。
+</li>
+</ul>
+
+
+<p>出現這些解析問題的原因，是如果系統找不到符合的項目，它會剝除地區設定中的國家/地區代碼。
+例如：</p>
+<p class="table-caption" id="t-resource-res">
+<strong>表 1.</strong> 沒有完全符合的地區設定的資源解析。
+</p>
+<table>
+<tbody>
+<tr>
+<th>使用者設定</th>
+<th>應用程式資源</th>
+<th>資源解析</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+預設 (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+嘗試 fr_CH =&gt; 失敗<br>
+嘗試 fr =&gt; 失敗<br>
+使用預設 (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>在此例中，系統會顯示英文字串，而不知道使用者是否了解英文。
+現在這種行為相當常見。
+Android N 可以大幅降低出現這類結果的頻率。
+</p>
+
+<h2 id="postN">對資源解析策略所做的改進</h2>
+<p>Android N 帶來更健全的資源解析，而且會自動發現更佳的遞補。
+然而，為了加速解析和改進維護能力，您應該將資源存放在最常用的父系語言中。
+
+ 例如，如果之前將西班牙文資源存放在 {@code es-US} 目錄，請將它們移到包含拉丁美洲西班牙文的 {@code es-419} 目錄。
+
+ 同樣地，如果在名為 {@code en-GB} 的資料夾中包含資源字串，請將資料夾重新命名為 {@code en-001} (國際英文)，因為 <code>en-GB</code> 字串的最常見父系為 {@code en-001}。
+
+
+ 下列範例說明為什麼這些做法可改善資源解析的效能和可靠性。
+</p>
+
+<h3>資源解析範例</h3>
+
+<p>在 Android N 中，<strong>表 1</strong> 中所述的案例會用不同的方式解析：
+</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>表 2.</strong> 沒有完全符合的地區設定的已改進解析策略。
+</p>
+<table>
+<tr>
+<th>使用者設定</th>
+<th>應用程式資源</th>
+<th>資源解析</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+預設 (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+嘗試 fr_CH =&gt; 失敗<br>
+嘗試 fr =&gt; 失敗<br>
+嘗試 fr 的子項 =&gt; fr_FR<br>
+使用 fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>現在使用者會取得法文資源而非英文資源。這個範例也顯示為什麼在 Android N 中，您應該將法文字串存放在 {@code fr} 而非 {@code fr_FR} 中。以下是比對最接近父系語言的動作步驟，這些步驟可讓解析更快、更容易預測。
+
+
+</p>
+
+<p>除了這個已改進的解析邏輯之外，現在 Android 還提供更多使用者語言供您選擇。
+讓我們指定義大利文做為額外的使用者語言但應用程式不支援法文的情況，再試一次上述的範例。
+  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>表 3.</strong> 應用程式只比對到符合使用者第二個慣用地區設定時的資源解析。
+</p>
+<table>
+<tr>
+<th>使用者設定</th>
+<th>應用程式資源</th>
+<th>資源解析</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+預設 (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+嘗試 fr_CH =&gt; 失敗<br>
+嘗試 fr =&gt; 失敗<br>
+嘗試 fr 的子項 =&gt; 失敗<br>
+嘗試 it_CH =&gt; 失敗<br>
+嘗試 it =&gt; 失敗<br>
+嘗試 it 的子項 =&gt; it_IT<br>
+使用 it_IT
+</td>
+
+</tr>
+
+</table>
+<p>即使應用程式不支援法文，但是使用者仍然取得他們了解的語言。
+</p>
+
+
+<h2 id="design">設計您的應用程式支援其他地區設定</h2>
+<h3>LocaleList API</h3>
+
+<p>Android N 增加了新的 API {@code LocaleList.GetDefault()}
+，讓應用程式直接查詢使用者指定的語言清單。這個 API 可讓您建立更精細的應用程式行為，也能更好的最佳化內容的顯示方式。
+
+例如，搜尋可以根據使用者的設定以多語言顯示結果。
+瀏覽器應用程式可以避免提供以使用者已知語言來翻譯網頁的選項，鍵盤應用程式可以自動啟用所有適當的版面配置。
+
+ </p>
+
+<h3>格式設定</h3>
+
+<p>直到 Android 6.0 (API 層級 23)，Android 還只支援許多常用語言 (en、es、ar、fr、ru) 的一或兩個地區設定。
+
+因為每種語言只有幾種變體，所以應用程式不用在資源檔案中將一些數字和日期儲存為硬式編碼字串。
+
+然而，隨著 Android 擴充了支援的地區設定之後，即使在單一地區設定中，日期、時間、貨幣和類似資訊的格式可能會有顯著的差異。
+
+
+硬式編碼您的格式會對使用者產生令人混淆的體驗。
+因此，針對 Android N 進行開發時，請務必使用格式子，而不要硬式編碼數字和日期字串。
+</p>
+
+<p>最主要的範例是阿拉伯文，它對 Android N 的支援從一個 {@code ar_EG} 擴充到 27 個阿拉伯地區設定。
+這些地區設定可以共用大多數的資源，但是有些地區設定慣用 ASCII 數字，而其他地區設定慣用當地數字。
+例如，在您想要建立一個包含數字變數的句子時，例如 "Choose a 4 digit pin"，請使用如下所示的格式設定：
+
+</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

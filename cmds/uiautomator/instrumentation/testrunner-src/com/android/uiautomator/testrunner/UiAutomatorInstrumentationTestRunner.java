@@ -28,7 +28,10 @@ import junit.framework.TestListener;
 /**
  * Test runner for {@link UiAutomatorTestCase}s. Such tests are executed
  * on the device and have access to an applications context.
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiAutomatorInstrumentationTestRunner extends InstrumentationTestRunner {
 
     @Override

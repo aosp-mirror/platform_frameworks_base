@@ -1161,6 +1161,12 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         printf("Creating resources for package %s\n", assets->getPackage().string());
     }
 
+    // Set the private symbols package if it was declared.
+    // This can also be declared in XML as <private-symbols name="package" />
+    if (bundle->getPrivateSymbolsPackage().size() != 0) {
+        assets->setSymbolsPrivatePackage(bundle->getPrivateSymbolsPackage());
+    }
+
     ResourceTable::PackageType packageType = ResourceTable::App;
     if (bundle->getBuildSharedLibrary()) {
         packageType = ResourceTable::SharedLibrary;
@@ -1537,12 +1543,20 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     std::queue<CompileResourceWorkItem>& workQueue = table.getWorkQueue();
     while (!workQueue.empty()) {
         CompileResourceWorkItem& workItem = workQueue.front();
-        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.file, &table, xmlFlags);
+        int xmlCompilationFlags = xmlFlags | XML_COMPILE_PARSE_VALUES
+                | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS;
+        if (!workItem.needsCompiling) {
+            xmlCompilationFlags &= ~XML_COMPILE_ASSIGN_ATTRIBUTE_IDS;
+            xmlCompilationFlags &= ~XML_COMPILE_PARSE_VALUES;
+        }
+        err = compileXmlFile(bundle, assets, workItem.resourceName, workItem.xmlRoot,
+                             workItem.file, &table, xmlCompilationFlags);
+
         if (err == NO_ERROR) {
             assets->addResource(workItem.resPath.getPathLeaf(),
-                    workItem.resPath,
-                    workItem.file,
-                    workItem.file->getResourceType());
+                                workItem.resPath,
+                                workItem.file,
+                                workItem.file->getResourceType());
         } else {
             hasErrors = true;
         }
@@ -1737,9 +1751,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
             manifestFile->getGroupEntry(),
             manifestFile->getResourceType());
     err = compileXmlFile(bundle, assets, String16(), manifestFile,
-            outManifestFile, &table,
-            XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
-            | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES);
+            outManifestFile, &table, XML_COMPILE_STANDARD_RESOURCE & ~XML_COMPILE_STRIP_COMMENTS);
     if (err < NO_ERROR) {
         return err;
     }
@@ -1871,8 +1883,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                     //printf("Comment of %s: %s\n", String8(e).string(),
                     //        String8(cmt).string());
                     syms->appendComment(String8(e), String16(cmt), srcPos);
-                } else {
-                    //printf("No comment for %s\n", String8(e).string());
                 }
                 syms->makeSymbolPublic(String8(e), srcPos);
             } else if (strcmp16(block.getElementName(&len), uses_permission16.string()) == 0) {
@@ -2120,7 +2130,7 @@ static status_t writeResourceLoadedCallback(
     size_t N = symbols->getSymbols().size();
     for (i=0; i<N; i++) {
         const AaptSymbolEntry& sym = symbols->getSymbols().valueAt(i);
-        if (sym.typeCode == AaptSymbolEntry::TYPE_UNKNOWN) {
+        if (sym.typeCode != AaptSymbolEntry::TYPE_INT32) {
             continue;
         }
         if (!assets->isJavaSymbol(sym, includePrivate)) {
@@ -2244,6 +2254,9 @@ static status_t writeLayoutClasses(
                 String16 comment(sym.comment);
                 if (comment.size() <= 0) {
                     comment = getAttributeComment(assets, name8);
+                }
+                if (comment.contains(u"@removed")) {
+                    continue;
                 }
                 if (comment.size() > 0) {
                     const char16_t* p = comment.string();
@@ -2523,10 +2536,6 @@ static status_t writeSymbolClass(
             fprintf(fp,
                     "%s/** %s\n",
                     getIndentSpace(indent), cmt.string());
-        } else if (sym.isPublic && !includePrivate) {
-            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
-                assets->getPackage().string(), className.string(),
-                String8(sym.name).string());
         }
         String16 typeComment(sym.typeComment);
         if (typeComment.size() > 0) {
@@ -2569,10 +2578,6 @@ static status_t writeSymbolClass(
                      "%s */\n",
                     getIndentSpace(indent), cmt.string(),
                     getIndentSpace(indent));
-        } else if (sym.isPublic && !includePrivate) {
-            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
-                assets->getPackage().string(), className.string(),
-                String8(sym.name).string());
         }
         ann.printAnnotations(fp, getIndentSpace(indent));
         fprintf(fp, "%spublic static final String %s=\"%s\";\n",

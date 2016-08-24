@@ -64,41 +64,19 @@ public final class NavigationBarTransitions extends BarTransitions {
         mLightsOut = lightsOut;
 
         final View navButtons = mView.getCurrentView().findViewById(R.id.nav_buttons);
-        final View lowLights = mView.getCurrentView().findViewById(R.id.lights_out);
 
         // ok, everyone, stop it right there
         navButtons.animate().cancel();
-        lowLights.animate().cancel();
 
-        final float navButtonsAlpha = lightsOut ? 0f : 1f;
-        final float lowLightsAlpha = lightsOut ? 1f : 0f;
+        final float navButtonsAlpha = lightsOut ? 0.5f : 1f;
 
         if (!animate) {
             navButtons.setAlpha(navButtonsAlpha);
-            lowLights.setAlpha(lowLightsAlpha);
-            lowLights.setVisibility(lightsOut ? View.VISIBLE : View.GONE);
         } else {
             final int duration = lightsOut ? LIGHTS_OUT_DURATION : LIGHTS_IN_DURATION;
             navButtons.animate()
                 .alpha(navButtonsAlpha)
                 .setDuration(duration)
-                .start();
-
-            lowLights.setOnTouchListener(mLightsOutListener);
-            if (lowLights.getVisibility() == View.GONE) {
-                lowLights.setAlpha(0f);
-                lowLights.setVisibility(View.VISIBLE);
-            }
-            lowLights.animate()
-                .alpha(lowLightsAlpha)
-                .setDuration(duration)
-                .setInterpolator(new AccelerateInterpolator(2.0f))
-                .setListener(lightsOut ? null : new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator _a) {
-                        lowLights.setVisibility(View.GONE);
-                    }
-                })
                 .start();
         }
     }

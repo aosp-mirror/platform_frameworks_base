@@ -16,6 +16,9 @@
 
 package android.text.util;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.telephony.PhoneNumberUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
@@ -29,6 +32,8 @@ import android.widget.TextView;
 
 
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,19 +46,21 @@ import com.android.i18n.phonenumbers.PhoneNumberMatch;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.Leniency;
 
+import libcore.util.EmptyArray;
+
 /**
  *  Linkify take a piece of text and a regular expression and turns all of the
  *  regex matches in the text into clickable links.  This is particularly
- *  useful for matching things like email addresses, web urls, etc. and making
+ *  useful for matching things like email addresses, web URLs, etc. and making
  *  them actionable.
  *
- *  Alone with the pattern that is to be matched, a url scheme prefix is also
+ *  Alone with the pattern that is to be matched, a URL scheme prefix is also
  *  required.  Any pattern match that does not begin with the supplied scheme
- *  will have the scheme prepended to the matched text when the clickable url
- *  is created.  For instance, if you are matching web urls you would supply
- *  the scheme <code>http://</code>.  If the pattern matches example.com, which
- *  does not have a url scheme prefix, the supplied scheme will be prepended to
- *  create <code>http://example.com</code> when the clickable url link is
+ *  will have the scheme prepended to the matched text when the clickable URL
+ *  is created.  For instance, if you are matching web URLs you would supply
+ *  the scheme <code>http://</code>. If the pattern matches example.com, which
+ *  does not have a URL scheme prefix, the supplied scheme will be prepended to
+ *  create <code>http://example.com</code> when the clickable URL link is
  *  created.
  */
 
@@ -96,6 +103,11 @@ public class Linkify {
      * phone number.
      */
     private static final int PHONE_NUMBER_MINIMUM_DIGITS = 5;
+
+    /** @hide */
+    @IntDef(flag = true, value = { WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, MAP_ADDRESSES, ALL })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LinkifyMask {}
 
     /**
      *  Filters out web URL matches that occur after an at-sign (@).  This is
@@ -152,10 +164,10 @@ public class Linkify {
      *  MatchFilter enables client code to have more control over
      *  what is allowed to match and become a link, and what is not.
      *
-     *  For example:  when matching web urls you would like things like
+     *  For example:  when matching web URLs you would like things like
      *  http://www.example.com to match, as well as just example.com itelf.
      *  However, you would not want to match against the domain in
-     *  support@example.com.  So, when matching against a web url pattern you
+     *  support@example.com.  So, when matching against a web URL pattern you
      *  might also include a MatchFilter that disallows the match if it is
      *  immediately preceded by an at-sign (@).
      */
@@ -203,8 +215,13 @@ public class Linkify {
      *  If the mask is nonzero, it also removes any existing URLSpans
      *  attached to the Spannable, to avoid problems if you call it
      *  repeatedly on the same text.
+     *
+     *  @param text Spannable whose text is to be marked-up with links
+     *  @param mask Mask to define which kinds of links will be searched.
+     *
+     *  @return True if at least one link is found and applied.
      */
-    public static final boolean addLinks(Spannable text, int mask) {
+    public static final boolean addLinks(@NonNull Spannable text, @LinkifyMask int mask) {
         if (mask == 0) {
             return false;
         }
@@ -218,13 +235,13 @@ public class Linkify {
         ArrayList<LinkSpec> links = new ArrayList<LinkSpec>();
 
         if ((mask & WEB_URLS) != 0) {
-            gatherLinks(links, text, Patterns.WEB_URL,
+            gatherLinks(links, text, Patterns.AUTOLINK_WEB_URL,
                 new String[] { "http://", "https://", "rtsp://" },
                 sUrlMatchFilter, null);
         }
 
         if ((mask & EMAIL_ADDRESSES) != 0) {
-            gatherLinks(links, text, Patterns.EMAIL_ADDRESS,
+            gatherLinks(links, text, Patterns.AUTOLINK_EMAIL_ADDRESS,
                 new String[] { "mailto:" },
                 null, null);
         }
@@ -255,8 +272,13 @@ public class Linkify {
      *  the link types indicated in the mask into clickable links.  If matches
      *  are found the movement method for the TextView is set to
      *  LinkMovementMethod.
+     *
+     *  @param text TextView whose text is to be marked-up with links
+     *  @param mask Mask to define which kinds of links will be searched.
+     *
+     *  @return True if at least one link is found and applied.
      */
-    public static final boolean addLinks(TextView text, int mask) {
+    public static final boolean addLinks(@NonNull TextView text, @LinkifyMask int mask) {
         if (mask == 0) {
             return false;
         }
@@ -284,7 +306,7 @@ public class Linkify {
         }
     }
 
-    private static final void addLinkMovementMethod(TextView t) {
+    private static final void addLinkMovementMethod(@NonNull TextView t) {
         MovementMethod m = t.getMovementMethod();
 
         if ((m == null) || !(m instanceof LinkMovementMethod)) {
@@ -302,12 +324,12 @@ public class Linkify {
      *
      *  @param text         TextView whose text is to be marked-up with links
      *  @param pattern      Regex pattern to be used for finding links
-     *  @param scheme       Url scheme string (eg <code>http://</code> to be
-     *                      prepended to the url of links that do not have
-     *                      a scheme specified in the link text
+     *  @param scheme       URL scheme string (eg <code>http://</code>) to be
+     *                      prepended to the links that do not start with this scheme.
      */
-    public static final void addLinks(TextView text, Pattern pattern, String scheme) {
-        addLinks(text, pattern, scheme, null, null);
+    public static final void addLinks(@NonNull TextView text, @NonNull Pattern pattern,
+            @Nullable String scheme) {
+        addLinks(text, pattern, scheme, null, null, null);
     }
 
     /**
@@ -317,20 +339,45 @@ public class Linkify {
      *  to LinkMovementMethod.
      *
      *  @param text         TextView whose text is to be marked-up with links
-     *  @param p            Regex pattern to be used for finding links
-     *  @param scheme       Url scheme string (eg <code>http://</code> to be
-     *                      prepended to the url of links that do not have
-     *                      a scheme specified in the link text
+     *  @param pattern      Regex pattern to be used for finding links
+     *  @param scheme       URL scheme string (eg <code>http://</code>) to be
+     *                      prepended to the links that do not start with this scheme.
      *  @param matchFilter  The filter that is used to allow the client code
      *                      additional control over which pattern matches are
      *                      to be converted into links.
      */
-    public static final void addLinks(TextView text, Pattern p, String scheme,
-            MatchFilter matchFilter, TransformFilter transformFilter) {
-        SpannableString s = SpannableString.valueOf(text.getText());
+    public static final void addLinks(@NonNull TextView text, @NonNull Pattern pattern,
+            @Nullable String scheme, @Nullable MatchFilter matchFilter,
+            @Nullable TransformFilter transformFilter) {
+        addLinks(text, pattern, scheme, null, matchFilter, transformFilter);
+    }
 
-        if (addLinks(s, p, scheme, matchFilter, transformFilter)) {
-            text.setText(s);
+    /**
+     *  Applies a regex to the text of a TextView turning the matches into
+     *  links.  If links are found then UrlSpans are applied to the link
+     *  text match areas, and the movement method for the text is changed
+     *  to LinkMovementMethod.
+     *
+     *  @param text TextView whose text is to be marked-up with links.
+     *  @param pattern Regex pattern to be used for finding links.
+     *  @param defaultScheme The default scheme to be prepended to links if the link does not
+     *                       start with one of the <code>schemes</code> given.
+     *  @param schemes Array of schemes (eg <code>http://</code>) to check if the link found
+     *                 contains a scheme. Passing a null or empty value means prepend defaultScheme
+     *                 to all links.
+     *  @param matchFilter  The filter that is used to allow the client code additional control
+     *                      over which pattern matches are to be converted into links.
+     *  @param transformFilter Filter to allow the client code to update the link found.
+     */
+    public static final void addLinks(@NonNull TextView text, @NonNull Pattern pattern,
+             @Nullable  String defaultScheme, @Nullable String[] schemes,
+             @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+        SpannableString spannable = SpannableString.valueOf(text.getText());
+
+        boolean linksAdded = addLinks(spannable, pattern, defaultScheme, schemes, matchFilter,
+                transformFilter);
+        if (linksAdded) {
+            text.setText(spannable);
             addLinkMovementMethod(text);
         }
     }
@@ -339,37 +386,72 @@ public class Linkify {
      *  Applies a regex to a Spannable turning the matches into
      *  links.
      *
-     *  @param text         Spannable whose text is to be marked-up with
-     *                      links
+     *  @param text         Spannable whose text is to be marked-up with links
      *  @param pattern      Regex pattern to be used for finding links
-     *  @param scheme       Url scheme string (eg <code>http://</code> to be
-     *                      prepended to the url of links that do not have
-     *                      a scheme specified in the link text
+     *  @param scheme       URL scheme string (eg <code>http://</code>) to be
+     *                      prepended to the links that do not start with this scheme.
      */
-    public static final boolean addLinks(Spannable text, Pattern pattern, String scheme) {
-        return addLinks(text, pattern, scheme, null, null);
+    public static final boolean addLinks(@NonNull Spannable text, @NonNull Pattern pattern,
+            @Nullable String scheme) {
+        return addLinks(text, pattern, scheme, null, null, null);
     }
 
     /**
-     *  Applies a regex to a Spannable turning the matches into
-     *  links.
+     * Applies a regex to a Spannable turning the matches into
+     * links.
      *
-     *  @param s            Spannable whose text is to be marked-up with
-     *                      links
-     *  @param p            Regex pattern to be used for finding links
-     *  @param scheme       Url scheme string (eg <code>http://</code> to be
-     *                      prepended to the url of links that do not have
-     *                      a scheme specified in the link text
-     *  @param matchFilter  The filter that is used to allow the client code
-     *                      additional control over which pattern matches are
-     *                      to be converted into links.
+     * @param spannable    Spannable whose text is to be marked-up with links
+     * @param pattern      Regex pattern to be used for finding links
+     * @param scheme       URL scheme string (eg <code>http://</code>) to be
+     *                     prepended to the links that do not start with this scheme.
+     * @param matchFilter  The filter that is used to allow the client code
+     *                     additional control over which pattern matches are
+     *                     to be converted into links.
+     * @param transformFilter Filter to allow the client code to update the link found.
+     *
+     * @return True if at least one link is found and applied.
      */
-    public static final boolean addLinks(Spannable s, Pattern p,
-            String scheme, MatchFilter matchFilter,
-            TransformFilter transformFilter) {
+    public static final boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern,
+            @Nullable String scheme, @Nullable MatchFilter matchFilter,
+            @Nullable TransformFilter transformFilter) {
+        return addLinks(spannable, pattern, scheme, null, matchFilter,
+                transformFilter);
+    }
+
+    /**
+     * Applies a regex to a Spannable turning the matches into links.
+     *
+     * @param spannable Spannable whose text is to be marked-up with links.
+     * @param pattern Regex pattern to be used for finding links.
+     * @param defaultScheme The default scheme to be prepended to links if the link does not
+     *                      start with one of the <code>schemes</code> given.
+     * @param schemes Array of schemes (eg <code>http://</code>) to check if the link found
+     *                contains a scheme. Passing a null or empty value means prepend defaultScheme
+     *                to all links.
+     * @param matchFilter  The filter that is used to allow the client code additional control
+     *                     over which pattern matches are to be converted into links.
+     * @param transformFilter Filter to allow the client code to update the link found.
+     *
+     * @return True if at least one link is found and applied.
+     */
+    public static final boolean addLinks(@NonNull Spannable spannable, @NonNull Pattern pattern,
+            @Nullable  String defaultScheme, @Nullable String[] schemes,
+            @Nullable MatchFilter matchFilter, @Nullable TransformFilter transformFilter) {
+        final String[] schemesCopy;
+        if (defaultScheme == null) defaultScheme = "";
+        if (schemes == null || schemes.length < 1) {
+            schemes = EmptyArray.STRING;
+        }
+
+        schemesCopy = new String[schemes.length + 1];
+        schemesCopy[0] = defaultScheme.toLowerCase(Locale.ROOT);
+        for (int index = 0; index < schemes.length; index++) {
+            String scheme = schemes[index];
+            schemesCopy[index + 1] = (scheme == null) ? "" : scheme.toLowerCase(Locale.ROOT);
+        }
+
         boolean hasMatches = false;
-        String prefix = (scheme == null) ? "" : scheme.toLowerCase(Locale.ROOT);
-        Matcher m = p.matcher(s);
+        Matcher m = pattern.matcher(spannable);
 
         while (m.find()) {
             int start = m.start();
@@ -377,14 +459,13 @@ public class Linkify {
             boolean allowed = true;
 
             if (matchFilter != null) {
-                allowed = matchFilter.acceptMatch(s, start, end);
+                allowed = matchFilter.acceptMatch(spannable, start, end);
             }
 
             if (allowed) {
-                String url = makeUrl(m.group(0), new String[] { prefix },
-                                     m, transformFilter);
+                String url = makeUrl(m.group(0), schemesCopy, m, transformFilter);
 
-                applyLink(url, start, end, s);
+                applyLink(url, start, end, spannable);
                 hasMatches = true;
             }
         }
@@ -398,22 +479,20 @@ public class Linkify {
         text.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
-    private static final String makeUrl(String url, String[] prefixes,
-            Matcher m, TransformFilter filter) {
+    private static final String makeUrl(@NonNull String url, @NonNull String[] prefixes,
+            Matcher matcher, @Nullable TransformFilter filter) {
         if (filter != null) {
-            url = filter.transformUrl(m, url);
+            url = filter.transformUrl(matcher, url);
         }
 
         boolean hasPrefix = false;
-        
+
         for (int i = 0; i < prefixes.length; i++) {
-            if (url.regionMatches(true, 0, prefixes[i], 0,
-                                  prefixes[i].length())) {
+            if (url.regionMatches(true, 0, prefixes[i], 0, prefixes[i].length())) {
                 hasPrefix = true;
 
                 // Fix capitalization if necessary
-                if (!url.regionMatches(false, 0, prefixes[i], 0,
-                                       prefixes[i].length())) {
+                if (!url.regionMatches(false, 0, prefixes[i], 0, prefixes[i].length())) {
                     url = prefixes[i] + url.substring(prefixes[i].length());
                 }
 
@@ -421,7 +500,7 @@ public class Linkify {
             }
         }
 
-        if (!hasPrefix) {
+        if (!hasPrefix && prefixes.length > 0) {
             url = prefixes[0] + url;
         }
 

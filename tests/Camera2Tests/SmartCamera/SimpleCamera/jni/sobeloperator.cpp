@@ -81,8 +81,6 @@ jboolean Java_androidx_media_filterpacks_image_SobelFilter_sobelOperator(
   short* gyPtr = new short[3 * numPixels];
   computeGradient(srcPtr, width, height, gxPtr, gyPtr);
 
-  unsigned char* mag = magPtr;
-  unsigned char* dir = dirPtr;
   for (int i = 0; i < numPixels; ++i) {
     for (int c = 0; c < 3; c++) {
       int gx = static_cast<int>(*(gxPtr + 3 * i + c) / 8 + 127.5);

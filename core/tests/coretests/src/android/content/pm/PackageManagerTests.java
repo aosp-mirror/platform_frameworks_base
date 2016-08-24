@@ -58,6 +58,7 @@ import android.system.StructStat;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.frameworks.coretests.R;
@@ -432,14 +433,6 @@ public class PackageManagerTests extends AndroidTestCase {
                             SECURE_CONTAINERS_PREFIX, publicSrcPath);
                     assertStartsWith("The native library path should point to the ASEC",
                             SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
-                    try {
-                        String compatLib = new File(info.dataDir + "/lib").getCanonicalPath();
-                        assertEquals("The compatibility lib directory should be a symbolic link to "
-                                + info.nativeLibraryDir,
-                                info.nativeLibraryDir, compatLib);
-                    } catch (IOException e) {
-                        fail("compat check: Can't read " + info.dataDir + "/lib");
-                    }
                 } else {
                     assertFalse(
                             (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
@@ -1012,7 +1005,8 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private static void assertUninstalled(ApplicationInfo info) throws Exception {
         File nativeLibraryFile = new File(info.nativeLibraryDir);
-        assertFalse("Native library directory should be erased", nativeLibraryFile.exists());
+        assertFalse("Native library directory " + info.nativeLibraryDir
+                + " should be erased", nativeLibraryFile.exists());
     }
 
     public void deleteFromRawResource(int iFlags, int dFlags) throws Exception {
@@ -1166,16 +1160,10 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     boolean checkMediaState(String desired) {
-        try {
-            String mPath = Environment.getExternalStorageDirectory().getPath();
-            String actual = getMs().getVolumeState(mPath);
-            if (desired.equals(actual)) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception while checking media state", e);
+        String actual = Environment.getExternalStorageState();
+        if (desired.equals(actual)) {
+            return true;
+        } else {
             return false;
         }
     }
@@ -1654,15 +1642,10 @@ public class PackageManagerTests extends AndroidTestCase {
                             (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                     assertStartsWith("Native library dir should point to ASEC",
                             SECURE_CONTAINERS_PREFIX, info.nativeLibraryDir);
-                    final File nativeLibSymLink = new File(info.dataDir, "lib");
-                    assertStartsWith("The data directory should have a 'lib' symlink that points to the ASEC container",
-                            SECURE_CONTAINERS_PREFIX, nativeLibSymLink.getCanonicalPath());
                 }
             }
         } catch (NameNotFoundException e) {
             failStr("Pkg hasnt been installed correctly");
-        } catch (Exception e) {
-            failStr("Failed with exception : " + e);
         } finally {
             if (ip != null) {
                 cleanUpInstall(ip);
@@ -1693,6 +1676,7 @@ public class PackageManagerTests extends AndroidTestCase {
         sampleMoveFromRawResource(installFlags, moveFlags, fail, result);
     }
 
+    @Suppress
     @LargeTest
     public void testMoveAppInternalToInternal() throws Exception {
         int installFlags = PackageManager.INSTALL_INTERNAL;
@@ -2161,6 +2145,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 -1);
     }
 
+    @Suppress
     @LargeTest
     public void testFlagFExistingI() throws Exception {
         int iFlags = PackageManager.INSTALL_INTERNAL;
@@ -3276,14 +3261,15 @@ public class PackageManagerTests extends AndroidTestCase {
             assertTrue(false); // should have thrown
         } catch (IllegalArgumentException e) {
         }
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+        final InstallParams ip = installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
         try {
             ks = pm.getSigningKeySet(otherPkgName);
             assertTrue(false); // should have thrown
         } catch (SecurityException e) {
+        } finally {
+            cleanUpInstall(ip);
         }
-        cleanUpInstall(otherPkgName);
         ks = pm.getSigningKeySet(mContext.getPackageName());
         assertNotNull(ks);
     }
@@ -3322,16 +3308,20 @@ public class PackageManagerTests extends AndroidTestCase {
             assertTrue(false); // should have thrown
         } catch(IllegalArgumentException e) {
         }
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+
+        // make sure we can get a KeySet from our pkg
+        ks = pm.getKeySetByAlias(mPkgName, "A");
+        assertNotNull(ks);
+
+        // and another
+        final InstallParams ip = installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
         try {
             ks = pm.getKeySetByAlias(otherPkgName, "A");
-            assertTrue(false); // should have thrown
-        } catch (SecurityException e) {
+            assertNotNull(ks);
+        } finally {
+            cleanUpInstall(ip);
         }
-        cleanUpInstall(otherPkgName);
-        ks = pm.getKeySetByAlias(mPkgName, "A");
-        assertNotNull(ks);
     }
 
     public void testIsSignedBy() throws Exception {
@@ -3364,17 +3354,23 @@ public class PackageManagerTests extends AndroidTestCase {
         assertFalse(pm.isSignedBy(mPkgName, new KeySet(new Binder())));
         assertTrue(pm.isSignedBy(mPkgName, mSigningKS));
 
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+        final InstallParams ip1 = installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        assertFalse(pm.isSignedBy(otherPkgName, mDefinedKS));
-        assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
-        cleanUpInstall(otherPkgName);
+        try {
+            assertFalse(pm.isSignedBy(otherPkgName, mDefinedKS));
+            assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
+        } finally {
+            cleanUpInstall(ip1);
+        }
 
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
+        final InstallParams ip2 = installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        assertTrue(pm.isSignedBy(otherPkgName, mDefinedKS));
-        assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
-        cleanUpInstall(otherPkgName);
+        try {
+            assertTrue(pm.isSignedBy(otherPkgName, mDefinedKS));
+            assertTrue(pm.isSignedBy(otherPkgName, mSigningKS));
+        } finally {
+            cleanUpInstall(ip2);
+        }
     }
 
     public void testIsSignedByExactly() throws Exception {
@@ -3406,17 +3402,23 @@ public class PackageManagerTests extends AndroidTestCase {
         assertFalse(pm.isSignedByExactly(mPkgName, new KeySet(new Binder())));
         assertTrue(pm.isSignedByExactly(mPkgName, mSigningKS));
 
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
+        final InstallParams ip1 = installFromRawResource("keysetApi.apk", R.raw.keyset_splat_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
-        assertTrue(pm.isSignedByExactly(otherPkgName, mSigningKS));
-        cleanUpInstall(otherPkgName);
+        try {
+            assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
+            assertTrue(pm.isSignedByExactly(otherPkgName, mSigningKS));
+        } finally {
+            cleanUpInstall(ip1);
+        }
 
-        installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
+        final InstallParams ip2 = installFromRawResource("keysetApi.apk", R.raw.keyset_splata_api,
                 0, false, false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
-        assertFalse(pm.isSignedByExactly(otherPkgName, mSigningKS));
-        cleanUpInstall(otherPkgName);
+        try {
+            assertFalse(pm.isSignedByExactly(otherPkgName, mDefinedKS));
+            assertFalse(pm.isSignedByExactly(otherPkgName, mSigningKS));
+        } finally {
+            cleanUpInstall(ip2);
+        }
     }
 
 
@@ -3469,11 +3471,10 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = APP2_CERT1_CERT2;
         String apk1Name = "install1.apk";
         String apk2Name = "install2.apk";
-        InstallParams ip1 = null;
 
+        final InstallParams ip = installFromRawResource(apk1Name, apk1, 0, false,
+                false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
         try {
-            ip1 = installFromRawResource(apk1Name, apk1, 0, false,
-                    false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
             PackageManager pm = mContext.getPackageManager();
             // Delete app2
             File filesDir = mContext.getFilesDir();
@@ -3484,12 +3485,10 @@ public class PackageManagerTests extends AndroidTestCase {
             getPm().deletePackage(pkg.packageName, null, PackageManager.DELETE_ALL_USERS);
             // Check signatures now
             int match = mContext.getPackageManager().checkSignatures(
-                    ip1.pkg.packageName, pkg.packageName);
+                    ip.pkg.packageName, pkg.packageName);
             assertEquals(PackageManager.SIGNATURE_UNKNOWN_PACKAGE, match);
         } finally {
-            if (ip1 != null) {
-                cleanUpInstall(ip1);
-            }
+            cleanUpInstall(ip);
         }
     }
 
@@ -3497,14 +3496,10 @@ public class PackageManagerTests extends AndroidTestCase {
     public void testInstallNoCertificates() throws Exception {
         int apk1 = APP1_UNSIGNED;
         String apk1Name = "install1.apk";
-        InstallParams ip1 = null;
 
-        try {
-            installFromRawResource(apk1Name, apk1, 0, false,
-                    true, PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                    PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
-        } finally {
-        }
+        installFromRawResource(apk1Name, apk1, 0, false,
+                true, PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
     /*
@@ -3770,35 +3765,43 @@ public class PackageManagerTests extends AndroidTestCase {
      * Test that getInstalledPackages returns all the data specified in flags.
      */
     public void testGetInstalledPackagesAll() throws Exception {
-        int flags = PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
+        final int flags = PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
                 | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
 
-        List<PackageInfo> packages = getPm().getInstalledPackages(flags);
-        assertNotNull("installed packages cannot be null", packages);
-        assertTrue("installed packages cannot be empty", packages.size() > 0);
+        final InstallParams ip =
+                installFromRawResource("install.apk", R.raw.install_complete_package_info,
+                        0 /*flags*/, false /*cleanUp*/, false /*fail*/, -1 /*result*/,
+                        PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+        try {
+            final List<PackageInfo> packages = getPm().getInstalledPackages(flags);
+            assertNotNull("installed packages cannot be null", packages);
+            assertTrue("installed packages cannot be empty", packages.size() > 0);
 
-        PackageInfo packageInfo = null;
+            PackageInfo packageInfo = null;
 
-        // Find the package with all components specified in the AndroidManifest
-        // to ensure no null values
-        for (PackageInfo pi : packages) {
-            if ("com.android.frameworks.coretests.install_complete_package_info"
-                    .equals(pi.packageName)) {
-                packageInfo = pi;
-                break;
+            // Find the package with all components specified in the AndroidManifest
+            // to ensure no null values
+            for (PackageInfo pi : packages) {
+                if ("com.android.frameworks.coretests.install_complete_package_info"
+                        .equals(pi.packageName)) {
+                    packageInfo = pi;
+                    break;
+                }
             }
+            assertNotNull("activities should not be null", packageInfo.activities);
+            assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
+            assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
+            assertNotNull("permissions should not be null", packageInfo.permissions);
+            assertNotNull("providers should not be null", packageInfo.providers);
+            assertNotNull("receivers should not be null", packageInfo.receivers);
+            assertNotNull("services should not be null", packageInfo.services);
+            assertNotNull("signatures should not be null", packageInfo.signatures);
+        } finally {
+            cleanUpInstall(ip);
         }
-        assertNotNull("activities should not be null", packageInfo.activities);
-        assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
-        assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
-        assertNotNull("permissions should not be null", packageInfo.permissions);
-        assertNotNull("providers should not be null", packageInfo.providers);
-        assertNotNull("receivers should not be null", packageInfo.receivers);
-        assertNotNull("services should not be null", packageInfo.services);
-        assertNotNull("signatures should not be null", packageInfo.signatures);
     }
 
     /**
@@ -3806,38 +3809,52 @@ public class PackageManagerTests extends AndroidTestCase {
      * flags when the GET_UNINSTALLED_PACKAGES flag is set.
      */
     public void testGetUnInstalledPackagesAll() throws Exception {
-        int flags = PackageManager.GET_UNINSTALLED_PACKAGES
+        final int flags = PackageManager.GET_UNINSTALLED_PACKAGES
                 | PackageManager.GET_ACTIVITIES | PackageManager.GET_GIDS
                 | PackageManager.GET_CONFIGURATIONS | PackageManager.GET_INSTRUMENTATION
                 | PackageManager.GET_PERMISSIONS | PackageManager.GET_PROVIDERS
                 | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES
                 | PackageManager.GET_SIGNATURES | PackageManager.GET_UNINSTALLED_PACKAGES;
 
-        List<PackageInfo> packages = getPm().getInstalledPackages(flags);
-        assertNotNull("installed packages cannot be null", packages);
-        assertTrue("installed packages cannot be empty", packages.size() > 0);
+        // first, install the package
+        final InstallParams ip =
+                installFromRawResource("install.apk", R.raw.install_complete_package_info,
+                        0 /*flags*/, false /*cleanUp*/, false /*fail*/, -1 /*result*/,
+                        PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
+        try {
+            // then, remove it, keeping it's data around
+            final GenericReceiver receiver = new DeleteReceiver(ip.pkg.packageName);
+            invokeDeletePackage(ip.pkg.packageName, PackageManager.DELETE_KEEP_DATA, receiver);
 
-        PackageInfo packageInfo = null;
+            final List<PackageInfo> packages = getPm().getInstalledPackages(flags);
+            assertNotNull("installed packages cannot be null", packages);
+            assertTrue("installed packages cannot be empty", packages.size() > 0);
 
-        // Find the package with all components specified in the AndroidManifest
-        // to ensure no null values
-        for (PackageInfo pi : packages) {
-            if ("com.android.frameworks.coretests.install_complete_package_info"
-                    .equals(pi.packageName)) {
-                packageInfo = pi;
-                break;
+            PackageInfo packageInfo = null;
+
+            // Find the package with all components specified in the AndroidManifest
+            // to ensure no null values
+            for (PackageInfo pi : packages) {
+                if ("com.android.frameworks.coretests.install_complete_package_info"
+                        .equals(pi.packageName)) {
+                    packageInfo = pi;
+                    break;
+                }
             }
+            assertNotNull("activities should not be null", packageInfo.activities);
+            assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
+            assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
+            assertNotNull("permissions should not be null", packageInfo.permissions);
+            assertNotNull("providers should not be null", packageInfo.providers);
+            assertNotNull("receivers should not be null", packageInfo.receivers);
+            assertNotNull("services should not be null", packageInfo.services);
+            assertNotNull("signatures should not be null", packageInfo.signatures);
+        } finally {
+            cleanUpInstall(ip);
         }
-        assertNotNull("activities should not be null", packageInfo.activities);
-        assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
-        assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
-        assertNotNull("permissions should not be null", packageInfo.permissions);
-        assertNotNull("providers should not be null", packageInfo.providers);
-        assertNotNull("receivers should not be null", packageInfo.receivers);
-        assertNotNull("services should not be null", packageInfo.services);
-        assertNotNull("signatures should not be null", packageInfo.signatures);
     }
 
+    @Suppress
     public void testInstall_BadDex_CleanUp() throws Exception {
         int retCode = PackageManager.INSTALL_FAILED_DEXOPT;
         installFromRawResource("install.apk", R.raw.install_bad_dex, 0, true, true, retCode,

@@ -75,8 +75,12 @@ public class ImageUtils {
             }
         }
         else {
-            BufferedImage goldenImage = ImageIO.read(is);
-            assertImageSimilar(relativePath, goldenImage, thumbnail, MAX_PERCENT_DIFFERENCE);
+            try {
+                BufferedImage goldenImage = ImageIO.read(is);
+                assertImageSimilar(relativePath, goldenImage, thumbnail, MAX_PERCENT_DIFFERENCE);
+            } finally {
+                is.close();
+            }
         }
     }
 

@@ -46,6 +46,15 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
+    public int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag) {
+        try {
+            return mBinder.scheduleAsPackage(job, packageName, userId, tag);
+        } catch (RemoteException e) {
+            return JobScheduler.RESULT_FAILURE;
+        }
+    }
+
+    @Override
     public void cancel(int jobId) {
         try {
             mBinder.cancel(jobId);
@@ -65,6 +74,15 @@ public class JobSchedulerImpl extends JobScheduler {
     public List<JobInfo> getAllPendingJobs() {
         try {
             return mBinder.getAllPendingJobs();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public JobInfo getPendingJob(int jobId) {
+        try {
+            return mBinder.getPendingJob(jobId);
         } catch (RemoteException e) {
             return null;
         }

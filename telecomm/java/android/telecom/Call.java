@@ -24,7 +24,6 @@ import android.os.Handler;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,6 +93,20 @@ public final class Call {
      * state of the call is (potentially) {@link #STATE_DISCONNECTED}.
      */
     public static final int STATE_DISCONNECTING = 10;
+
+    /**
+     * The state of an external call which is in the process of being pulled from a remote device to
+     * the local device.
+     * <p>
+     * A call can only be in this state if the {@link Details#PROPERTY_IS_EXTERNAL_CALL} property
+     * and {@link Details#CAPABILITY_CAN_PULL_CALL} capability are set on the call.
+     * <p>
+     * An {@link InCallService} will only see this state if it has the
+     * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
+     * manifest.
+     * @hide
+     */
+    public static final int STATE_PULLING_CALL = 11;
 
     /**
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
@@ -210,10 +223,41 @@ public final class Call {
          * Call sends responses through connection.
          * @hide
          */
-        public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00400000;
+        public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00200000;
+
+        /**
+         * When set, prevents a video {@code Call} from being downgraded to an audio-only call.
+         * <p>
+         * Should be set when the VideoState has the {@link VideoProfile#STATE_TX_ENABLED} or
+         * {@link VideoProfile#STATE_RX_ENABLED} bits set to indicate that the connection cannot be
+         * downgraded from a video call back to a VideoState of
+         * {@link VideoProfile#STATE_AUDIO_ONLY}.
+         * <p>
+         * Intuitively, a call which can be downgraded to audio should also have local and remote
+         * video
+         * capabilities (see {@link #CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL} and
+         * {@link #CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL}).
+         */
+        public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 0x00400000;
+
+        /**
+         * When set for an external call, indicates that this {@code Call} can be pulled from a
+         * remote device to the current device.
+         * <p>
+         * Should only be set on a {@code Call} where {@link #PROPERTY_IS_EXTERNAL_CALL} is set.
+         * <p>
+         * An {@link InCallService} will only see calls with this capability if it has the
+         * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+         * in its manifest.
+         * <p>
+         * See {@link Connection#CAPABILITY_CAN_PULL_CALL} and
+         * {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
+         * @hide
+         */
+        public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
         //******************************************************************************************
-        // Next CAPABILITY value: 0x00800000
+        // Next CAPABILITY value: 0x01000000
         //******************************************************************************************
 
         /**
@@ -242,10 +286,34 @@ public final class Call {
          */
         public static final int PROPERTY_HIGH_DEF_AUDIO = 0x00000010;
 
+        /**
+         * Whether the call is associated with the work profile.
+         */
+        public static final int PROPERTY_ENTERPRISE_CALL = 0x00000020;
+
+        /**
+         * When set, indicates that this {@code Call} does not actually exist locally for the
+         * {@link ConnectionService}.
+         * <p>
+         * Consider, for example, a scenario where a user has two phones with the same phone number.
+         * When a user places a call on one device, the telephony stack can represent that call on
+         * the other device by adding it to the {@link ConnectionService} with the
+         * {@link Connection#PROPERTY_IS_EXTERNAL_CALL} property set.
+         * <p>
+         * An {@link InCallService} will only see calls with this property if it has the
+         * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+         * in its manifest.
+         * <p>
+         * See {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
+         * @hide
+         */
+        public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000020
+        // Next PROPERTY value: 0x00000100
         //******************************************************************************************
 
+        private final String mTelecomCallId;
         private final Uri mHandle;
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
@@ -269,7 +337,7 @@ public final class Call {
          * @return Whether the specified capability is supported.
          */
         public static boolean can(int capabilities, int capability) {
-            return (capabilities & capability) != 0;
+            return (capabilities & capability) == capability;
         }
 
         /**
@@ -327,6 +395,9 @@ public final class Call {
             if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
                 builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
             }
+            if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
+                builder.append(" CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO");
+            }
             if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
                 builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
             }
@@ -338,6 +409,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
                 builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
+            }
+            if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
+                builder.append(" CAPABILITY_CAN_PULL_CALL");
             }
             builder.append("]");
             return builder.toString();
@@ -351,7 +425,7 @@ public final class Call {
          * @return Whether the specified property is supported.
          */
         public static boolean hasProperty(int properties, int property) {
-            return (properties & property) != 0;
+            return (properties & property) == property;
         }
 
         /**
@@ -388,8 +462,16 @@ public final class Call {
             if (hasProperty(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
                 builder.append(" PROPERTY_EMERGENCY_CALLBACK_MODE");
             }
+            if (hasProperty(properties, PROPERTY_IS_EXTERNAL_CALL)) {
+                builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+            }
             builder.append("]");
             return builder.toString();
+        }
+
+        /** {@hide} */
+        public String getTelecomCallId() {
+            return mTelecomCallId;
         }
 
         /**
@@ -545,6 +627,7 @@ public final class Call {
 
         /** {@hide} */
         public Details(
+                String telecomCallId,
                 Uri handle,
                 int handlePresentation,
                 String callerDisplayName,
@@ -559,6 +642,7 @@ public final class Call {
                 StatusHints statusHints,
                 Bundle extras,
                 Bundle intentExtras) {
+            mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -573,6 +657,41 @@ public final class Call {
             mStatusHints = statusHints;
             mExtras = extras;
             mIntentExtras = intentExtras;
+        }
+
+        /** {@hide} */
+        public static Details createFromParcelableCall(ParcelableCall parcelableCall) {
+            return new Details(
+                    parcelableCall.getId(),
+                    parcelableCall.getHandle(),
+                    parcelableCall.getHandlePresentation(),
+                    parcelableCall.getCallerDisplayName(),
+                    parcelableCall.getCallerDisplayNamePresentation(),
+                    parcelableCall.getAccountHandle(),
+                    parcelableCall.getCapabilities(),
+                    parcelableCall.getProperties(),
+                    parcelableCall.getDisconnectCause(),
+                    parcelableCall.getConnectTimeMillis(),
+                    parcelableCall.getGatewayInfo(),
+                    parcelableCall.getVideoState(),
+                    parcelableCall.getStatusHints(),
+                    parcelableCall.getExtras(),
+                    parcelableCall.getIntentExtras());
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[pa: ");
+            sb.append(mAccountHandle);
+            sb.append(", hdl: ");
+            sb.append(Log.pii(mHandle));
+            sb.append(", caps: ");
+            sb.append(capabilitiesToString(mCallCapabilities));
+            sb.append(", props: ");
+            sb.append(propertiesToString(mCallProperties));
+            sb.append("]");
+            return sb.toString();
         }
     }
 
@@ -658,6 +777,18 @@ public final class Call {
          *          conferenced.
          */
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
+
+        /**
+         * Invoked when a call receives an event from its associated {@link Connection}.
+         * <p>
+         * See {@link Connection#sendConnectionEvent(String, Bundle)}.
+         *
+         * @param call The {@code Call} receiving the event.
+         * @param event The event.
+         * @param extras Extras associated with the connection event.
+         * @hide
+         */
+        public void onConnectionEvent(Call call, String event, Bundle extras) {}
     }
 
     /**
@@ -684,8 +815,9 @@ public final class Call {
     private int mState;
     private List<String> mCannedTextResponses = null;
     private String mRemainingPostDialSequence;
-    private InCallService.VideoCall mVideoCall;
+    private VideoCallImpl mVideoCallImpl;
     private Details mDetails;
+    private Bundle mExtras;
 
     /**
      * Obtains the post-dial sequence remaining to be emitted by this {@code Call}, if any.
@@ -824,6 +956,130 @@ public final class Call {
     }
 
     /**
+     * Initiates a request to the {@link ConnectionService} to pull an external call to the local
+     * device.
+     * <p>
+     * Calls to this method are ignored if the call does not have the
+     * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} property set.
+     * <p>
+     * An {@link InCallService} will only see calls which support this method if it has the
+     * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
+     * in its manifest.
+     * @hide
+     */
+    public void pullExternalCall() {
+        // If this isn't an external call, ignore the request.
+        if (!mDetails.hasProperty(Details.PROPERTY_IS_EXTERNAL_CALL)) {
+            return;
+        }
+
+        mInCallAdapter.pullExternalCall(mTelecomCallId);
+    }
+
+    /**
+     * Sends a {@code Call} event from this {@code Call} to the associated {@link Connection} in
+     * the {@link ConnectionService}.
+     * <p>
+     * Events are exposed to {@link ConnectionService} implementations via
+     * {@link android.telecom.Connection#onCallEvent(String, Bundle)}.
+     * <p>
+     * No assumptions should be made as to how a {@link ConnectionService} will handle these events.
+     * Events should be fully qualified (e.g., com.example.event.MY_EVENT) to avoid conflicts.
+     *
+     * @param event The connection event.
+     * @param extras Bundle containing extra information associated with the event.
+     * @hide
+     */
+    public void sendCallEvent(String event, Bundle extras) {
+        mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
+    }
+
+    /**
+     * Adds some extras to this {@link Call}.  Existing keys are replaced and new ones are
+     * added.
+     * <p>
+     * No assumptions should be made as to how an In-Call UI or service will handle these
+     * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras to add.
+     * @hide
+     */
+    public final void putExtras(Bundle extras) {
+        if (extras == null) {
+            return;
+        }
+
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+        mInCallAdapter.putExtras(mTelecomCallId, extras);
+    }
+
+    /**
+     * Adds a boolean extra to this {@link Call}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, boolean value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putBoolean(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Adds an integer extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, int value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putInt(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Adds a string extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(String key, String value) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putString(key, value);
+        mInCallAdapter.putExtra(mTelecomCallId, key, value);
+    }
+
+    /**
+     * Removes extras from this {@code Connection}.
+     *
+     * @param keys The keys of the extras to remove.
+     * @hide
+     */
+    public final void removeExtras(List<String> keys) {
+        if (mExtras != null) {
+            for (String key : keys) {
+                mExtras.remove(key);
+            }
+            if (mExtras.size() == 0) {
+                mExtras = null;
+            }
+        }
+        mInCallAdapter.removeExtras(mTelecomCallId, keys);
+    }
+
+    /**
      * Obtains the parent of this {@code Call} in a conference, if any.
      *
      * @return The parent {@code Call}, or {@code null} if this {@code Call} is not a
@@ -897,7 +1153,7 @@ public final class Call {
      * @return An {@code Call.VideoCall}.
      */
     public InCallService.VideoCall getVideoCall() {
-        return mVideoCall;
+        return mVideoCallImpl;
     }
 
     /**
@@ -947,6 +1203,48 @@ public final class Call {
                     break;
                 }
             }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder().
+                append("Call [id: ").
+                append(mTelecomCallId).
+                append(", state: ").
+                append(stateToString(mState)).
+                append(", details: ").
+                append(mDetails).
+                append("]").toString();
+    }
+
+    /**
+     * @param state An integer value of a {@code STATE_*} constant.
+     * @return A string representation of the value.
+     */
+    private static String stateToString(int state) {
+        switch (state) {
+            case STATE_NEW:
+                return "NEW";
+            case STATE_RINGING:
+                return "RINGING";
+            case STATE_DIALING:
+                return "DIALING";
+            case STATE_ACTIVE:
+                return "ACTIVE";
+            case STATE_HOLDING:
+                return "HOLDING";
+            case STATE_DISCONNECTED:
+                return "DISCONNECTED";
+            case STATE_CONNECTING:
+                return "CONNECTING";
+            case STATE_DISCONNECTING:
+                return "DISCONNECTING";
+            case STATE_SELECT_PHONE_ACCOUNT:
+                return "SELECT_PHONE_ACCOUNT";
+            default:
+                Log.w(Call.class, "Unknown state %d", state);
+                return "UNKNOWN";
         }
     }
 
@@ -1000,21 +1298,7 @@ public final class Call {
     /** {@hide} */
     final void internalUpdate(ParcelableCall parcelableCall, Map<String, Call> callIdMap) {
         // First, we update the internal state as far as possible before firing any updates.
-        Details details = new Details(
-                parcelableCall.getHandle(),
-                parcelableCall.getHandlePresentation(),
-                parcelableCall.getCallerDisplayName(),
-                parcelableCall.getCallerDisplayNamePresentation(),
-                parcelableCall.getAccountHandle(),
-                parcelableCall.getCapabilities(),
-                parcelableCall.getProperties(),
-                parcelableCall.getDisconnectCause(),
-                parcelableCall.getConnectTimeMillis(),
-                parcelableCall.getGatewayInfo(),
-                parcelableCall.getVideoState(),
-                parcelableCall.getStatusHints(),
-                parcelableCall.getExtras(),
-                parcelableCall.getIntentExtras());
+        Details details = Details.createFromParcelableCall(parcelableCall);
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;
@@ -1025,12 +1309,17 @@ public final class Call {
                 && !parcelableCall.getCannedSmsResponses().isEmpty()) {
             mCannedTextResponses =
                     Collections.unmodifiableList(parcelableCall.getCannedSmsResponses());
+            cannedTextResponsesChanged = true;
         }
 
+        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl();
         boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
-                !Objects.equals(mVideoCall, parcelableCall.getVideoCall(this));
+                !Objects.equals(mVideoCallImpl, newVideoCallImpl);
         if (videoCallChanged) {
-            mVideoCall = parcelableCall.getVideoCall(this);
+            mVideoCallImpl = newVideoCallImpl;
+        }
+        if (mVideoCallImpl != null) {
+            mVideoCallImpl.setVideoState(getDetails().getVideoState());
         }
 
         int state = parcelableCall.getState();
@@ -1080,7 +1369,7 @@ public final class Call {
             fireCannedTextResponsesLoaded(mCannedTextResponses);
         }
         if (videoCallChanged) {
-            fireVideoCallChanged(mVideoCall);
+            fireVideoCallChanged(mVideoCallImpl);
         }
         if (parentChanged) {
             fireParentChanged(getParent());
@@ -1111,6 +1400,11 @@ public final class Call {
             fireStateChanged(mState);
             fireCallDestroyed();
         }
+    }
+
+    /** {@hide} */
+    final void internalOnConnectionEvent(String event, Bundle extras) {
+        fireOnConnectionEvent(event, extras);
     }
 
     private void fireStateChanged(final int newState) {
@@ -1254,6 +1548,27 @@ public final class Call {
                 @Override
                 public void run() {
                     callback.onConferenceableCallsChanged(call, mUnmodifiableConferenceableCalls);
+                }
+            });
+        }
+    }
+
+    /**
+     * Notifies listeners of an incoming connection event.
+     * <p>
+     * Connection events are issued via {@link Connection#sendConnectionEvent(String, Bundle)}.
+     *
+     * @param event
+     * @param extras
+     */
+    private void fireOnConnectionEvent(final String event, final Bundle extras) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionEvent(call, event, extras);
                 }
             });
         }

@@ -125,6 +125,77 @@ import java.util.Map;
  All video codecs support flexible YUV 4:2:0 buffers since {@link
  android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
 
+ <h4>Accessing Raw Video ByteBuffers on Older Devices</h4>
+ <p>
+ Prior to {@link android.os.Build.VERSION_CODES#LOLLIPOP} and {@link Image} support, you need to
+ use the {@link MediaFormat#KEY_STRIDE} and {@link MediaFormat#KEY_SLICE_HEIGHT} output format
+ values to understand the layout of the raw output buffers.
+ <p class=note>
+ Note that on some devices the slice-height is advertised as 0. This could mean either that the
+ slice-height is the same as the frame height, or that the slice-height is the frame height
+ aligned to some value (usually a power of 2). Unfortunately, there is no way to tell the actual
+ slice height in this case. Furthermore, the vertical stride of the {@code U} plane in planar
+ formats is also not specified or defined, though usually it is half of the slice height.
+ <p>
+ The {@link MediaFormat#KEY_WIDTH} and {@link MediaFormat#KEY_HEIGHT} keys specify the size of the
+ video frames; however, for most encondings the video (picture) only occupies a portion of the
+ video frame. This is represented by the 'crop rectangle'.
+ <p>
+ You need to use the following keys to get the crop rectangle of raw output images from the
+ {@linkplain #getOutputFormat output format}. If these keys are not present, the video occupies the
+ entire video frame.The crop rectangle is understood in the context of the output frame
+ <em>before</em> applying any {@linkplain MediaFormat#KEY_ROTATION rotation}.
+ <table style="width: 0%">
+  <thead>
+   <tr>
+    <th>Format Key</th>
+    <th>Type</th>
+    <th>Description</th>
+   </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>{@code "crop-left"}</td>
+    <td>Integer</td>
+    <td>The left-coordinate (x) of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-top"}</td>
+    <td>Integer</td>
+    <td>The top-coordinate (y) of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-right"}</td>
+    <td>Integer</td>
+    <td>The right-coordinate (x) <strong>MINUS 1</strong> of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-bottom"}</td>
+    <td>Integer</td>
+    <td>The bottom-coordinate (y) <strong>MINUS 1</strong> of the crop rectangle</td>
+   </tr><tr>
+    <td colspan=3>
+     The right and bottom coordinates can be understood as the coordinates of the right-most
+     valid column/bottom-most valid row of the cropped output image.
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <p>
+ The size of the video frame (before rotation) can be calculated as such:
+ <pre class=prettyprint>
+ MediaFormat format = decoder.getOutputFormat(&hellip;);
+ int width = format.getInteger(MediaFormat.KEY_WIDTH);
+ if (format.containsKey("crop-left") && format.containsKey("crop-right")) {
+     width = format.getInteger("crop-right") + 1 - format.getInteger("crop-left");
+ }
+ int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+ if (format.containsKey("crop-top") && format.containsKey("crop-bottom")) {
+     height = format.getInteger("crop-bottom") + 1 - format.getInteger("crop-top");
+ }
+ </pre>
+ <p class=note>
+ Also note that the meaning of {@link BufferInfo#offset BufferInfo.offset} was not consistent across
+ devices. On some devices the offset pointed to the top-left pixel of the crop rectangle, while on
+ most devices it pointed to the top-left pixel of the entire frame.
+
  <h3>States</h3>
  <p>
  During its life a codec conceptually exists in one of three states: Stopped, Executing or
@@ -1290,10 +1361,10 @@ import java.util.Map;
    </tr>
    <tr>
     <td>-</td>
+    <td>(16+)</td>
+    <td>(16+)</td>
     <td>16+</td>
-    <td>16+</td>
-    <td>16+</td>
-    <td>16+</td>
+    <td>(16+)</td>
     <td>(16+)</td>
     <td>-</td>
     <td class=fn>{@link #setVideoScalingMode setVideoScalingMode}</td>
@@ -2074,6 +2145,16 @@ final public class MediaCodec {
          */
         public static final int ERROR_SESSION_NOT_OPENED = 5;
 
+        /**
+         * This indicates that an operation was attempted that could not be
+         * supported by the crypto system of the device in its current
+         * configuration.  It may occur when the license policy requires
+         * device security features that aren't supported by the device,
+         * or due to an internal error in the crypto system that prevents
+         * the specified security policy from being met.
+         */
+        public static final int ERROR_UNSUPPORTED_OPERATION = 6;
+
         /** @hide */
         @IntDef({
             ERROR_NO_KEY,
@@ -2081,6 +2162,7 @@ final public class MediaCodec {
             ERROR_RESOURCE_BUSY,
             ERROR_INSUFFICIENT_OUTPUT_PROTECTION,
             ERROR_SESSION_NOT_OPENED,
+            ERROR_UNSUPPORTED_OPERATION
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface CryptoErrorCode {}
@@ -2175,10 +2257,9 @@ final public class MediaCodec {
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException;
 
-    // The following mode constants MUST stay in sync with their equivalents
-    // in media/hardware/CryptoAPI.h !
     public static final int CRYPTO_MODE_UNENCRYPTED = 0;
     public static final int CRYPTO_MODE_AES_CTR     = 1;
+    public static final int CRYPTO_MODE_AES_CBC     = 2;
 
     /**
      * Metadata describing the structure of a (at least partially) encrypted
@@ -2186,27 +2267,14 @@ final public class MediaCodec {
      * A buffer's data is considered to be partitioned into "subSamples",
      * each subSample starts with a (potentially empty) run of plain,
      * unencrypted bytes followed by a (also potentially empty) run of
-     * encrypted bytes.
-     * numBytesOfClearData can be null to indicate that all data is encrypted.
-     * This information encapsulates per-sample metadata as outlined in
-     * ISO/IEC FDIS 23001-7:2011 "Common encryption in ISO base media file format files".
+     * encrypted bytes. If pattern encryption applies, each of the latter runs
+     * is encrypted only partly, according to a repeating pattern of "encrypt"
+     * and "skip" blocks. numBytesOfClearData can be null to indicate that all
+     * data is encrypted. This information encapsulates per-sample metadata as
+     * outlined in ISO/IEC FDIS 23001-7:2011 "Common encryption in ISO base
+     * media file format files".
      */
     public final static class CryptoInfo {
-        public void set(
-                int newNumSubSamples,
-                @NonNull int[] newNumBytesOfClearData,
-                @NonNull int[] newNumBytesOfEncryptedData,
-                @NonNull byte[] newKey,
-                @NonNull byte[] newIV,
-                int newMode) {
-            numSubSamples = newNumSubSamples;
-            numBytesOfClearData = newNumBytesOfClearData;
-            numBytesOfEncryptedData = newNumBytesOfEncryptedData;
-            key = newKey;
-            iv = newIV;
-            mode = newMode;
-        }
-
         /**
          * The number of subSamples that make up the buffer's contents.
          */
@@ -2220,7 +2288,7 @@ final public class MediaCodec {
          */
         public int[] numBytesOfEncryptedData;
         /**
-         * A 16-byte opaque key
+         * A 16-byte key id
          */
         public byte[] key;
         /**
@@ -2229,9 +2297,94 @@ final public class MediaCodec {
         public byte[] iv;
         /**
          * The type of encryption that has been applied,
-         * see {@link #CRYPTO_MODE_UNENCRYPTED} and {@link #CRYPTO_MODE_AES_CTR}.
+         * see {@link #CRYPTO_MODE_UNENCRYPTED}, {@link #CRYPTO_MODE_AES_CTR}
+         * and {@link #CRYPTO_MODE_AES_CBC}
          */
         public int mode;
+
+        /**
+         * Metadata describing an encryption pattern for the protected bytes in
+         * a subsample.  An encryption pattern consists of a repeating sequence
+         * of crypto blocks comprised of a number of encrypted blocks followed
+         * by a number of unencrypted, or skipped, blocks.
+         */
+        public final static class Pattern {
+            /**
+             * Number of blocks to be encrypted in the pattern. If zero, pattern
+             * encryption is inoperative.
+             */
+            private int mEncryptBlocks;
+
+            /**
+             * Number of blocks to be skipped (left clear) in the pattern. If zero,
+             * pattern encryption is inoperative.
+             */
+            private int mSkipBlocks;
+
+            /**
+             * Construct a sample encryption pattern given the number of blocks to
+             * encrypt and skip in the pattern.
+             */
+            public Pattern(int blocksToEncrypt, int blocksToSkip) {
+                set(blocksToEncrypt, blocksToSkip);
+            }
+
+            /**
+             * Set the number of blocks to encrypt and skip in a sample encryption
+             * pattern.
+             */
+            public void set(int blocksToEncrypt, int blocksToSkip) {
+                mEncryptBlocks = blocksToEncrypt;
+                mSkipBlocks = blocksToSkip;
+            }
+
+            /**
+             * Return the number of blocks to skip in a sample encryption pattern.
+             */
+            public int getSkipBlocks() {
+                return mSkipBlocks;
+            }
+
+            /**
+             * Return the number of blocks to encrypt in a sample encryption pattern.
+             */
+            public int getEncryptBlocks() {
+                return mEncryptBlocks;
+            }
+        };
+
+        /**
+         * The pattern applicable to the protected data in each subsample.
+         */
+        private Pattern pattern;
+
+        /**
+         * Set the subsample count, clear/encrypted sizes, key, IV and mode fields of
+         * a {@link MediaCodec.CryptoInfo} instance.
+         */
+        public void set(
+                int newNumSubSamples,
+                @NonNull int[] newNumBytesOfClearData,
+                @NonNull int[] newNumBytesOfEncryptedData,
+                @NonNull byte[] newKey,
+                @NonNull byte[] newIV,
+                int newMode) {
+            numSubSamples = newNumSubSamples;
+            numBytesOfClearData = newNumBytesOfClearData;
+            numBytesOfEncryptedData = newNumBytesOfEncryptedData;
+            key = newKey;
+            iv = newIV;
+            mode = newMode;
+            pattern = new Pattern(0, 0);
+        }
+
+        /**
+         * Set the encryption pattern on a {@link MediaCodec.CryptoInfo} instance.
+         * See {@link MediaCodec.CryptoInfo.Pattern}.
+         */
+        public void setPattern(Pattern newPattern) {
+            pattern = newPattern;
+        }
 
         @Override
         public String toString() {
@@ -2346,6 +2499,9 @@ final public class MediaCodec {
      * The output buffers have changed, the client must refer to the new
      * set of output buffers returned by {@link #getOutputBuffers} from
      * this point on.
+     *
+     * <p>Additionally, this event signals that the video scaling mode
+     * may have been reset to the default.</p>
      *
      * @deprecated This return value can be ignored as {@link
      * #getOutputBuffers} has been deprecated.  Client should
@@ -2914,6 +3070,10 @@ final public class MediaCodec {
     /**
      * If a surface has been specified in a previous call to {@link #configure}
      * specifies the scaling mode to use. The default is "scale to fit".
+     * <p class=note>The scaling mode may be reset to the <strong>default</strong> each time an
+     * {@link #INFO_OUTPUT_BUFFERS_CHANGED} event is received from the codec; therefore, the client
+     * must call this method after every buffer change event (and before the first output buffer is
+     * released for rendering) to ensure consistent scaling mode.</p>
      * @throws IllegalArgumentException if mode is not recognized.
      * @throws IllegalStateException if in the Released state.
      */
@@ -3279,14 +3439,6 @@ final public class MediaCodec {
         }
 
 
-        private int readInt(@NonNull ByteBuffer buffer, boolean asLong) {
-            if (asLong) {
-                return (int)buffer.getLong();
-            } else {
-                return buffer.getInt();
-            }
-        }
-
         public MediaImage(
                 @NonNull ByteBuffer buffer, @NonNull ByteBuffer info, boolean readOnly,
                 long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
@@ -3301,38 +3453,45 @@ final public class MediaCodec {
             mYOffset = yOffset;
             mInfo = info;
 
-            // read media-info.  the size of media info can be 80 or 156/160 depending on
-            // whether it was created on a 32- or 64-bit process.  See MediaImage
-            if (info.remaining() == 80 || info.remaining() == 156 || info.remaining() == 160) {
-                boolean sizeIsLong = info.remaining() != 80;
-                int type = readInt(info, info.remaining() == 160);
+            // read media-info.  See MediaImage2
+            if (info.remaining() == 104) {
+                int type = info.getInt();
                 if (type != TYPE_YUV) {
                     throw new UnsupportedOperationException("unsupported type: " + type);
                 }
-                int numPlanes = readInt(info, sizeIsLong);
+                int numPlanes = info.getInt();
                 if (numPlanes != 3) {
                     throw new RuntimeException("unexpected number of planes: " + numPlanes);
                 }
-                mWidth = readInt(info, sizeIsLong);
-                mHeight = readInt(info, sizeIsLong);
+                mWidth = info.getInt();
+                mHeight = info.getInt();
                 if (mWidth < 1 || mHeight < 1) {
                     throw new UnsupportedOperationException(
                             "unsupported size: " + mWidth + "x" + mHeight);
                 }
-                int bitDepth = readInt(info, sizeIsLong);
+                int bitDepth = info.getInt();
                 if (bitDepth != 8) {
                     throw new UnsupportedOperationException("unsupported bit depth: " + bitDepth);
                 }
+                int bitDepthAllocated = info.getInt();
+                if (bitDepthAllocated != 8) {
+                    throw new UnsupportedOperationException(
+                            "unsupported allocated bit depth: " + bitDepthAllocated);
+                }
                 mPlanes = new MediaPlane[numPlanes];
                 for (int ix = 0; ix < numPlanes; ix++) {
-                    int planeOffset = readInt(info, sizeIsLong);
-                    int colInc = readInt(info, sizeIsLong);
-                    int rowInc = readInt(info, sizeIsLong);
-                    int horiz = readInt(info, sizeIsLong);
-                    int vert = readInt(info, sizeIsLong);
+                    int planeOffset = info.getInt();
+                    int colInc = info.getInt();
+                    int rowInc = info.getInt();
+                    int horiz = info.getInt();
+                    int vert = info.getInt();
                     if (horiz != vert || horiz != (ix == 0 ? 1 : 2)) {
                         throw new UnsupportedOperationException("unexpected subsampling: "
                                 + horiz + "x" + vert + " on plane " + ix);
+                    }
+                    if (colInc < 1 || rowInc < 1) {
+                        throw new UnsupportedOperationException("unexpected strides: "
+                                + colInc + " pixel, " + rowInc + " row on plane " + ix);
                     }
 
                     buffer.clear();

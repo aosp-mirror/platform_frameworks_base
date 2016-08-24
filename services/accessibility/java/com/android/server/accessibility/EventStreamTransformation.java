@@ -68,6 +68,14 @@ interface EventStreamTransformation {
     public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
     /**
+     * Receives a key event.
+     *
+     * @param event The key event.
+     * @param policyFlags Policy flags for the event.
+     */
+    public void onKeyEvent(KeyEvent event, int policyFlags);
+
+    /**
      * Receives an accessibility event.
      *
      * @param event The accessibility event.
@@ -82,9 +90,11 @@ interface EventStreamTransformation {
     public void setNext(EventStreamTransformation next);
 
     /**
-     * Clears the internal state of this transformation.
+     * Clears internal state associated with events from specific input source.
+     *
+     * @param inputSource The input source class for which transformation state should be cleared.
      */
-    public void clear();
+    public void clearEvents(int inputSource);
 
     /**
      * Destroys this transformation.

@@ -1,0 +1,88 @@
+toc:
+- title: Google Play In-app Billing
+  path: /google/play/billing/index.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 应用内结算
+  section:
+  - title: Overview
+    path: /google/play/billing/billing_overview.html
+    path_attributes:
+    - name: zh-cn-lang
+      value: 应用内结算概述
+  - title: Version 3 API
+    path: /google/play/billing/api.html
+    path_attributes:
+    - name: zh-cn-lang
+      value: 应用内结算 API
+    section:
+    - title: Implementing the API
+      path: /google/play/billing/billing_integrate.html
+    - title: Reference
+      path: /google/play/billing/billing_reference.html
+  - title: Subscriptions
+    path: /google/play/billing/billing_subscriptions.html
+  - title: Promotions
+    path: /google/play/billing/billing_promotions.html
+  - title: Security and Design
+    path: /google/play/billing/billing_best_practices.html
+    path_attributes:
+    - name: zh-cn-lang
+      value: 安全性和设计
+  - title: Testing In-app Billing
+    path: /google/play/billing/billing_testing.html
+    path_attributes:
+    - name: zh-cn-lang
+      value: 测试应用内结算
+  - title: Administering In-app Billing
+    path: /google/play/billing/billing_admin.html
+    path_attributes:
+    - name: zh-cn-lang
+      value: 管理应用内结算
+  - title: Version Notes
+    path: /google/play/billing/versions.html
+
+- title: Filters on Google Play
+  path: /google/play/filters.html
+  path_attributes:
+  - name: es-lang
+    value: Filtros en Google Play
+  - name: ja-lang
+    value: Google Play 上のフィルタ
+  - name: ko-lang
+    value: Google Play 필터
+  - name: pt-br-lang
+    value: Filtros no Google Play
+  - name: ru-lang
+    value: Фильтры в Google Play
+  - name: zh-cn-lang
+    value: Google Play 上的筛选器
+  - name: zh-tw-lang
+    value: Google Play 上的篩選器
+
+- title: Google Play Developer API
+  path: /google/play/developer-api.html
+
+- title: Multiple APK Support
+  path: /google/play/publishing/multiple-apks.html
+
+- title: APK Expansion Files
+  path: /google/play/expansion-files.html
+
+- title: Application Licensing
+  path: /google/play/licensing/index.html
+  section:
+  - title: Licensing Overview
+    path: /google/play/licensing/overview.html
+  - title: Setting Up for Licensing
+    path: /google/play/licensing/setting-up.html
+  - title: Adding Licensing to Your App
+    path: /google/play/licensing/adding-licensing.html
+  - title: Licensing Reference
+    path: /google/play/licensing/licensing-reference.html
+
+- title: Android Backup Service
+  path: /google/backup/index.html
+  section:
+  - title: Register
+    path: /google/backup/signup.html

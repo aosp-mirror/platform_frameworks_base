@@ -16,86 +16,42 @@
 
 #define LOG_TAG "BitmapRegionDecoder"
 
-#include "SkBitmap.h"
-#include "SkData.h"
-#include "SkImageEncoder.h"
+#include "BitmapFactory.h"
+#include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
+#include "Utils.h"
+
+#include "SkBitmap.h"
+#include "SkBitmapRegionDecoder.h"
+#include "SkCodec.h"
+#include "SkData.h"
 #include "SkUtils.h"
-#include "SkTemplates.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
-#include "BitmapFactory.h"
-#include "AutoDecodeCancel.h"
-#include "CreateJavaOutputStreamAdaptor.h"
-#include "Utils.h"
-#include "JNIHelp.h"
 
-#include "core_jni_helpers.h"
-#include "android_util_Binder.h"
 #include "android_nio_utils.h"
-#include "CreateJavaOutputStreamAdaptor.h"
+#include "android_util_Binder.h"
+#include "core_jni_helpers.h"
 
+#include <JNIHelp.h>
+#include <androidfw/Asset.h>
 #include <binder/Parcel.h>
 #include <jni.h>
-#include <androidfw/Asset.h>
 #include <sys/stat.h>
 
 using namespace android;
 
-class SkBitmapRegionDecoder {
-public:
-    SkBitmapRegionDecoder(SkImageDecoder* decoder, int width, int height) {
-        fDecoder = decoder;
-        fWidth = width;
-        fHeight = height;
-    }
-    ~SkBitmapRegionDecoder() {
-        SkDELETE(fDecoder);
-    }
-
-    bool decodeRegion(SkBitmap* bitmap, const SkIRect& rect,
-                      SkColorType pref, int sampleSize) {
-        fDecoder->setSampleSize(sampleSize);
-        return fDecoder->decodeSubset(bitmap, rect, pref);
-    }
-
-    SkImageDecoder* getDecoder() const { return fDecoder; }
-    int getWidth() const { return fWidth; }
-    int getHeight() const { return fHeight; }
-
-private:
-    SkImageDecoder* fDecoder;
-    int fWidth;
-    int fHeight;
-};
-
 // Takes ownership of the SkStreamRewindable. For consistency, deletes stream even
 // when returning null.
 static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream) {
-    SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
-    int width, height;
-    if (NULL == decoder) {
-        SkDELETE(stream);
+    SkAutoTDelete<SkBitmapRegionDecoder> brd(
+            SkBitmapRegionDecoder::Create(stream, SkBitmapRegionDecoder::kAndroidCodec_Strategy));
+    if (NULL == brd) {
         doThrowIOE(env, "Image format not supported");
-        return nullObjectReturn("SkImageDecoder::Factory returned null");
+        return nullObjectReturn("CreateBitmapRegionDecoder returned null");
     }
 
-    JavaPixelAllocator *javaAllocator = new JavaPixelAllocator(env);
-    decoder->setAllocator(javaAllocator);
-    javaAllocator->unref();
-
-    // This call passes ownership of stream to the decoder, or deletes on failure.
-    if (!decoder->buildTileIndex(stream, &width, &height)) {
-        char msg[100];
-        snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
-                decoder->getFormatName());
-        doThrowIOE(env, msg);
-        SkDELETE(decoder);
-        return nullObjectReturn("decoder->buildTileIndex returned false");
-    }
-
-    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, width, height);
-    return GraphicsJNI::createBitmapRegionDecoder(env, bm);
+    return GraphicsJNI::createBitmapRegionDecoder(env, brd.detach());
 }
 
 static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
@@ -163,102 +119,106 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
 
 /*
  * nine patch not supported
- *
  * purgeable not supported
  * reportSizeToVM not supported
  */
-static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
-                                jint start_x, jint start_y, jint width, jint height, jobject options) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
-    jobject tileBitmap = NULL;
-    SkImageDecoder *decoder = brd->getDecoder();
-    int sampleSize = 1;
-    SkColorType prefColorType = kUnknown_SkColorType;
-    bool doDither = true;
-    bool preferQualityOverSpeed = false;
-    bool requireUnpremultiplied = false;
+static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint inputX,
+        jint inputY, jint inputWidth, jint inputHeight, jobject options) {
 
+    // Set default options.
+    int sampleSize = 1;
+    SkColorType colorType = kN32_SkColorType;
+    bool requireUnpremul = false;
+    jobject javaBitmap = NULL;
+
+    // Update the default options with any options supplied by the client.
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
-        // initialize these, in case we fail later on
+        jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
+        colorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
+        requireUnpremul = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
+        javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
+        // The Java options of ditherMode and preferQualityOverSpeed are deprecated.  We will
+        // ignore the values of these fields.
+
+        // Initialize these fields to indicate a failure.  If the decode succeeds, we
+        // will update them later on.
         env->SetIntField(options, gOptions_widthFieldID, -1);
         env->SetIntField(options, gOptions_heightFieldID, -1);
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
-
-        jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
-        prefColorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
-        doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
-        preferQualityOverSpeed = env->GetBooleanField(options,
-                gOptions_preferQualityOverSpeedFieldID);
-        // Get the bitmap for re-use if it exists.
-        tileBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
-        requireUnpremultiplied = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
     }
 
-    decoder->setDitherImage(doDither);
-    decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
-    decoder->setRequireUnpremultipliedColors(requireUnpremultiplied);
-    AutoDecoderCancel adc(options, decoder);
-
-    // To fix the race condition in case "requestCancelDecode"
-    // happens earlier than AutoDecoderCancel object is added
-    // to the gAutoDecoderCancelMutex linked list.
-    if (NULL != options && env->GetBooleanField(options, gOptions_mCancelID)) {
-        return nullObjectReturn("gOptions_mCancelID");;
+    // Recycle a bitmap if possible.
+    android::Bitmap* recycledBitmap = nullptr;
+    size_t recycledBytes = 0;
+    if (javaBitmap) {
+        recycledBitmap = GraphicsJNI::getBitmap(env, javaBitmap);
+        if (recycledBitmap->peekAtPixelRef()->isImmutable()) {
+            ALOGW("Warning: Reusing an immutable bitmap as an image decoder target.");
+        }
+        recycledBytes = GraphicsJNI::getBitmapAllocationByteCount(env, javaBitmap);
     }
 
-    SkIRect region;
-    region.fLeft = start_x;
-    region.fTop = start_y;
-    region.fRight = start_x + width;
-    region.fBottom = start_y + height;
+    // Set up the pixel allocator
+    SkBRDAllocator* allocator = nullptr;
+    RecyclingClippingPixelAllocator recycleAlloc(recycledBitmap, recycledBytes);
+    JavaPixelAllocator javaAlloc(env);
+    if (javaBitmap) {
+        allocator = &recycleAlloc;
+        // We are required to match the color type of the recycled bitmap.
+        colorType = recycledBitmap->info().colorType();
+    } else {
+        allocator = &javaAlloc;
+    }
+
+    // Decode the region.
+    SkIRect subset = SkIRect::MakeXYWH(inputX, inputY, inputWidth, inputHeight);
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     SkBitmap bitmap;
-
-    if (tileBitmap != NULL) {
-        // Re-use bitmap.
-        GraphicsJNI::getSkBitmap(env, tileBitmap, &bitmap);
+    if (!brd->decodeRegion(&bitmap, allocator, subset, sampleSize, colorType, requireUnpremul)) {
+        return nullObjectReturn("Failed to decode region.");
     }
 
-    if (!brd->decodeRegion(&bitmap, region, prefColorType, sampleSize)) {
-        return nullObjectReturn("decoder->decodeRegion returned false");
-    }
-
-    // update options (if any)
+    // If the client provided options, indicate that the decode was successful.
     if (NULL != options) {
         env->SetIntField(options, gOptions_widthFieldID, bitmap.width());
         env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
-        // TODO: set the mimeType field with the data from the codec.
-        // but how to reuse a set of strings, rather than allocating new one
-        // each time?
         env->SetObjectField(options, gOptions_mimeFieldID,
-                            getMimeTypeString(env, decoder->getFormat()));
+                encodedFormatToString(env, brd->getEncodedFormat()));
+        if (env->ExceptionCheck()) {
+            return nullObjectReturn("OOM in encodedFormatToString()");
+        }
     }
 
-    if (tileBitmap != NULL) {
-        bitmap.notifyPixelsChanged();
-        return tileBitmap;
+    // If we may have reused a bitmap, we need to indicate that the pixels have changed.
+    if (javaBitmap) {
+        recycleAlloc.copyIfNecessary();
+        return javaBitmap;
     }
-
-    JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
 
     int bitmapCreateFlags = 0;
-    if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
-    return GraphicsJNI::createBitmap(env, allocator->getStorageObjAndReset(),
-            bitmapCreateFlags);
+    if (!requireUnpremul) {
+        bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
+    }
+    return GraphicsJNI::createBitmap(env, javaAlloc.getStorageObjAndReset(), bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
-    return static_cast<jint>(brd->getHeight());
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    return static_cast<jint>(brd->height());
 }
 
 static jint nativeGetWidth(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
-    return static_cast<jint>(brd->getWidth());
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    return static_cast<jint>(brd->width());
 }
 
 static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
-    SkBitmapRegionDecoder *brd = reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
+    SkBitmapRegionDecoder* brd =
+            reinterpret_cast<SkBitmapRegionDecoder*>(brdHandle);
     delete brd;
 }
 

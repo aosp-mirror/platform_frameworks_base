@@ -330,7 +330,7 @@ static jint nativeSendCecCommand(JNIEnv* env, jclass clazz, jlong controllerPtr,
     jsize len = env->GetArrayLength(body);
     message.length = MIN(len, CEC_MESSAGE_BODY_MAX_LENGTH);
     ScopedByteArrayRO bodyPtr(env, body);
-    std::memcpy(message.body, bodyPtr.get(), len);
+    std::memcpy(message.body, bodyPtr.get(), message.length);
 
     HdmiCecController* controller =
             reinterpret_cast<HdmiCecController*>(controllerPtr);

@@ -18,9 +18,6 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Message;
@@ -29,9 +26,12 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
+import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
-import java.util.List;
+import com.android.systemui.R;
+
 import java.util.Objects;
 
 
@@ -40,12 +40,14 @@ public class WifiSignalController extends
     private final WifiManager mWifiManager;
     private final AsyncChannel mWifiChannel;
     private final boolean mHasMobileData;
+    private final WifiStatusTracker mWifiTracker;
 
     public WifiSignalController(Context context, boolean hasMobileData,
             CallbackHandler callbackHandler, NetworkControllerImpl networkController) {
         super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
                 callbackHandler, networkController);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        mWifiTracker = new WifiStatusTracker(mWifiManager);
         mHasMobileData = hasMobileData;
         Handler handler = new WifiHandler();
         mWifiChannel = new AsyncChannel();
@@ -73,18 +75,22 @@ public class WifiSignalController extends
     }
 
     @Override
-    public void notifyListeners() {
+    public void notifyListeners(SignalCallback callback) {
         // only show wifi in the cluster if connected or if wifi-only
         boolean wifiVisible = mCurrentState.enabled
                 && (mCurrentState.connected || !mHasMobileData);
         String wifiDesc = wifiVisible ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getStringIfExists(getContentDescription());
+        if (mCurrentState.inetCondition == 0) {
+            contentDescription +=
+                    ("," + mContext.getString(R.string.accessibility_quick_settings_no_internet));
+        }
 
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),
                 contentDescription);
-        mCallbackHandler.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
+        callback.setWifiIndicators(mCurrentState.enabled, statusIcon, qsIcon,
                 ssidPresent && mCurrentState.activityIn, ssidPresent && mCurrentState.activityOut,
                 wifiDesc);
     }
@@ -93,52 +99,13 @@ public class WifiSignalController extends
      * Extract wifi state directly from broadcasts about changes in wifi state.
      */
     public void handleBroadcast(Intent intent) {
-        String action = intent.getAction();
-        if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-            mCurrentState.enabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                    WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
-        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            final NetworkInfo networkInfo = (NetworkInfo)
-                    intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            mCurrentState.connected = networkInfo != null && networkInfo.isConnected();
-            // If Connected grab the signal strength and ssid.
-            if (mCurrentState.connected) {
-                // try getting it out of the intent first
-                WifiInfo info = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO) != null
-                        ? (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO)
-                        : mWifiManager.getConnectionInfo();
-                if (info != null) {
-                    mCurrentState.ssid = getSsid(info);
-                } else {
-                    mCurrentState.ssid = null;
-                }
-            } else if (!mCurrentState.connected) {
-                mCurrentState.ssid = null;
-            }
-        } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
-            // Default to -200 as its below WifiManager.MIN_RSSI.
-            mCurrentState.rssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-            mCurrentState.level = WifiManager.calculateSignalLevel(
-                    mCurrentState.rssi, WifiIcons.WIFI_LEVEL_COUNT);
-        }
-
+        mWifiTracker.handleBroadcast(intent);
+        mCurrentState.enabled = mWifiTracker.enabled;
+        mCurrentState.connected = mWifiTracker.connected;
+        mCurrentState.ssid = mWifiTracker.ssid;
+        mCurrentState.rssi = mWifiTracker.rssi;
+        mCurrentState.level = mWifiTracker.level;
         notifyListenersIfNecessary();
-    }
-
-    private String getSsid(WifiInfo info) {
-        String ssid = info.getSSID();
-        if (ssid != null) {
-            return ssid;
-        }
-        // OK, it's not in the connectionInfo; we have to go hunting for it
-        List<WifiConfiguration> networks = mWifiManager.getConfiguredNetworks();
-        int length = networks.size();
-        for (int i = 0; i < length; i++) {
-            if (networks.get(i).networkId == info.getNetworkId()) {
-                return networks.get(i).SSID;
-            }
-        }
-        return null;
     }
 
     @VisibleForTesting

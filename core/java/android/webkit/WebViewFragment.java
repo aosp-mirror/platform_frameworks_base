@@ -44,7 +44,7 @@ public class WebViewFragment extends Fragment {
         if (mWebView != null) {
             mWebView.destroy();
         }
-        mWebView = new WebView(getActivity());
+        mWebView = new WebView(getContext());
         mIsWebViewAvailable = true;
         return mWebView;
     }

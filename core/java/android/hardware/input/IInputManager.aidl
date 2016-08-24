@@ -24,6 +24,9 @@ import android.hardware.input.TouchCalibration;
 import android.os.IBinder;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.PointerIcon;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 /** @hide */
 interface IInputManager {
@@ -48,14 +51,20 @@ interface IInputManager {
 
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
+    KeyboardLayout[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
     String getCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier);
     void setCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
-    String[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
+    String[] getEnabledKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
     void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor);
     void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
+            String keyboardLayoutDescriptor);
+    KeyboardLayout getKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
+            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype);
+    void setKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
+            in InputMethodInfo imeInfo, in InputMethodSubtype imeSubtype,
             String keyboardLayoutDescriptor);
 
     // Registers an input devices changed listener.
@@ -69,4 +78,7 @@ interface IInputManager {
     // Input device vibrator control.
     void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
+
+    void setPointerIconType(int typeId);
+    void setCustomPointerIcon(in PointerIcon icon);
 }

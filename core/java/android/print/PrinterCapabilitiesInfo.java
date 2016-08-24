@@ -16,16 +16,21 @@
 
 package android.print;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.print.PrintAttributes.ColorMode;
+import android.print.PrintAttributes.DuplexMode;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.IntConsumer;
 
 /**
  * This class represents the capabilities of a printer. Instances
@@ -52,9 +57,9 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
 
     private static final Margins DEFAULT_MARGINS = new Margins(0,  0,  0,  0);
 
-    private Margins mMinMargins = DEFAULT_MARGINS;
-    private List<MediaSize> mMediaSizes;
-    private List<Resolution> mResolutions;
+    private @NonNull Margins mMinMargins = DEFAULT_MARGINS;
+    private @NonNull List<MediaSize> mMediaSizes;
+    private @NonNull List<Resolution> mResolutions;
 
     private int mColorModes;
     private int mDuplexModes;
@@ -121,7 +126,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The media sizes.
      */
-    public List<MediaSize> getMediaSizes() {
+    public @NonNull List<MediaSize> getMediaSizes() {
         return Collections.unmodifiableList(mMediaSizes);
     }
 
@@ -130,7 +135,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The resolutions.
      */
-    public List<Resolution> getResolutions() {
+    public @NonNull List<Resolution> getResolutions() {
         return Collections.unmodifiableList(mResolutions);
     }
 
@@ -140,7 +145,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The minimal margins.
      */
-    public Margins getMinMargins() {
+    public @NonNull Margins getMinMargins() {
         return mMinMargins;
     }
 
@@ -152,7 +157,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      * @see PrintAttributes#COLOR_MODE_COLOR
      * @see PrintAttributes#COLOR_MODE_MONOCHROME
      */
-    public int getColorModes() {
+    public @ColorMode int getColorModes() {
         return mColorModes;
     }
 
@@ -165,7 +170,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
      * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
      */
-    public int getDuplexModes() {
+    public @DuplexMode int getDuplexModes() {
         return mDuplexModes;
     }
 
@@ -174,7 +179,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The default attributes.
      */
-    public PrintAttributes getDefaults() {
+    public @NonNull PrintAttributes getDefaults() {
         PrintAttributes.Builder builder = new PrintAttributes.Builder();
 
         builder.setMinMargins(mMinMargins);
@@ -202,15 +207,37 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         return builder.build();
     }
 
+    /**
+     * Call enforceSingle for each bit in the mask.
+     *
+     * @param mask The mask
+     * @param enforceSingle The function to call
+     */
+    private static void enforceValidMask(int mask, IntConsumer enforceSingle) {
+        int current = mask;
+        while (current > 0) {
+            final int currentMode = (1 << Integer.numberOfTrailingZeros(current));
+            current &= ~currentMode;
+            enforceSingle.accept(currentMode);
+        }
+    }
+
     private PrinterCapabilitiesInfo(Parcel parcel) {
-        mMinMargins = readMargins(parcel);
+        mMinMargins = Preconditions.checkNotNull(readMargins(parcel));
         readMediaSizes(parcel);
         readResolutions(parcel);
 
         mColorModes = parcel.readInt();
+        enforceValidMask(mColorModes,
+                (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
+
         mDuplexModes = parcel.readInt();
+        enforceValidMask(mDuplexModes,
+                (currentMode) -> PrintAttributes.enforceValidDuplexMode(currentMode));
 
         readDefaults(parcel);
+        Preconditions.checkArgument(mMediaSizes.size() > mDefaults[PROPERTY_MEDIA_SIZE]);
+        Preconditions.checkArgument(mResolutions.size() > mDefaults[PROPERTY_RESOLUTION]);
     }
 
     @Override
@@ -425,7 +452,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @throws IllegalArgumentException If the printer id is <code>null</code>.
          */
-        public Builder(PrinterId printerId) {
+        public Builder(@NonNull PrinterId printerId) {
             if (printerId == null) {
                 throw new IllegalArgumentException("printerId cannot be null.");
             }
@@ -446,7 +473,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.MediaSize
          */
-        public Builder addMediaSize(MediaSize mediaSize, boolean isDefault) {
+        public @NonNull Builder addMediaSize(@NonNull MediaSize mediaSize, boolean isDefault) {
             if (mPrototype.mMediaSizes == null) {
                 mPrototype.mMediaSizes = new ArrayList<MediaSize>();
             }
@@ -474,7 +501,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.Resolution
          */
-        public Builder addResolution(Resolution resolution, boolean isDefault) {
+        public @NonNull Builder addResolution(@NonNull Resolution resolution, boolean isDefault) {
             if (mPrototype.mResolutions == null) {
                 mPrototype.mResolutions = new ArrayList<Resolution>();
             }
@@ -502,7 +529,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.Margins
          */
-        public Builder setMinMargins(Margins margins) {
+        public @NonNull Builder setMinMargins(@NonNull Margins margins) {
             if (margins == null) {
                 throw new IllegalArgumentException("margins cannot be null");
             }
@@ -532,13 +559,10 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * @see PrintAttributes#COLOR_MODE_COLOR
          * @see PrintAttributes#COLOR_MODE_MONOCHROME
          */
-        public Builder setColorModes(int colorModes, int defaultColorMode) {
-            int currentModes = colorModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidColorMode(currentMode);
-            }
+        public @NonNull Builder setColorModes(@ColorMode int colorModes,
+                @ColorMode int defaultColorMode) {
+            enforceValidMask(colorModes,
+                    (currentMode) -> PrintAttributes.enforceValidColorMode(currentMode));
             PrintAttributes.enforceValidColorMode(defaultColorMode);
             mPrototype.mColorModes = colorModes;
             mPrototype.mDefaults[PROPERTY_COLOR_MODE] = defaultColorMode;
@@ -562,13 +586,10 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
          * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
          */
-        public Builder setDuplexModes(int duplexModes, int defaultDuplexMode) {
-            int currentModes = duplexModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidDuplexMode(currentMode);
-            }
+        public @NonNull Builder setDuplexModes(@DuplexMode int duplexModes,
+                @DuplexMode int defaultDuplexMode) {
+            enforceValidMask(duplexModes,
+                    (currentMode) -> PrintAttributes.enforceValidDuplexMode(currentMode));
             PrintAttributes.enforceValidDuplexMode(defaultDuplexMode);
             mPrototype.mDuplexModes = duplexModes;
             mPrototype.mDefaults[PROPERTY_DUPLEX_MODE] = defaultDuplexMode;
@@ -589,7 +610,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @throws IllegalStateException If a required attribute was not specified.
          */
-        public PrinterCapabilitiesInfo build() {
+        public @NonNull PrinterCapabilitiesInfo build() {
             if (mPrototype.mMediaSizes == null || mPrototype.mMediaSizes.isEmpty()) {
                 throw new IllegalStateException("No media size specified.");
             }

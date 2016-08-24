@@ -73,6 +73,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     CharSequence mPendingPrompt;
     Request mPendingRequest;
     int mCurrentTask = -1;
+    int mShowFlags;
 
     MainInteractionSession(Context context) {
         super(context);
@@ -88,6 +89,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     @Override
     public void onShow(Bundle args, int showFlags) {
         super.onShow(args, showFlags);
+        mShowFlags = showFlags;
         Log.i(TAG, "onShow: flags=0x" + Integer.toHexString(showFlags) + " args=" + args);
         mState = STATE_IDLE;
         mStartIntent = args != null ? (Intent)args.getParcelable("intent") : null;
@@ -189,6 +191,18 @@ public class MainInteractionSession extends VoiceInteractionSession
                 Log.i(TAG, "Referrer: " + referrer);
             }
         }
+    }
+
+    @Override
+    public void onHandleAssistSecondary(final Bundle data, final AssistStructure structure,
+            final AssistContent content, int index, int count) {
+        Log.i(TAG, "Got secondary activity assist data " + index + " of " + count);
+        Log.i(TAG, "Showing assist structure after a few seconds...");
+        mContentView.postDelayed(new Runnable() {
+            public void run() {
+                onHandleAssist(data, structure, content);
+            }
+        }, 2000 * index);
     }
 
     @Override
@@ -311,6 +325,8 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (mState != STATE_IDLE) {
             outInsets.contentInsets.top = mBottomContent.getTop();
             outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT;
+        } else if ((mShowFlags & SHOW_SOURCE_ACTIVITY) != 0) {
+            outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT;
         }
     }
 
@@ -355,7 +371,7 @@ public class MainInteractionSession extends VoiceInteractionSession
             mPendingPrompt = prompt.getVisualPrompt();
         }
     }
-      
+
     @Override
     public void onRequestConfirmation(ConfirmationRequest request) {
         Log.i(TAG, "onConfirm: prompt=" + request.getVoicePrompt() + " extras="

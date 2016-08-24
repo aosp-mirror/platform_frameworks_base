@@ -1,0 +1,400 @@
+page.title=Getting Started with Testing
+page.tags="testing"
+page.article=true
+page.image=images/tools/studio-main-screen.png
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+    <h2>
+      In this document
+    </h2>
+
+      <ol>
+        <li><a href="#test-types">Test Types</a></li>
+        <li><a href="#test-apis">Test APIs</a>
+          <ol>
+            <li><a href="#junit">JUnit</a></li>
+            <li><a href="#support-library">Android Testing Support Library</a></li>
+            <li><a href="#assertion">Assertion classes</a></li>
+            <li><a href="#monkeyrunner">Monkey and monkeyrunner</a></li>
+          </ol>
+        </li>
+        <li><a href="#build">Guides for Building Android Tests</a>
+      </ol>
+
+    <h2>
+      See also
+    </h2>
+
+    <ul>
+
+      <li>
+        <a href="https://github.com/googlesamples/android-testing" class=
+        "external-link">Android Testing Samples</a>
+      </li>
+
+      <li>
+        <a href="https://developers.google.com/cloud-test-lab/">Cloud Test
+        Lab</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  Android tests are based on <a href="http://junit.org/" class=
+  "external-link">JUnit</a>, and you can run them either as local
+  unit tests on the JVM or as instrumented tests on an Android device.
+  This page provides an introduction to the concepts and
+  tools for building Android tests.
+</p>
+
+
+<h2 id="test-types">Test Types</h2>
+
+
+<p>When using Android Studio to write any of your tests, your test code must go
+into one of two different code directories (source sets). For each module in
+your project, Android Studio includes both source sets, corresponding to the
+following test types:</p>
+
+<dl>
+<dt><b>Local unit tests</b></dt>
+<dd>Located at <code><var>module-name</var>/src/test/java/</code>.
+<p>These tests run on the local JVM
+and do not have access to functional Android framework APIs.</p>
+<p>To get started, see <a
+href="/training/testing/unit-testing/local-unit-tests.html">Building Local
+Unit Tests</a>.</p>
+</dd>
+
+<dt><b>Instrumented tests</b></dt>
+<dd>Located at <code><var>module-name</var>/src/androidTest/java/</code>.
+<p>These are all tests that must run on an Android hardware device or
+an Android emulator.</p>
+
+<p>Instrumented tests are built into an APK that runs on the device alongside
+your app under test. The system runs your test APK and your app under tests in
+the same process, so your tests can invoke methods and modify fields in the
+app, and automate user interaction with your app.</p>
+
+<p>For information about how to create instrumented tests, see the
+following topics:</p>
+
+<ul>
+  <li>
+    <a href=
+    "{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html"
+    >Building Instrumented Unit Tests</a>: Build complex unit tests with
+    Android dependencies that cannot be satisfied with mock objects.
+  </li>
+
+  <li>
+    <a href="{@docRoot}training/testing/ui-testing/index.html">Automating User
+    Interface Tests</a>: Create tests to verify that the user interface
+    behaves correctly for user interactions within a single app or for
+    interactions across multiple apps.
+  </li>
+
+  <li>
+    <a href="{@docRoot}training/testing/integration-testing/index.html">Testing
+    App Component Integrations</a>: Verify the behavior of components that
+    users do not directly interact with, such as a <a href=
+    "{@docRoot}guide/components/services.html">Service</a> or a <a href=
+    "{@docRoot}guide/topics/providers/content-providers.html">Content Provider</a>.
+  </li>
+</ul>
+
+</dd>
+</dl>
+
+<img src="/images/testing/test-types_2x.png" alt="" width="798" />
+
+<p>However, the <em>local unit tests</em> and <em>instrumented tests</em>
+described above are just terms that help distinguish the tests that run on your
+local JVM from the tests that run on the Android platform (on a hardware device
+or emulator). The real testing types that you should understand when building a
+complete test suite are described in the following table.</p>
+
+<table>
+  <tr>
+    <th>
+      Type
+    </th>
+    <th>
+      Subtype
+    </th>
+    <th>
+      Description
+    </th>
+  </tr>
+
+  <tr>
+    <td rowspan="3">
+      Unit tests
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Local Unit Tests
+    </td>
+    <td>
+      Unit tests that run locally on the Java Virtual Machine (JVM). Use these
+tests to minimize execution time when your tests have no Android framework
+dependencies or when you can mock the Android framework dependencies.
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Instrumented unit tests
+    </td>
+    <td>
+      Unit tests that run on an Android device or emulator. These tests have
+access to <code><a href=
+"/reference/android/app/Instrumentation.html">Instrumentation</a></code>
+information, such as the <code><a href=
+"/reference/android/content/Context.html">Context</a></code> of the app you are
+testing. Use these tests when your tests have Android dependencies that mock
+objects cannot satisfy.
+    </td>
+  </tr>
+
+  <tr>
+    <td style="white-space:nowrap" rowspan="3">
+      Integration Tests
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Components within your app only
+    </td>
+    <td>
+      This type of test verifies that the target app behaves as expected when
+a user performs a specific action or enters a specific input in its activities.
+For example, it allows you to check that the target app returns the correct UI
+output in response to user interactions in the app’s activities. UI testing
+frameworks like <a href=
+      "/tools/testing-support-library/index.html#Espresso">Espresso</a> allow
+you to programmatically simulate user actions and test complex intra-app user
+interactions.
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Cross-app Components
+    </td>
+    <td>
+      This type of test verifies the correct behavior of interactions between
+different user apps or between user apps and system apps. For example, you might
+want to test that your app behaves correctly when the user performs an action
+in the Android Settings menu. UI testing frameworks that support cross-app
+interactions, such as <a
+href="/topic/libraries/testing-support-library/index.html#UIAutomator"
+>UI Automator</a>, allow you to create tests for such scenarios.
+    </td>
+  </tr>
+</table>
+
+
+
+
+
+
+<h2 id="test-apis">Test APIs</h2>
+
+<p>The following are common APIs used for testing apps on Android.</p>
+
+
+<h3 id="junit">JUnit</h3>
+
+<p>You should write your unit or integration test class as a <a href=
+"http://junit.org/" class="external-link">JUnit 4</a> test class. The framework
+offers a convenient way to perform common setup, teardown, and assertion
+operations in your test.</p>
+
+<p>A basic JUnit 4 test class is a Java class that contains one or more test
+methods. A test method begins with the <code>@Test</code> annotation and
+contains the code to exercise and verify a single functionality (that is, a
+logical unit) in the component that you want to test.</p>
+
+<p>The following snippet shows an example JUnit 4 integration test that uses the
+<a href="/topic/libraries/testing-support-library/index.html#Espresso">Espresso
+APIs</a> to perform a click action on a UI element, then checks to see if
+an expected string is displayed.</p>
+
+<pre>
+&#64;RunWith(AndroidJUnit4.class)
+&#64;LargeTest
+public class MainActivityInstrumentationTest {
+
+    &#64;Rule
+    public ActivityTestRule mActivityRule = new ActivityTestRule<>(
+            MainActivity.class);
+
+    &#64;Test
+    public void sayHello(){
+        onView(withText("Say hello!")).perform(click());
+
+        onView(withId(R.id.textView)).check(matches(withText("Hello, World!")));
+    }
+}
+</pre>
+
+<p>In your JUnit 4 test class, you can call out sections in your test code for
+special processing by using the following annotations:</p>
+
+<ul>
+<li><code>@Before</code>: Use this annotation to specify a block of code that
+contains test setup operations. The test class invokes this code block before
+each test. You can have multiple <code>@Before</code> methods but the order in
+which the test class calls these methods is not guaranteed.</li>
+
+<li><code>@After</code>: This annotation specifies a block of code that
+contains test tear-down operations. The test class calls this code block after
+every test method. You can define multiple <code>@After</code> operations in
+your test code. Use this annotation to release any resources from memory.</li>
+
+<li><code>@Test</code>: Use this annotation to mark a test method. A single
+test class can contain multiple test methods, each prefixed with this
+annotation.</li>
+
+<li><code>@Rule</code>: Rules allow you to flexibly add or redefine the
+behavior of each test method in a reusable way. In Android testing, use this
+annotation together with one of the test rule classes that the Android Testing
+Support Library provides, such as <a href=
+"/reference/android/support/test/rule/ActivityTestRule.html"><code>ActivityTestRule</code></a>
+or <a href=
+"/reference/android/support/test/rule/ServiceTestRule.html"><code>ServiceTestRule</code></a>.</li>
+
+<li><code>@BeforeClass</code>: Use this annotation to specify static methods
+for each test class to invoke only once. This testing step is useful for
+expensive operations such as connecting to a database.</li>
+
+<li><code>@AfterClass</code>: Use this annotation to specify static methods for
+the test class to invoke only after all tests in the class have run. This
+testing step is useful for releasing any resources allocated in the
+<code>@BeforeClass</code> block.</li>
+
+<li><code>@Test(timeout=)</code>: Some annotations support the ability to pass
+in elements for which you can set values. For example, you can specify a
+timeout period for the test. If the test starts but does not complete within
+the given timeout period, it automatically fails. You must specify the timeout
+period in milliseconds, for example: <code>@Test(timeout=5000)</code>.</li>
+</ul>
+
+<p>For more annotations, see the documentation for <a
+href="http://junit.sourceforge.net/javadoc/org/junit/package-summary.html"
+class="external-link">JUnit annotations</a> and the <a
+href="/reference/android/support/annotation/package-summary.html">Android
+annotations</a>.</p>
+
+<p>Use the JUnit <code><a href=
+"/reference/junit/framework/Assert.html">Assert</a></code> class to verify the
+correctness of an object's state. The assert methods compare values you expect
+from a test to the actual results and throw an exception if the comparison
+fails. <a href="#AssertionClasses">Assertion classes</a> describes these
+methods in more detail.</p>
+
+
+<h3 id="support-library">Android Testing Support Library</h3>
+
+<p>The <a href="/topic/libraries/testing-support-library/index.html">Android
+Testing Support Library</a> provides a set of APIs that allow you
+to quickly build and run test code for your apps, including JUnit 4 and
+functional UI tests. The library includes the following instrumentation-based
+APIs that are useful when you want to automate your tests:</p>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#AndroidJUnitRunner"
+>AndroidJUnitRunner</a></dt>
+<dd>A JUnit 4-compatible test runner for Android.</dd>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#Espresso"
+>Espresso</a></dt>
+<dd>A UI testing framework; suitable for functional UI testing within an
+app.</dd>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#UIAutomator"
+>UI Automator</a></dt>
+<dd>A UI testing framework suitable for cross-app functional UI testing between
+both system and installed apps.</dd>
+
+
+<h3 id="assertion">Assertion classes</h3>
+
+<p>Because Android Testing Support Library APIs extend JUnit, you can use
+assertion methods to display the results of tests. An assertion method compares
+an actual value returned by a test to an expected value, and throws an
+AssertionException if the comparison test fails. Using assertions is more
+convenient than logging, and provides better test performance.</p>
+
+<p>To simplify test development, you should use the <a href=
+"https://github.com/hamcrest" class="external-link">Hamcrest library</a>, which
+lets you create more flexible tests using the Hamcrest matcher APIs.</p>
+
+
+
+<h3 id="monkeyrunner">Monkey and monkeyrunner</h3>
+
+<p>The Android SDK includes two tools for functional-level app testing:</p>
+
+<dl>
+<dt>Monkey</dt>
+<dd>This is a command-line tool that sends pseudo-random streams of keystrokes,
+touches, and gestures to a device. You run it with the <a href=
+"/studio/command-line/adb.html">Android Debug Bridge (adb)</a> tool, and use it
+to stress-test your app, report back errors any that are encountered, or repeat
+a stream of events by running the tool multiple times with the same random
+number seed.</dd>
+
+
+<dt>monkeyrunner</dt>
+<dd>This tool is an API and execution environment for test programs written in
+Python. The API includes functions for connecting to a device, installing and
+uninstalling packages, taking screenshots, comparing two images, and running a
+test package against an app. Using the API, you can write a wide range of
+large, powerful, and complex tests. You run programs that use the API with the
+<code>monkeyrunner</code> command-line tool.</dd>
+</dl>
+
+
+
+
+<h2 id="build">Guides for Building Android Tests</h2>
+
+<p>The following documents provide more detail about how to build and run
+a variety of test types:
+</p>
+
+<dl>
+  <dt><a href="/training/testing/unit-testing/local-unit-tests.html"
+    >Building Local Unit Tests</a></dt>
+  <dd>Build unit tests that have no dependencies or only simple dependencies
+    that you can mock, which run on your local JVM.</dd>
+  <dt><a href=
+    "/training/testing/unit-testing/instrumented-unit-tests.html"
+    >Building Instrumented Unit Tests</a></dt>
+  <dd>Build complex unit tests with
+    Android dependencies that cannot be satisfied with mock objects,
+    which run on a hardware device or emulator.</dd>
+  <dt><a href="/training/testing/ui-testing/index.html">Automating User
+    Interface Tests</a></dt>
+  <dd>Create tests to verify that the user interface
+    behaves correctly for user interactions within a single app or for
+    interactions across multiple apps.</dd>
+  <dt><a href="/training/testing/integration-testing/index.html">Testing App
+    Compontent Integrations</a></dt>
+  <dd>Verify the behavior of components that
+    users do not directly interact with, such as a service or a content
+    provider.</dd>
+  <dt><a href="/training/testing/performance.html">Testing Display
+    Performance</a></dt>
+  <dd>Write tests that measure your app's UI performance to ensure
+    a consistently smooth user experience.</dd>
+</dl>

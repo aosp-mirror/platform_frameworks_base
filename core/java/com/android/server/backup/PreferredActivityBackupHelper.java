@@ -52,13 +52,14 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
             Slog.d(TAG, "Handling backup of " + key);
         }
         try {
+            // TODO: http://b/22388012
             switch (key) {
                 case KEY_PREFERRED:
-                    return pm.getPreferredActivityBackup(UserHandle.USER_OWNER);
+                    return pm.getPreferredActivityBackup(UserHandle.USER_SYSTEM);
                 case KEY_DEFAULT_APPS:
-                    return pm.getDefaultAppsBackup(UserHandle.USER_OWNER);
+                    return pm.getDefaultAppsBackup(UserHandle.USER_SYSTEM);
                 case KEY_INTENT_VERIFICATION:
-                    return pm.getIntentFilterVerificationBackup(UserHandle.USER_OWNER);
+                    return pm.getIntentFilterVerificationBackup(UserHandle.USER_SYSTEM);
                 default:
                     Slog.w(TAG, "Unexpected backup key " + key);
             }
@@ -75,15 +76,16 @@ public class PreferredActivityBackupHelper extends BlobBackupHelper {
             Slog.d(TAG, "Handling restore of " + key);
         }
         try {
+            // TODO: http://b/22388012
             switch (key) {
                 case KEY_PREFERRED:
-                    pm.restorePreferredActivities(payload, UserHandle.USER_OWNER);
+                    pm.restorePreferredActivities(payload, UserHandle.USER_SYSTEM);
                     break;
                 case KEY_DEFAULT_APPS:
-                    pm.restoreDefaultApps(payload, UserHandle.USER_OWNER);
+                    pm.restoreDefaultApps(payload, UserHandle.USER_SYSTEM);
                     break;
                 case KEY_INTENT_VERIFICATION:
-                    pm.restoreIntentFilterVerification(payload, UserHandle.USER_OWNER);
+                    pm.restoreIntentFilterVerification(payload, UserHandle.USER_SYSTEM);
                     break;
                 default:
                     Slog.w(TAG, "Unexpected restore key " + key);

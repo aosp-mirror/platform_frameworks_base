@@ -18,6 +18,8 @@
 
 #include <stdio.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -33,6 +35,8 @@
 #include "JNIHelp.h"
 
 // ----------------------------------------------------------------------------
+
+#define EGL_PROTECTED_CONTENT_EXT 0x32C0
 
 namespace android {
 
@@ -53,6 +57,21 @@ static fields_t fields;
 static int32_t createProcessUniqueId() {
     static volatile int32_t globalCounter = 0;
     return android_atomic_inc(&globalCounter);
+}
+
+// Check whether the current EGL context is protected.
+static bool isProtectedContext() {
+    EGLDisplay dpy = eglGetCurrentDisplay();
+    EGLContext ctx = eglGetCurrentContext();
+
+    if (dpy == EGL_NO_DISPLAY || ctx == EGL_NO_CONTEXT) {
+        return false;
+    }
+
+    EGLint isProtected = EGL_FALSE;
+    eglQueryContext(dpy, ctx, EGL_PROTECTED_CONTENT_EXT, &isProtected);
+
+    return isProtected;
 }
 
 // ----------------------------------------------------------------------------
@@ -241,17 +260,16 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
     BufferQueue::createBufferQueue(&producer, &consumer);
 
     if (singleBufferMode) {
-        consumer->disableAsyncBuffer();
-        consumer->setDefaultMaxBufferCount(1);
+        consumer->setMaxBufferCount(1);
     }
 
     sp<GLConsumer> surfaceTexture;
     if (isDetached) {
         surfaceTexture = new GLConsumer(consumer, GL_TEXTURE_EXTERNAL_OES,
-                true, true);
+                true, !singleBufferMode);
     } else {
         surfaceTexture = new GLConsumer(consumer, texName,
-                GL_TEXTURE_EXTERNAL_OES, true, true);
+                GL_TEXTURE_EXTERNAL_OES, true, !singleBufferMode);
     }
 
     if (surfaceTexture == 0) {
@@ -263,6 +281,11 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
             (isDetached ? 0 : texName),
             getpid(),
             createProcessUniqueId()));
+
+    // If the current context is protected, inform the producer.
+    if (isProtectedContext()) {
+        consumer->setConsumerUsageBits(GRALLOC_USAGE_PROTECTED);
+    }
 
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);

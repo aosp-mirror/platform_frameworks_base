@@ -111,6 +111,10 @@ public final class AudioDeviceInfo {
      * A device type connected over IP.
      */
     public static final int TYPE_IP               = 20;
+    /**
+     * A type-agnostic device used for communication with external audio systems
+     */
+    public static final int TYPE_BUS              = 21;
 
     private final AudioDevicePort mPort;
 
@@ -221,8 +225,9 @@ public final class AudioDeviceInfo {
      * @return An array of audio encodings (e.g. {@link AudioFormat#ENCODING_PCM_16BIT},
      * {@link AudioFormat#ENCODING_PCM_FLOAT}) supported by the audio device.
      * <code>ENCODING_PCM_FLOAT</code> indicates the device supports more
-     * than 16 bits of integer precision.  Specifying <code>ENCODING_PCM_FLOAT</code>
-     * with {@link AudioTrack} or {@link AudioRecord} can preserve at least 24 bits of
+     * than 16 bits of integer precision.  As there is no AudioFormat constant
+     * specifically defined for 24-bit PCM, the value <code>ENCODING_PCM_FLOAT</code>
+     * indicates that {@link AudioTrack} or {@link AudioRecord} can preserve at least 24 bits of
      * integer precision to that device.
      *
      * @see AudioFormat
@@ -278,6 +283,7 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_FM, TYPE_FM);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_AUX_LINE, TYPE_AUX_LINE);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_IP, TYPE_IP);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BUS, TYPE_BUS);
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, TYPE_BLUETOOTH_SCO);
@@ -295,6 +301,7 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_SPDIF, TYPE_LINE_DIGITAL);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, TYPE_BLUETOOTH_A2DP);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_IP, TYPE_IP);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUS, TYPE_BUS);
 
         // not covered here, legacy
         //AudioSystem.DEVICE_OUT_REMOTE_SUBMIX
@@ -322,6 +329,7 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_TELEPHONY, AudioSystem.DEVICE_OUT_TELEPHONY_TX);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_AUX_LINE, AudioSystem.DEVICE_OUT_AUX_LINE);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_IP, AudioSystem.DEVICE_OUT_IP);
+        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BUS, AudioSystem.DEVICE_OUT_BUS);
     }
 }
 

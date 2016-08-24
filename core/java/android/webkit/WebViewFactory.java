@@ -18,12 +18,14 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -33,6 +35,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.server.LocalServices;
@@ -83,6 +86,8 @@ public final class WebViewFactory {
     public static final int LIBLOAD_SUCCESS = 0;
     public static final int LIBLOAD_WRONG_PACKAGE_NAME = 1;
     public static final int LIBLOAD_ADDRESS_SPACE_NOT_RESERVED = 2;
+
+    // error codes for waiting for WebView preparation
     public static final int LIBLOAD_FAILED_WAITING_FOR_RELRO = 3;
     public static final int LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES = 4;
 
@@ -91,35 +96,36 @@ public final class WebViewFactory {
     public static final int LIBLOAD_FAILED_TO_LOAD_LIBRARY = 6;
     public static final int LIBLOAD_FAILED_JNI_CALL = 7;
 
-    private static class MissingWebViewPackageException extends AndroidRuntimeException {
+    // more error codes for waiting for WebView preparation
+    public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 8;
+
+    // error for namespace lookup
+    public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
+
+    private static String getWebViewPreparationErrorReason(int error) {
+        switch (error) {
+            case LIBLOAD_FAILED_WAITING_FOR_RELRO:
+                return "Time out waiting for Relro files being created";
+            case LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES:
+                return "No WebView installed";
+            case LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN:
+                return "Crashed for unknown reason";
+        }
+        return "Unknown";
+    }
+
+    /**
+     * @hide
+     */
+    public static class MissingWebViewPackageException extends AndroidRuntimeException {
         public MissingWebViewPackageException(String message) { super(message); }
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
 
-    public static String getWebViewPackageName() {
-        return AppGlobals.getInitialApplication().getString(
-                com.android.internal.R.string.config_webViewPackageName);
-    }
-
-    private static PackageInfo fetchPackageInfo() {
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
-        try {
-            return pm.getPackageInfo(getWebViewPackageName(), PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new MissingWebViewPackageException(e);
-        }
-    }
-
-    // throws MissingWebViewPackageException
-    private static ApplicationInfo getWebViewApplicationInfo() {
-        if (sPackageInfo == null) {
-            return fetchPackageInfo().applicationInfo;
-        } else {
-            return sPackageInfo.applicationInfo;
-        }
-    }
-
-    private static String getWebViewLibrary(ApplicationInfo ai) {
+    /**
+     * @hide
+     */
+    public static String getWebViewLibrary(ApplicationInfo ai) {
         if (ai.metaData != null)
             return ai.metaData.getString("com.android.webview.WebViewLibrary");
         return null;
@@ -133,12 +139,41 @@ public final class WebViewFactory {
      * Load the native library for the given package name iff that package
      * name is the same as the one providing the webview.
      */
-    public static int loadWebViewNativeLibraryFromPackage(String packageName) {
-        sPackageInfo = fetchPackageInfo();
-        if (packageName != null && packageName.equals(sPackageInfo.packageName)) {
-            return loadNativeLibrary();
+    public static int loadWebViewNativeLibraryFromPackage(String packageName,
+                                                          ClassLoader clazzLoader) {
+        WebViewProviderResponse response = null;
+        try {
+            response = getUpdateService().waitForAndGetProvider();
+        } catch (RemoteException e) {
+            Log.e(LOGTAG, "error waiting for relro creation", e);
+            return LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN;
         }
-        return LIBLOAD_WRONG_PACKAGE_NAME;
+
+
+        if (response.status != LIBLOAD_SUCCESS
+                && response.status != LIBLOAD_FAILED_WAITING_FOR_RELRO) {
+            return response.status;
+        }
+        if (!response.packageInfo.packageName.equals(packageName)) {
+            return LIBLOAD_WRONG_PACKAGE_NAME;
+        }
+
+        PackageManager packageManager = AppGlobals.getInitialApplication().getPackageManager();
+        PackageInfo packageInfo;
+        try {
+            packageInfo = packageManager.getPackageInfo(packageName,
+                    PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(LOGTAG, "Couldn't find package " + packageName);
+            return LIBLOAD_WRONG_PACKAGE_NAME;
+        }
+        sPackageInfo = packageInfo;
+
+        int loadNativeRet = loadNativeLibrary(clazzLoader);
+        // If we failed waiting for relro we want to return that fact even if we successfully load
+        // the relro file.
+        if (loadNativeRet == LIBLOAD_SUCCESS) return response.status;
+        return loadNativeRet;
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -153,11 +188,11 @@ public final class WebViewFactory {
                         "For security reasons, WebView is not allowed in privileged processes");
             }
 
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
 
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
                 try {
                     sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
@@ -169,28 +204,153 @@ public final class WebViewFactory {
                     throw new AndroidRuntimeException(e);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-                    StrictMode.setThreadPolicy(oldPolicy);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                StrictMode.setThreadPolicy(oldPolicy);
             }
         }
     }
 
-    private static Class<WebViewFactoryProvider> getProviderClass() {
-        try {
-            // First fetch the package info so we can log the webview package version.
-            sPackageInfo = fetchPackageInfo();
-            Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
-                sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
+    /**
+     * Returns true if the signatures match, false otherwise
+     */
+    private static boolean signaturesEquals(Signature[] s1, Signature[] s2) {
+        if (s1 == null) {
+            return s2 == null;
+        }
+        if (s2 == null) return false;
 
-            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
-            loadNativeLibrary();
-            Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+        ArraySet<Signature> set1 = new ArraySet<>();
+        for(Signature signature : s1) {
+            set1.add(signature);
+        }
+        ArraySet<Signature> set2 = new ArraySet<>();
+        for(Signature signature : s2) {
+            set2.add(signature);
+        }
+        return set1.equals(set2);
+    }
+
+    // Throws MissingWebViewPackageException on failure
+    private static void verifyPackageInfo(PackageInfo chosen, PackageInfo toUse) {
+        if (!chosen.packageName.equals(toUse.packageName)) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "packageName mismatch, expected: "
+                    + chosen.packageName + " actual: " + toUse.packageName);
+        }
+        if (chosen.versionCode > toUse.versionCode) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "version code is lower than expected: " + chosen.versionCode
+                    + " actual: " + toUse.versionCode);
+        }
+        if (getWebViewLibrary(toUse.applicationInfo) == null) {
+            throw new MissingWebViewPackageException("Tried to load an invalid WebView provider: "
+                    + toUse.packageName);
+        }
+        if (!signaturesEquals(chosen.signatures, toUse.signatures)) {
+            throw new MissingWebViewPackageException("Failed to verify WebView provider, "
+                    + "signature mismatch");
+        }
+    }
+
+    private static Context getWebViewContextAndSetProvider() {
+        Application initialApplication = AppGlobals.getInitialApplication();
+        try {
+            WebViewProviderResponse response = null;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "WebViewUpdateService.waitForAndGetProvider()");
+            try {
+                response = getUpdateService().waitForAndGetProvider();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+            if (response.status != LIBLOAD_SUCCESS
+                    && response.status != LIBLOAD_FAILED_WAITING_FOR_RELRO) {
+                throw new MissingWebViewPackageException("Failed to load WebView provider: "
+                        + getWebViewPreparationErrorReason(response.status));
+            }
+            // Register to be killed before fetching package info - so that we will be
+            // killed if the package info goes out-of-date.
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "ActivityManager.addPackageDependency()");
+            try {
+                ActivityManagerNative.getDefault().addPackageDependency(
+                        response.packageInfo.packageName);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+            // Fetch package info and verify it against the chosen package
+            PackageInfo newPackageInfo = null;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getPackageInfo()");
+            try {
+                newPackageInfo = initialApplication.getPackageManager().getPackageInfo(
+                    response.packageInfo.packageName,
+                    PackageManager.GET_SHARED_LIBRARY_FILES
+                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                    // Make sure that we fetch the current provider even if its not
+                    // installed for the current user
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    // Fetch signatures for verification
+                    | PackageManager.GET_SIGNATURES
+                    // Get meta-data for meta data flag verification
+                    | PackageManager.GET_META_DATA);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+
+            // Validate the newly fetched package info, throws MissingWebViewPackageException on
+            // failure
+            verifyPackageInfo(response.packageInfo, newPackageInfo);
+
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "initialApplication.createApplicationContext");
+            try {
+                // Construct an app context to load the Java code into the current app.
+                Context webViewContext = initialApplication.createApplicationContext(
+                        newPackageInfo.applicationInfo,
+                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                sPackageInfo = newPackageInfo;
+                return webViewContext;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+        } catch (RemoteException | PackageManager.NameNotFoundException e) {
+            throw new MissingWebViewPackageException("Failed to load WebView provider: " + e);
+        }
+    }
+
+    private static Class<WebViewFactoryProvider> getProviderClass() {
+        Context webViewContext = null;
+        Application initialApplication = AppGlobals.getInitialApplication();
+
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "WebViewFactory.getWebViewContextAndSetProvider()");
+            try {
+                webViewContext = getWebViewContextAndSetProvider();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+            Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
+                    sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
-                return getChromiumProviderClass();
+                initialApplication.getAssets().addAssetPathAsSharedLibrary(
+                        webViewContext.getApplicationInfo().sourceDir);
+                ClassLoader clazzLoader = webViewContext.getClassLoader();
+
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
+                loadNativeLibrary(clazzLoader);
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
+                try {
+                    return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
+                            true, clazzLoader);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                }
             } catch (ClassNotFoundException e) {
                 Log.e(LOGTAG, "error loading provider", e);
                 throw new AndroidRuntimeException(e);
@@ -209,30 +369,6 @@ public final class WebViewFactory {
             }
             Log.e(LOGTAG, "Chromium WebView package does not exist", e);
             throw new AndroidRuntimeException(e);
-        }
-    }
-
-    // throws MissingWebViewPackageException
-    private static Class<WebViewFactoryProvider> getChromiumProviderClass()
-            throws ClassNotFoundException {
-        Application initialApplication = AppGlobals.getInitialApplication();
-        try {
-            // Construct a package context to load the Java code into the current app.
-            Context webViewContext = initialApplication.createPackageContext(
-                    sPackageInfo.packageName,
-                    Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-            initialApplication.getAssets().addAssetPath(
-                    webViewContext.getApplicationInfo().sourceDir);
-            ClassLoader clazzLoader = webViewContext.getClassLoader();
-            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "Class.forName()");
-            try {
-                return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY, true,
-                                                                     clazzLoader);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new MissingWebViewPackageException(e);
         }
     }
 
@@ -262,44 +398,34 @@ public final class WebViewFactory {
         }
     }
 
-    /**
-     * Perform any WebView loading preparations that must happen at boot from the system server,
-     * after the package manager has started or after an update to the webview is installed.
-     * This must be called in the system server.
-     * Currently, this means spawning the child processes which will create the relro files.
-     */
-    public static void prepareWebViewInSystemServer() {
-        String[] nativePaths = null;
-        try {
-            nativePaths = getWebViewNativeLibraryPaths();
-        } catch (Throwable t) {
-            // Log and discard errors at this stage as we must not crash the system server.
-            Log.e(LOGTAG, "error preparing webview native library", t);
-        }
-        prepareWebViewInSystemServer(nativePaths);
-    }
-
-    private static void prepareWebViewInSystemServer(String[] nativeLibraryPaths) {
+    private static int prepareWebViewInSystemServer(String[] nativeLibraryPaths) {
         if (DEBUG) Log.v(LOGTAG, "creating relro files");
+        int numRelros = 0;
 
         // We must always trigger createRelRo regardless of the value of nativeLibraryPaths. Any
         // unexpected values will be handled there to ensure that we trigger notifying any process
-        // waiting on relreo creation.
+        // waiting on relro creation.
         if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
             if (DEBUG) Log.v(LOGTAG, "Create 32 bit relro");
             createRelroFile(false /* is64Bit */, nativeLibraryPaths);
+            numRelros++;
         }
 
         if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
             if (DEBUG) Log.v(LOGTAG, "Create 64 bit relro");
             createRelroFile(true /* is64Bit */, nativeLibraryPaths);
+            numRelros++;
         }
+        return numRelros;
     }
 
-    public static void onWebViewUpdateInstalled() {
+    /**
+     * @hide
+     */
+    public static int onWebViewProviderChanged(PackageInfo packageInfo) {
         String[] nativeLibs = null;
         try {
-            nativeLibs = WebViewFactory.getWebViewNativeLibraryPaths();
+            nativeLibs = WebViewFactory.getWebViewNativeLibraryPaths(packageInfo);
             if (nativeLibs != null) {
                 long newVmSize = 0L;
 
@@ -346,7 +472,7 @@ public final class WebViewFactory {
             // Log and discard errors at this stage as we must not crash the system server.
             Log.e(LOGTAG, "error preparing webview native library", t);
         }
-        prepareWebViewInSystemServer(nativeLibs);
+        return prepareWebViewInSystemServer(nativeLibs);
     }
 
     // throws MissingWebViewPackageException
@@ -370,8 +496,8 @@ public final class WebViewFactory {
     }
 
     // throws MissingWebViewPackageException
-    private static String[] getWebViewNativeLibraryPaths() {
-        ApplicationInfo ai = getWebViewApplicationInfo();
+    private static String[] getWebViewNativeLibraryPaths(PackageInfo packageInfo) {
+        ApplicationInfo ai = packageInfo.applicationInfo;
         final String NATIVE_LIB_FILE_NAME = getWebViewLibrary(ai);
 
         String path32;
@@ -433,7 +559,7 @@ public final class WebViewFactory {
             public void run() {
                 try {
                     Log.e(LOGTAG, "relro file creator for " + abi + " crashed. Proceeding without");
-                    getUpdateService().notifyRelroCreationCompleted(is64Bit, false);
+                    getUpdateService().notifyRelroCreationCompleted();
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "Cannot reach WebViewUpdateService. " + e.getMessage());
                 }
@@ -481,7 +607,7 @@ public final class WebViewFactory {
             } finally {
                 // We must do our best to always notify the update service, even if something fails.
                 try {
-                    getUpdateService().notifyRelroCreationCompleted(is64Bit, result);
+                    getUpdateService().notifyRelroCreationCompleted();
                 } catch (RemoteException e) {
                     Log.e(LOGTAG, "error notifying update service", e);
                 }
@@ -494,44 +620,39 @@ public final class WebViewFactory {
         }
     }
 
-    private static int loadNativeLibrary() {
+    // Assumes that we have waited for relro creation and set sPackageInfo
+    private static int loadNativeLibrary(ClassLoader clazzLoader) {
         if (!sAddressSpaceReserved) {
             Log.e(LOGTAG, "can't load with relro file; address space not reserved");
             return LIBLOAD_ADDRESS_SPACE_NOT_RESERVED;
         }
 
-        try {
-            getUpdateService().waitForRelroCreationCompleted(VMRuntime.getRuntime().is64Bit());
-        } catch (RemoteException e) {
-            Log.e(LOGTAG, "error waiting for relro creation, proceeding without", e);
-            return LIBLOAD_FAILED_WAITING_FOR_RELRO;
+        String[] args = getWebViewNativeLibraryPaths(sPackageInfo);
+        int result = nativeLoadWithRelroFile(args[0] /* path32 */,
+                                             args[1] /* path64 */,
+                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
+                                             CHROMIUM_WEBVIEW_NATIVE_RELRO_64,
+                                             clazzLoader);
+        if (result != LIBLOAD_SUCCESS) {
+            Log.w(LOGTAG, "failed to load with relro file, proceeding without");
+        } else if (DEBUG) {
+            Log.v(LOGTAG, "loaded with relro file");
         }
-
-        try {
-            String[] args = getWebViewNativeLibraryPaths();
-            int result = nativeLoadWithRelroFile(args[0] /* path32 */,
-                                                     args[1] /* path64 */,
-                                                     CHROMIUM_WEBVIEW_NATIVE_RELRO_32,
-                                                     CHROMIUM_WEBVIEW_NATIVE_RELRO_64);
-            if (result != LIBLOAD_SUCCESS) {
-                Log.w(LOGTAG, "failed to load with relro file, proceeding without");
-            } else if (DEBUG) {
-                Log.v(LOGTAG, "loaded with relro file");
-            }
-            return result;
-        } catch (MissingWebViewPackageException e) {
-            Log.e(LOGTAG, "Failed to list WebView package libraries for loadNativeLibrary", e);
-            return LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES;
-        }
+        return result;
     }
 
-    private static IWebViewUpdateService getUpdateService() {
-        return IWebViewUpdateService.Stub.asInterface(ServiceManager.getService("webviewupdate"));
+    private static String WEBVIEW_UPDATE_SERVICE_NAME = "webviewupdate";
+
+    /** @hide */
+    public static IWebViewUpdateService getUpdateService() {
+        return IWebViewUpdateService.Stub.asInterface(
+                ServiceManager.getService(WEBVIEW_UPDATE_SERVICE_NAME));
     }
 
     private static native boolean nativeReserveAddressSpace(long addressSpaceToReserve);
     private static native boolean nativeCreateRelroFile(String lib32, String lib64,
                                                         String relro32, String relro64);
     private static native int nativeLoadWithRelroFile(String lib32, String lib64,
-                                                          String relro32, String relro64);
+                                                      String relro32, String relro64,
+                                                      ClassLoader clazzLoader);
 }

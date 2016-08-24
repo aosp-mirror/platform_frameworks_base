@@ -1,0 +1,221 @@
+page.title=Idioma e localidades
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Neste documento:</h2>
+<ol>
+	  <li><a href="#preN">Desafios ao resolver recursos de idioma</a></li>
+    <li><a href="#postN">Melhorias na estratégia de resolução de recursos</a></li>
+    <li><a href="#design">Projetar seu aplicativo para oferecer suporte a
+ localidades adicionais</a></li>
+
+</ol>
+
+</div>
+</div>
+
+<p>O Android N oferece suporte avançado para usuários multilíngues,
+permitindo que eles selecionem várias localidades nas configurações. O Android N
+fornece esse recurso ao expandir significativamente a quantidade de localidades com suporte
+e mudando a forma como o sistema resolve recursos. O novo método para resolver
+recursos é mais robusto e foi projetado para ser compatível com APKs existentes, mas
+tenha cuidado adicional para identificar comportamentos inesperados. Por exemplo, você
+deve testar para garantir que seu aplicativo assuma o idioma esperado por padrão. Além disso,
+se seu aplicativo oferecer suporte a vários idiomas, você deverá garantir que esse suporte funcione da maneira
+esperada. Por fim, garanta que seu aplicativo possa lidar corretamente
+com idiomas que ele não tenha sido explicitamente projetado para suportar.</p>
+
+<p>Este documento começa explicando a estratégia de resolução de recursos anterior ao 
+Android N. Em seguida, ele descreve a estratégia
+de resolução de recursos aprimorada do Android N. Por fim, ele explica como aproveitar as vantagens
+do maior número de localidades para oferecer suporte a usuários multilíngues.</p>
+
+<h2 id="preN">Desafios ao resolver recursos de idioma</h2>
+
+<p>Antes do Android N, o Android nem sempre conseguia
+ fazer a correspondência correta entre aplicativos e localidades do sistema.</p>
+
+ <p>Considere, por exemplo, que temos a seguinte situação:</p>
+ <ul>
+ <li>o idioma padrão do seu aplicativo é {@code en_US} (inglês - EUA), mas ele também tem
+ strings em espanhol localizadas em arquivos de recursos {@code es_ES}
+.</li>
+ <li> Um dispositivo está definido para {@code es_MX}. </li>
+
+<p>Quando seu código Java usa strings como referência, o sistema carrega
+strings do arquivo de recursos padrão ({@code en_US}), mesmo que o aplicativo tenha recursos em
+espanhol localizados em {@code es_ES}. Isso acontece porque, quando
+ não consegue encontrar uma correspondência exata, o sistema continua procurando recursos após extrair o
+ código do país da localidade. Por fim, se não há correspondência, o sistema volta
+ ao padrão, que é {@code en_US}. </p>
+
+
+<p>O sistema também usaria {@code en_US} como padrão se o usuário escolhesse um idioma
+ não suportado pelo aplicativo, como o francês. Por exemplo:</p>
+
+<p class="table-caption" id="t-resource-res">
+<strong>Tabela 1.</strong> Resolução de recurso sem uma correspondência exata de localidade.
+</p>
+<table>
+<tbody>
+<tr>
+<th>Configurações do usuário</th>
+<th>Recursos do aplicativo</th>
+<th>Resolução do recurso</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+padrão (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+Tentativa de fr_CH =&gt; Falha<br>
+Tentativa de fr =&gt; Falha<br>
+Usar o padrão (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>Neste exemplo, o sistema exibe strings em inglês sem saber
+se o usuário entende inglês. Esse comportamento é bastante comum
+hoje em dia. O Android N deverá reduzir de forma significativa a frequência de
+resultados como esse.</p>
+
+<h2 id="postN">Melhorias na estratégia de resolução de recursos</h2>
+<p>O Android N proporciona uma resolução de recurso mais robusta e
+encontra soluções alternativas melhores. No entanto, para agilizar a resolução e melhorar
+ a capacidade de manutenção, você deve armazenar os recursos no dialeto pai mais comum.
+ Por exemplo, se você estava armazenando recursos em espanhol no diretório {@code es-US}
+ antes, mova-os para o diretório {@code es-419}, que contém o espanhol latino-americano.
+ Da mesma maneira, se você tiver strings de recurso em uma pasta {@code en-GB}, renomeie
+ essa pasta para {@code en-001} (inglês internacional), pois o pai mais comum
+ para strings <code>en-GB</code> é {@code en-001}.
+ O exemplo a seguir explica por que essas práticas melhoram o desempenho e
+a confiabilidade da resolução de recursos.</p>
+
+<h3>Exemplos de resolução de recursos</h3>
+
+<p>Com o Android N, o caso descrito na <strong>Tabela 1</strong> é resolvido
+de forma diferente:</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>Tabela 2.</strong> Uma estratégia de resolução melhorada para quando não há
+uma correspondência exata para a localidade.</p>
+<table>
+<tr>
+<th>Configurações do usuário</th>
+<th>Recursos do aplicativo</th>
+<th>Resolução do recurso</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+padrão (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+Tentativa de fr_CH =&gt; Falha<br>
+Tentativa de fr =&gt; Falha<br>
+Tentativa de filhos de fr =&gt; fr_FR<br>
+Usar fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>Agora o usuário obtém recursos em francês em vez de inglês. Esse exemplo também mostra
+ por que você deve armazenar strings em francês em {@code fr} em vez de em {@code fr_FR}
+ para o Android N. Nesse caso, a ação necessária é fazer a correspondência com o dialeto pai mais próximo,
+ tornando a resolução mais rápida e mais previsível.</p>
+
+<p>Além dessa lógica de resolução melhorada, agora o Android oferece mais
+ idiomas de usuário dentre os quais escolher. Vamos experimentar o exemplo acima novamente com o italiano
+ especificado como um idioma de usuário adicional, mas sem suporte para francês no aplicativo.  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>Tabela 3.</strong> Resolução de recurso quando o aplicativo faz a correspondência apenas da
+segunda configuração de localidade preferencial do usuário.</p>
+<table>
+<tr>
+<th>Configurações do usuário</th>
+<th>Recursos do aplicativo</th>
+<th>Resolução do recurso</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+padrão (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+Tentativa de fr_CH =&gt; Falha<br>
+Tentativa de fr =&gt; Falha<br>
+Tentativa de filhos de fr =&gt; Falha<br>
+Tentativa de it_CH =&gt; Falha<br>
+Tentativa de it =&gt; Falha<br>
+Tentativa de filhos de it =&gt; it_IT<br>
+Usar it_IT
+</td>
+
+</tr>
+
+</table>
+<p>O usuário obtém um idioma que ele compreende, mesmo que o aplicativo não tenha suporte para
+o francês.</p>
+
+
+<h2 id="design">Projetar seu aplicativo para oferecer suporte a localidades adicionais</h2>
+<h3>LocaleList API</h3>
+
+<p>O Android N adiciona uma nova API {@code LocaleList.getDefault()}
+que permite que os aplicativos façam uma consulta direta na lista de idiomas especificados por um usuário. Essa API
+permite que você crie um comportamento mais sofisticado
+ para o aplicativo e uma exibição de conteúdo mais otimizada. Por exemplo, uma pesquisa
+ pode mostrar resultados em vários idiomas com base nas configurações do usuário.  Aplicativos de navegador
+ podem evitar ofertas de tradução de páginas em um idioma que o usuário conhece
+ e os aplicativos de teclado também podem ativar todos os layouts apropriados automaticamente. </p>
+
+<h3>Formatadores</h3>
+
+<p>Até o Android 6.0 (nível da API 23), o Android oferecia suporte para apenas uma ou duas localidades
+ para muitos idiomas comuns
+(en, es, ar, fr, ru). Como só existiam poucas variantes de cada idioma,
+os aplicativos podiam armazenar alguns números e datas como strings no código
+nos arquivos de recurso.  No entanto, com o conjunto mais amplo de localidades suportadas do Android,
+podem existir
+diferenças significativas nos formatos de data, hora, moeda e informações
+similares dentro da mesma localidade. Colocar formatos no código pode produzir uma
+experiência confusa para os usuários.  Portanto, ao desenvolver para o Android N,
+não deixe de usar formatadores em vez de strings no código para números e datas.</p>
+
+<p>Um bom exemplo é o árabe, cujo suporte no Android N foi expandido de
+uma {@code ar_EG} para 27 localidades de árabe. Essas localidades podem compartilhar a maioria dos recursos,
+mas algumas preferem dígitos ASCII, enquanto outras preferem dígitos nativos. Por exemplo,
+quando você quer criar uma frase com uma variável em dígito, como 
+“Choose a 4 digit pin”, use formatadores como mostrado abaixo:</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

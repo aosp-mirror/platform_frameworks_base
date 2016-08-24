@@ -16,10 +16,14 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.app.ResourcesManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.SystemProperties;
@@ -28,6 +32,8 @@ import android.util.SparseArray;
 import android.view.DisplayListCanvas;
 import android.view.View;
 import android.view.ViewRootImpl;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * Delegate used by the WebView provider implementation to access
@@ -72,9 +78,7 @@ public final class WebViewDelegate {
      * and false otherwise.
      */
     public boolean canInvokeDrawGlFunctor(View containerView) {
-        ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
-         // viewRootImpl can be null during teardown when window is leaked.
-        return viewRootImpl != null;
+        return true;
     }
 
     /**
@@ -86,8 +90,7 @@ public final class WebViewDelegate {
      */
     public void invokeDrawGlFunctor(View containerView, long nativeDrawGLFunctor,
             boolean waitForCompletion) {
-        ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
-        viewRootImpl.invokeFunctor(nativeDrawGLFunctor, waitForCompletion);
+        ViewRootImpl.invokeFunctor(nativeDrawGLFunctor, waitForCompletion);
     }
 
     /**
@@ -106,7 +109,29 @@ public final class WebViewDelegate {
             throw new IllegalArgumentException(canvas.getClass().getName()
                     + " is not a DisplayList canvas");
         }
-        ((DisplayListCanvas) canvas).callDrawGLFunction2(nativeDrawGLFunctor);
+        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, null);
+    }
+
+    /**
+     * Calls the function specified with the nativeDrawGLFunctor functor pointer. This
+     * functionality is used by the WebView for calling into their renderer from the
+     * framework display lists.
+     *
+     * @param canvas a hardware accelerated canvas (see {@link Canvas#isHardwareAccelerated()})
+     * @param nativeDrawGLFunctor the pointer to the native functor that implements
+     *        system/core/include/utils/Functor.h
+     * @param releasedRunnable Called when this nativeDrawGLFunctor is no longer referenced by this
+     *        canvas, so is safe to be destroyed.
+     * @throws IllegalArgumentException if the canvas is not hardware accelerated
+     */
+    public void callDrawGlFunction(@NonNull Canvas canvas, long nativeDrawGLFunctor,
+            @Nullable Runnable releasedRunnable) {
+        if (!(canvas instanceof DisplayListCanvas)) {
+            // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
+            throw new IllegalArgumentException(canvas.getClass().getName()
+                    + " is not a DisplayList canvas");
+        }
+        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, releasedRunnable);
     }
 
     /**
@@ -156,7 +181,29 @@ public final class WebViewDelegate {
      * Adds the WebView asset path to {@link android.content.res.AssetManager}.
      */
     public void addWebViewAssetPath(Context context) {
-        context.getAssets().addAssetPath(
-                WebViewFactory.getLoadedPackageInfo().applicationInfo.sourceDir);
+        final String newAssetPath = WebViewFactory.getLoadedPackageInfo().applicationInfo.sourceDir;
+
+        final ApplicationInfo appInfo = context.getApplicationInfo();
+        final String[] libs = appInfo.sharedLibraryFiles;
+        if (!ArrayUtils.contains(libs, newAssetPath)) {
+            // Build the new library asset path list.
+            final int newLibAssetsCount = 1 + (libs != null ? libs.length : 0);
+            final String[] newLibAssets = new String[newLibAssetsCount];
+            if (libs != null) {
+                System.arraycopy(libs, 0, newLibAssets, 0, libs.length);
+            }
+            newLibAssets[newLibAssetsCount - 1] = newAssetPath;
+
+            // Update the ApplicationInfo object with the new list.
+            // We know this will persist and future Resources created via ResourcesManager
+            // will include the shared library because this ApplicationInfo comes from the
+            // underlying LoadedApk in ContextImpl, which does not change during the life of the
+            // application.
+            appInfo.sharedLibraryFiles = newLibAssets;
+
+            // Update existing Resources with the WebView library.
+            ResourcesManager.getInstance().appendLibAssetForMainAssetPath(
+                    appInfo.getBaseResourcePath(), newAssetPath);
+        }
     }
 }

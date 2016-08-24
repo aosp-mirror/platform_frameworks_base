@@ -18,17 +18,21 @@ package android.media;
 
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Size;
 import android.view.Surface;
+
+import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * <p>
@@ -83,8 +87,10 @@ public class ImageWriter implements AutoCloseable {
     private int mWriterFormat;
 
     private final int mMaxImages;
-    // Keep track of the currently dequeued Image.
-    private List<Image> mDequeuedImages = new ArrayList<Image>();
+    // Keep track of the currently dequeued Image. This need to be thread safe as the images
+    // could be closed by different threads (e.g., application thread and GC thread).
+    private List<Image> mDequeuedImages = new CopyOnWriteArrayList<Image>();
+    private int mEstimatedNativeAllocBytes;
 
     /**
      * <p>
@@ -128,6 +134,19 @@ public class ImageWriter implements AutoCloseable {
         // Note that the underlying BufferQueue is working in synchronous mode
         // to avoid dropping any buffers.
         mNativeContext = nativeInit(new WeakReference<ImageWriter>(this), surface, maxImages);
+
+        // Estimate the native buffer allocation size and register it so it gets accounted for
+        // during GC. Note that this doesn't include the buffers required by the buffer queue
+        // itself and the buffers requested by the producer.
+        // Only include memory for 1 buffer, since actually accounting for the memory used is
+        // complex, and 1 buffer is enough for the VM to treat the ImageWriter as being of some
+        // size.
+        Size surfSize = SurfaceUtils.getSurfaceSize(surface);
+        int format = SurfaceUtils.getSurfaceFormat(surface);
+        mEstimatedNativeAllocBytes =
+                ImageUtils.getEstimatedNativeAllocBytes(surfSize.getWidth(),surfSize.getHeight(),
+                        format, /*buffer count*/ 1);
+        VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
     /**
@@ -432,6 +451,11 @@ public class ImageWriter implements AutoCloseable {
         mDequeuedImages.clear();
         nativeClose(mNativeContext);
         mNativeContext = 0;
+
+        if (mEstimatedNativeAllocBytes > 0) {
+            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+            mEstimatedNativeAllocBytes = 0;
+        }
     }
 
     @Override
@@ -569,9 +593,8 @@ public class ImageWriter implements AutoCloseable {
         }
 
         WriterSurfaceImage wi = (WriterSurfaceImage) image;
-
         if (!wi.mIsImageValid) {
-            throw new IllegalStateException("Image is invalid");
+            return;
         }
 
         /**
@@ -728,8 +751,8 @@ public class ImageWriter implements AutoCloseable {
             final private int mPixelStride;
             final private int mRowStride;
 
-            // SurfacePlane instance is created by native code when a new
-            // SurfaceImage is created
+            // SurfacePlane instance is created by native code when SurfaceImage#getPlanes() is
+            // called
             private SurfacePlane(int rowStride, int pixelStride, ByteBuffer buffer) {
                 mRowStride = rowStride;
                 mPixelStride = pixelStride;
@@ -775,7 +798,7 @@ public class ImageWriter implements AutoCloseable {
 
         }
 
-        // this will create the SurfacePlane object and fill the information
+        // Create the SurfacePlane object and fill the information
         private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt);
 
         private synchronized native int nativeGetWidth();

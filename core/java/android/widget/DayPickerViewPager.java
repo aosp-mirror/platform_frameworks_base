@@ -16,12 +16,18 @@
 
 package android.widget;
 
-import com.android.internal.widget.ViewPager;
-
+import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+
+import com.android.internal.util.Predicate;
+import com.android.internal.widget.PagerAdapter;
+import com.android.internal.widget.ViewPager;
 
 import java.util.ArrayList;
 
@@ -134,4 +140,37 @@ class DayPickerViewPager extends ViewPager {
 
         mMatchParentChildren.clear();
     }
+
+    @Override
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
+        if (predicate.apply(this)) {
+            return this;
+        }
+
+        // Always try the selected view first.
+        final DayPickerPagerAdapter adapter = (DayPickerPagerAdapter) getAdapter();
+        final SimpleMonthView current = adapter.getView(getCurrent());
+        if (current != childToSkip && current != null) {
+            final View v = current.findViewByPredicate(predicate);
+            if (v != null) {
+                return v;
+            }
+        }
+
+        final int len = getChildCount();
+        for (int i = 0; i < len; i++) {
+            final View child = getChildAt(i);
+
+            if (child != childToSkip && child != current) {
+                final View v = child.findViewByPredicate(predicate);
+
+                if (v != null) {
+                    return v;
+                }
+            }
+        }
+
+        return null;
+    }
+
 }

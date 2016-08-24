@@ -27,7 +27,7 @@
         <path
             android:name="progressBar"
             android:fillColor="#00000000"
-            android:pathData="M0, 0 m 0, -19 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
+            android:pathData="M0, 0 m 0, -18 a 18,18 0 1,1 0,36 a 18,18 0 1,1 0,-36"
             android:strokeColor="@color/white"
             android:strokeLineCap="square"
             android:strokeLineJoin="miter"

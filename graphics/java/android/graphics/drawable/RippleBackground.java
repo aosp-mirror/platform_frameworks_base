@@ -33,6 +33,7 @@ import android.view.animation.LinearInterpolator;
  * Draws a ripple background.
  */
 class RippleBackground extends RippleComponent {
+
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
     private static final int OPACITY_ENTER_DURATION = 600;
@@ -48,8 +49,14 @@ class RippleBackground extends RippleComponent {
     // Software rendering properties.
     private float mOpacity = 0;
 
-    public RippleBackground(RippleDrawable owner, Rect bounds, boolean forceSoftware) {
+    /** Whether this ripple is bounded. */
+    private boolean mIsBounded;
+
+    public RippleBackground(RippleDrawable owner, Rect bounds, boolean isBounded,
+            boolean forceSoftware) {
         super(owner, bounds, forceSoftware);
+
+        mIsBounded = isBounded;
     }
 
     public boolean isVisible() {
@@ -105,7 +112,8 @@ class RippleBackground extends RippleComponent {
         final AnimatorSet.Builder builder = set.play(exit);
 
         // Linear "fast" enter based on current opacity.
-        final int fastEnterDuration = (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST);
+        final int fastEnterDuration = mIsBounded ?
+                (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST) : 0;
         if (fastEnterDuration > 0) {
             final ObjectAnimator enter = ObjectAnimator.ofFloat(this, RippleBackground.OPACITY, 1);
             enter.setInterpolator(LINEAR_INTERPOLATOR);
@@ -131,8 +139,21 @@ class RippleBackground extends RippleComponent {
         mPropX = CanvasProperty.createFloat(0);
         mPropY = CanvasProperty.createFloat(0);
 
+        final int fastEnterDuration = mIsBounded ?
+                (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST) : 0;
+
+        // Linear exit after enter is completed.
+        final RenderNodeAnimator exit = new RenderNodeAnimator(
+                mPropPaint, RenderNodeAnimator.PAINT_ALPHA, 0);
+        exit.setInterpolator(LINEAR_INTERPOLATOR);
+        exit.setDuration(OPACITY_EXIT_DURATION);
+        if (fastEnterDuration > 0) {
+            exit.setStartDelay(fastEnterDuration);
+            exit.setStartValue(targetAlpha);
+        }
+        set.add(exit);
+
         // Linear "fast" enter based on current opacity.
-        final int fastEnterDuration = (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST);
         if (fastEnterDuration > 0) {
             final RenderNodeAnimator enter = new RenderNodeAnimator(
                     mPropPaint, RenderNodeAnimator.PAINT_ALPHA, targetAlpha);
@@ -140,14 +161,6 @@ class RippleBackground extends RippleComponent {
             enter.setDuration(fastEnterDuration);
             set.add(enter);
         }
-
-        // Linear exit after enter is completed.
-        final RenderNodeAnimator exit = new RenderNodeAnimator(
-                mPropPaint, RenderNodeAnimator.PAINT_ALPHA, 0);
-        exit.setInterpolator(LINEAR_INTERPOLATOR);
-        exit.setDuration(OPACITY_EXIT_DURATION);
-        exit.setStartDelay(fastEnterDuration);
-        set.add(exit);
 
         return set;
     }

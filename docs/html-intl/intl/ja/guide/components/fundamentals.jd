@@ -1,0 +1,480 @@
+page.title=アプリケーションの基礎
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本書の内容</h2>
+<ol>
+<li><a href="#Components">アプリのコンポーネント</a>
+  <ol>
+    <li><a href="#ActivatingComponents">コンポーネントをアクティベートする</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">マニフェスト ファイル</a>
+  <ol>
+    <li><a href="#DeclaringComponents">コンポーネントを宣言する</a></li>
+    <li><a href="#DeclaringRequirements">アプリの要件を宣言する</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">アプリのリソース</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android アプリは Java プログラミング言語で記述されています。APKAndroid SDK ツールがコードを&mdash;データとリソース ファイルと共に、
+&mdash;APK  <i>（Android パッケージ）にコンパイルします。</i>これは、
+{@code .apk} という接尾語の付いたアーカイブ ファイルです。1 つの APK ファイルにはAndroid アプリのすべてのコンテンツが含まれており、Android 端末はアプリをインストールする際にこのファイルを使用します。
+</p>
+
+<p>端末にインストールすると、各 Android アプリはそれぞれのセキュリティ サンドボックス内で動作します。 </p>
+
+<ul>
+ <li>Android オペレーティング システムはマルチユーザーの Linux システムであり、各アプリが異なるユーザーになります。
+</li>
+
+<li>デフォルトで、システムは各アプリに一意の Linux ユーザー ID を割り当てます（ID はシステムのみが使用し、アプリは ID を関知しません）。
+アプリが割り当てられたユーザー ID のみがアプリ内のすべてのファイルにアクセスできるよう、システムがパーミッションを設定します。
+ </li>
+
+<li>各プロセスにはそれぞれ独自の仮想マシン（VM）があるため、アプリのコードは他のアプリとは分離して実行します。
+</li>
+
+<li>デフォルトで、すべてのアプリは独自の Linux プロセス上で実行します。Android はアプリのコンポーネントのいずれかを実行する必要があるときにプロセスを開始し、それが必要なくなったときや、システムが他のアプリ用にメモリを回復させる必要があるときにプロセスをシャットダウンします。
+
+</li>
+</ul>
+
+<p>このようにして、Android システムは<em>最小権限の原則</em>を実装しています。つまり、デフォルトでは各アプリにはコンポーネントの動作に必要な分だけのアクセス権が与えられます。
+
+これにより、パーミッションの与えられていないシステムの一部にアプリはアクセスできないという非常に安全性の高い環境が作り出されます。
+</p>
+
+<p>ただし、アプリが他のアプリとデータを共有したり、システムのサービスにアクセスしたりする方法もあります。
+</p>
+
+<ul>
+  <li>2 つのアプリで同一の Linux ユーザー ID を共有して、お互いのファイルにアクセスできるようにすることも可能です。
+システム リソースを節約するため、同じユーザー ID を持つアプリを同じ Linux プロセス上で実行し、同じ VM を共有するよう設定することもできます（アプリを同じ証明書で署名する必要があります）。
+
+</li>
+  <li>アプリから、ユーザーの連絡先、SMS メッセージ、マウント可能なストレージ（SD カード）、カメラ、Bluetooth といった端末データにアクセスするためのパーミッションを要求できます。
+アプリのすべてのパーミッションは、インストール時にユーザーから付与される必要があります。
+</li>
+</ul>
+
+<p>以上が、システム内の Android アプリの基本的な仕組みです。続いて、このドキュメントでは次の内容について説明します。
+</p>
+<ul>
+  <li>アプリを定義するコア フレームワーク コンポーネント。</li>
+  <li>コンポーネントを宣言し、アプリの端末機能に必要なマニフェスト ファイル。
+</li>
+  <li>アプリでさまざまな端末構成の動作を最適化できるようにする、アプリコードから分離されたリソース。
+</li>
+</ul>
+
+
+
+<h2 id="Components">アプリのコンポーネント</h2>
+
+<p>アプリのコンポーネントは、Android アプリに不可欠な構成要素です。各コンポーネントは、システムがアプリにアクセスするためのさまざまなエントリ ポイントになります。すべてのコンポーネントがユーザーの実際のエントリ ポイントになるわけではなく、中にはお互いに依存関係にあるものもありますが、それぞれが独自のエンティティとして存在し、特定の役割を担っています。各コンポーネントはアプリの全体的な動作を定義する固有の構成要素となっています。
+
+
+&mdash;
+</p>
+
+<p>アプリのコンポーネントには、4 つのタイプがあります。それぞれのタイプは、まったく異なる目的を果たし、コンポーネントの作成や破棄方法を定義するライフサイクルもそれぞれ異なります。
+</p>
+
+<p>アプリのコンポーネントのタイプは次の 4 つです。</p>
+
+<dl>
+
+<dt><b>アクティビティ</b></dt>
+
+<dd>アクティビティ <i>は</i> 1 つのユーザー インターフェースで 1 つの画面を表すものです。たとえば、メール アプリには新着メールの一覧を表示する 1 つのアクティビティと、メールを作成するアクティビティ、メールを閲覧するアクティビティがそれぞれ別にあります。
+
+メールアプリでは、複数のアクティビティが一体となって結合したユーザー操作を実現しますが、それぞれは他のものから独立しています。
+
+それにより、別のアプリで複数のアクティビティの中から、1 つのアクティビティを開始できるようになります（メールアプリが許可している場合）。
+たとえば、カメラアプリでは写真を他のユーザーと共有するために、メール アプリの新規メールを作成するアクティビティを開始できます。
+
+
+<p>アクティビティは {@link android.app.Activity} のサブクラスとして実装されます。詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/components/activities.html">Activities</a>」をご覧ください。
+
+</p>
+</dd>
+
+
+<dt><b>サービス</b></dt>
+
+<dd>サービス <i>は、</i> 長期間の操作やリモート プロセスを処理するためにバックグラウンドで実行するコンポーネントです。
+サービスは、ユーザー インターフェースを提供しません。
+たとえば、サービスはユーザーが別のアプリを使用している間にバックグラウンドで音楽を再生したり、ユーザーが別のアクティビティを操作している間にそれを妨げることなくネットワークからデータを取得したりします。
+
+アクティビティなどの別のコンポーネントは、サービスを開始して実行したり、それをバインドしたりして操作することもできます。
+
+
+<p>サービスは {@link android.app.Service} のサブクラスとして実装されます。詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/components/services.html">サービス</a>」をご覧ください。
+
+</p>
+</dd>
+
+
+<dt><b>コンテンツ プロバイダ</b></dt>
+
+<dd>コンテンツ プロバイダ <i>は</i> 共有されているアプリデータを管理します。データは、ファイル システム、SQLite データベース、ウェブ、アプリがアクセスできる、あらゆる永続性のストレージに保存できます。
+
+コンテンツ プロバイダを介して、他のアプリがデータをクエリしたり、修正したりすることもできます（コンテンツ プロバイダが許可している場合）。
+たとえば、Android システムではユーザーの連絡先情報を管理するコンテンツ プロバイダを提供しています。
+このように、適切なパーミッションさえあれば、アプリからコンテンツ プロバイダの一部（{@link
+android.provider.ContactsContract.Data}など）に問い合わせて、特定の人物に関する情報を読み取ったり書き込んだりできます。
+
+
+<p>コンテンツ プロバイダは、アプリで非公開扱いの共有されていないデータを閲覧したり書き込んだりする場合にも役立ちます。
+たとえば、<a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> のサンプル アプリでは、コンテンツ プロバイダを使用してメモを保存します。
+</p>
+
+<p>コンテンツ プロバイダは {@link android.content.ContentProvider} のサブクラスとして実装され、他のアプリがトランザクションを実行できるようにする API の標準セットを実装する必要があります。
+
+詳細については、デベロッパー ガイドの「<a href="{@docRoot}guide/topics/providers/content-providers.html">Contetns Providers</a>」をご覧ください。
+</p>
+</dd>
+
+
+<dt><b>ブロードキャスト レシーバー</b></dt>
+
+<dd>ブロードキャスト レシーバー <i>は</i> システム全体のブロードキャスト アナウンスに応答するコンポーネントです。
+たとえば、画面がオフになった、バッテリ残量が低い、写真が撮影されたなど、システムに起因するブロードキャストはたくさんあります。アプリでもブロードキャストを開始でき、たとえば他のアプリに、一部のデータが端末にダウンロードされ、利用可能になったことを伝えることもできます。&mdash;
+
+&mdash;
+ブロードキャスト レシーバーがユーザー インターフェースを表示することはありませんが、<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">ステータスバー通知を作成</a>して、ブロードキャスト イベントの発生時にユーザーに警告できます。
+
+一般的には、ブロードキャスト レシーバーは他のコンポーネントへの単なる「入り口」であり、最小限の操作を行うことが前提となっています。
+たとえば、イベントに基づいた何らかの作業を実行するサービスを開始する場合などに適しています。
+
+
+<p>ブロードキャスト レシーバーは、{@link android.content.BroadcastReceiver} のサブクラスとして実装され、各ブロードキャストは {@link android.content.Intent} オブジェクトとして配信されます。
+詳細については、{@link android.content.BroadcastReceiver} クラスをご覧ください。
+</p>
+</dd>
+
+</dl>
+
+
+
+<p>Android ならではのシステムデザインによって、どのアプリケーションからでも別のアプリケーションを開始できます。
+たとえば、ユーザーが端末のカメラで写真を撮影できるようにする場合、既にその機能を備えた別のアプリがあることを想定して、写真を撮影するアクティビティを自身で開発する代わりに、アプリがそれを使用できます。
+
+カメラアプリを組み込んだり、コードにリンクしたりする必要もなく、単純に写真を撮影するカメラアプリのアクティビティを開始するだけです。
+
+
+完了後、写真はアプリに戻り、それを使用することもできます。ユーザー側には、カメラがアプリの一部であるかのように見えます。
+</p>
+
+<p>システムがコンポーネントを開始すると、そのアプリのプロセスを開始し（まだ実行していない場合）、コンポーネントが必要とするクラスをインスタンス化します。
+たとえば、アプリで写真を撮影するカメラアプリのアクティビティを開始すると、そのアクティビティはアプリのプロセスではなく、カメラアプリのプロセスで実行します。そのため、他のシステムのアプリとは異なり、Android アプリのエントリ ポイントは 1 つではありません（たとえば、{@code main()} 関数はありません）。
+
+
+
+</p>
+
+<p>システムは、他のアプリへのアクセスを制限するファイル許可を使用して各アプリを別々のプロセスで実行するため、アプリから直接他のアプリのコンポーネントはアクティベートできませんが、Android システムはそれが可能です。
+
+そのため、他のアプリのコンポーネントをアクティベートするには、特定のコンポーネントを開始する<em>インテント</em>を指定するメッセージをシステムに配信する必要があります。
+
+その後、システムが代わりにコンポーネントをアクティベートします。</p>
+
+
+<h3 id="ActivatingComponents">コンポーネントをアクティベートする</h3>
+
+<p>4 つのコンポーネント タイプのなかで、アクティビティ、サービス、ブロードキャスト レシーバーの 3 つは、<em>インテント</em>と呼ばれる非同期メッセージによってアクティベートされます。コンポーネントがアプリに属していても他のものに属していても、インテントにより実行時に個別のコンポーネントがお互いに結び付けられます（他のコンポーネントからのアクションを要求するメッセンジャーのようなものです）。&mdash;&mdash;
+
+
+
+</p>
+
+<p>インテントは {@link android.content.Intent} オブジェクトを使用して作成されます。このオブジェクトは特定のコンポーネントや特定の<em>タイプ</em>のコンポーネントをアクティベートするようにメッセージを定義します。インテントはそれぞれ明示的、暗黙的のいずれかになります。&mdash;
+
+</p>
+
+<p>アクティビティとサービスでは、インテントが実行するアクション（「閲覧」したり「送信」したりする）を定義し、操作に使うデータ（特に、開始されるコンポーネントが知っておく必要があるデータ）の URI を指定することもできます。
+
+たとえば、インテントはアクティビティに画像を表示したり、ウェブページを開いたりするアクティビティに対して要求を伝達します。
+場合によっては、結果を受け取るアクティビティを開始でき、この場合にアクティビティが返す結果も {@link android.content.Intent} になります（たとえば、ユーザーが個人の連絡先を取り出し、それを返してくれるインテントを発行できます。返されたインテントには選択された連絡先を指す URI が含まれています）。
+&mdash;
+
+
+</p>
+
+<p>ブロードキャスト レシーバーの場合、インテントは単純にブロードキャストするアナウンスを定義します（たとえば、端末のバッテリ残量が少ないことを示すブロードキャストには、「バッテリが少ない」ことを示す既知のアクション文字列が含まれます）。
+
+</p>
+
+<p>他のコンポーネント タイプであるコンテンツ プロバイダは、インテントではアクティベートされず、{@link android.content.ContentResolver} からの要求の対象となったときにアクティベートされます。
+コンテンツリゾルバが、コンテンツプロバイダを使ってすべてのトランザクションを直接処理することで、プロバイダを使ってトランザクションを実行しているコンポーネントは処理する必要がなくなり、代わりに {@link
+android.content.ContentResolver} オブジェクトのメソッドを呼び出します。
+
+これによりコンテンツ プロバイダと情報を要求しているコンポーネントとの間に（セキュリティ目的で）抽象的な層ができます。
+</p>
+
+<p>各コンポーネント タイプのアクティベート用に、個別のメソッドが用意されています。</p>
+<ul>
+  <li>アクティビティを開始する（または新しい作業を与える）場合は、{@link android.content.Intent} を {@link android.content.Context#startActivity
+startActivity()} や {@link android.app.Activity#startActivityForResult startActivityForResult()} （アクティビティに結果を求める場合）に渡します。
+
+</li>
+  <li>サービスを開始する（または継続中のサービスに新しい指示を与える）には、{@link android.content.Intent} を {@link android.content.Context#startService
+startService()} に渡します。
+または、{@link android.content.Intent} を {@link android.content.Context#bindService bindService()} に渡してサービスにバインドできます。
+</li>
+  <li>ブロードキャストを開始するには、{@link android.content.Intent} を {@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}、{@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}、{@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()} などのメソッドに渡します。
+</li>
+  <li>コンテンツ プロバイダへのクエリを実行するには、{@link android.content.ContentResolver} の {@link
+android.content.ContentProvider#query query()} を呼び出します。</li>
+</ul>
+
+<p>インテントの使用に関する詳細については、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」のドキュメントをご覧ください。
+特定のコンポーネントのアクティベートの詳細については、
+<a href="{@docRoot}guide/components/activities.html">アクティビティ</a>、<a href="{@docRoot}guide/components/services.html">サービス</a>、{@link
+android.content.BroadcastReceiver}、<a href="{@docRoot}guide/topics/providers/content-providers.html">コンテンツ プロバイダ</a> のドキュメントでも説明しています。</p>
+
+
+<h2 id="Manifest">マニフェスト ファイル</h2>
+
+<p>Android システムがコンポーネントを開始する前に、システムはアプリの {@code AndroidManifest.xml} ファイル（「マニフェスト」ファイル）を読み取って、コンポーネントの存在を認識する必要があります。
+
+アプリはこのファイルですべてのコンポーネントを宣言し、このファイルはアプリ プロジェクトのディレクトリのルートに置く必要があります。
+</p>
+
+<p>マニフェストはアプリのコンポーネントを宣言する他にも、次のようにさまざまな役割があります。
+</p>
+<ul>
+  <li>インターネット アクセスや、ユーザーの連絡先への読み取りアクセスなど、アプリに必要なユーザー パーミッションを識別する。
+</li>
+  <li>アプリが使用する API に基づいた、アプリが必要とする最小 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API レベル</a>を宣言する。
+</li>
+  <li>カメラ、Bluetooth サービス、マルチタッチ スクリーンなど、アプリで使用されるか必要とされるハードウェア機能やソフトウェア機能を宣言する。
+</li>
+  <li><a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google マップ ライブラリ</a>など、アプリにリンクする必要のある API ライブラリ（Android フレームワーク API は除く）。
+
+</li>
+  <li>その他の役割</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">コンポーネントを宣言する</h3>
+
+<p>マニフェストの主なタスクは、システムにアプリ コンポーネントに関する情報を与えることです。たとえば、マニフェスト ファイルではアクティビティを次のように宣言できます。
+ </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p><code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> 要素では、{@code android:icon} 属性でアプリを特定するアイコンのリソースを指します。
+
+</p>
+
+<p><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 要素では、{@code android:name} 属性で{@link
+android.app.Activity} サブクラスの完全修飾k裏スパイウェア名を指定し、{@code android:label} 属性でアクティビティのユーザーに表示するラベルとして使用する文字列を指定しています。
+
+</p>
+
+<p>すべてのアプリ コンポーネントは、次の方法で宣言する必要があります。</p>
+<ul>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> アクティビティ用の要素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> サービス用の要素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> ブロードキャスト レシーバー用の要素
+</li>
+  <li><code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> コンテンツ プロバイダ用の要素
+</li>
+</ul>
+
+<p>ソースに含まれていながら、マニフェスト ファイルでは定義されていないアクティビティ、サービス、コンテンツ プロバイダはシステムには見えないため、実行されることはありません。
+ただし、ブロードキャスト レシーバーはマニフェストで宣言するか、コードで動的に作成（{@link android.content.BroadcastReceiver} オブジェクトとして）して {@link android.content.Context#registerReceiver registerReceiver()} を呼び出すことでシステムに登録できます。
+
+
+
+</p>
+
+<p>アプリのマニフェスト ファイルの構築方法の詳細については、「<a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml File</a>」のドキュメントをご覧ください。
+ </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">コンポーネントの機能を宣言する</h3>
+
+<p><a href="#ActivatingComponents">コンポーネントをアクティベートする</a>で説明したように、{@link android.content.Intent} を使用してアクティビティ、サービス、ブロードキャスト レシーバーを開始できます。
+開始するには、インテントでターゲットのコンポーネントの名前を（コンポーネントのクラス名を使って）明示的に指定する必要があります。
+ただし、インテントの本来の能力は、<em>暗黙的インテント</em>の概念にあります。
+暗黙的インテントは、単に実行するアクションのタイプを記述し（どのデータ上でアクションを実行するかも任意で記述できます）、それによりシステムがそのアクションを実行できる端末上のコンポーネントを見つけて開始できます。
+
+
+インテントで記述されたアクションを実行できるコンポーネントが複数ある場合は、使用するコンポーネントを 1 つ選択できます。
+</p>
+
+<p>システムは、端末の他のアプリのマニフェスト ファイルに提供されたインテント フィルタが受け取った
+ <i>インテントを比較して、</i> インテントに応答できるコンポーネントを識別します。
+</p>
+
+<p>アプリのマニフェストでアクティビティを宣言するとき、任意でアクティビティの機能を宣言するインテント フィルタを含めて、他のアプリからのインテントに応答できるようにできます。
+
+<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> 要素を、コンポーネントを宣言している要素の子として追加することで、コンポーネントのインテント フィルタを宣言できます。
+</p>
+
+<p>たとえば、新規メールを作成するアクティビティを持つメールアプリをビルドした場合、次のように「送信」インテント（新規メールを送信するための）に応答するインテント フィルタを宣言できます。
+</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>次に、別のアプリが {@link
+android.content.Intent#ACTION_SEND} アクションを持つインテントを作成し、{@link android.app.Activity#startActivity
+startActivity()} に渡す場合、ユーザーがメールを下書きして送信できるよう、システムがアクティビティを開始する場合があります。
+</p>
+
+<p>インテント フィルタの作成の詳細については、「<a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>」のドキュメントをご覧ください。
+</p>
+
+
+
+<h3 id="DeclaringRequirements">アプリの要件を宣言する</h3>
+
+<p>Android が搭載された端末は数多くありますが、すべての端末が同じ機能や性能を備えているわけではありません。
+アプリに必要な機能を搭載していない端末にアプリをインストールしてしまわないよう、アプリがサポートする端末のタイプについてプロファイルで明確に定義し、マニフェスト ファイルで端末の要件やソフトウェア要件を宣言しておくことが重要です。
+
+
+これらの宣言のほとんどはただの情報で、システムがそれを読み取ることはありませんが、Google Play などの外部サービスはそれを読み取って、ユーザーが端末からアプリを検索したときにフィルタを提供します。
+
+</p>
+
+<p>たとえば、アプリでカメラを使用する必要があり、Android 2.1 で採用された API（<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API レベル</a> 7）を使用する場合、次のようにマニフェスト ファイルでそれを要件として宣言する必要があります。
+</p> 
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>カメラの<em>ない</em>端末で、Android バージョンが 2.1 <em>以下</em>の場合は、Google Play からアプリをインストールできません。
+</p>
+
+<p>ただし、アプリでカメラを使用するが、それが<em>必須</em>ではないということを宣言することもできます。
+この場合、アプリで <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a> 属性を {@code "false"} に設定し、端末にカメラがあるかどうかを実行時に確認して、必要に応じてすべてのカメラ機能を無効にする必要があります。
+
+</p>
+
+<p>異なる端末でのアプリの互換性を管理する方法については、「<a href="{@docRoot}guide/practices/compatibility.html">Device Compatibility</a>」をご覧ください。
+
+</p>
+
+
+
+<h2 id="Resources">アプリのリソース</h2>
+
+<p>Android アプリは、コードだけで構成されているわけではありません。ソース コードから分離された画像、オーディオ ファイル、その他アプリの外観に関連するあらゆるリソースが必要です。たとえば、アクティビティのアニメーション、メニュー、スタイル、色、レイアウトなどを XML ファイルで定義する必要があります。&mdash;
+
+
+アプリのリソースを使用すると、コードを修正することなく別のリソースセットを提供することで、アプリのあらゆる特性を簡単にアップデートできるようになります。これにより、さまざまな端末の設定用（別の言語や画面サイズなど）にアプリを最適化できます。
+&mdash;
+&mdash;
+</p>
+
+<p>Android プロジェクトに含めるすべてのリソースに対し、SDK ビルド ツールが一意の整数 ID を定義し、アプリコードや XML で定義された他のリソースからリソースにそれを使って参照できます。
+
+たとえば、アプリに {@code
+logo.png} という名前の画像ファイルがある場合（{@code res/drawable/} ディレクトリ内に保存）、SDK ツールが {@code R.drawable.logo} という名前のリソース ID を生成し、これを使って画像を参照してユーザー インターフェースに挿入できます。
+
+</p>
+
+<p>リソースとソース コードを分離して提供する方法の最も重要な側面は、さまざまな端末設定に合わせて別のリソースを提供できるという点です。
+
+たとえば、XML で UI 文字列を定義することで、その文字列を他の言語に翻訳して、それらの文字列を別のファイルに保存しておくことができます。
+それを、リソースのディレクトリ名に付けた言語の<em>修飾子</em>（フランス語の文字列値なら {@code res/values-fr/} のように）とユーザーの言語設定に基づいて、Android システムによって UI に適切な言語の文字列が適用されます。
+
+
+</p>
+
+<p>Android では代替リソース用に多様な<em>修飾子</em>をサポートしています。修飾子は、リソースのディレクトリ名に含める短い文字列で、そのリソースを使用する端末構成を定義するものです。
+
+例をもう 1 つ挙げると、端末の画面の向きやサイズによって、アクティビティのレイアウトを複数作成する必要があります。
+
+たとえば、端末が縦方向（縦長）の場合、ボタンの付いたレイアウトを縦に並べ、端末が横方向（横長）の場合はボタンを横並びにする、といった場合です。
+
+画面の方向によってレイアウトを変更するには、2 つの異なるレイアウトを定義して、それぞれのレイアウトのディレクトリ名に適切な修飾子を適用します。
+
+そうすることで、現在の端末の向きによってシステムが自動的に適切なレイアウトを適用できます。
+</p>
+
+<p>アプリケーションに含めることのできるリソースの種類や、異なる端末設定用の代替リソースの作成方法については、「<a href="{@docRoot}guide/topics/resources/providing-resources.html">リソースの提供</a>」をご覧ください。
+</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">こちらもご覧ください。</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">インテントとインテント フィルタ</a>
+    </dt>
+    <dd>{@link android.content.Intent} API を使用して、アクティビティやサービスなどのアプリのコンポーネントをアクティベートする方法や、アプリのコンポーネントを他のアプリで利用できるようにする方法について説明しています。
+
+</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">Activities</a></dt>
+    <dd>ユーザー インターフェースを使って独特のアプリケーション画面を提供する {@link android.app.Activity}
+ クラスのインスタンスの作成方法について説明しています。</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">リソースの提供</a></dt>
+    <dd>特定の端末構成に対して代替リソースを提供する方法など、Android アプリでアプリのリソースをアプリコードから分離する仕組みについて説明しています。
+
+
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">関連ドキュメント</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">Device Compatibility</a></dt>
+    <dd>あらゆるタイプの端末での Android の動作と、端末ごとにアプリを最適化したり、別の端末でのアプリの利用を制限したりする方法について説明しています。
+
+</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">System Permissions</a></dt>
+    <dd>アプリが特定の API を使用するのにユーザーの同意を必要とするパーミッション システムを使用して、アプリから特定の API へのアクセスを Android が制限する仕組みについて説明しています。
+</dd>
+  </dl>
+</div>
+</div>
+

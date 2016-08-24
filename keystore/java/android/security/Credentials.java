@@ -20,9 +20,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
 import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
 import com.android.org.bouncycastle.util.io.pem.PemWriter;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -147,20 +149,23 @@ public class Credentials {
         Reader reader = new InputStreamReader(bai, StandardCharsets.US_ASCII);
         PemReader pr = new PemReader(reader);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X509");
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
 
-        List<X509Certificate> result = new ArrayList<X509Certificate>();
-        PemObject o;
-        while ((o = pr.readPemObject()) != null) {
-            if (o.getType().equals("CERTIFICATE")) {
-                Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
-                result.add((X509Certificate) c);
-            } else {
-                throw new IllegalArgumentException("Unknown type " + o.getType());
+            List<X509Certificate> result = new ArrayList<X509Certificate>();
+            PemObject o;
+            while ((o = pr.readPemObject()) != null) {
+                if (o.getType().equals("CERTIFICATE")) {
+                    Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
+                    result.add((X509Certificate) c);
+                } else {
+                    throw new IllegalArgumentException("Unknown type " + o.getType());
+                }
             }
+            return result;
+        } finally {
+            pr.close();
         }
-        pr.close();
-        return result;
     }
 
     private static Credentials singleton;
@@ -212,47 +217,81 @@ public class Credentials {
     }
 
     /**
-     * Delete all types (private key, certificate, CA certificate) for a
+     * Delete all types (private key, user certificate, CA certificate) for a
      * particular {@code alias}. All three can exist for any given alias.
-     * Returns {@code true} if there was at least one of those types.
+     * Returns {@code true} if the alias no longer contains any types.
      */
     public static boolean deleteAllTypesForAlias(KeyStore keystore, String alias) {
+        return deleteAllTypesForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete all types (private key, user certificate, CA certificate) for a
+     * particular {@code alias}. All three can exist for any given alias.
+     * Returns {@code true} if the alias no longer contains any types.
+     */
+    public static boolean deleteAllTypesForAlias(KeyStore keystore, String alias, int uid) {
         /*
          * Make sure every type is deleted. There can be all three types, so
          * don't use a conditional here.
          */
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias)
-                | keystore.delete(Credentials.USER_SECRET_KEY + alias)
-                | deleteCertificateTypesForAlias(keystore, alias);
+        return deletePrivateKeyTypeForAlias(keystore, alias, uid)
+                & deleteSecretKeyTypeForAlias(keystore, alias, uid)
+                & deleteCertificateTypesForAlias(keystore, alias, uid);
     }
 
     /**
-     * Delete all types (private key, certificate, CA certificate) for a
-     * particular {@code alias}. All three can exist for any given alias.
-     * Returns {@code true} if there was at least one of those types.
+     * Delete certificate types (user certificate, CA certificate) for a
+     * particular {@code alias}. Both can exist for any given alias.
+     * Returns {@code true} if the alias no longer contains either type.
      */
     public static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias) {
+        return deleteCertificateTypesForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete certificate types (user certificate, CA certificate) for a
+     * particular {@code alias}. Both can exist for any given alias.
+     * Returns {@code true} if the alias no longer contains either type.
+     */
+    public static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias, int uid) {
         /*
          * Make sure every certificate type is deleted. There can be two types,
          * so don't use a conditional here.
          */
-        return keystore.delete(Credentials.USER_CERTIFICATE + alias)
-                | keystore.delete(Credentials.CA_CERTIFICATE + alias);
+        return keystore.delete(Credentials.USER_CERTIFICATE + alias, uid)
+                & keystore.delete(Credentials.CA_CERTIFICATE + alias, uid);
     }
 
     /**
      * Delete private key for a particular {@code alias}.
-     * Returns {@code true} if an entry was was deleted.
+     * Returns {@code true} if the entry no longer exists.
      */
     static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias) {
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias);
+        return deletePrivateKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete private key for a particular {@code alias}.
+     * Returns {@code true} if the entry no longer exists.
+     */
+    static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid);
     }
 
     /**
      * Delete secret key for a particular {@code alias}.
-     * Returns {@code true} if an entry was was deleted.
+     * Returns {@code true} if the entry no longer exists.
      */
     public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias) {
-        return keystore.delete(Credentials.USER_SECRET_KEY + alias);
+        return deleteSecretKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
+    }
+
+    /**
+     * Delete secret key for a particular {@code alias}.
+     * Returns {@code true} if the entry no longer exists.
+     */
+    public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+        return keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
     }
 }

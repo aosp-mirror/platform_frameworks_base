@@ -30,11 +30,6 @@ href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
 Differences Report &raquo;</a> </li>
 </ol>
 
-<h2>See Also</h2>
-<ol>
-  <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
-</ol>
-
 </div>
 </div>
 
@@ -55,9 +50,7 @@ includes no external libraries. </p>
 
 <p>To get started developing or testing against the Android
 {@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
-download the platform into your SDK. For more information,
-see <a href="{@docRoot}sdk/exploring.html">Exploring the
-SDK</a>.</p>
+download the platform into your SDK.</p>
 
 
 <h2 id="features">Platform Highlights</h2>
@@ -78,7 +71,7 @@ the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 <div class="toggle-content opened" style="padding-left:1em;">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-opened.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_up.png"
 class="toggle-content-img" alt="" />
   Android {@sdkPlatformVersion}, Revision 3</a> <em>(July 2011)</em>
 </a></p>
@@ -106,7 +99,7 @@ ADT 12.</p>
 <div class="toggle-content closed" style="padding-left:1em;">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />
   Android {@sdkPlatformVersion}, Revision 2</a> <em>(May 2010)</em>
 </a></p>
@@ -133,7 +126,7 @@ class="toggle-content-img" alt="" />
 <div class="toggle-content closed" style="padding-left:1em;">
 
 <p><a href="#" onclick="return toggleContent(this)">
-  <img src="{@docRoot}assets/images/triangle-closed.png"
+  <img src="{@docRoot}assets/images/styles/disclosure_down.png"
 class="toggle-content-img" alt="" />
   Android {@sdkPlatformVersion}, Revision 1</a> <em>(January 2010)</em>
 </a></p>

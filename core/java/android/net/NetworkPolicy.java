@@ -20,7 +20,12 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.BackupUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -30,6 +35,11 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
+    /**
+     * Current Version of the Backup Serializer.
+     */
+    private static final int BACKUP_VERSION = 1;
+
     public static final int CYCLE_NONE = -1;
     public static final long WARNING_DISABLED = -1;
     public static final long LIMIT_DISABLED = -1;
@@ -191,4 +201,41 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
             return new NetworkPolicy[size];
         }
     };
+
+    public byte[] getBytesForBackup() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+
+        out.writeInt(BACKUP_VERSION);
+        out.write(template.getBytesForBackup());
+        out.writeInt(cycleDay);
+        BackupUtils.writeString(out, cycleTimezone);
+        out.writeLong(warningBytes);
+        out.writeLong(limitBytes);
+        out.writeLong(lastWarningSnooze);
+        out.writeLong(lastLimitSnooze);
+        out.writeInt(metered ? 1 : 0);
+        out.writeInt(inferred ? 1 : 0);
+        return baos.toByteArray();
+    }
+
+    public static NetworkPolicy getNetworkPolicyFromBackup(DataInputStream in) throws IOException,
+            BackupUtils.BadVersionException {
+        int version = in.readInt();
+        if (version < 1 || version > BACKUP_VERSION) {
+            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
+        }
+
+        NetworkTemplate template = NetworkTemplate.getNetworkTemplateFromBackup(in);
+        int cycleDay = in.readInt();
+        String cycleTimeZone = BackupUtils.readString(in);
+        long warningBytes = in.readLong();
+        long limitBytes = in.readLong();
+        long lastWarningSnooze = in.readLong();
+        long lastLimitSnooze = in.readLong();
+        boolean metered = in.readInt() == 1;
+        boolean inferred = in.readInt() == 1;
+        return new NetworkPolicy(template, cycleDay, cycleTimeZone, warningBytes, limitBytes,
+                lastWarningSnooze, lastLimitSnooze, metered, inferred);
+    }
 }

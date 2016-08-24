@@ -26,7 +26,9 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.Condition;
@@ -42,6 +44,8 @@ import com.android.server.notification.CalendarTracker.CheckEventResult;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Built-in zen condition provider for calendar event-based conditions.
@@ -63,15 +67,18 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private final ArraySet<Uri> mSubscriptions = new ArraySet<Uri>();
     private final SparseArray<CalendarTracker> mTrackers = new SparseArray<>();
     private final Handler mWorker;
+    private final HandlerThread mThread;
 
     private boolean mConnected;
     private boolean mRegistered;
     private boolean mBootComplete;  // don't hammer the calendar provider until boot completes.
     private long mNextAlarmTime;
 
-    public EventConditionProvider(Looper worker) {
+    public EventConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
-        mWorker = new Handler(worker);
+        mThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        mThread.start();
+        mWorker = new Handler(mThread.getLooper());
     }
 
     @Override
@@ -91,10 +98,12 @@ public class EventConditionProvider extends SystemConditionProviderService {
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.print("      mBootComplete="); pw.println(mBootComplete);
         dumpUpcomingTime(pw, "mNextAlarmTime", mNextAlarmTime, System.currentTimeMillis());
-        pw.println("      mSubscriptions=");
-        for (Uri conditionId : mSubscriptions) {
-            pw.print("        ");
-            pw.println(conditionId);
+        synchronized (mSubscriptions) {
+            pw.println("      mSubscriptions=");
+            for (Uri conditionId : mSubscriptions) {
+                pw.print("        ");
+                pw.println(conditionId);
+            }
         }
         pw.println("      mTrackers=");
         for (int i = 0; i < mTrackers.size(); i++) {
@@ -134,28 +143,26 @@ public class EventConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public void onRequestConditions(int relevance) {
-        if (DEBUG) Slog.d(TAG, "onRequestConditions relevance=" + relevance);
-        // does not advertise conditions
-    }
-
-    @Override
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         if (!ZenModeConfig.isValidEventConditionId(conditionId)) {
-            notifyCondition(conditionId, Condition.STATE_FALSE, "badCondition");
+            notifyCondition(createCondition(conditionId, Condition.STATE_FALSE));
             return;
         }
-        if (mSubscriptions.add(conditionId)) {
-            evaluateSubscriptions();
+        synchronized (mSubscriptions) {
+            if (mSubscriptions.add(conditionId)) {
+                evaluateSubscriptions();
+            }
         }
     }
 
     @Override
     public void onUnsubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onUnsubscribe " + conditionId);
-        if (mSubscriptions.remove(conditionId)) {
-            evaluateSubscriptions();
+        synchronized (mSubscriptions) {
+            if (mSubscriptions.remove(conditionId)) {
+                evaluateSubscriptions();
+            }
         }
     }
 
@@ -176,7 +183,7 @@ public class EventConditionProvider extends SystemConditionProviderService {
         }
         mTrackers.clear();
         for (UserHandle user : UserManager.get(mContext).getUserProfiles()) {
-            final Context context = user.isOwner() ? mContext : getContextForUser(mContext, user);
+            final Context context = user.isSystem() ? mContext : getContextForUser(mContext, user);
             if (context == null) {
                 Slog.w(TAG, "Unable to create context for user " + user.getIdentifier());
                 continue;
@@ -199,51 +206,61 @@ public class EventConditionProvider extends SystemConditionProviderService {
             return;
         }
         final long now = System.currentTimeMillis();
-        for (int i = 0; i < mTrackers.size(); i++) {
-            mTrackers.valueAt(i).setCallback(mSubscriptions.isEmpty() ? null : mTrackerCallback);
-        }
-        setRegistered(!mSubscriptions.isEmpty());
-        long reevaluateAt = 0;
-        for (Uri conditionId : mSubscriptions) {
-            final EventInfo event = ZenModeConfig.tryParseEventConditionId(conditionId);
-            if (event == null) {
-                notifyCondition(conditionId, Condition.STATE_FALSE, "badConditionId");
-                continue;
+        List<Condition> conditionsToNotify = new ArrayList<>();
+        synchronized (mSubscriptions) {
+            for (int i = 0; i < mTrackers.size(); i++) {
+                mTrackers.valueAt(i).setCallback(
+                        mSubscriptions.isEmpty() ? null : mTrackerCallback);
             }
-            CheckEventResult result = null;
-            if (event.calendar == null) { // any calendar
-                // event could exist on any tracker
-                for (int i = 0; i < mTrackers.size(); i++) {
-                    final CalendarTracker tracker = mTrackers.valueAt(i);
-                    final CheckEventResult r = tracker.checkEvent(event, now);
-                    if (result == null) {
-                        result = r;
-                    } else {
-                        result.inEvent |= r.inEvent;
-                        result.recheckAt = Math.min(result.recheckAt, r.recheckAt);
-                    }
-                }
-            } else {
-                // event should exist on one tracker
-                final int userId = EventInfo.resolveUserId(event.userId);
-                final CalendarTracker tracker = mTrackers.get(userId);
-                if (tracker == null) {
-                    Slog.w(TAG, "No calendar tracker found for user " + userId);
-                    notifyCondition(conditionId, Condition.STATE_FALSE, "badUserId");
+            setRegistered(!mSubscriptions.isEmpty());
+            long reevaluateAt = 0;
+            for (Uri conditionId : mSubscriptions) {
+                final EventInfo event = ZenModeConfig.tryParseEventConditionId(conditionId);
+                if (event == null) {
+                    conditionsToNotify.add(createCondition(conditionId, Condition.STATE_FALSE));
                     continue;
                 }
-                result = tracker.checkEvent(event, now);
+                CheckEventResult result = null;
+                if (event.calendar == null) { // any calendar
+                    // event could exist on any tracker
+                    for (int i = 0; i < mTrackers.size(); i++) {
+                        final CalendarTracker tracker = mTrackers.valueAt(i);
+                        final CheckEventResult r = tracker.checkEvent(event, now);
+                        if (result == null) {
+                            result = r;
+                        } else {
+                            result.inEvent |= r.inEvent;
+                            result.recheckAt = Math.min(result.recheckAt, r.recheckAt);
+                        }
+                    }
+                } else {
+                    // event should exist on one tracker
+                    final int userId = EventInfo.resolveUserId(event.userId);
+                    final CalendarTracker tracker = mTrackers.get(userId);
+                    if (tracker == null) {
+                        Slog.w(TAG, "No calendar tracker found for user " + userId);
+                        conditionsToNotify.add(createCondition(conditionId, Condition.STATE_FALSE));
+                        continue;
+                    }
+                    result = tracker.checkEvent(event, now);
+                }
+                if (result.recheckAt != 0
+                        && (reevaluateAt == 0 || result.recheckAt < reevaluateAt)) {
+                    reevaluateAt = result.recheckAt;
+                }
+                if (!result.inEvent) {
+                    conditionsToNotify.add(createCondition(conditionId, Condition.STATE_FALSE));
+                    continue;
+                }
+                conditionsToNotify.add(createCondition(conditionId, Condition.STATE_TRUE));
             }
-            if (result.recheckAt != 0 && (reevaluateAt == 0 || result.recheckAt < reevaluateAt)) {
-                reevaluateAt = result.recheckAt;
-            }
-            if (!result.inEvent) {
-                notifyCondition(conditionId, Condition.STATE_FALSE, "!inEventNow");
-                continue;
-            }
-            notifyCondition(conditionId, Condition.STATE_TRUE, "inEventNow");
+            rescheduleAlarm(now, reevaluateAt);
         }
-        rescheduleAlarm(now, reevaluateAt);
+        for (Condition condition : conditionsToNotify) {
+            if (condition != null) {
+                notifyCondition(condition);
+            }
+        }
         if (DEBUG) Slog.d(TAG, "evaluateSubscriptions took " + (System.currentTimeMillis() - now));
     }
 
@@ -265,12 +282,6 @@ public class EventConditionProvider extends SystemConditionProviderService {
         if (DEBUG) Slog.d(TAG, String.format("Scheduling evaluate for %s, in %s, now=%s",
                 ts(time), formatDuration(time - now), ts(now)));
         alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-    }
-
-    private void notifyCondition(Uri conditionId, int state, String reason) {
-        if (DEBUG) Slog.d(TAG, "notifyCondition " + conditionId + " "
-                + Condition.stateToString(state) + " reason=" + reason);
-        notifyCondition(createCondition(conditionId, state));
     }
 
     private Condition createCondition(Uri id, int state) {

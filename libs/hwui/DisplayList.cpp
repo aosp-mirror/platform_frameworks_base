@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define ATRACE_TAG ATRACE_TAG_VIEW
-
 #include <SkCanvas.h>
 #include <algorithm>
 
@@ -23,36 +21,62 @@
 
 #include "Debug.h"
 #include "DisplayList.h"
+#include "RenderNode.h"
+
+#if HWUI_NEW_OPS
+#include "RecordedOp.h"
+#else
 #include "DisplayListOp.h"
+#endif
 
 namespace android {
 namespace uirenderer {
 
-DisplayListData::DisplayListData()
+DisplayList::DisplayList()
         : projectionReceiveIndex(-1)
+        , stdAllocator(allocator)
+        , chunks(stdAllocator)
+        , ops(stdAllocator)
+        , children(stdAllocator)
+        , bitmapResources(stdAllocator)
+        , pathResources(stdAllocator)
+        , patchResources(stdAllocator)
+        , paints(stdAllocator)
+        , regions(stdAllocator)
+        , referenceHolders(stdAllocator)
+        , functors(stdAllocator)
+        , pushStagingFunctors(stdAllocator)
         , hasDrawOps(false) {
 }
 
-DisplayListData::~DisplayListData() {
+DisplayList::~DisplayList() {
     cleanupResources();
 }
 
-void DisplayListData::cleanupResources() {
-    ResourceCache& resourceCache = ResourceCache::getInstance();
-    resourceCache.lock();
+void DisplayList::cleanupResources() {
+    if (CC_UNLIKELY(patchResources.size())) {
+        ResourceCache& resourceCache = ResourceCache::getInstance();
+        resourceCache.lock();
 
-    for (size_t i = 0; i < patchResources.size(); i++) {
-        resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
+        for (size_t i = 0; i < patchResources.size(); i++) {
+            resourceCache.decrementRefcountLocked(patchResources[i]);
+        }
+
+        resourceCache.unlock();
     }
 
-    resourceCache.unlock();
-
     for (size_t i = 0; i < pathResources.size(); i++) {
-        const SkPath* path = pathResources.itemAt(i);
+        const SkPath* path = pathResources[i];
         if (path->unique() && Caches::hasInstance()) {
             Caches::getInstance().pathCache.removeDeferred(path);
         }
         delete path;
+    }
+
+    for (auto& iter : functors) {
+        if (iter.listener) {
+            iter.listener->onGlFunctorReleased(iter.functor);
+        }
     }
 
     patchResources.clear();
@@ -61,9 +85,11 @@ void DisplayListData::cleanupResources() {
     regions.clear();
 }
 
-size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
-    mReferenceHolders.push(op->renderNode());
-    return mChildren.add(op);
+size_t DisplayList::addChild(NodeOpType* op) {
+    referenceHolders.push_back(op->renderNode);
+    size_t index = children.size();
+    children.push_back(op);
+    return index;
 }
 
 }; // namespace uirenderer

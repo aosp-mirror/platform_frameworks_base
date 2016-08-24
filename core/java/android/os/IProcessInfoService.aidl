@@ -25,5 +25,12 @@ interface IProcessInfoService
      * to indicate that no process with the given PID exists.
      */
     void getProcessStatesFromPids(in int[] pids, out int[] states);
+
+    /**
+     * For each PID in the given input array, write the current process state and OOM score
+     * for that process into the output arrays, or ActivityManager.PROCESS_STATE_NONEXISTENT
+     * in the states array to indicate that no process with the given PID exists.
+     */
+    void getProcessStatesAndOomScoresFromPids(in int[] pids, out int[] states, out int[] scores);
 }
 

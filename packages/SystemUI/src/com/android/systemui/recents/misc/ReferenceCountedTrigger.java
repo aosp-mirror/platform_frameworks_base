@@ -18,7 +18,6 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 
 import java.util.ArrayList;
 
@@ -28,10 +27,9 @@ import java.util.ArrayList;
  */
 public class ReferenceCountedTrigger {
 
-    Context mContext;
     int mCount;
-    ArrayList<Runnable> mFirstIncRunnables = new ArrayList<Runnable>();
-    ArrayList<Runnable> mLastDecRunnables = new ArrayList<Runnable>();
+    ArrayList<Runnable> mFirstIncRunnables = new ArrayList<>();
+    ArrayList<Runnable> mLastDecRunnables = new ArrayList<>();
     Runnable mErrorRunnable;
 
     // Convenience runnables
@@ -48,9 +46,12 @@ public class ReferenceCountedTrigger {
         }
     };
 
-    public ReferenceCountedTrigger(Context context, Runnable firstIncRunnable,
-                                   Runnable lastDecRunnable, Runnable errorRunanable) {
-        mContext = context;
+    public ReferenceCountedTrigger() {
+        this(null, null, null);
+    }
+
+    public ReferenceCountedTrigger(Runnable firstIncRunnable, Runnable lastDecRunnable,
+            Runnable errorRunanable) {
         if (firstIncRunnable != null) mFirstIncRunnables.add(firstIncRunnable);
         if (lastDecRunnable != null) mLastDecRunnables.add(lastDecRunnable);
         mErrorRunnable = errorRunanable;
@@ -74,42 +75,50 @@ public class ReferenceCountedTrigger {
 
     /** Adds a runnable to the last-decrement runnables list. */
     public void addLastDecrementRunnable(Runnable r) {
-        // To ensure that the last decrement always calls, we increment and decrement after setting
-        // the last decrement runnable
-        boolean ensureLastDecrement = (mCount == 0);
-        if (ensureLastDecrement) increment();
         mLastDecRunnables.add(r);
-        if (ensureLastDecrement) decrement();
     }
 
     /** Decrements the ref count */
     public void decrement() {
         mCount--;
-        if (mCount == 0 && !mLastDecRunnables.isEmpty()) {
-            int numRunnables = mLastDecRunnables.size();
-            for (int i = 0; i < numRunnables; i++) {
-                mLastDecRunnables.get(i).run();
-            }
+        if (mCount == 0) {
+            flushLastDecrementRunnables();
         } else if (mCount < 0) {
             if (mErrorRunnable != null) {
                 mErrorRunnable.run();
             } else {
-                new Throwable("Invalid ref count").printStackTrace();
-                Console.logError(mContext, "Invalid ref count");
+                throw new RuntimeException("Invalid ref count");
             }
         }
     }
 
-    /** Convenience method to decrement this trigger as a runnable. */
-    public Runnable decrementAsRunnable() {
-        return mDecrementRunnable;
+    /**
+     * Runs and clears all the last-decrement runnables now.
+     */
+    public void flushLastDecrementRunnables() {
+        if (!mLastDecRunnables.isEmpty()) {
+            int numRunnables = mLastDecRunnables.size();
+            for (int i = 0; i < numRunnables; i++) {
+                mLastDecRunnables.get(i).run();
+            }
+        }
+        mLastDecRunnables.clear();
     }
-    /** Convenience method to decrement this trigger as a animator listener. */
+
+    /**
+     * Convenience method to decrement this trigger as a animator listener.  This listener is
+     * guarded to prevent being called back multiple times, and will trigger a decrement once and
+     * only once.
+     */
     public Animator.AnimatorListener decrementOnAnimationEnd() {
         return new AnimatorListenerAdapter() {
+            private boolean hasEnded;
+
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (hasEnded) return;
                 decrement();
+                hasEnded = true;
             }
         };
     }

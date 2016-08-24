@@ -17,9 +17,7 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -33,7 +31,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 import libcore.icu.LocaleData;
 
@@ -47,11 +44,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     private static final boolean DEFAULT_ENABLED_STATE = true;
     private static final int HOURS_IN_HALF_DAY = 12;
 
-    // state
-    private boolean mIs24HourView;
-    private boolean mIsAm;
-
-    // ui components
     private final NumberPicker mHourSpinner;
     private final NumberPicker mMinuteSpinner;
     private final NumberPicker mAmPmSpinner;
@@ -68,10 +60,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     private final String[] mAmPmStrings;
 
+    private final Calendar mTempCalendar;
+
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
-    private Calendar mTempCalendar;
     private boolean mHourWithTwoDigit;
     private char mHourFormat;
+
+    private boolean mIs24HourView;
+    private boolean mIsAm;
 
     public TimePickerSpinnerDelegate(TimePicker delegator, Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
@@ -92,7 +88,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 updateInputState();
-                if (!is24HourView()) {
+                if (!is24Hour()) {
                     if ((oldVal == HOURS_IN_HALF_DAY - 1 && newVal == HOURS_IN_HALF_DAY) ||
                             (oldVal == HOURS_IN_HALF_DAY && newVal == HOURS_IN_HALF_DAY - 1)) {
                         mIsAm = !mIsAm;
@@ -124,14 +120,14 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
                 int maxValue = mMinuteSpinner.getMaxValue();
                 if (oldVal == maxValue && newVal == minValue) {
                     int newHour = mHourSpinner.getValue() + 1;
-                    if (!is24HourView() && newHour == HOURS_IN_HALF_DAY) {
+                    if (!is24Hour() && newHour == HOURS_IN_HALF_DAY) {
                         mIsAm = !mIsAm;
                         updateAmPmControl();
                     }
                     mHourSpinner.setValue(newHour);
                 } else if (oldVal == minValue && newVal == maxValue) {
                     int newHour = mHourSpinner.getValue() - 1;
-                    if (!is24HourView() && newHour == HOURS_IN_HALF_DAY - 1) {
+                    if (!is24Hour() && newHour == HOURS_IN_HALF_DAY - 1) {
                         mIsAm = !mIsAm;
                         updateAmPmControl();
                     }
@@ -204,8 +200,9 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         updateAmPmControl();
 
         // set to current time
-        setCurrentHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
-        setCurrentMinute(mTempCalendar.get(Calendar.MINUTE));
+        mTempCalendar = Calendar.getInstance(mLocale);
+        setHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
+        setMinute(mTempCalendar.get(Calendar.MINUTE));
 
         if (!isEnabled()) {
             setEnabled(false);
@@ -221,7 +218,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     private void getHourFormatData() {
-        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
                 (mIs24HourView) ? "Hm" : "hm");
         final int lengthPattern = bestDateTimePattern.length();
         mHourWithTwoDigit = false;
@@ -241,7 +238,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     private boolean isAmPmAtStart() {
-        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
                 "hm" /* skeleton */);
 
         return bestDateTimePattern.startsWith("a");
@@ -257,7 +254,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
      */
     private void setDividerText() {
         final String skeleton = (mIs24HourView) ? "Hm" : "hm";
-        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale,
+        final String bestDateTimePattern = DateFormat.getBestDateTimePattern(mLocale,
                 skeleton);
         final String separatorText;
         int hourIndex = bestDateTimePattern.lastIndexOf('H');
@@ -279,16 +276,16 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentHour(int currentHour) {
-        setCurrentHour(currentHour, true);
+    public void setHour(int hour) {
+        setCurrentHour(hour, true);
     }
 
     private void setCurrentHour(int currentHour, boolean notifyTimeChanged) {
         // why was Integer used in the first place?
-        if (currentHour == getCurrentHour()) {
+        if (currentHour == getHour()) {
             return;
         }
-        if (!is24HourView()) {
+        if (!is24Hour()) {
             // convert [0,23] ordinal to wall clock display
             if (currentHour >= HOURS_IN_HALF_DAY) {
                 mIsAm = false;
@@ -310,9 +307,9 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public int getCurrentHour() {
+    public int getHour() {
         int currentHour = mHourSpinner.getValue();
-        if (is24HourView()) {
+        if (is24Hour()) {
             return currentHour;
         } else if (mIsAm) {
             return currentHour % HOURS_IN_HALF_DAY;
@@ -322,28 +319,27 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentMinute(int currentMinute) {
-        if (currentMinute == getCurrentMinute()) {
+    public void setMinute(int minute) {
+        if (minute == getMinute()) {
             return;
         }
-        mMinuteSpinner.setValue(currentMinute);
+        mMinuteSpinner.setValue(minute);
         onTimeChanged();
     }
 
     @Override
-    public int getCurrentMinute() {
+    public int getMinute() {
         return mMinuteSpinner.getValue();
     }
 
-    @Override
-    public void setIs24HourView(boolean is24HourView) {
-        if (mIs24HourView == is24HourView) {
+    public void setIs24Hour(boolean is24Hour) {
+        if (mIs24HourView == is24Hour) {
             return;
         }
         // cache the current hour since spinner range changes and BEFORE changing mIs24HourView!!
-        int currentHour = getCurrentHour();
+        int currentHour = getHour();
         // Order is important here.
-        mIs24HourView = is24HourView;
+        mIs24HourView = is24Hour;
         getHourFormatData();
         updateHourControl();
         // set value after spinner range is updated
@@ -353,7 +349,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public boolean is24HourView() {
+    public boolean is24Hour() {
         return mIs24HourView;
     }
 
@@ -388,20 +384,17 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        setCurrentLocale(newConfig.locale);
-    }
-
-    @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
-        return new SavedState(superState, getCurrentHour(), getCurrentMinute());
+        return new SavedState(superState, getHour(), getMinute(), is24Hour());
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        setCurrentHour(ss.getHour());
-        setCurrentMinute(ss.getMinute());
+        if (state instanceof SavedState) {
+            final SavedState ss = (SavedState) state;
+            setHour(ss.getHour());
+            setMinute(ss.getMinute());
+        }
     }
 
     @Override
@@ -418,8 +411,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         } else {
             flags |= DateUtils.FORMAT_12HOUR;
         }
-        mTempCalendar.set(Calendar.HOUR_OF_DAY, getCurrentHour());
-        mTempCalendar.set(Calendar.MINUTE, getCurrentMinute());
+        mTempCalendar.set(Calendar.HOUR_OF_DAY, getHour());
+        mTempCalendar.set(Calendar.MINUTE, getMinute());
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
@@ -447,7 +440,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     private void updateAmPmControl() {
-        if (is24HourView()) {
+        if (is24Hour()) {
             if (mAmPmSpinner != null) {
                 mAmPmSpinner.setVisibility(View.GONE);
             } else {
@@ -466,27 +459,16 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
     }
 
-    /**
-     * Sets the current locale.
-     *
-     * @param locale The current locale.
-     */
-    @Override
-    public void setCurrentLocale(Locale locale) {
-        super.setCurrentLocale(locale);
-        mTempCalendar = Calendar.getInstance(locale);
-    }
-
     private void onTimeChanged() {
         mDelegator.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnTimeChangedListener != null) {
-            mOnTimeChangedListener.onTimeChanged(mDelegator, getCurrentHour(),
-                    getCurrentMinute());
+            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(),
+                    getMinute());
         }
     }
 
     private void updateHourControl() {
-        if (is24HourView()) {
+        if (is24Hour()) {
             // 'k' means 1-24 hour
             if (mHourFormat == 'k') {
                 mHourSpinner.setMinValue(1);
@@ -509,7 +491,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     private void updateMinuteControl() {
-        if (is24HourView()) {
+        if (is24Hour()) {
             mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_DONE);
         } else {
             mMinuteSpinnerInput.setImeOptions(EditorInfo.IME_ACTION_NEXT);
@@ -541,52 +523,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (target != null) {
             target.setContentDescription(mContext.getString(contDescResId));
         }
-    }
-
-    /**
-     * Used to save / restore state of time picker
-     */
-    private static class SavedState extends View.BaseSavedState {
-        private final int mHour;
-        private final int mMinute;
-
-        private SavedState(Parcelable superState, int hour, int minute) {
-            super(superState);
-            mHour = hour;
-            mMinute = minute;
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            mHour = in.readInt();
-            mMinute = in.readInt();
-        }
-
-        public int getHour() {
-            return mHour;
-        }
-
-        public int getMinute() {
-            return mMinute;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeInt(mHour);
-            dest.writeInt(mMinute);
-        }
-
-        @SuppressWarnings({"unused", "hiding"})
-        public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
     }
 
     public static String[] getAmPmStrings(Context context) {

@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Content providers are one of the primary building blocks of Android applications, providing
@@ -393,6 +394,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public Bundle call(
                 String callingPkg, String method, @Nullable String arg, @Nullable Bundle extras) {
+            Bundle.setDefusable(extras, true);
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.call(method, arg, extras);
@@ -411,6 +413,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         @Override
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
+            Bundle.setDefusable(opts, true);
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
             enforceFilePermission(callingPkg, uri, "r", null);
@@ -1854,7 +1857,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (mAuthority != null) {
                 message += mAuthority;
             } else {
-                message += mAuthorities;
+                message += Arrays.toString(mAuthorities);
             }
             throw new SecurityException(message);
         }

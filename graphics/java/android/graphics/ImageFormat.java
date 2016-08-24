@@ -361,6 +361,17 @@ public class ImageFormat {
     public static final int RAW_SENSOR = 0x20;
 
     /**
+     * <p>Private raw camera sensor image format, a single channel image with
+     * implementation depedent pixel layout.</p>
+     *
+     * <p>RAW_PRIVATE is a format for unprocessed raw image buffers coming from an
+     * image sensor. The actual structure of buffers of this format is
+     * implementation-dependent.</p>
+     *
+     */
+    public static final int RAW_PRIVATE = 0x24;
+
+    /**
      * <p>
      * Android 10-bit raw format
      * </p>
@@ -748,6 +759,7 @@ public class ImageFormat {
             case FLEX_RGB_888:
             case FLEX_RGBA_8888:
             case RAW_SENSOR:
+            case RAW_PRIVATE:
             case RAW10:
             case RAW12:
             case DEPTH16:

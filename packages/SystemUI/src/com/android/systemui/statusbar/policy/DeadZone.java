@@ -28,12 +28,19 @@ import android.view.View;
 
 import com.android.systemui.R;
 
+/**
+ * The "dead zone" consumes unintentional taps along the top edge of the navigation bar.
+ * When users are typing quickly on an IME they may attempt to hit the space bar, overshoot, and
+ * accidentally hit the home button. The DeadZone expands temporarily after each tap in the UI
+ * outside the navigation bar (since this is when accidental taps are more likely), then contracts
+ * back over time (since a later tap might be intended for the top of the bar).
+ */
 public class DeadZone extends View {
     public static final String TAG = "DeadZone";
 
     public static final boolean DEBUG = false;
-    public static final int HORIZONTAL = 0;
-    public static final int VERTICAL = 1;
+    public static final int HORIZONTAL = 0;  // Consume taps along the top edge.
+    public static final int VERTICAL = 1;  // Consume taps along the left edge.
 
     private static final boolean CHATTY = true; // print to logcat when we eat a click
 
@@ -109,6 +116,12 @@ public class DeadZone extends View {
             Slog.v(TAG, this + " onTouch: " + MotionEvent.actionToString(event.getAction()));
         }
 
+        // Don't consume events for high precision pointing devices. For this purpose a stylus is
+        // considered low precision (like a finger), so its events may be consumed.
+        if (event.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) {
+            return false;
+        }
+
         final int action = event.getAction();
         if (action == MotionEvent.ACTION_OUTSIDE) {
             poke(event);
@@ -117,7 +130,10 @@ public class DeadZone extends View {
                 Slog.v(TAG, this + " ACTION_DOWN: " + event.getX() + "," + event.getY());
             }
             int size = (int) getSize(event.getEventTime());
-            if ((mVertical && event.getX() < size) || event.getY() < size) {
+            // In the vertical orientation consume taps along the left edge.
+            // In horizontal orientation consume taps along the top edge.
+            final boolean consumeEvent = mVertical ? event.getX() < size : event.getY() < size;
+            if (consumeEvent) {
                 if (CHATTY) {
                     Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
                 }

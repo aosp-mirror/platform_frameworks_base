@@ -19,7 +19,6 @@
 #include "core_jni_helpers.h"
 #include <vector>
 
-#include "Canvas.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
 #include "SkDocument.h"
@@ -27,6 +26,8 @@
 #include "SkPictureRecorder.h"
 #include "SkStream.h"
 #include "SkRect.h"
+
+#include <hwui/Canvas.h>
 
 namespace android {
 
@@ -87,15 +88,13 @@ public:
     }
 
     void write(SkWStream* stream) {
-        SkDocument* document = SkDocument::CreatePDF(stream);
+        SkAutoTUnref<SkDocument> document(SkDocument::CreatePDF(stream));
         for (unsigned i = 0; i < mPages.size(); i++) {
             PageRecord* page =  mPages[i];
 
             SkCanvas* canvas = document->beginPage(page->mWidth, page->mHeight,
                     &(page->mContentRect));
 
-            canvas->clipRect(page->mContentRect);
-            canvas->translate(page->mContentRect.left(), page->mContentRect.top());
             canvas->drawPicture(page->mPicture);
 
             document->endPage();

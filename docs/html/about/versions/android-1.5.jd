@@ -30,11 +30,6 @@ href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
 Differences Report &raquo;</a> </li>
 </ol>
 
-<h2>See Also</h2>
-<ol>
-  <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
-</ol>
-
 </div>
 </div>
 
@@ -54,9 +49,7 @@ compliant and includes no external libraries. </p>
 
 <p>To get started developing or testing against the Android
 {@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
-download the platform into your Android 1.6 or later SDK. For more information,
-see <a href="{@docRoot}sdk/exploring.html">Exploring the
-SDK</a>.</p>
+download the platform into your Android 1.6 or later SDK.</p>
 
 
 <h2 id="features">Platform Highlights</h2>
@@ -80,12 +73,12 @@ function toggleDiv(link) {
     //$(".toggleme", toggleable).slideDown("fast");
     toggleable.removeClass("closed");
     toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/styles/disclosure_up.png"));
   } else {
     //$(".toggleme", toggleable).slideUp("fast");
     toggleable.removeClass("open");
     toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/styles/disclosure_down.png"));
   }
   return false;
 }
@@ -115,7 +108,7 @@ function toggleDiv(link) {
 
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-img" height="9px" width="9px" />
         Android 1.5, Revision 4</a> <em>(May 2010)</em></a>
   <div class="toggleme">
 <dl>
@@ -138,7 +131,7 @@ function toggleDiv(link) {
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-img" height="9px" width="9px" />
         Android 1.5, Revision 3</a> <em>(July 2009)</em></a>
   <div class="toggleme">
 <dl>
@@ -152,7 +145,7 @@ function toggleDiv(link) {
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-img" height="9px" width="9px" />
         Android 1.5, Revision 2</a> <em>(May 2009)</em></a>
   <div class="toggleme">
 <p>Not available as an SDK component &mdash; please use Android 1.5, r3 instead. </p>
@@ -161,7 +154,7 @@ function toggleDiv(link) {
 
 <div class="toggleable closed">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-img" height="9px" width="9px" />
         Android 1.5, Revision 1</a> <em>(April 2009)</em></a>
   <div class="toggleme">
 <p>Not available as an SDK component &mdash; please use Android 1.5, r3 instead. </p>

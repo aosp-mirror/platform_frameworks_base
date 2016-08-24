@@ -2595,13 +2595,13 @@
     <public type="attr" name="accessibilityTraversalAfter" id="0x010104d2" />
     <public type="attr" name="dialogPreferredPadding" id="0x010104d3" />
     <public type="attr" name="searchHintIcon" id="0x010104d4" />
-    <public type="attr" name="revisionCode" />
-    <public type="attr" name="drawableTint" />
-    <public type="attr" name="drawableTintMode" />
-    <public type="attr" name="fraction" />
+    <public type="attr" name="revisionCode" id="0x010104d5" />
+    <public type="attr" name="drawableTint" id="0x010104d6" />
+    <public type="attr" name="drawableTintMode" id="0x010104d7" />
+    <public type="attr" name="fraction" id="0x010104d8" />
 
-    <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
-    <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
+    <public type="style" name="Theme.DeviceDefault.Dialog.Alert" id="0x010302d1" />
+    <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" id="0x010302d2" />
 
   <!-- ===============================================================
        Resources added in version M of the platform
@@ -2653,5 +2653,79 @@
     <public type="id" name="accessibilityActionScrollRight" id="0x0102003b" />
     <public type="id" name="accessibilityActionContextClick" id="0x0102003c" />
 
-    <public type="string" name="fingerprint_icon_content_description" />
+    <public type="string" name="fingerprint_icon_content_description" id="0x01040018" />
+
+  <!-- ===============================================================
+       Resources added in version N of the platform
+       =============================================================== -->
+    <eat-comment />
+
+    <public type="attr" name="listMenuViewStyle" id="0x010104f2" />
+    <public type="attr" name="subMenuArrow" id="0x010104f3" />
+    <public type="attr" name="defaultWidth" id="0x010104f4" />
+    <public type="attr" name="defaultHeight" id="0x010104f5" />
+    <public type="attr" name="resizeableActivity" id="0x010104f6" />
+    <public type="attr" name="supportsPictureInPicture" id="0x010104f7" />
+    <public type="attr" name="titleMargin" id="0x010104f8" />
+    <public type="attr" name="titleMarginStart" id="0x010104f9" />
+    <public type="attr" name="titleMarginEnd" id="0x010104fa" />
+    <public type="attr" name="titleMarginTop" id="0x010104fb" />
+    <public type="attr" name="titleMarginBottom" id="0x010104fc" />
+    <public type="attr" name="maxButtonHeight" id="0x010104fd" />
+    <public type="attr" name="buttonGravity" id="0x010104fe" />
+    <public type="attr" name="collapseIcon" id="0x010104ff" />
+    <public type="attr" name="level" id="0x01010500" />
+    <public type="attr" name="contextPopupMenuStyle" id="0x01010501" />
+    <public type="attr" name="textAppearancePopupMenuHeader" id="0x01010502" />
+    <public type="attr" name="windowBackgroundFallback" id="0x01010503" />
+    <public type="attr" name="defaultToDeviceProtectedStorage" id="0x01010504" />
+    <public type="attr" name="directBootAware" id="0x01010505" />
+    <public type="attr" name="preferenceFragmentStyle" id="0x01010506" />
+    <public type="attr" name="canControlMagnification" id="0x01010507" />
+    <public type="attr" name="languageTag" id="0x01010508" />
+    <public type="attr" name="pointerIcon" id="0x01010509" />
+    <public type="attr" name="tickMark" id="0x0101050a" />
+    <public type="attr" name="tickMarkTint" id="0x0101050b" />
+    <public type="attr" name="tickMarkTintMode" id="0x0101050c" />
+    <public type="attr" name="canPerformGestures" id="0x0101050d" />
+    <public type="attr" name="externalService" id="0x0101050e" />
+    <public type="attr" name="supportsLocalInteraction" id="0x0101050f" />
+    <public type="attr" name="startX" id="0x01010510" />
+    <public type="attr" name="startY" id="0x01010511" />
+    <public type="attr" name="endX" id="0x01010512" />
+    <public type="attr" name="endY" id="0x01010513" />
+    <public type="attr" name="offset" id="0x01010514" />
+    <public type="attr" name="use32bitAbi" id="0x01010515" />
+    <public type="attr" name="bitmap" id="0x01010516" />
+    <public type="attr" name="hotSpotX" id="0x01010517" />
+    <public type="attr" name="hotSpotY" id="0x01010518" />
+    <public type="attr" name="version" id="0x01010519" />
+    <public type="attr" name="backupInForeground" id="0x0101051a" />
+    <public type="attr" name="countDown" id="0x0101051b" />
+    <public type="attr" name="canRecord" id="0x0101051c" />
+    <public type="attr" name="tunerCount" id="0x0101051d" />
+    <public type="attr" name="fillType" id="0x0101051e" />
+    <public type="attr" name="popupEnterTransition" id="0x0101051f" />
+    <public type="attr" name="popupExitTransition" id="0x01010520" />
+    <public type="attr" name="forceHasOverlappingRendering" id="0x01010521" />
+    <public type="attr" name="contentInsetStartWithNavigation" id="0x01010522" />
+    <public type="attr" name="contentInsetEndWithActions" id="0x01010523" />
+    <public type="attr" name="numberPickerStyle" id="0x01010524" />
+    <public type="attr" name="enableVrMode" id="0x01010525" />
+    <public type="attr" name="hash" id="0x01010526" />
+    <public type="attr" name="networkSecurityConfig" id="0x01010527" />
+
+    <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" id="0x010302d8" />
+    <public type="style" name="Widget.Material.SeekBar.Discrete" id="0x010302d9" />
+    <public type="style" name="Widget.Material.CompoundButton.Switch" id="0x010302da" />
+    <public type="style" name="Widget.Material.Light.CompoundButton.Switch" id="0x010302db" />
+    <public type="style" name="Widget.Material.NumberPicker" id="0x010302dc" />
+    <public type="style" name="Widget.Material.Light.NumberPicker" id="0x010302dd" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Colored" id="0x010302de" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Borderless.Colored" id="0x010302df" />
+
+    <public type="id" name="accessibilityActionSetProgress" id="0x0102003d" />
+    <public type="id" name="icon_frame" id="0x0102003e" />
+    <public type="id" name="list_container" id="0x0102003f" />
+    <public type="id" name="switch_widget" id="0x01020040" />
 </resources>

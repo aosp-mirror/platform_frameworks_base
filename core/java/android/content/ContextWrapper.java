@@ -33,8 +33,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -82,8 +82,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Resources getResources()
-    {
+    public Resources getResources() {
         return mBase.getResources();
     }
 
@@ -160,15 +159,25 @@ public class ContextWrapper extends Context {
         return mBase.getPackageCodePath();
     }
 
-    /** @hide */
-    @Override
-    public File getSharedPrefsFile(String name) {
-        return mBase.getSharedPrefsFile(name);
-    }
-
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return mBase.getSharedPreferences(name, mode);
+    }
+
+    /** @removed */
+    @Override
+    public SharedPreferences getSharedPreferences(File file, int mode) {
+        return mBase.getSharedPreferences(file, mode);
+    }
+
+    @Override
+    public boolean moveSharedPreferencesFrom(Context sourceContext, String name) {
+        return mBase.moveSharedPreferencesFrom(sourceContext, name);
+    }
+
+    @Override
+    public boolean deleteSharedPreferences(String name) {
+        return mBase.deleteSharedPreferences(name);
     }
 
     @Override
@@ -193,9 +202,20 @@ public class ContextWrapper extends Context {
         return mBase.getFileStreamPath(name);
     }
 
+    /** @removed */
+    @Override
+    public File getSharedPreferencesPath(String name) {
+        return mBase.getSharedPreferencesPath(name);
+    }
+
     @Override
     public String[] fileList() {
         return mBase.fileList();
+    }
+
+    @Override
+    public File getDataDir() {
+        return mBase.getDataDir();
     }
 
     @Override
@@ -267,6 +287,11 @@ public class ContextWrapper extends Context {
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
         return mBase.openOrCreateDatabase(name, mode, factory, errorHandler);
+    }
+
+    @Override
+    public boolean moveDatabaseFrom(Context sourceContext, String name) {
+        return mBase.moveDatabaseFrom(sourceContext, name);
     }
 
     @Override
@@ -532,6 +557,13 @@ public class ContextWrapper extends Context {
         mBase.sendStickyBroadcastAsUser(intent, user);
     }
 
+    /** @hide */
+    @Override
+    @Deprecated
+    public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
+        mBase.sendStickyBroadcastAsUser(intent, user, options);
+    }
+
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,
@@ -785,5 +817,37 @@ public class ContextWrapper extends Context {
     @Override
     public DisplayAdjustments getDisplayAdjustments(int displayId) {
         return mBase.getDisplayAdjustments(displayId);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public Display getDisplay() {
+        return mBase.getDisplay();
+    }
+
+    @Override
+    public Context createDeviceProtectedStorageContext() {
+        return mBase.createDeviceProtectedStorageContext();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public Context createCredentialProtectedStorageContext() {
+        return mBase.createCredentialProtectedStorageContext();
+    }
+
+    @Override
+    public boolean isDeviceProtectedStorage() {
+        return mBase.isDeviceProtectedStorage();
+    }
+
+    /** {@hide} */
+    @SystemApi
+    @Override
+    public boolean isCredentialProtectedStorage() {
+        return mBase.isCredentialProtectedStorage();
     }
 }

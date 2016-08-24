@@ -16,11 +16,12 @@
 
 #include "DisplayListCanvas.h"
 
-#include "ResourceCache.h"
 #include "DeferredDisplayList.h"
 #include "DeferredLayerUpdater.h"
 #include "DisplayListOp.h"
+#include "ResourceCache.h"
 #include "RenderNode.h"
+#include "VectorDrawable.h"
 #include "utils/PaintUtils.h"
 
 #include <SkCamera.h>
@@ -31,70 +32,64 @@
 namespace android {
 namespace uirenderer {
 
-DisplayListCanvas::DisplayListCanvas()
+DisplayListCanvas::DisplayListCanvas(int width, int height)
     : mState(*this)
     , mResourceCache(ResourceCache::getInstance())
-    , mDisplayListData(nullptr)
+    , mDisplayList(nullptr)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
     , mHasDeferredTranslate(false)
     , mDeferredBarrierType(kBarrier_None)
     , mHighContrastText(false)
     , mRestoreSaveCount(-1) {
+    resetRecording(width, height);
 }
 
 DisplayListCanvas::~DisplayListCanvas() {
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "Destroyed a DisplayListCanvas during a record!");
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Operations
-///////////////////////////////////////////////////////////////////////////////
-
-DisplayListData* DisplayListCanvas::finishRecording() {
-    mPaintMap.clear();
-    mRegionMap.clear();
-    mPathMap.clear();
-    DisplayListData* data = mDisplayListData;
-    mDisplayListData = nullptr;
-    mSkiaCanvasProxy.reset(nullptr);
-    return data;
-}
-
-void DisplayListCanvas::prepareDirty(float left, float top,
-        float right, float bottom) {
-
-    LOG_ALWAYS_FATAL_IF(mDisplayListData,
+void DisplayListCanvas::resetRecording(int width, int height) {
+    LOG_ALWAYS_FATAL_IF(mDisplayList,
             "prepareDirty called a second time during a recording!");
-    mDisplayListData = new DisplayListData();
+    mDisplayList = new DisplayList();
 
-    mState.initializeSaveStack(0, 0, mState.getWidth(), mState.getHeight(), Vector3());
+    mState.initializeSaveStack(width, height,
+            0, 0, width, height, Vector3());
 
     mDeferredBarrierType = kBarrier_InOrder;
     mState.setDirtyClip(false);
     mRestoreSaveCount = -1;
 }
 
-bool DisplayListCanvas::finish() {
+
+///////////////////////////////////////////////////////////////////////////////
+// Operations
+///////////////////////////////////////////////////////////////////////////////
+
+DisplayList* DisplayListCanvas::finishRecording() {
     flushRestoreToCount();
     flushTranslate();
-    return false;
+
+    mPaintMap.clear();
+    mRegionMap.clear();
+    mPathMap.clear();
+    DisplayList* displayList = mDisplayList;
+    mDisplayList = nullptr;
+    mSkiaCanvasProxy.reset(nullptr);
+    return displayList;
 }
 
-void DisplayListCanvas::interrupt() {
-}
-
-void DisplayListCanvas::resume() {
-}
-
-void DisplayListCanvas::callDrawGLFunction(Functor *functor) {
+void DisplayListCanvas::callDrawGLFunction(Functor* functor,
+        GlFunctorLifecycleListener* listener) {
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
-    mDisplayListData->functors.add(functor);
+    mDisplayList->functors.push_back({functor, listener});
+    mDisplayList->ref(listener);
 }
 
 SkCanvas* DisplayListCanvas::asSkCanvas() {
-    LOG_ALWAYS_FATAL_IF(!mDisplayListData,
+    LOG_ALWAYS_FATAL_IF(!mDisplayList,
             "attempting to get an SkCanvas when we are not recording!");
     if (!mSkiaCanvasProxy) {
         mSkiaCanvasProxy.reset(new SkiaCanvasProxy(this));
@@ -110,7 +105,7 @@ SkCanvas* DisplayListCanvas::asSkCanvas() {
     return mSkiaCanvasProxy.get();
 }
 
-int DisplayListCanvas::save(SkCanvas::SaveFlags flags) {
+int DisplayListCanvas::save(SaveFlags::Flags flags) {
     addStateOp(new (alloc()) SaveOp((int) flags));
     return mState.save((int) flags);
 }
@@ -133,9 +128,9 @@ void DisplayListCanvas::restoreToCount(int saveCount) {
 }
 
 int DisplayListCanvas::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* paint, SkCanvas::SaveFlags flags) {
+        const SkPaint* paint, SaveFlags::Flags flags) {
     // force matrix/clip isolation for layer
-    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+    flags |= SaveFlags::MatrixClip;
 
     paint = refPaint(paint);
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, (int) flags));
@@ -173,11 +168,6 @@ void DisplayListCanvas::skew(float sx, float sy) {
 
 void DisplayListCanvas::setMatrix(const SkMatrix& matrix) {
     addStateOp(new (alloc()) SetMatrixOp(matrix));
-    mState.setMatrix(matrix);
-}
-
-void DisplayListCanvas::setLocalMatrix(const SkMatrix& matrix) {
-    addStateOp(new (alloc()) SetLocalMatrixOp(matrix));
     mState.setMatrix(matrix);
 }
 
@@ -229,11 +219,11 @@ void DisplayListCanvas::drawRenderNode(RenderNode* renderNode) {
     addRenderNodeOp(op);
 }
 
-void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle, float x, float y) {
+void DisplayListCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     // We ref the DeferredLayerUpdater due to its thread-safe ref-counting
     // semantics.
-    mDisplayListData->ref(layerHandle);
-    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer(), x, y));
+    mDisplayList->ref(layerHandle);
+    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer()));
 }
 
 void DisplayListCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
@@ -245,7 +235,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint)
 
 void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top,
         const SkPaint* paint) {
-    save(SkCanvas::kMatrix_SaveFlag);
+    save(SaveFlags::Matrix);
     translate(left, top);
     drawBitmap(&bitmap, paint);
     restore();
@@ -266,7 +256,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matri
         drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                    dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
     } else {
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         concat(matrix);
         drawBitmap(&bitmap, paint);
         restore();
@@ -282,7 +272,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
             && (srcBottom - srcTop == dstBottom - dstTop)
             && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         translate(dstLeft, dstTop);
         drawBitmap(&bitmap, paint);
         restore();
@@ -296,7 +286,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
                 // Apply the scale transform on the canvas, so that the shader
                 // effectively calculates positions relative to src rect space
 
-                save(SkCanvas::kMatrix_SaveFlag);
+                save(SaveFlags::Matrix);
                 translate(dstLeft, dstTop);
                 scale(scaleX, scaleY);
 
@@ -330,13 +320,14 @@ void DisplayListCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, in
            vertices, colors, paint));
 }
 
-void DisplayListCanvas::drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
+void DisplayListCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& patch,
+        float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
     const SkBitmap* bitmapPtr = refBitmap(bitmap);
-    patch = refPatch(patch);
+    const Res_png_9patch* patchPtr = refPatch(&patch);
     paint = refPaint(paint);
 
-    addDrawOp(new (alloc()) DrawPatchOp(bitmapPtr, patch, left, top, right, bottom, paint));
+    addDrawOp(new (alloc()) DrawPatchOp(bitmapPtr, patchPtr,
+            dstLeft, dstTop, dstRight, dstBottom, paint));
 }
 
 void DisplayListCanvas::drawColor(int color, SkXfermode::Mode mode) {
@@ -366,13 +357,13 @@ void DisplayListCanvas::drawRoundRect(
         CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
         CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
         CanvasPropertyPaint* paint) {
-    mDisplayListData->ref(left);
-    mDisplayListData->ref(top);
-    mDisplayListData->ref(right);
-    mDisplayListData->ref(bottom);
-    mDisplayListData->ref(rx);
-    mDisplayListData->ref(ry);
-    mDisplayListData->ref(paint);
+    mDisplayList->ref(left);
+    mDisplayList->ref(top);
+    mDisplayList->ref(right);
+    mDisplayList->ref(bottom);
+    mDisplayList->ref(rx);
+    mDisplayList->ref(ry);
+    mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
             &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
@@ -384,10 +375,10 @@ void DisplayListCanvas::drawCircle(float x, float y, float radius, const SkPaint
 
 void DisplayListCanvas::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
         CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
-    mDisplayListData->ref(x);
-    mDisplayListData->ref(y);
-    mDisplayListData->ref(radius);
-    mDisplayListData->ref(paint);
+    mDisplayList->ref(x);
+    mDisplayList->ref(y);
+    mDisplayList->ref(radius);
+    mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
     addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
             &radius->value, &paint->value));
@@ -424,40 +415,24 @@ void DisplayListCanvas::drawPoints(const float* points, int count, const SkPaint
     addDrawOp(new (alloc()) DrawPointsOp(points, count, refPaint(&paint)));
 }
 
-void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
+void DisplayListCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
+    mDisplayList->ref(tree);
+    mDisplayList->pushStagingFunctors.push_back(tree->getFunctor());
+    addDrawOp(new (alloc()) DrawVectorDrawableOp(tree, tree->stagingProperties()->getBounds()));
+}
+
+void DisplayListCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int count,
         const SkPath& path, float hOffset, float vOffset, const SkPaint& paint) {
     if (!glyphs || count <= 0) return;
 
     int bytesCount = 2 * count;
-    DrawOp* op = new (alloc()) DrawTextOnPathOp(refText((const char*) glyphs, bytesCount),
+    DrawOp* op = new (alloc()) DrawTextOnPathOp(refBuffer<glyph_t>(glyphs, count),
             bytesCount, count, refPath(&path),
             hOffset, vOffset, refPaint(&paint));
     addDrawOp(op);
 }
 
-void DisplayListCanvas::drawPosText(const uint16_t* text, const float* positions,
-        int count, int posCount, const SkPaint& paint) {
-    if (!text || count <= 0) return;
-
-    int bytesCount = 2 * count;
-    positions = refBuffer<float>(positions, count * 2);
-
-    DrawOp* op = new (alloc()) DrawPosTextOp(refText((const char*) text, bytesCount),
-                                             bytesCount, count, positions, refPaint(&paint));
-    addDrawOp(op);
-}
-
-static void simplifyPaint(int color, SkPaint* paint) {
-    paint->setColor(color);
-    paint->setShader(nullptr);
-    paint->setColorFilter(nullptr);
-    paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
-    paint->setStrokeJoin(SkPaint::kRound_Join);
-    paint->setLooper(nullptr);
-}
-
-void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
+void DisplayListCanvas::drawGlyphs(const uint16_t* glyphs, const float* positions,
         int count, const SkPaint& paint, float x, float y,
         float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
         float totalAdvance) {
@@ -465,34 +440,38 @@ void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
     if (!glyphs || count <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
 
     int bytesCount = count * 2;
-    const char* text = refText((const char*) glyphs, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
     Rect bounds(boundsLeft, boundsTop, boundsRight, boundsBottom);
 
-    if (CC_UNLIKELY(mHighContrastText)) {
-        // high contrast draw path
-        int color = paint.getColor();
-        int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-        bool darken = channelSum < (128 * 3);
+    DrawOp* op = new (alloc()) DrawTextOp(refBuffer<glyph_t>(glyphs, count), bytesCount, count,
+            x, y, positions, refPaint(&paint), totalAdvance, bounds);
+    addDrawOp(op);
+    drawTextDecorations(x, y, totalAdvance, paint);
+}
 
-        // outline
-        SkPaint* outlinePaint = copyPaint(&paint);
-        simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, outlinePaint);
-        outlinePaint->setStyle(SkPaint::kStrokeAndFill_Style);
-        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, outlinePaint, totalAdvance, bounds)); // bounds?
-
-        // inner
-        SkPaint* innerPaint = copyPaint(&paint);
-        simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, innerPaint);
-        innerPaint->setStyle(SkPaint::kFill_Style);
-        addDrawOp(new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, innerPaint, totalAdvance, bounds));
+void DisplayListCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
+    if (paint.getStyle() != SkPaint::kFill_Style ||
+            (paint.isAntiAlias() && !mState.currentTransform()->isSimple())) {
+        SkRegion::Iterator it(region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, paint);
+            it.next();
+        }
     } else {
-        // standard draw path
-        DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
-                x, y, positions, refPaint(&paint), totalAdvance, bounds);
-        addDrawOp(op);
+        int count = 0;
+        Vector<float> rects;
+        SkRegion::Iterator it(region);
+        while (!it.done()) {
+            const SkIRect& r = it.rect();
+            rects.push(r.fLeft);
+            rects.push(r.fTop);
+            rects.push(r.fRight);
+            rects.push(r.fBottom);
+            count += 4;
+            it.next();
+        }
+        drawRects(rects.array(), count, &paint);
     }
 }
 
@@ -532,21 +511,26 @@ void DisplayListCanvas::flushTranslate() {
 }
 
 size_t DisplayListCanvas::addOpAndUpdateChunk(DisplayListOp* op) {
-    int insertIndex = mDisplayListData->displayListOps.add(op);
+    int insertIndex = mDisplayList->ops.size();
+#if HWUI_NEW_OPS
+    LOG_ALWAYS_FATAL("unsupported");
+#else
+    mDisplayList->ops.push_back(op);
+#endif
     if (mDeferredBarrierType != kBarrier_None) {
         // op is first in new chunk
-        mDisplayListData->chunks.push();
-        DisplayListData::Chunk& newChunk = mDisplayListData->chunks.editTop();
+        mDisplayList->chunks.emplace_back();
+        DisplayList::Chunk& newChunk = mDisplayList->chunks.back();
         newChunk.beginOpIndex = insertIndex;
         newChunk.endOpIndex = insertIndex + 1;
         newChunk.reorderChildren = (mDeferredBarrierType == kBarrier_OutOfOrder);
 
-        int nextChildIndex = mDisplayListData->children().size();
+        int nextChildIndex = mDisplayList->children.size();
         newChunk.beginChildIndex = newChunk.endChildIndex = nextChildIndex;
         mDeferredBarrierType = kBarrier_None;
     } else {
         // standard case - append to existing chunk
-        mDisplayListData->chunks.editTop().endOpIndex = insertIndex + 1;
+        mDisplayList->chunks.back().endOpIndex = insertIndex + 1;
     }
     return insertIndex;
 }
@@ -569,22 +553,24 @@ size_t DisplayListCanvas::addDrawOp(DrawOp* op) {
         op->setQuickRejected(rejected);
     }
 
-    mDisplayListData->hasDrawOps = true;
+    mDisplayList->hasDrawOps = true;
     return flushAndAddOp(op);
 }
 
 size_t DisplayListCanvas::addRenderNodeOp(DrawRenderNodeOp* op) {
     int opIndex = addDrawOp(op);
-    int childIndex = mDisplayListData->addChild(op);
+#if !HWUI_NEW_OPS
+    int childIndex = mDisplayList->addChild(op);
 
     // update the chunk's child indices
-    DisplayListData::Chunk& chunk = mDisplayListData->chunks.editTop();
+    DisplayList::Chunk& chunk = mDisplayList->chunks.back();
     chunk.endChildIndex = childIndex + 1;
 
-    if (op->renderNode()->stagingProperties().isProjectionReceiver()) {
+    if (op->renderNode->stagingProperties().isProjectionReceiver()) {
         // use staging property, since recording on UI thread
-        mDisplayListData->projectionReceiveIndex = opIndex;
+        mDisplayList->projectionReceiveIndex = opIndex;
     }
+#endif
     return opIndex;
 }
 
@@ -595,7 +581,7 @@ void DisplayListCanvas::refBitmapsInShader(const SkShader* shader) {
     // it to the bitmap pile
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
-    if (shader->asABitmap(&bitmap, nullptr, xy) == SkShader::kDefault_BitmapType) {
+    if (shader->isABitmap(&bitmap, nullptr, xy)) {
         refBitmap(bitmap);
         return;
     }

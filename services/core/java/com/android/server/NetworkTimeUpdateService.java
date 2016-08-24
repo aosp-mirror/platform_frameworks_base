@@ -23,8 +23,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -34,9 +36,13 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.NtpTrustedTime;
+import android.util.TimeUtils;
 import android.util.TrustedTime;
 
 import com.android.internal.telephony.TelephonyIntents;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Monitors the network time and updates the system time if it is out of sync
@@ -48,7 +54,7 @@ import com.android.internal.telephony.TelephonyIntents;
  * available.
  * </p>
  */
-public class NetworkTimeUpdateService {
+public class NetworkTimeUpdateService extends Binder {
 
     private static final String TAG = "NetworkTimeUpdateService";
     private static final boolean DBG = false;
@@ -59,6 +65,8 @@ public class NetworkTimeUpdateService {
 
     private static final String ACTION_POLL =
             "com.android.server.NetworkTimeUpdateService.action.POLL";
+
+    private static final int NETWORK_CHANGE_EVENT_DELAY_MS = 1000;
     private static int POLL_REQUEST = 0;
 
     private static final long NOT_SET = -1;
@@ -245,6 +253,7 @@ public class NetworkTimeUpdateService {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (DBG) Log.d(TAG, "Received " + action);
             if (TelephonyIntents.ACTION_NETWORK_SET_TIME.equals(action)) {
                 mNitzTimeSetTime = SystemClock.elapsedRealtime();
             } else if (TelephonyIntents.ACTION_NETWORK_SET_TIMEZONE.equals(action)) {
@@ -260,8 +269,11 @@ public class NetworkTimeUpdateService {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+                if (DBG) Log.d(TAG, "Received CONNECTIVITY_ACTION ");
                 // Don't bother checking if we have connectivity, NtpTrustedTime does that for us.
-                mHandler.obtainMessage(EVENT_NETWORK_CHANGED).sendToTarget();
+                Message message = mHandler.obtainMessage(EVENT_NETWORK_CHANGED);
+                // Send with a short delay to make sure the network is ready for use
+                mHandler.sendMessageDelayed(message, NETWORK_CHANGE_EVENT_DELAY_MS);
             }
         }
     };
@@ -307,5 +319,29 @@ public class NetworkTimeUpdateService {
         public void onChange(boolean selfChange) {
             mHandler.obtainMessage(mMsg).sendToTarget();
         }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump NetworkTimeUpdateService from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " without permission "
+                    + android.Manifest.permission.DUMP);
+            return;
+        }
+        pw.print("PollingIntervalMs: ");
+        TimeUtils.formatDuration(mPollingIntervalMs, pw);
+        pw.print("\nPollingIntervalShorterMs: ");
+        TimeUtils.formatDuration(mPollingIntervalShorterMs, pw);
+        pw.println("\nTryAgainTimesMax: " + mTryAgainTimesMax);
+        pw.print("TimeErrorThresholdMs: ");
+        TimeUtils.formatDuration(mTimeErrorThresholdMs, pw);
+        pw.println("\nTryAgainCounter: " + mTryAgainCounter);
+        pw.print("LastNtpFetchTime: ");
+        TimeUtils.formatDuration(mLastNtpFetchTime, pw);
+        pw.println();
     }
 }

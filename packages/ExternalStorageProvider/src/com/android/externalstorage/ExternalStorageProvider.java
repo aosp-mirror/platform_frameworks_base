@@ -25,13 +25,16 @@ import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.UserHandle;
+import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
@@ -39,6 +42,8 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.provider.DocumentArchiveHelper;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
@@ -59,6 +64,7 @@ import java.util.List;
 public class ExternalStorageProvider extends DocumentsProvider {
     private static final String TAG = "ExternalStorage";
 
+    private static final boolean DEBUG = false;
     private static final boolean LOG_INOTIFY = false;
 
     public static final String AUTHORITY = "com.android.externalstorage.documents";
@@ -85,12 +91,15 @@ public class ExternalStorageProvider extends DocumentsProvider {
         public String docId;
         public File visiblePath;
         public File path;
+        public boolean reportAvailableBytes = true;
     }
 
     private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
+    private static final String ROOT_ID_HOME = "home";
 
     private StorageManager mStorageManager;
     private Handler mHandler;
+    private DocumentArchiveHelper mArchiveHelper;
 
     private final Object mRootsLock = new Object();
 
@@ -104,6 +113,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public boolean onCreate() {
         mStorageManager = (StorageManager) getContext().getSystemService(Context.STORAGE_SERVICE);
         mHandler = new Handler();
+        mArchiveHelper = new DocumentArchiveHelper(this, (char) 0);
 
         updateVolumes();
         return true;
@@ -118,6 +128,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     private void updateVolumesLocked() {
         mRoots.clear();
 
+        VolumeInfo primaryVolume = null;
         final int userId = UserHandle.myUserId();
         final List<VolumeInfo> volumes = mStorageManager.getVolumes();
         for (VolumeInfo volume : volumes) {
@@ -128,10 +139,25 @@ public class ExternalStorageProvider extends DocumentsProvider {
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
                 // We currently only support a single emulated volume mounted at
                 // a time, and it's always considered the primary
+                if (DEBUG) Log.d(TAG, "Found primary volume: " + volume);
                 rootId = ROOT_ID_PRIMARY_EMULATED;
+
                 if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
-                    title = getContext().getString(R.string.root_internal_storage);
+                    // This is basically the user's primary device storage.
+                    // Use device name for the volume since this is likely same thing
+                    // the user sees when they mount their phone on another device.
+                    String deviceName = Settings.Global.getString(
+                            getContext().getContentResolver(), Settings.Global.DEVICE_NAME);
+
+                    // Device name should always be set. In case it isn't, though,
+                    // fall back to a localized "Internal Storage" string.
+                    title = !TextUtils.isEmpty(deviceName)
+                            ? deviceName
+                            : getContext().getString(R.string.root_internal_storage);
                 } else {
+                    // This should cover all other storage devices, like an SD card
+                    // or USB OTG drive plugged in. Using getBestVolumeDescription()
+                    // will give us a nice string like "Samsung SD card" or "SanDisk USB drive"
                     final VolumeInfo privateVol = mStorageManager.findPrivateForEmulated(volume);
                     title = mStorageManager.getBestVolumeDescription(privateVol);
                 }
@@ -152,25 +178,73 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 continue;
             }
 
+            final RootInfo root = new RootInfo();
+            mRoots.put(rootId, root);
+
+            root.rootId = rootId;
+            root.flags = Root.FLAG_LOCAL_ONLY
+                    | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
+
+            final DiskInfo disk = volume.getDisk();
+            if (DEBUG) Log.d(TAG, "Disk for root " + rootId + " is " + disk);
+            if (disk != null && disk.isSd()) {
+                root.flags |= Root.FLAG_REMOVABLE_SD;
+            } else if (disk != null && disk.isUsb()) {
+                root.flags |= Root.FLAG_REMOVABLE_USB;
+            }
+
+            if (volume.isPrimary()) {
+                // save off the primary volume for subsequent "Home" dir initialization.
+                primaryVolume = volume;
+                root.flags |= Root.FLAG_ADVANCED;
+            }
+            // Dunno when this would NOT be the case, but never hurts to be correct.
+            if (volume.isMountedWritable()) {
+                root.flags |= Root.FLAG_SUPPORTS_CREATE;
+            }
+            root.title = title;
+            if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
+                root.flags |= Root.FLAG_HAS_SETTINGS;
+            }
+            if (volume.isVisibleForRead(userId)) {
+                root.visiblePath = volume.getPathForUser(userId);
+            } else {
+                root.visiblePath = null;
+            }
+            root.path = volume.getInternalPathForUser(userId);
             try {
-                final RootInfo root = new RootInfo();
-                mRoots.put(rootId, root);
-
-                root.rootId = rootId;
-                root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
-                        | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
-                root.title = title;
-                if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
-                    root.flags |= Root.FLAG_HAS_SETTINGS;
-                }
-                if (volume.isVisibleForRead(userId)) {
-                    root.visiblePath = volume.getPathForUser(userId);
-                } else {
-                    root.visiblePath = null;
-                }
-                root.path = volume.getInternalPathForUser(userId);
                 root.docId = getDocIdForFile(root.path);
+            } catch (FileNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
+        }
 
+        // Finally, if primary storage is available we add the "Documents" directory.
+        // If I recall correctly the actual directory is created on demand
+        // by calling either getPathForUser, or getInternalPathForUser.
+        if (primaryVolume != null && primaryVolume.isVisible()) {
+            final RootInfo root = new RootInfo();
+            root.rootId = ROOT_ID_HOME;
+            mRoots.put(root.rootId, root);
+            root.title = getContext().getString(R.string.root_documents);
+
+            // Only report bytes on *volumes*...as a matter of policy.
+            root.reportAvailableBytes = false;
+            root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_SEARCH
+                    | Root.FLAG_SUPPORTS_IS_CHILD;
+
+            // Dunno when this would NOT be the case, but never hurts to be correct.
+            if (primaryVolume.isMountedWritable()) {
+                root.flags |= Root.FLAG_SUPPORTS_CREATE;
+            }
+
+            // Create the "Documents" directory on disk (don't use the localized title).
+            root.visiblePath = new File(
+                    primaryVolume.getPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
+            root.path = new File(
+                    primaryVolume.getInternalPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
+            try {
+                root.docId = getDocIdForFile(root.path);
             } catch (FileNotFoundException e) {
                 throw new IllegalStateException(e);
             }
@@ -192,7 +266,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
 
+
     private String getDocIdForFile(File file) throws FileNotFoundException {
+        return getDocIdForFileMaybeCreate(file, false);
+    }
+
+    private String getDocIdForFileMaybeCreate(File file, boolean createNewDir)
+            throws FileNotFoundException {
         String path = file.getAbsolutePath();
 
         // Find the most-specific root path
@@ -222,6 +302,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
             path = path.substring(rootPath.length());
         } else {
             path = path.substring(rootPath.length() + 1);
+        }
+
+        if (!file.exists() && createNewDir) {
+            Log.i(TAG, "Creating new directory " + file);
+            if (!file.mkdir()) {
+                Log.e(TAG, "Could not create directory " + file);
+            }
         }
 
         return mostSpecificId + ':' + path;
@@ -273,15 +360,21 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
                 flags |= Document.FLAG_SUPPORTS_DELETE;
                 flags |= Document.FLAG_SUPPORTS_RENAME;
+                flags |= Document.FLAG_SUPPORTS_MOVE;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
                 flags |= Document.FLAG_SUPPORTS_DELETE;
                 flags |= Document.FLAG_SUPPORTS_RENAME;
+                flags |= Document.FLAG_SUPPORTS_MOVE;
             }
         }
 
-        final String displayName = file.getName();
         final String mimeType = getTypeForFile(file);
+        if (mArchiveHelper.isSupportedArchiveType(mimeType)) {
+            flags |= Document.FLAG_ARCHIVE;
+        }
+
+        final String displayName = file.getName();
         if (mimeType.startsWith("image/")) {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
@@ -292,6 +385,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         row.add(Document.COLUMN_SIZE, file.length());
         row.add(Document.COLUMN_MIME_TYPE, mimeType);
         row.add(Document.COLUMN_FLAGS, flags);
+        row.add(DocumentArchiveHelper.COLUMN_LOCAL_FILE_PATH, file.getPath());
 
         // Only publish dates reasonably after epoch
         long lastModified = file.lastModified();
@@ -310,7 +404,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 row.add(Root.COLUMN_FLAGS, root.flags);
                 row.add(Root.COLUMN_TITLE, root.title);
                 row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
-                row.add(Root.COLUMN_AVAILABLE_BYTES, root.path.getFreeSpace());
+                row.add(Root.COLUMN_AVAILABLE_BYTES,
+                        root.reportAvailableBytes ? root.path.getFreeSpace() : -1);
             }
         }
         return result;
@@ -319,6 +414,14 @@ public class ExternalStorageProvider extends DocumentsProvider {
     @Override
     public boolean isChildDocument(String parentDocId, String docId) {
         try {
+            if (mArchiveHelper.isArchivedDocument(docId)) {
+                return mArchiveHelper.isChildDocument(parentDocId, docId);
+            }
+            // Archives do not contain regular files.
+            if (mArchiveHelper.isArchivedDocument(parentDocId)) {
+                return false;
+            }
+
             final File parent = getFileForDocId(parentDocId).getCanonicalFile();
             final File doc = getFileForDocId(docId).getCanonicalFile();
             return FileUtils.contains(parent, doc);
@@ -409,8 +512,28 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
+    public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
+            String targetParentDocumentId)
+            throws FileNotFoundException {
+        final File before = getFileForDocId(sourceDocumentId);
+        final File after = new File(getFileForDocId(targetParentDocumentId), before.getName());
+
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+        if (!before.renameTo(after)) {
+            throw new IllegalStateException("Failed to move to " + after);
+        }
+        return getDocIdForFile(after);
+    }
+
+    @Override
     public Cursor queryDocument(String documentId, String[] projection)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.queryDocument(documentId, projection);
+        }
+
         final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
         includeFile(result, documentId, null);
         return result;
@@ -420,6 +543,11 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public Cursor queryChildDocuments(
             String parentDocumentId, String[] projection, String sortOrder)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(parentDocumentId) ||
+                mArchiveHelper.isSupportedArchiveType(getDocumentType(parentDocumentId))) {
+            return mArchiveHelper.queryChildDocuments(parentDocumentId, projection, sortOrder);
+        }
+
         final File parent = getFileForDocId(parentDocumentId);
         final MatrixCursor result = new DirectoryCursor(
                 resolveDocumentProjection(projection), parentDocumentId, parent);
@@ -457,6 +585,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     @Override
     public String getDocumentType(String documentId) throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.getDocumentType(documentId);
+        }
+
         final File file = getFileForDocId(documentId);
         return getTypeForFile(file);
     }
@@ -465,6 +597,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.openDocument(documentId, mode, signal);
+        }
+
         final File file = getFileForDocId(documentId);
         final File visibleFile = getFileForDocId(documentId, true);
 
@@ -493,6 +629,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public AssetFileDescriptor openDocumentThumbnail(
             String documentId, Point sizeHint, CancellationSignal signal)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.openDocumentThumbnail(documentId, sizeHint, signal);
+        }
+
         final File file = getFileForDocId(documentId);
         return DocumentsContract.openImageThumbnail(file);
     }
@@ -516,6 +656,34 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 pw.println();
             }
         }
+    }
+
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        Bundle bundle = super.call(method, arg, extras);
+        if (bundle == null && !TextUtils.isEmpty(method)) {
+            switch (method) {
+                case "getDocIdForFileCreateNewDir": {
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.MANAGE_DOCUMENTS, null);
+                    if (TextUtils.isEmpty(arg)) {
+                        return null;
+                    }
+                    try {
+                        final String docId = getDocIdForFileMaybeCreate(new File(arg), true);
+                        bundle = new Bundle();
+                        bundle.putString("DOC_ID", docId);
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "file '" + arg + "' not found");
+                        return null;
+                    }
+                    break;
+                }
+                default:
+                    Log.w(TAG, "unknown method passed to call(): " + method);
+            }
+        }
+        return bundle;
     }
 
     private static String getTypeForFile(File file) {

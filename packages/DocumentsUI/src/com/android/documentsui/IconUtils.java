@@ -23,13 +23,11 @@ import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
 import android.util.TypedValue;
 
-import com.google.android.collect.Maps;
-
 import java.util.HashMap;
 
 public class IconUtils {
 
-    private static HashMap<String, Integer> sMimeIcons = Maps.newHashMap();
+    private static HashMap<String, Integer> sMimeIcons = new HashMap<>();
 
     private static void add(String mimeType, int resId) {
         if (sMimeIcons.put(mimeType, resId) != null) {
@@ -161,8 +159,8 @@ public class IconUtils {
         add("application/vnd.sun.xml.calc.template", icon);
         add("application/x-kspread", icon);
 
-        // Text
-        icon = R.drawable.ic_doc_text;
+        // Document
+        icon = R.drawable.ic_doc_document;
         add("application/vnd.oasis.opendocument.text", icon);
         add("application/vnd.oasis.opendocument.text-master", icon);
         add("application/vnd.oasis.opendocument.text-template", icon);
@@ -224,7 +222,7 @@ public class IconUtils {
                 return context.getDrawable(R.drawable.ic_doc_album);
             }
 
-            if (mode == DocumentsActivity.State.MODE_GRID) {
+            if (mode == State.MODE_GRID) {
                 return context.getDrawable(R.drawable.ic_grid_folder);
             } else {
                 return context.getDrawable(R.drawable.ic_doc_folder);

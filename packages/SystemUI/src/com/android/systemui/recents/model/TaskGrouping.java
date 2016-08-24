@@ -1,7 +1,8 @@
 package com.android.systemui.recents.model;
 
+import android.util.ArrayMap;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /** Represents a grouping of tasks witihin a stack. */
 public class TaskGrouping {
@@ -11,7 +12,7 @@ public class TaskGrouping {
 
     Task.TaskKey mFrontMostTaskKey;
     ArrayList<Task.TaskKey> mTaskKeys = new ArrayList<Task.TaskKey>();
-    HashMap<Task.TaskKey, Integer> mTaskKeyIndices = new HashMap<Task.TaskKey, Integer>();
+    ArrayMap<Task.TaskKey, Integer> mTaskKeyIndices = new ArrayMap<>();
 
     /** Creates a group with a specified affiliation. */
     public TaskGrouping(int affiliation) {
@@ -94,9 +95,9 @@ public class TaskGrouping {
             return;
         }
 
+        int taskCount = mTaskKeys.size();
         mFrontMostTaskKey = mTaskKeys.get(mTaskKeys.size() - 1);
         mTaskKeyIndices.clear();
-        int taskCount = mTaskKeys.size();
         for (int i = 0; i < taskCount; i++) {
             Task.TaskKey k = mTaskKeys.get(i);
             mTaskKeyIndices.put(k, i);

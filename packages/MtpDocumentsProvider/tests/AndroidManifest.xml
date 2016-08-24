@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.mtp.tests"
+    android:sharedUserId="android.media">
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.mtp.TestResultActivity"
+                  android:screenOrientation="locked"
+                  android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+    <instrumentation android:name="com.android.mtp.TestResultInstrumentation"
+        android:targetPackage="com.android.mtp"
+        android:label="Tests for MtpDocumentsProvider with the UI for output." />
+</manifest>

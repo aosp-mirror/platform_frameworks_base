@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
@@ -46,10 +47,11 @@ public class LockIcon extends KeyguardAffordanceView {
     private boolean mDeviceInteractive;
     private boolean mScreenOn;
     private boolean mLastScreenOn;
-    private final TrustDrawable mTrustDrawable;
+    private TrustDrawable mTrustDrawable;
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
     private boolean mHasFingerPrintIcon;
+    private int mDensity;
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -89,7 +91,24 @@ public class LockIcon extends KeyguardAffordanceView {
         update();
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        final int density = newConfig.densityDpi;
+        if (density != mDensity) {
+            mDensity = density;
+            mTrustDrawable.stop();
+            mTrustDrawable = new TrustDrawable(getContext());
+            setBackground(mTrustDrawable);
+            update();
+        }
+    }
+
     public void update() {
+        update(false /* force */);
+    }
+
+    public void update(boolean force) {
         boolean visible = isShown()
                 && KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         if (visible) {
@@ -103,7 +122,7 @@ public class LockIcon extends KeyguardAffordanceView {
         boolean useAdditionalPadding = anyFingerprintIcon;
         boolean trustHidden = anyFingerprintIcon;
         if (state != mLastState || mDeviceInteractive != mLastDeviceInteractive
-                || mScreenOn != mLastScreenOn) {
+                || mScreenOn != mLastScreenOn || force) {
             boolean isAnim = true;
             int iconRes = getAnimationResForTransition(mLastState, state, mLastDeviceInteractive,
                     mDeviceInteractive, mLastScreenOn, mScreenOn);

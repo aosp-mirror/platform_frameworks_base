@@ -15,6 +15,8 @@
  */
 package android.speech.tts;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -38,6 +40,8 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,6 +78,12 @@ public class TextToSpeech {
      * client should never expect to see this result code.
      */
     public static final int STOPPED = -2;
+
+    /** @hide */
+    @IntDef({ERROR_SYNTHESIS, ERROR_SERVICE, ERROR_OUTPUT, ERROR_NETWORK, ERROR_NETWORK_TIMEOUT,
+             ERROR_INVALID_REQUEST, ERROR_NOT_INSTALLED_YET})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Error {}
 
     /**
      * Denotes a failure of a TTS engine to synthesize the given input.
@@ -656,7 +666,7 @@ public class TextToSpeech {
     private OnInitListener mInitListener;
     // Written from an unspecified application thread, read from
     // a binder thread.
-    private volatile UtteranceProgressListener mUtteranceProgressListener;
+    @Nullable private volatile UtteranceProgressListener mUtteranceProgressListener;
     private final Object mStartLock = new Object();
 
     private String mRequestedEngine;
@@ -2122,6 +2132,23 @@ public class TextToSpeech {
                 UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
                     listener.onStart(utteranceId);
+                }
+            }
+
+            @Override
+            public void onBeginSynthesis(String utteranceId, int sampleRateInHz, int audioFormat,
+                                     int channelCount) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onBeginSynthesis(utteranceId, sampleRateInHz, audioFormat, channelCount);
+                }
+            }
+
+            @Override
+            public void onAudioAvailable(String utteranceId, byte[] audio) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onAudioAvailable(utteranceId, audio);
                 }
             }
         };

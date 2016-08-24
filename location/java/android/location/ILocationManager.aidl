@@ -21,9 +21,9 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
-import android.location.IGpsMeasurementsListener;
-import android.location.IGpsNavigationMessageListener;
-import android.location.IGpsStatusListener;
+import android.location.IGnssMeasurementsListener;
+import android.location.IGnssStatusListener;
+import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationListener;
 import android.location.Location;
 import android.location.LocationRequest;
@@ -48,8 +48,8 @@ interface ILocationManager
 
     Location getLastLocation(in LocationRequest request, String packageName);
 
-    boolean addGpsStatusListener(IGpsStatusListener listener, String packageName);
-    void removeGpsStatusListener(IGpsStatusListener listener);
+    boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName);
+    void unregisterGnssStatusCallback(IGnssStatusListener callback);
 
     boolean geocoderIsPresent();
     String getFromLocation(double latitude, double longitude, int maxResults,
@@ -61,13 +61,15 @@ interface ILocationManager
 
     boolean sendNiResponse(int notifId, int userResponse);
 
-    boolean addGpsMeasurementsListener(in IGpsMeasurementsListener listener, in String packageName);
-    void removeGpsMeasurementsListener(in IGpsMeasurementsListener listener);
+    boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
+    void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
-    boolean addGpsNavigationMessageListener(
-            in IGpsNavigationMessageListener listener,
+    boolean addGnssNavigationMessageListener(
+            in IGnssNavigationMessageListener listener,
             in String packageName);
-    void removeGpsNavigationMessageListener(in IGpsNavigationMessageListener listener);
+    void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
+
+    int getGnssYearOfHardware();
 
     // --- deprecated ---
     List<String> getAllProviders();

@@ -23,6 +23,8 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
+import com.android.tools.layoutlib.java.System_Delegate;
+import com.android.util.PropertiesMap;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,20 +71,8 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
-    public Map<String, String> getDefaultProperties(Object viewObject) {
-        return mSession.getDefaultProperties(viewObject);
-    }
-
-    @Override
-    public Result getProperty(Object objectView, String propertyName) {
-        // pass
-        return super.getProperty(objectView, propertyName);
-    }
-
-    @Override
-    public Result setProperty(Object objectView, String propertyName, String propertyValue) {
-        // pass
-        return super.setProperty(objectView, propertyName, propertyValue);
+    public Map<Object, PropertiesMap> getDefaultProperties() {
+        return mSession.getDefaultProperties();
     }
 
     @Override
@@ -191,7 +181,27 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
+    public void setSystemTimeNanos(long nanos) {
+        System_Delegate.setNanosTime(nanos);
+    }
+
+    @Override
+    public void setSystemBootTimeNanos(long nanos) {
+        System_Delegate.setBootTimeNanos(nanos);
+    }
+
+    @Override
+    public void setElapsedFrameTimeNanos(long nanos) {
+        if (mSession != null) {
+            mSession.setElapsedFrameTimeNanos(nanos);
+        }
+    }
+
+    @Override
     public void dispose() {
+        if (mSession != null) {
+            mSession.dispose();
+        }
     }
 
     /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {

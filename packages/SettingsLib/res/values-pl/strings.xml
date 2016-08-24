@@ -91,8 +91,255 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Tethering przez Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Tethering"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Tethering i punkt dostępu"</string>
-    <string name="managed_user_title" msgid="8101244883654409696">"Profil do pracy"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"Wszystkie aplikacje do pracy"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gość"</string>
     <string name="unknown" msgid="1592123443519355854">"Nieznana"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Użytkownik: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Część ustawień domyślnych"</string>
+    <string name="launch_defaults_none" msgid="4241129108140034876">"Brak ustawień domyślnych"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Zamiana tekstu na mowę"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Zamiana tekstu na mowę"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Szybkość mowy"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Szybkość czytania tekstu"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tony"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Wpływa na dźwięk syntezatora mowy"</string>
+    <string name="tts_default_lang_title" msgid="8018087612299820556">"Język"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Użyj języka systemu"</string>
+    <string name="tts_lang_not_selected" msgid="7395787019276734765">"Nie wybrano języka"</string>
+    <string name="tts_default_lang_summary" msgid="5219362163902707785">"Ustawia zależny od języka głos dla czytanych tekstów"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"Posłuchaj przykładu"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"Odtwórz krótką prezentację syntezy mowy"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Zainstaluj dane głosowe"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Zainstaluj dane głosowe wymagane do syntezy mowy"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ten mechanizm syntezy mowy może gromadzić cały odczytywany tekst, w tym dane osobiste w postaci haseł i numerów kart kredytowych. Nazwa mechanizmu to <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Włączyć ten mechanizm syntezy mowy?"</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Do przetwarzania tekstu na mowę w tym języku wymagane jest działające połączenie sieciowe."</string>
+    <string name="tts_default_sample_string" msgid="4040835213373086322">"To jest przykład syntezy mowy"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Stan domyślnego języka"</string>
+    <string name="tts_status_ok" msgid="1309762510278029765">"Język <xliff:g id="LOCALE">%1$s</xliff:g> jest w pełni obsługiwany"</string>
+    <string name="tts_status_requires_network" msgid="6042500821503226892">"Język <xliff:g id="LOCALE">%1$s</xliff:g> wymaga połączenia z siecią"</string>
+    <string name="tts_status_not_supported" msgid="4491154212762472495">"Język <xliff:g id="LOCALE">%1$s</xliff:g> nie jest obsługiwany"</string>
+    <string name="tts_status_checking" msgid="5339150797940483592">"Sprawdzam…"</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Ustawienia <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_button" msgid="1030512042040722285">"Otwórz ustawienia mechanizmu"</string>
+    <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Preferowany mechanizm"</string>
+    <string name="tts_general_section_title" msgid="4402572014604490502">"Ogólne"</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Zresetuj ton głosu"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Przywróć domyślny ton głosu czytającego tekst."</string>
+  <string-array name="tts_rate_entries">
+    <item msgid="6695494874362656215">"Bardzo wolno"</item>
+    <item msgid="4795095314303559268">"Powoli"</item>
+    <item msgid="8903157781070679765">"Normalnie"</item>
+    <item msgid="164347302621392996">"Szybko"</item>
+    <item msgid="5794028588101562009">"Trochę szybciej"</item>
+    <item msgid="7163942783888652942">"Szybciej"</item>
+    <item msgid="7831712693748700507">"Jeszcze szybciej"</item>
+    <item msgid="5194774745031751806">"Bardzo szybko"</item>
+    <item msgid="9085102246155045744">"Najszybciej"</item>
+  </string-array>
+    <string name="choose_profile" msgid="8229363046053568878">"Wybierz profil"</string>
+    <string name="category_personal" msgid="1299663247844969448">"Osobiste"</string>
+    <string name="category_work" msgid="8699184680584175622">"Praca"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opcje programistyczne"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Włącz opcje dla programistów"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"Ustaw opcje związane z programowaniem aplikacji."</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"Opcje programisty są niedostępne dla tego użytkownika"</string>
+    <string name="vpn_settings_not_available" msgid="956841430176985598">"Ustawienia VPN są niedostępne dla tego użytkownika"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Ustawienia tetheringu są niedostępne dla tego użytkownika"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Ustawienia nazwy punktu dostępu są niedostępne dla tego użytkownika"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Debugowanie USB"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Tryb debugowania, gdy podłączone jest USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Odwołaj dostęp do debugowania USB"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Skrót do zgłoszenia błędu"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Pokaż w menu zasilania przycisk zgłaszania błędu"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"Pozostaw ekran włączony"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekran nie będzie gaszony podczas ładowania telefonu"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Włącz dziennik snoop Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Przechwyć wszystkie pakiety Bluetooth HCI do pliku"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"Zdjęcie blokady OEM"</string>
+    <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Zezwalaj na odblokowanie programu rozruchowego"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Zezwolić na zdjęcie blokady OEM?"</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UWAGA: gdy to ustawienie jest włączone, na urządzeniu nie będą działać funkcje ochrony."</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Aplikacja do pozorowania lokalizacji"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Nie ustawiono aplikacji do pozorowania lokalizacji"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacja do pozorowania lokalizacji: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Sieci"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Wyświetlacz bezprzewodowy"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Szczegółowy dziennik Wi-Fi"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Przełączaj na sieć komórkową"</string>
+    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Zawsze szukaj Wi-Fi w roamingu"</string>
+    <string name="mobile_data_always_on" msgid="7745605759775320362">"Dane komórkowe zawsze aktywne"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Wyłącz głośność bezwzględną"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaż opcje certyfikacji wyświetlacza bezprzewodowego"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zwiększ poziom rejestrowania Wi‑Fi, pokazuj według RSSI SSID w selektorze Wi‑Fi"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Po włączeniu połączenie danych będzie bardziej agresywnie przełączać się z Wi-Fi na sieć komórkową przy słabym sygnale Wi-Fi"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Zezwalaj/nie zezwalaj na wyszukiwanie sieci Wi-Fi w roamingu w zależności od natężenia ruchu"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Rozmiary bufora Rejestratora"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Wybierz rozmiary Rejestratora/bufor dziennika"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Wyczyścić pamięć trwałych dzienników?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Po zakończeniu monitorowania przy użyciu trwale zapisywanych dzienników musimy usunąć ich dane zapisane na urządzeniu."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Zapisuj trwale dane dzienników"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Wybierz bufory dziennika, które mają być trwale przechowywane na urządzeniu"</string>
+    <string name="select_usb_configuration_title" msgid="2649938511506971843">"Wybierz konfigurację USB"</string>
+    <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Wybierz konfigurację USB"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"Pozorowanie lokalizacji"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"Zezwalaj na pozorowanie lokalizacji"</string>
+    <string name="debug_view_attributes" msgid="6485448367803310384">"Inspekcja wyświetlania atrybutu"</string>
+    <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Użyj klienta DHCP z Lollipop zamiast nowego klienta DHCP Androida"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Nie wyłączaj transmisji danych przez sieć komórkową, nawet gdy aktywne jest połączenie Wi-Fi (aby szybko przełączać sieci)"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Czy zezwalać na debugowanie USB?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Debugowanie USB jest przeznaczone wyłącznie do celów programistycznych. Może służyć do kopiowania danych między komputerem a urządzeniem, instalowania aplikacji na urządzeniu bez powiadamiania, a także odczytu danych dziennika."</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Odwołać dostęp wszystkich poprzednio autoryzowanych komputerów do debugowania USB?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Zezwolić na ustawienia programistyczne?"</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Te ustawienia są przeznaczone wyłącznie dla programistów. Ich użycie może spowodować uszkodzenie lub nieprawidłowe działanie urządzenia i zainstalowanych na nim aplikacji."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Zweryfikuj aplikacje przez USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sprawdź, czy aplikacje zainstalowane przez ADB/ADT nie zachowują się w szkodliwy sposób"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Wyłącza funkcję Głośność bezwzględna Bluetooth, jeśli występują problemy z urządzeniami zdalnymi, np. zbyt duża głośność lub brak kontroli."</string>
+    <string name="enable_terminal_title" msgid="95572094356054120">"Terminal lokalny"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Włącz terminal, który umożliwia dostęp do powłoki lokalnej"</string>
+    <string name="hdcp_checking_title" msgid="8605478913544273282">"Sprawdzanie HDCP"</string>
+    <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Ustaw sprawdzanie HDCP"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Debugowanie"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Aplikacja do debugowania"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Nie ustawiono aplikacji do debugowania"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Aplikacja do debugowania: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="select_application" msgid="5156029161289091703">"Wybierz aplikację"</string>
+    <string name="no_application" msgid="2813387563129153880">"Brak"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Poczekaj na debugera"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacja do debugowania czeka na przyłączenie debugera"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Ekran dotykowy"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Rysowanie"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Sprzętowa akceleracja renderowania"</string>
+    <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
+    <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorowanie"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Tryb ścisły włączony"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Miganie ekranu podczas długich operacji w wątku głównym"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Lokalizacja wskaźnika"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Nakładka pokazująca dane o dotknięciach ekranu"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Pokaż dotknięcia"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Pokaż potwierdzenie wizualne po dotknięciu"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Pokaż zmiany powierzchni"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Podświetlaj całe aktualizowane powierzchnie okien"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Pokaż zmiany widoku z GPU"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Podświetlaj elementy w oknach, jeśli są rysowane przez GPU"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Pokaż zmiany warstw sprzęt."</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Oznaczaj aktualizowane warstwy sprzętowe na zielono"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Debuguj przerysowania GPU"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Wyłącz nakładki HW"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Zawsze używaj GPU do komponowania ekranu"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Symuluj przestrzeń kolorów"</string>
+    <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Włącz śledzenie OpenGL"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Wyłącz kierowanie dźwiękowe USB"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Wyłącz auto kierowanie do urządzeń peryferyjnych audio USB"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Pokaż granice układu"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"Pokaż granice przycięcia, marginesy itd."</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Układ od prawej do lewej"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Wymuś wszędzie układ ekranu od prawej do lewej"</string>
+    <string name="show_cpu_usage" msgid="2389212910758076024">"Pokaż użycie procesora"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"Nakładka na ekranie pokazująca użycie procesora"</string>
+    <string name="force_hw_ui" msgid="6426383462520888732">"Renderowanie na GPU"</string>
+    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Wymuszaj użycie GPU do rysowania 2D"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Wymuś 4x MSAA"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"Włącz 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Debuguj operacje przycinania nieprostokątnego"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Profil renderowania GPU"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Skala animacji okna"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Skala animacji przejścia"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Skala długości animacji"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Symuluj ekrany dodatkowe"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacje"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"Nie zachowuj działań"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Przerwij każde działanie, gdy użytkownik je porzuci"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Limit procesów w tle"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Pokaż wszystkie ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Pokaż okno Aplikacja Nie Reaguje dla aplikacji w tle"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Wymuś zezwalanie na aplikacje w pamięci zewn."</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Wymuś zmianę rozmiaru okien aktywności"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Zezwól na zmianę rozmiaru wszystkich okien aktywności w trybie wielu okien niezależnie od ustawień w pliku manifestu."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Włącz dowolny rozmiar okien"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Włącz obsługę eksperymentalnej funkcji dowolnego rozmiaru okien."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Hasło kopii zapasowej"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Pełne kopie zapasowe na komputerze nie są obecnie chronione"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Dotknij, by zmienić lub usunąć hasło pełnych kopii zapasowych na komputerze."</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nowe hasło kopii zapasowej zostało ustawione"</string>
+    <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nowe hasła nie pasują do siebie"</string>
+    <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nie udało się ustawić hasła kopii zapasowej"</string>
+  <string-array name="color_mode_names">
+    <item msgid="2425514299220523812">"Żywe (domyślnie)"</item>
+    <item msgid="8446070607501413455">"Naturalne"</item>
+    <item msgid="6553408765810699025">"Standardowe"</item>
+  </string-array>
+  <string-array name="color_mode_descriptions">
+    <item msgid="4979629397075120893">"Bogatsze kolory"</item>
+    <item msgid="8280754435979370728">"Naturalne kolory widziane przez ludzkie oko"</item>
+    <item msgid="5363960654009010371">"Kolory dostosowane do wyświetlania treści cyfrowych"</item>
+  </string-array>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"Nieaktywne aplikacje"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Nieaktywna. Dotknij, by zmienić."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktywna. Dotknij, by zmienić."</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Uruchomione usługi"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Wyświetl obecnie uruchomione usługi i zarządzaj nimi"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Wieloprocesowy WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Uruchom mechanizmy renderowania WebView osobno"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacja WebView"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ustaw implementację WebView"</string>
+    <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ta opcja nie jest już obsługiwana. Spróbuj ponownie."</string>
+    <string name="convert_to_file_encryption" msgid="3060156730651061223">"Przekształć na szyfrowanie plików"</string>
+    <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Przekształć…"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Pliki są już zaszyfrowane"</string>
+    <string name="title_convert_fbe" msgid="1263622876196444453">"Przekształcanie na szyfrowanie plików"</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Przekształć zwykłą partycję danych w system szyfrowania plików.\n !!Ostrzeżenie!! Spowoduje to wykasowanie wszystkich Twoich danych.\n Ta funkcja jest w wersji alfa i może działać nieprawidłowo.\n Naciśnij „Wyczyść i przekształć…”, by kontynuować."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Wyczyść i przekształć…"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Tryb kolorów obrazu"</string>
+    <string name="picture_color_mode_desc" msgid="1141891467675548590">"Użyj sRGB"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Wyłączona"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monochromatyzm"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomalia (czerwony-zielony)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomalia (czerwony-zielony)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomalia (niebieski-żółty)"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korekcja kolorów"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"To jest funkcja eksperymentalna i może wpływać na działanie urządzenia."</string>
+    <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Nadpisana przez <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Pozostało około <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Zostało <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – zostało ok. <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">%1$s</xliff:g> – zostało <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania"</string>
+    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania z gniazdka"</string>
+    <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania przez USB"</string>
+    <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do pełnego naładowania bezprzewodowo"</string>
+    <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"Nieznane"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Ładowanie"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Ładowanie zasilaczem"</string>
+    <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Ładowanie"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Ładowanie przez USB"</string>
+    <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Ładowanie"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Ład. bezprzewodowe"</string>
+    <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Ładowanie"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"Nie podłączony"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nie podłączony"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Naładowana"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolowane przez administratora"</string>
+    <string name="enabled_by_admin" msgid="2386503803463071894">"Włączone przez administratora"</string>
+    <string name="disabled_by_admin" msgid="3669999613095206948">"Wyłączone przez administratora"</string>
+    <string name="home" msgid="3256884684164448244">"Ekran główny ustawień"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> temu"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Pozostało <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Mały"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Domyślny"</string>
+    <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Duży"</string>
+    <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Większy"</string>
+    <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Największy"</string>
+    <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Niestandardowe (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Pomoc i opinie"</string>
 </resources>

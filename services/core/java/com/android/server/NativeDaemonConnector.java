@@ -28,6 +28,7 @@ import android.util.LocalLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
 
@@ -57,6 +59,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private LocalLog mLocalLog;
 
     private volatile boolean mDebug = false;
+    private volatile Object mWarnIfHeld;
 
     private final ResponseQueue mResponseQueue;
 
@@ -107,6 +110,23 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         mDebug = debug;
     }
 
+    /**
+     * Like SystemClock.uptimeMillis, except truncated to an int so it will fit in a message arg.
+     * Inaccurate across 49.7 days of uptime, but only used for debugging.
+     */
+    private int uptimeMillisInt() {
+        return (int) SystemClock.uptimeMillis() & Integer.MAX_VALUE;
+    }
+
+    /**
+     * Yell loudly if someone tries making future {@link #execute(Command)}
+     * calls while holding a lock on the given object.
+     */
+    public void setWarnIfHeld(Object warnIfHeld) {
+        Preconditions.checkState(mWarnIfHeld == null);
+        mWarnIfHeld = Preconditions.checkNotNull(warnIfHeld);
+    }
+
     @Override
     public void run() {
         mCallbackHandler = new Handler(mLooper, this);
@@ -123,7 +143,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     @Override
     public boolean handleMessage(Message msg) {
-        String event = (String) msg.obj;
+        final String event = (String) msg.obj;
+        final int start = uptimeMillisInt();
+        final int sent = msg.arg1;
         try {
             if (!mCallbacks.onEvent(msg.what, event, NativeDaemonEvent.unescapeArgs(event))) {
                 log(String.format("Unhandled event '%s'", event));
@@ -133,6 +155,13 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         } finally {
             if (mCallbacks.onCheckHoldWakeLock(msg.what) && mWakeLock != null) {
                 mWakeLock.release();
+            }
+            final int end = uptimeMillisInt();
+            if (start > sent && start - sent > WARN_EXECUTE_DELAY_MS) {
+                loge(String.format("NDC event {%s} processed too late: %dms", event, start - sent));
+            }
+            if (end > start && end - start > WARN_EXECUTE_DELAY_MS) {
+                loge(String.format("NDC event {%s} took too long: %dms", event, end - start));
             }
         }
         return true;
@@ -166,6 +195,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
             mCallbacks.onDaemonConnected();
 
+            FileDescriptor[] fdList = null;
             byte[] buffer = new byte[BUFFER_SIZE];
             int start = 0;
 
@@ -175,6 +205,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     loge("got " + count + " reading with start = " + start);
                     break;
                 }
+                fdList = socket.getAncillaryFileDescriptors();
 
                 // Add our starting point to the count and reset the start.
                 count += start;
@@ -189,8 +220,8 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
                         boolean releaseWl = false;
                         try {
-                            final NativeDaemonEvent event = NativeDaemonEvent.parseRawEvent(
-                                    rawEvent);
+                            final NativeDaemonEvent event =
+                                    NativeDaemonEvent.parseRawEvent(rawEvent, fdList);
 
                             log("RCV <- {" + event + "}");
 
@@ -201,8 +232,9 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                     mWakeLock.acquire();
                                     releaseWl = true;
                                 }
-                                if (mCallbackHandler.sendMessage(mCallbackHandler.obtainMessage(
-                                        event.getCode(), event.getRawEvent()))) {
+                                Message msg = mCallbackHandler.obtainMessage(
+                                        event.getCode(), uptimeMillisInt(), 0, event.getRawEvent());
+                                if (mCallbackHandler.sendMessage(msg)) {
                                     releaseWl = false;
                                 }
                             } else {
@@ -212,7 +244,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                             log("Problem parsing message " + e);
                         } finally {
                             if (releaseWl) {
-                                mWakeLock.acquire();
+                                mWakeLock.release();
                             }
                         }
 
@@ -313,6 +345,30 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
+     * Method that waits until all asychronous notifications sent by the native daemon have
+     * been processed. This method must not be called on the notification thread or an
+     * exception will be thrown.
+     */
+    public void waitForCallbacks() {
+        if (Thread.currentThread() == mLooper.getThread()) {
+            throw new IllegalStateException("Must not call this method on callback thread");
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mCallbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Slog.wtf(TAG, "Interrupted while waiting for unsolicited response handling", e);
+        }
+    }
+
+    /**
      * Issue the given command to the native daemon and return a single expected
      * response.
      *
@@ -394,6 +450,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent[] executeForList(long timeoutMs, String cmd, Object... args)
             throws NativeDaemonConnectorException {
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
+        }
+
         final long startTime = SystemClock.elapsedRealtime();
 
         final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();

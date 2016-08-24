@@ -17,14 +17,13 @@
 #ifndef AAPT_SOURCE_H
 #define AAPT_SOURCE_H
 
+#include "util/Maybe.h"
+#include "util/StringPiece.h"
+
 #include <ostream>
 #include <string>
-#include <tuple>
 
 namespace aapt {
-
-struct SourceLineColumn;
-struct SourceLine;
 
 /**
  * Represents a file on disk. Used for logging and
@@ -32,57 +31,48 @@ struct SourceLine;
  */
 struct Source {
     std::string path;
+    Maybe<size_t> line;
 
-    inline SourceLine line(size_t line) const;
-};
+    Source() = default;
 
-/**
- * Represents a file on disk and a line number in that file.
- * Used for logging and showing errors.
- */
-struct SourceLine {
-    std::string path;
-    size_t line;
+    inline Source(const StringPiece& path) : path(path.toString()) {
+    }
 
-    inline SourceLineColumn column(size_t column) const;
-};
+    inline Source(const StringPiece& path, size_t line) : path(path.toString()), line(line) {
+    }
 
-/**
- * Represents a file on disk and a line:column number in that file.
- * Used for logging and showing errors.
- */
-struct SourceLineColumn {
-    std::string path;
-    size_t line;
-    size_t column;
+    inline Source withLine(size_t line) const {
+        return Source(path, line);
+    }
 };
 
 //
 // Implementations
 //
 
-SourceLine Source::line(size_t line) const {
-    return SourceLine{ path, line };
-}
-
-SourceLineColumn SourceLine::column(size_t column) const {
-    return SourceLineColumn{ path, line, column };
-}
-
 inline ::std::ostream& operator<<(::std::ostream& out, const Source& source) {
-    return out << source.path;
+    out << source.path;
+    if (source.line) {
+        out << ":" << source.line.value();
+    }
+    return out;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const SourceLine& source) {
-    return out << source.path << ":" << source.line;
+inline bool operator==(const Source& lhs, const Source& rhs) {
+    return lhs.path == rhs.path && lhs.line == rhs.line;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out, const SourceLineColumn& source) {
-    return out << source.path << ":" << source.line << ":" << source.column;
-}
-
-inline bool operator<(const SourceLine& lhs, const SourceLine& rhs) {
-    return std::tie(lhs.path, lhs.line) < std::tie(rhs.path, rhs.line);
+inline bool operator<(const Source& lhs, const Source& rhs) {
+    int cmp = lhs.path.compare(rhs.path);
+    if (cmp < 0) return true;
+    if (cmp > 0) return false;
+    if (lhs.line) {
+        if (rhs.line) {
+            return lhs.line.value() < rhs.line.value();
+        }
+        return false;
+    }
+    return bool(rhs.line);
 }
 
 } // namespace aapt

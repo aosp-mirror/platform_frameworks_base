@@ -17,11 +17,11 @@
 #ifndef ANDROID_HWUI_CANVAS_STATE_H
 #define ANDROID_HWUI_CANVAS_STATE_H
 
+#include "Snapshot.h"
+
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkRegion.h>
-
-#include "Snapshot.h"
 
 namespace android {
 namespace uirenderer {
@@ -71,7 +71,7 @@ public:
  * (getClip/Matrix), but so that quickRejection can also be used.
  */
 
-class ANDROID_API CanvasState {
+class CanvasState {
 public:
     explicit CanvasState(CanvasStateClient& renderer);
     ~CanvasState();
@@ -80,10 +80,15 @@ public:
      * Initializes the first snapshot, computing the projection matrix,
      * and stores the dimensions of the render target.
      */
-    void initializeSaveStack(float clipLeft, float clipTop, float clipRight, float clipBottom,
-            const Vector3& lightCenter);
+    void initializeRecordingSaveStack(int viewportWidth, int viewportHeight);
 
-    void setViewport(int width, int height);
+    /**
+     * Initializes the first snapshot, computing the projection matrix,
+     * and stores the dimensions of the render target.
+     */
+    void initializeSaveStack(int viewportWidth, int viewportHeight,
+            float clipLeft, float clipTop, float clipRight, float clipBottom,
+            const Vector3& lightCenter);
 
     bool hasRectToRectTransform() const {
         return CC_LIKELY(currentTransform()->rectToRect());
@@ -148,7 +153,7 @@ public:
     void setInvisible(bool value) { mSnapshot->invisible = value; }
 
     inline const mat4* currentTransform() const { return currentSnapshot()->transform; }
-    inline const Rect& currentClipRect() const { return currentSnapshot()->getClipRect(); }
+    inline const Rect& currentRenderTargetClip() const { return currentSnapshot()->getRenderTargetClip(); }
     inline Region* currentRegion() const { return currentSnapshot()->region; }
     inline int currentFlags() const { return currentSnapshot()->flags; }
     const Vector3& currentLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }
@@ -159,17 +164,17 @@ public:
     int getHeight() const { return mHeight; }
     bool clipIsSimple() const { return currentSnapshot()->clipIsSimple(); }
 
-    inline const Snapshot* currentSnapshot() const {
-        return mSnapshot != nullptr ? mSnapshot.get() : mFirstSnapshot.get();
-    }
-    inline Snapshot* writableSnapshot() { return mSnapshot.get(); }
-    inline const Snapshot* firstSnapshot() const { return mFirstSnapshot.get(); }
+    inline const Snapshot* currentSnapshot() const { return mSnapshot; }
+    inline Snapshot* writableSnapshot() { return mSnapshot; }
+    inline const Snapshot* firstSnapshot() const { return &mFirstSnapshot; }
 
 private:
-    /// No default constructor - must supply a CanvasStateClient (mCanvas).
-    CanvasState();
+    Snapshot* allocSnapshot(Snapshot* previous, int savecount);
+    void freeSnapshot(Snapshot* snapshot);
+    void freeAllSnapshots();
 
     /// indicates that the clip has been changed since the last time it was consumed
+    // TODO: delete when switching to HWUI_NEW_OPS
     bool mDirtyClip;
 
     /// Dimensions of the drawing surface
@@ -179,13 +184,18 @@ private:
     int mSaveCount;
 
     /// Base state
-    sp<Snapshot> mFirstSnapshot;
+    Snapshot mFirstSnapshot;
 
     /// Host providing callbacks
     CanvasStateClient& mCanvas;
 
     /// Current state
-    sp<Snapshot> mSnapshot;
+    Snapshot* mSnapshot;
+
+    // Pool of allocated snapshots to re-use
+    // NOTE: The dtors have already been invoked!
+    Snapshot* mSnapshotPool = nullptr;
+    int mSnapshotPoolCount = 0;
 
 }; // class CanvasState
 

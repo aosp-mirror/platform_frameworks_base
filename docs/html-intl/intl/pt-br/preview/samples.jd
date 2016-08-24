@@ -1,70 +1,85 @@
 page.title=Exemplos
-page.image=images/cards/samples-new_2x.png
+page.tags="preview", "samples", "android"
+page.image=images/cards/card-n-samples_2x.png
 @jd:body
 
 <p>
-  Os seguintes exemplos de código são fornecidos para o M Developer Preview. Para fazer o download
- dos exemplos no Android Studio, selecione a opção do menu <b>File (Arquivo) &gt; Import Samples (Importar exemplos)</b>.
+  Os exemplos de código a seguir são fornecidos para o Android N. Para
+ fazer o download dos exemplos no Android Studio, selecione a opção de menu <b>File &gt; Import
+ Samples</b>.
 </p>
 
 <p class="note">
-  <strong>Observação:</strong> estes projetos disponíveis para download foram feitos
-para serem usados com Gradle e Android Studio.
+  <strong>Observação:</strong> Esses projetos disponíveis para download são projetados
+ para uso com Gradle e Android Studio.
 </p>
 
 
-<h3 id="RuntimePermissions">Permissões em tempo de execução</h3>
-
+<h3 id="mw">Interface com várias janelas</h3>
+<img src="{@docRoot}preview/images/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
 <p>
- O Android M altera a maneira como as permissões do sistema funcionam. Os usuários são solicitados a aprovar
- as permissões em tempo de execução em vez de aprovar durante a instalação. Este exemplo mostra como solicitar
- essas permissões.
+  Este exemplo demonstra como aproveitar as vantagens de interfaces de usuário com várias janelas
+ com seu aplicativo.
 </p>
-
-<p><a href="https://github.com/googlesamples/android-RuntimePermissions">Obtenha isto no GitHub</a></p>
-
-<h3 id="ConfirmCredentials">Confirmação de credencial</h3>
-
 <p>
- Este exemplo demonstra como usar as credenciais do dispositivo como um método de autenticação no aplicativo.
+  <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
+Obter no GitHub</a>
 </p>
 
-<p><a href="https://github.com/googlesamples/android-ConfirmCredential">Obtenha isto
-no GitHub</a></p>
-
-<h3 id="FingerprintDialog">Diálogo de impressão digital</h3>
-
+<div style="clear: both;"></div>
+<h3 id="an">Notificações ativas</h3>
+<img src="{@docRoot}preview/images/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
- Este exemplo demonstra como reconhecer as impressões digitais registradas para autenticar o usuário
- no aplicativo.
+  Este é um exemplo pré-existente que mostra um serviço simples que envia
+ notificações usando NotificationCompat. Cada conversa não lida de um usuário
+ é enviada como uma notificação distinta.
 </p>
-
-<p><a href="https://github.com/googlesamples/android-FingerprintDialog">Obtenha isto no GitHub</a></p>
-
-<h3 id="AutomaticBackup">Backup automático para aplicativos</h3>
-
 <p>
- O Android M introduz o backup automático para as configurações de aplicativos. Este exemplo demonstra como adicionar
- regras de filtro a um aplicativo para gerenciar o backup de configurações.
+  Este exemplo foi atualizado para utilizar os novos recursos de notificação
+ disponíveis no Android N.
 </p>
-
-<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">Obtenha isto no GitHub</a></p>
-
-<h3 id="CameraRaw">Câmera 2 Bruta</h3>
-
 <p>
-  Demonstra como usar a API <code>Camera2</code> API para capturar buffers de câmera RAW e salvá-los
- como arquivos <code>DNG</code>.
+  <a href="https://github.com/googlesamples/android-ActiveNotifications">
+Obter no GitHub</a>
 </p>
 
-<p><a href="https://github.com/googlesamples/android-Camera2Raw">Obtenha isto no GitHub</a></p>
-
-<h3 id="ActiveNotification">Notificação ativa</h3>
-
+<div style="clear: both;"></div>
+<h3 id="ms">Serviço de mensagens</h3>
+<img src="{@docRoot}preview/images/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
 <p>
-  Este exemplo demonstra como o
- <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
- pode dizer quantas notificações o aplicativo está exibindo.
+  Este é um exemplo pré-existente que demonstra como usar o
+ NotificationManager para identificar quantas notificações um aplicativo está mostrando
+ no momento.
+</p>
+<p>
+  Este exemplo foi atualizado para utilizar os novos recursos de notificação
+ disponíveis no Android N.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-MessagingService">
+Obter no GitHub</a>
 </p>
 
-<p><a href="https://github.com/googlesamples/android-ActiveNotifications">Obtenha isto no GitHub</a></p>
+<div style="clear: both;"></div>
+<h3 id="fbe">Inicialização direta</h3>
+<img src="{@docRoot}preview/images/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Este exemplo demonstra como armazenar e acessar dados no armazenamento criptografado de um dispositivo
+ que está sempre disponível enquanto o dispositivo é inicializado.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-DirectBoot">
+Obter no GitHub</a>
+</p>
+
+<div style="clear: both;"></div>
+<h3 id="sda">Acesso a diretórios com escopo</h3>
+<img src="{@docRoot}preview/images/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
+<p>
+  Este exemplo demonstra como ler e gravar dados de diretórios
+ específicos exigindo menos permissões.
+</p>
+<p>
+  <a href="https://github.com/googlesamples/android-ScopedDirectoryAccess">
+Obter no GitHub</a>
+</p>

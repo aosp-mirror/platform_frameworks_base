@@ -1,10 +1,10 @@
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
@@ -14,16 +14,15 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-
-import java.util.concurrent.CountDownLatch;
 
 /** @hide */
 @SystemApi
 public class RttManager {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "RttManager";
 
     /** @deprecated It is Not supported anymore. */
@@ -136,6 +135,9 @@ public class RttManager {
     public static final int REASON_INVALID_REQUEST          = -4;
     /** Do not have required permission */
     public static final int REASON_PERMISSION_DENIED        = -5;
+    /** Ranging failed because responder role is enabled in STA mode.*/
+    public static final int
+            REASON_INITIATOR_NOT_ALLOWED_WHEN_RESPONDER_ON  = -6;
 
     public static final String DESCRIPTION_KEY  = "android.net.wifi.RttManager.Description";
 
@@ -191,6 +193,14 @@ public class RttManager {
         public int preambleSupported;
         //RTT bandwidth supported
         public int bwSupported;
+        // Whether STA responder role is supported.
+        public boolean responderSupported;
+
+        /** Whether the secure RTT protocol is supported. */
+        public boolean secureRttSupported;
+
+        /** Draft 11mc version supported, including major and minor version. e.g, draft 4.3 is 43 */
+        public int mcVersion;
 
         @Override
         public String toString() {
@@ -216,7 +226,7 @@ public class RttManager {
                 sb.append("VHT ");
             }
 
-            sb.append("is supported. \n");
+            sb.append("is supported. ");
 
             if ((bwSupported & RTT_BW_5_SUPPORT) != 0) {
                 sb.append("5 MHz ");
@@ -244,6 +254,12 @@ public class RttManager {
 
             sb.append("is supported.");
 
+            sb.append(" STA responder role is ")
+                    .append(responderSupported ? "supported" : "not supported");
+            sb.append(" Secure RTT protocol is ")
+                    .append(secureRttSupported ? "supported" : "not supported");
+            sb.append(" 11mc version is " + mcVersion);
+
             return sb.toString();
         }
         /** Implement the Parcelable interface {@hide} */
@@ -261,22 +277,28 @@ public class RttManager {
             dest.writeInt(lcrSupported ? 1 : 0);
             dest.writeInt(preambleSupported);
             dest.writeInt(bwSupported);
-
+            dest.writeInt(responderSupported ? 1 : 0);
+            dest.writeInt(secureRttSupported ? 1 : 0);
+            dest.writeInt(mcVersion);
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<RttCapabilities> CREATOR =
             new Creator<RttCapabilities>() {
-               public RttCapabilities createFromParcel(Parcel in) {
-                    RttCapabilities capabilities = new RttCapabilities();
-                    capabilities.oneSidedRttSupported = in.readInt() == 1 ? true : false;
-                        capabilities.twoSided11McRttSupported = in.readInt() == 1 ? true : false;
-                        capabilities.lciSupported = in.readInt() == 1 ? true : false;
-                        capabilities.lcrSupported = in.readInt() == 1 ? true : false;
-                        capabilities.preambleSupported = in.readInt();
-                        capabilities.bwSupported = in.readInt();
-                        return capabilities;
-                    }
+            @Override
+            public RttCapabilities createFromParcel(Parcel in) {
+                RttCapabilities capabilities = new RttCapabilities();
+                capabilities.oneSidedRttSupported = (in.readInt() == 1);
+                capabilities.twoSided11McRttSupported = (in.readInt() == 1);
+                capabilities.lciSupported = (in.readInt() == 1);
+                capabilities.lcrSupported = (in.readInt() == 1);
+                capabilities.preambleSupported = in.readInt();
+                capabilities.bwSupported = in.readInt();
+                capabilities.responderSupported = (in.readInt() == 1);
+                capabilities.secureRttSupported = (in.readInt() == 1);
+                capabilities.mcVersion = in.readInt();
+                return capabilities;
+            }
                 /** Implement the Parcelable interface {@hide} */
                 @Override
                 public RttCapabilities[] newArray(int size) {
@@ -286,12 +308,12 @@ public class RttManager {
     }
 
     public RttCapabilities getRttCapabilities() {
-        synchronized (sCapabilitiesLock) {
+        synchronized (mCapabilitiesLock) {
             if (mRttCapabilities == null) {
                 try {
                     mRttCapabilities = mService.getRttCapabilities();
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Can not get RTT Capabilities");
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return mRttCapabilities;
@@ -313,6 +335,11 @@ public class RttManager {
          * Default value: RTT_TYPE_ONE_SIDED
          */
         public int requestType;
+
+        /**
+         * Whether the secure RTT protocol needs to be used for ranging this peer device.
+         */
+        public boolean secure;
 
         /**
          * mac address of the device being ranged
@@ -450,62 +477,63 @@ public class RttManager {
     /** pseudo-private class used to parcel arguments */
     public static class ParcelableRttParams implements Parcelable {
 
+        @NonNull
         public RttParams mParams[];
 
-        ParcelableRttParams(RttParams[] params) {
-            mParams = params;
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public ParcelableRttParams(RttParams[] params) {
+            mParams = (params == null ? new RttParams[0] : params);
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public int describeContents() {
             return 0;
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
-            if (mParams != null) {
-                dest.writeInt(mParams.length);
+            dest.writeInt(mParams.length);
 
-                for (RttParams params : mParams) {
-                    dest.writeInt(params.deviceType);
-                    dest.writeInt(params.requestType);
-                    dest.writeString(params.bssid);
-                    dest.writeInt(params.channelWidth);
-                    dest.writeInt(params.frequency);
-                    dest.writeInt(params.centerFreq0);
-                    dest.writeInt(params.centerFreq1);
-                    dest.writeInt(params.numberBurst);
-                    dest.writeInt(params.interval);
-                    dest.writeInt(params.numSamplesPerBurst);
-                    dest.writeInt(params.numRetriesPerMeasurementFrame);
-                    dest.writeInt(params.numRetriesPerFTMR);
-                    dest.writeInt(params.LCIRequest ? 1 : 0);
-                    dest.writeInt(params.LCRRequest ? 1 : 0);
-                    dest.writeInt(params.burstTimeout);
-                    dest.writeInt(params.preamble);
-                    dest.writeInt(params.bandwidth);
-                }
-            } else {
-                dest.writeInt(0);
+            for (RttParams params : mParams) {
+                dest.writeInt(params.deviceType);
+                dest.writeInt(params.requestType);
+                dest.writeByte(params.secure ? (byte) 1 : 0);
+                dest.writeString(params.bssid);
+                dest.writeInt(params.channelWidth);
+                dest.writeInt(params.frequency);
+                dest.writeInt(params.centerFreq0);
+                dest.writeInt(params.centerFreq1);
+                dest.writeInt(params.numberBurst);
+                dest.writeInt(params.interval);
+                dest.writeInt(params.numSamplesPerBurst);
+                dest.writeInt(params.numRetriesPerMeasurementFrame);
+                dest.writeInt(params.numRetriesPerFTMR);
+                dest.writeInt(params.LCIRequest ? 1 : 0);
+                dest.writeInt(params.LCRRequest ? 1 : 0);
+                dest.writeInt(params.burstTimeout);
+                dest.writeInt(params.preamble);
+                dest.writeInt(params.bandwidth);
             }
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ParcelableRttParams> CREATOR =
                 new Creator<ParcelableRttParams>() {
+                    @Override
                     public ParcelableRttParams createFromParcel(Parcel in) {
 
                         int num = in.readInt();
-
-                        if (num == 0) {
-                            return new ParcelableRttParams(null);
-                        }
-
                         RttParams params[] = new RttParams[num];
                         for (int i = 0; i < num; i++) {
                             params[i] = new RttParams();
                             params[i].deviceType = in.readInt();
                             params[i].requestType = in.readInt();
+                            params[i].secure = (in.readByte() != 0);
                             params[i].bssid = in.readString();
                             params[i].channelWidth = in.readInt();
                             params[i].frequency = in.readInt();
@@ -516,8 +544,8 @@ public class RttManager {
                             params[i].numSamplesPerBurst = in.readInt();
                             params[i].numRetriesPerMeasurementFrame = in.readInt();
                             params[i].numRetriesPerFTMR = in.readInt();
-                            params[i].LCIRequest = in.readInt() == 1 ? true : false;
-                            params[i].LCRRequest = in.readInt() == 1 ? true : false;
+                            params[i].LCIRequest = (in.readInt() == 1);
+                            params[i].LCRRequest = (in.readInt() == 1);
                             params[i].burstTimeout = in.readInt();
                             params[i].preamble = in.readInt();
                             params[i].bandwidth = in.readInt();
@@ -527,6 +555,7 @@ public class RttManager {
                         return parcelableParams;
                     }
 
+                    @Override
                     public ParcelableRttParams[] newArray(int size) {
                         return new ParcelableRttParams[size];
                     }
@@ -662,7 +691,7 @@ public class RttManager {
 
         /**
          * spread (i.e. max - min) distance
-         * @deprecate Use {@link android.net.wifi.RttManager.RttResult#distanceSpread} API.
+         * @deprecated Use {@link android.net.wifi.RttManager.RttResult#distanceSpread} API.
          */
         @Deprecated
         public int distance_spread_cm;
@@ -681,6 +710,11 @@ public class RttManager {
 
         /** LCR information Element, only available to double side RTT. */
         public WifiInformationElement LCR;
+
+        /**
+         * Whether the secure RTT protocol was used for ranging.
+         */
+        public boolean secure;
     }
 
 
@@ -694,11 +728,13 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public int describeContents() {
             return 0;
         }
 
         /** Implement the Parcelable interface {@hide} */
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             if (mResults != null) {
                 dest.writeInt(mResults.length);
@@ -733,6 +769,7 @@ public class RttManager {
                         dest.writeInt((byte) result.LCR.data.length);
                         dest.writeByte(result.LCR.id);
                     }
+                    dest.writeByte(result.secure ? (byte) 1 : 0);
                 }
             } else {
                 dest.writeInt(0);
@@ -742,6 +779,7 @@ public class RttManager {
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ParcelableRttResults> CREATOR =
                 new Creator<ParcelableRttResults>() {
+                    @Override
                     public ParcelableRttResults createFromParcel(Parcel in) {
 
                         int num = in.readInt();
@@ -787,12 +825,14 @@ public class RttManager {
                                 results[i].LCR.data = new byte[length];
                                 in.readByteArray(results[i].LCR.data);
                             }
+                            results[i].secure = (in.readByte() != 0);
                         }
 
                         ParcelableRttResults parcelableResults = new ParcelableRttResults(results);
                         return parcelableResults;
                     }
 
+                    @Override
                     public ParcelableRttResults[] newArray(int size) {
                         return new ParcelableRttResults[size];
                     }
@@ -889,13 +929,167 @@ public class RttManager {
         validateChannel();
         ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
         Log.i(TAG, "Send RTT request to RTT Service");
-        sAsyncChannel.sendMessage(CMD_OP_START_RANGING,
+        mAsyncChannel.sendMessage(CMD_OP_START_RANGING,
                 0, putListener(listener), parcelableParams);
     }
 
     public void stopRanging(RttListener listener) {
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
+    }
+
+    /**
+     * Callbacks for responder operations.
+     * <p>
+     * A {@link ResponderCallback} is the handle to the calling client. {@link RttManager} will keep
+     * a reference to the callback for the entire period when responder is enabled. The same
+     * callback as used in enabling responder needs to be passed for disabling responder.
+     * The client can freely destroy or reuse the callback after {@link RttManager#disableResponder}
+     * is called.
+     */
+    public abstract static class ResponderCallback {
+        /** Callback when responder is enabled. */
+        public abstract void onResponderEnabled(ResponderConfig config);
+        /** Callback when enabling responder failed. */
+        public abstract void onResponderEnableFailure(int reason);
+        // TODO: consider adding onResponderAborted once it's supported.
+    }
+
+    /**
+     * Enable Wi-Fi RTT responder mode on the device. The enabling result will be delivered via
+     * {@code callback}.
+     * <p>
+     * Note calling this method with the same callback when the responder is already enabled won't
+     * change the responder state, a cached {@link ResponderConfig} from the last enabling will be
+     * returned through the callback.
+     *
+     * @param callback Callback for responder enabling/disabling result.
+     * @throws IllegalArgumentException If {@code callback} is null.
+     */
+    public void enableResponder(ResponderCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+        validateChannel();
+        int key = putListenerIfAbsent(callback);
+        mAsyncChannel.sendMessage(CMD_OP_ENABLE_RESPONDER, 0, key);
+    }
+
+    /**
+     * Disable Wi-Fi RTT responder mode on the device. The {@code callback} needs to be the
+     * same one used in {@link #enableResponder(ResponderCallback)}.
+     * <p>
+     * Calling this method when responder isn't enabled won't have any effect. The callback can be
+     * reused for enabling responder after this method is called.
+     *
+     * @param callback The same callback used for enabling responder.
+     * @throws IllegalArgumentException If {@code callback} is null.
+     */
+    public void disableResponder(ResponderCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+        validateChannel();
+        int key = removeListener(callback);
+        if (key == INVALID_KEY) {
+            Log.e(TAG, "responder not enabled yet");
+            return;
+        }
+        mAsyncChannel.sendMessage(CMD_OP_DISABLE_RESPONDER, 0, key);
+    }
+
+    /**
+     * Configuration used for RTT responder mode. The configuration information can be used by a
+     * peer device to range the responder.
+     *
+     * @see ScanResult
+     */
+    public static class ResponderConfig implements Parcelable {
+
+        // TODO: make all fields final once we can get mac address from responder HAL APIs.
+        /**
+         * Wi-Fi mac address used for responder mode.
+         */
+        public String macAddress = "";
+
+        /**
+         * The primary 20 MHz frequency (in MHz) of the channel where responder is enabled.
+         * @see ScanResult#frequency
+         */
+        public int frequency;
+
+        /**
+         * Center frequency of the channel where responder is enabled on. Only in use when channel
+         * width is at least 40MHz.
+         * @see ScanResult#centerFreq0
+         */
+        public int centerFreq0;
+
+        /**
+         * Center frequency of the second segment when channel width is 80 + 80 MHz.
+         * @see ScanResult#centerFreq1
+         */
+        public int centerFreq1;
+
+        /**
+         * Width of the channel where responder is enabled on.
+         * @see ScanResult#channelWidth
+         */
+        public int channelWidth;
+
+        /**
+         * Preamble supported by responder.
+         */
+        public int preamble;
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("macAddress = ").append(macAddress)
+                    .append(" frequency = ").append(frequency)
+                    .append(" centerFreq0 = ").append(centerFreq0)
+                    .append(" centerFreq1 = ").append(centerFreq1)
+                    .append(" channelWidth = ").append(channelWidth)
+                    .append(" preamble = ").append(preamble);
+            return builder.toString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(macAddress);
+            dest.writeInt(frequency);
+            dest.writeInt(centerFreq0);
+            dest.writeInt(centerFreq1);
+            dest.writeInt(channelWidth);
+            dest.writeInt(preamble);
+        }
+
+        /** Implement {@link Parcelable} interface */
+        public static final Parcelable.Creator<ResponderConfig> CREATOR =
+                new Parcelable.Creator<ResponderConfig>() {
+            @Override
+            public ResponderConfig createFromParcel(Parcel in) {
+                ResponderConfig config = new ResponderConfig();
+                config.macAddress = in.readString();
+                config.frequency = in.readInt();
+                config.centerFreq0 = in.readInt();
+                config.centerFreq1 = in.readInt();
+                config.channelWidth = in.readInt();
+                config.preamble = in.readInt();
+                return config;
+            }
+
+            @Override
+            public ResponderConfig[] newArray(int size) {
+                return new ResponderConfig[size];
+            }
+        };
+
     }
 
     /* private methods */
@@ -906,24 +1100,24 @@ public class RttManager {
     public static final int CMD_OP_FAILED               = BASE + 2;
     public static final int CMD_OP_SUCCEEDED            = BASE + 3;
     public static final int CMD_OP_ABORTED              = BASE + 4;
-
-    private Context mContext;
-    private IRttManager mService;
-    private RttCapabilities mRttCapabilities;
+    public static final int CMD_OP_ENABLE_RESPONDER     = BASE + 5;
+    public static final int CMD_OP_DISABLE_RESPONDER    = BASE + 6;
+    public static final int
+            CMD_OP_ENALBE_RESPONDER_SUCCEEDED           = BASE + 7;
+    public static final int
+            CMD_OP_ENALBE_RESPONDER_FAILED              = BASE + 8;
 
     private static final int INVALID_KEY = 0;
-    private static int sListenerKey = 1;
 
-    private static final SparseArray sListenerMap = new SparseArray();
-    private static final Object sListenerMapLock = new Object();
-    private static final Object sCapabilitiesLock = new Object();
+    private final Context mContext;
+    private final IRttManager mService;
+    private final SparseArray mListenerMap = new SparseArray();
+    private final Object mListenerMapLock = new Object();
+    private final Object mCapabilitiesLock = new Object();
 
-    private static AsyncChannel sAsyncChannel;
-    private static CountDownLatch sConnected;
-
-    private static final Object sThreadRefLock = new Object();
-    private static int sThreadRefCount;
-    private static HandlerThread sHandlerThread;
+    private RttCapabilities mRttCapabilities;
+    private int mListenerKey = 1;
+    private AsyncChannel mAsyncChannel;
 
     /**
      * Create a new WifiScanner instance.
@@ -932,105 +1126,107 @@ public class RttManager {
      * the standard {@link android.content.Context#WIFI_RTT_SERVICE Context.WIFI_RTT_SERVICE}.
      * @param context the application context
      * @param service the Binder interface
+     * @param looper Looper for running the callbacks.
+     *
      * @hide
      */
-
-    public RttManager(Context context, IRttManager service) {
+    public RttManager(Context context, IRttManager service, Looper looper) {
         mContext = context;
         mService = service;
-        init();
-    }
-
-    private void init() {
-        synchronized (sThreadRefLock) {
-            if (++sThreadRefCount == 1) {
-                Messenger messenger = null;
-                try {
-                    Log.d(TAG, "Get the messenger from " + mService);
-                    messenger = mService.getMessenger();
-                } catch (RemoteException e) {
-                    /* do nothing */
-                } catch (SecurityException e) {
-                    /* do nothing */
-                }
-
-                if (messenger == null) {
-                    sAsyncChannel = null;
-                    return;
-                }
-
-                sHandlerThread = new HandlerThread("RttManager");
-                sAsyncChannel = new AsyncChannel();
-                sConnected = new CountDownLatch(1);
-
-                sHandlerThread.start();
-                Handler handler = new ServiceHandler(sHandlerThread.getLooper());
-                sAsyncChannel.connect(mContext, handler, messenger);
-                try {
-                    sConnected.await();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "interrupted wait at init");
-                }
-            }
+        Messenger messenger = null;
+        try {
+            Log.d(TAG, "Get the messenger from " + mService);
+            messenger = mService.getMessenger();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
+
+        if (messenger == null) {
+            throw new IllegalStateException("getMessenger() returned null!  This is invalid.");
+        }
+
+        mAsyncChannel = new AsyncChannel();
+
+        Handler handler = new ServiceHandler(looper);
+        mAsyncChannel.connectSync(mContext, handler, messenger);
+        // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
+        // synchronously, which causes RttService to receive the wrong replyTo value.
+        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
     }
 
     private void validateChannel() {
-        if (sAsyncChannel == null) throw new IllegalStateException(
+        if (mAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
     }
 
-    private static int putListener(Object listener) {
+    private int putListener(Object listener) {
         if (listener == null) return INVALID_KEY;
         int key;
-        synchronized (sListenerMapLock) {
+        synchronized (mListenerMapLock) {
             do {
-                key = sListenerKey++;
+                key = mListenerKey++;
             } while (key == INVALID_KEY);
-            sListenerMap.put(key, listener);
+            mListenerMap.put(key, listener);
         }
         return key;
     }
 
-    private static Object getListener(int key) {
+    // Insert a listener if it doesn't exist in mListenerMap. Returns the key of the listener.
+    private int putListenerIfAbsent(Object listener) {
+        if (listener == null) return INVALID_KEY;
+        synchronized (mListenerMapLock) {
+            int key = getListenerKey(listener);
+            if (key != INVALID_KEY) {
+                return key;
+            }
+            do {
+                key = mListenerKey++;
+            } while (key == INVALID_KEY);
+            mListenerMap.put(key, listener);
+            return key;
+        }
+
+    }
+
+    private Object getListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
             return listener;
         }
     }
 
-    private static int getListenerKey(Object listener) {
+    private int getListenerKey(Object listener) {
         if (listener == null) return INVALID_KEY;
-        synchronized (sListenerMapLock) {
-            int index = sListenerMap.indexOfValue(listener);
+        synchronized (mListenerMapLock) {
+            int index = mListenerMap.indexOfValue(listener);
             if (index == -1) {
                 return INVALID_KEY;
             } else {
-                return sListenerMap.keyAt(index);
+                return mListenerMap.keyAt(index);
             }
         }
     }
 
-    private static Object removeListener(int key) {
+    private Object removeListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
-            sListenerMap.remove(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
+            mListenerMap.remove(key);
             return listener;
         }
     }
 
-    private static int removeListener(Object listener) {
+    private int removeListener(Object listener) {
         int key = getListenerKey(listener);
         if (key == INVALID_KEY) return key;
-        synchronized (sListenerMapLock) {
-            sListenerMap.remove(key);
+        synchronized (mListenerMapLock) {
+            mListenerMap.remove(key);
             return key;
         }
     }
 
-    private static class ServiceHandler extends Handler {
+    private class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
         }
@@ -1038,24 +1234,13 @@ public class RttManager {
         public void handleMessage(Message msg) {
             Log.i(TAG, "RTT manager get message: " + msg.what);
             switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        sAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    } else {
-                        Log.e(TAG, "Failed to set up channel connection");
-                        // This will cause all further async API calls on the WifiManager
-                        // to fail and throw an exception
-                        sAsyncChannel = null;
-                    }
-                    sConnected.countDown();
-                    return;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
                     return;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                     Log.e(TAG, "Channel connection lost");
                     // This will cause all further async API calls on the WifiManager
                     // to fail and throw an exception
-                    sAsyncChannel = null;
+                    mAsyncChannel = null;
                     getLooper().quit();
                     return;
             }
@@ -1080,6 +1265,14 @@ public class RttManager {
                     break;
                 case CMD_OP_ABORTED :
                     ((RttListener) listener).onAborted();
+                    removeListener(msg.arg2);
+                    break;
+                case CMD_OP_ENALBE_RESPONDER_SUCCEEDED:
+                    ResponderConfig config = (ResponderConfig) msg.obj;
+                    ((ResponderCallback) (listener)).onResponderEnabled(config);
+                    break;
+                case CMD_OP_ENALBE_RESPONDER_FAILED:
+                    ((ResponderCallback) (listener)).onResponderEnableFailure(msg.arg1);
                     removeListener(msg.arg2);
                     break;
                 default:

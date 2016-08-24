@@ -22,15 +22,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
@@ -54,9 +57,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
 
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_dnd_disable_animation);
+            new AnimationIcon(R.drawable.ic_dnd_disable_animation,
+                    R.drawable.ic_qs_dnd_off);
     private final AnimationIcon mDisableTotalSilence =
-            new AnimationIcon(R.drawable.ic_dnd_total_silence_disable_animation);
+            new AnimationIcon(R.drawable.ic_dnd_total_silence_disable_animation,
+                    R.drawable.ic_qs_dnd_off);
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
@@ -94,8 +99,13 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected BooleanState newTileState() {
+    public BooleanState newTileState() {
         return new BooleanState();
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return ZEN_SETTINGS;
     }
 
     @Override
@@ -108,8 +118,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                     Toast.LENGTH_LONG).show();
             return;
         }
-        mDisable.setAllowAnimation(true);
-        mDisableTotalSilence.setAllowAnimation(true);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
@@ -121,12 +129,17 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_dnd_label);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         final boolean newValue = zen != Global.ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
         state.value = newValue;
-        state.visible = isVisible(mContext);
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
@@ -150,7 +163,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                 state.icon = TOTAL_SILENCE.equals(state.icon) ? mDisableTotalSilence : mDisable;
                 state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription =  mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_off);
+                        R.string.accessibility_quick_settings_dnd);
                 break;
         }
         if (mShowingDetail && !state.value) {
@@ -159,11 +172,13 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (valueChanged) {
             fireToggleStateChanged(state.value);
         }
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_DND;
+        return MetricsEvent.QS_DND;
     }
 
     @Override
@@ -186,6 +201,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             mController.removeCallback(mZenCallback);
             Prefs.unregisterListener(mContext, mPrefListener);
         }
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return isVisible(mContext);
     }
 
     private final OnSharedPreferenceChangeListener mPrefListener
@@ -218,8 +238,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_dnd_label;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_dnd_label);
         }
 
         @Override
@@ -234,7 +254,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
         @Override
         public void setToggleState(boolean state) {
-            MetricsLogger.action(mContext, MetricsLogger.QS_DND_TOGGLE, state);
+            MetricsLogger.action(mContext, MetricsEvent.QS_DND_TOGGLE, state);
             if (!state) {
                 mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
                 showDetail(false);
@@ -243,7 +263,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
         @Override
         public int getMetricsCategory() {
-            return MetricsLogger.QS_DND_DETAILS;
+            return MetricsEvent.QS_DND_DETAILS;
         }
 
         @Override

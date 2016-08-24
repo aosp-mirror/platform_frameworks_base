@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.content.PackageMonitor;
@@ -71,6 +72,13 @@ public class MidiService extends IMidiManager.Stub {
             mMidiService = new MidiService(getContext());
             publishBinderService(Context.MIDI_SERVICE, mMidiService);
         }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            if (userHandle == UserHandle.USER_SYSTEM) {
+                mMidiService.onUnlockUser();
+            }
+        }
     }
 
     private static final String TAG = "MidiService";
@@ -97,7 +105,7 @@ public class MidiService extends IMidiManager.Stub {
     private final PackageManager mPackageManager;
 
     // UID of BluetoothMidiService
-    private final int mBluetoothServiceUid;
+    private int mBluetoothServiceUid;
 
     // PackageMonitor for listening to package changes
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -557,7 +565,12 @@ public class MidiService extends IMidiManager.Stub {
     public MidiService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
-        mPackageMonitor.register(context, null, true);
+
+        mBluetoothServiceUid = -1;
+    }
+
+    private void onUnlockUser() {
+        mPackageMonitor.register(mContext, null, true);
 
         Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
         List<ResolveInfo> resolveInfos = mPackageManager.queryIntentServices(intent,
@@ -583,7 +596,7 @@ public class MidiService extends IMidiManager.Stub {
         } else {
             mBluetoothServiceUid = -1;
         }
-   }
+    }
 
     @Override
     public void registerListener(IBinder token, IMidiDeviceListener listener) {

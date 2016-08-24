@@ -52,7 +52,7 @@ interface IContentService {
      *     USER_CURRENT are properly interpreted.
      */
     void notifyChange(in Uri uri, IContentObserver observer,
-            boolean observerWantsSelfNotifications, boolean syncToNetwork,
+            boolean observerWantsSelfNotifications, int flags,
             int userHandle);
 
     void requestSync(in Account account, String authority, in Bundle extras);
@@ -179,6 +179,8 @@ interface IContentService {
             int userId);
 
     void addStatusChangeListener(int mask, ISyncStatusObserver callback);
-
     void removeStatusChangeListener(ISyncStatusObserver callback);
+
+    void putCache(in String packageName, in Uri key, in Bundle value, int userId);
+    Bundle getCache(in String packageName, in Uri key, int userId);
 }

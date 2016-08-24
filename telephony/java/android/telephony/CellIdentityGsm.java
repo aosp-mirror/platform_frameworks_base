@@ -38,6 +38,10 @@ public final class CellIdentityGsm implements Parcelable {
     private final int mLac;
     // 16-bit GSM Cell Identity described in TS 27.007, 0..65535
     private final int mCid;
+    // 16-bit GSM Absolute RF Channel Number
+    private final int mArfcn;
+    // 6-bit Base Station Identity Code
+    private final int mBsic;
 
     /**
      * @hide
@@ -47,6 +51,8 @@ public final class CellIdentityGsm implements Parcelable {
         mMnc = Integer.MAX_VALUE;
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
+        mArfcn = Integer.MAX_VALUE;
+        mBsic = Integer.MAX_VALUE;
     }
     /**
      * public constructor
@@ -58,10 +64,27 @@ public final class CellIdentityGsm implements Parcelable {
      * @hide
      */
     public CellIdentityGsm (int mcc, int mnc, int lac, int cid) {
+        this(mcc, mnc, lac, cid, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    }
+
+    /**
+     * public constructor
+     * @param mcc 3-digit Mobile Country Code, 0..999
+     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
+     * @param lac 16-bit Location Area Code, 0..65535
+     * @param cid 16-bit GSM Cell Identity or 28-bit UMTS Cell Identity
+     * @param arfcn 16-bit GSM Absolute RF Channel Number
+     * @param bsic 6-bit Base Station Identity Code
+     *
+     * @hide
+     */
+    public CellIdentityGsm (int mcc, int mnc, int lac, int cid, int arfcn, int bsic) {
         mMcc = mcc;
         mMnc = mnc;
         mLac = lac;
         mCid = cid;
+        mArfcn = arfcn;
+        mBsic = bsic;
     }
 
     private CellIdentityGsm(CellIdentityGsm cid) {
@@ -69,6 +92,8 @@ public final class CellIdentityGsm implements Parcelable {
         mMnc = cid.mMnc;
         mLac = cid.mLac;
         mCid = cid.mCid;
+        mArfcn = cid.mArfcn;
+        mBsic = cid.mBsic;
     }
 
     CellIdentityGsm copy() {
@@ -106,6 +131,21 @@ public final class CellIdentityGsm implements Parcelable {
     }
 
     /**
+     * @return 16-bit GSM Absolute RF Channel Number, Integer.MAX_VALUE if unknown
+     */
+    public int getArfcn() {
+        return mArfcn;
+    }
+
+    /**
+     * @return 6-bit Base Station Identity Code, Integer.MAX_VALUE if unknown
+     */
+    public int getBsic() {
+        return mBsic;
+    }
+
+
+    /**
      * @return Integer.MAX_VALUE, undefined for GSM
      */
     @Deprecated
@@ -132,7 +172,9 @@ public final class CellIdentityGsm implements Parcelable {
         return mMcc == o.mMcc &&
                 mMnc == o.mMnc &&
                 mLac == o.mLac &&
-                mCid == o.mCid;
+                mCid == o.mCid &&
+                mArfcn == o.mArfcn &&
+                mBsic == o.mBsic;
     }
 
     @Override
@@ -142,6 +184,8 @@ public final class CellIdentityGsm implements Parcelable {
         sb.append(" mMnc=").append(mMnc);
         sb.append(" mLac=").append(mLac);
         sb.append(" mCid=").append(mCid);
+        sb.append(" mArfcn=").append(mArfcn);
+        sb.append(" mBsic=").append("0x").append(Integer.toHexString(mBsic));
         sb.append("}");
 
         return sb.toString();
@@ -161,6 +205,8 @@ public final class CellIdentityGsm implements Parcelable {
         dest.writeInt(mMnc);
         dest.writeInt(mLac);
         dest.writeInt(mCid);
+        dest.writeInt(mArfcn);
+        dest.writeInt(mBsic);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -169,6 +215,13 @@ public final class CellIdentityGsm implements Parcelable {
         mMnc = in.readInt();
         mLac = in.readInt();
         mCid = in.readInt();
+        mArfcn = in.readInt();
+        int bsic = in.readInt();
+        // In RIL BSIC is a UINT8, so 0xFF is the 'INVALID' designator
+        // for inbound parcels
+        if (bsic == 0xFF) bsic = Integer.MAX_VALUE;
+        mBsic = bsic;
+
         if (DBG) log("CellIdentityGsm(Parcel): " + toString());
     }
 

@@ -17,7 +17,7 @@
 #ifndef AAPT_CONFIG_DESCRIPTION_H
 #define AAPT_CONFIG_DESCRIPTION_H
 
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <ostream>
@@ -29,6 +29,11 @@ namespace aapt {
  * initialization and comparison methods.
  */
 struct ConfigDescription : public android::ResTable_config {
+    /**
+     * Returns an immutable default config.
+     */
+    static const ConfigDescription& defaultConfig();
+
     /*
      * Parse a string of the form 'fr-sw600dp-land' and fill in the
      * given ResTable_config with resulting configuration parameters.

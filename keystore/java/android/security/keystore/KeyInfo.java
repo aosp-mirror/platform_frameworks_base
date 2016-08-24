@@ -79,6 +79,8 @@ public class KeyInfo implements KeySpec {
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
+    private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mInvalidatedByBiometricEnrollment;
 
     /**
      * @hide
@@ -97,7 +99,9 @@ public class KeyInfo implements KeySpec {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean userAuthenticationRequirementEnforcedBySecureHardware) {
+            boolean userAuthenticationRequirementEnforcedBySecureHardware,
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -116,6 +120,8 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
+        mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
     /**
@@ -276,5 +282,23 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isUserAuthenticationRequirementEnforcedBySecureHardware() {
         return mUserAuthenticationRequirementEnforcedBySecureHardware;
+    }
+
+    /**
+     * Returns {@code true} if this key will become unusable when the device is removed from the
+     * user's body.  This is possible only for keys with a specified validity duration, and only on
+     * devices with an on-body sensor.  Always returns {@code false} on devices that lack an on-body
+     * sensor.
+     */
+    public boolean isUserAuthenticationValidWhileOnBody() {
+        return mUserAuthenticationValidWhileOnBody;
+    }
+
+    /**
+     * Returns {@code true} if the key will be invalidated by enrollment of a new fingerprint or
+     * removal of all fingerprints.
+     */
+    public boolean isInvalidatedByBiometricEnrollment() {
+        return mInvalidatedByBiometricEnrollment;
     }
 }

@@ -154,8 +154,8 @@ public class MediaSessionLegacyHelper {
                     metadata.getString(MediaMetadata.METADATA_KEY_WRITER));
         }
         if (metadata.containsKey(MediaMetadata.METADATA_KEY_YEAR)) {
-            oldMetadata.putString(String.valueOf(MediaMetadataRetriever.METADATA_KEY_YEAR),
-                    metadata.getString(MediaMetadata.METADATA_KEY_YEAR));
+            oldMetadata.putLong(String.valueOf(MediaMetadataRetriever.METADATA_KEY_YEAR),
+                    metadata.getLong(MediaMetadata.METADATA_KEY_YEAR));
         }
         return oldMetadata;
     }

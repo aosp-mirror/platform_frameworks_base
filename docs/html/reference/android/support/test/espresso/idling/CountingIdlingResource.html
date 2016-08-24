@@ -1,0 +1,1302 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html devsite>
+<head>
+
+  
+    <meta name="top_category" value="develop" />
+    
+    <meta name="subcategory" value="reference" />
+
+    
+      <meta name="book_path" value="/reference/android/support/test/_book.yaml" />
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+<title>CountingIdlingResource</title>
+
+
+</head>
+
+<body class="gc-documentation develop reference api apilevel-">
+<div id="doc-api-level" class="" style="display:none"></div>
+
+
+
+
+<div id="naMessage"></div>
+
+<div id="api-info-block">
+<div class="api-level">
+  
+  
+  
+
+</div>
+
+
+
+  
+   
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
+
+<div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
+  
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
+</div><!-- end api-info-block -->
+
+<div class="api apilevel-" id="jd-content">
+
+<!-- ======== START OF CLASS DATA ======== -->
+
+<h1 class="api-title">CountingIdlingResource</h1>
+<p>
+<code class="api-signature">
+  public
+  
+  final
+  
+  class
+  CountingIdlingResource
+</code>
+<br>
+
+
+<code class="api-signature">
+  
+    extends Object
+  
+  
+  
+</code>
+
+<code class="api-signature">
+  
+  
+      implements
+      
+        <a href="/reference/android/support/test/espresso/IdlingResource.html">IdlingResource</a>
+      
+  
+  
+</code>
+
+</p><table class="jd-inheritance-table">
+
+
+  <tr>
+    
+    <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object
+    </td>
+  </tr>
+  
+
+  <tr>
+    
+      <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+    
+    <td colspan="1" class="jd-inheritance-class-cell">android.support.test.espresso.idling.CountingIdlingResource
+    </td>
+  </tr>
+  
+
+</table>
+  
+
+    
+
+<br><hr>
+
+
+  <p>An implementation of <code><a href="/reference/android/support/test/espresso/IdlingResource.html">IdlingResource</a></code> that determines idleness by maintaining an internal
+ counter. When the counter is 0 - it is considered to be idle, when it is non-zero it is not
+ idle. This is very similar to the way a <code><a href="/reference/java/util/concurrent/Semaphore.html">Semaphore</a></code> behaves.
+ <p>
+ The counter may be incremented or decremented from any thread. If it reaches an illogical state
+ (like counter less than zero) it will throw an IllegalStateException.
+ </p>
+ <p>
+ This class can then be used to wrap up operations that while in progress should block tests from
+ accessing the UI.
+ </p>
+
+ <pre>
+ <code>public interface FooServer {
+     public Foo newFoo();
+     public void updateFoo(Foo foo);
+   }
+
+   public DecoratedFooServer implements FooServer {
+     private final FooServer realFooServer;
+     private final CountingIdlingResource fooServerIdlingResource;
+
+     public DecoratedFooServer(FooServer realFooServer,
+         CountingIdlingResource fooServerIdlingResource) {
+       this.realFooServer = checkNotNull(realFooServer);
+       this.fooServerIdlingResource = checkNotNull(fooServerIdlingResource);
+     }
+
+     public Foo newFoo() {
+       fooServerIdlingResource.increment();
+       try {
+         return realFooServer.newFoo();
+       } finally {
+         fooServerIdlingResource.decrement();
+       }
+     }
+
+     public void updateFoo(Foo foo) {
+       fooServerIdlingResource.increment();
+       try {
+         realFooServer.updateFoo(foo);
+       } finally {
+         fooServerIdlingResource.decrement();
+       }
+     }
+   }
+   </code>
+   </pre>
+
+   Then in your test setup:
+   <pre>
+   <code>public void setUp() throws Exception {
+       super.setUp();
+       FooServer realServer = FooApplication.getFooServer();
+       CountingIdlingResource countingResource = new CountingIdlingResource("FooServerCalls");
+       FooApplication.setFooServer(new DecoratedFooServer(realServer, countingResource));
+       Espresso.registerIdlingResource(countingResource);
+     }
+   </code>
+   </pre>
+
+</p>
+
+
+
+
+
+
+
+<h2 class="api-section">Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="responsive constructors">
+<tr><th colspan="2"><h3>Public constructors</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#CountingIdlingResource(java.lang.String)">CountingIdlingResource</a>(String resourceName)
+      </code>
+      
+        <p>Creates a CountingIdlingResource without debug tracing.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#CountingIdlingResource(java.lang.String, boolean)">CountingIdlingResource</a>(String resourceName, boolean debugCounting)
+      </code>
+      
+        <p>Creates a CountingIdlingResource.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="responsive methods">
+<tr><th colspan="2"><h3>Public methods</h3></th></tr>
+
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#decrement()">decrement</a>()
+      </code>
+      
+        <p>Decrements the count of in-flight transactions to the resource being monitored.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#dumpStateToLogs()">dumpStateToLogs</a>()
+      </code>
+      
+        <p>Prints the current state of this resource to the logcat at info level.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#getName()">getName</a>()
+      </code>
+      
+        <p>Returns the name of the resources (used for logging and idempotency  of registration).
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#increment()">increment</a>()
+      </code>
+      
+        <p>Increments the count of in-flight transactions to the resource being monitored.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#isIdleNow()">isIdleNow</a>()
+      </code>
+      
+        <p>Returns <code>true</code> if resource is currently idle.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html#registerIdleTransitionCallback(android.support.test.espresso.IdlingResource.ResourceCallback)">registerIdleTransitionCallback</a>(<a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a> resourceCallback)
+      </code>
+      
+        <p>Registers the given <code><a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a></code> with the resource.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="methods inhtable">
+<tr><th><h3>Inherited methods</h3></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+class
+<code>
+  
+    java.lang.Object
+  
+</code>
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        Object</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      clone()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      equals(Object arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      finalize()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        Class&lt;?&gt;</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      getClass()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        int</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      hashCode()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notify()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      notifyAll()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      toString()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0, int arg1)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait(long arg0)
+      </code>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        
+        
+        
+        final
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      wait()
+      </code>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="2">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.support.test.espresso.IdlingResource" class="jd-expando-trigger closed"
+          ><img height="34" id="inherited-methods-android.support.test.espresso.IdlingResource-trigger"
+          src="/assets/images/styles/disclosure_down.png"
+          class="jd-expando-trigger-img" /></a>From
+interface
+<code>
+  
+    <a href="/reference/android/support/test/espresso/IdlingResource.html">android.support.test.espresso.IdlingResource</a>
+  
+</code>
+<div id="inherited-methods-android.support.test.espresso.IdlingResource">
+  <div id="inherited-methods-android.support.test.espresso.IdlingResource-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.support.test.espresso.IdlingResource-summary" style="display: none;">
+    <table class="jd-sumtable-expando responsive">
+      
+
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        String</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/IdlingResource.html#getName()">getName</a>()
+      </code>
+      
+        <p>Returns the name of the resources (used for logging and idempotency  of registration).
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        boolean</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/IdlingResource.html#isIdleNow()">isIdleNow</a>()
+      </code>
+      
+        <p>Returns <code>true</code> if resource is currently idle.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+  
+  <tr class="api apilevel-" >
+  
+  
+    <td><code>
+        abstract
+        
+        
+        
+        
+        void</code>
+    </td>
+  
+    <td width="100%">
+      <code>
+      <a href="/reference/android/support/test/espresso/IdlingResource.html#registerIdleTransitionCallback(android.support.test.espresso.IdlingResource.ResourceCallback)">registerIdleTransitionCallback</a>(<a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a> callback)
+      </code>
+      
+        <p>Registers the given <code><a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a></code> with the resource.
+        
+    
+</p>
+      
+    </td>
+  </tr>
+  
+
+
+    </table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2 class="api-section">Public constructors</h2>
+
+
+
+<A NAME="CountingIdlingResource(java.lang.String)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">CountingIdlingResource</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+CountingIdlingResource (String resourceName)</pre>
+    
+    
+
+    
+  <p>Creates a CountingIdlingResource without debug tracing.</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>resourceName</code></td>
+        <td width="100%">
+          <code>String</code>:
+          the resource name this resource should report to Espresso.
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="CountingIdlingResource(java.lang.String, boolean)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">CountingIdlingResource</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+CountingIdlingResource (String resourceName, 
+                boolean debugCounting)</pre>
+    
+    
+
+    
+  <p>Creates a CountingIdlingResource.</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>resourceName</code></td>
+        <td width="100%">
+          <code>String</code>:
+          the resource name this resource should report to Espresso.</td>
+      </tr>
+      <tr>
+        <td><code>debugCounting</code></td>
+        <td width="100%">
+          <code>boolean</code>:
+          if true increment & decrement calls will print trace information to logs.
+</td>
+      </tr>
+    </table>
+
+</div>
+
+
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2 class="api-section">Public methods</h2>
+
+
+
+<A NAME="decrement()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">decrement</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void decrement ()</pre>
+    
+    
+
+    
+  <p>Decrements the count of in-flight transactions to the resource being monitored.
+
+ If this operation results in the counter falling below 0 - an exception is raised.</p>
+      <table class="responsive">
+      <tr><th colspan=2>Throws</th></tr>
+        <tr>
+          <td><code>IllegalStateException</code></td>
+          <td width="100%">if the counter is below 0.
+</td>
+        </tr>
+      </table>
+  
+
+</div>
+
+
+<A NAME="dumpStateToLogs()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">dumpStateToLogs</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void dumpStateToLogs ()</pre>
+    
+    
+
+    
+  <p>Prints the current state of this resource to the logcat at info level.
+</p>
+
+</div>
+
+
+<A NAME="getName()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">getName</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+String getName ()</pre>
+    
+    
+
+    
+  <p>Returns the name of the resources (used for logging and idempotency  of registration).
+</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>String</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="increment()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">increment</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void increment ()</pre>
+    
+    
+
+    
+  <p>Increments the count of in-flight transactions to the resource being monitored.
+
+ This method can be called from any thread.
+</p>
+
+</div>
+
+
+<A NAME="isIdleNow()"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">isIdleNow</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+boolean isIdleNow ()</pre>
+    
+    
+
+    
+  <p>Returns <code>true</code> if resource is currently idle. Espresso will <b>always</b> call this
+ method from the main thread, therefore it should be non-blocking and return immediately.
+</p>
+    <table class="responsive">
+      <tr><th colspan=2>Returns</th></tr>
+      <tr>
+        <td><code>boolean</code></td>
+        <td width="100%"><!-- no returns description in source --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+<A NAME="registerIdleTransitionCallback(android.support.test.espresso.IdlingResource.ResourceCallback)"></A>
+
+<div class="api apilevel-">
+    <h3 class="api-name">registerIdleTransitionCallback</h3>
+    <div class="api-level">
+      <div></div>
+      
+  
+
+    </div>
+<pre class="api-signature no-pretty-print">
+void registerIdleTransitionCallback (<a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a> resourceCallback)</pre>
+    
+    
+
+    
+  <p>Registers the given <code><a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a></code> with the resource. Espresso will call this method:
+ <ul>
+ <li>with its implementation of <code><a href="/reference/android/support/test/espresso/IdlingResource.ResourceCallback.html">IdlingResource.ResourceCallback</a></code> so it can be notified asynchronously
+ that your resource is idle
+ <li>from the main thread, but you are free to execute the callback's onTransitionToIdle from
+ any thread
+ <li>once (when it is initially given a reference to your IdlingResource)
+ </ul>
+ <br>
+ You only need to call this upon transition from busy to idle - if the resource is already idle
+ when the method is called invoking the call back is optional and has no significant impact.
+</p>
+    <table class="responsive">
+    <tr><th colspan=2>Parameters</th></tr>
+      <tr>
+        <td><code>resourceCallback</code></td>
+        <td width="100%">
+          <code>IdlingResource.ResourceCallback</code>
+          <!-- no parameter comment --></td>
+      </tr>
+    </table>
+
+</div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+
+</div><!-- end jd-content -->
+
+
+
+<div class="data-reference-resources-wrapper">
+  
+  <ul data-reference-resources>
+    
+    
+    
+    <li><h2>Classes</h2>
+      <ul>
+          <li class="selected api apilevel-"><a href="/reference/android/support/test/espresso/idling/CountingIdlingResource.html">CountingIdlingResource</a></li>
+      </ul>
+    </li>
+    
+    
+    
+  </ul>
+  
+</div>
+
+
+
+</body>
+</html>

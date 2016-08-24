@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,6 +50,8 @@ import android.view.Window;
 import com.android.internal.content.ReferrerIntent;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +81,15 @@ public class Instrumentation {
     public static final String REPORT_KEY_STREAMRESULT = "stream";
 
     private static final String TAG = "Instrumentation";
-    
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({0, UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES})
+    public @interface UiAutomationFlags {};
+
+
     private final Object mSync = new Object();
     private ActivityThread mThread = null;
     private MessageQueue mMessageQueue = null;
@@ -195,7 +206,7 @@ public class Instrumentation {
             }
             results.putAll(mPerfMetrics);
         }
-        if (mUiAutomation != null) {
+        if ((mUiAutomation != null) && !mUiAutomation.isDestroyed()) {
             mUiAutomation.disconnect();
             mUiAutomation = null;
         }
@@ -545,7 +556,7 @@ public class Instrumentation {
          * returning the resulting activity or till the timeOut period expires.
          * If the timeOut expires before the activity is started, return null. 
          * 
-         * @param timeOut Time to wait before the activity is created.
+         * @param timeOut Time to wait in milliseconds before the activity is created.
          * 
          * @return Activity
          */
@@ -1044,7 +1055,7 @@ public class Instrumentation {
         activity.attach(context, aThread, this, token, 0, application, intent,
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
-                new Configuration(), null, null);
+                new Configuration(), null, null, null);
         return activity;
     }
 
@@ -1503,7 +1514,7 @@ public class Instrumentation {
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(who);
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1561,7 +1572,7 @@ public class Instrumentation {
             String[] resolvedTypes = new String[intents.length];
             for (int i=0; i<intents.length; i++) {
                 intents[i].migrateExtraStreamToClipData();
-                intents[i].prepareToLeaveProcess();
+                intents[i].prepareToLeaveProcess(who);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -1622,7 +1633,7 @@ public class Instrumentation {
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(who);
             int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1682,7 +1693,7 @@ public class Instrumentation {
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(who);
             int result = ActivityManagerNative.getDefault()
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1721,7 +1732,7 @@ public class Instrumentation {
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(who);
             int result = ActivityManagerNative.getDefault()
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
@@ -1759,7 +1770,7 @@ public class Instrumentation {
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(who);
             int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
                     intent, intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
@@ -1786,7 +1797,7 @@ public class Instrumentation {
         if (res >= ActivityManager.START_SUCCESS) {
             return;
         }
-        
+
         switch (res) {
             case ActivityManager.START_INTENT_NOT_RESOLVED:
             case ActivityManager.START_CLASS_NOT_FOUND:
@@ -1809,21 +1820,21 @@ public class Instrumentation {
             case ActivityManager.START_NOT_VOICE_COMPATIBLE:
                 throw new SecurityException(
                         "Starting under voice control not allowed for: " + intent);
-            case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
-                // Fail silently for this case so we don't break current apps.
-                // TODO(b/22929608): Instead of failing silently or throwing an exception,
-                // we should properly position the activity in the stack (i.e. behind all current
-                // user activity/task) and not change the positioning of stacks.
-                Log.e(TAG,
-                        "Not allowed to start background user activity that shouldn't be displayed"
-                        + " for all users. Failing silently...");
-                break;
+            case ActivityManager.START_VOICE_NOT_ACTIVE_SESSION:
+                throw new IllegalStateException(
+                        "Session calling startVoiceActivity does not match active session");
+            case ActivityManager.START_VOICE_HIDDEN_SESSION:
+                throw new IllegalStateException(
+                        "Cannot start voice activity on a hidden session");
+            case ActivityManager.START_CANCELED:
+                throw new AndroidRuntimeException("Activity could not be started for "
+                        + intent);
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);
         }
     }
-    
+
     private final void validateNotAppThread() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException(
@@ -1832,7 +1843,7 @@ public class Instrumentation {
     }
 
     /**
-     * Gets the {@link UiAutomation} instance.
+     * Gets the {@link UiAutomation} instance with no flags set.
      * <p>
      * <strong>Note:</strong> The APIs exposed via the returned {@link UiAutomation}
      * work across application boundaries while the APIs exposed by the instrumentation
@@ -1846,17 +1857,59 @@ public class Instrumentation {
      * {@link Instrumentation} APIs. Using both APIs at the same time is not
      * a mistake by itself but a client has to be aware of the APIs limitations.
      * </p>
+     * <p>
+     * Equivalent to {@code getUiAutomation(0)}. If a {@link UiAutomation} exists with different
+     * flags, the flags on that instance will be changed, and then it will be returned.
+     * </p>
      * @return The UI automation instance.
      *
      * @see UiAutomation
      */
     public UiAutomation getUiAutomation() {
+        return getUiAutomation(0);
+    }
+
+    /**
+     * Gets the {@link UiAutomation} instance with flags set.
+     * <p>
+     * <strong>Note:</strong> The APIs exposed via the returned {@link UiAutomation}
+     * work across application boundaries while the APIs exposed by the instrumentation
+     * do not. For example, {@link Instrumentation#sendPointerSync(MotionEvent)} will
+     * not allow you to inject the event in an app different from the instrumentation
+     * target, while {@link UiAutomation#injectInputEvent(android.view.InputEvent, boolean)}
+     * will work regardless of the current application.
+     * </p>
+     * <p>
+     * A typical test case should be using either the {@link UiAutomation} or
+     * {@link Instrumentation} APIs. Using both APIs at the same time is not
+     * a mistake by itself but a client has to be aware of the APIs limitations.
+     * </p>
+     * <p>
+     * If a {@link UiAutomation} exists with different flags, the flags on that instance will be
+     * changed, and then it will be returned.
+     * </p>
+     *
+     * @param flags The flags to be passed to the UiAutomation, for example
+     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES}.
+     *
+     * @return The UI automation instance.
+     *
+     * @see UiAutomation
+     */
+    public UiAutomation getUiAutomation(@UiAutomationFlags int flags) {
+        boolean mustCreateNewAutomation = (mUiAutomation == null) || (mUiAutomation.isDestroyed());
+
         if (mUiAutomationConnection != null) {
-            if (mUiAutomation == null) {
+            if (!mustCreateNewAutomation && (mUiAutomation.getFlags() == flags)) {
+                return mUiAutomation;
+            }
+            if (mustCreateNewAutomation) {
                 mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
                         mUiAutomationConnection);
-                mUiAutomation.connect();
+            } else {
+                mUiAutomation.disconnect();
             }
+            mUiAutomation.connect(flags);
             return mUiAutomation;
         }
         return null;
@@ -1870,8 +1923,8 @@ public class Instrumentation {
             try {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Exception setting priority of instrumentation thread "                                            
-                        + Process.myTid(), e);                                                                             
+                Log.w(TAG, "Exception setting priority of instrumentation thread "
+                        + Process.myTid(), e);
             }
             if (mAutomaticPerformanceSnapshots) {
                 startPerformanceSnapshot();

@@ -22,8 +22,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
-import com.google.android.collect.Lists;
-
 import java.util.ArrayList;
 
 /**
@@ -31,7 +29,7 @@ import java.util.ArrayList;
  * provide a header, and correctly handling item types across child adapters.
  */
 public class SectionedListAdapter extends BaseAdapter {
-    private ArrayList<SectionAdapter> mSections = Lists.newArrayList();
+    private ArrayList<SectionAdapter> mSections = new ArrayList<>();
 
     public interface SectionAdapter extends ListAdapter {
         public View getHeaderView(View convertView, ViewGroup parent);

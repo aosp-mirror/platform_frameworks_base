@@ -1,0 +1,391 @@
+page.title=后台优化
+page.metaDescription=隐式广播的新限制。
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      本文内容
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">对 CONNECTIVITY_ACTION 的限制</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">安排连入无限流量连接时的网络作业</a>
+
+      </li>
+
+      <li>
+        <a href="#monitor-conn">在应用运行时监控网络连接</a>
+
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">对 NEW_PICTURE 和 NEW_VIDEO 的限制</a>
+
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">新的 JobInfo 方法</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">新的 JobParameter 方法</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">进一步优化您的应用</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  后台进程非常耗费内存和电池。例如，隐式广播可以启动许多已注册侦听它的后台进程，即使这些进程可能没有执行许多工作。
+
+这会严重影响设备性能和用户体验。
+
+</p>
+
+<p>
+  为缓解这个问题，Android N 应用了以下限制：
+
+</p>
+
+<ul>
+  <li>面向 Preview 的应用不会收到 {@link
+android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单中注册接收这些广播。
+运行的应用如果使用 {@link android.content.Context#registerReceiver Context.registerReceiver()} 注册 
+{@link android.content.BroadcastReceiver}，则仍可在主线程上侦听 {@code CONNECTIVITY_CHANGE}。
+
+
+  </li>
+
+  <li>应用无法发送或接收 {@link
+android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此项优化会影响所有应用，而不仅仅是面向 Preview 的应用。
+
+  </li>
+</ul>
+
+<p>
+  如果您的应用使用任何 Intent，您仍需要尽快移除它们的依赖关系，以正确适配 Android N 设备。
+
+  Android 框架提供多个解决方案来缓解对这些隐式广播的需求。
+例如，{@link android.app.job.JobScheduler}
+和<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> 提供了一个稳健可靠的机制来安排满足指定条件（例如连入无限流量网络）时所执行的网络操作。
+
+现在，您还可以使用 {@link android.app.job.JobScheduler}
+来响应内容提供程序所发生的变更。{@link android.app.job.JobInfo}
+对象封装了 {@link android.app.job.JobScheduler}
+用来安排您的作业的参数。如果符合作业条件，系统将在应用的 {@link android.app.job.JobService} 上执行此作业。
+
+</p>
+
+<p>
+  在本文档中，我们将学习如何使用备用方法（如 {@link android.app.job.JobScheduler}）调整您的应用以符合这些新限制。
+
+
+</p>
+
+<h2 id="connectivity-action">
+  对 CONNECTIVITY_ACTION 的限制
+</h2>
+
+<p>
+  面向 Android N 的应用不会收到 {@link
+android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单中注册接收这些广播亦是如此，依赖此广播的流程也不会启动。
+
+这可能会给需要侦听网络变化或者需要在设备接入无限流量网络时执行批量网络活动的应用造成问题。
+
+Android 框架中已存在多个可绕过此限制的解决方案，但需要根据您想要应用实现的目标来选择正确的解决方案。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>当应用运行时，通过
+{@link android.content.Context#registerReceiver Context.registerReceiver()}
+中注册的 {@link android.content.BroadcastReceiver} 将继续接收这些广播。
+</p>
+
+<h3 id="sched-jobs">
+  安排连入无限流量连接时的网络作业
+</h3>
+
+<p>
+  使用 {@link android.app.job.JobInfo.Builder JobInfo.Builder} 类构建
+{@link android.app.job.JobInfo} 对象时，应用 {@link
+android.app.job.JobInfo.Builder#setRequiredNetworkType
+setRequiredNetworkType()} 方法，并将 {@link android.app.job.JobInfo
+JobInfo.NETWORK_TYPE_UNMETERED} 作为作业参数传递。以下代码示例展示如何安排当设备接入无限流量网络且正在充电时要运行的服务：
+
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  当符合作业条件时，应用会收到回调以运行指定的{@code JobService.class} 中的 {@link android.app.job.JobService#onStartJob onStartJob()} 方法。
+
+如需查看 {@link
+  android.app.job.JobScheduler} 实现的更多示例，请参阅 <a href="{@docRoot}samples/JobScheduler/index.html">JobScheduler 示例应用</a>。
+</p>
+
+<p>
+  使用 GMSCore 服务且面向 Android 5.0（API 级别 21）或更低版本系统的应用可以使用<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> 并指定 {@code Task.NETWORK_STATE_UNMETERED}。
+
+</p>
+
+<h3 id="monitor-conn">
+  在应用运行时监控网络连接
+</h3>
+
+<p>
+  注册了 {@link android.content.BroadcastReceiver} 的运行的应用仍可侦听 {@code CONNECTIVITY_CHANGE}。
+不过，{@link
+android.net.ConnectivityManager} API 提供了一个更稳健可靠的方法，可以仅在符合指定的网络条件时才请求回调。
+
+</p>
+
+<p>
+  {@link android.net.NetworkRequest} 对象根据 {@link android.net.NetworkCapabilities} 定义网络回调的参数。
+使用 {@link
+android.net.NetworkRequest.Builder NetworkRequest.Builder} 类创建 {@link android.net.NetworkRequest} 对象。然后，{@link
+android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+将 {@link android.net.NetworkRequest} 对象传递给系统。
+当符合网络条件时，应用会收到回调以执行在其 {@link
+android.net.ConnectivityManager.NetworkCallback} 类中定义的
+{@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+onAvailable()} 方法。
+
+</p>
+
+<p>
+  应用继续接收回调，直至应用退出或调用
+{@link android.net.ConnectivityManager#unregisterNetworkCallback
+unregisterNetworkCallback()}。
+</p>
+
+<h2 id="media-broadcasts">
+  对 NEW_PICTURE 和 NEW_VIDEO 的限制
+</h2>
+
+<p>
+  在 Android N 中，应用无法发送或接收 {@link
+android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此限制有助于缓解必须唤醒多个应用以处理新图像或视频时对性能和用户体验造成的影响。
+
+Android N 扩展了 {@link android.app.job.JobInfo} 和 {@link
+android.app.job.JobParameters} 以提供备用解决方案。
+
+</p>
+
+<h3 id="new-jobinfo">
+  新的 JobInfo 方法
+</h3>
+
+<p>
+  为了针对内容 URI 变化触发作业，Android N 使用以下方法扩展了 {@link android.app.job.JobInfo} API：
+
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    封装针对内容 URI 变化触发作业所需的参数。
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    将 {@code TriggerContentUri} 对象传递给 {@link
+android.app.job.JobInfo}。{@link android.database.ContentObserver}
+监控已封装的内容 URI。如果存在多个与某个作业关联的 {@code
+TriggerContentUri} 对象，则系统会提供一个回调，即使其报告仅一个内容 URI 发生变化。
+
+  </dd>
+
+  <dd>
+    如果给定 URI 的任何子级发生变化，则添加 {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} 标志以触发作业。
+此标志对应于传递给 {@link
+android.content.ContentResolver#registerContentObserver    registerContentObserver()} 的
+{@code notifyForDescendants} 参数。
+
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>注：</strong> {@code TriggerContentUri()} 无法与 {@link android.app.job.JobInfo.Builder#setPeriodic
+setPeriodic()} 或 {@link android.app.job.JobInfo.Builder#setPersisted
+setPersisted()} 结合使用。
+若要持续监控内容变化，则可在应用的 {@link
+android.app.job.JobService} 完成处理最新的回调前安排新的
+{@link android.app.job.JobInfo}。
+</p>
+
+<p>
+  以下示例代码展示如何安排当系统报告内容 URI {@code MEDIA_URI} 所发生变化时要触发的作业：
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  当系统报告指定内容 URI 所发生变化时，应用将收到一个回调，并向 {@code MediaContentJob.class} 中的 {@link android.app.job.JobService#onStartJob onStartJob()}
+方法传递一个 {@link android.app.job.JobParameters} 对象。
+
+
+</p>
+
+<h3 id="new-jobparam">
+  新的 JobParameter 方法
+</h3>
+
+<p>
+  Android N 也扩展了{@link android.app.job.JobParameters}，以允许应用接收有关哪些内容权限和 URI 已触发作业的有用信息：
+
+
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    返回已触发作业的 URI 数组。如果没有任何 URI 触发作业（例如，作业是因截止期限或其他一些原因触发的），或者已更改的 URI 数量超过 50，该数组将为 {@code
+null}。
+
+
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    返回已触发作业的内容权限的字符串数组。
+    如果返回的数组不是 {@code null}，请使用 {@code getTriggeredContentUris()}
+检索有关哪些 URI 已更改的详细信息。
+  </dd>
+</dl>
+
+<p>
+  以下示例代码重写 {@link
+android.app.job.JobService#onStartJob JobService.onStartJob()} 方法并记录已触发作业的内容权限和 URI：
+
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  进一步优化您的应用
+</h2>
+
+<p>
+  优化您的应用以在低内存设备上或在低内存条件下运行，这样可以提升性能和用户体验。
+删除后台服务依赖关系和静态注册的隐式广播接收器可帮助您的应用在此类设备上运行得更好。
+
+尽管 Android N 采取了措施以减少部分问题，但建议您优化自己的应用，使其能够在完全不使用这些后台进程的情况下运行。
+
+
+
+</p>
+
+<p>
+  Android N 推出了一些附加 <a href="{@docRoot}tools/help/adb.html">Android 调试桥 (ADB)</a> 命令，您可以使用这些命令测试在禁用那些后台进程情况下的应用行为：
+
+</p>
+
+<ul>
+  <li>要模拟隐式广播和后台服务不可用的条件，请输入以下命令：
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>要重新启用隐式广播和后台服务，请输入以下命令：
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

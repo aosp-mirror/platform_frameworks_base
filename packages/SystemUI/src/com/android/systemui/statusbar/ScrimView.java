@@ -22,7 +22,10 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -32,11 +35,14 @@ import android.view.animation.Interpolator;
  */
 public class ScrimView extends View
 {
+    private final Paint mPaint = new Paint();
     private int mScrimColor;
     private boolean mIsEmpty = true;
     private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
+    private Rect mExcludedRect = new Rect();
+    private boolean mHasExcludedArea;
     private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
             = new ValueAnimator.AnimatorUpdateListener() {
         @Override
@@ -51,6 +57,7 @@ public class ScrimView extends View
             mAlphaAnimator = null;
         }
     };
+    private Runnable mChangeRunnable;
 
     public ScrimView(Context context) {
         this(context, null);
@@ -72,15 +79,43 @@ public class ScrimView extends View
     protected void onDraw(Canvas canvas) {
         if (mDrawAsSrc || (!mIsEmpty && mViewAlpha > 0f)) {
             PorterDuff.Mode mode = mDrawAsSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
-            int color = mScrimColor;
-            color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
-                    Color.green(color), Color.blue(color));
-            canvas.drawColor(color, mode);
+            int color = getScrimColorWithAlpha();
+            if (!mHasExcludedArea) {
+                canvas.drawColor(color, mode);
+            } else {
+                mPaint.setColor(color);
+                if (mExcludedRect.top > 0) {
+                    canvas.drawRect(0, 0, getWidth(), mExcludedRect.top, mPaint);
+                }
+                if (mExcludedRect.left > 0) {
+                    canvas.drawRect(0,  mExcludedRect.top, mExcludedRect.left, mExcludedRect.bottom,
+                            mPaint);
+                }
+                if (mExcludedRect.right < getWidth()) {
+                    canvas.drawRect(mExcludedRect.right,
+                            mExcludedRect.top,
+                            getWidth(),
+                            mExcludedRect.bottom,
+                            mPaint);
+                }
+                if (mExcludedRect.bottom < getHeight()) {
+                    canvas.drawRect(0,  mExcludedRect.bottom, getWidth(), getHeight(), mPaint);
+                }
+            }
         }
+    }
+
+    public int getScrimColorWithAlpha() {
+        int color = mScrimColor;
+        color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
+                Color.green(color), Color.blue(color));
+        return color;
     }
 
     public void setDrawAsSrc(boolean asSrc) {
         mDrawAsSrc = asSrc;
+        mPaint.setXfermode(new PorterDuffXfermode(mDrawAsSrc ? PorterDuff.Mode.SRC
+                : PorterDuff.Mode.SRC_OVER));
         invalidate();
     }
 
@@ -89,6 +124,9 @@ public class ScrimView extends View
             mIsEmpty = Color.alpha(color) == 0;
             mScrimColor = color;
             invalidate();
+            if (mChangeRunnable != null) {
+                mChangeRunnable.run();
+            }
         }
     }
 
@@ -105,8 +143,13 @@ public class ScrimView extends View
         if (mAlphaAnimator != null) {
             mAlphaAnimator.cancel();
         }
-        mViewAlpha = alpha;
-        invalidate();
+        if (alpha != mViewAlpha) {
+            mViewAlpha = alpha;
+            invalidate();
+            if (mChangeRunnable != null) {
+                mChangeRunnable.run();
+            }
+        }
     }
 
     public void animateViewAlpha(float alpha, long durationOut, Interpolator interpolator) {
@@ -119,5 +162,25 @@ public class ScrimView extends View
         mAlphaAnimator.setInterpolator(interpolator);
         mAlphaAnimator.setDuration(durationOut);
         mAlphaAnimator.start();
+    }
+
+    public void setExcludedArea(Rect area) {
+        if (area == null) {
+            mHasExcludedArea = false;
+            invalidate();
+            return;
+        }
+
+        int left = Math.max(area.left, 0);
+        int top = Math.max(area.top, 0);
+        int right = Math.min(area.right, getWidth());
+        int bottom = Math.min(area.bottom, getHeight());
+        mExcludedRect.set(left, top, right, bottom);
+        mHasExcludedArea = left < right && top < bottom;
+        invalidate();
+    }
+
+    public void setChangeRunnable(Runnable changeRunnable) {
+        mChangeRunnable = changeRunnable;
     }
 }

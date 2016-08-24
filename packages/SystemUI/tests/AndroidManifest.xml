@@ -19,10 +19,20 @@
 
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application>
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.systemui.screenshot.ScreenshotStubActivity" />
+
+        <service
+            android:name="com.android.systemui.qs.external.TileLifecycleManagerTests$FakeTileService"
+            android:process=":killable" />
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"

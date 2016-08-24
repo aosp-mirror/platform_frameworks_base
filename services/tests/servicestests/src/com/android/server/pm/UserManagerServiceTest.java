@@ -16,9 +16,12 @@
 
 package com.android.server.pm;
 
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Parcelable;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.test.AndroidTestCase;
 import android.util.AtomicFile;
 
@@ -29,6 +32,7 @@ import java.util.Arrays;
 public class UserManagerServiceTest extends AndroidTestCase {
     private static String[] STRING_ARRAY = new String[] {"<tag", "<![CDATA["};
     private File restrictionsFile;
+    private int tempUserId = UserHandle.USER_NULL;
 
     @Override
     protected void setUp() throws Exception {
@@ -40,19 +44,32 @@ public class UserManagerServiceTest extends AndroidTestCase {
     @Override
     protected void tearDown() throws Exception {
         restrictionsFile.delete();
+        if (tempUserId != UserHandle.USER_NULL) {
+            UserManager.get(mContext).removeUser(tempUserId);
+        }
         super.tearDown();
     }
 
     public void testWriteReadApplicationRestrictions() throws IOException {
         AtomicFile atomicFile = new AtomicFile(restrictionsFile);
         Bundle bundle = createBundle();
-        UserManagerService.writeApplicationRestrictionsLocked(bundle, atomicFile);
+        UserManagerService.writeApplicationRestrictionsLP(bundle, atomicFile);
         assertTrue(atomicFile.getBaseFile().exists());
         String s = FileUtils.readTextFile(restrictionsFile, 10000, "");
         System.out.println("restrictionsFile: " + s);
-        bundle = UserManagerService.readApplicationRestrictionsLocked(atomicFile);
+        bundle = UserManagerService.readApplicationRestrictionsLP(atomicFile);
         System.out.println("readApplicationRestrictionsLocked bundle: " + bundle);
         assertBundle(bundle);
+    }
+
+    public void testAddUserWithAccount() {
+        UserManager um = UserManager.get(mContext);
+        UserInfo user = um.createUser("Test User", 0);
+        assertNotNull(user);
+        tempUserId = user.id;
+        String accountName = "Test Account";
+        um.setUserAccount(tempUserId, accountName);
+        assertEquals(accountName, um.getUserAccount(tempUserId));
     }
 
     private Bundle createBundle() {

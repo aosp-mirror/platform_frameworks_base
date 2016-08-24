@@ -500,7 +500,7 @@ public class MmsServiceBroker extends SystemService {
         private Uri adjustUriForUserAndGrantPermission(Uri contentUri, String action,
                 int permission) {
             final int callingUserId = UserHandle.getCallingUserId();
-            if (callingUserId != UserHandle.USER_OWNER) {
+            if (callingUserId != UserHandle.USER_SYSTEM) {
                 contentUri = ContentProvider.maybeAddUserId(contentUri, callingUserId);
             }
             long token = Binder.clearCallingIdentity();

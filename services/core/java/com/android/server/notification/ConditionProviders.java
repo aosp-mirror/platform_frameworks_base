@@ -16,7 +16,9 @@
 
 package com.android.server.notification;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
@@ -27,8 +29,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
-import android.service.notification.IConditionListener;
 import android.service.notification.IConditionProvider;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -42,7 +44,6 @@ import java.util.Arrays;
 
 public class ConditionProviders extends ManagedServices {
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<>();
-    private final ArrayMap<IBinder, IConditionListener> mListeners = new ArrayMap<>();
     private final ArraySet<String> mSystemConditionProviderNames;
     private final ArraySet<SystemConditionProviderService> mSystemConditionProviders
             = new ArraySet<>();
@@ -67,7 +68,7 @@ public class ConditionProviders extends ManagedServices {
     public void addSystemProvider(SystemConditionProviderService service) {
         mSystemConditionProviders.add(service);
         service.attachBase(mContext);
-        registerService(service.asInterface(), service.getComponent(), UserHandle.USER_OWNER);
+        registerService(service.asInterface(), service.getComponent(), UserHandle.USER_SYSTEM);
     }
 
     public Iterable<SystemConditionProviderService> getSystemProviders() {
@@ -79,7 +80,8 @@ public class ConditionProviders extends ManagedServices {
         final Config c = new Config();
         c.caption = "condition provider";
         c.serviceInterface = ConditionProviderService.SERVICE_INTERFACE;
-        c.secureSettingName = Settings.Secure.ENABLED_CONDITION_PROVIDERS;
+        c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES;
+        c.secondarySettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
         c.bindPermission = android.Manifest.permission.BIND_CONDITION_PROVIDER_SERVICE;
         c.settingsAction = Settings.ACTION_CONDITION_PROVIDER_SETTINGS;
         c.clientLabel = R.string.condition_provider_service_binding_label;
@@ -101,12 +103,6 @@ public class ConditionProviders extends ManagedServices {
                 }
             }
         }
-        if (filter == null) {
-            pw.print("    mListeners("); pw.print(mListeners.size()); pw.println("):");
-            for (int i = 0; i < mListeners.size(); i++) {
-                pw.print("      "); pw.println(mListeners.keyAt(i));
-            }
-        }
         pw.print("    mSystemConditionProviders: "); pw.println(mSystemConditionProviderNames);
         for (int i = 0; i < mSystemConditionProviders.size(); i++) {
             mSystemConditionProviders.valueAt(i).dump(pw, filter);
@@ -116,6 +112,11 @@ public class ConditionProviders extends ManagedServices {
     @Override
     protected IInterface asInterface(IBinder binder) {
         return IConditionProvider.Stub.asInterface(binder);
+    }
+
+    @Override
+    protected boolean checkType(IInterface service) {
+        return service instanceof IConditionProvider;
     }
 
     @Override
@@ -166,34 +167,12 @@ public class ConditionProviders extends ManagedServices {
         }
     }
 
-    public void requestConditions(IConditionListener callback, int relevance) {
-        synchronized(mMutex) {
-            if (DEBUG) Slog.d(TAG, "requestConditions callback=" + callback
-                    + " relevance=" + Condition.relevanceToString(relevance));
-            if (callback == null) return;
-            relevance = relevance & (Condition.FLAG_RELEVANT_NOW | Condition.FLAG_RELEVANT_ALWAYS);
-            if (relevance != 0) {
-                mListeners.put(callback.asBinder(), callback);
-                requestConditionsLocked(relevance);
-            } else {
-                mListeners.remove(callback.asBinder());
-                if (mListeners.isEmpty()) {
-                    requestConditionsLocked(0);
-                }
-            }
-        }
-    }
-
-    private Condition[] validateConditions(String pkg, Condition[] conditions) {
+    private Condition[] removeDuplicateConditions(String pkg, Condition[] conditions) {
         if (conditions == null || conditions.length == 0) return null;
         final int N = conditions.length;
         final ArrayMap<Uri, Condition> valid = new ArrayMap<Uri, Condition>(N);
         for (int i = 0; i < N; i++) {
             final Uri id = conditions[i].id;
-            if (!Condition.isValidId(id, pkg)) {
-                Slog.w(TAG, "Ignoring condition from " + pkg + " for invalid id: " + id);
-                continue;
-            }
             if (valid.containsKey(id)) {
                 Slog.w(TAG, "Ignoring condition from " + pkg + " for duplicate id: " + id);
                 continue;
@@ -230,24 +209,21 @@ public class ConditionProviders extends ManagedServices {
         synchronized(mMutex) {
             if (DEBUG) Slog.d(TAG, "notifyConditions pkg=" + pkg + " info=" + info + " conditions="
                     + (conditions == null ? null : Arrays.asList(conditions)));
-            conditions = validateConditions(pkg, conditions);
+            conditions = removeDuplicateConditions(pkg, conditions);
             if (conditions == null || conditions.length == 0) return;
             final int N = conditions.length;
-            for (IConditionListener listener : mListeners.values()) {
-                try {
-                    listener.onConditionsReceived(conditions);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Error sending conditions to listener " + listener, e);
-                }
-            }
             for (int i = 0; i < N; i++) {
                 final Condition c = conditions[i];
                 final ConditionRecord r = getRecordLocked(c.id, info.component, true /*create*/);
                 r.info = info;
                 r.condition = c;
-                if (mCallback != null) {
-                    mCallback.onConditionChanged(c.id, c);
-                }
+            }
+        }
+        final int N = conditions.length;
+        for (int i = 0; i < N; i++) {
+            final Condition c = conditions[i];
+            if (mCallback != null) {
+                mCallback.onConditionChanged(c.id, c);
             }
         }
     }
@@ -278,6 +254,31 @@ public class ConditionProviders extends ManagedServices {
             // ... and is associated with the in-process service
             r.info = checkServiceTokenLocked(provider);
         }
+    }
+
+    @Override
+    protected @NonNull ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
+            int userId) {
+        final ContentResolver cr = mContext.getContentResolver();
+        String settingValue = Settings.Secure.getStringForUser(
+                cr,
+                settingName,
+                userId);
+        if (TextUtils.isEmpty(settingValue))
+            return new ArraySet<>();
+        String[] packages = settingValue.split(ENABLED_SERVICES_SEPARATOR);
+        ArraySet<ComponentName> result = new ArraySet<>(packages.length);
+        for (int i = 0; i < packages.length; i++) {
+            if (!TextUtils.isEmpty(packages[i])) {
+                final ComponentName component = ComponentName.unflattenFromString(packages[i]);
+                if (component != null) {
+                    result.addAll(queryPackageForServices(component.getPackageName(), userId));
+                } else {
+                    result.addAll(queryPackageForServices(packages[i], userId));
+                }
+            }
+        }
+        return result;
     }
 
     public boolean subscribeIfNecessary(ComponentName component, Uri conditionId) {
@@ -358,25 +359,6 @@ public class ConditionProviders extends ManagedServices {
 
     private static IConditionProvider provider(ManagedServiceInfo info) {
         return info == null ? null : (IConditionProvider) info.service;
-    }
-
-    private void requestConditionsLocked(int flags) {
-        for (ManagedServiceInfo info : mServices) {
-            final IConditionProvider provider = provider(info);
-            if (provider == null) continue;
-            // clear all stored conditions from this provider that we no longer care about
-            for (int i = mRecords.size() - 1; i >= 0; i--) {
-                final ConditionRecord r = mRecords.get(i);
-                if (r.info != info) continue;
-                if (r.subscribed) continue;
-                mRecords.remove(i);
-            }
-            try {
-                provider.onRequestConditions(flags);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error requesting conditions from " + info.component, e);
-            }
-        }
     }
 
     private static class ConditionRecord {

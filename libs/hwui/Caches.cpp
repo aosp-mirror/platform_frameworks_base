@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "Caches.h"
 
 #include "GammaFontRenderer.h"
@@ -25,6 +23,7 @@
 #include "ShadowTessellator.h"
 #include "utils/GLUtils.h"
 
+#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 
@@ -56,7 +55,6 @@ Caches::Caches(RenderState& renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
-    initFont();
     initConstraints();
     initStaticProperties();
     initExtensions();
@@ -70,20 +68,15 @@ bool Caches::init() {
     mRegionMesh = nullptr;
     mProgram = nullptr;
 
-    mFunctorsCount = 0;
-
     patchCache.init();
 
     mInitialized = true;
 
     mPixelBufferState = new PixelBufferState();
     mTextureState = new TextureState();
+    mTextureState->constructTexture(*this);
 
     return true;
-}
-
-void Caches::initFont() {
-    fontRenderer = GammaFontRenderer::createRenderer();
 }
 
 void Caches::initExtensions() {
@@ -104,15 +97,9 @@ void Caches::initConstraints() {
 }
 
 void Caches::initStaticProperties() {
-    gpuPixelBuffersEnabled = false;
-
     // OpenGL ES 3.0+ specific features
-    if (mExtensions.hasPixelBufferObjects()) {
-        char property[PROPERTY_VALUE_MAX];
-        if (property_get(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, property, "true") > 0) {
-            gpuPixelBuffersEnabled = !strcmp(property, "true");
-        }
-    }
+    gpuPixelBuffersEnabled = mExtensions.hasPixelBufferObjects()
+            && property_get_bool(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, true);
 }
 
 void Caches::terminate() {
@@ -207,14 +194,14 @@ void Caches::dumpMemoryUsage(String8 &log) {
             dropShadowCache.getMaxSize());
     log.appendFormat("  PatchCache           %8d / %8d\n",
             patchCache.getSize(), patchCache.getMaxSize());
-    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        const uint32_t sizeA8 = fontRenderer->getFontRendererSize(i, GL_ALPHA);
-        const uint32_t sizeRGBA = fontRenderer->getFontRendererSize(i, GL_RGBA);
-        log.appendFormat("  FontRenderer %d A8    %8d / %8d\n", i, sizeA8, sizeA8);
-        log.appendFormat("  FontRenderer %d RGBA  %8d / %8d\n", i, sizeRGBA, sizeRGBA);
-        log.appendFormat("  FontRenderer %d total %8d / %8d\n", i, sizeA8 + sizeRGBA,
-                sizeA8 + sizeRGBA);
-    }
+
+    const uint32_t sizeA8 = fontRenderer.getFontRendererSize(GL_ALPHA);
+    const uint32_t sizeRGBA = fontRenderer.getFontRendererSize(GL_RGBA);
+    log.appendFormat("  FontRenderer A8    %8d / %8d\n", sizeA8, sizeA8);
+    log.appendFormat("  FontRenderer RGBA  %8d / %8d\n", sizeRGBA, sizeRGBA);
+    log.appendFormat("  FontRenderer total %8d / %8d\n", sizeA8 + sizeRGBA,
+            sizeA8 + sizeRGBA);
+
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
@@ -226,10 +213,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += tessellationCache.getSize();
     total += dropShadowCache.getSize();
     total += patchCache.getSize();
-    for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        total += fontRenderer->getFontRendererSize(i, GL_ALPHA);
-        total += fontRenderer->getFontRendererSize(i, GL_RGBA);
-    }
+    total += fontRenderer.getFontRendererSize(GL_ALPHA);
+    total += fontRenderer.getFontRendererSize(GL_RGBA);
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
@@ -249,22 +234,22 @@ void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
     switch (mode) {
-        case kFlushMode_Full:
+        case FlushMode::Full:
             textureCache.clear();
             patchCache.clear();
             dropShadowCache.clear();
             gradientCache.clear();
-            fontRenderer->clear();
+            fontRenderer.clear();
             fboCache.clear();
             dither.clear();
             // fall through
-        case kFlushMode_Moderate:
-            fontRenderer->flush();
+        case FlushMode::Moderate:
+            fontRenderer.flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();
             // fall through
-        case kFlushMode_Layers:
+        case FlushMode::Layers:
             layerCache.clear();
             renderBufferCache.clear();
             break;
@@ -275,38 +260,6 @@ void Caches::flush(FlushMode mode) {
     // Errors during cleanup should be considered non-fatal, dump them and
     // and move on. TODO: All errors or just errors like bad surface?
     GLUtils::dumpGLErrors();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Tiling
-///////////////////////////////////////////////////////////////////////////////
-
-void Caches::startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard) {
-    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
-        glStartTilingQCOM(x, y, width, height, (discard ? GL_NONE : GL_COLOR_BUFFER_BIT0_QCOM));
-    }
-}
-
-void Caches::endTiling() {
-    if (mExtensions.hasTiledRendering() && !Properties::debugOverdraw) {
-        glEndTilingQCOM(GL_COLOR_BUFFER_BIT0_QCOM);
-    }
-}
-
-bool Caches::hasRegisteredFunctors() {
-    return mFunctorsCount > 0;
-}
-
-void Caches::registerFunctors(uint32_t functorCount) {
-    mFunctorsCount += functorCount;
-}
-
-void Caches::unregisterFunctors(uint32_t functorCount) {
-    if (functorCount > mFunctorsCount) {
-        mFunctorsCount = 0;
-    } else {
-        mFunctorsCount -= functorCount;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.Notification;
+import android.content.Context;
 import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -24,6 +25,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.view.View;
+import android.widget.RemoteViews;
 
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -32,6 +34,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The list of currently displaying notifications.
@@ -53,6 +57,11 @@ public class NotificationData {
         public boolean legacy; // whether the notification has a legacy, dark background
         public int targetSdk;
         private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
+        public RemoteViews cachedContentView;
+        public RemoteViews cachedBigContentView;
+        public RemoteViews cachedHeadsUpContentView;
+        public RemoteViews cachedPublicContentView;
+        public CharSequence remoteInputText;
 
         public Entry(StatusBarNotification n, StatusBarIconView ic) {
             this.key = n.getKey();
@@ -98,6 +107,57 @@ public class NotificationData {
             return row.getPublicLayout().getContractedChild();
         }
 
+        public boolean cacheContentViews(Context ctx, Notification updatedNotification) {
+            boolean applyInPlace = false;
+            if (updatedNotification != null) {
+                final Notification.Builder updatedNotificationBuilder
+                        = Notification.Builder.recoverBuilder(ctx, updatedNotification);
+                final RemoteViews newContentView = updatedNotificationBuilder.createContentView();
+                final RemoteViews newBigContentView =
+                        updatedNotificationBuilder.createBigContentView();
+                final RemoteViews newHeadsUpContentView =
+                        updatedNotificationBuilder.createHeadsUpContentView();
+                final RemoteViews newPublicNotification
+                        = updatedNotificationBuilder.makePublicContentView();
+
+                boolean sameCustomView = Objects.equals(
+                        notification.getNotification().extras.getBoolean(
+                                Notification.EXTRA_CONTAINS_CUSTOM_VIEW),
+                        updatedNotification.extras.getBoolean(
+                                Notification.EXTRA_CONTAINS_CUSTOM_VIEW));
+                applyInPlace = compareRemoteViews(cachedContentView, newContentView)
+                        && compareRemoteViews(cachedBigContentView, newBigContentView)
+                        && compareRemoteViews(cachedHeadsUpContentView, newHeadsUpContentView)
+                        && compareRemoteViews(cachedPublicContentView, newPublicNotification)
+                        && sameCustomView;
+                cachedPublicContentView = newPublicNotification;
+                cachedHeadsUpContentView = newHeadsUpContentView;
+                cachedBigContentView = newBigContentView;
+                cachedContentView = newContentView;
+            } else {
+                final Notification.Builder builder
+                        = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
+
+                cachedContentView = builder.createContentView();
+                cachedBigContentView = builder.createBigContentView();
+                cachedHeadsUpContentView = builder.createHeadsUpContentView();
+                cachedPublicContentView = builder.makePublicContentView();
+
+                applyInPlace = false;
+            }
+            return applyInPlace;
+        }
+
+        // Returns true if the RemoteViews are the same.
+        private boolean compareRemoteViews(final RemoteViews a, final RemoteViews b) {
+            return (a == null && b == null) ||
+                    (a != null && b != null
+                    && b.getPackage() != null
+                    && a.getPackage() != null
+                    && a.getPackage().equals(b.getPackage())
+                    && a.getLayoutId() == b.getLayoutId());
+        }
+
         public void notifyFullScreenIntentLaunched() {
             lastFullScreenIntentLaunchTime = SystemClock.elapsedRealtime();
         }
@@ -127,22 +187,33 @@ public class NotificationData {
         public int compare(Entry a, Entry b) {
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
-            final int aPriority = na.getNotification().priority;
-            final int bPriority = nb.getNotification().priority;
+            int aImportance = Ranking.IMPORTANCE_DEFAULT;
+            int bImportance = Ranking.IMPORTANCE_DEFAULT;
+            int aRank = 0;
+            int bRank = 0;
+
+            if (mRankingMap != null) {
+                // RankingMap as received from NoMan
+                mRankingMap.getRanking(a.key, mRankingA);
+                mRankingMap.getRanking(b.key, mRankingB);
+                aImportance = mRankingA.getImportance();
+                bImportance = mRankingB.getImportance();
+                aRank = mRankingA.getRank();
+                bRank = mRankingB.getRank();
+            }
 
             String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
 
-            // PRIORITY_MIN media streams are allowed to drift to the bottom
+            // IMPORTANCE_MIN media streams are allowed to drift to the bottom
             final boolean aMedia = a.key.equals(mediaNotification)
-                    && aPriority > Notification.PRIORITY_MIN;
+                    && aImportance > Ranking.IMPORTANCE_MIN;
             final boolean bMedia = b.key.equals(mediaNotification)
-                    && bPriority > Notification.PRIORITY_MIN;
+                    && bImportance > Ranking.IMPORTANCE_MIN;
 
-            boolean aSystemMax = aPriority >= Notification.PRIORITY_MAX &&
+            boolean aSystemMax = aImportance >= Ranking.IMPORTANCE_MAX &&
                     isSystemNotification(na);
-            boolean bSystemMax = bPriority >= Notification.PRIORITY_MAX &&
+            boolean bSystemMax = bImportance >= Ranking.IMPORTANCE_MAX &&
                     isSystemNotification(nb);
-            int d = nb.getScore() - na.getScore();
 
             boolean isHeadsUp = a.row.isHeadsUp();
             if (isHeadsUp != b.row.isHeadsUp()) {
@@ -156,13 +227,8 @@ public class NotificationData {
             } else if (aSystemMax != bSystemMax) {
                 // Upsort PRIORITY_MAX system notifications
                 return aSystemMax ? -1 : 1;
-            } else if (mRankingMap != null) {
-                // RankingMap as received from NoMan
-                mRankingMap.getRanking(a.key, mRankingA);
-                mRankingMap.getRanking(b.key, mRankingB);
-                return mRankingA.getRank() - mRankingB.getRank();
-            } if (d != 0) {
-                return d;
+            } else if (aRank != bRank) {
+                return aRank - bRank;
             } else {
                 return (int) (nb.getNotification().when - na.getNotification().when);
             }
@@ -192,16 +258,21 @@ public class NotificationData {
     }
 
     public void add(Entry entry, RankingMap ranking) {
-        mEntries.put(entry.notification.getKey(), entry);
-        updateRankingAndSort(ranking);
+        synchronized (mEntries) {
+            mEntries.put(entry.notification.getKey(), entry);
+        }
         mGroupManager.onEntryAdded(entry);
+        updateRankingAndSort(ranking);
     }
 
     public Entry remove(String key, RankingMap ranking) {
-        Entry removed = mEntries.remove(key);
+        Entry removed = null;
+        synchronized (mEntries) {
+            removed = mEntries.remove(key);
+        }
         if (removed == null) return null;
-        updateRankingAndSort(ranking);
         mGroupManager.onEntryRemoved(removed);
+        updateRankingAndSort(ranking);
         return removed;
     }
 
@@ -222,12 +293,59 @@ public class NotificationData {
             mRankingMap.getRanking(key, mTmpRanking);
             return mTmpRanking.getVisibilityOverride();
         }
-        return NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+        return Ranking.VISIBILITY_NO_OVERRIDE;
+    }
+
+    public boolean shouldSuppressScreenOff(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0;
+        }
+        return false;
+    }
+
+    public boolean shouldSuppressScreenOn(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0;
+        }
+        return false;
+    }
+
+    public int getImportance(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getImportance();
+        }
+        return Ranking.IMPORTANCE_UNSPECIFIED;
+    }
+
+    public String getOverrideGroupKey(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return mTmpRanking.getOverrideGroupKey();
+        }
+         return null;
     }
 
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
+            synchronized (mEntries) {
+                final int N = mEntries.size();
+                for (int i = 0; i < N; i++) {
+                    Entry entry = mEntries.valueAt(i);
+                    final StatusBarNotification oldSbn = entry.notification.clone();
+                    final String overrideGroupKey = getOverrideGroupKey(entry.key);
+                    if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
+                        entry.notification.setOverrideGroupKey(overrideGroupKey);
+                        mGroupManager.onEntryUpdated(entry, oldSbn);
+                    }
+                    //mGroupManager.onEntryBundlingUpdated(entry, getOverrideGroupKey(entry.key));
+                }
+            }
         }
         filterAndSort();
     }
@@ -237,16 +355,18 @@ public class NotificationData {
     public void filterAndSort() {
         mSortedAndFiltered.clear();
 
-        final int N = mEntries.size();
-        for (int i = 0; i < N; i++) {
-            Entry entry = mEntries.valueAt(i);
-            StatusBarNotification sbn = entry.notification;
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                StatusBarNotification sbn = entry.notification;
 
-            if (shouldFilterOut(sbn)) {
-                continue;
+                if (shouldFilterOut(sbn)) {
+                    continue;
+                }
+
+                mSortedAndFiltered.add(entry);
             }
-
-            mSortedAndFiltered.add(entry);
         }
 
         Collections.sort(mSortedAndFiltered, mRankingComparator);
@@ -262,8 +382,10 @@ public class NotificationData {
             return true;
         }
 
-        if (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET &&
-                mEnvironment.shouldHideSensitiveContents(sbn.getUserId())) {
+        if (mEnvironment.onSecureLockScreen() &&
+                (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
+                        || mEnvironment.shouldHideNotifications(sbn.getUserId())
+                        || mEnvironment.shouldHideNotifications(sbn.getKey()))) {
             return true;
         }
 
@@ -305,27 +427,29 @@ public class NotificationData {
             NotificationData.Entry e = mSortedAndFiltered.get(active);
             dumpEntry(pw, indent, active, e);
         }
-
-        int M = mEntries.size();
-        pw.print(indent);
-        pw.println("inactive notifications: " + (M - active));
-        int inactiveCount = 0;
-        for (int i = 0; i < M; i++) {
-            Entry entry = mEntries.valueAt(i);
-            if (!mSortedAndFiltered.contains(entry)) {
-                dumpEntry(pw, indent, inactiveCount, entry);
-                inactiveCount++;
+        synchronized (mEntries) {
+            int M = mEntries.size();
+            pw.print(indent);
+            pw.println("inactive notifications: " + (M - active));
+            int inactiveCount = 0;
+            for (int i = 0; i < M; i++) {
+                Entry entry = mEntries.valueAt(i);
+                if (!mSortedAndFiltered.contains(entry)) {
+                    dumpEntry(pw, indent, inactiveCount, entry);
+                    inactiveCount++;
+                }
             }
         }
     }
 
     private void dumpEntry(PrintWriter pw, String indent, int i, Entry e) {
+        mRankingMap.getRanking(e.key, mTmpRanking);
         pw.print(indent);
         pw.println("  [" + i + "] key=" + e.key + " icon=" + e.icon);
         StatusBarNotification n = e.notification;
         pw.print(indent);
-        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" +
-                n.getScore());
+        pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " importance=" +
+                mTmpRanking.getImportance());
         pw.print(indent);
         pw.println("      notification=" + n.getNotification());
         pw.print(indent);
@@ -341,7 +465,9 @@ public class NotificationData {
      * Provides access to keyguard state and user settings dependent data.
      */
     public interface Environment {
-        public boolean shouldHideSensitiveContents(int userid);
+        public boolean onSecureLockScreen();
+        public boolean shouldHideNotifications(int userid);
+        public boolean shouldHideNotifications(String key);
         public boolean isDeviceProvisioned();
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();

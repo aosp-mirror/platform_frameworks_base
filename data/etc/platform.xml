@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -107,8 +107,23 @@
     </permission>
 
     <permission name="android.permission.ACCESS_FM_RADIO" >
+        <!-- /dev/fm is gid media, not audio -->
         <group gid="media" />
     </permission>
+
+    <!-- These are permissions that were mapped to gids but we need
+         to keep them here until an upgrade from L to the current
+         version is to be supported. These permissions are built-in
+         and in L were not stored in packages.xml as a result if they
+         are not defined here while parsing packages.xml we would
+         ignore these permissions being granted to apps and not
+         propagate the granted state. From N we are storing the
+         built-in permissions in packages.xml as the saved storage
+         is negligible (one tag with the permission) compared to
+         the fragility as one can remove a built-in permission which
+         no longer needs to be mapped to gids and break grant propagation. -->
+    <permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- ================================================================== -->
     <!-- ================================================================== -->
@@ -127,6 +142,19 @@
     <assign-permission name="android.permission.WAKE_LOCK" uid="media" />
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="media" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="media" />
+    <assign-permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" uid="media" />
+
+    <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="audioserver" />
+    <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="audioserver" />
+    <assign-permission name="android.permission.WAKE_LOCK" uid="audioserver" />
+    <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="audioserver" />
+    <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="audioserver" />
+
+    <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="cameraserver" />
+    <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="cameraserver" />
+    <assign-permission name="android.permission.WAKE_LOCK" uid="cameraserver" />
+    <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="cameraserver" />
+    <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="cameraserver" />
 
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
 
@@ -142,6 +170,15 @@
 
     <!-- These are the standard packages that are white-listed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
-    <allow-in-power-save-except-idle package="com.android.providers.downloads" />
+    <allow-in-power-save package="com.android.providers.downloads" />
 
+    <!-- These are the standard packages that are white-listed to always have internet
+         access while in data mode, even if they aren't in the foreground. -->
+    <allow-in-data-usage-save package="com.android.providers.downloads" />
+
+    <!-- These are the packages that are white-listed to be able to run as system user -->
+    <system-user-whitelisted-app package="com.android.settings" />
+
+    <!-- These are the packages that shouldn't run as system user -->
+    <system-user-blacklisted-app package="com.android.wallpaper.livepicker" />
 </permissions>

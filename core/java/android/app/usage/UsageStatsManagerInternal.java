@@ -19,6 +19,8 @@ package android.app.usage;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 
+import java.io.IOException;
+
 /**
  * UsageStatsManager local system service interface.
  *
@@ -108,5 +110,10 @@ public abstract class UsageStatsManagerInternal {
         public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle);
         public abstract void onParoleStateChanged(boolean isParoleOn);
     }
+
+    /*  Backup/Restore API */
+    public abstract byte[] getBackupPayload(int user, String key);
+
+    public abstract void applyRestoredPayload(int user, String key, byte[] payload);
 
 }

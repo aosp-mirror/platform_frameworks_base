@@ -16,9 +16,11 @@
 
 package com.android.tools.layoutlib.create;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
 
 public class RefactorClassAdapter extends AbstractClassAdapter {
 
@@ -27,6 +29,14 @@ public class RefactorClassAdapter extends AbstractClassAdapter {
     RefactorClassAdapter(ClassVisitor cv, HashMap<String, String> refactorClasses) {
         super(cv);
         mRefactorClasses = refactorClasses;
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature,
+            String[] exceptions) {
+        MethodVisitor mw = super.visitMethod(access, name, desc, signature, exceptions);
+
+        return new RefactorStackMapAdapter(mw);
     }
 
     @Override
@@ -45,5 +55,50 @@ public class RefactorClassAdapter extends AbstractClassAdapter {
             }
         }
         return oldClassName;
+    }
+
+    /**
+     * A method visitor that renames all references from an old class name to a new class name in
+     * the stackmap of the method.
+     */
+    private class RefactorStackMapAdapter extends MethodVisitor {
+
+        private RefactorStackMapAdapter(MethodVisitor mv) {
+            super(Main.ASM_VERSION, mv);
+        }
+
+
+        private Object[] renameFrame(Object[] elements) {
+            if (elements == null) {
+                return null;
+            }
+
+            // The input array cannot be modified. We only copy the source array on write
+            boolean copied = false;
+            for (int i = 0; i < elements.length; i++) {
+                if (!(elements[i] instanceof String)) {
+                    continue;
+                }
+
+                if (!copied) {
+                    elements = Arrays.copyOf(elements, elements.length);
+                    copied = true;
+                }
+
+                String type = (String)elements[i];
+                if (type.indexOf(';') > 0) {
+                    elements[i] = renameTypeDesc(type);
+                } else {
+                    elements[i] = renameInternalType(type);
+                }
+            }
+
+            return elements;
+        }
+
+        @Override
+        public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
+            super.visitFrame(type, nLocal, renameFrame(local), nStack, renameFrame(stack));
+        }
     }
 }

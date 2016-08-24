@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- Manifest for the privileged CTS shim upgrade -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.cts.priv.ctsshim" >
+
+    <uses-sdk android:minSdkVersion="24"
+        android:targetSdkVersion="24" />
+
+    <application
+        android:hasCode="false"
+        tools:ignore="AllowBackup,MissingApplicationIcon" >
+
+        <!-- These activities don't actually exist; define them just to test the filters !-->
+
+        <!-- install test; [some] high priority filters granted -->
+        <activity android:name=".InstallPriority">
+            <!-- normal actions; priority will be granted -->
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+
+            <!-- protected actions; priority will be denied -->
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.SEND" />
+            </intent-filter>
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+            </intent-filter>
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.SENDTO" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; single, equivalent filter -->
+        <activity android:name=".UpgradeMatch">
+            <intent-filter android:priority="500">
+                <action android:name="com.android.cts.action.MATCH" />
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; multiple, equivalent filters -->
+        <activity android:name=".UpgradeMatchMultiple">
+            <intent-filter android:priority="500">
+                <action android:name="com.android.cts.action.MATCH_MULTIPLE" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; lower priority is okay -->
+        <activity android:name=".UpgradeLowerPriority">
+            <intent-filter android:priority="75">
+                <action android:name="com.android.cts.action.LOWER_PRIORITY" />
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; action subset is "equivalent" -->
+        <activity android:name=".UpgradeActionSubset">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.ACTION_SUB_2" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; category subset is "equivalent" -->
+        <activity android:name=".UpgradeCategorySubset">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.CATEGORY_SUB" />
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; scheme subset is "equivalent" -->
+        <activity android:name=".UpgradeSchemeSubset">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.SCHEME_SUB" />
+                <data android:scheme="flubber" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; authority subset is "equivalent" -->
+        <activity android:name=".UpgradeAuthoritySubset">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.AUTHORITY_SUB" />
+                <data android:host="goo.gl" android:port="443" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; new activity cannot get >0 priority -->
+        <activity android:name=".UpgradeNewActivity">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.NEW_ACTIVITY" />
+                <category android:name="android.intent.category.INFO" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; new action cannot get >0 priority -->
+        <activity android:name=".UpgradeNewAction">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.NEW_ACTION" />
+                <action android:name="com.android.cts.action.NEW_ACTION_2" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; new category cannot get >0 priority -->
+        <activity android:name=".UpgradeNewCategory">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.NEW_CATEGORY" />
+                <category android:name="android.intent.category.INFO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DOODLE" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; new scheme cannot get >0 priority -->
+        <activity android:name=".UpgradeNewScheme">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.NEW_SCHEME" />
+                <data android:scheme="content" />
+                <data android:scheme="flubber" />
+                <data android:scheme="zoodle" />
+                <data android:scheme="zowie" />
+            </intent-filter>
+        </activity>
+
+        <!-- upgrade test; new authority cannot get >0 priority -->
+        <activity android:name=".UpgradeNewAuthority">
+            <intent-filter android:priority="100">
+                <action android:name="com.android.cts.action.NEW_AUTHORITY" />
+                <data android:host="www.google.com" android:port="80" />
+                <data android:host="www.google.com" android:port="8080" />
+                <data android:host="mail.google.com" android:port="80" />
+                <data android:host="goo.gl" android:port="443" />
+                <data android:host="www.google.com" android:port="443" />
+            </intent-filter>
+        </activity>
+
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>
+

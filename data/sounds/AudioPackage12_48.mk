@@ -13,7 +13,7 @@ NOTIFICATION_FILES := Ariel Ceres Carme Elara Europa Iapetus Io Rhea Salacia Tit
 RINGTONE_FILES := Callisto Dione Ganymede Luna Oberon Phobos Sedna Titania Triton Umbriel
 EFFECT_FILES := Effect_Tick KeypressReturn KeypressInvalid KeypressDelete KeypressSpacebar KeypressStandard \
 	Lock Unlock Trusted
-MATERIAL_EFFECT_FILES := camera_click VideoRecord LowBattery WirelessChargingStarted
+MATERIAL_EFFECT_FILES := camera_click VideoRecord LowBattery WirelessChargingStarted VideoStop
 
 # Alarms not yet available in 48 kHz
 PRODUCT_COPY_FILES += $(foreach fn,$(ALARM_FILES),\

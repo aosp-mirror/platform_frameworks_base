@@ -168,7 +168,8 @@ public abstract class AndroidKeyStoreHmacSpi extends MacSpi implements KeyStoreC
                 KeymasterDefs.KM_PURPOSE_SIGN,
                 true,
                 keymasterArgs,
-                null); // no additional entropy needed for HMAC because it's deterministic
+                null, // no additional entropy needed for HMAC because it's deterministic
+                mKey.getUid());
 
         if (opResult == null) {
             throw new KeyStoreConnectException();

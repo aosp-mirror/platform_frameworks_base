@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Trace;
 
 /**
  * Shared singleton background thread for each process.
@@ -34,6 +35,7 @@ public final class BackgroundThread extends HandlerThread {
         if (sInstance == null) {
             sInstance = new BackgroundThread();
             sInstance.start();
+            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }

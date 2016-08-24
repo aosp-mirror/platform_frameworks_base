@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Classic NES Controller
+# Classic [S]NES Controller
 
+key 288 BUTTON_X
 key 289 BUTTON_A
 key 290 BUTTON_B
+key 291 BUTTON_Y
+key 292 BUTTON_L1
+key 293 BUTTON_R1
 key 297 BUTTON_START
 key 296 BUTTON_SELECT
 

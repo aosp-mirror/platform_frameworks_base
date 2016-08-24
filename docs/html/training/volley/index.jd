@@ -17,13 +17,13 @@ startpage=true
 <h2>Dependencies and prerequisites</h2>
 
 <ul>
-  <li>Android 1.6 (API Level 4) or higher</li>
+  <li>Android 2.2 (API Level 8) or higher</li>
 </ul>
 
 </div>
 </div>
 
-<a class="notice-developers-video wide" href="https://developers.google.com/events/io/sessions/325304728">
+<a class="notice-developers-video wide" href="https://www.youtube.com/watch?v=yhv8l9F44qo">
 <div>
     <h3>Video</h3>
     <p>Volley: Easy, Fast Networking for Android</p>
@@ -77,10 +77,9 @@ git clone https://android.googlesource.com/platform/frameworks/volley
 </pre>
 </li>
 
-<li>Import the downloaded source into your app project as an Android library project
-(as described in <a href="{@docRoot}tools/projects/projects-eclipse.html">
-Managing Projects from Eclipse with ADT</a>, if you're using Eclipse) or make a
-<a href="{@docRoot}guide/faq/commontasks.html#addexternallibrary"><code>.jar</code> file</a>.</li>
+<li>Import the downloaded source into your app project as an Android library module
+as described in <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</li>
 </ol>
 
 <h2>Lessons</h2>

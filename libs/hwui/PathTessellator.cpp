@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define LOG_TAG "OpenGLRenderer"
 #define LOG_NDEBUG 1
-#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #define VERTEX_DEBUG 0
 
@@ -35,6 +32,15 @@
 #define DEBUG_DUMP_BUFFER()
 #endif
 
+#include "PathTessellator.h"
+
+#include "Matrix.h"
+#include "Vector.h"
+#include "Vertex.h"
+#include "utils/MathUtils.h"
+
+#include <algorithm>
+
 #include <SkPath.h>
 #include <SkPaint.h>
 #include <SkPoint.h>
@@ -46,12 +52,6 @@
 
 #include <utils/Log.h>
 #include <utils/Trace.h>
-
-#include "PathTessellator.h"
-#include "Matrix.h"
-#include "Vector.h"
-#include "Vertex.h"
-#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -155,7 +155,7 @@ public:
             // always use 2 points for hairline
             if (halfStrokeWidth == 0.0f) return 2;
 
-            float threshold = MathUtils::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
+            float threshold = std::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
             return MathUtils::divisionsNeededToApproximateArc(halfStrokeWidth, PI, threshold);
         }
         return 0;
@@ -180,7 +180,8 @@ public:
     }
 };
 
-void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer& vertexBuffer) {
+void getFillVerticesFromPerimeter(const std::vector<Vertex>& perimeter,
+        VertexBuffer& vertexBuffer) {
     Vertex* buffer = vertexBuffer.alloc<Vertex>(perimeter.size());
 
     int currentIndex = 0;
@@ -204,8 +205,8 @@ void getFillVerticesFromPerimeter(const Vector<Vertex>& perimeter, VertexBuffer&
  * Uses an additional 2 vertices at the end to wrap around, closing the tri-strip
  * (for a total of perimeter.size() * 2 + 2 vertices)
  */
-void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Vertex>& perimeter,
-        VertexBuffer& vertexBuffer) {
+void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo,
+        const std::vector<Vertex>& perimeter, VertexBuffer& vertexBuffer) {
     Vertex* buffer = vertexBuffer.alloc<Vertex>(perimeter.size() * 2 + 2);
 
     int currentIndex = 0;
@@ -263,7 +264,7 @@ static inline void storeBeginEnd(const PaintInfo& paintInfo, const Vertex& cente
  * 2 - can zig-zag across 'extra' vertices at either end, to create round caps
  */
 void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
-        const Vector<Vertex>& vertices, VertexBuffer& vertexBuffer) {
+        const std::vector<Vertex>& vertices, VertexBuffer& vertexBuffer) {
     const int extra = paintInfo.capExtraDivisions();
     const int allocSize = (vertices.size() + extra) * 2;
     Vertex* buffer = vertexBuffer.alloc<Vertex>(allocSize);
@@ -342,8 +343,9 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
  *
  * 3 - zig zag back and forth inside the shape to fill it (using perimeter.size() vertices)
  */
-void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Vertex>& perimeter,
-        VertexBuffer& vertexBuffer, float maxAlpha = 1.0f) {
+void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo,
+        const std::vector<Vertex>& perimeter, VertexBuffer& vertexBuffer,
+        float maxAlpha = 1.0f) {
     AlphaVertex* buffer = vertexBuffer.alloc<AlphaVertex>(perimeter.size() * 3 + 2);
 
     // generate alpha points - fill Alpha vertex gaps in between each point with
@@ -401,7 +403,7 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
  * For explanation of constants and general methodoloyg, see comments for
  * getStrokeVerticesFromUnclosedVerticesAA() below.
  */
-inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& vertices,
+inline static void storeCapAA(const PaintInfo& paintInfo, const std::vector<Vertex>& vertices,
         AlphaVertex* buffer, bool isFirst, Vector2 normal, int offset) {
     const int extra = paintInfo.capExtraDivisions();
     const int extraOffset = (extra + 1) / 2;
@@ -426,8 +428,8 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
     }
 
     // determine referencePoint, the center point for the 4 primary cap vertices
-    const Vertex* point = isFirst ? vertices.begin() : (vertices.end() - 1);
-    Vector2 referencePoint = {point->x, point->y};
+    const Vertex& point = isFirst ? vertices.front() : vertices.back();
+    Vector2 referencePoint = {point.x, point.y};
     if (paintInfo.cap == SkPaint::kSquare_Cap) {
         // To account for square cap, move the primary cap vertices (that create the AA edge) by the
         // stroke offset vector (rotated to be parallel to the stroke)
@@ -572,7 +574,7 @@ or, for rounded caps:
     = 2 + 6 * pts + 6 * roundDivs
  */
 void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
-        const Vector<Vertex>& vertices, VertexBuffer& vertexBuffer) {
+        const std::vector<Vertex>& vertices, VertexBuffer& vertexBuffer) {
 
     const int extra = paintInfo.capExtraDivisions();
     const int allocSize = 6 * vertices.size() + 2 + 6 * extra;
@@ -645,8 +647,8 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
 }
 
 
-void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Vertex>& perimeter,
-        VertexBuffer& vertexBuffer) {
+void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo,
+        const std::vector<Vertex>& perimeter, VertexBuffer& vertexBuffer) {
     AlphaVertex* buffer = vertexBuffer.alloc<AlphaVertex>(6 * perimeter.size() + 8);
 
     int offset = 2 * perimeter.size() + 3;
@@ -724,7 +726,7 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
 
     const PaintInfo paintInfo(paint, transform);
 
-    Vector<Vertex> tempVertices;
+    std::vector<Vertex> tempVertices;
     float threshInvScaleX = paintInfo.inverseScaleX;
     float threshInvScaleY = paintInfo.inverseScaleY;
     if (paintInfo.style == SkPaint::kStroke_Style) {
@@ -797,7 +799,7 @@ static void instanceVertices(VertexBuffer& srcBuffer, VertexBuffer& dstBuffer,
     dstBuffer.alloc<TYPE>(numPoints * verticesPerPoint + (numPoints - 1) * 2);
 
     for (int i = 0; i < count; i += 2) {
-        bounds.expandToCoverVertex(points[i + 0], points[i + 1]);
+        bounds.expandToCover(points[i + 0], points[i + 1]);
         dstBuffer.copyInto<TYPE>(srcBuffer, points[i + 0], points[i + 1]);
     }
     dstBuffer.createDegenerateSeparators<TYPE>(verticesPerPoint);
@@ -819,7 +821,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
     }
 
     // calculate outline
-    Vector<Vertex> outlineVertices;
+    std::vector<Vertex> outlineVertices;
     PathApproximationInfo approximationInfo(paintInfo.inverseScaleX, paintInfo.inverseScaleY,
             OUTLINE_REFINE_THRESHOLD);
     approximatePathOutlineVertices(path, true, approximationInfo, outlineVertices);
@@ -861,10 +863,8 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
         vertexBuffer.alloc<Vertex>(numLines * lineAllocSize + (numLines - 1) * 2);
     }
 
-    Vector<Vertex> tempVertices;
-    tempVertices.push();
-    tempVertices.push();
-    Vertex* tempVerticesData = tempVertices.editArray();
+    std::vector<Vertex> tempVertices(2);
+    Vertex* tempVerticesData = &tempVertices.front();
     Rect bounds;
     bounds.set(points[0], points[1], points[0], points[1]);
     for (int i = 0; i < count; i += 4) {
@@ -878,8 +878,8 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
         }
 
         // calculate bounds
-        bounds.expandToCoverVertex(tempVerticesData[0].x, tempVerticesData[0].y);
-        bounds.expandToCoverVertex(tempVerticesData[1].x, tempVerticesData[1].y);
+        bounds.expandToCover(tempVerticesData[0].x, tempVerticesData[0].y);
+        bounds.expandToCover(tempVerticesData[1].x, tempVerticesData[1].y);
     }
 
     // since multiple objects tessellated into buffer, separate them with degen tris
@@ -900,16 +900,9 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
 ///////////////////////////////////////////////////////////////////////////////
 
 bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, float threshold,
-        Vector<Vertex>& outputVertices) {
+        std::vector<Vertex>& outputVertices) {
     PathApproximationInfo approximationInfo(1.0f, 1.0f, threshold);
     return approximatePathOutlineVertices(path, true, approximationInfo, outputVertices);
-}
-
-void pushToVector(Vector<Vertex>& vertices, float x, float y) {
-    // TODO: make this not yuck
-    vertices.push();
-    Vertex* newVertex = &(vertices.editArray()[vertices.size() - 1]);
-    Vertex::set(newVertex, x, y);
 }
 
 class ClockwiseEnforcer {
@@ -927,15 +920,15 @@ public:
         lastX = x;
         lastY = y;
     }
-    void reverseVectorIfNotClockwise(Vector<Vertex>& vertices) {
+    void reverseVectorIfNotClockwise(std::vector<Vertex>& vertices) {
         if (sum < 0) {
             // negative sum implies CounterClockwise
             const int size = vertices.size();
             for (int i = 0; i < size / 2; i++) {
                 Vertex tmp = vertices[i];
                 int k = size - 1 - i;
-                vertices.replaceAt(vertices[k], i);
-                vertices.replaceAt(tmp, k);
+                vertices[i] = vertices[k];
+                vertices[k] = tmp;
             }
         }
     }
@@ -947,7 +940,7 @@ private:
 };
 
 bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool forceClose,
-        const PathApproximationInfo& approximationInfo, Vector<Vertex>& outputVertices) {
+        const PathApproximationInfo& approximationInfo, std::vector<Vertex>& outputVertices) {
     ATRACE_CALL();
 
     // TODO: to support joins other than sharp miter, join vertices should be labelled in the
@@ -959,7 +952,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     while (SkPath::kDone_Verb != (v = iter.next(pts))) {
             switch (v) {
             case SkPath::kMove_Verb:
-                pushToVector(outputVertices, pts[0].x(), pts[0].y());
+                outputVertices.push_back(Vertex{pts[0].x(), pts[0].y()});
                 ALOGV("Move to pos %f %f", pts[0].x(), pts[0].y());
                 clockwiseEnforcer.addPoint(pts[0]);
                 break;
@@ -969,7 +962,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                 break;
             case SkPath::kLine_Verb:
                 ALOGV("kLine_Verb %f %f -> %f %f", pts[0].x(), pts[0].y(), pts[1].x(), pts[1].y());
-                pushToVector(outputVertices, pts[1].x(), pts[1].y());
+                outputVertices.push_back(Vertex{pts[1].x(), pts[1].y()});
                 clockwiseEnforcer.addPoint(pts[1]);
                 break;
             case SkPath::kQuad_Verb:
@@ -1020,7 +1013,7 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     int size = outputVertices.size();
     if (size >= 2 && outputVertices[0].x == outputVertices[size - 1].x &&
             outputVertices[0].y == outputVertices[size - 1].y) {
-        outputVertices.pop();
+        outputVertices.pop_back();
         wasClosed = true;
     }
 
@@ -1048,7 +1041,7 @@ void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
         float p2x, float p2y, float c2x, float c2y,
         const PathApproximationInfo& approximationInfo,
-        Vector<Vertex>& outputVertices, int depth) {
+        std::vector<Vertex>& outputVertices, int depth) {
     float dx = p2x - p1x;
     float dy = p2y - p1y;
     float d1 = fabs((c1x - p2x) * dy - (c1y - p2y) * dx);
@@ -1058,7 +1051,7 @@ void PathTessellator::recursiveCubicBezierVertices(
     if (depth >= MAX_DEPTH
             || d * d <= getThreshold(approximationInfo, dx, dy)) {
         // below thresh, draw line by adding endpoint
-        pushToVector(outputVertices, p2x, p2y);
+        outputVertices.push_back(Vertex{p2x, p2y});
     } else {
         float p1c1x = (p1x + c1x) * 0.5f;
         float p1c1y = (p1y + c1y) * 0.5f;
@@ -1093,7 +1086,7 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float bx, float by,
         float cx, float cy,
         const PathApproximationInfo& approximationInfo,
-        Vector<Vertex>& outputVertices, int depth) {
+        std::vector<Vertex>& outputVertices, int depth) {
     float dx = bx - ax;
     float dy = by - ay;
     // d is the cross product of vector (B-A) and (C-B).
@@ -1102,7 +1095,7 @@ void PathTessellator::recursiveQuadraticBezierVertices(
     if (depth >= MAX_DEPTH
             || d * d <= getThreshold(approximationInfo, dx, dy)) {
         // below thresh, draw line by adding endpoint
-        pushToVector(outputVertices, bx, by);
+        outputVertices.push_back(Vertex{bx, by});
     } else {
         float acx = (ax + cx) * 0.5f;
         float bcx = (bx + cx) * 0.5f;

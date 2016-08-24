@@ -16,13 +16,29 @@
 #ifndef GLUTILS_H
 #define GLUTILS_H
 
+#include "Debug.h"
+
+#include <cutils/log.h>
+
 namespace android {
 namespace uirenderer {
+
+
+#if DEBUG_OPENGL
+#define GL_CHECKPOINT(LEVEL) \
+    do { if (DEBUG_OPENGL >= DEBUG_LEVEL_##LEVEL) {\
+    LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(),\
+            "GL errors! %s:%d", __FILE__, __LINE__);\
+    } } while (0)
+#else
+#define GL_CHECKPOINT(LEVEL)
+#endif
 
 class GLUtils {
 public:
     /**
      * Print out any GL errors with ALOGE, returns true if any errors were found.
+     * You probably want to use GL_CHECKPOINT(LEVEL) instead of calling this directly
      */
     static bool dumpGLErrors();
 

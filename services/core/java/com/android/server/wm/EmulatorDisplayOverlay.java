@@ -17,6 +17,10 @@
 package com.android.server.wm;
 
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,7 +36,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 class EmulatorDisplayOverlay {
-    private static final String TAG = "EmulatorDisplayOverlay";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "EmulatorDisplayOverlay" : TAG_WM;
 
     // Display dimensions
     private Point mScreenSize;
@@ -53,8 +57,8 @@ class EmulatorDisplayOverlay {
 
         SurfaceControl ctrl = null;
         try {
-            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                ctrl = new WindowStateAnimator.SurfaceTrace(session, "EmulatorDisplayOverlay",
+            if (DEBUG_SURFACE_TRACE) {
+                ctrl = new WindowSurfaceController.SurfaceTrace(session, "EmulatorDisplayOverlay",
                         mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
                         SurfaceControl.HIDDEN);
             } else {

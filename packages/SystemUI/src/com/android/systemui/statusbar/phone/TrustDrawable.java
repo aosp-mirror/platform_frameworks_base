@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.R;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -31,9 +29,10 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 
 public class TrustDrawable extends Drawable {
 
@@ -69,10 +68,6 @@ public class TrustDrawable extends Drawable {
 
     private final Animator mVisibleAnimator;
 
-    private final Interpolator mLinearOutSlowInInterpolator;
-    private final Interpolator mFastOutSlowInInterpolator;
-    private final Interpolator mAccelerateDecelerateInterpolator;
-
     public TrustDrawable(Context context) {
         Resources r = context.getResources();
         mInnerRadiusVisibleMin = r.getDimension(R.dimen.trust_circle_inner_radius_visible_min);
@@ -82,12 +77,6 @@ public class TrustDrawable extends Drawable {
         mThickness = r.getDimension(R.dimen.trust_circle_thickness);
 
         mCurInnerRadius = mInnerRadiusEnter;
-
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(
-                context, android.R.interpolator.linear_out_slow_in);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(
-                context, android.R.interpolator.fast_out_slow_in);
-        mAccelerateDecelerateInterpolator = new AccelerateDecelerateInterpolator();
 
         mVisibleAnimator = makeVisibleAnimator();
 
@@ -212,19 +201,19 @@ public class TrustDrawable extends Drawable {
     private Animator makeVisibleAnimator() {
         return makeAnimators(mInnerRadiusVisibleMax, mInnerRadiusVisibleMin,
                 ALPHA_VISIBLE_MAX, ALPHA_VISIBLE_MIN, VISIBLE_DURATION,
-                mAccelerateDecelerateInterpolator,
+                Interpolators.ACCELERATE_DECELERATE,
                 true /* repeating */, false /* stateUpdateListener */);
     }
 
     private Animator makeEnterAnimator(float radius, int alpha) {
         return makeAnimators(radius, mInnerRadiusVisibleMax,
-                alpha, ALPHA_VISIBLE_MAX, ENTER_DURATION, mLinearOutSlowInInterpolator,
+                alpha, ALPHA_VISIBLE_MAX, ENTER_DURATION, Interpolators.LINEAR_OUT_SLOW_IN,
                 false /* repeating */, true /* stateUpdateListener */);
     }
 
     private Animator makeExitAnimator(float radius, int alpha) {
         return makeAnimators(radius, mInnerRadiusExit,
-                alpha, 0, EXIT_DURATION, mFastOutSlowInInterpolator,
+                alpha, 0, EXIT_DURATION, Interpolators.FAST_OUT_SLOW_IN,
                 false /* repeating */, true /* stateUpdateListener */);
     }
 

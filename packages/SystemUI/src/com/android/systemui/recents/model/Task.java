@@ -16,13 +16,22 @@
 
 package com.android.systemui.recents.model;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.ViewDebug;
+
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -30,67 +39,54 @@ import java.util.Objects;
  * A task represents the top most task in the system's task stack.
  */
 public class Task {
+
+    public static final String TAG = "Task";
+
     /* Task callbacks */
     public interface TaskCallbacks {
         /* Notifies when a task has been bound */
-        public void onTaskDataLoaded();
+        public void onTaskDataLoaded(Task task, ActivityManager.TaskThumbnailInfo thumbnailInfo);
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
-
         /* Notifies when a task's stack id has changed. */
-        public void onMultiStackDebugTaskStackIdChanged();
-    }
-
-    /** The ComponentNameKey represents the unique primary key for a component
-     * belonging to a specified user. */
-    public static class ComponentNameKey {
-        final ComponentName component;
-        final int userId;
-
-        public ComponentNameKey(ComponentName cn, int user) {
-            component = cn;
-            userId = user;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(component, userId);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof ComponentNameKey)) {
-                return false;
-            }
-            return component.equals(((ComponentNameKey) o).component) &&
-                    userId == ((ComponentNameKey) o).userId;
-        }
+        public void onTaskStackIdChanged();
     }
 
     /* The Task Key represents the unique primary key for the task */
     public static class TaskKey {
-        final ComponentNameKey mComponentNameKey;
+        @ViewDebug.ExportedProperty(category="recents")
         public final int id;
+        @ViewDebug.ExportedProperty(category="recents")
         public int stackId;
+        @ViewDebug.ExportedProperty(category="recents")
         public final Intent baseIntent;
+        @ViewDebug.ExportedProperty(category="recents")
         public final int userId;
+        @ViewDebug.ExportedProperty(category="recents")
         public long firstActiveTime;
+        @ViewDebug.ExportedProperty(category="recents")
         public long lastActiveTime;
+
+        private int mHashCode;
 
         public TaskKey(int id, int stackId, Intent intent, int userId, long firstActiveTime,
                 long lastActiveTime) {
-            mComponentNameKey = new ComponentNameKey(intent.getComponent(), userId);
             this.id = id;
             this.stackId = stackId;
             this.baseIntent = intent;
             this.userId = userId;
             this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
+            updateHashCode();
         }
 
-        /** Returns the component name key for this task. */
-        public ComponentNameKey getComponentNameKey() {
-            return mComponentNameKey;
+        public void setStackId(int stackId) {
+            this.stackId = stackId;
+            updateHashCode();
+        }
+
+        public ComponentName getComponent() {
+            return this.baseIntent.getComponent();
         }
 
         @Override
@@ -104,116 +100,233 @@ public class Task {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, stackId, userId);
+            return mHashCode;
         }
 
         @Override
         public String toString() {
-            return "Task.Key: " + id + ", "
-                    + "s: " + stackId + ", "
-                    + "u: " + userId + ", "
-                    + "lat: " + lastActiveTime + ", "
-                    + baseIntent.getComponent().getPackageName();
+            return "id=" + id + " stackId=" + stackId + " user=" + userId + " lastActiveTime=" +
+                    lastActiveTime;
+        }
+
+        private void updateHashCode() {
+            mHashCode = Objects.hash(id, stackId, userId);
         }
     }
 
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="key_")
     public TaskKey key;
+
+    /**
+     * The temporary sort index in the stack, used when ordering the stack.
+     */
+    public int temporarySortIndexInStack;
+
+    /**
+     * The group will be computed separately from the initialization of the task
+     */
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="group_")
     public TaskGrouping group;
-    public int taskAffiliation;
-    public int taskAffiliationColor;
-    public boolean isLaunchTarget;
-    public Drawable applicationIcon;
-    public Drawable activityIcon;
-    public String contentDescription;
-    public String activityLabel;
-    public int colorPrimary;
-    public boolean useLightOnPrimaryColor;
+    /**
+     * The affiliationTaskId is the task id of the parent task or itself if it is not affiliated
+     * with any task.
+     */
+    @ViewDebug.ExportedProperty(category="recents")
+    public int affiliationTaskId;
+    @ViewDebug.ExportedProperty(category="recents")
+    public int affiliationColor;
+
+    /**
+     * The icon is the task description icon (if provided), which falls back to the activity icon,
+     * which can then fall back to the application icon.
+     */
+    public Drawable icon;
     public Bitmap thumbnail;
-    public boolean isActive;
-    public boolean lockToThisTask;
-    public boolean lockToTaskEnabled;
-    public Bitmap icon;
-    public String iconFilename;
-    TaskCallbacks mCb;
+    @ViewDebug.ExportedProperty(category="recents")
+    public String title;
+    @ViewDebug.ExportedProperty(category="recents")
+    public String titleDescription;
+    @ViewDebug.ExportedProperty(category="recents")
+    public String dismissDescription;
+    @ViewDebug.ExportedProperty(category="recents")
+    public String appInfoDescription;
+    @ViewDebug.ExportedProperty(category="recents")
+    public int colorPrimary;
+    @ViewDebug.ExportedProperty(category="recents")
+    public int colorBackground;
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean useLightOnPrimaryColor;
+
+    /**
+     * The bounds of the task, used only if it is a freeform task.
+     */
+    @ViewDebug.ExportedProperty(category="recents")
+    public Rect bounds;
+
+    /**
+     * The task description for this task, only used to reload task icons.
+     */
+    public ActivityManager.TaskDescription taskDescription;
+
+    /**
+     * The state isLaunchTarget will be set for the correct task upon launching Recents.
+     */
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isLaunchTarget;
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isStackTask;
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isSystemApp;
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isDockable;
+
+    /**
+     * Resize mode. See {@link ActivityInfo#resizeMode}.
+     */
+    @ViewDebug.ExportedProperty(category="recents")
+    public int resizeMode;
+
+    @ViewDebug.ExportedProperty(category="recents")
+    public ComponentName topActivity;
+
+    private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
     public Task() {
         // Do nothing
     }
 
-    public Task(TaskKey key, boolean isActive, int taskAffiliation, int taskAffiliationColor,
-                String activityTitle, String contentDescription, Drawable activityIcon,
-                int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled, Bitmap icon,
-                String iconFilename) {
-        boolean isInAffiliationGroup = (taskAffiliation != key.id);
-        boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
+    public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
+                Bitmap thumbnail, String title, String titleDescription, String dismissDescription,
+                String appInfoDescription, int colorPrimary, int colorBackground,
+                boolean isLaunchTarget, boolean isStackTask, boolean isSystemApp,
+                boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription,
+                int resizeMode, ComponentName topActivity) {
+        boolean isInAffiliationGroup = (affiliationTaskId != key.id);
+        boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
-        this.taskAffiliation = taskAffiliation;
-        this.taskAffiliationColor = taskAffiliationColor;
-        this.activityLabel = activityTitle;
-        this.contentDescription = contentDescription;
-        this.activityIcon = activityIcon;
-        this.colorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
+        this.affiliationTaskId = affiliationTaskId;
+        this.affiliationColor = affiliationColor;
+        this.icon = icon;
+        this.thumbnail = thumbnail;
+        this.title = title;
+        this.titleDescription = titleDescription;
+        this.dismissDescription = dismissDescription;
+        this.appInfoDescription = appInfoDescription;
+        this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
+        this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
-        this.isActive = isActive;
-        this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
-        this.lockToTaskEnabled = lockToTaskEnabled;
-        this.icon = icon;
-        this.iconFilename = iconFilename;
+        this.bounds = bounds;
+        this.taskDescription = taskDescription;
+        this.isLaunchTarget = isLaunchTarget;
+        this.isStackTask = isStackTask;
+        this.isSystemApp = isSystemApp;
+        this.isDockable = isDockable;
+        this.resizeMode = resizeMode;
+        this.topActivity = topActivity;
     }
 
-    /** Copies the other task. */
+    /**
+     * Copies the metadata from another task, but retains the current callbacks.
+     */
     public void copyFrom(Task o) {
         this.key = o.key;
-        this.taskAffiliation = o.taskAffiliation;
-        this.taskAffiliationColor = o.taskAffiliationColor;
-        this.activityLabel = o.activityLabel;
-        this.contentDescription = o.contentDescription;
-        this.activityIcon = o.activityIcon;
+        this.group = o.group;
+        this.affiliationTaskId = o.affiliationTaskId;
+        this.affiliationColor = o.affiliationColor;
+        this.icon = o.icon;
+        this.thumbnail = o.thumbnail;
+        this.title = o.title;
+        this.titleDescription = o.titleDescription;
+        this.dismissDescription = o.dismissDescription;
+        this.appInfoDescription = o.appInfoDescription;
         this.colorPrimary = o.colorPrimary;
+        this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
-        this.isActive = o.isActive;
-        this.lockToThisTask = o.lockToThisTask;
-        this.lockToTaskEnabled = o.lockToTaskEnabled;
+        this.bounds = o.bounds;
+        this.taskDescription = o.taskDescription;
+        this.isLaunchTarget = o.isLaunchTarget;
+        this.isStackTask = o.isStackTask;
+        this.isSystemApp = o.isSystemApp;
+        this.isDockable = o.isDockable;
+        this.resizeMode = o.resizeMode;
+        this.topActivity = o.topActivity;
     }
 
-    /** Set the callbacks */
-    public void setCallbacks(TaskCallbacks cb) {
-        mCb = cb;
+    /**
+     * Add a callback.
+     */
+    public void addCallback(TaskCallbacks cb) {
+        if (!mCallbacks.contains(cb)) {
+            mCallbacks.add(cb);
+        }
+    }
+
+    /**
+     * Remove a callback.
+     */
+    public void removeCallback(TaskCallbacks cb) {
+        mCallbacks.remove(cb);
     }
 
     /** Set the grouping */
     public void setGroup(TaskGrouping group) {
-        if (group != null && this.group != null) {
-            throw new RuntimeException("This task is already assigned to a group.");
-        }
         this.group = group;
     }
 
-    /** Updates the stack id of this task. */
+    /**
+     * Updates the stack id of this task.
+     */
     public void setStackId(int stackId) {
-        key.stackId = stackId;
-        if (mCb != null) {
-            mCb.onMultiStackDebugTaskStackIdChanged();
+        key.setStackId(stackId);
+        int callbackCount = mCallbacks.size();
+        for (int i = 0; i < callbackCount; i++) {
+            mCallbacks.get(i).onTaskStackIdChanged();
         }
     }
 
+    /**
+     * Returns whether this task is on the freeform task stack.
+     */
+    public boolean isFreeformTask() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        return ssp.hasFreeformWorkspaceSupport() && ssp.isFreeformStack(key.stackId);
+    }
+
     /** Notifies the callback listeners that this task has been loaded */
-    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
-        this.applicationIcon = applicationIcon;
+    public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon,
+            ActivityManager.TaskThumbnailInfo thumbnailInfo) {
+        this.icon = applicationIcon;
         this.thumbnail = thumbnail;
-        if (mCb != null) {
-            mCb.onTaskDataLoaded();
+        int callbackCount = mCallbacks.size();
+        for (int i = 0; i < callbackCount; i++) {
+            mCallbacks.get(i).onTaskDataLoaded(this, thumbnailInfo);
         }
     }
 
     /** Notifies the callback listeners that this task has been unloaded */
     public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
-        applicationIcon = defaultApplicationIcon;
+        icon = defaultApplicationIcon;
         thumbnail = defaultThumbnail;
-        if (mCb != null) {
-            mCb.onTaskDataUnloaded();
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
+            mCallbacks.get(i).onTaskDataUnloaded();
         }
+    }
+
+    /**
+     * Returns whether this task is affiliated with another task.
+     */
+    public boolean isAffiliatedTask() {
+        return key.id != affiliationTaskId;
+    }
+
+    /**
+     * Returns the top activity component.
+     */
+    public ComponentName getTopComponent() {
+        return topActivity != null
+                ? topActivity
+                : key.baseIntent.getComponent();
     }
 
     @Override
@@ -225,11 +338,24 @@ public class Task {
 
     @Override
     public String toString() {
-        String groupAffiliation = "no group";
-        if (group != null) {
-            groupAffiliation = Integer.toString(group.affiliation);
+        return "[" + key.toString() + "] " + title;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        writer.print(prefix); writer.print(key);
+        if (isAffiliatedTask()) {
+            writer.print(" "); writer.print("affTaskId=" + affiliationTaskId);
         }
-        return "Task (" + groupAffiliation + "): " + key.baseIntent.getComponent().getPackageName() +
-                " [" + super.toString() + "]";
+        if (!isDockable) {
+            writer.print(" dockable=N");
+        }
+        if (isLaunchTarget) {
+            writer.print(" launchTarget=Y");
+        }
+        if (isFreeformTask()) {
+            writer.print(" freeform=Y");
+        }
+        writer.print(" "); writer.print(title);
+        writer.println();
     }
 }

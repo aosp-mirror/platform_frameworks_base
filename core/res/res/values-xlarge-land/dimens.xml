@@ -20,6 +20,4 @@
     <!-- Default height of a key in the password keyboard for alpha -->
     <dimen name="password_keyboard_key_height_alpha">100dip</dimen>
     <dimen name="password_keyboard_key_height_numeric">75dip</dimen>
-    <!-- Minimum width of the search view text entry area. -->
-    <dimen name="search_view_text_min_width">256dip</dimen>
 </resources>

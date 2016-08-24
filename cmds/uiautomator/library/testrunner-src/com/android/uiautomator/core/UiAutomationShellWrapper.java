@@ -50,9 +50,9 @@ public class UiAutomationShellWrapper {
         }
         try {
             if (isSet) {
-                am.setActivityController(new DummyActivityController());
+                am.setActivityController(new DummyActivityController(), true);
             } else {
-                am.setActivityController(null);
+                am.setActivityController(null, true);
             }
         } catch (RemoteException e) {
             throw new RuntimeException(e);

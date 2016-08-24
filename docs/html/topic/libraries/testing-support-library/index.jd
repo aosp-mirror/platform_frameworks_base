@@ -1,0 +1,633 @@
+page.title=Testing Support Library
+page.metaDescription=The Android Testing Support Library provides an extensive framework for testing Android apps.
+page.image=images/tools/studio-test-module.png
+
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+    <h2>
+      In this document
+    </h2>
+
+    <ol>
+      <li>
+      <a href="#features">Testing Support Library Features</a>
+      <ol>
+        <li>
+        <a href="#AndroidJUnitRunner">AndroidJUnitRunner</a>
+        </li>
+
+        <li>
+        <a href="#Espresso">Espresso</a>
+        </li>
+
+        <li>
+        <a href="#UIAutomator">UI Automator</a>
+        </li>
+      </ol>
+      </li>
+
+      <li>
+      <a href="#setup">Testing Support Library Setup</a>
+      </li>
+    </ol>
+
+    <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}reference/android/support/test/package-summary.html">
+      Testing Support Library API Reference</a></li>
+    <li><a href="https://github.com/googlesamples/android-testing" class="external-link">
+      Code Samples</a></li>
+  </ol>
+    </div>
+  </div>
+
+  <p>
+    The Android Testing Support Library provides an extensive framework for testing Android apps.
+    This library provides a set of APIs that allow you to quickly build and run test code for
+    your apps, including JUnit 4 and functional user interface (UI) tests. You can run tests
+    created using these APIs from the <a href=
+    "{@docRoot}tools/studio/index.html">Android Studio IDE</a> or from the command line.
+  </p>
+
+  <p>The Android Testing Support library is available through the Android SDK Manager.
+    For more information, see <a href="#setup">Testing Support Library Setup</a>
+  </p>
+
+  <p>
+    This page provides information about what tools are provided in the Android Testing Support
+    Library, how to use them in your testing environment, and information about library releases.
+  </p>
+
+  <h2 id="features">
+    Testing Support Library Features
+  </h2>
+
+  <p>
+    The Android Testing Support Library includes the following test automation tools:
+  </p>
+
+  <ul>
+    <li>
+    <strong><a href="#AndroidJUnitRunner">AndroidJUnitRunner</a></strong>: JUnit 4-compatible
+    test runner for Android
+    </li>
+
+    <li>
+    <strong><a href="#Espresso">Espresso</a></strong>: UI testing framework; suitable for
+    functional UI testing within an app
+    </li>
+
+    <li>
+    <strong><a href="#UIAutomator">UI Automator</a></strong>: UI testing framework; suitable
+    for cross-app functional UI testing across system and installed apps
+    </li>
+  </ul>
+
+  <h3 id="AndroidJUnitRunner">
+    AndroidJUnitRunner
+  </h3>
+
+  <p>
+    The
+    <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
+    class is a <a href="http://junit.org/" class="external-link">JUnit</a> test runner that lets you
+    run JUnit 3 or JUnit 4-style test classes on Android devices, including those using the
+    <a href="#Espresso">Espresso</a> and <a href="#UIAutomator">UI Automator</a> testing frameworks.
+    The test runner handles loading your test package and the app under test
+    to a device, running your tests, and reporting test results. This class replaces the {@link
+    android.test.InstrumentationTestRunner} class, which only supports JUnit 3 tests.
+  </p>
+
+  <p>
+    The key features of this test runner include:
+  </p>
+
+  <ul>
+    <li><a href="#ajur-junit">JUnit support</a>
+    </li>
+
+    <li><a href="#ajur-instrumentation">Access to instrumentation information</a>
+    </li>
+
+    <li><a href="#ajur-filtering">Test filtering</a>
+    </li>
+
+    <li><a href="#ajur-sharding">Test sharding</a>
+    </li>
+  </ul>
+
+  <p>Requires Android 2.2 (API level 8) or higher.</p>
+
+  <h4 id="ajur-junit">
+    JUnit support
+  </h4>
+
+  <p>
+    The test runner is compatible with your JUnit 3 and JUnit 4 (up to JUnit
+    4.10) tests. However, you should avoid mixing JUnit 3 and and JUnit 4 test code in the same
+    package, as this might cause unexpected results. If you are creating an instrumented JUnit 4
+    test class to run on a device or emulator, your test class must be prefixed with the
+    {@code @RunWith(AndroidJUnit4.class)} annotation.
+  </p>
+
+  <p>The following code snippet shows how you might write an instrumented JUnit 4 test to validate
+    that the <em>add</em> operation in the {@code CalculatorActivity} class works correctly.
+</p>
+
+<pre>
+import android.support.test.runner.AndroidJUnit4;
+import android.support.test.runner.AndroidJUnitRunner;
+import android.test.ActivityInstrumentationTestCase2;
+
+&#64;RunWith(AndroidJUnit4.class)
+public class CalculatorInstrumentationTest
+        extends ActivityInstrumentationTestCase2&lt;CalculatorActivity&gt; {
+
+    &#64;Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        // Injecting the Instrumentation instance is required
+        // for your test to run with AndroidJUnitRunner.
+        injectInstrumentation(InstrumentationRegistry.getInstrumentation());
+        mActivity = getActivity();
+    }
+
+    &#64;Test
+    public void typeOperandsAndPerformAddOperation() {
+        // Call the CalculatorActivity add() method and pass in some operand values, then
+        // check that the expected value is returned.
+    }
+
+    &#64;After
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+}
+</pre>
+
+  <h4 id="ajur-instrumentation">
+    Access to instrumentation information
+  </h4>
+
+  <p>
+    You can use the
+    <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">{@code InstrumentationRegistry}</a>
+    class to access information related to your
+    test run. This class includes the {@link android.app.Instrumentation} object, target app {@link
+    android.content.Context} object, test app {@link android.content.Context} object, and the
+    command line arguments passed into your test. This data is useful when you are writing tests
+    using the UI Automator framework or when writing tests that have dependencies on the {@link
+    android.app.Instrumentation} or {@link android.content.Context} objects.
+  </p>
+
+  <h4 id="ajur-filtering">
+    Test filtering
+  </h4>
+
+  <p>
+    In your JUnit 4.x tests, you can use annotations to configure the test run. This feature
+    minimizes the need to add boilerplate and conditional code in your tests. In addition to the
+    standard annotations supported by JUnit 4, the test runner  also supports Android-specific
+    annotations, including:
+  </p>
+
+  <ul>
+    <li><a href="{@docRoot}reference/android/support/test/filters/RequiresDevice.html">{@code @RequiresDevice}</a>:
+    Specifies that the test should run only on physical devices, not on emulators.
+    </li>
+
+    <li><a href="{@docRoot}reference/android/support/test/filters/SdkSuppress.html">{@code @SdkSupress}</a>:
+    Suppresses the test from running on a lower Android API level than the given level. For
+    example, to suppress tests on all API levels lower than 18 from running, use the annotation
+    {@code @SDKSupress(minSdkVersion=18)}.
+    </li>
+
+    <li>{@link android.test.suitebuilder.annotation.SmallTest &#64;SmallTest},
+      {@link android.test.suitebuilder.annotation.MediumTest &#64;MediumTest},
+      and {@link android.test.suitebuilder.annotation.LargeTest &#64;LargeTest}: Classify how long
+      a test should take to run, and consequently, how frequently you can run the test.
+    </li>
+  </ul>
+
+  <h4 id="ajur-sharding">
+    Test sharding
+  </h4>
+
+  <p>
+    The test runner supports splitting a single test suite into multiple
+    <em>shards</em>, so you can easily run tests belonging to the same shard together as a group,
+    under the same {@link android.app.Instrumentation} instance. Each shard is identified by an
+    index number. When running tests, use the {@code -e numShards} option to specify the number
+    of separate shards to create and the {@code -e shardIndex} option to specify which shard to
+    run.
+  </p>
+
+  <p>
+    For example, to split the test suite into 10 shards and run only the tests grouped in the
+    second shard, use the following command:
+  </p>
+
+  <pre>
+adb shell am instrument -w -e numShards 10 -e shardIndex 2</pre>
+
+  <p>
+    To learn more about using this test runner, see the
+    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a>.
+  </p>
+
+  <h3 id="Espresso">
+    Espresso
+  </h3>
+
+  <p>
+    The Espresso testing framework provides a set of APIs to build UI tests to test user flows
+    within an app. These APIs let you write automated UI tests that are concise and that run
+    reliably. Espresso is well-suited for writing <em>white box</em>-style automated tests, where
+    the test code utilizes implementation code details from the app under test.
+  </p>
+
+  <p>
+    The key features of the Espresso testing framework include:
+  </p>
+
+  <ul>
+    <li>Flexible APIs for view and adapter matching in target apps.
+      For more information, see <a href="#espresso-matching">View matching</a>.
+
+    <li>An extensive set of action APIs to automate UI interactions.
+      For more information, see <a href="#espresso-actions">Action APIs</a>.
+    </li>
+
+    <li>UI thread synchronization to improve test reliability.
+      For more information, see <a href="#espresso-thread-sync">UI thread synchronization</a>.
+    </li>
+  </ul>
+
+  <p>Requires Android 2.2 (API level 8) or higher.</p>
+
+  <h4 id="espresso-matching">
+    View matching
+  </h4>
+
+  <p>
+    The <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">{@code Espresso.onView()}</a>
+    method lets you access a UI component in the target app and
+    interact with it. The method accepts a
+    <a href="http://hamcrest.org/JavaHamcrest/javadoc/1.3/org/hamcrest/Matcher.html"
+    class="external-link">{@code Matcher}</a> argument and searches the view
+    hierarchy to locate a corresponding {@link android.view.View} instance that meets some given
+    criteria. You can refine searches by specifying such criteria as:
+  </p>
+
+  <ul>
+    <li>The class name of the view
+    </li>
+
+    <li>The content description of the view
+    </li>
+
+    <li>The {@code R.id} of the view
+    </li>
+
+    <li>Text displayed in the view
+    </li>
+  </ul>
+
+  <p>
+    For example, to target a button that has the ID value of {@code my_button}, you can specify
+    a matcher like this:
+  </p>
+
+  <pre>
+onView(withId(R.id.my_button));</pre>
+
+  <p>
+    If the search is successful, the
+    <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">{@code onView()}</a>
+    method returns a reference which lets you
+    perform user actions and test assertions against the target view.
+  </p>
+
+  <h4>
+    Adapter matching
+  </h4>
+
+  <p>
+    In an {@link android.widget.AdapterView} layout, the layout is dynamically populated with
+    children views at runtime. If the target view is inside a layout subclassed from {@link
+    android.widget.AdapterView} (such as a {@link android.widget.ListView} or {@link
+    android.widget.GridView}), the
+    <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onView(org.hamcrest.Matcher<android.view.View>)">{@code onView()}</a>
+    method might not work because only a subset of
+    the layout’s views may be loaded in the current view hierarchy.
+  </p>
+
+  <p>
+    Instead, use the <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code Espresso.onData()}</a>
+    method to access a target view element. The <a href="{@docRoot}reference/android/support/test/espresso/Espresso.html#onData(org.hamcrest.Matcher<java.lang.Object>)">{@code Espresso.onData()}</a>
+    method returns a reference which lets you perform user actions and test assertions against the
+    elements in an {@link android.widget.AdapterView}.
+  </p>
+
+  <h4 id="espresso-actions">
+    Action APIs
+  </h4>
+
+  <p>
+    Typically, you test an app by performing some user interactions against the app’s user
+    interface. You can easily automate these actions in your test by using the
+    <a href="{@docRoot}reference/android/support/test/espresso/action/ViewActions.html">{@code ViewActions}</a>
+    API. You can perform such UI interactions as:
+  </p>
+
+  <ul>
+    <li>View clicks
+    </li>
+
+    <li>Swipes
+    </li>
+
+    <li>Key and button presses
+    </li>
+
+    <li>Typing text
+    </li>
+
+    <li>Opening a link
+    </li>
+  </ul>
+
+  <p>
+    For example, to simulate entering a string value and pressing a button to submit the value,
+    you can write an automated test script like this. The
+    <a href="{@docRoot}reference/android/support/test/espresso/ViewInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code ViewInteraction.perform()}</a>
+    and <a href="{@docRoot}reference/android/support/test/espresso/DataInteraction.html#perform(android.support.test.espresso.ViewAction...)">{@code DataInteraction.perform()}</a>
+    methods take one or more
+    <a href="{@docRoot}reference/android/support/test/espresso/ViewAction.html">{@code ViewAction}</a>
+    arguments and run the actions in the order provided.
+  </p>
+
+  <pre>
+// Type text into an EditText view, then close the soft keyboard
+onView(withId(R.id.editTextUserInput))
+    .perform(typeText(STRING_TO_BE_TYPED), closeSoftKeyboard());
+
+// Press the button to submit the text change
+onView(withId(R.id.changeTextBt)).perform(click());</pre>
+
+  <h4 id="espresso-thread-sync">
+    UI thread synchronization
+  </h4>
+
+  <p>
+    Tests on Android devices can fail randomly because of timing issues. This testing issue is
+    referred to as <em>test flakiness</em>. Prior to Espresso, the workaround was to insert a
+    sufficiently long sleep or timeout period into a test or to add code to keep retrying the
+    failing operation. The Espresso testing framework handles synchronization between the
+    {@link android.app.Instrumentation} and the UI thread; this removes the need for the previous
+    timing workarounds and ensures that your test actions and assertions run more reliably.
+  </p>
+
+  <p>
+    To learn more about using Espresso, see the
+    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a> and
+    <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">
+      Testing UI for a Single App</a> training.
+  </p>
+
+  <h3 id="UIAutomator">
+    UI Automator
+  </h3>
+
+  <p>
+    The UI Automator testing framework provides a set of APIs to build UI tests that perform
+    interactions on user apps and system apps. The UI Automator APIs allows you to perform
+    operations such as opening the Settings menu or the app launcher in a test device. The UI
+    Automator testing framework is well-suited for writing <em>black box</em>-style automated
+    tests, where the test code does not rely on internal implementation details of the target
+    app.
+  </p>
+
+  <p>
+    The key features of the UI Automator testing framework include:
+  </p>
+
+  <ul>
+    <li>A viewer to inspect layout hierarchy.
+      For more information, see <a href="#uia-viewer">UI Automator Viewer</a>.
+    </li>
+    <li>An API to retrieve state information and perform operations on the target device.
+      For more information, see <a href="#uia-device-state">Access to device state</a>.
+    </li>
+    <li>APIs that support cross-app UI testing.
+      For more information, see <a href="#uia-apis">UI Automator APIs</a> .
+    </li>
+  </ul>
+
+  <p>Requires Android 4.3 (API level 18) or higher.</p>
+
+  <h4 id="uia-viewer">
+    UI Automator Viewer
+  </h4>
+
+  <p>
+    The {@code uiautomatorviewer} tool provides a convenient GUI to scan and analyze the UI
+    components currently displayed on an Android device. You can use this tool to inspect the
+    layout hierarchy and view the properties of UI components that are visible on the foreground
+    of the device. This information lets you create more fine-grained tests using UI Automator,
+    for example by creating a UI selector that matches a specific visible property.
+  </p>
+
+  <p>
+    The {@code uiautomatorviewer} tool is located in the {@code <android-sdk>/tools/}
+    directory.
+  </p>
+
+  <h4 id="uia-device-state">
+    Access to device state
+  </h4>
+
+  <p>
+    The UI Automator testing framework provides a
+    <a href="{@docRoot}reference/android/support/test/uiautomator/UiDevice.html">{@code UiDevice}</a>
+    class to access and perform operations on the device on which the target app is running. You
+    can call its methods to access device properties such as current orientation or display size.
+    The <a href="{@docRoot}reference/android/support/test/uiautomator/UiDevice.html">{@code UiDevice}</a>
+    class also let you perform actions such as:
+  </p>
+
+  <ul>
+    <li>Change the device rotation
+    </li>
+
+    <li>Press a D-pad button
+    </li>
+
+    <li>Press the Back, Home, or Menu buttons
+    </li>
+
+    <li>Open the notification shade
+    </li>
+
+    <li>Take a screenshot of the current window
+    </li>
+  </ul>
+
+  <p>
+    For example, to simulate a Home button press, call the {@code UiDevice.pressHome()} method.
+  </p>
+
+  <h4 id="uia-apis">
+    UI Automator APIs
+  </h4>
+
+  <p>
+    The UI Automator APIs allow you to write robust tests without needing to know about the
+    implementation details of the app that you are targeting. You can use these APIs to capture
+    and manipulate UI components across multiple apps:
+  </p>
+
+  <ul>
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/UiCollection.html">{@code UiCollection}</a>:
+      Enumerates a container's UI elements for the purpose of counting,
+    or targeting sub-elements by their visible text or content-description property.
+    </li>
+
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/UiObject.html">{@code UiObject}</a>:
+      Represents a UI element that is visible on the device.
+    </li>
+
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/UiScrollable.html">{@code UiScrollable}</a>:
+      Provides support for searching for items in a scrollable UI container.
+    </li>
+
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/UiSelector.html">{@code UiSelector}</a>:
+      Represents a query for one or more target UI elements on a device.
+    </li>
+
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/Configurator.html">{@code Configurator}</a>:
+      Allows you to set key parameters for running UI Automator tests.
+    </li>
+  </ul>
+
+  <p>
+    For example, the following code shows how you can write a test script that brings up the
+    default app launcher in the device:
+  </p>
+
+  <pre>
+// Initialize UiDevice instance
+mDevice = UiDevice.getInstance(getInstrumentation());
+
+// Perform a short press on the HOME button
+mDevice.pressHome();
+
+// Bring up the default launcher by searching for
+// a UI component that matches the content-description for the launcher button
+UiObject allAppsButton = mDevice
+        .findObject(new UiSelector().description("Apps"));
+
+// Perform a click on the button to bring up the launcher
+allAppsButton.clickAndWaitForNewWindow();</pre>
+
+  <p>
+    To learn more about using UI Automator, see the
+    <a href="{@docRoot}reference/android/support/test/package-summary.html">API reference</a> and
+    <a href="{@docRoot}training/testing/ui-testing/uiautomator-testing.html">
+      Testing UI for Multiple Apps</a> training.
+  </p>
+
+  <h2 id="setup">
+    Testing Support Library Setup
+  </h2>
+
+  <p>
+    The Android Testing Support Library package is included with the latest version of the
+    Android Support Repository, which you can obtain as a supplemental download through the
+    Android SDK Manager.
+  </p>
+
+  <p>
+    To download the Android Support Repository through the SDK Manager:
+  </p>
+
+  <ol>
+    <li>Start the <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a>.
+    </li>
+
+    <li>In the SDK Manager window, scroll to the end of the <i>Packages</i> list, find the
+    <em>Extras</em> folder and, if necessary, expand to show its contents.
+    </li>
+
+    <li>Select the <strong>Android Support Repository</strong> item.
+    </li>
+
+    <li>Click the <strong>Install packages...</strong> button.
+    </li>
+  </ol>
+
+  <p>
+    After downloading, the tool installs the Support Repository files to your existing Android
+    SDK directory. The library files are located in the following subdirectory of your SDK:
+    {@code <sdk>/extras/android/m2repository} directory.
+  </p>
+
+  <p>
+    The Android Testing Support Library classes are located under the
+    {@code android.support.test} package.
+  </p>
+
+  <p>
+    To use the Android Testing Support Library in your Gradle project, add these dependencies in
+    your {@code build.gradle} file:
+  </p>
+
+  <pre>
+dependencies {
+  androidTestCompile 'com.android.support.test:runner:0.4'
+  // Set this dependency to use JUnit 4 rules
+  androidTestCompile 'com.android.support.test:rules:0.4'
+  // Set this dependency to build and run Espresso tests
+  androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+  // Set this dependency to build and run UI Automator tests
+  androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+}</pre>
+
+  <p>To set
+<a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code AndroidJUnitRunner}</a>
+  as the default test instrumentation runner in your Gradle project, specify this dependency in
+  your {@code build.gradle} file:</p>
+
+  <pre>
+android {
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}</pre>
+
+  <p>
+    It is strongly recommended that you use the Android Testing Support Library together with the
+    Android Studio IDE. Android Studio offers capabilities that support test
+    development, such as:
+  </p>
+
+  <ul>
+    <li>Flexible Gradle-based build system that supports dependency management for your test code
+    </li>
+
+    <li>Single project structure to contain your unit and instrumented test code together with
+    your app source code
+    </li>
+
+    <li>Support for deploying and running tests on virtual or physical devices, from a
+    command line or graphical user interface
+    </li>
+  </ul>
+
+  <p>
+  For more information about Android Studio and to download it, see
+  <a href="{@docRoot}studio/index.html">Download Android Studio and SDK Tools</a>.
+  </p>

@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.ProcessStats;
+import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
@@ -88,8 +88,9 @@ final class ServiceRecord extends Binder {
 
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
-    ProcessStats.ServiceState tracker; // tracking service execution, may be null
-    ProcessStats.ServiceState restartTracker; // tracking service restart
+    ServiceState tracker; // tracking service execution, may be null
+    ServiceState restartTracker; // tracking service restart
+    boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
@@ -225,6 +226,9 @@ final class ServiceRecord extends Binder {
         if (isolatedProc != null) {
             pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
         }
+        if (whitelistManager) {
+            pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
+        }
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
         }
@@ -326,7 +330,7 @@ final class ServiceRecord extends Binder {
         createdFromFg = callerIsFg;
     }
 
-    public ProcessStats.ServiceState getTracker() {
+    public ServiceState getTracker() {
         if (tracker != null) {
             return tracker;
         }
@@ -391,6 +395,19 @@ final class ServiceRecord extends Binder {
         return false;
     }
 
+    public void updateWhitelistManager() {
+        whitelistManager = false;
+        for (int conni=connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
+            for (int i=0; i<cr.size(); i++) {
+                if ((cr.get(i).flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                    whitelistManager = true;
+                    return;
+                }
+            }
+        }
+    }
+
     public void resetRestartCounter() {
         restartCount = 0;
         restartDelay = 0;
@@ -441,7 +458,7 @@ final class ServiceRecord extends Binder {
                     Notification localForegroundNoti = _foregroundNoti;
                     try {
                         if (localForegroundNoti.getSmallIcon() == null) {
-                            // It is not correct for the caller to supply a notification
+                            // It is not correct for the caller to not supply a notification
                             // icon, but this used to be able to slip through, so for
                             // those dirty apps we will create a notification clearly
                             // blaming the app.
@@ -516,7 +533,7 @@ final class ServiceRecord extends Binder {
                         // If it gave us a garbage notification, it doesn't
                         // get to be foreground.
                         ams.setServiceForeground(name, ServiceRecord.this,
-                                0, null, true);
+                                0, null, 0);
                         ams.crashApplication(appUid, appPid, localPackageName,
                                 "Bad notification for startForeground: " + e);
                     }

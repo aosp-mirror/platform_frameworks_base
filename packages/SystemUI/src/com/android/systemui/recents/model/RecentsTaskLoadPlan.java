@@ -18,20 +18,27 @@ package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
-import android.util.Log;
+import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.SparseArray;
-import com.android.systemui.recents.Constants;
+import android.util.SparseIntArray;
+
+import com.android.systemui.Prefs;
+import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -44,8 +51,10 @@ import java.util.List;
  *      options specified, such that we can transition into the Recents activity seamlessly
  */
 public class RecentsTaskLoadPlan {
-    static String TAG = "RecentsTaskLoadPlan";
-    static boolean DEBUG = false;
+
+    private static int MIN_NUM_TASKS = 5;
+    private static int SESSION_BEGIN_TIME = 1000 /* ms/s */ * 60 /* s/min */ * 60 /* min/hr */ *
+            6 /* hrs */;
 
     /** The set of conditions to load tasks. */
     public static class Options {
@@ -59,51 +68,78 @@ public class RecentsTaskLoadPlan {
     }
 
     Context mContext;
-    RecentsConfiguration mConfig;
-    SystemServicesProxy mSystemServicesProxy;
 
     List<ActivityManager.RecentTaskInfo> mRawTasks;
-    SparseArray<TaskStack> mStacks = new SparseArray<>();
-    HashMap<Task.ComponentNameKey, ActivityInfoHandle> mActivityInfoCache =
-            new HashMap<Task.ComponentNameKey, ActivityInfoHandle>();
+    TaskStack mStack;
+    ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
 
     /** Package level ctor */
-    RecentsTaskLoadPlan(Context context, RecentsConfiguration config, SystemServicesProxy ssp) {
+    RecentsTaskLoadPlan(Context context) {
         mContext = context;
-        mConfig = config;
-        mSystemServicesProxy = ssp;
+    }
+
+    private void updateCurrentQuietProfilesCache(int currentUserId) {
+        mCurrentQuietProfiles.clear();
+
+        if (currentUserId == UserHandle.USER_CURRENT) {
+            currentUserId = ActivityManager.getCurrentUser();
+        }
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        List<UserInfo> profiles = userManager.getProfiles(currentUserId);
+        if (profiles != null) {
+            for (int i = 0; i < profiles.size(); i++) {
+                UserInfo user  = profiles.get(i);
+                if (user.isManagedProfile() && user.isQuietModeEnabled()) {
+                    mCurrentQuietProfiles.add(user.id);
+                }
+            }
+        }
     }
 
     /**
-     * An optimization to preload the raw list of tasks.
+     * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
+     * to most-recent order.
      */
-    public synchronized void preloadRawTasks(boolean isTopTaskHome) {
-        mRawTasks = mSystemServicesProxy.getRecentTasks(mConfig.maxNumTasksToLoad,
-                UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
-        Collections.reverse(mRawTasks);
+    public synchronized void preloadRawTasks(boolean includeFrontMostExcludedTask) {
+        int currentUserId = UserHandle.USER_CURRENT;
+        updateCurrentQuietProfilesCache(currentUserId);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
+                currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
 
-        if (DEBUG) Log.d(TAG, "preloadRawTasks, tasks: " + mRawTasks.size());
+        // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
+        Collections.reverse(mRawTasks);
     }
 
     /**
-     * Preloads the list of recent tasks from the system.  After this call, the TaskStack will
+     * Preloads the list of recent tasks from the system. After this call, the TaskStack will
      * have a list of all the recent tasks with their metadata, not including icons or
      * thumbnails which were not cached and have to be loaded.
+     *
+     * The tasks will be ordered by:
+     * - least-recent to most-recent stack tasks
+     * - least-recent to most-recent freeform tasks
      */
-    synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
-        if (DEBUG) Log.d(TAG, "preloadPlan");
-
-        // This activity info cache will be used for both preloadPlan() and executePlan()
-        mActivityInfoCache.clear();
-
-        // TODO (multi-display): Currently assume the primary display
-        Rect displayBounds = mSystemServicesProxy.getWindowRect();
-
+    public synchronized void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
+            boolean includeFrontMostExcludedTask) {
         Resources res = mContext.getResources();
-        SparseArray<ArrayList<Task>> stacksTasks = new SparseArray<>();
+        ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks(isTopTaskHome);
+            preloadRawTasks(includeFrontMostExcludedTask);
         }
+
+        SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
+        SparseIntArray affiliatedTaskCounts = new SparseIntArray();
+        String dismissDescFormat = mContext.getString(
+                R.string.accessibility_recents_item_will_be_dismissed);
+        String appInfoDescFormat = mContext.getString(
+                R.string.accessibility_recents_item_open_app_info);
+        long lastStackActiveTime = Prefs.getLong(mContext,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            lastStackActiveTime = 0;
+        }
+        long newLastStackActiveTime = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
@@ -112,184 +148,118 @@ public class RecentsTaskLoadPlan {
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
-            // Get an existing activity info handle if possible
-            Task.ComponentNameKey cnKey = taskKey.getComponentNameKey();
-            ActivityInfoHandle infoHandle;
-            boolean hadCachedActivityInfo = false;
-            if (mActivityInfoCache.containsKey(cnKey)) {
-                infoHandle = mActivityInfoCache.get(cnKey);
-                hadCachedActivityInfo = true;
-            } else {
-                infoHandle = new ActivityInfoHandle();
+            // This task is only shown in the stack if it statisfies the historical time or min
+            // number of tasks constraints. Freeform tasks are also always shown.
+            boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
+            boolean isStackTask = isFreeformTask || !isHistoricalTask(t) ||
+                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
+            boolean isLaunchTarget = taskKey.id == runningTaskId;
+
+            // The last stack active time is the baseline for which we show visible tasks.  Since
+            // the system will store all the tasks, we don't want to show the tasks prior to the
+            // last visible ones, otherwise, as you dismiss them, the previous tasks may satisfy
+            // the other stack-task constraints.
+            if (isStackTask && newLastStackActiveTime < 0) {
+                newLastStackActiveTime = t.lastActiveTime;
             }
 
-            // Load the label, icon, and color
-            String activityLabel = loader.getAndUpdateActivityLabel(taskKey, t.taskDescription,
-                    mSystemServicesProxy, infoHandle);
-            String contentDescription = loader.getAndUpdateContentDescription(taskKey,
-                    activityLabel, mSystemServicesProxy, res);
-            Drawable activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
-                    mSystemServicesProxy, res, infoHandle, false);
-            int activityColor = loader.getActivityPrimaryColor(t.taskDescription, mConfig);
-
-            // Update the activity info cache
-            if (!hadCachedActivityInfo && infoHandle.info != null) {
-                mActivityInfoCache.put(cnKey, infoHandle);
-            }
-
-            Bitmap icon = t.taskDescription != null
-                    ? t.taskDescription.getInMemoryIcon()
+            // Load the title, icon, and color
+            ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
+            String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
+            String titleDescription = loader.getAndUpdateContentDescription(taskKey, res);
+            String dismissDescription = String.format(dismissDescFormat, titleDescription);
+            String appInfoDescription = String.format(appInfoDescFormat, titleDescription);
+            Drawable icon = isStackTask
+                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
-            String iconFilename = t.taskDescription != null
-                    ? t.taskDescription.getIconFilename()
-                    : null;
+            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false /* loadIfNotCached */);
+            int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
+            int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
+            boolean isSystemApp = (info != null) &&
+                    ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
 
             // Add the task to the stack
-            Task task = new Task(taskKey, (t.id != RecentsTaskLoader.INVALID_TASK_ID),
-                    t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel, contentDescription,
-                    activityIcon, activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled,
-                    icon, iconFilename);
-            task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy, false);
-            if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
+            Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
+                    thumbnail, title, titleDescription, dismissDescription, appInfoDescription,
+                    activityColor, backgroundColor, isLaunchTarget, isStackTask, isSystemApp,
+                    t.isDockable, t.bounds, t.taskDescription, t.resizeMode, t.topActivity);
 
-            if (!mConfig.multiStackEnabled ||
-                    Constants.DebugFlags.App.EnableMultiStackToSingleStack) {
-                int firstStackId = 0;
-                ArrayList<Task> stackTasks = stacksTasks.get(firstStackId);
-                if (stackTasks == null) {
-                    stackTasks = new ArrayList<>();
-                    stacksTasks.put(firstStackId, stackTasks);
-                }
-                stackTasks.add(task);
-            } else {
-                ArrayList<Task> stackTasks = stacksTasks.get(t.stackId);
-                if (stackTasks == null) {
-                    stackTasks = new ArrayList<>();
-                    stacksTasks.put(t.stackId, stackTasks);
-                }
-                stackTasks.add(task);
-            }
+            allTasks.add(task);
+            affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
+            affiliatedTasks.put(taskKey.id, taskKey);
+        }
+        if (newLastStackActiveTime != -1) {
+            Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+                    newLastStackActiveTime);
         }
 
         // Initialize the stacks
-        SparseArray<ActivityManager.StackInfo> stackInfos = mSystemServicesProxy.getAllStackInfos();
-        mStacks.clear();
-        int stackCount = stacksTasks.size();
-        for (int i = 0; i < stackCount; i++) {
-            int stackId = stacksTasks.keyAt(i);
-            ActivityManager.StackInfo info = stackInfos.get(stackId);
-            ArrayList<Task> stackTasks = stacksTasks.valueAt(i);
-            TaskStack stack = new TaskStack(stackId);
-            if (Constants.DebugFlags.App.EnableMultiStackToSingleStack) {
-                stack.setBounds(displayBounds, displayBounds);
-            } else {
-                stack.setBounds(info.bounds, displayBounds);
-            }
-            stack.setTasks(stackTasks);
-            stack.createAffiliatedGroupings(mConfig);
-            mStacks.put(stackId, stack);
-        }
+        mStack = new TaskStack();
+        mStack.setTasks(mContext, allTasks, false /* notifyStackChanges */);
     }
 
     /**
      * Called to apply the actual loading based on the specified conditions.
      */
-    synchronized void executePlan(Options opts, RecentsTaskLoader loader,
+    public synchronized void executePlan(Options opts, RecentsTaskLoader loader,
             TaskResourceLoadQueue loadQueue) {
-        if (DEBUG) Log.d(TAG, "executePlan, # tasks: " + opts.numVisibleTasks +
-                ", # thumbnails: " + opts.numVisibleTaskThumbnails +
-                ", running task id: " + opts.runningTaskId);
-
+        RecentsConfiguration config = Recents.getConfiguration();
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
-        int stackCount = mStacks.size();
-        for (int j = 0; j < stackCount; j++) {
-            ArrayList<Task> tasks = mStacks.valueAt(j).getTasks();
-            int taskCount = tasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
-                Task task = tasks.get(i);
-                Task.TaskKey taskKey = task.key;
+        ArrayList<Task> tasks = mStack.getStackTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            Task.TaskKey taskKey = task.key;
 
-                // Get an existing activity info handle if possible
-                Task.ComponentNameKey cnKey = taskKey.getComponentNameKey();
-                ActivityInfoHandle infoHandle;
-                boolean hadCachedActivityInfo = false;
-                if (mActivityInfoCache.containsKey(cnKey)) {
-                    infoHandle = mActivityInfoCache.get(cnKey);
-                    hadCachedActivityInfo = true;
-                } else {
-                    infoHandle = new ActivityInfoHandle();
+            boolean isRunningTask = (task.key.id == opts.runningTaskId);
+            boolean isVisibleTask = i >= (taskCount - opts.numVisibleTasks);
+            boolean isVisibleThumbnail = i >= (taskCount - opts.numVisibleTaskThumbnails);
+
+            // If requested, skip the running task
+            if (opts.onlyLoadPausedActivities && isRunningTask) {
+                continue;
+            }
+
+            if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
+                if (task.icon == null) {
+                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription, res,
+                            true);
                 }
-
-                boolean isRunningTask = (task.key.id == opts.runningTaskId);
-                boolean isVisibleTask = i >= (taskCount - opts.numVisibleTasks);
-                boolean isVisibleThumbnail = i >= (taskCount - opts.numVisibleTaskThumbnails);
-
-                // If requested, skip the running task
-                if (opts.onlyLoadPausedActivities && isRunningTask) {
-                    continue;
-                }
-
-                if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
-                    if (task.activityIcon == null) {
-                        if (DEBUG) Log.d(TAG, "\tLoading icon: " + taskKey);
-                        task.activityIcon = loader.getAndUpdateActivityIcon(taskKey,
-                                t.taskDescription, mSystemServicesProxy, res, infoHandle, true);
+            }
+            if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
+                if (task.thumbnail == null || isRunningTask) {
+                    if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
+                                true /* loadIfNotCached */);
+                    } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
+                        loadQueue.addTask(task);
                     }
-                }
-                if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
-                    if (task.thumbnail == null || isRunningTask) {
-                        if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
-                        if (mConfig.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                            task.thumbnail = loader.getAndUpdateThumbnail(taskKey,
-                                    mSystemServicesProxy, true);
-                        } else if (mConfig.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
-                            loadQueue.addTask(task);
-                        }
-                    }
-                }
-
-                // Update the activity info cache
-                if (!hadCachedActivityInfo && infoHandle.info != null) {
-                    mActivityInfoCache.put(cnKey, infoHandle);
                 }
             }
         }
     }
 
     /**
-     * Returns all TaskStacks from the preloaded list of recent tasks.
+     * Returns the TaskStack from the preloaded list of recent tasks.
      */
-    public ArrayList<TaskStack> getAllTaskStacks() {
-        ArrayList<TaskStack> stacks = new ArrayList<TaskStack>();
-        int stackCount = mStacks.size();
-        for (int i = 0; i < stackCount; i++) {
-            stacks.add(mStacks.valueAt(i));
-        }
-        // Ensure that we have at least one stack
-        if (stacks.isEmpty()) {
-            stacks.add(new TaskStack());
-        }
-        return stacks;
-    }
-
-    /**
-     * Returns a specific TaskStack from the preloaded list of recent tasks.
-     */
-    public TaskStack getTaskStack(int stackId) {
-        return mStacks.get(stackId);
+    public TaskStack getTaskStack() {
+        return mStack;
     }
 
     /** Returns whether there are any tasks in any stacks. */
     public boolean hasTasks() {
-        int stackCount = mStacks.size();
-        for (int i = 0; i < stackCount; i++) {
-            if (mStacks.valueAt(i).getTaskCount() > 0) {
-                return true;
-            }
+        if (mStack != null) {
+            return mStack.getTaskCount() > 0;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this task is too old to be shown.
+     */
+    private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
+        return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
     }
 }

@@ -1,3 +1,11 @@
+/*
+ * THIS FILE IS DEPRECATED.
+ *
+ * Please add and edit resource collections in jd_extras_<lang>.js
+ * where lang matches the language code appropriate for the resource.
+ * Last sync'd with jd_extras_<lang>.js on 29 Apr 2016.
+ *
+ */
 var RESOURCE_COLLECTIONS = {
   "index/carousel": {
     "title": "",
@@ -10,16 +18,16 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/building-wearables.html",
       "training/material/index.html",
-      "sdk/index.html"
+      "studio/index.html"
     ]
   },
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=0r36OJaeMo4",
-      "http://www.youtube.com/watch?v=1Iw7Tg_afKk",
-      "http://www.youtube.com/watch?v=TieksFvD-7o",
-      "http://www.youtube.com/watch?v=MCoh4Pxs_ok"
+      "http://www.youtube.com/watch?v=9m6MoBM-sFI",
+      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
+      "http://www.youtube.com/watch?v=e7t3svG9PTk",
+      "http://www.youtube.com/watch?v=J3IvOfvH1ys"
     ]
   },
   "index/multiscreen": {
@@ -41,9 +49,9 @@ var RESOURCE_COLLECTIONS = {
   "design/landing/latest": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=p4gmvHyuZzw",
-      "http://www.youtube.com/watch?v=YaG_ljfzeUw",
-      "http://www.youtube.com/watch?v=XOcCOBe8PTc"
+      "https://www.youtube.com/watch?v=p4gmvHyuZzw",
+      "https://www.youtube.com/watch?v=YaG_ljfzeUw",
+      "https://www.youtube.com/watch?v=XOcCOBe8PTc"
     ]
   },
   "design/landing/materialdesign": {
@@ -90,17 +98,25 @@ var RESOURCE_COLLECTIONS = {
   "develop/landing/latest": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2015/04/new-android-code-samples.html",
-      "http://android-developers.blogspot.com/2015/04/android-support-library-221.html",
-      "http://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
+      "https://android-developers.blogspot.com/2015/04/new-android-code-samples.html",
+      "https://android-developers.blogspot.com/2015/04/android-support-library-221.html",
+      "https://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
+    ]
+  },
+  "develop/landing/devpatterns": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=kmUGLURRPkI",
+      "https://www.youtube.com/watch?v=HGElAW224dE",
+      "https://www.youtube.com/watch?v=zQekzaAgIlQ"
     ]
   },
   "develop/landing/performance": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=fEEulSk1kNY",
-      "http://www.youtube.com/watch?v=-3ry8PxcJJA",
-      "http://www.youtube.com/watch?v=_kKTGK-Cb_4"
+      "https://www.youtube.com/watch?v=fEEulSk1kNY",
+      "https://www.youtube.com/watch?v=-3ry8PxcJJA",
+      "https://www.youtube.com/watch?v=_kKTGK-Cb_4"
     ]
   },
   "develop/landing/buildwithgoogle": {
@@ -120,11 +136,53 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=3PIc-DuEU2s&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
       "https://www.youtube.com/watch?v=cD7NPxuuXYY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=JLLnhwtDoHw&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
+    ]
+  },
+  "preview/landing/resources": {
+    "title": "",
+    "resources": [
+      "preview/overview.html",
+      "preview/api-overview.html",
+      "preview/behavior-changes.html",
+      "preview/setup-sdk.html",
+      "preview/samples.html",
+      "preview/support.html"
+    ]
+  },
+  "preview/landing/more": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=CsulIu3UaUM",
+      "preview/features/multi-window.html",
+      "preview/features/notification-updates.html",
+      "preview/features/background-optimization.html",
+      "preview/features/data-saver.html",
+      "preview/features/direct-boot.html",
+      "preview/features/icu4j-framework.html",
+      "preview/features/multilingual-support.html",
+      "preview/features/scoped-folder-access.html",
+      "preview/features/picture-in-picture.html",
+      "preview/features/tv-recording-api.html"
+    ]
+  },
+  "wear/preview/landing": {
+    "title": "",
+    "resources": [
+      "wear/preview/api-overview.html",
+      "wear/preview/downloads.html",
+      "wear/preview/start.html"
+    ]
+  },
+  "wear/preview/landing/resources": {
+    "title": "",
+    "resources": [
+      "wear/preview/features/complications.html",
+      "wear/preview/features/notifications.html",
+      "wear/preview/features/ui-nav-actions.html"
     ]
   },
   "google/landing/services": {
@@ -158,36 +216,31 @@ var RESOURCE_COLLECTIONS = {
   "develop/landing/courses": {
     "title": "",
     "resources": [
-      "https://www.udacity.com/course/ux-design-for-mobile-developers--ud849",
-      "https://www.udacity.com/course/developing-android-apps--ud853",
-      "https://www.udacity.com/course/android-performance--ud825",
+      "https://www.udacity.com/course/ud849",
+      "https://www.udacity.com/course/ud853",
+      "https://www.udacity.com/course/ud825",
       "https://www.udacity.com/android",
-      "https://www.udacity.com/course/advanced-android-app-development--ud855",
-      "https://www.udacity.com/course/android-ubiquitous-computing--ud875",
-      "https://www.udacity.com/course/google-play-services--ud876",
-      "https://www.udacity.com/course/android-design-for-developers--ud862",
-      "https://www.udacity.com/course/android-development-for-beginners--ud837",
-      "https://www.udacity.com/course/gradle-for-android-and-java--ud867"
-    ]
-  },
-  "preview/landing/more": {
-    "title": "",
-    "resources": [
-      "preview/features/runtime-permissions.html",
-      "preview/behavior-changes.html",
-      "preview/backup/index.html",
-      "preview/features/app-linking.html",
-      "preview/testing/guide.html",
-      "preview/testing/performance.html",
+      "https://www.udacity.com/course/ud855",
+      "https://www.udacity.com/course/ud875A",
+      "https://www.udacity.com/course/ud875B",
+      "https://www.udacity.com/course/ud875C",
+      "https://www.udacity.com/course/ud876--1",
+      "https://www.udacity.com/course/ud876--2",
+      "https://www.udacity.com/course/ud876--3",
+      "https://www.udacity.com/course/ud876--4",
+      "https://www.udacity.com/course/ud876--5",
+      "https://www.udacity.com/course/ud862",
+      "https://www.udacity.com/course/ud837",
+      "https://www.udacity.com/course/ud867"
     ]
   },
   "distribute/landing/carousel": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=QDM52bblwlg",
-      "https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-      "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-      "https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "distribute/googleplay/guide.html",
+    "https://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
+    "https://www.youtube.com/watch?v=yJisuP94lHU",
     ]
   },
   "distribute/landing/googleplay": {
@@ -201,12 +254,12 @@ var RESOURCE_COLLECTIONS = {
   "distribute/landing/more": {
     "title": "",
     "resources": [
-    "distribute/users/promote-with-ads.html",
-    "distribute/monetize/ads.html",
-    "distribute/analyze/index.html",
-    "distribute/engage/deep-linking.html",
-    "distribute/engage/easy-signin.html",
-    "https://cloud.google.com/docs/"
+      "distribute/users/promote-with-ads.html",
+      "distribute/monetize/ads.html",
+      "distribute/analyze/index.html",
+      "distribute/engage/deep-linking.html",
+      "distribute/engage/easy-signin.html",
+      "https://cloud.google.com/docs/"
     ]
   },
   "distribute/edu/videos/stories": {
@@ -228,17 +281,17 @@ var RESOURCE_COLLECTIONS = {
   "distribute/edu/videos/experience": {
     "title": "",
     "resources": [
-      "http://youtu.be/vzvpcEffvaE"
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
 /*  "launch/static": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=1RIz-cmTQB4",
-      "http://www.youtube.com/watch?v=MVBMWDzyHAI",
-      "http://android-developers.blogspot.com/2013/11/app-translation-service-now-available.html",
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
-      "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
+      "https://www.youtube.com/watch?v=1RIz-cmTQB4",
+      "https://www.youtube.com/watch?v=MVBMWDzyHAI",
+      "https://android-developers.blogspot.com/2013/11/app-translation-service-now-available.html",
+      "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "https://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
       "distribute/essentials/quality/tablets.html",
       "distribute/users/build-buzz.html",
       "distribute/monetize/premium.html",
@@ -255,17 +308,17 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.youtube.com/watch?v=xelYnWcYkuE",
       "https://www.youtube.com/playlist?list=PLCOC_kP3nqGIHEgwm9mybvA04Vn4Cg9nn",
-      "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
-      "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
-      "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+      "https://googledevjp.blogspot.jp/2014/12/android-wear.html",
+      "https://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+      "https://googledevjp.blogspot.jp/2014/12/google-play-65.html",
       "intl/ja/distribute/googleplay/developer-console.html#alpha-beta",
       "intl/ja/distribute/googleplay/guide.html",
       "intl/ja/distribute/essentials/quality/core.html",
-      "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
       "intl/ja/support.html",
       "intl/ja/distribute/essentials/quality/wear.html",
       "intl/ja/training/tv/start/index.html",
-      "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+      "https://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
       "intl/ja/distribute/monetize/ads.html"
     ]
   },
@@ -274,9 +327,9 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.youtube.com/watch?v=7X9Ue0Nfdh4&index=2&list=PL_WJkTbDHdBksDBRoqfeyLchEQqBAOlNl",
       "https://www.youtube.com/watch?v=83FpwuschCQ",
-      "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
-      "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
-      "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+      "https://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+      "https://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+      "https://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
       "intl/ko/distribute/googleplay/developer-console.html#alpha-beta",
       "intl/ko/distribute/googleplay/guide.html",
       "intl/ko/distribute/essentials/quality/core.html",
@@ -305,13 +358,14 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/edu/about.html",
       "distribute/googleplay/cast.html",
       "distribute/googleplay/cardboard.html",
+      "distribute/googleplay/guide.html"
     ]
   },
   "distribute/googleplay/gpfw": {
     "resources": [
-      "http://www.android.com/work/",
+      "https://www.android.com/work/",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "training/enterprise/index.html"
+      "work/index.html"
     ]
   },
   "distribute/essentials": {
@@ -321,7 +375,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/auto.html",
-      "https://developers.google.com/edu/guidelines"
+      "distribute/essentials/quality/billions.html"
     ]
   },
   "distribute/essentials/zhcn": {
@@ -339,22 +393,25 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/users/your-listing.html",
       "distribute/users/promote-with-ads.html",
-      "distribute/users/appindexing.html",
       "distribute/googleplay/index.html#opportunities",
       "distribute/analyze/improve-roi.html",
       "distribute/users/expand-to-new-markets.html",
-      "distribute/users/promote-with-ads.html",
       "distribute/analyze/index.html",
       "distribute/users/app-invites.html",
       "distribute/users/ota-installs.html",
       "distribute/users/youtube.html",
       "distribute/users/house-ads.html",
+      "distribute/users/experiments.html",
+      "distribute/users/user-acquisition.html",
+      "distribute/users/banners.html",
+      "distribute/users/beta.html"
     ]
   },
   "distribute/engagelanding": {
     "resources": [
       "distribute/engage/intents.html",
       "distribute/engage/widgets.html",
+      "distribute/engage/translate.html",
       "distribute/engage/notifications.html",
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
@@ -362,6 +419,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
+      "distribute/engage/beta.html"
     ]
   },
   "distribute/monetize": {
@@ -391,7 +449,7 @@ var RESOURCE_COLLECTIONS = {
       "google/play-services/index.html",
       "https://developers.google.com/analytics/solutions/mobile-implementation-guide",
       "https://developers.google.com/analytics/devguides/collection/android/",
-      "http://www.google.com/tagmanager/",
+      "https://www.google.com/tagmanager/",
       "https://github.com/googleanalytics/google-analytics-plugin-for-unity"
     ]
   },
@@ -449,7 +507,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/auto.html",
-      "https://developers.google.com/edu/guidelines"
+      "distribute/essentials/quality/billions.html"
     ]
   },
   "distribute/essentials/tools": {
@@ -460,7 +518,7 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer",
       "distribute/tools/promote/brand.html",
       "distribute/tools/promote/device-art.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html",
       "distribute/tools/open-distribution.html",
       "about/dashboards/index.html"
@@ -483,14 +541,14 @@ var RESOURCE_COLLECTIONS = {
   "distribute/tools/promote": {
     "resources": [
       "distribute/tools/promote/device-art.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html"
     ]
   },
   "distribute/tools/promote/zhcn": {
     "resources": [
       "intl/zh-cn/distribute/tools/promote/device-art.html",
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/linking.html"
     ]
   },
@@ -513,7 +571,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/tools/news": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/",
+      "https://android-developers.blogspot.com/",
       "https://plus.google.com/+AndroidDevelopers/"
     ]
   },
@@ -551,11 +609,44 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer"
     ]
   },
-  "distribute/googleplay/developerconsole": {
+  "distribute/googleplay/developerconsole/related": {
     "title": "Developer Console",
     "resources": [
       "google/play/billing/index.html",
       "https://support.google.com/googleplay/android-developer/answer/138294"
+    ]
+  },
+  "distribute/googleplay/beta": {
+    "title": "Alpha and Beta Testing",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/3131213",
+      "https://support.google.com/googleplay/android-developer/answer/3131213#games",
+      "distribute/googleplay/experiments.html"
+    ]
+  },
+  "distribute/googleplay/experiments/successes": {
+    "title": "Store Listing Experiment successes",
+    "resources": [
+    ]
+  },
+  "distribute/googleplay/experiments/related": {
+    "title": "Store Listing Experiments",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/6227309",
+      "https://www.youtube.com/watch?v=B6ydLpkhq04",
+      "https://support.google.com/tagmanager/answer/6003007"
+    ]
+  },
+  "distribute/googleplay/banners/related": {
+    "title": "App Install Banners",
+    "resources": [
+      "https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native"
+    ]
+  },
+  "distribute/googleplay/useracquisition/related": {
+    "title": "User Acquisition",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/6263332"
     ]
   },
   "distribute/googleplay/cast": {
@@ -563,7 +654,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://developers.google.com/cast/docs/ux_guidelines",
       "https://developers.google.com/cast/docs/android_sender",
-      "http://www.github.com/googlecast"
+      "https://www.github.com/googlecast"
     ]
   },
   "distribute/googleplay/cardboard": {
@@ -571,13 +662,13 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.google.com/get/cardboard/get-cardboard/",
       "https://developers.google.com/cardboard/android/download",
-      "http://www.google.com/design/spec-vr"
+      "https://www.google.com/design/spec-vr"
     ]
   },
   "distribute/googleplay/gpfe/highlight": {
     "title": "About Google Play for Education",
     "resources": [
-      "http://youtu.be/vzvpcEffvaE"
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/googleplay/gpfe/dev/about": {
@@ -598,28 +689,28 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/edu/guidelines",
       "distribute/essentials/quality/tablets.html",
       "distribute/googleplay/developer-console.html",
-      "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+      "https://play.google.com/about/developer-distribution-agreement-addendum.html",
     ]
   },
   "distribute/googleplay/aboutgpfe/educators/about": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://www.youtube.com/watch?v=haEmsMo0f3w"
+      "https://www.google.com/edu/tablets/",
+      "https://www.youtube.com/watch?v=haEmsMo0f3w"
     ]
   },
   "distribute/googleplay/aboutgpfe/educators": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://youtu.be/vzvpcEffvaE"
+      "https://www.google.com/edu/tablets/",
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/googleplay/gettingstartedgpfe/educators": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://youtu.be/vzvpcEffvaE"
+      "https://www.google.com/edu/tablets/",
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/essentials/eduessentials/developers": {
@@ -633,7 +724,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/essentials/eduessentials/educators": {
     "title": "",
     "resources": [
-      "http://www.google.com/edu/tablets/",
+      "https://www.google.com/edu/tablets/",
       "distribute/essentials/quality/tablets.html",
     ]
   },
@@ -642,7 +733,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "design/index.html",
       "training/articles/perf-anr.html",
-      "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html"
+      "https://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html"
      ]
   },
   "distribute/users/appinvites": {
@@ -651,6 +742,14 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/app-invites/",
       "https://developers.google.com/identity/sign-in/android/",
       "https://developers.google.com/app-indexing/"
+    ]
+  },
+  "distribute/users/knowyouruser": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/optimizing-your-app.html",
+      "http://www.youtube.com/watch?v=RRelFvc6Czo",
+      "distribute/stories/games/rvappstudios-zombie.html"
     ]
   },
   "distribute/users/promotewithads": {
@@ -665,21 +764,21 @@ var RESOURCE_COLLECTIONS = {
   "distribute/users/buildbuzz": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/device-art.html",
-      "http://plus.google.com/+GooglePlay"
+      "https://plus.google.com/+GooglePlay"
     ]
   },
   "distribute/users/createagreatlisting": {
     "title": "",
     "resources": [
       "https://support.google.com/googleplay/android-developer/answer/1078870",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
       "distribute/tools/launch-checklist.html",
-      "http://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
-      "http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
-      "http://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html"
+      "https://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
+      "https://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
+      "https://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html"
     ]
   },
   "distribute/users/buildcommunity": {
@@ -688,7 +787,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/developer-console.html",
       "https://support.google.com/groups/answer/46601",
       "https://support.google.com/plus/topic/2888488",
-      "http://www.youtube.com/yt/dev/"
+      "https://www.youtube.com/yt/dev/"
     ]
   },
   "distribute/users/appindexing": {
@@ -713,8 +812,8 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://support.google.com/admob/topic/2784623",
       "https://developers.google.com/mobile-ads-sdk/download",
-      "http://support.google.com/googleplay/android-developer/topic/2985714",
-      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "https://support.google.com/googleplay/android-developer/topic/2985714",
+      "https://analyticsacademy.withgoogle.com/mobile-app",
       "https://support.google.com/analytics/answer/2611404",
       "https://support.google.com/admob/answer/3111064"
     ]
@@ -730,16 +829,16 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "distribute/googleplay/developer-console.html",
-      "http://android-developers.blogspot.com/"
+      "https://android-developers.blogspot.com/"
     ]
   },
   "distribute/toolsreference/bestpractices/games": {
     "title": "",
     "resources": [
       "google/play-services/games.html",
-      "http://android-developers.blogspot.com/",
+      "https://android-developers.blogspot.com/",
       "distribute/googleplay/developer-console.html",
-      "http://www.youtube.com/watch?v=1RIz-cmTQB4"
+      "https://www.youtube.com/watch?v=1RIz-cmTQB4"
     ]
   },
   "distribute/essentials/corequalityguidelines/visualdesign": {
@@ -755,7 +854,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/essentials/corequalityguidelines/functionality": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
+      "https://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
       "guide/components/tasks-and-back-stack.html",
       "training/basics/activity-lifecycle/recreating.html"
     ]
@@ -800,19 +899,19 @@ var RESOURCE_COLLECTIONS = {
   "distribute/essentials/core/performance": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2010/12/new-gingerbread-api-strictmode.html",
+      "https://android-developers.blogspot.com/2010/12/new-gingerbread-api-strictmode.html",
       "training/articles/perf-anr.html",
-      "http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html"
+      "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html"
     ]
   },
   "distribute/essentials/core/play": {
     "title": "",
     "resources": [
       "distribute/tools/launch-checklist.html",
-      "http://play.google.com/about/developer-content-policy.html?hl=zh-Hans",
+      "https://play.google.com/about/developer-content-policy.html?hl=zh-Hans",
       "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
       "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
       "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans"
     ]
   },
@@ -820,10 +919,10 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "intl/zh-cn/distribute/tools/launch-checklist.html",
-      "http://play.google.com/about/developer-content-policy.html",
+      "https://play.google.com/about/developer-content-policy.html",
       "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
       "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
       "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans"
     ]
   },
@@ -897,7 +996,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/tools/launch-checklist.html",
       "https://play.google.com/apps/publish/",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html"
     ]
   },
@@ -906,22 +1005,60 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "intl/zh-cn/distribute/tools/launch-checklist.html",
       "https://play.google.com/apps/publish/?hl=zh-Hans",
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/device-art.html"
     ]
   },
   "distribute/essentials/tabletguidelines/googleplay": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "google/play/filters.html"
+    ]
+  },
+ "distribute/essentials/billionsquality/connectivity": {
+    "title": "",
+    "resources": [
+      "training/basics/network-ops/managing.html",
+      "training/monitoring-device-state/connectivity-monitoring.html",
+      "guide/topics/providers/content-providers.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/capability": {
+    "title": "",
+    "resources": [
+      "guide/practices/screens_support.html",
+      "training/multiscreen/screendensities.html",
+      "training/articles/memory.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/cost": {
+    "title": "",
+    "resources": [
+      "https://medium.com/@wkalicinski/smallerapk-part-6-image-optimization-zopfli-webp-4c462955647d#.23hlddo3x",
+      "training/basics/network-ops/managing.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/consumption": {
+    "title": "",
+    "resources": [
+      "training/efficient-downloads/efficient-network-access.html",
+      "training/monitoring-device-state/index.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/content": {
+    "title": "",
+    "resources": [
+      "training/material/animations.html#Touch",
+      "training/articles/perf-anr.html",
+      "training/improving-layouts/index.html"
     ]
   },
   "distribute/essentials/tabletguidelines": {
     "title": "",
     "resources": [
       "distribute/essentials/quality/core.html",
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "distribute/tools/launch-checklist.html",
       "distribute/tools/promote/device-art.html"
     ]
@@ -931,14 +1068,14 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "design/patterns/notifications.html",
       "distribute/engage/gcm.html",
-      "http://play.google.com/about/developer-content-policy.html"
+      "https://play.google.com/about/developer-content-policy.html"
     ]
   },
   "distribute/engage/analytics": {
     "title": "",
     "resources": [
-      "http://www.google.com/analytics/mobile/",
-      "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html",
+      "https://www.google.com/analytics/mobile/",
+      "https://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html",
       "https://developers.google.com/analytics/devguides/collection/android/"
     ]
   },
@@ -947,6 +1084,12 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "design/patterns/widgets.html",
       "guide/topics/appwidgets/index.html"
+    ]
+  },
+  "distribute/engage/translate": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/l10n/answer/6359997"
     ]
   },
   "distribute/engage/reengage": {
@@ -963,7 +1106,6 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/engage/intents.html",
       "distribute/engage/deep-linking.html",
-      "distribute/users/appindexing.html",
       "training/app-indexing/index.html"
     ]
   },
@@ -980,10 +1122,9 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/tools/localization-checklist.html",
       "https://support.google.com/googleplay/android-developer/table/3541286",
-      "distribute/stories/localization.html",
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
-      "http://www.youtube.com/watch?v=SkHHPf3EdzE"
+      "https://www.youtube.com/watch?v=SkHHPf3EdzE"
     ]
   },
   "distribute/engage/gcm": {
@@ -993,11 +1134,13 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/cloud-messaging/android/client",
     ]
   },
-  "distribute/engage/googleplaygames": {
+  "distribute/engage/gamesservices/related": {
     "title": "",
     "resources": [
-      "google/play-services/games.html",
-      "distribute/essentials/best-practices/games.html"
+      "https://developers.google.com/games/services/",
+      "distribute/analyze/start.html",
+      "distribute/googleplay/cardboard.html",
+      "https://www.google.com/admob/"
     ]
   },
   "distribute/engage/gplus": {
@@ -1035,9 +1178,9 @@ var RESOURCE_COLLECTIONS = {
   "distribute/engage/video/more": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/yt/dev/",
+      "https://www.youtube.com/yt/dev/",
       "distribute/essentials/best-practices/games.html",
-      "http://www.youtube.com/watch?v=RRelFvc6Czo"
+      "https://www.youtube.com/watch?v=RRelFvc6Czo"
     ]
   },
   "distribute/engage/community": {
@@ -1050,15 +1193,15 @@ var RESOURCE_COLLECTIONS = {
   "distribute/engage/kiwi": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=WWArLD6nqrk"
+      "https://www.youtube.com/watch?v=WWArLD6nqrk"
     ]
   },
   "distribute/toolsreference/gpfefaq": {
     "title": "",
     "resources": [
-      "http://www.google.com/edu/tablets/",
+      "https://www.google.com/edu/tablets/",
       "distribute/googleplay/edu/start.html",
-      "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+      "https://play.google.com/about/developer-distribution-agreement-addendum.html",
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html"
     ]
@@ -1078,7 +1221,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/tools/loc/designforloc": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
+      "https://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
       "guide/topics/resources/string-resource.html#Plurals",
       "guide/topics/resources/string-resource.html",
       "reference/java/util/Locale.html"
@@ -1089,7 +1232,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "guide/topics/resources/string-resource.html",
       "design/style/writing.html",
-      "http://en.wikipedia.org/wiki/XLIFF"
+      "https://en.wikipedia.org/wiki/XLIFF"
     ]
   },
   "distribute/toolsreference/localizationchecklist/managestrings/zhcn": {
@@ -1097,26 +1240,20 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "guide/topics/resources/string-resource.html",
       "intl/zh-cn/design/style/writing.html",
-      "http://en.wikipedia.org/wiki/XLIFF"
-    ]
-  },
-  "distribute/toolsreference/localizationchecklist/translatestrings": {
-    "title": "",
-    "resources": [
-      "distribute/stories/localization.html",
+      "https://en.wikipedia.org/wiki/XLIFF"
     ]
   },
   "distribute/toolsreference/localizationchecklist/preplaunch": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html"
     ]
   },
   "distribute/toolsreference/localizationchecklist/preplaunch/zhcn": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/device-art.html"
     ]
   },
@@ -1208,14 +1345,14 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "distribute/tools/localization-checklist.html",
-      "guide/topics/resources/localization.html",
+      "https://support.google.com/l10n/answer/6359997"
     ]
   },
   "distribute/toolsreference/launchchecklist/graphics": {
     "title": "",
     "resources": [
       "https://support.google.com/googleplay/android-developer/answer/1078870",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/productdetails": {
@@ -1228,14 +1365,14 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/badges": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/finalchecks": {
     "title": "",
     "resources": [
-      "http://play.google.com/about/developer-content-policy.html",
+      "https://play.google.com/about/developer-content-policy.html",
       "https://support.google.com/googleplay/android-developer/answer/113476",
       "support.html"
     ]
@@ -1249,9 +1386,6 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/optimizing-your-app.html"
     ]
   },
-
-
-
   "distribute/toolsreference/launchchecklist/understanding/zhcn": {
     "title": "",
     "resources": [
@@ -1317,18 +1451,25 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer/answer/138000?hl=zh-Hans"
     ]
   },
+  "distribute/stories/localization": {
+    "title": "",
+    "resources": [
+      "distribute/stories/games/rvappstudios-zombie.html",
+      "distribute/stories/games/g4a-indian-rummy.html",
+      "distribute/stories/apps/sayhi.html"
+    ]
+  },
   "distribute/toolsreference/launchchecklist/localization/zhcn": {
     "title": "",
     "resources": [
       "intl/zh-cn/distribute/tools/localization-checklist.html",
-      "guide/topics/resources/localization.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/graphics/zhcn": {
     "title": "",
     "resources": [
       "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/productdetails/zhcn": {
@@ -1341,14 +1482,14 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/badges/zhcn": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "intl/zh-cn/distribute/tools/promote/linking.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/finalchecks/zhcn": {
     "title": "",
     "resources": [
-      "http://play.google.com/about/developer-content-policy.html",
+      "https://play.google.com/about/developer-content-policy.html",
       "https://support.google.com/googleplay/android-developer/answer/113476?hl=zh-Hans",
       "support.html"
     ]
@@ -1393,9 +1534,9 @@ var RESOURCE_COLLECTIONS = {
   "distribute/monetize/advertising": {
     "title": "",
     "resources": [
-      "http://www.google.com/ads/admob/#subid=us-en-et-dac",
-      "http://www.google.com/doubleclick/publishers/small-business/index.html",
-      "http://support.google.com/googleplay/android-developer/topic/2985714",
+      "https://www.google.com/ads/admob/#subid=us-en-et-dac",
+      "https://www.google.com/doubleclick/publishers/small-business/index.html",
+      "https://support.google.com/googleplay/android-developer/topic/2985714",
       "training/monetization/ads-and-ux.html"
     ]
   },
@@ -1403,8 +1544,9 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "https://support.google.com/admob/topic/2784623",
-      "http://admob.blogspot.com/",
-      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "https://admob.blogspot.com/",
+      "https://analyticsacademy.withgoogle.com/mobile-app",
+      "https://www.udacity.com/courses/ud876-3"
     ]
   },
   "distribute/monetize/paymentmethods": {
@@ -1412,17 +1554,6 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://play.google.com/about/giftcards/",
       "https://support.google.com/googleplay/answer/2651410"
-    ]
-  },
-  "preview/landing/resources": {
-    "title": "",
-    "resources": [
-      "preview/overview.html",
-      "preview/download.html",
-      "preview/setup-sdk.html",
-      "preview/samples.html",
-      "preview/api-overview.html",
-      "preview/support.html"
     ]
   },
   "autolanding": {
@@ -1447,12 +1578,6 @@ var RESOURCE_COLLECTIONS = {
       "design/wear/index.html",
       "training/building-wearables.html",
       "training/wearables/ui/index.html"
-    ]
-  },
-  "play_dev_guide": {
-    "title": "",
-    "resources": [
-      "shareables/distribute/play_dev_guide_secrets_en.pdf"
     ]
   },
   "design/auto/auto_ui_guidelines": {
@@ -1494,19 +1619,55 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/auto.html"
     ]
   },
+  "training/testing/overview": {
+    "title": "",
+    "resources": [
+      "training/testing/start/index.html",
+      "tools/testing/testing_android.html",
+      "https://www.youtube.com/watch?v=vdasFFfXKOY"
+    ]
+  },
+  "training/testing/tools": {
+    "title": "",
+    "resources": [
+      "tools/testing-support-library/index.html",
+      "tools/help/monkey.html",
+      "tools/help/monkeyrunner_concepts.html",
+      "tools/testing/testing_otheride.html",
+      "https://source.android.com/devices/tech/debug/dumpsys.html"
+    ]
+  },
+  "training/testing/techniques": {
+    "title": "",
+    "resources": [
+      "training/testing/ui-testing/index.html",
+      "training/testing/unit-testing/index.html",
+      "training/testing/performance.html"
+    ]
+  },
+  "training/testing/resources": {
+    "title": "",
+    "resources": [
+      "https://github.com/googlesamples/android-testing",
+      "https://www.youtube.com/watch?v=2I6fuD20qlY",
+      "https://codelabs.developers.google.com/codelabs/android-testing/index.html",
+      "https://github.com/googlesamples/android-testing-templates",
+      "https://google.github.io/android-testing-support-library"
+    ]
+  },
   "distribute/stories/games": {
     "title": "",
     "resources": [
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
     ]
   },
   "overview/zhcn/1": {
@@ -1532,7 +1693,7 @@ var RESOURCE_COLLECTIONS = {
   "overview/zhcn/3": {
     "title": "",
     "resources": [
-      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
 
       "intl/zh-cn/distribute/tools/promote/device-art.html",
       "intl/zh-cn/distribute/tools/promote/linking.html",
@@ -1552,9 +1713,9 @@ var RESOURCE_COLLECTIONS = {
   "overview/carousel/zhcn": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=vGV7FHGzpFU",
-      "http://www.youtube.com/watch?v=aqc3ZOTzpdk",
-      "http://www.youtube.com/watch?v=jaNrJ8uyLSc"
+      "https://www.youtube.com/watch?v=vGV7FHGzpFU",
+      "https://www.youtube.com/watch?v=aqc3ZOTzpdk",
+      "https://www.youtube.com/watch?v=jaNrJ8uyLSc"
     ]
   },
   "overview/1": {
@@ -1580,7 +1741,7 @@ var RESOURCE_COLLECTIONS = {
   "overview/3": {
     "title": "",
     "resources": [
-      "distribute/tools/promote/badges.html",
+      "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/brand.html",
@@ -1596,23 +1757,35 @@ var RESOURCE_COLLECTIONS = {
       "training/monitoring-device-state/index.html"
     ]
   },
-  "training/work/apps": {
+"tools/help/log": {
     "title": "",
     "resources": [
-      "training/enterprise/app-compatibility.html",
-      "training/enterprise/app-restrictions.html",
-      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "samples/AppRestrictionSchema/index.html",
-      "samples/AppRestrictionEnforcer/index.html",
-      "https://www.youtube.com/watch?v=dH41OutAMNM"
+       "tools/help/am-logcat.html"
     ]
   },
-  "training/work/admin": {
+"tools/help/monitor": {
     "title": "",
     "resources": [
-      "training/enterprise/work-policy-ctrl.html",
-      "samples/BasicManagedProfile/index.html",
-      "https://www.youtube.com/watch?v=j3QC6hcpy90"
+       "tools/help/am-memory.html",
+       "tools/help/am-cpu.html",
+       "tools/help/am-gpu.html",
+       "tools/help/am-network.html"
+    ]
+  },
+ "tools/help/data": {
+    "title": "",
+    "resources": [
+       "tools/help/am-hprof.html",
+       "tools/help/am-allocation.html",
+       "tools/help/am-methodtrace.html",
+       "tools/help/am-sysinfo.html"
+    ]
+  },
+  "tools/help/shot": {
+    "title": "",
+    "resources": [
+       "tools/help/am-screenshot.html",
+       "tools/help/am-video.html"
     ]
   },
   "tools/performance/rendering": {
@@ -1647,5 +1820,100 @@ var RESOURCE_COLLECTIONS = {
        "tools/performance/batterystats-battery-historian/index.html",
        "tools/performance/batterystats-battery-historian/charts.html"
     ]
+  },
+  "marshmallow/landing/resources": {
+    "title": "",
+    "resources": [
+       "about/versions/marshmallow/android-6.0-changes.html",
+       "about/versions/marshmallow/android-6.0.html",
+       "about/versions/marshmallow/samples.html"
+    ]
+  },
+  "marshmallow/landing/videos": {
+    "title": "",
+    "resources": [
+       "https://youtu.be/U9tw5ypqEN0",
+       "https://youtu.be/N72ksDKrX6c",
+       "https://youtu.be/iZqDdvhTZj0",
+       "https://www.youtube.com/watch?v=vcSj8ln-BlE",
+       "https://youtu.be/LQoohRwojmw",
+       "https://www.youtube.com/watch?v=VOn7VrTRlA4",
+       "https://youtu.be/5sCQjeGoE7M",
+       "https://www.youtube.com/watch?v=C8lUdPVSzDk",
+       "https://www.youtube.com/watch?v=HXacyy0HSW0",
+       "https://www.youtube.com/watch?v=OW1A4XFRuyc",
+       "https://www.youtube.com/watch?v=j3QC6hcpy90",
+       "https://www.youtube.com/watch?v=f17qe9vZ8RM",
+       "https://www.youtube.com/watch?v=ndBdf1_oOGA"
+    ]
+  },
+  "marshmallow/landing/more": {
+    "title": "",
+    "resources": [
+      "training/permissions/requesting.html",
+      "training/backup/autosyncapi.html",
+      "training/monitoring-device-state/doze-standby.html",
+      "training/app-links/index.html",
+      "training/articles/assistant.html",
+      "training/testing/performance.html",
+      "https://developers.google.com/android/nexus/images"
+    ]
+  },
+  "tools/landing/resources": {
+    "title": "",
+    "resources": [
+    "tools/studio/index.html",
+    "tools/studio/studio-features.html",
+    "studio/intro/index.html",
+    ]
+  },
+  "tools/landing/latest": {
+    "title": "",
+    "resources": [
+    "https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
+    "http://android-developers.blogspot.com/2016/04/android-studio-2-0.html",
+    "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
+    ]
+  },
+  "work/landing/primary": {
+    "title": "",
+    "resources": [
+      "work/overview.html",
+      "work/guide.html",
+      "https://www.google.com/work/android/developers/applyDevHub/",
+      "work/managed-configurations.html",
+      "work/cosu.html",
+      "work/managed-profiles.html"
+    ]
+  },
+  "work/landing/resources": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/",
+      "https://www.google.com/work/android/",
+      "https://developers.google.com/android/work/build-dpc",
+      "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=Za0OQo8DRM4",
+      "https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX"
+    ]
+  },
+  "work/apps": {
+    "title": "",
+    "resources": [
+      "work/managed-profiles.html",
+      "work/managed-configurations.html",
+      "work/cosu.html",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "samples/AppRestrictionSchema/index.html",
+      "samples/AppRestrictionEnforcer/index.html"
+    ]
+  },
+  "work/admin": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/build-dpc",
+      "samples/BasicManagedProfile/index.html",
+      "https://www.youtube.com/watch?v=j3QC6hcpy90"
+    ]
   }
-}
+};

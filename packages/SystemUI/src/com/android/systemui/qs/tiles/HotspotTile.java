@@ -19,89 +19,129 @@ package com.android.systemui.qs.tiles;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.UserManager;
+
+import android.provider.Settings;
+import android.provider.Settings.Global;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.Prefs;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
-public class HotspotTile extends QSTile<QSTile.BooleanState> {
+public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_hotspot_enable_animation);
+            new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
+                    R.drawable.ic_hotspot_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_hotspot_disable_animation);
+            new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
+                    R.drawable.ic_hotspot_enable);
+    private final Icon mDisableNoAnimation = ResourceIcon.get(R.drawable.ic_hotspot_enable);
+    private final Icon mUnavailable = ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
+
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
-    private final UsageTracker mUsageTracker;
+    private final GlobalSetting mAirplaneMode;
+    private boolean mListening;
 
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
-        mUsageTracker = newUsageTracker(host.getContext());
-        mUsageTracker.setListening(true);
+        mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
+            @Override
+            protected void handleValueChanged(int value) {
+                refreshState();
+            }
+        };
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return mController.isHotspotSupported();
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mUsageTracker.setListening(false);
     }
 
     @Override
-    protected BooleanState newTileState() {
-        return new BooleanState();
+    public AirplaneBooleanState newTileState() {
+        return new AirplaneBooleanState();
     }
 
     @Override
     public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
         if (listening) {
             mController.addCallback(mCallback);
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            refreshState();
         } else {
             mController.removeCallback(mCallback);
         }
+        mAirplaneMode.setListening(listening);
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_WIRELESS_SETTINGS);
     }
 
     @Override
     protected void handleClick() {
         final boolean isEnabled = (Boolean) mState.value;
+        if (!isEnabled && mAirplaneMode.getValue() != 0) {
+            return;
+        }
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setHotspotEnabled(!isEnabled);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     @Override
-    protected void handleLongClick() {
-        if (mState.value) return;  // don't allow usage reset if hotspot is active
-        final String title = mContext.getString(R.string.quick_settings_reset_confirmation_title,
-                mState.label);
-        mUsageTracker.showResetConfirmation(title, new Runnable() {
-            @Override
-            public void run() {
-                refreshState();
-            }
-        });
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.quick_settings_hotspot_label);
     }
 
     @Override
-    protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed();
+    protected void handleUpdateState(AirplaneBooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
         if (arg instanceof Boolean) {
             state.value = (boolean) arg;
         } else {
             state.value = mController.isHotspotEnabled();
         }
-        state.icon = state.visible && state.value ? mEnable : mDisable;
+        state.icon = state.value ? mEnable : mDisable;
+        boolean wasAirplane = state.isAirplaneMode;
+        state.isAirplaneMode = mAirplaneMode.getValue() != 0;
+        if (state.isAirplaneMode) {
+            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
+            state.label = new SpannableStringBuilder().append(state.label,
+                    new ForegroundColorSpan(disabledColor),
+                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+            state.icon = mUnavailable;
+        } else if (wasAirplane) {
+            state.icon = mDisableNoAnimation;
+        }
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
+        state.contentDescription = state.label;
     }
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_HOTSPOT;
+        return MetricsEvent.QS_HOTSPOT;
     }
 
     @Override
@@ -113,31 +153,10 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
-    private static UsageTracker newUsageTracker(Context context) {
-        return new UsageTracker(context, Prefs.Key.HOTSPOT_TILE_LAST_USED, HotspotTile.class,
-                R.integer.days_to_show_hotspot_tile);
-    }
-
     private final class Callback implements HotspotController.Callback {
         @Override
         public void onHotspotChanged(boolean enabled) {
             refreshState(enabled);
         }
     };
-
-    /**
-     * This will catch broadcasts for changes in hotspot state so we can show
-     * the hotspot tile for a number of days after use.
-     */
-    public static class APChangedReceiver extends BroadcastReceiver {
-        private UsageTracker mUsageTracker;
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (mUsageTracker == null) {
-                mUsageTracker = newUsageTracker(context);
-            }
-            mUsageTracker.trackUsage();
-        }
-    }
 }

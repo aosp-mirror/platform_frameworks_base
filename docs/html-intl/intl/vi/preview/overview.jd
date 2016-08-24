@@ -1,0 +1,440 @@
+page.title=Tổng quan về Chương trình
+page.metaDescription=Hãy chuẩn bị ứng dụng sẵn sàng cho phiên bản Android tiếp theo.
+page.image=images/cards/card-n-overview_2x.png
+meta.tags="preview", "developer", "android"
+page.tags="preview", "developer", "android"
+
+@jd:body
+<!--
+<div class="cols" style=
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 3 is now available
+  </h3>
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+  </div>
+</div>
+-->
+
+<p>
+  Chào mừng bạn đến với <strong>Android N Developer Preview</strong>, một chương trình
+  cung cấp cho bạn mọi thứ cần thiết để kiểm thử và tối ưu hóa các ứng dụng cho phiên bản
+  Android tiếp theo. Đây là chương trình miễn phí và bạn có thể bắt đầu ngay bằng cách
+  tải xuống các công cụ của N Developer Preview.
+</p>
+
+
+
+
+
+
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        Thiết bị phần cứng và ảnh của bộ giả lập
+      </h5>
+
+      <p>
+        Chạy và kiểm thử ứng dụng của bạn trên một loạt các thiết bị hoặc trên bộ giả lập.
+
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Mã nền tảng mới nhất
+      </h5>
+
+      <p>
+        Chúng tôi sẽ cung cấp các bản cập nhật hàng tháng trong thời gian của Preview vì vậy bạn sẽ được kiểm tra các thay đổi nền tảng mới nhất.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Ưu tiên các vấn đề của nhà phát triển
+      </h5>
+
+      <p>
+        Trong một vài tuần đầu, chúng tôi sẽ dành ưu tiên cho các vấn đề
+        được nhà phát triển báo cáo, vì vậy hãy kiểm thử và gửi phản hồi sớm nhất có thể.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        Các hành vi và khả năng mới
+      </h5>
+
+      <p>
+        Tiến hành công việc sớm để hỗ trợ các hành vi mới của nền tảng và phát triển với các tính năng mới.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+        <h5>
+        Cập nhật qua OTA
+      </h5>
+
+      <p>
+        Các bản cập nhật liền mạch qua sóng vô tuyến cho bất kỳ thiết bị nào được hỗ trợ thông qua
+        Chương trình Android Beta. Không cần phải flash.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Phản hồi và hỗ trợ
+      </h5>
+
+      <p>
+        Báo cáo các vấn đề và gửi phản hồi về cho chúng tôi thông qua
+        <a href="{@docRoot}preview/bug">bộ theo dõi vấn đề</a> của chúng tôi. Kết nối với các nhà phát triển
+        khác trong
+        <a href="{@docRoot}preview/dev-community">Cộng đồng Nhà phát triển&nbsp;N</a>.
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>New in the Android N Developer Preview: </p>
+
+<ul>
+  <li> Accompanying Android Beta Program for consumers, starting later in the preview</li>
+  <li> More supported devices, including devices from OEM partners</li>
+  <li> Seamless OTAs for your devices, from initial release to final N release without flashing</li>
+</ul>
+-->
+
+<h2 id="timeline">Tiến trình thời gian và các bản cập nhật</h2>
+<img src="{@docRoot}images/n-preview-updates_2x.png">
+
+<p>
+  N Developer Preview sẽ kéo dài từ 9 tháng 3 năm 2016 đến khi phát hành công chúng
+  bản Android N cuối cùng cho AOSP và OEM, dự kiến trong Q3 2016.
+</p>
+
+<p>
+  Tại các mốc phát triển chính chúng tôi sẽ cung cấp các bản cập nhật cho môi trường phát triển và
+  kiểm thử của bạn. Nói chung, bạn có thể nhận một bản cập nhật hàng tháng (khoảng cách
+  4 đến 6 tuần). Các mốc được liệt kê dưới đây.
+</p>
+
+<ul>
+  <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong> (phát hành lần đầu, alpha)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong> (bản cập nhật tăng dần, alpha)</li>
+  <li><strong>Preview 3</strong> (bản cập nhật tăng dần, beta)</li>
+  <li><strong>Preview 4</strong> (các API cuối cùng và SDK chính thức, phát hành Play)</li>
+  <li><strong>Preview 5</strong> (các ảnh hệ thống gần hoàn thiện để kiểm thử cuối cùng)</li>
+  <li><strong>Phát hành bản cuối</strong> cho AOSP và hệ sinh thái</li>
+</ul>
+
+<p>
+  Mỗi bản cập nhật sẽ có các công cụ SDK, ảnh hệ thống xem trước, bộ giả lập, tài liệu
+  tham khảo và những khác biệt về API.
+</p>
+
+<p>
+  <strong>Ba phiên bản Preview đầu tiên</strong> sẽ cung cấp một <strong>môi trường
+  kiểm thử và phát triển sớm</strong> để giúp bạn xác định
+  các vấn đề tương thích trong ứng dụng hiện tại và lập kế hoạch di chuyển hoặc trang bị hoạt động
+   cần thiết để nhắm tới nền tảng mới. Đây là giai đoạn ưu tiên để bạn
+  gửi phản hồi cho chúng tôi về các tính năng, khả năng tương thích của API và tệp
+  &mdash; đối với mọi vấn đề đó, vui lòng sử dụng <a href="{@docRoot}preview/bug">bộ theo dõi
+  vấn đề</a>. Sẽ có một số thay đổi với API giữa các bản cập nhật này.
+</p>
+
+<p>
+  Tại <strong>Preview 4 và 5</strong> bạn sẽ được sử dụng <strong>các   
+API và SDK N cuối cùng</strong> để phát triển, và cả các ảnh hệ thống gần hoàn thiện
+  để kiểm thử các hành vi, tính năng của hệ thống. Android N sẽ cung cấp một mức
+  API chuẩn vào thời điểm này. Bạn có thể tiến hành kiểm thử khả năng tương thích cuối cùng đối với các ứng dụng
+  cũ và tinh chỉnh mã nguồn mới có sử dụng các API hoặc tính năng mới của N.
+</p>
+
+<p>
+  Ngoài ra, bắt đầu từ Preview 4 bạn có thể <strong>phát hành ứng dụng lên
+  các thiết bị</strong> chạy Android N ở cấp API chính thức, chẳng hạn như
+  thiết bị người dùng được chọn cho chương trình Android Beta. Bạn có thể
+  phát hành ứng dụng lên kênh alpha và beta của Google Play trước do đó bạn có thể kiểm thử
+  ứng dụng của mình với người dùng Android Beta trước khi phân phối rộng rãi trên
+  cửa hàng.
+</p>
+
+<p>
+  Khi bạn kiểm thử và phát triển trên Android N, chúng tôi khuyến cáo bạn <strong>duy trì
+  môi trường phát triển được cập nhật</strong> khi các cập nhật Preview được
+  phát hành. Để giúp cho quá trình này thuận tiện hơn, bạn có thể đăng ký các thiết bị kiểm thử của mình vào
+  chương trình Android Beta và lấy <strong>các bản cập nhật qua sóng vô tuyến (OTA)</strong> tại
+  mỗi mốc. Ngoài ra, các ảnh xem trước cũng có sẵn để bạn
+  tải xuống và flash thủ công.
+</p>
+
+<p>
+  Chúng tôi sẽ thông báo cho bạn khi các cập nhật Preview xuất hiện thông qua <a href="http://android-developers.blogspot.com/">Blog Nhà phát triển Android</a>, cũng
+  như thông qua trang này và <a href="{@docRoot}preview/dev-community">Cộng đồng
+  Nhà phát triển Android N</a>.
+</p>
+
+
+<h2 id="preview_tools">Có gì trong N Developer Preview?</h2>
+
+<p>
+  N Developer Preview có tất cả mọi thứ bạn cần để kiểm thử ứng dụng
+  sẵn có của bạn trên nhiều loại kích cỡ màn hình, công nghệ mạng, chipset CPU/GPU
+  và kiến trúc phần cứng.
+</p>
+
+<h3 id="sdk_tools">Bộ công cụ SDK</h3>
+
+<p>Bạn có thể tải xuống các thành phần này thông qua Trình quản lý SDK trong <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a>:</p>
+
+<ul>
+  <li> N Developer Preview <strong>SDK và công cụ</strong>
+  <li> <strong>Ảnh hệ thống cho bộ giả lập</strong> (32-bit và 64-bit) của N Developer Preview
+  <li> <strong>Ảnh hệ thống cho bộ giả lập cho Android TV</strong> (32-bit) của N Developer Preview
+  <li> Các thư viện hỗ trợ của N Developer Preview (dành cho các mẫu ứng dụng mới)
+</ul>
+
+<p>
+  Chúng tôi sẽ cung cấp các bản cập nhật cho các công cụ phát triển này theo từng mốc khi cần thiết.
+</p>
+
+<h3 id="hardware_system_images">Ảnh hệ thống cho phần cứng</h3>
+
+<p>
+  N Developer Preview bao gồm các ảnh hệ thống cho Nexus và phần cứng khác mà bạn có thể sử dụng khi
+  kiểm thử và phát triển trên các thiết bị vật lý. Hãy xem trang <a href="{@docRoot}preview/download.html">Ảnh cho Thiết bị</a> để có danh sách đầy đủ
+  các ảnh cho phần cứng.
+</p>
+
+<p>
+  Chúng tôi sẽ cung cấp các ảnh hệ thống cập nhật cho những thiết bị này tại mỗi mốc. Bạn
+  có thể tải xuống và flash các ảnh hệ thống cập nhật vào các thiết bị kiểm thử
+  một cách thủ công nhiều lần theo nhu cầu. Điều này đặc biệt hữu ích đối với các môi trường
+  kiểm thử tự động, trong đó bạn có thể cần flash lại thiết bị nhiều
+  lần.
+</p>
+
+<p class="note"><strong>Lưu ý</strong>:
+  <strong>Các thiết bị được flash thủ công sẽ không nhận các bản cập nhật qua OTA</strong> giống như trong
+  preview của năm ngoái.  Năm nay bạn có thể nhận qua OTA bằng cách đăng ký các thiết bị trong
+  Chương trình Android Beta &mdash; hãy xem chi tiết trong phần tiếp theo.
+</p>
+
+<h3 id="android_beta">Các bản cập nhật OTA thông qua Chương trình Android Beta</h3>
+
+<p>
+  Tính năng mới cho Android N là một chương trình cập nhật qua sóng vô tuyến (OTA) sẽ tự động
+  phát hành các cập nhật Preview mới nhất của Android N trực tiếp tới thiết bị đã đăng ký
+   trong chương trình. Đây là chương trình miễn phí và mở đối với bất cứ ai có một
+  thiết bị được hỗ trợ đã đăng ký với tài khoản Google của họ.
+</p>
+
+<p>
+  Để đăng ký vào chương trình, hãy truy cập trang <a href="https://g.co/androidbeta">Chương trình
+  Android Beta</a>. Bạn sẽ thấy
+   tất cả các thiết bị đã đăng ký với tài khoản của bạn có đủ điều kiện để đăng ký
+  Android Beta.
+</p>
+
+<ol>
+  <li> Hãy chọn các thiết bị bạn muốn nhận bản cập nhật Android N
+  <li> Nhấp vào Đăng ký, đọc và đồng ý với các điều khoản dịch vụ và sau đó nhấp OK
+</ol>
+
+<p>
+  Một khi đã đăng ký, thiết bị của bạn sẽ sớm nhận được một bản cập nhật. Trong hầu hết trường hợp,
+  bạn sẽ không cần thực hiện thiết lập lại toàn bộ dữ liệu để chuyển sang Android N. Tuy nhiên,
+  chúng tôi khuyến cáo bạn sao lưu bất kỳ dữ liệu nào bạn không muốn bị mất trước khi
+   đăng ký thiết bị.
+</p>
+
+<p>
+  Khi các bản cập nhật được phát hành tới thiết bị của bạn, chúng tôi khuyến cáo bạn tải xuống và
+  cài đặt sớm nhất có thể. Bạn sẽ muốn cập nhật các
+  thay đổi mới nhất về UI, hành vi, API và các tính năng của hệ thống.
+</p>
+
+<p>
+  Khi kết thúc Developer Preview, các thiết bị đăng ký của bạn sẽ
+   nhận một bản cập nhật của bản phát hành Android N chính thức.
+</p>
+
+<p>
+  Bạn có thể hủy đăng ký các thiết bị của mình trong chương trình Android Beta bất kỳ lúc nào thông qua
+   trang Android Beta. Trước khi hủy đăng ký, hãy chắc chắn sao lưu dự phòng dữ liệu của bạn trên
+   thiết bị đó.
+</p>
+
+  <p class="note"><strong>Lưu ý</strong>:
+  Khi bạn hủy đăng ký, <strong>thiết bị của bạn sẽ được khôi phục cài đặt gốc</strong>
+  về phiên bản mới nhất
+  của Android 6.0 Marshmallow (không nhất thiết là phiên bản bạn từng
+  được cài đặt trước khi đăng ký thiết bị).  Để đảm bảo cài đặt mới hoàn toàn,
+   dữ liệu của bạn sẽ bị xóa khỏi thiết bị, bao gồm danh bạ, tin nhắn,
+  ảnh, v.v...
+</p>
+
+<h3 id="documentation_and_sample_code">Tài liệu và mã mẫu</h3>
+
+<p>
+  Các nguồn tài liệu này có trên trang Developer Preview để
+  trợ giúp bạn tìm hiểu về Android&nbsp;N:
+</p>
+
+<ul>
+  <li> <a href="{@docRoot}preview/setup-sdk.html">Thiết lập để Phát triển dành cho
+Android N</a> có
+  các hướng dẫn từng bước để bắt đầu.</li>
+  <li> <a href="{@docRoot}preview/behavior-changes.html">Các thay đổi
+  Hành vi</a> chỉ ra cho bạn các phần chính yếu để kiểm thử.</li>
+  <li> Tổng quan về các API mới, bao gồm một phần <a href="{@docRoot}preview/api-overview.html">Tổng quan về API</a>, bản tải xuống được
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo
+ API</a> và các hướng dẫn chi tiết cho nhà phát triển đối với các tính năng quan trọng như 
+  hỗ trợ đa cửa sổ, thông báo gộp, hỗ trợ đa bản địa và các tính năng khác.
+  <li> <a href="{@docRoot}preview/samples.html">Mã mẫu</a> trong đó
+  minh họa cách hỗ trợ các quyền và tính năng mới.
+  <li> <a href="{@docRoot}preview/support.html#release-notes">Ghi chú phát hành</a>
+  cho phiên bản hiện hành của N Developer Preview, bao gồm các ghi chú về thay đổi và
+  các báo cáo về sự khác biệt.
+</ul>
+
+<h4 id="reference">Tham khảo API có thể tải xuống</h4>
+
+<p>
+  Trong các cập nhật preview có sớm bạn có thể tải xuống
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo API
+  mới nhất cho nền tảng Android N</a> dưới dạng tệp lưu trữ zip riêng biệt. Bản tải xuống
+  tham khảo này cũng có một báo cáo về các khác biệt để giúp bạn nhận biết các thay đổi API từ
+   API 23 và bản cập nhật trước đó.
+</p>
+
+<p>
+  Khi các API Android N hoàn thiện và được chỉ định một mức API chính thức,
+   chúng tôi sẽ cung cấp tham khảo API cho bạn trực tuyến tại <a href="https://developer.android.com">https://developer.android.com</a>.
+</p>
+
+<h3 id="support_resources">
+  Tài nguyên Hỗ trợ
+</h3>
+
+<p>
+  Khi bạn kiểm thử và phát triển trên N Developer Preview, xin vui lòng sử dụng các kênh sau
+  để thông báo các vấn đề và gửi phản hồi.
+</p>
+
+<ul>
+  <li> <a href="https://code.google.com/p/android-developer-preview/">Bộ theo dõi Vấn đề N Developer Preview
+  </a> là <strong>kênh phản hồi chính</strong> của bạn. Bạn có thể thông báo lỗi, các vấn đề về
+  hiệu năng và phản hồi chung thông qua bộ theo dõi vấn đề. Bạn cũng có thể kiểm tra
+<a href="{@docRoot}preview/bug">các vấn đề đã biết</a> và
+   tìm các bước khắc phục. Chúng tôi sẽ cập nhật thông tin cho bạn về vấn đề của bạn khi nó đã được phân loại và gửi tới
+   nhóm kỹ thuật Android xem xét. </li>
+  <li> <a href="{@docRoot}preview/dev-community">Cộng đồng Nhà phát triển Android N</a> là
+   một cộng đồng Google+ nơi bạn có thể <strong>kết nối với các nhà phát triển khác</strong> đang thử nghiệm
+   Android N. Bạn có thể chia sẻ các phát hiện hoặc ý tưởng hoặc tìm câu trả lời cho các
+    thắc mắc về Android N. Chúng tôi sẽ điều hành cộng đồng này và cung cấp các câu trả lời và
+    hướng dẫn khi cần thiết.</li>
+</ul>
+
+<h3 id="targeting">Nhắm mục tiêu, API xem trước và phát hành</h3>
+
+<p>
+  N Developer Preview sẽ cung cấp một hệ thống và thư viện
+   Android chỉ dành cho phát triển mà <strong>không có mức API tiêu chuẩn</strong>. Nếu bạn muốn
+  bỏ các hành vi về khả năng tương thích để kiểm thử ứng dụng của mình (đặc biệt
+  khuyến cáo), bạn có thể nhắm mục tiêu phiên bản xem trước của Android N bằng cách thiết lập
+  <code><a href=
+  "{@docRoot}preview/setup-sdk.html#create-update">targetSdkVersion</a></code>
+ của ứng dụng thành <code>“N”</code>.
+</p>
+
+<p>
+  Android N Developer Preview cung cấp các <strong>API xem trước</strong>
+  &mdash; các API này không phải bản chính thức cho đến khi SDK cuối cùng được phát hành,
+  hiện được dự kiến phát hành vào quý ba năm 2016. Điều này có nghĩa là có thể
+  <strong>có các thay đổi API nhỏ</strong> sau này, đặc biệt trong
+   các tuần đầu của chương trình. Chúng tôi sẽ cung cấp bản tóm tắt các thay đổi cho bạn theo
+   mỗi bản cập nhật của Android N Developer Preview.
+</p>
+
+<p class="note">
+  <strong>Lưu ý</strong>: Mặc dù các API xem trước có thể thay đổi nhưng
+  các hành vi hệ thống cơ bản vẫn ổn định và sẵn sàng để kiểm thử
+  ngay.
+</p>
+
+<p>
+  Google Play <strong>không cho phép phát hành các ứng dụng nhắm mục tiêu tới N Developer
+  Preview</strong>. Khi có bản SDK cuối cùng của Android N bạn sẽ có thể
+   nhắm mục tiêu mức API Android N chính thức và phát hành ứng dụng của mình lên Google
+  Play thông qua các kênh phát hành alpha và beta. Trong thời gian này, nếu bạn muốn
+   phân phối một ứng dụng nhắm mục tiêu Android N cho người kiểm thử thì bạn có thể thực hiện phân phối qua email hoặc
+  bằng cách tải trực tiếp trên trang web của bạn.
+</p>
+
+<p>
+  Khi Android N được phát hành hoàn chỉnh cho AOSP và OEM, dự kiến vào Q3 2016,
+  bạn có thể phát hành ứng dụng của mình nhắm mục tiêu Android N lên kênh
+  phát hành công chúng trong Google Play.
+</p>
+
+
+<h2 id="how_to_get_started">Cách thức bắt đầu</h2>
+
+<p>
+  Để bắt đầu kiểm thử ứng dụng của bạn với Android N:
+</p>
+
+<ol>
+  <li> Xem lại <a href="{@docRoot}preview/api-overview.html">Tổng quan về API</a>
+  và <a href="{@docRoot}preview/behavior-changes.html">Các thay đổi Hành vi</a> để
+  biết được có những gì mới và nó sẽ tác động đến ứng dụng của bạn như thế nào. Đặc biệt,
+  hãy tìm hiểu về các tính năng <a href="{@docRoot}preview/features/notification-updates.html">thông báo</a> mới và
+  <a href="{@docRoot}preview/features/multi-window.html">hỗ trợ đa cửa sổ</a>.</li>
+  <li> Thiết lập môi trường của bạn bằng cách làm theo các hướng dẫn để <a href="{@docRoot}preview/setup-sdk.html">Preview SDK</a>
+  và cấu hình các thiết bị kiểm thử.</li>
+  <li> Làm theo <a href="https://developers.google.com/android/nexus/images">các hướng dẫn
+  flash</a> để flash ảnh hệ thống Android N mới nhất cho thiết bị của bạn. </li>
+  <li> Xem lại <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Tham khảo API</a>
+ và <a href="{@docRoot}preview/samples.html">các ví dụ về Android N</a> để hiểu
+  sâu hơn về các tính năng API mới cũng như cách sử dụng chúng trong ứng dụng của bạn.
+  <li> Tham gia <a href="{@docRoot}preview/dev-community">Cộng đồng
+  Nhà phát triển Android N</a> để nhận được thông tin mới nhất và kết nối với các
+  nhà phát triển khác đang thử nghiệm với nền tảng mới.</li>
+</ol>
+
+<p>
+  Cảm ơn bạn đã tham gia chương trình Android N Developer Preview!
+</p>

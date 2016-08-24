@@ -20,7 +20,10 @@ package com.android.uiautomator.core;
  * Generated in test runs when a {@link UiSelector} selector could not be matched
  * to any UI element displayed.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiObjectNotFoundException extends Exception {
 
     private static final long serialVersionUID = 1L;

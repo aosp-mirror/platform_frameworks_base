@@ -19,5 +19,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_more_divider"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_children_divider_height"
-    android:background="@*android:drawable/notification_template_divider" />
+    android:layout_height="@dimen/notification_divider_height"
+    android:background="#FF616161" />

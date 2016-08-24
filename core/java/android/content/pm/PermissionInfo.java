@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -112,6 +113,13 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_PREINSTALLED = 0x400;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>setup</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_SETUP = 0x800;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -145,11 +153,12 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_COSTS_MONEY = 1<<0;
 
     /**
-     * Flag for {@link #flags}, corresponding to <code>hidden</code>
+     * Flag for {@link #flags}, corresponding to <code>removed</code>
      * value of {@link android.R.attr#permissionFlags}.
      * @hide
      */
-    public static final int FLAG_HIDDEN = 1<<1;
+    @SystemApi
+    public static final int FLAG_REMOVED = 1<<1;
 
     /**
      * Flag for {@link #flags}, indicating that this permission has been
@@ -223,6 +232,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
             protLevel += "|preinstalled";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_SETUP) != 0) {
+            protLevel += "|setup";
         }
         return protLevel;
     }

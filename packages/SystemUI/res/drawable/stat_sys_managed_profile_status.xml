@@ -14,16 +14,29 @@ Copyright (C) 2015 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="23.0dp"
-        android:height="18.0dp"
-        android:viewportWidth="21.0"
-        android:viewportHeight="17.0">
-    <group android:translateX="2.0">
-        <path
-            android:fillColor="@android:color/white"
-            android:pathData="M9.9,11.6H7v-1.1H2.1v2.8c0,0.8,0.6,1.4,1.4,1.4h9.9c0.8,0,1.4,-0.6,1.4,-1.4v-2.8H9.9V11.6z"/>
-        <path
-            android:fillColor="@android:color/white"
-            android:pathData="M14.1,4.2h-2.5V3.2l-1.1,-1.1H6.3L5.3,3.2v1H2.8C2,4.2,1.4,4.9,1.4,5.6v2.8c0,0.8,0.6,1.4,1.4,1.4H7V8.8h2.8v1.1h4.2     c0.8,0,1.4,-0.6,1.4,-1.4V5.6C15.5,4.9,14.8,4.2,14.1,4.2z M10.6,4.2H6.3V3.2h4.2V4.2z"/>
-    </group>
+    android:width="23dp"
+    android:height="18dp"
+    android:viewportWidth="23"
+    android:viewportHeight="18">
+<!--
+    The asset contains a briefcase symbol of 15.26dp x 13.6dp in the center.
+-->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M15.0815,4.5903 L15.0815,3.43636 L13.9276,2.2 L9.14696,2.2 L7.99302,3.43636
+L7.99302,4.5903 L9.14696,4.5903 L9.14696,3.43636 L13.9276,3.43636
+L13.9276,4.5903 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M18.0488,4.5903 L5.02575,4.5903 C4.36635,4.5903,3.87181,5.08485,3.87181,5.74424
+L3.87181,9.28848 C3.87181,9.94788,4.36635,10.4424,5.02575,10.4424
+L9.72393,10.4424 L9.72393,9.28848 L13.2682,9.28848 L13.2682,10.4424
+L17.9664,10.4424 C18.6257,10.4424,19.1203,9.94788,19.1203,9.28848
+L19.1203,5.74424 C19.2027,5.08485,18.6257,4.5903,18.0488,4.5903 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M9.80635,12.8327 L9.80635,11.6788 L4.44878,11.6788 L4.44878,14.6461
+C4.44878,15.3055,4.94332,15.8,5.60272,15.8 L17.3894,15.8
+C18.0488,15.8,18.5433,15.3055,18.5433,14.6461 L18.5433,11.6788 L13.2682,11.6788
+L13.2682,12.8327 L9.80635,12.8327 Z" />
 </vector>

@@ -22,7 +22,10 @@ import android.os.Bundle;
  * Provides auxiliary support for running test cases
  *
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public interface IAutomationSupport {
 
     /**

@@ -1,35 +1,48 @@
-page.title=Android M 개발자 미리 보기
-page.tags="preview",
-meta.tags="preview, M preview", androidm
+page.title=Android N Developer Preview
+page.tags="preview","developer"
+meta.tags="preview", "android"
 fullpage=true
-section.landing=true
+forcelocalnav=true
 header.hide=1
 footer.hide=1
 @jd:body
 
-<section class="dac-expand dac-hero dac-light" >
-  <div class="wrap">
-    <div class="cols dac-hero-content">
-      <div class="col-9of16 col-push-7of16 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/home/devices-hero_620px_2x.png" srcset="{@docRoot}images/home/devices-hero_620px.png 1x,
-             {@docRoot}images/home/devices-hero_620px_2x.png 2x">
-      </div>
-      <div class="col-7of16 col-pull-9of16">
-        <h1 class="dac-hero-title">Android M 개발자 미리 보기</h1>
+<script>
+  $(document).ready(function() {
+    if (useUpdatedTemplates) {
+      $("#useUpdatedTemplates").css("display","block");
+    } else {
+      $("#useOldTemplates").css("display","block");
+    }
+  })
+</script>
+
+<section class="dac-expand dac-hero dac-light" style="background-color:#B2DFDB">
+  <div class="wrap" style="max-width:1100px;margin-top:0">
+    <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+      <div class="col-7of16 col-push-9of16" style="padding-left:2em">
+        <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
-          Android의 다음 버전을 만나볼 준비가 되셨습니까? 여러분의 앱을 Nexus 5, 6, 9 및 Player에서 테스트해보십시오.
- 새로운 내용은 무엇인지 둘러보십시오. <strong>런타임 권한</strong>, <strong>Doze</strong> 및 <strong>앱 대기 모드</strong> 절전 기능, 새로 나온 <strong>지원 기술</strong>, 이외에도 많은 것이 있습니다.
-
-
+          Android N을 맞이할 준비를 하세요!
+          Nexus와 다른 기기에서 <strong>앱을 테스트하세요</strong>. <strong>전력과 메모리를 절약</strong>하는 새로운 시스템
+동작을 지원하세요.
+          <strong>다중 창 UI</strong>,
+<strong>직접 회신 알림</strong> 등으로 앱을 확장하세요.
         </p>
 
         <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          지금 시작하세요!
-</a><br>
+          시작하기
+        </a><!--<br>
         <a class="dac-hero-cta" href="{@docRoot}preview/support.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Developer Preview 3 (final SDK)</a>
+          Update to Android N (final SDK)
+        </a><br>-->
+      </div>
+      <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
+        <img class="dac-hero-image" src="{@docRoot}images/home/n-preview-hero.png" srcset="{@docRoot}images/home/n-preview-hero.png 1x,
+             {@docRoot}images/home/n-preview-hero_2x.png 2x">
       </div>
     </div>
     <div class="dac-section dac-small">
@@ -41,30 +54,78 @@ footer.hide=1
   </div>
 </section>
 
+<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="https://developer.android.com/preview/bug">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          문제 보고
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}preview/support.html">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          릴리스 노트 보기
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="{@docRoot}preview/dev-community">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          개발자 커뮤니티 가입
+        </a>
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end .dac-actions -->
+
+<div id="useOldTemplates" style="display:none;color:black" class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+
+    <div class="actions">
+      <div><a href="https://developer.android.com/preview/bug">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        문제 보고
+      </a></div>
+      <div><a href="{@docRoot}preview/support.html">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        릴리스 노트 보기
+        </a></div>
+      <div><a href="{@docRoot}preview/dev-community">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        개발자 커뮤니티 가입
+      </a></div>
+    </div><!-- end .actions -->
+  </div><!-- end .wrap -->
+</div>
+
+<section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
+  <h2 class="norule">최신</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:androidn+tag:featured, type:youtube+tag:androidn+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
+</div></section>
+
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">리소스</h1>
   <div class="dac-section-subtitle">
-    앱을 Android M에 대비시키는 데 유용한 중요 정보입니다.
+    앱을 Android N에서 사용할 수 있도록 준비하는 데 유용한 중요 정보입니다.
   </div>
 
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:preview/landing/more"
        data-cardSizes="6x6"
-       data-maxResults="16"></div>
+       data-items-per-page="6"
+       data-maxResults="15"
+       data-initial-results="6"></div>
 
-    <ul class="dac-section-links">
-      <li class="dac-section-link">
-        <a href="https://code.google.com/p/android-developer-preview/">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          문제 보고
-</a>
-      </li>
-      <li class="dac-section-link"><a href="http://g.co/dev/AndroidMDevPreview">
-        <span class="dac-sprite dac-auto-chevron"></span>
-        G+ 커뮤니티 가입
-</a>
-      </li>
-    </ul>
   </div>
 </section>
 

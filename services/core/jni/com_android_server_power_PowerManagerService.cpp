@@ -48,7 +48,7 @@ static struct {
 // ----------------------------------------------------------------------------
 
 static jobject gPowerManagerServiceObj;
-static struct power_module* gPowerModule;
+struct power_module* gPowerModule;
 
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 

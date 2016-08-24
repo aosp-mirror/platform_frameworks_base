@@ -26,7 +26,10 @@ import com.android.uiautomator.core.UiDevice;
 
 /**
  * UI Automator test case that is executed on the device.
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiAutomatorTestCase extends InstrumentationTestCase {
 
     private Bundle mParams;

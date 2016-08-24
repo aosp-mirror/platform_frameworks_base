@@ -66,7 +66,7 @@ public class FullBackupTest extends AndroidTestCase {
         assertEquals("Excluding files when there was no <exclude/> tag.", 0, excludesSet.size());
         assertEquals("Unexpected number of <include/>s", 1, includeMap.size());
 
-        Set<String> fileDomainIncludes = includeMap.get(FullBackup.DATA_TREE_TOKEN);
+        Set<String> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertEquals("Didn't find expected file domain include.", 1, fileDomainIncludes.size());
         assertEquals("Invalid path parsed for <include/>",
                 new File(mContext.getFilesDir(), "onlyInclude.txt").getCanonicalPath(),
@@ -99,7 +99,7 @@ public class FullBackupTest extends AndroidTestCase {
         FullBackup.BackupScheme bs = FullBackup.getBackupSchemeForTest(mContext);
         bs.parseBackupSchemeFromXmlLocked(mXpp, excludesSet, includeMap);
 
-        Set<String> fileDomainIncludes = includeMap.get(FullBackup.DATA_TREE_TOKEN);
+        Set<String> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertEquals("Didn't find expected file domain include.", 1, fileDomainIncludes.size());
         assertEquals("Invalid path parsed for <include/>",
                 new File(mContext.getFilesDir(), "include.txt").getCanonicalPath(),
@@ -114,27 +114,30 @@ public class FullBackupTest extends AndroidTestCase {
     public void testparseBackupSchemeFromXml_lotsOfIncludesAndExcludes() throws Exception {
         mXpp.setInput(new StringReader(
                 "<full-backup-content>" +
-                        "<exclude path=\"exclude1.txt\" domain=\"file\"/>" +
+                         "<exclude path=\"exclude1.txt\" domain=\"file\"/>" +
                         "<include path=\"include1.txt\" domain=\"file\"/>" +
                          "<exclude path=\"exclude2.txt\" domain=\"database\"/>" +
                         "<include path=\"include2.txt\" domain=\"database\"/>" +
-                         "<exclude path=\"exclude3.txt\" domain=\"sharedpref\"/>" +
-                        "<include path=\"include3.txt\" domain=\"sharedpref\"/>" +
+                         "<exclude path=\"exclude3\" domain=\"sharedpref\"/>" +
+                        "<include path=\"include3\" domain=\"sharedpref\"/>" +
+                         "<exclude path=\"exclude4.xml\" domain=\"sharedpref\"/>" +
+                        "<include path=\"include4.xml\" domain=\"sharedpref\"/>" +
                 "</full-backup-content>"));
 
 
         FullBackup.BackupScheme bs = FullBackup.getBackupSchemeForTest(mContext);
         bs.parseBackupSchemeFromXmlLocked(mXpp, excludesSet, includeMap);
 
-        Set<String> fileDomainIncludes = includeMap.get(FullBackup.DATA_TREE_TOKEN);
+        Set<String> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertEquals("Didn't find expected file domain include.", 1, fileDomainIncludes.size());
         assertEquals("Invalid path parsed for <include/>",
                 new File(mContext.getFilesDir(), "include1.txt").getCanonicalPath(),
                 fileDomainIncludes.iterator().next());
 
         Set<String> databaseDomainIncludes = includeMap.get(FullBackup.DATABASE_TREE_TOKEN);
+        // Three expected here because of "-journal" and "-wal" files
         assertEquals("Didn't find expected database domain include.",
-                2, databaseDomainIncludes.size()); // two expected here because of "-journal" file
+                3, databaseDomainIncludes.size());
         assertTrue("Invalid path parsed for <include/>",
                 databaseDomainIncludes.contains(
                         new File(mContext.getDatabasePath("foo").getParentFile(), "include2.txt")
@@ -145,17 +148,34 @@ public class FullBackupTest extends AndroidTestCase {
                                 mContext.getDatabasePath("foo").getParentFile(),
                                 "include2.txt-journal")
                                 .getCanonicalPath()));
+        assertTrue("Invalid path parsed for <include/>",
+                databaseDomainIncludes.contains(
+                        new File(
+                                mContext.getDatabasePath("foo").getParentFile(),
+                                "include2.txt-wal")
+                                .getCanonicalPath()));
 
-        Set<String> sharedPrefDomainIncludes = includeMap.get(FullBackup.SHAREDPREFS_TREE_TOKEN);
+        List<String> sharedPrefDomainIncludes = new ArrayList<String>(
+                includeMap.get(FullBackup.SHAREDPREFS_TREE_TOKEN));
+        Collections.sort(sharedPrefDomainIncludes);
+
         assertEquals("Didn't find expected sharedpref domain include.",
-                1, sharedPrefDomainIncludes.size());
+                3, sharedPrefDomainIncludes.size());
         assertEquals("Invalid path parsed for <include/>",
-                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3.txt")
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3")
                         .getCanonicalPath(),
-                sharedPrefDomainIncludes.iterator().next());
+                sharedPrefDomainIncludes.get(0));
+        assertEquals("Invalid path parsed for <include/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include3.xml")
+                        .getCanonicalPath(),
+                sharedPrefDomainIncludes.get(1));
+        assertEquals("Invalid path parsed for <include/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "include4.xml")
+                        .getCanonicalPath(),
+                sharedPrefDomainIncludes.get(2));
 
 
-        assertEquals("Unexpected number of <exclude/>s", 4, excludesSet.size());
+        assertEquals("Unexpected number of <exclude/>s", 7, excludesSet.size());
         // Sets are annoying to iterate over b/c order isn't enforced - convert to an array and
         // sort lexicographically.
         List<String> arrayedSet = new ArrayList<String>(excludesSet);
@@ -170,12 +190,24 @@ public class FullBackupTest extends AndroidTestCase {
                         .getCanonicalPath(),
                 arrayedSet.get(1));
         assertEquals("Invalid path parsed for <exclude/>",
-                new File(mContext.getFilesDir(), "exclude1.txt").getCanonicalPath(),
+                new File(mContext.getDatabasePath("foo").getParentFile(), "exclude2.txt-wal")
+                        .getCanonicalPath(),
                 arrayedSet.get(2));
         assertEquals("Invalid path parsed for <exclude/>",
-                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3.txt")
-                        .getCanonicalPath(),
+                new File(mContext.getFilesDir(), "exclude1.txt").getCanonicalPath(),
                 arrayedSet.get(3));
+        assertEquals("Invalid path parsed for <exclude/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3")
+                        .getCanonicalPath(),
+                arrayedSet.get(4));
+        assertEquals("Invalid path parsed for <exclude/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude3.xml")
+                        .getCanonicalPath(),
+                arrayedSet.get(5));
+        assertEquals("Invalid path parsed for <exclude/>",
+                new File(mContext.getSharedPrefsFile("foo").getParentFile(), "exclude4.xml")
+                        .getCanonicalPath(),
+                arrayedSet.get(6));
     }
 
     public void testParseBackupSchemeFromXml_invalidXmlFails() throws Exception {
@@ -226,7 +258,7 @@ public class FullBackupTest extends AndroidTestCase {
 
         assertEquals("Didn't throw away invalid \"..\" path.", 0, includeMap.size());
 
-        Set<String> fileDomainIncludes = includeMap.get(FullBackup.DATA_TREE_TOKEN);
+        Set<String> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertNull("Didn't throw away invalid \"..\" path.", fileDomainIncludes);
     }
     public void testDoubleDotInPath_isIgnored() throws Exception {
@@ -240,7 +272,7 @@ public class FullBackupTest extends AndroidTestCase {
 
         assertEquals("Didn't throw away invalid \"..\" path.", 0, includeMap.size());
 
-        Set<String> fileDomainIncludes = includeMap.get(FullBackup.DATA_TREE_TOKEN);
+        Set<String> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
         assertNull("Didn't throw away invalid \"..\" path.", fileDomainIncludes);
     }
 

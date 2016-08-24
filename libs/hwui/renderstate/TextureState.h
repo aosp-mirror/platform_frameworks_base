@@ -17,18 +17,23 @@
 #define RENDERSTATE_TEXTURESTATE_H
 
 #include "Vertex.h"
+#include "Texture.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <SkXfermode.h>
 #include <memory>
 
 namespace android {
 namespace uirenderer {
 
+class Texture;
+
 class TextureState {
     friend class Caches; // TODO: move to RenderState
 public:
+
+    void constructTexture(Caches& caches);
+
     /**
      * Activate the specified texture unit. The texture unit must
      * be specified using an integer number (0 for GL_TEXTURE0 etc.)
@@ -71,15 +76,21 @@ public:
      * Clear the cache of bound textures.
      */
     void unbindTexture(GLuint texture);
+
+    Texture* getShadowLutTexture() { return mShadowLutTexture.get(); }
+
 private:
     // total number of texture units available for use
     static const int kTextureUnitsCount = 4;
 
     TextureState();
+    ~TextureState();
     GLuint mTextureUnit;
 
     // Caches texture bindings for the GL_TEXTURE_2D target
     GLuint mBoundTextures[kTextureUnitsCount];
+
+    std::unique_ptr<Texture> mShadowLutTexture;
 };
 
 } /* namespace uirenderer */

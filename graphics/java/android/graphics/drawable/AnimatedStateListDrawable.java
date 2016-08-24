@@ -379,6 +379,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
                 r, theme, attrs, R.styleable.AnimatedStateListDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedStateListDrawable_visible);
         updateStateFromTypedArray(a);
+        updateDensity(r);
         a.recycle();
 
         inflateChildElements(r, parser, attrs, theme);

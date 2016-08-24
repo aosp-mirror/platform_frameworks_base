@@ -40,10 +40,14 @@ import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
 import android.webkit.WebViewFactory;
+import android.widget.TextView;
+
+import com.android.internal.os.InstallerConnection.InstallerException;
 
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
+import dalvik.system.ZygoteHooks;
 
 import libcore.io.IoUtils;
 
@@ -76,6 +80,7 @@ public class ZygoteInit {
     private static final String TAG = "Zygote";
 
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
+    private static final String PROPERTY_RUNNING_IN_CONTAINER = "ro.boot.container";
 
     private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
@@ -103,7 +108,7 @@ public class ZygoteInit {
     private static final String PRELOADED_CLASSES = "/system/etc/preloaded-classes";
 
     /** Controls whether we should preload resources during zygote init. */
-    private static final boolean PRELOAD_RESOURCES = true;
+    public static final boolean PRELOAD_RESOURCES = true;
 
     /**
      * Registers a server socket for zygote command connections
@@ -245,6 +250,7 @@ public class ZygoteInit {
 
     private static void preloadTextResources() {
         Hyphenator.init();
+        TextView.preloadFontCache();
     }
 
     /**
@@ -408,7 +414,7 @@ public class ZygoteInit {
                 long startTime = SystemClock.uptimeMillis();
                 TypedArray ar = mResources.obtainTypedArray(
                         com.android.internal.R.array.preloaded_drawables);
-                int N = preloadDrawables(runtime, ar);
+                int N = preloadDrawables(ar);
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
@@ -416,10 +422,21 @@ public class ZygoteInit {
                 startTime = SystemClock.uptimeMillis();
                 ar = mResources.obtainTypedArray(
                         com.android.internal.R.array.preloaded_color_state_lists);
-                N = preloadColorStateLists(runtime, ar);
+                N = preloadColorStateLists(ar);
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
+
+                if (mResources.getBoolean(
+                        com.android.internal.R.bool.config_freeformWindowManagement)) {
+                    startTime = SystemClock.uptimeMillis();
+                    ar = mResources.obtainTypedArray(
+                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
+                    N = preloadDrawables(ar);
+                    ar.recycle();
+                    Log.i(TAG, "...preloaded " + N + " resource in "
+                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
+                }
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {
@@ -427,7 +444,7 @@ public class ZygoteInit {
         }
     }
 
-    private static int preloadColorStateLists(VMRuntime runtime, TypedArray ar) {
+    private static int preloadColorStateLists(TypedArray ar) {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             int id = ar.getResourceId(i, 0);
@@ -447,7 +464,7 @@ public class ZygoteInit {
     }
 
 
-    private static int preloadDrawables(VMRuntime runtime, TypedArray ar) {
+    private static int preloadDrawables(TypedArray ar) {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             int id = ar.getResourceId(i, 0);
@@ -564,16 +581,26 @@ public class ZygoteInit {
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
         try {
+            String sharedLibraries = "";
             for (String classPathElement : classPathElements) {
+                // System server is fully AOTed and never profiled
+                // for profile guided compilation.
+                // TODO: Make this configurable between INTERPRET_ONLY, SPEED, SPACE and EVERYTHING?
                 final int dexoptNeeded = DexFile.getDexOptNeeded(
-                        classPathElement, instructionSet, "speed", false /* newProfile */);
+                        classPathElement, instructionSet, "speed",
+                        false /* newProfile */);
                 if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
                     installer.dexopt(classPathElement, Process.SYSTEM_UID, instructionSet,
-                            dexoptNeeded, 0 /*dexFlags*/);
+                            dexoptNeeded, 0 /*dexFlags*/, "speed", null /*volumeUuid*/,
+                            sharedLibraries);
                 }
+                if (!sharedLibraries.isEmpty()) {
+                    sharedLibraries += ":";
+                }
+                sharedLibraries += classPathElement;
             }
-        } catch (IOException ioe) {
-            throw new RuntimeException("Error starting system_server", ioe);
+        } catch (IOException | InstallerException e) {
+            throw new RuntimeException("Error starting system_server", e);
         } finally {
             installer.disconnect();
         }
@@ -585,7 +612,7 @@ public class ZygoteInit {
     private static boolean startSystemServer(String abiList, String socketName)
             throws MethodAndArgsCaller, RuntimeException {
         long capabilities = posixCapabilitiesAsBits(
-            OsConstants.CAP_BLOCK_SUSPEND,
+            OsConstants.CAP_IPC_LOCK,
             OsConstants.CAP_KILL,
             OsConstants.CAP_NET_ADMIN,
             OsConstants.CAP_NET_BIND_SERVICE,
@@ -598,6 +625,10 @@ public class ZygoteInit {
             OsConstants.CAP_SYS_TTY_CONFIG,
             OsConstants.CAP_WAKE_ALARM
         );
+        /* Containers run without this capability, so avoid setting it in that case */
+        if (!SystemProperties.getBoolean(PROPERTY_RUNNING_IN_CONTAINER, false)) {
+            capabilities |= posixCapabilitiesAsBits(OsConstants.CAP_BLOCK_SUSPEND);
+        }
         /* Hardcoded command line to start the system server */
         String args[] = {
             "--setuid=1000",
@@ -656,6 +687,10 @@ public class ZygoteInit {
     }
 
     public static void main(String argv[]) {
+        // Mark zygote start. This ensures that thread creation will throw
+        // an error.
+        ZygoteHooks.startZygoteNoThreadCreation();
+
         try {
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygoteInit");
             RuntimeInit.enableDdms();
@@ -706,6 +741,8 @@ public class ZygoteInit {
 
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
+
+            ZygoteHooks.stopZygoteNoThreadCreation();
 
             if (startSystemServer) {
                 startSystemServer(abiList, socketName);

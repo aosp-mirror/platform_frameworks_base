@@ -123,6 +123,7 @@ public class CdmaCellLocation extends CellLocation {
     /**
      * Invalidate this object.  The cell location data is set to invalid values.
      */
+    @Override
     public void setStateInvalid() {
         this.mBaseStationId = -1;
         this.mBaseStationLatitude = INVALID_LAT_LONG;
@@ -134,7 +135,7 @@ public class CdmaCellLocation extends CellLocation {
     /**
      * Set the cell location data.
      */
-     public void setCellLocationData(int baseStationId, int baseStationLatitude,
+    public void setCellLocationData(int baseStationId, int baseStationLatitude,
          int baseStationLongitude) {
          // The following values have to be written in the correct sequence
          this.mBaseStationId = baseStationId;

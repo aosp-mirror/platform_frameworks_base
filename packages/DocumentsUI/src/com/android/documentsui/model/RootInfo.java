@@ -16,17 +16,23 @@
 
 package com.android.documentsui.model;
 
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Shared.compareToIgnoreCaseNullable;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
@@ -34,15 +40,45 @@ import com.android.documentsui.R;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.ProtocolException;
 import java.util.Objects;
 
 /**
  * Representation of a {@link Root}.
  */
-public class RootInfo implements Durable, Parcelable {
+public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
+
+    private static final String TAG = "RootInfo";
     private static final int VERSION_INIT = 1;
     private static final int VERSION_DROP_TYPE = 2;
+
+    // The values of these constants determine the sort order of various roots in the RootsFragment.
+    @IntDef(flag = false, value = {
+            TYPE_IMAGES,
+            TYPE_VIDEO,
+            TYPE_AUDIO,
+            TYPE_RECENTS,
+            TYPE_DOWNLOADS,
+            TYPE_LOCAL,
+            TYPE_MTP,
+            TYPE_SD,
+            TYPE_USB,
+            TYPE_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RootType {}
+    public static final int TYPE_IMAGES = 1;
+    public static final int TYPE_VIDEO = 2;
+    public static final int TYPE_AUDIO = 3;
+    public static final int TYPE_RECENTS = 4;
+    public static final int TYPE_DOWNLOADS = 5;
+    public static final int TYPE_LOCAL = 6;
+    public static final int TYPE_MTP = 7;
+    public static final int TYPE_SD = 8;
+    public static final int TYPE_USB = 9;
+    public static final int TYPE_OTHER = 10;
 
     public String authority;
     public String rootId;
@@ -57,6 +93,7 @@ public class RootInfo implements Durable, Parcelable {
     /** Derived fields that aren't persisted */
     public String[] derivedMimeTypes;
     public int derivedIcon;
+    public @RootType int derivedType;
 
     public RootInfo() {
         reset();
@@ -76,6 +113,7 @@ public class RootInfo implements Durable, Parcelable {
 
         derivedMimeTypes = null;
         derivedIcon = 0;
+        derivedType = 0;
     }
 
     @Override
@@ -155,22 +193,55 @@ public class RootInfo implements Durable, Parcelable {
     private void deriveFields() {
         derivedMimeTypes = (mimeTypes != null) ? mimeTypes.split("\n") : null;
 
-        // TODO: remove these special case icons
-        if (isExternalStorage()) {
-            derivedIcon = R.drawable.ic_root_sdcard;
+        if (isHome()) {
+            derivedType = TYPE_LOCAL;
+            derivedIcon = R.drawable.ic_root_documents;
+        } else if (isMtp()) {
+            derivedType = TYPE_MTP;
+            derivedIcon = R.drawable.ic_usb_storage;
+        } else if (isUsb()) {
+            derivedType = TYPE_USB;
+            derivedIcon = R.drawable.ic_usb_storage;
+        } else if (isSd()) {
+            derivedType = TYPE_SD;
+            derivedIcon = R.drawable.ic_sd_storage;
+        } else if (isExternalStorage()) {
+            derivedType = TYPE_LOCAL;
+            derivedIcon = R.drawable.ic_root_smartphone;
         } else if (isDownloads()) {
+            derivedType = TYPE_DOWNLOADS;
             derivedIcon = R.drawable.ic_root_download;
         } else if (isImages()) {
+            derivedType = TYPE_IMAGES;
             derivedIcon = R.drawable.ic_doc_image;
         } else if (isVideos()) {
+            derivedType = TYPE_VIDEO;
             derivedIcon = R.drawable.ic_doc_video;
         } else if (isAudio()) {
+            derivedType = TYPE_AUDIO;
             derivedIcon = R.drawable.ic_doc_audio;
+        } else if (isRecents()) {
+            derivedType = TYPE_RECENTS;
+        } else {
+            derivedType = TYPE_OTHER;
         }
+
+        if (DEBUG) Log.d(TAG, "Finished deriving fields: " + this);
+    }
+
+    public Uri getUri() {
+        return DocumentsContract.buildRootUri(authority, rootId);
     }
 
     public boolean isRecents() {
         return authority == null && rootId == null;
+    }
+
+    public boolean isHome() {
+        // Note that "home" is the expected root id for the auto-created
+        // user home directory on external storage. The "home" value should
+        // match ExternalStorageProvider.ROOT_ID_HOME.
+        return isExternalStorage() && "home".equals(rootId);
     }
 
     public boolean isExternalStorage() {
@@ -196,9 +267,55 @@ public class RootInfo implements Durable, Parcelable {
                 && "audio_root".equals(rootId);
     }
 
-    @Override
-    public String toString() {
-        return "Root{authority=" + authority + ", rootId=" + rootId + ", title=" + title + "}";
+    public boolean isMtp() {
+        return "com.android.mtp.documents".equals(authority);
+    }
+
+    public boolean isLibrary() {
+        return derivedType == TYPE_IMAGES
+                || derivedType == TYPE_VIDEO
+                || derivedType == TYPE_AUDIO
+                || derivedType == TYPE_RECENTS;
+    }
+
+    public boolean hasSettings() {
+        return (flags & Root.FLAG_HAS_SETTINGS) != 0;
+    }
+
+    public boolean supportsChildren() {
+        return (flags & Root.FLAG_SUPPORTS_IS_CHILD) != 0;
+    }
+
+    public boolean supportsCreate() {
+        return (flags & Root.FLAG_SUPPORTS_CREATE) != 0;
+    }
+
+    public boolean supportsRecents() {
+        return (flags & Root.FLAG_SUPPORTS_RECENTS) != 0;
+    }
+
+    public boolean supportsSearch() {
+        return (flags & Root.FLAG_SUPPORTS_SEARCH) != 0;
+    }
+
+    public boolean isAdvanced() {
+        return (flags & Root.FLAG_ADVANCED) != 0;
+    }
+
+    public boolean isLocalOnly() {
+        return (flags & Root.FLAG_LOCAL_ONLY) != 0;
+    }
+
+    public boolean isEmpty() {
+        return (flags & Root.FLAG_EMPTY) != 0;
+    }
+
+    public boolean isSd() {
+        return (flags & Root.FLAG_REMOVABLE_SD) != 0;
+    }
+
+    public boolean isUsb() {
+        return (flags & Root.FLAG_REMOVABLE_USB) != 0;
     }
 
     public Drawable loadIcon(Context context) {
@@ -217,37 +334,56 @@ public class RootInfo implements Durable, Parcelable {
         }
     }
 
-    public Drawable loadGridIcon(Context context) {
-        if (derivedIcon != 0) {
-            return IconUtils.applyTintAttr(context, derivedIcon,
-                    android.R.attr.textColorPrimaryInverse);
-        } else {
-            return IconUtils.loadPackageIcon(context, authority, icon);
-        }
-    }
-
-    public Drawable loadToolbarIcon(Context context) {
-        if (derivedIcon != 0) {
-            return IconUtils.applyTintAttr(context, derivedIcon,
-                    android.R.attr.colorControlNormal);
-        } else {
-            return IconUtils.loadPackageIcon(context, authority, icon);
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (o instanceof RootInfo) {
-            final RootInfo root = (RootInfo) o;
-            return Objects.equals(authority, root.authority) && Objects.equals(rootId, root.rootId);
-        } else {
+        if (o == null) {
             return false;
         }
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o instanceof RootInfo) {
+            RootInfo other = (RootInfo) o;
+            return Objects.equals(authority, other.authority)
+                    && Objects.equals(rootId, other.rootId);
+        }
+
+        return false;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(authority, rootId);
+    }
+
+    @Override
+    public int compareTo(RootInfo other) {
+        // Sort by root type, then title, then summary.
+        int score = derivedType - other.derivedType;
+        if (score != 0) {
+            return score;
+        }
+
+        score = compareToIgnoreCaseNullable(title, other.title);
+        if (score != 0) {
+            return score;
+        }
+
+        return compareToIgnoreCaseNullable(summary, other.summary);
+    }
+
+    @Override
+    public String toString() {
+        return "Root{"
+                + "authority=" + authority
+                + ", rootId=" + rootId
+                + ", title=" + title
+                + ", isUsb=" + isUsb()
+                + ", isSd=" + isSd()
+                + ", isMtp=" + isMtp()
+                + "}";
     }
 
     public String getDirectoryString() {

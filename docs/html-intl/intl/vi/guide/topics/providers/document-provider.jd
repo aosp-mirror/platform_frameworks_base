@@ -1,0 +1,916 @@
+page.title=Khuôn khổ Truy cập Kho lưu trữ
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Trong tài liệu này
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">hiện nhiều hơn</span>
+        <span class="less" style="display:none">hiện ít hơn</span></a></h2>
+<ol id="toc44" class="hide-nested">
+    <li>
+        <a href="#overview">Tổng quan</a>
+    </li>
+    <li>
+        <a href="#flow">Dòng Điều khiển</a>
+    </li>
+    <li>
+        <a href="#client">Ghi một Ứng dụng Máy khách</a>
+        <ol>
+        <li><a href="#search">Tìm kiếm tài liệu</a></li>
+        <li><a href="#process">Kết quả tiến trình</a></li>
+        <li><a href="#metadata">Kiểm tra siêu dữ liệu tài liệu</a></li>
+        <li><a href="#open">Mở một tài liệu</a></li>
+        <li><a href="#create">Tạo một tài liệu mới</a></li>
+        <li><a href="#delete">Xóa một tài liệu</a></li>
+        <li><a href="#edit">Chỉnh sửa một tài liệu</a></li>
+        <li><a href="#permissions">Cố định các quyền</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">Ghi một Trình cung cấp Tài liệu Tùy chỉnh</a>
+        <ol>
+        <li><a href="#manifest">Bản kê khai</a></li>
+        <li><a href="#contract">Hợp đồng</a></li>
+        <li><a href="#subclass">Phân lớp con DocumentsProvider</a></li>
+        <li><a href="#security">Bảo mật</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>Lớp khóa</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+</ol>
+
+<h2>Video</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">
+DevBytes: Khuôn khổ Truy cập Kho lưu trữ Android 4.4: Trình cung cấp</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">
+DevBytes: Khuôn khổ Truy cập Kho lưu trữ Android 4.4: Máy khách</a></li>
+</ol>
+
+
+<h2>Mã Ví dụ</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">
+Trình cung cấp Lưu trữ</a></li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">
+StorageClient</a></li>
+</ol>
+
+<h2>Xem thêm</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Nội dung Cơ bản về Trình cung cấp Nội dung
+        </a>
+    </li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Android 4.4 (API mức 19) giới thiệu Khuôn khổ Truy cập Kho lưu trữ (SAF). SAF
+ giúp người dùng đơn giản hóa việc duyệt và mở tài liệu, hình ảnh và các tệp khác
+giữa tất cả trình cung cấp lưu trữ tài liệu mà họ thích. UI tiêu chuẩn, dễ sử dụng
+cho phép người dùng duyệt tệp và truy cập hoạt động gần đây một cách nhất quán giữa các ứng dụng và trình cung cấp.</p>
+
+<p>Dịch vụ lưu trữ đám mây hoặc cục bộ có thể tham gia vào hệ sinh thái này bằng cách triển khai một
+{@link android.provider.DocumentsProvider} để gói gọn các dịch vụ của mình. Những ứng dụng
+máy khách cần truy cập vào tài liệu của một trình cung cấp có thể tích hợp với SAF chỉ bằng một vài
+dòng mã.</p>
+
+<p>SAF bao gồm:</p>
+
+<ul>
+<li><strong>Trình cung cấp tài liệu</strong>&mdash;Một trình cung cấp nội dung cho phép một
+dịch vụ lưu trữ (chẳng hạn như Google Drive) phát hiện các tệp mà nó quản lý. Trình cung cấp tài liệu được
+triển khai thành một lớp con của lớp {@link android.provider.DocumentsProvider}.
+Sơ đồ tài liệu-trình cung cấp sẽ được dựa trên một phân cấp tệp truyền thống,
+cho dù cách thức trình cung cấp tài liệu của bạn trực tiếp lưu trữ dữ liệu là hoàn toàn do bạn.
+Nền tảng Android bao gồm một vài trình cung cấp tài liệu tích hợp, chẳng hạn như
+Downloads, Images, và Videos.</li>
+
+<li><strong>Ứng dụng máy khách</strong>&mdash;Một ứng dụng tùy chỉnh có chức năng gọi ra ý định
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} và/hoặc
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} và nhận các tệp
+được trả về bởi trình cung cấp tài liệu.</li>
+
+<li><strong>Bộ chọn</strong>&mdash;Một UI hệ thống cho phép người dùng truy cập tài liệu từ tất cả
+trình cung cấp tài liệu mà thỏa mãn các tiêu chí tìm kiếm của ứng dụng máy khách.</li>
+</ul>
+
+<p>Một số tính năng được SAF cung cấp bao gồm:</p>
+<ul>
+<li>Cho phép người dùng duyệt nội dung từ tất cả trình cung cấp tài liệu, không chỉ một ứng dụng duy nhất.</li>
+<li>Giúp ứng dụng của bạn có thể có quyền truy cập lâu dài, cố định vào
+ các tài liệu được sở hữu bởi một trình cung cấp tài liệu. Thông qua truy cập này, người dùng có thể thêm, chỉnh sửa,
+ lưu và xóa tệp trên trình cung cấp.</li>
+<li>Hỗ trợ nhiều tài khoản người dùng và các phần gốc tạm thời chẳng hạn như trình cung cấp
+bộ nhớ USB, nó chỉ xuất hiện nếu ổ đĩa được cắm vào. </li>
+</ul>
+
+<h2 id ="overview">Tổng quan</h2>
+
+<p>SAF tập trung xoay quanh một trình cung cấp nội dung là một lớp con
+của lớp {@link android.provider.DocumentsProvider}. Trong một <em>trình cung cấp tài liệu</em>, dữ liệu được
+cấu trúc thành một phân cấp tệp truyền thống:</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>Hình 1.</strong> Mô hình dữ liệu của trình cung cấp tài liệu. Một Phần gốc chỉ đến một Tài liệu duy nhất,
+sau đó nó bắt đầu xòe ra toàn bộ cây.</p>
+
+<p>Lưu ý điều sau đây:</p>
+<ul>
+
+<li>Mỗi một trình cung cấp tài liệu sẽ báo cáo một hoặc nhiều
+"phần gốc" là điểm bắt đầu khám phá cây tài liệu.
+Mỗi phần gốc có một {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID} duy nhất,
+và nó trỏ đến một tài liệu (thư mục)
+biểu diễn nội dung bên dưới phần gốc đó.
+Phần gốc có thể linh hoạt theo thiết kế để hỗ trợ các trường hợp sử dụng như nhiều tài khoản,
+thiết bị lưu trữ USB tạm thời, hoặc đăng nhập/đăng xuất người dùng.</li>
+
+<li>Dưới mỗi phần gốc là một tài liệu đơn lẻ. Tài liệu đó sẽ trỏ tới 1 đến <em>N</em> tài liệu,
+mỗi tài liệu lại có thể trỏ tới 1 đến <em>N</em> tài liệu khác. </li>
+
+<li>Mỗi bộ nhớ phụ trợ phủ bề mặt
+các tệp và thư mục riêng lẻ bằng cách tham chiếu chúng bằng một
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} duy nhất.
+ID của tài liệu phải là duy nhất và không thay đổi sau khi được phát hành, do chúng được sử dụng để cấp URI
+không thay đổi giữa các lần khởi động lại thiết bị.</li>
+
+
+<li>Tài liệu có thể là một tệp mở được (có một kiểu MIME cụ thể), hoặc một
+thư mục chứa các tài liệu bổ sung (có kiểu MIME 
+{@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR}).</li>
+
+<li>Mỗi tài liệu có thể có các khả năng khác nhau như được mô tả bởi
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS}.
+Ví dụ, {@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE},
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE}, và
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL}.
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} cũng có thể
+có trong nhiều thư mục.</li>
+</ul>
+
+<h2 id="flow">Dòng Điều khiển</h2>
+<p>Như nêu trên, mô hình dữ liệu của trình cung cấp tài liệu được dựa trên một phân cấp
+tệp truyền thống. Tuy nhiên, bạn có thể thực tế lưu trữ dữ liệu của mình bằng bất kỳ cách nào mà mình thích, miễn
+là nó có thể được truy cập thông qua API {@link android.provider.DocumentsProvider}. Ví dụ, bạn
+có thể sử dụng kho lưu trữ đám mây dựa trên tag cho dữ liệu của mình.</p>
+
+<p>Hình 2 minh họa một ví dụ về cách mà một ứng dụng ảnh có thể sử dụng SAF
+để truy cập dữ liệu được lưu trữ:</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>Hình 2.</strong> Dòng Khuôn khổ Truy cập Kho lưu trữ</p>
+
+<p>Lưu ý điều sau đây:</p>
+<ul>
+
+<li>Trong SAF, trình cung cấp và máy khách không tương tác
+trực tiếp với nhau. Một máy khách yêu cầu quyền để tương tác
+với tệp (cụ thể là quyền đọc, chỉnh sửa, tạo hoặc xóa tệp).</li>
+
+<li>Tương tác bắt đầu khi một ứng dụng (trong ví dụ này này một ứng dụng ảnh) thể hiện ý định 
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} hoặc {@link android.content.Intent#ACTION_CREATE_DOCUMENT}. Ý định có thể bao gồm các bộ lọc
+để cụ thể hơn các tiêu chí&mdash;ví dụ, "cấp cho tôi tất cả tệp mở được
+có kiểu MIME là 'image'."</li>
+
+<li>Sau khi ý định thể hiện, bộ chọn của hệ thống sẽ đi đến từng trình cung cấp được đăng ký
+và hiển thị cho người dùng xem các phần gốc nội dung khớp với tiêu chí.</li>
+
+<li>Bộ chọn cấp cho người dùng một giao diện tiêu chuẩn để truy cập tài liệu, mặc
+dù các trình cung cấp tài liệu liên quan có thể rất khác nhau. Ví dụ, hình 2
+minh họa một trình cung cấp Google Drive, một trình cung cấp USB, và một trình cung cấp đám mây.</li>
+</ul>
+
+<p>Hình 3 minh họa một bộ chọn mà trong đó một người dùng đang tìm kiếm hình ảnh đã chọn một
+tài khoản Google Drive:</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Hình 3.</strong> Bộ chọn</p>
+
+<p>Khi người dùng chọn Google Drive, hình ảnh được hiển thị như minh họa trong
+hình 4. Từ điểm đó trở đi, người dùng có thể tương tác với chúng theo bất kỳ cách nào
+được hỗ trợ bởi trình cung cấp và ứng dụng máy khách.
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Hình 4.</strong> Hình ảnh</p>
+
+<h2 id="client">Ghi một Ứng dụng Máy khách</h2>
+
+<p>Trên phiên bản Android 4.3 và thấp hơn, nếu bạn muốn ứng dụng của mình truy xuất một tệp từ một ứng dụng
+khác, nó phải gọi ra một ý định chẳng hạn như {@link android.content.Intent#ACTION_PICK}
+hay {@link android.content.Intent#ACTION_GET_CONTENT}. Khi đó, người dùng phải chọn
+một ứng dụng duy nhất mà từ đó họ chọn một tệp và ứng dụng được chọn phải cung cấp một
+giao diện người dùng để người dùng duyệt và chọn từ các tệp có sẵn. </p>
+
+<p>Trên phiên bản Android 4.4 trở lên, bạn có thêm một tùy chọn là sử dụng ý định
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT},
+nó hiển thị một UI bộ chọn được điều khiển bởi hệ thống, cho phép người dùng
+duyệt tất cả tệp mà các ứng dụng khác đã cung cấp. Từ UI duy nhất này, người dùng
+có thể chọn một tệp từ bất kỳ ứng dụng nào được hỗ trợ.</p>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT} không
+nhằm mục đích thay thế cho {@link android.content.Intent#ACTION_GET_CONTENT}.
+Bạn nên sử dụng cái nào sẽ phụ thuộc vào nhu cầu của ứng dụng của bạn:</p>
+
+<ul>
+<li>Sử dụng {@link android.content.Intent#ACTION_GET_CONTENT} nếu bạn muốn ứng dụng của mình
+chỉ đơn thuần đọc/nhập dữ liệu. Bằng cách này, ứng dụng nhập một bản sao dữ liệu,
+chẳng hạn như một tệp hình ảnh.</li>
+
+<li>Sử dụng {@link android.content.Intent#ACTION_OPEN_DOCUMENT} nếu bạn muốn ứng dụng
+của mình có quyền truy cập lâu dài, cố định vào các tài liệu được sở hữu bởi một
+trình cung cấp tài liệu. Ví dụ như trường hợp một ứng dụng chỉnh sửa ảnh cho phép người dùng chỉnh sửa
+các hình ảnh được lưu trữ trong một trình cung cấp tài liệu. </li>
+
+</ul>
+
+
+<p>Phần này mô tả cách ghi các ứng dụng máy khách dựa trên
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} và
+các ý định {@link android.content.Intent#ACTION_CREATE_DOCUMENT}.</p>
+
+
+<h3 id="search">Tìm kiếm tài liệu</h3>
+
+<p>
+Đoạn mã HTML sau sử dụng {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+để tìm kiếm các trình cung cấp tài liệu mà
+chứa tệp hình ảnh:</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>Lưu ý điều sau đây:</p>
+<ul>
+<li>Khi ứng dụng thể hiện ý định {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+, nó sẽ khởi chạy một bộ chọn để hiển thị tất cả trình cung cấp tài liệu khớp với tiêu chí.</li>
+
+<li>Thêm thể loại {@link android.content.Intent#CATEGORY_OPENABLE} vào
+ý định sẽ lọc kết quả để chỉ hiển thị những tài liệu có thể mở được, chẳng hạn như tệp hình ảnh.</li>
+
+<li>Câu lệnh {@code intent.setType("image/*")} sẽ lọc thêm để
+chỉ hiển thị những tài liệu có kiểu dữ liệu MIME hình ảnh.</li>
+</ul>
+
+<h3 id="results">Kết quả Tiến trình</h3>
+
+<p>Sau khi người dùng chọn một tài liệu trong bộ chọn,
+{@link android.app.Activity#onActivityResult onActivityResult()} sẽ được gọi.
+URI tro tới tài liệu được chọn sẽ nằm trong tham số {@code resultData}
+. Trích xuất UI bằng cách sử dụng {@link android.content.Intent#getData getData()}.
+Sau khi có nó, bạn có thể sử dụng nó để truy xuất tài liệu mà người dùng muốn. Ví
+dụ:</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">Kiểm tra siêu dữ liệu tài liệu</h3>
+
+<p>Sau khi có URI cho một tài liệu, bạn có quyền truy cập siêu dữ liệu của nó. Đoạn mã HTML
+này bắt siêu dữ liệu cho một tài liệu được quy định bởi URI, và ghi lại nó:</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">Mở một tài liệu</h3>
+
+<p>Sau khi có URI cho một tài liệu, bạn có thể mở nó hoặc làm bất kỳ điều gì
+mà bạn muốn.</p>
+
+<h4>Bitmap</h4>
+
+<p>Sau đây là một ví dụ về cách bạn có thể mở một {@link android.graphics.Bitmap}:</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>Lưu ý rằng bạn không nên thực hiện thao tác này trên luồng UI. Thực hiện điều này dưới
+nền bằng cách sử dụng {@link android.os.AsyncTask}. Sau khi mở bitmap, bạn có thể
+hiển thị nó trong một {@link android.widget.ImageView}.
+</p>
+
+<h4>Nhận một InputStream</h4>
+
+<p>Sau đây là một ví dụ về cách mà bạn có thể nhận một {@link java.io.InputStream} từ URI. Trong đoạn mã HTML
+này, các dòng tệp đang được đọc thành một xâu:</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">Tạo một tài liệu mới</h3>
+
+<p>Ứng dụng của bạn có thể tạo một tài liệu mới trong một trình cung cấp tài liệu bằng cách sử dụng ý định
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT}
+. Để tạo một tệp, bạn cấp cho ý định của mình một kiểu MIME và tên tệp, và
+khởi chạy nó bằng một mã yêu cầu duy nhất. Phần còn lại sẽ được làm hộ bạn:</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>Sau khi tạo một tài liệu mới, bạn có thể nhận URI của tài liệu trong
+{@link android.app.Activity#onActivityResult onActivityResult()}, sao cho bạn
+có thể tiếp tục ghi nó.</p>
+
+<h3 id="delete">Xóa một tài liệu</h3>
+
+<p>Nếu bạn có URI cho một tài liệu và
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS}
+của tài liệu chứa
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE},
+bạn có thể xóa tài liệu đó. Ví dụ:</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">Chỉnh sửa một tài liệu</h3>
+
+<p>Bạn có thể sử dụng SAF để chỉnh sửa một tài liệu văn bản ngay tại chỗ.
+Đoạn mã HTML này thể hiện
+ý định {@link android.content.Intent#ACTION_OPEN_DOCUMENT} và sử dụng
+thể loại {@link android.content.Intent#CATEGORY_OPENABLE} để chỉ hiển thị
+những tài liệu có thể mở được. Nó lọc thêm để chỉ hiển thị những tệp văn bản:</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>Tiếp theo, từ {@link android.app.Activity#onActivityResult onActivityResult()}
+(xem <a href="#results">Kết quả tiến trình</a>) bạn có thể gọi mã để thực hiện chỉnh sửa.
+Đoạn mã HTML sau nhận được một {@link java.io.FileOutputStream}
+từ {@link android.content.ContentResolver}. Theo mặc định, nó sử dụng chế độ “ghi”.
+Cách tốt nhất là yêu cầu lượng quyền truy cập bạn cần ở mức ít nhất, vì thế đừng yêu cầu
+quyền đọc/ghi nếu bạn chỉ cần quyền ghi:</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">Cố định các quyền</h3>
+
+<p>Khi ứng dụng của bạn mở một tệp để đọc hoặc ghi, hệ thống sẽ cấp cho
+ứng dụng của bạn một quyền URI được cấp cho tệp đó. Quyền này sẽ kéo dài tới khi thiết bị của bạn khởi động lại.
+Nhưng giả sử ứng dụng của bạn là một ứng dụng chỉnh sửa hình ảnh, và bạn muốn người dùng có thể
+truy cập 5 hình ảnh cuối cùng mà họ đã chỉnh sửa, trực tiếp từ ứng dụng của bạn. Nếu thiết bị của người dùng
+đã khởi động lại, bạn sẽ phải gửi người dùng trở lại bộ chọn hệ thống để tìm
+các tệp đó, đây rõ ràng không phải là cách lý tưởng.</p>
+
+<p>Để tránh điều này xảy ra, bạn có thể cố định các quyền mà hệ thống
+cấp cho ứng dụng của bạn. Ứng dụng của bạn sẽ "nhận" cấp quyền URI có thể cố định
+mà hệ thống cung cấp một cách hiệu quả. Điều này cho phép người dùng có quyền liên tục truy cập các tệp đó
+thông qua ứng dụng của bạn, ngay cả khi thiết bị đã bị khởi động lại:</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>Còn một bước cuối cùng. Bạn có thể đã lưu các
+URI gần đây nhất mà ứng dụng của bạn đã truy cập, nhưng chúng còn thể không còn hợp lệ&mdash;một ứng dụng khác
+có thể đã xóa hoặc sửa đổi tài liệu. Vì thế, bạn luôn nên gọi
+{@code getContentResolver().takePersistableUriPermission()} để kiểm tra
+dữ liệu mới nhất.</p>
+
+<h2 id="custom">Ghi một Trình cung cấp Tài liệu Tùy chỉnh</h2>
+
+<p>
+Nếu bạn đang phát triển một ứng dụng cung cấp dịch vụ lưu trữ cho tệp (chẳng hạn như
+một dịch vụ lưu trữ đám mây), bạn có thể cung cấp các tệp của mình thông qua
+SAF bằng cách ghi một trình cung cấp tài liệu tùy chỉnh.  Phần này mô tả cách làm điều
+này.</p>
+
+
+<h3 id="manifest">Bản kê khai</h3>
+
+<p>Để triển khai một trình cung cấp tài liệu tùy chỉnh, hãy thêm nội dung sau vào bản kê khai
+của ứng dụng của bạn:</p>
+<ul>
+
+<li>Một mục tiêu API mức 19 hoặc cao hơn.</li>
+
+<li>Một phần tử <code>&lt;provider&gt;</code> khai báo trình cung cấp lưu trữ
+tùy chỉnh của bạn. </li>
+
+<li>Tên của trình cung cấp của bạn, là tên lớp của nó, bao gồm tên gói.
+Ví dụ: <code>com.example.android.storageprovider.MyCloudProvider</code>.</li>
+
+<li>Tên thẩm quyền của bạn, tức là tên gói của bạn (trong ví dụ này là
+<code>com.example.android.storageprovider</code>) cộng với kiểu của trình cung cấp nội dung
+(<code>documents</code>). Ví dụ, {@code com.example.android.storageprovider.documents}.</li>
+
+<li>Thuộc tính <code>android:exported</code> được đặt thành <code>&quot;true&quot;</code>.
+Bạn phải xuất trình cung cấp của mình để các ứng dụng khác có thể thấy nó.</li>
+
+<li>Thuộc tính <code>android:grantUriPermissions</code> được đặt thành
+<code>&quot;true&quot;</code>. Thiết đặt này cho phép hệ thống cấp cho các ứng dụng khác quyền truy cập
+vào nội dung trong trình cung cấp của bạn. Để thảo luận về cách cố định quyền được cấp cho
+một tài liệu cụ thể, hãy xem phần<a href="#permissions">Cố định các quyền</a>.</li>
+
+<li>Quyền {@code MANAGE_DOCUMENTS}. Theo mặc định, một trình cung cấp sẽ có sẵn
+đối với mọi người. Việc thêm quyền này sẽ hạn chế trình cung cấp của bạn vào hệ thống.
+Hạn chế này có ý nghĩa quan trọng đối với vấn đề bảo mật.</li>
+
+<li>Thuộc tính {@code android:enabled} được đặt thành một giá trị boolean được định nghĩa trong một tệp
+tài nguyên. Mục đích của thuộc tính này là để vô hiệu hóa trình cung cấp trên các thiết bị chạy phiên bản Android 4.3 hoặc thấp hơn.
+Ví dụ, {@code android:enabled="@bool/atLeastKitKat"}. Bên
+cạnh việc nêu thuộc tính này trong bản kê khai, bạn cần làm như sau:
+<ul>
+<li>Trong tệp tài nguyên {@code bool.xml} của bạn bên dưới {@code res/values/}, hãy thêm
+dòng sau: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Trong tệp tài nguyên {@code bool.xml} của bạn bên dưới {@code res/values-v19/}, hãy thêm
+dòng sau: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
+
+<li>Một bộ lọc ý định chứa hành động
+{@code android.content.action.DOCUMENTS_PROVIDER}, sao cho trình cung cấp của bạn
+xuất hiện trong bộ chọn khi hệ thống tìm kiếm trình cung cấp.</li>
+
+</ul>
+<p>Sau đây là các đoạn trích từ một bản kê khai mẫu chứa một trình cung cấp:</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4 id="43">Hỗ trợ các thiết bị chạy phiên bản Android 4.3 và thấp hơn</h4>
+
+<p>Ý định
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} chỉ có sẵn
+trên các thiết bị chạy phiên bản Android 4.4 trở lên.
+Nếu bạn muốn ứng dụng của mình hỗ trợ {@link android.content.Intent#ACTION_GET_CONTENT}
+để tạo điều kiện cho các thiết bị đang chạy phiên bản Android 4.3 và thấp hơn, bạn nên
+vô hiệu hóa bộ lọc ý định {@link android.content.Intent#ACTION_GET_CONTENT} trong
+bản kê khai của bạn cho các thiết bị chạy phiên bản Android 4.4 trở lên. Một
+trình cung cấp tài liệu và {@link android.content.Intent#ACTION_GET_CONTENT} nên được xem xét
+ loại trừ lẫn nhau. Nếu bạn hỗ trợ cả hai đồng thời, ứng dụng của bạn sẽ
+xuất hiện hai lần trong UI của bộ chọn hệ thống, đưa ra hai cách khác nhau để truy cập
+dữ liệu đã lưu của bạn. Điều này có thể khiến người dùng bị nhầm lẫn.</p>
+
+<p>Sau đây là cách được khuyến cáo để vô hiệu hóa bộ lọc ý định
+{@link android.content.Intent#ACTION_GET_CONTENT} đối với các thiết bị
+chạy phiên bản Android 4.4 hoặc cao hơn:</p>
+
+<ol>
+<li>Trong tệp tài nguyên {@code bool.xml} của bạn bên dưới {@code res/values/}, hãy thêm
+dòng sau: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>Trong tệp tài nguyên {@code bool.xml} của bạn bên dưới {@code res/values-v19/}, hãy thêm
+dòng sau: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Thêm một
+<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">bí danh
+hoạt động</a> để vô hiệu hóa bộ lọc ý định {@link android.content.Intent#ACTION_GET_CONTENT}
+đối với các phiên bản 4.4 (API mức 19) trở lên. Ví dụ:
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">Hợp đồng</h3>
+
+<p>Thường khi bạn ghi một trình cung cấp nội dung tùy chỉnh, một trong những tác vụ đó là
+triển khai các lớp hợp đồng như được mô tả trong hướng dẫn cho nhà phát triển
+<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">
+Trình cung cấp Nội dung</a>. Lớp hợp đồng là một lớp {@code public final} mà
+chứa các định nghĩa hằng số cho URI, tên cột, kiểu MIME và
+siêu dữ liệu khác liên quan tới trình cung cấp. SAF
+cung cấp những lớp hợp đồng này cho bạn, vì thế bạn không cần tự
+ghi:</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>Ví dụ, sau đây là các cột bạn có thể trả về trong một con chạy khi
+trình cung cấp tài liệu của bạn được truy vấn về tài liệu hoặc phần gốc:</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">Phân lớp con DocumentsProvider</h3>
+
+<p>Bước tiếp theo trong khi ghi một trình cung cấp tài liệu tùy chỉnh đó là phân lớp con
+cho lớp tóm tắt {@link android.provider.DocumentsProvider}. Tối thiểu, bạn cần triển khai
+các phương pháp sau:</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>Đây là những phương pháp duy nhất mà bạn được yêu cầu phải triển khai, nhưng còn
+nhiều phương pháp nữa mà bạn có thể muốn triển khai. Xem {@link android.provider.DocumentsProvider}
+để biết chi tiết.</p>
+
+<h4 id="queryRoots">Triển khai queryRoots</h4>
+
+<p>Việc bạn triển khai {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} phải trả về một {@link android.database.Cursor} trỏ về tất cả
+thư mục gốc trong trình cung cấp tài liệu của bạn, bằng cách sử dụng các cột được định nghĩa trong
+{@link android.provider.DocumentsContract.Root}.</p>
+
+<p>Trong đoạn mã HTML sau, tham số {@code projection} biểu diễn các trường cụ thể
+mà hàm gọi muốn nhận về. Đoạn mã HTML tạo một con chạy mới
+và thêm một hàng vào nó&mdash;một thư mục gốc, mức cao nhất, như
+Downloads hoặc Images.  Hầu hết các trình cung cấp chỉ có một phần gốc. Bạn có thể có nhiều hơn một,
+ví dụ, trong trường hợp nhiều tài khoản người dùng. Trong trường hợp đó, chỉ cần thêm một
+hàng thứ hai vào con chạy.</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">Triển khai queryChildDocuments</h4>
+
+<p>Việc bạn triển khai
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}
+phải trả về một {@link android.database.Cursor} mà chỉ đến tất cả tệp trong
+thư mục được chỉ định, bằng cách sử dụng các cột được định nghĩa trong
+{@link android.provider.DocumentsContract.Document}.</p>
+
+<p>Phương pháp này được gọi khi bạn chọn một thư mục gốc ứng dụng trong UI bộ chọn.
+Nó nhận được tài liệu con của một thư mục nằm dưới phần gốc.  Nó có thể được gọi ở bất kỳ mức nào trong phân cấp tệp
+, không chỉ phần gốc. Đoạn mã HTML
+này tạo một con chạy mới bằng các cột được yêu cầu, sau đó thêm thông tin về
+mọi tệp con trực tiếp trong thư mục mẹ vào con chạy.
+Tệp con có thể là một hình ảnh, một thư mục khác&mdash;bất kỳ tệp nào:</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">Triển khai queryDocument</h4>
+
+<p>Việc bạn triển khai
+{@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+phải trả về một {@link android.database.Cursor} mà chỉ đến tệp được chỉ định,
+bằng cách sử dụng các cột được định nghĩa trong {@link android.provider.DocumentsContract.Document}.
+</p>
+
+<p>Phương pháp {@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+trả về cùng thông tin đã được chuyển trong
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()},
+nhưng là đối với một tệp cụ thể:</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">Triển khai openDocument</h4>
+
+<p>Bạn phải triển khai {@link android.provider.DocumentsProvider#openDocument
+openDocument()} để trả về một {@link android.os.ParcelFileDescriptor} biểu diễn
+tệp được chỉ định. Các ứng dụng khác có thể sử dụng {@link android.os.ParcelFileDescriptor}
+được trả về để truyền phát dữ liệu. Hệ thống gọi phương pháp này sau khi người dùng chọn một tệp
+và ứng dụng máy khách yêu cầu truy cập nó bằng cách gọi
+{@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}.
+Ví dụ:</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">Bảo mật</h3>
+
+<p>Giả sử trình cung cấp tài liệu của bạn là một dịch vụ lưu trữ đám mây được bảo vệ bằng mật khẩu
+và bạn muốn đảm bảo rằng người dùng được đăng nhập trước khi bạn bắt đầu chia sẻ tệp của họ.
+Ứng dụng của bạn nên làm gì nếu người dùng không đăng nhập?  Giải pháp là trả về
+phần gốc 0 trong triển khai {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} của bạn. Cụ thể là một con chạy gốc trống:</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>Bước còn lại là gọi {@code getContentResolver().notifyChange()}.
+Bạn còn nhớ {@link android.provider.DocumentsContract} chứ?  Chúng ta đang sử dụng nó để tạo
+URI này. Đoạn mã HTML sau báo cho hệ thống truy vấn các phần gốc trong
+trình cung cấp tài liệu của bạn bất cứ khi nào trạng thái đăng nhập của người dùng thay đổi. Nếu người dùng không được
+đăng nhập, lệnh gọi tới {@link android.provider.DocumentsProvider#queryRoots queryRoots()} sẽ trả về một
+con chạy trống như minh họa bên trên. Điều này đảm bảo rằng tài liệu của một trình cung cấp chỉ
+có sẵn nếu người dùng đăng nhập vào trình cung cấp đó.</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

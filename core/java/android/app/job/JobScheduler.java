@@ -16,6 +16,9 @@
 
 package android.app.job;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.List;
 
 /**
@@ -50,26 +53,34 @@ public abstract class JobScheduler {
      */
     public static final int RESULT_FAILURE = 0;
     /**
-     * Returned from {@link #schedule(JobInfo)} if this application has made too many requests for
-     * work over too short a time.
+     * Returned from {@link #schedule(JobInfo)} if this job has been successfully scheduled.
      */
-    // TODO: Determine if this is necessary.
     public static final int RESULT_SUCCESS = 1;
 
     /**
      * @param job The job you wish scheduled. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
-     * @return If >0, this int returns the jobId of the successfully scheduled job.
-     * Otherwise you have to compare the return value to the error codes defined in this class.
+     * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
      */
     public abstract int schedule(JobInfo job);
+
+    /**
+     *
+     * @param job The job to be scheduled.
+     * @param packageName The package on behalf of which the job is to be scheduled. This will be
+     *                    used to track battery usage and appIdleState.
+     * @param userId    User on behalf of whom this job is to be scheduled.
+     * @param tag Debugging tag for dumps associated with this job (instead of the service class)
+     * @return {@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}
+     * @hide
+     */
+    public abstract int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag);
 
     /**
      * Cancel a job that is pending in the JobScheduler.
      * @param jobId unique identifier for this job. Obtain this value from the jobs returned by
      * {@link #getAllPendingJobs()}.
-     * @return
      */
     public abstract void cancel(int jobId);
 
@@ -79,8 +90,18 @@ public abstract class JobScheduler {
     public abstract void cancelAll();
 
     /**
-     * @return a list of all the jobs registered by this package that have not yet been executed.
+     * Retrieve all jobs for this package that are pending in the JobScheduler.
+     *
+     * @return a list of all the jobs registered by this package that have not
+     *         yet been executed.
      */
-    public abstract List<JobInfo> getAllPendingJobs();
+    public abstract @NonNull List<JobInfo> getAllPendingJobs();
 
+    /**
+     * Retrieve a specific job for this package that is pending in the
+     * JobScheduler.
+     *
+     * @return job registered by this package that has not yet been executed.
+     */
+    public abstract @Nullable JobInfo getPendingJob(int jobId);
 }

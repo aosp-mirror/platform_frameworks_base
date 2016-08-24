@@ -118,6 +118,10 @@ public:
         set(FrameInfoIndex::Flags) |= static_cast<uint64_t>(frameInfoFlag);
     }
 
+    const int64_t* data() const {
+        return mFrameInfo;
+    }
+
     inline int64_t operator[](FrameInfoIndex index) const {
         return get(index);
     }

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-#include "Canvas.h"
 #include "Picture.h"
-
 #include "SkStream.h"
+
+#include <memory>
+#include <hwui/Canvas.h>
 
 namespace android {
 
@@ -81,7 +82,7 @@ Picture* Picture::CreateFromStream(SkStream* stream) {
 
 void Picture::serialize(SkWStream* stream) const {
     if (NULL != mRecorder.get()) {
-        SkAutoTDelete<SkPicture> tempPict(this->makePartialCopy());
+        std::unique_ptr<SkPicture> tempPict(this->makePartialCopy());
         tempPict->serialize(stream);
     } else if (NULL != mPicture.get()) {
         validate();
@@ -89,7 +90,7 @@ void Picture::serialize(SkWStream* stream) const {
     } else {
         SkPictureRecorder recorder;
         recorder.beginRecording(0, 0);
-        SkAutoTUnref<SkPicture> empty(recorder.endRecording());
+        std::unique_ptr<SkPicture> empty(recorder.endRecording());
         empty->serialize(stream);
     }
 }

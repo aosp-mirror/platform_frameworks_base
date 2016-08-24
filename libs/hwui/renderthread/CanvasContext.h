@@ -18,23 +18,35 @@
 #define CANVASCONTEXT_H_
 
 #include "DamageAccumulator.h"
-#include "IContextFactory.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
+#include "FrameMetricsReporter.h"
+#include "IContextFactory.h"
+#include "LayerUpdateQueue.h"
 #include "RenderNode.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
 #include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+
+#if HWUI_NEW_OPS
+#include "BakedOpDispatcher.h"
+#include "BakedOpRenderer.h"
+#include "FrameBuilder.h"
+#endif
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <utils/Functor.h>
-#include <utils/Vector.h>
+#include <gui/Surface.h>
 
+#include <functional>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -67,29 +79,31 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void initialize(ANativeWindow* window);
-    void updateSurface(ANativeWindow* window);
-    bool pauseSurface(ANativeWindow* window);
-    bool hasSurface() { return mNativeWindow.get(); }
+    void initialize(Surface* surface);
+    void updateSurface(Surface* surface);
+    bool pauseSurface(Surface* surface);
+    void setStopped(bool stopped);
+    bool hasSurface() { return mNativeSurface.get(); }
 
     void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
-    void makeCurrent();
-    void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
-    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued);
+    bool makeCurrent();
+    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
+            int64_t syncQueued, RenderNode* target);
     void draw();
-    void destroy();
+    void destroy(TreeObserver* observer);
 
-    // IFrameCallback, Chroreographer-driven frame callback entry point
+    // IFrameCallback, Choreographer-driven frame callback entry point
     virtual void doFrame() override;
+    void prepareAndDraw(RenderNode* node);
 
-    void buildLayer(RenderNode* node);
+    void buildLayer(RenderNode* node, TreeObserver* observer);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
-    void destroyHardwareResources();
+    void destroyHardwareResources(TreeObserver* observer);
     static void trimMemory(RenderThread& thread, int level);
 
     static void invokeFunctor(RenderThread& thread, Functor* functor);
@@ -112,32 +126,98 @@ public:
     void setName(const std::string&& name) { mName = name; }
     const std::string& name() { return mName; }
 
+    void serializeDisplayListTree();
+
+    void addRenderNode(RenderNode* node, bool placeFront) {
+        int pos = placeFront ? 0 : static_cast<int>(mRenderNodes.size());
+        mRenderNodes.emplace(mRenderNodes.begin() + pos, node);
+    }
+
+    void removeRenderNode(RenderNode* node) {
+        mRenderNodes.erase(std::remove(mRenderNodes.begin(), mRenderNodes.end(), node),
+                mRenderNodes.end());
+    }
+
+    void setContentDrawBounds(int left, int top, int right, int bottom) {
+        mContentDrawBounds.set(left, top, right, bottom);
+    }
+
+    RenderState& getRenderState() {
+        return mRenderThread.renderState();
+    }
+
+    void addFrameMetricsObserver(FrameMetricsObserver* observer) {
+        if (mFrameMetricsReporter.get() == nullptr) {
+            mFrameMetricsReporter.reset(new FrameMetricsReporter());
+        }
+
+        mFrameMetricsReporter->addObserver(observer);
+    }
+
+    void removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+        if (mFrameMetricsReporter.get() != nullptr) {
+            mFrameMetricsReporter->removeObserver(observer);
+            if (!mFrameMetricsReporter->hasObservers()) {
+                mFrameMetricsReporter.reset(nullptr);
+            }
+        }
+    }
+
+    // Used to queue up work that needs to be completed before this frame completes
+    ANDROID_API void enqueueFrameWork(std::function<void()>&& func);
+
+    ANDROID_API int64_t getFrameNumber();
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
     // lifecycle tracking
     friend class android::uirenderer::RenderState;
 
-    void setSurface(ANativeWindow* window);
-    void swapBuffers(const SkRect& dirty, EGLint width, EGLint height);
-    void requireSurface();
+    void setSurface(Surface* window);
 
-    void freePrefetechedLayers();
+    void freePrefetchedLayers(TreeObserver* observer);
+
+    void waitOnFences();
+
+    EGLint mLastFrameWidth = 0;
+    EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
     EglManager& mEglManager;
-    sp<ANativeWindow> mNativeWindow;
+    sp<Surface> mNativeSurface;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
+    // stopped indicates the CanvasContext will reject actual redraw operations,
+    // and defer repaint until it is un-stopped
+    bool mStopped = false;
+    // CanvasContext is dirty if it has received an update that it has not
+    // painted onto its surface.
+    bool mIsDirty = false;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;
+    struct SwapHistory {
+        SkRect damage;
+        nsecs_t vsyncTime;
+        nsecs_t swapTime;
+    };
+
+    RingBuffer<SwapHistory, 3> mSwapHistory;
+    int64_t mFrameNumber = -1;
 
     bool mOpaque;
+#if HWUI_NEW_OPS
+    BakedOpRenderer::LightInfo mLightInfo;
+    FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
+#else
     OpenGLRenderer* mCanvas = nullptr;
+#endif
+
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
+    LayerUpdateQueue mLayerUpdateQueue;
     std::unique_ptr<AnimationContext> mAnimationContext;
 
-    const sp<RenderNode> mRootRenderNode;
+    std::vector< sp<RenderNode> > mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
     // Ring buffer large enough for 2 seconds worth of frames
@@ -145,8 +225,22 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
 
-    std::set<RenderNode*> mPrefetechedLayers;
+    std::set<RenderNode*> mPrefetchedLayers;
+
+    // Stores the bounds of the main content.
+    Rect mContentDrawBounds;
+
+    // TODO: This is really a Task<void> but that doesn't really work
+    // when Future<> expects to be able to get/set a value
+    struct FuncTask : public Task<bool> {
+        std::function<void()> func;
+    };
+    class FuncTaskProcessor;
+
+    std::vector< sp<FuncTask> > mFrameFences;
+    sp<TaskProcessor<bool> > mFrameWorkProcessor;
 };
 
 } /* namespace renderthread */

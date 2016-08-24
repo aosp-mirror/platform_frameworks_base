@@ -60,6 +60,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 R.dimen.disappear_y_translation);
     }
 
+    @Override
     protected void resetState() {
         super.resetState();
         mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);

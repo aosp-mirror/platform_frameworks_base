@@ -17,10 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Apvalkalas"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Riktų ataskaita užfiksuota"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Pranešimas apie riktą (<xliff:g id="ID">#%d</xliff:g>) generuojamas"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Pranešimas apie riktą (<xliff:g id="ID">#%d</xliff:g>) užfiksuotas"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Pridedama informacijos prie pranešimo apie riktą"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Palaukite…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Perbraukite kairėn, kad bendrintumėte rikto ataskaitą"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Palieskite, kad bendrintumėte riktų ataskaitą"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"Riktų ataskaitose pateikiami duomenys iš įvairių sistemos žurnalo failų, įskaitant asmeninę ir privačią informaciją. Riktų ataskaitas bendrinkite tik su patikimomis programomis ir žmonėmis."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Rodyti šį pranešimą kitą kartą"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Palieskite, kad bendrintumėte pranešimą apie riktą"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Palieskite ir bendrinkite pranešimą apie riktą be ekrano kopijos arba palaukite, kol ji bus sukurta"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Palieskite ir bendrinkite pranešimą apie riktą be ekrano kopijos arba palaukite, kol ji bus sukurta"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Pranešimuose apie riktą pateikiami duomenys iš įvairių sistemos žurnalo failų, kurie gali apimti informaciją, kuri, jūsų manymu, yra neskelbtina (pvz., programos naudojimo ir vietovės duomenis). Pranešimus apie riktą bendrinkite tik su patikimomis programomis ir žmonėmis."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Daugiau neberodyti"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Riktų ataskaitos"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"Nepavyko sukurti pranešimo apie riktą failo"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Nepavyko pridėti išsamios pranešimo apie riktą informacijos prie .zip failo"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"be pavadinimo"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Informacija"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Ekrano kopija"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Ekrano kopija sėkmingai sukurta."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Nepavyko padaryti ekrano kopijos."</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Išsami informacija apie pranešimą apie riktą (<xliff:g id="ID">#%d</xliff:g>)"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Failo pavadinimas"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Rikto pavadinimas"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Rikto suvestinė"</string>
+    <string name="save" msgid="4781509040564835759">"Išsaugoti"</string>
 </resources>

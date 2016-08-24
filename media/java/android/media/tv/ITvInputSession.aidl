@@ -48,9 +48,14 @@ oneway interface ITvInputSession {
 
     void unblockContent(in String unblockedRating);
 
+    void timeShiftPlay(in Uri recordedProgramUri);
     void timeShiftPause();
     void timeShiftResume();
     void timeShiftSeekTo(long timeMs);
     void timeShiftSetPlaybackParams(in PlaybackParams params);
     void timeShiftEnablePositionTracking(boolean enable);
+
+    // For the recording session
+    void startRecording(in Uri programUri);
+    void stopRecording();
 }

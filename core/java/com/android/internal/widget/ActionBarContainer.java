@@ -147,7 +147,7 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return (who == mBackground && !mIsSplit) || (who == mStackedBackground && mIsStacked) ||
                 (who == mSplitBackground && mIsSplit) || super.verifyDrawable(who);
     }
@@ -155,14 +155,27 @@ public class ActionBarContainer extends FrameLayout {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        if (mBackground != null && mBackground.isStateful()) {
-            mBackground.setState(getDrawableState());
+
+        final int[] state = getDrawableState();
+        boolean changed = false;
+
+        final Drawable background = mBackground;
+        if (background != null && background.isStateful()) {
+            changed |= background.setState(state);
         }
-        if (mStackedBackground != null && mStackedBackground.isStateful()) {
-            mStackedBackground.setState(getDrawableState());
+
+        final Drawable stackedBackground = mStackedBackground;
+        if (stackedBackground != null && stackedBackground.isStateful()) {
+            changed |= stackedBackground.setState(state);
         }
-        if (mSplitBackground != null && mSplitBackground.isStateful()) {
-            mSplitBackground.setState(getDrawableState());
+
+        final Drawable splitBackground = mSplitBackground;
+        if (splitBackground != null && splitBackground.isStateful()) {
+            changed |= splitBackground.setState(state);
+        }
+
+        if (changed) {
+            invalidate();
         }
     }
 

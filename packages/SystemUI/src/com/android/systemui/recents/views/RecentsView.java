@@ -16,38 +16,68 @@
 
 package com.android.systemui.recents.views;
 
-import android.app.ActivityOptions;
-import android.app.TaskStackBuilder;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.app.ActivityOptions.OnAnimationStartedListener;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Rect;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.IRemoteCallback;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewOutlineProvider;
+import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.Constants;
-import com.android.systemui.recents.RecentsAppWidgetHostView;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivity;
+import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
+import com.android.systemui.recents.events.activity.HideStackActionButtonEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskEvent;
+import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.ShowStackActionButtonEvent;
+import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
+import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
+import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.model.RecentsPackageMonitor;
-import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.RecentsTransitionHelper.AnimationSpecComposer;
+import com.android.systemui.stackdivider.WindowManagerProxy;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,34 +85,39 @@ import java.util.List;
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
  */
-public class RecentsView extends FrameLayout implements TaskStackView.TaskStackViewCallbacks,
-        RecentsPackageMonitor.PackageCallbacks {
+public class RecentsView extends FrameLayout {
 
     private static final String TAG = "RecentsView";
 
-    /** The RecentsView callbacks */
-    public interface RecentsViewCallbacks {
-        public void onTaskViewClicked();
-        public void onTaskLaunchFailed();
-        public void onAllTaskViewsDismissed();
-        public void onExitToHomeAnimationTriggered();
-        public void onScreenPinningRequest();
-        public void onTaskResize(Task t);
-        public void runAfterPause(Runnable r);
-    }
+    private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
+    private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
 
-    RecentsConfiguration mConfig;
-    LayoutInflater mInflater;
-    DebugOverlayView mDebugOverlay;
-    RecentsViewLayoutAlgorithm mLayoutAlgorithm;
+    private static final int SHOW_STACK_ACTION_BUTTON_DURATION = 134;
+    private static final int HIDE_STACK_ACTION_BUTTON_DURATION = 100;
 
-    ArrayList<TaskStack> mStacks;
-    List<TaskStackView> mTaskStackViews = new ArrayList<>();
-    RecentsAppWidgetHostView mSearchBar;
-    RecentsViewCallbacks mCb;
+    private TaskStack mStack;
+    private TaskStackView mTaskStackView;
+    private TextView mStackActionButton;
+    private TextView mEmptyView;
+
+    private boolean mAwaitingFirstLayout = true;
+    private boolean mLastTaskLaunchedWasFreeform;
+
+    @ViewDebug.ExportedProperty(category="recents")
+    private Rect mSystemInsets = new Rect();
+    private int mDividerSize;
+
+    private Drawable mBackgroundScrim = new ColorDrawable(
+            Color.argb((int) (DEFAULT_SCRIM_ALPHA * 255), 0, 0, 0)).mutate();
+    private Animator mBackgroundScrimAnimator;
+
+    private RecentsTransitionHelper mTransitionHelper;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
+    private RecentsViewTouchHandler mTouchHandler;
+    private final FlingAnimationUtils mFlingAnimationUtils;
 
     public RecentsView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public RecentsView(Context context, AttributeSet attrs) {
@@ -95,132 +130,159 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mConfig = RecentsConfiguration.getInstance();
-        mInflater = LayoutInflater.from(context);
-        mLayoutAlgorithm = new RecentsViewLayoutAlgorithm(mConfig);
+        setWillNotDraw(false);
+
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mTransitionHelper = new RecentsTransitionHelper(getContext());
+        mDividerSize = ssp.getDockedDividerSize(context);
+        mTouchHandler = new RecentsViewTouchHandler(this);
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            float cornerRadius = context.getResources().getDimensionPixelSize(
+                    R.dimen.recents_task_view_rounded_corners_radius);
+            mStackActionButton = (TextView) inflater.inflate(R.layout.recents_stack_action_button,
+                    this, false);
+            mStackActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventBus.getDefault().send(new DismissAllTaskViewsEvent());
+                }
+            });
+            addView(mStackActionButton);
+            mStackActionButton.setClipToOutline(true);
+            mStackActionButton.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
+                }
+            });
+        }
+        mEmptyView = (TextView) inflater.inflate(R.layout.recents_empty, this, false);
+        addView(mEmptyView);
     }
 
-    /** Sets the callbacks */
-    public void setCallbacks(RecentsViewCallbacks cb) {
-        mCb = cb;
-    }
+    /**
+     * Called from RecentsActivity when it is relaunched.
+     */
+    public void onReload(boolean isResumingFromVisible, boolean isTaskStackEmpty) {
+        RecentsConfiguration config = Recents.getConfiguration();
+        RecentsActivityLaunchState launchState = config.getLaunchState();
 
-    /** Sets the debug overlay */
-    public void setDebugOverlay(DebugOverlayView overlay) {
-        mDebugOverlay = overlay;
-    }
-
-    /** Set/get the bsp root node */
-    public void setTaskStacks(ArrayList<TaskStack> stacks) {
-        int numStacks = stacks.size();
-
-        // Remove all/extra stack views
-        int numTaskStacksToKeep = 0; // Keep no tasks if we are recreating the layout
-        if (mConfig.launchedReuseTaskStackViews) {
-            numTaskStacksToKeep = Math.min(mTaskStackViews.size(), numStacks);
-        }
-        for (int i = mTaskStackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
-            removeView(mTaskStackViews.remove(i));
+        if (mTaskStackView == null) {
+            isResumingFromVisible = false;
+            mTaskStackView = new TaskStackView(getContext());
+            mTaskStackView.setSystemInsets(mSystemInsets);
+            addView(mTaskStackView);
         }
 
-        // Update the stack views that we are keeping
-        for (int i = 0; i < numTaskStacksToKeep; i++) {
-            TaskStackView tsv = mTaskStackViews.get(i);
-            // If onRecentsHidden is not triggered, we need to the stack view again here
-            tsv.reset();
-            tsv.setStack(stacks.get(i));
-        }
+        // Reset the state
+        mAwaitingFirstLayout = !isResumingFromVisible;
+        mLastTaskLaunchedWasFreeform = false;
 
-        // Add remaining/recreate stack views
-        mStacks = stacks;
-        for (int i = mTaskStackViews.size(); i < numStacks; i++) {
-            TaskStack stack = stacks.get(i);
-            TaskStackView stackView = new TaskStackView(getContext(), stack);
-            stackView.setCallbacks(this);
-            addView(stackView);
-            mTaskStackViews.add(stackView);
-        }
+        // Update the stack
+        mTaskStackView.onReload(isResumingFromVisible);
 
-        // Enable debug mode drawing on all the stacks if necessary
-        if (mConfig.debugModeEnabled) {
-            for (int i = mTaskStackViews.size() - 1; i >= 0; i--) {
-                TaskStackView stackView = mTaskStackViews.get(i);
-                stackView.setDebugOverlay(mDebugOverlay);
+        if (isResumingFromVisible) {
+            // If we are already visible, then restore the background scrim
+            animateBackgroundScrim(1f, DEFAULT_UPDATE_SCRIM_DURATION);
+        } else {
+            // If we are already occluded by the app, then set the final background scrim alpha now.
+            // Otherwise, defer until the enter animation completes to animate the scrim alpha with
+            // the tasks for the home animation.
+            if (launchState.launchedViaDockGesture || launchState.launchedFromApp
+                    || isTaskStackEmpty) {
+                mBackgroundScrim.setAlpha(255);
+            } else {
+                mBackgroundScrim.setAlpha(0);
             }
         }
-
-        // Trigger a new layout
-        requestLayout();
     }
 
-    /** Gets the list of task views */
-    List<TaskStackView> getTaskStackViews() {
-        return mTaskStackViews;
-    }
-
-    /** Gets the next task in the stack - or if the last - the top task */
-    public Task getNextTaskOrTopTask(Task taskToSearch) {
-        Task returnTask = null; 
-        boolean found = false;
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = stackCount - 1; i >= 0; --i) {
-            TaskStack stack = stackViews.get(i).getStack();
-            ArrayList<Task> taskList = stack.getTasks();
-            // Iterate the stack views and try and find the focused task
-            for (int j = taskList.size() - 1; j >= 0; --j) {
-                Task task = taskList.get(j);
-                // Return the next task in the line.
-                if (found)
-                    return task;
-                // Remember the first possible task as the top task.
-                if (returnTask == null)
-                    returnTask = task;
-                if (task == taskToSearch)
-                    found = true;
-            }
+    /**
+     * Called from RecentsActivity when the task stack is updated.
+     */
+    public void updateStack(TaskStack stack, boolean setStackViewTasks) {
+        mStack = stack;
+        if (setStackViewTasks) {
+            mTaskStackView.setTasks(stack, true /* allowNotifyStackChanges */);
         }
-        return returnTask;
+
+        // Update the top level view's visibilities
+        if (stack.getTaskCount() > 0) {
+            hideEmptyView();
+        } else {
+            showEmptyView(R.string.recents_empty_message);
+        }
+    }
+
+    /**
+     * Returns the current TaskStack.
+     */
+    public TaskStack getStack() {
+        return mStack;
+    }
+
+    /*
+     * Returns the window background scrim.
+     */
+    public Drawable getBackgroundScrim() {
+        return mBackgroundScrim;
+    }
+
+    /**
+     * Returns whether the last task launched was in the freeform stack or not.
+     */
+    public boolean isLastTaskLaunchedFreeform() {
+        return mLastTaskLaunchedWasFreeform;
     }
 
     /** Launches the focused task from the first stack if possible */
-    public boolean launchFocusedTask() {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            TaskStack stack = stackView.getStack();
-            // Iterate the stack views and try and find the focused task
-            List<TaskView> taskViews = stackView.getTaskViews();
-            int taskViewCount = taskViews.size();
-            for (int j = 0; j < taskViewCount; j++) {
-                TaskView tv = taskViews.get(j);
-                Task task = tv.getTask();
-                if (tv.isFocusedTask()) {
-                    onTaskViewClicked(stackView, tv, stack, task, false);
-                    return true;
+    public boolean launchFocusedTask(int logEvent) {
+        if (mTaskStackView != null) {
+            Task task = mTaskStackView.getFocusedTask();
+            if (task != null) {
+                TaskView taskView = mTaskStackView.getChildViewForTask(task);
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
+                        INVALID_STACK_ID, false));
+
+                if (logEvent != 0) {
+                    MetricsLogger.action(getContext(), logEvent,
+                            task.key.getComponent().toString());
                 }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Launches the task that recents was launched from if possible */
+    public boolean launchPreviousTask() {
+        if (mTaskStackView != null) {
+            TaskStack stack = mTaskStackView.getStack();
+            Task task = stack.getLaunchTarget();
+            if (task != null) {
+                TaskView taskView = mTaskStackView.getChildViewForTask(task);
+                EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
+                        INVALID_STACK_ID, false));
+                return true;
             }
         }
         return false;
     }
 
     /** Launches a given task. */
-    public boolean launchTask(Task task) {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            TaskStack stack = stackView.getStack();
+    public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
+        if (mTaskStackView != null) {
             // Iterate the stack views and try and find the given task.
-            List<TaskView> taskViews = stackView.getTaskViews();
+            List<TaskView> taskViews = mTaskStackView.getTaskViews();
             int taskViewCount = taskViews.size();
             for (int j = 0; j < taskViewCount; j++) {
                 TaskView tv = taskViews.get(j);
                 if (tv.getTask() == task) {
-                    onTaskViewClicked(stackView, tv, stack, task, false);
+                    EventBus.getDefault().send(new LaunchTaskEvent(tv, task, taskBounds,
+                            destinationStack, false));
                     return true;
                 }
             }
@@ -228,89 +290,43 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         return false;
     }
 
-    /** Launches the task that Recents was launched from, if possible */
-    public boolean launchPreviousTask() {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            TaskStack stack = stackView.getStack();
-            ArrayList<Task> tasks = stack.getTasks();
-
-            // Find the launch task in the stack
-            if (!tasks.isEmpty()) {
-                int taskCount = tasks.size();
-                for (int j = 0; j < taskCount; j++) {
-                    if (tasks.get(j).isLaunchTarget) {
-                        Task task = tasks.get(j);
-                        TaskView tv = stackView.getChildViewForTask(task);
-                        onTaskViewClicked(stackView, tv, stack, task, false);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /** Requests all task stacks to start their enter-recents animation */
-    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
-        // We have to increment/decrement the post animation trigger in case there are no children
-        // to ensure that it runs
-        ctx.postAnimationTrigger.increment();
-
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.startEnterRecentsAnimation(ctx);
-        }
-        ctx.postAnimationTrigger.decrement();
-    }
-
-    /** Requests all task stacks to start their exit-recents animation */
-    public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
-        // We have to increment/decrement the post animation trigger in case there are no children
-        // to ensure that it runs
-        ctx.postAnimationTrigger.increment();
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.startExitToHomeAnimation(ctx);
-        }
-        ctx.postAnimationTrigger.decrement();
-
-        // Notify of the exit animation
-        mCb.onExitToHomeAnimationTriggered();
-    }
-
-    /** Adds the search bar */
-    public void setSearchBar(RecentsAppWidgetHostView searchBar) {
-        // Remove the previous search bar if one exists
-        if (mSearchBar != null && indexOfChild(mSearchBar) > -1) {
-            removeView(mSearchBar);
-        }
-        // Add the new search bar
-        if (searchBar != null) {
-            mSearchBar = searchBar;
-            addView(mSearchBar);
+    /**
+     * Hides the task stack and shows the empty view.
+     */
+    public void showEmptyView(int msgResId) {
+        mTaskStackView.setVisibility(View.INVISIBLE);
+        mEmptyView.setText(msgResId);
+        mEmptyView.setVisibility(View.VISIBLE);
+        mEmptyView.bringToFront();
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButton.bringToFront();
         }
     }
 
-    /** Returns whether there is currently a search bar */
-    public boolean hasValidSearchBar() {
-        return mSearchBar != null && !mSearchBar.isReinflateRequired();
+    /**
+     * Shows the task stack and hides the empty view.
+     */
+    public void hideEmptyView() {
+        mEmptyView.setVisibility(View.INVISIBLE);
+        mTaskStackView.setVisibility(View.VISIBLE);
+        mTaskStackView.bringToFront();
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButton.bringToFront();
+        }
     }
 
-    /** Sets the visibility of the search bar */
-    public void setSearchBarVisibility(int visibility) {
-        if (mSearchBar != null) {
-            mSearchBar.setVisibility(visibility);
-            // Always bring the search bar to the top
-            mSearchBar.bringToFront();
-        }
+    @Override
+    protected void onAttachedToWindow() {
+        EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        EventBus.getDefault().register(mTouchHandler, RecentsActivity.EVENT_BUS_PRIORITY + 2);
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(mTouchHandler);
     }
 
     /**
@@ -321,34 +337,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        // Get the search bar bounds and measure the search bar layout
-        Rect searchBarSpaceBounds = new Rect();
-        if (mSearchBar != null) {
-            mConfig.getSearchBarBounds(width, height, mConfig.systemInsets.top, searchBarSpaceBounds);
-            mSearchBar.measure(
-                    MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.width(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(searchBarSpaceBounds.height(), MeasureSpec.EXACTLY));
+        if (mTaskStackView.getVisibility() != GONE) {
+            mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        Rect taskStackBounds = new Rect();
-        mConfig.getAvailableTaskStackBounds(width, height, mConfig.systemInsets.top,
-                mConfig.systemInsets.right, searchBarSpaceBounds, taskStackBounds);
+        // Measure the empty view to the full size of the screen
+        if (mEmptyView.getVisibility() != GONE) {
+            measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
+        }
 
-        // Measure each TaskStackView with the full width and height of the window since the
-        // transition view is a child of that stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        List<Rect> stackViewsBounds = mLayoutAlgorithm.computeStackRects(stackViews,
-                taskStackBounds);
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            if (stackView.getVisibility() != GONE) {
-                // We are going to measure the TaskStackView with the whole RecentsView dimensions,
-                // but the actual stack is going to be inset to the bounds calculated by the layout
-                // algorithm
-                stackView.setStackInsetRect(stackViewsBounds.get(i));
-                stackView.measure(widthMeasureSpec, heightMeasureSpec);
-            }
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            // Measure the stack action button within the constraints of the space above the stack
+            Rect buttonBounds = mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect;
+            measureChild(mStackActionButton,
+                    MeasureSpec.makeMeasureSpec(buttonBounds.width(), MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(buttonBounds.height(), MeasureSpec.AT_MOST));
         }
 
         setMeasuredDimension(width, height);
@@ -359,364 +363,453 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        // Get the search bar bounds so that we lay it out
-        if (mSearchBar != null) {
-            Rect searchBarSpaceBounds = new Rect();
-            mConfig.getSearchBarBounds(getMeasuredWidth(), getMeasuredHeight(),
-                    mConfig.systemInsets.top, searchBarSpaceBounds);
-            mSearchBar.layout(searchBarSpaceBounds.left, searchBarSpaceBounds.top,
-                    searchBarSpaceBounds.right, searchBarSpaceBounds.bottom);
+        if (mTaskStackView.getVisibility() != GONE) {
+            mTaskStackView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
         }
 
-        // Layout each TaskStackView with the full width and height of the window since the 
-        // transition view is a child of that stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            if (stackView.getVisibility() != GONE) {
-                stackView.layout(left, top, left + stackView.getMeasuredWidth(),
-                        top + stackView.getMeasuredHeight());
+        // Layout the empty view
+        if (mEmptyView.getVisibility() != GONE) {
+            int leftRightInsets = mSystemInsets.left + mSystemInsets.right;
+            int topBottomInsets = mSystemInsets.top + mSystemInsets.bottom;
+            int childWidth = mEmptyView.getMeasuredWidth();
+            int childHeight = mEmptyView.getMeasuredHeight();
+            int childLeft = left + mSystemInsets.left +
+                    Math.max(0, (right - left - leftRightInsets - childWidth)) / 2;
+            int childTop = top + mSystemInsets.top +
+                    Math.max(0, (bottom - top - topBottomInsets - childHeight)) / 2;
+            mEmptyView.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
+        }
+
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            // Layout the stack action button such that its drawable is start-aligned with the
+            // stack, vertically centered in the available space above the stack
+            Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+            mStackActionButton.layout(buttonBounds.left, buttonBounds.top, buttonBounds.right,
+                    buttonBounds.bottom);
+        }
+
+        if (mAwaitingFirstLayout) {
+            mAwaitingFirstLayout = false;
+
+            // If launched via dragging from the nav bar, then we should translate the whole view
+            // down offscreen
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            if (launchState.launchedViaDragGesture) {
+                setTranslationY(getMeasuredHeight());
+            } else {
+                setTranslationY(0f);
             }
         }
     }
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        // Update the configuration with the latest system insets and trigger a relayout
-        mConfig.updateSystemInsets(insets.getSystemWindowInsets());
+        mSystemInsets.set(insets.getSystemWindowInsets());
+        mTaskStackView.setSystemInsets(mSystemInsets);
         requestLayout();
-        return insets.consumeSystemWindowInsets();
+        return insets;
     }
-
-    /** Notifies each task view of the user interaction. */
-    public void onUserInteraction() {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.onUserInteraction();
-        }
-    }
-
-    /** Focuses the next task in the first stack view */
-    public void focusNextTask(boolean forward) {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        if (!stackViews.isEmpty()) {
-            stackViews.get(0).focusNextTask(forward, true);
-        }
-    }
-
-    /** Dismisses the focused task. */
-    public void dismissFocusedTask() {
-        // Get the first stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        if (!stackViews.isEmpty()) {
-            stackViews.get(0).dismissFocusedTask();
-        }
-    }
-
-    /** Unfilters any filtered stacks */
-    public boolean unfilterFilteredStacks() {
-        if (mStacks != null) {
-            // Check if there are any filtered stacks and unfilter them before we back out of Recents
-            boolean stacksUnfiltered = false;
-            int numStacks = mStacks.size();
-            for (int i = 0; i < numStacks; i++) {
-                TaskStack stack = mStacks.get(i);
-                if (stack.hasFilteredTasks()) {
-                    stack.unfilterTasks();
-                    stacksUnfiltered = true;
-                }
-            }
-            return stacksUnfiltered;
-        }
-        return false;
-    }
-
-    public void disableLayersForOneFrame() {
-        List<TaskStackView> stackViews = getTaskStackViews();
-        for (int i = 0; i < stackViews.size(); i++) {
-            stackViews.get(i).disableLayersForOneFrame();
-        }
-    }
-
-    private void postDrawHeaderThumbnailTransitionRunnable(final TaskView tv, final int offsetX,
-            final int offsetY, final TaskViewTransform transform,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                // Disable any focused state before we draw the header
-                if (tv.isFocusedTask()) {
-                    tv.unsetFocusedTask();
-                }
-
-                float scale = tv.getScaleX();
-                int fromHeaderWidth = (int) (tv.mHeaderView.getMeasuredWidth() * scale);
-                int fromHeaderHeight = (int) (tv.mHeaderView.getMeasuredHeight() * scale);
-
-                Bitmap b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
-                        Bitmap.Config.ARGB_8888);
-                if (Constants.DebugFlags.App.EnableTransitionThumbnailDebugMode) {
-                    b.eraseColor(0xFFff0000);
-                } else {
-                    Canvas c = new Canvas(b);
-                    c.scale(tv.getScaleX(), tv.getScaleY());
-                    tv.mHeaderView.draw(c);
-                    c.setBitmap(null);
-                }
-                b = b.createAshmemBitmap();
-                int[] pts = new int[2];
-                tv.getLocationOnScreen(pts);
-                try {
-                    WindowManagerGlobal.getWindowManagerService()
-                            .overridePendingAppTransitionAspectScaledThumb(b,
-                                    pts[0] + offsetX,
-                                    pts[1] + offsetY,
-                                    transform.rect.width(),
-                                    transform.rect.height(),
-                                    new IRemoteCallback.Stub() {
-                                        @Override
-                                        public void sendResult(Bundle data)
-                                                throws RemoteException {
-                                            post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    if (animStartedListener != null) {
-                                                        animStartedListener.onAnimationStarted();
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    }, true);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error overriding app transition", e);
-                }
-            }
-        };
-        mCb.runAfterPause(r);
-    }
-    /**** TaskStackView.TaskStackCallbacks Implementation ****/
 
     @Override
-    public void onTaskViewClicked(final TaskStackView stackView, final TaskView tv,
-                                  final TaskStack stack, final Task task, final boolean lockToTask) {
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onInterceptTouchEvent(ev);
+    }
 
-        // Notify any callbacks of the launching of a new task
-        if (mCb != null) {
-            mCb.onTaskViewClicked();
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mTouchHandler.onTouchEvent(ev);
+    }
+
+    @Override
+    public void onDrawForeground(Canvas canvas) {
+        super.onDrawForeground(canvas);
+
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            visDockStates.get(i).viewState.draw(canvas);
         }
+    }
 
-        // Upfront the processing of the thumbnail
-        TaskViewTransform transform = new TaskViewTransform();
-        View sourceView;
-        int offsetX = 0;
-        int offsetY = 0;
-        float stackScroll = stackView.getScroller().getStackScroll();
-        if (tv == null) {
-            // If there is no actual task view, then use the stack view as the source view
-            // and then offset to the expected transform rect, but bound this to just
-            // outside the display rect (to ensure we don't animate from too far away)
-            sourceView = stackView;
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
-            offsetX = transform.rect.left;
-            offsetY = mConfig.displayRect.height();
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
+            if (d == who) {
+                return true;
+            }
+        }
+        return super.verifyDrawable(who);
+    }
+
+    /**** EventBus Events ****/
+
+    public final void onBusEvent(LaunchTaskEvent event) {
+        mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
+        mTransitionHelper.launchTaskFromRecents(mStack, event.task, mTaskStackView, event.taskView,
+                event.screenPinningRequested, event.targetTaskBounds, event.targetTaskStack);
+    }
+
+    public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
+        int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            // Hide the stack action button
+            hideStackActionButton(taskViewExitToHomeDuration, false /* translate */);
+        }
+        animateBackgroundScrim(0f, taskViewExitToHomeDuration);
+    }
+
+    public final void onBusEvent(DragStartEvent event) {
+        updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+                true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                TaskStack.DockState.NONE.viewState.hintTextAlpha,
+                true /* animateAlpha */, false /* animateBounds */);
+
+        // Temporarily hide the stack action button without changing visibility
+        if (mStackActionButton != null) {
+            mStackActionButton.animate()
+                    .alpha(0f)
+                    .setDuration(HIDE_STACK_ACTION_BUTTON_DURATION)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .start();
+        }
+    }
+
+    public final void onBusEvent(DragDropTargetChangedEvent event) {
+        if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
+            updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
+                    true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                    TaskStack.DockState.NONE.viewState.hintTextAlpha,
+                    true /* animateAlpha */, true /* animateBounds */);
         } else {
-            sourceView = tv.mThumbnailView;
-            transform = stackView.getStackAlgorithm().getStackTransform(task, stackScroll, transform, null);
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            updateVisibleDockRegions(new TaskStack.DockState[] {dockState},
+                    false /* isDefaultDockState */, -1, -1, true /* animateAlpha */,
+                    true /* animateBounds */);
         }
+        if (mStackActionButton != null) {
+            event.addPostAnimationCallback(new Runnable() {
+                @Override
+                public void run() {
+                    // Move the clear all button to its new position
+                    Rect buttonBounds = getStackActionButtonBoundsFromStackLayout();
+                    mStackActionButton.setLeftTopRightBottom(buttonBounds.left, buttonBounds.top,
+                            buttonBounds.right, buttonBounds.bottom);
+                }
+            });
+        }
+    }
 
-        // Compute the thumbnail to scale up from
-        final SystemServicesProxy ssp =
-                RecentsTaskLoader.getInstance().getSystemServicesProxy();
-        ActivityOptions opts = null;
-        if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
-                task.thumbnail.getHeight() > 0) {
-            ActivityOptions.OnAnimationStartedListener animStartedListener = null;
-            if (lockToTask) {
-                animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
-                    boolean mTriggered = false;
+    public final void onBusEvent(final DragEndEvent event) {
+        // Handle the case where we drop onto a dock region
+        if (event.dropTarget instanceof TaskStack.DockState) {
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+
+            // Hide the dock region
+            updateVisibleDockRegions(null, false /* isDefaultDockState */, -1, -1,
+                    false /* animateAlpha */, false /* animateBounds */);
+
+            // We translated the view but we need to animate it back from the current layout-space
+            // rect to its final layout-space rect
+            Utilities.setViewFrameFromTranslation(event.taskView);
+
+            // Dock the task and launch it
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            if (ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode)) {
+                final OnAnimationStartedListener startedListener =
+                        new OnAnimationStartedListener() {
                     @Override
                     public void onAnimationStarted() {
-                        if (!mTriggered) {
-                            postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mCb.onScreenPinningRequest();
-                                }
-                            }, 350);
-                            mTriggered = true;
-                        }
+                        EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
+                        // Remove the task and don't bother relaying out, as all the tasks will be
+                        // relaid out when the stack changes on the multiwindow change event
+                        mTaskStackView.getStack().removeTask(event.task, null,
+                                true /* fromDockGesture */);
                     }
                 };
-            }
-            if (tv != null) {
-                postDrawHeaderThumbnailTransitionRunnable(tv, offsetX, offsetY, transform,
-                        animStartedListener);
-            }
-            if (mConfig.multiStackEnabled) {
-                opts = ActivityOptions.makeCustomAnimation(sourceView.getContext(),
-                        R.anim.recents_from_unknown_enter,
-                        R.anim.recents_from_unknown_exit,
-                        sourceView.getHandler(), animStartedListener);
+
+                final Rect taskRect = getTaskRect(event.taskView);
+                IAppTransitionAnimationSpecsFuture future =
+                        mTransitionHelper.getAppTransitionFuture(
+                                new AnimationSpecComposer() {
+                                    @Override
+                                    public List<AppTransitionAnimationSpec> composeSpecs() {
+                                        return mTransitionHelper.composeDockAnimationSpec(
+                                                event.taskView, taskRect);
+                                    }
+                                });
+                ssp.overridePendingAppTransitionMultiThumbFuture(future,
+                        mTransitionHelper.wrapStartedListener(startedListener),
+                        true /* scaleUp */);
+
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
+                        event.task.getTopComponent().flattenToShortString());
             } else {
-                opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
-                        Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8).createAshmemBitmap(),
-                        offsetX, offsetY, transform.rect.width(), transform.rect.height(),
-                        sourceView.getHandler(), animStartedListener);
+                EventBus.getDefault().send(new DragEndCancelledEvent(mStack, event.task,
+                        event.taskView));
             }
-        }
-
-        final ActivityOptions launchOpts = opts;
-        final Runnable launchRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (task.isActive) {
-                    // Bring an active task to the foreground
-                    ssp.moveTaskToFront(task.key.id, launchOpts);
-                } else {
-                    if (ssp.startActivityFromRecents(getContext(), task.key.id,
-                            task.activityLabel, launchOpts)) {
-                        if (launchOpts == null && lockToTask) {
-                            mCb.onScreenPinningRequest();
-                        }
-                    } else {
-                        // Dismiss the task and return the user to home if we fail to
-                        // launch the task
-                        onTaskViewDismissed(task);
-                        if (mCb != null) {
-                            mCb.onTaskLaunchFailed();
-                        }
-
-                        // Keep track of failed launches
-                        MetricsLogger.count(getContext(), "overview_task_launch_failed", 1);
-                    }
-                }
-            }
-        };
-
-        // Keep track of the index of the task launch
-        int taskIndexFromFront = 0;
-        int taskIndex = stack.indexOfTask(task);
-        if (taskIndex > -1) {
-            taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
-        }
-        MetricsLogger.histogram(getContext(), "overview_task_launch_index", taskIndexFromFront);
-
-        // Launch the app right away if there is no task view, otherwise, animate the icon out first
-        if (tv == null) {
-            launchRunnable.run();
         } else {
-            if (task.group != null && !task.group.isFrontMostTask(task)) {
-                // For affiliated tasks that are behind other tasks, we must animate the front cards
-                // out of view before starting the task transition
-                stackView.startLaunchTaskAnimation(tv, launchRunnable, lockToTask);
-            } else {
-                // Otherwise, we can start the task transition immediately
-                stackView.startLaunchTaskAnimation(tv, null, lockToTask);
-                launchRunnable.run();
-            }
-        }
-    }
-
-    @Override
-    public void onTaskViewAppInfoClicked(Task t) {
-        // Create a new task stack with the application info details activity
-        Intent baseIntent = t.key.baseIntent;
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", baseIntent.getComponent().getPackageName(), null));
-        intent.setComponent(intent.resolveActivity(getContext().getPackageManager()));
-        TaskStackBuilder.create(getContext())
-                .addNextIntentWithParentStack(intent).startActivities(null,
-                new UserHandle(t.key.userId));
-    }
-
-    @Override
-    public void onTaskViewDismissed(Task t) {
-        // Remove any stored data from the loader.  We currently don't bother notifying the views
-        // that the data has been unloaded because at the point we call onTaskViewDismissed(), the views
-        // either don't need to be updated, or have already been removed.
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        loader.deleteTaskData(t, false);
-
-        // Remove the old task from activity manager
-        loader.getSystemServicesProxy().removeTask(t.key.id);
-    }
-
-    @Override
-    public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks) {
-        if (removedTasks != null) {
-            int taskCount = removedTasks.size();
-            for (int i = 0; i < taskCount; i++) {
-                onTaskViewDismissed(removedTasks.get(i));
-            }
+            // Animate the overlay alpha back to 0
+            updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
+                    true /* animateAlpha */, false /* animateBounds */);
         }
 
-        mCb.onAllTaskViewsDismissed();
-
-        // Keep track of all-deletions
-        MetricsLogger.count(getContext(), "overview_task_all_dismissed", 1);
-    }
-
-    /** Final callback after Recents is finally hidden. */
-    public void onRecentsHidden() {
-        // Notify each task stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.onRecentsHidden();
-        }
-    }
-
-    @Override
-    public void onTaskStackFilterTriggered() {
-        // Hide the search bar
-        if (mSearchBar != null) {
-            mSearchBar.animate()
-                    .alpha(0f)
-                    .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.filteringCurrentViewsAnimDuration)
-                    .withLayer()
-                    .start();
-        }
-    }
-
-    @Override
-    public void onTaskStackUnfilterTriggered() {
-        // Show the search bar
-        if (mSearchBar != null) {
-            mSearchBar.animate()
+        // Show the stack action button again without changing visibility
+        if (mStackActionButton != null) {
+            mStackActionButton.animate()
                     .alpha(1f)
-                    .setStartDelay(0)
-                    .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.filteringNewViewsAnimDuration)
-                    .withLayer()
+                    .setDuration(SHOW_STACK_ACTION_BUTTON_DURATION)
+                    .setInterpolator(Interpolators.ALPHA_IN)
                     .start();
         }
     }
 
-    @Override
-    public void onTaskResize(Task t) {
-        if (mCb != null) {
-            mCb.onTaskResize(t);
+    public final void onBusEvent(final DragEndCancelledEvent event) {
+        // Animate the overlay alpha back to 0
+        updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
+                true /* animateAlpha */, false /* animateBounds */);
+    }
+
+    private Rect getTaskRect(TaskView taskView) {
+        int[] location = taskView.getLocationOnScreen();
+        int viewX = location[0];
+        int viewY = location[1];
+        return new Rect(viewX, viewY,
+                (int) (viewX + taskView.getWidth() * taskView.getScaleX()),
+                (int) (viewY + taskView.getHeight() * taskView.getScaleY()));
+    }
+
+    public final void onBusEvent(DraggingInRecentsEvent event) {
+        if (mTaskStackView.getTaskViews().size() > 0) {
+            setTranslationY(event.distanceFromTop - mTaskStackView.getTaskViews().get(0).getY());
         }
     }
 
-    /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
+    public final void onBusEvent(DraggingInRecentsEndedEvent event) {
+        ViewPropertyAnimator animator = animate();
+        if (event.velocity > mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
+            animator.translationY(getHeight());
+            animator.withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    WindowManagerProxy.getInstance().maximizeDockedStack();
+                }
+            });
+            mFlingAnimationUtils.apply(animator, getTranslationY(), getHeight(), event.velocity);
+        } else {
+            animator.translationY(0f);
+            animator.setListener(null);
+            mFlingAnimationUtils.apply(animator, getTranslationY(), 0, event.velocity);
+        }
+        animator.start();
+    }
 
-    @Override
-    public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
-        // Propagate this event down to each task stack view
-        List<TaskStackView> stackViews = getTaskStackViews();
-        int stackCount = stackViews.size();
-        for (int i = 0; i < stackCount; i++) {
-            TaskStackView stackView = stackViews.get(i);
-            stackView.onPackagesChanged(monitor, packageName, userId);
+    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        if (!launchState.launchedViaDockGesture && !launchState.launchedFromApp
+                && mStack.getTaskCount() > 0) {
+            animateBackgroundScrim(1f,
+                    TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
+        }
+    }
+
+    public final void onBusEvent(AllTaskViewsDismissedEvent event) {
+        hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
+    }
+
+    public final void onBusEvent(DismissAllTaskViewsEvent event) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (!ssp.hasDockedTask()) {
+            // Animate the background away only if we are dismissing Recents to home
+            animateBackgroundScrim(0f, DEFAULT_UPDATE_SCRIM_DURATION);
+        }
+    }
+
+    public final void onBusEvent(ShowStackActionButtonEvent event) {
+        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+            return;
+        }
+
+        showStackActionButton(SHOW_STACK_ACTION_BUTTON_DURATION, event.translate);
+    }
+
+    public final void onBusEvent(HideStackActionButtonEvent event) {
+        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+            return;
+        }
+
+        hideStackActionButton(HIDE_STACK_ACTION_BUTTON_DURATION, true /* translate */);
+    }
+
+    public final void onBusEvent(MultiWindowStateChangedEvent event) {
+        updateStack(event.stack, false /* setStackViewTasks */);
+    }
+
+    /**
+     * Shows the stack action button.
+     */
+    private void showStackActionButton(final int duration, final boolean translate) {
+        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+            return;
+        }
+
+        final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
+        if (mStackActionButton.getVisibility() == View.INVISIBLE) {
+            mStackActionButton.setVisibility(View.VISIBLE);
+            mStackActionButton.setAlpha(0f);
+            if (translate) {
+                mStackActionButton.setTranslationY(-mStackActionButton.getMeasuredHeight() * 0.25f);
+            } else {
+                mStackActionButton.setTranslationY(0f);
+            }
+            postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    if (translate) {
+                        mStackActionButton.animate()
+                            .translationY(0f);
+                    }
+                    mStackActionButton.animate()
+                            .alpha(1f)
+                            .setDuration(duration)
+                            .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                            .start();
+                }
+            });
+        }
+        postAnimationTrigger.flushLastDecrementRunnables();
+    }
+
+    /**
+     * Hides the stack action button.
+     */
+    private void hideStackActionButton(int duration, boolean translate) {
+        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+            return;
+        }
+
+        final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
+        hideStackActionButton(duration, translate, postAnimationTrigger);
+        postAnimationTrigger.flushLastDecrementRunnables();
+    }
+
+    /**
+     * Hides the stack action button.
+     */
+    private void hideStackActionButton(int duration, boolean translate,
+                                       final ReferenceCountedTrigger postAnimationTrigger) {
+        if (!RecentsDebugFlags.Static.EnableStackActionButton) {
+            return;
+        }
+
+        if (mStackActionButton.getVisibility() == View.VISIBLE) {
+            if (translate) {
+                mStackActionButton.animate()
+                    .translationY(-mStackActionButton.getMeasuredHeight() * 0.25f);
+            }
+            mStackActionButton.animate()
+                    .alpha(0f)
+                    .setDuration(duration)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mStackActionButton.setVisibility(View.INVISIBLE);
+                            postAnimationTrigger.decrement();
+                        }
+                    })
+                    .start();
+            postAnimationTrigger.increment();
+        }
+    }
+
+    /**
+     * Updates the dock region to match the specified dock state.
+     */
+    private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
+            boolean isDefaultDockState, int overrideAreaAlpha, int overrideHintAlpha,
+            boolean animateAlpha, boolean animateBounds) {
+        ArraySet<TaskStack.DockState> newDockStatesSet = Utilities.arrayToSet(newDockStates,
+                new ArraySet<TaskStack.DockState>());
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            TaskStack.DockState dockState = visDockStates.get(i);
+            TaskStack.DockState.ViewState viewState = dockState.viewState;
+            if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
+                // This is no longer visible, so hide it
+                viewState.startAnimation(null, 0, 0, TaskStackView.SLOW_SYNC_STACK_DURATION,
+                        Interpolators.FAST_OUT_SLOW_IN, animateAlpha, animateBounds);
+            } else {
+                // This state is now visible, update the bounds and show it
+                int areaAlpha = overrideAreaAlpha != -1
+                        ? overrideAreaAlpha
+                        : viewState.dockAreaAlpha;
+                int hintAlpha = overrideHintAlpha != -1
+                        ? overrideHintAlpha
+                        : viewState.hintTextAlpha;
+                Rect bounds = isDefaultDockState
+                        ? dockState.getPreDockedBounds(getMeasuredWidth(), getMeasuredHeight())
+                        : dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight(),
+                        mDividerSize, mSystemInsets, getResources());
+                if (viewState.dockAreaOverlay.getCallback() != this) {
+                    viewState.dockAreaOverlay.setCallback(this);
+                    viewState.dockAreaOverlay.setBounds(bounds);
+                }
+                viewState.startAnimation(bounds, areaAlpha, hintAlpha,
+                        TaskStackView.SLOW_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN,
+                        animateAlpha, animateBounds);
+            }
+        }
+    }
+
+    /**
+     * Animates the background scrim to the given {@param alpha}.
+     */
+    private void animateBackgroundScrim(float alpha, int duration) {
+        Utilities.cancelAnimationWithoutCallbacks(mBackgroundScrimAnimator);
+        // Calculate the absolute alpha to animate from
+        int fromAlpha = (int) ((mBackgroundScrim.getAlpha() / (DEFAULT_SCRIM_ALPHA * 255)) * 255);
+        int toAlpha = (int) (alpha * 255);
+        mBackgroundScrimAnimator = ObjectAnimator.ofInt(mBackgroundScrim, Utilities.DRAWABLE_ALPHA,
+                fromAlpha, toAlpha);
+        mBackgroundScrimAnimator.setDuration(duration);
+        mBackgroundScrimAnimator.setInterpolator(toAlpha > fromAlpha
+                ? Interpolators.ALPHA_IN
+                : Interpolators.ALPHA_OUT);
+        mBackgroundScrimAnimator.start();
+    }
+
+    /**
+     * @return the bounds of the stack action button.
+     */
+    private Rect getStackActionButtonBoundsFromStackLayout() {
+        Rect actionButtonRect = new Rect(mTaskStackView.mLayoutAlgorithm.mStackActionButtonRect);
+        int left = isLayoutRtl()
+                ? actionButtonRect.left - mStackActionButton.getPaddingLeft()
+                : actionButtonRect.right + mStackActionButton.getPaddingRight()
+                        - mStackActionButton.getMeasuredWidth();
+        int top = actionButtonRect.top +
+                (actionButtonRect.height() - mStackActionButton.getMeasuredHeight()) / 2;
+        actionButtonRect.set(left, top, left + mStackActionButton.getMeasuredWidth(),
+                top + mStackActionButton.getMeasuredHeight());
+        return actionButtonRect;
+    }
+
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "  ";
+        String id = Integer.toHexString(System.identityHashCode(this));
+
+        writer.print(prefix); writer.print(TAG);
+        writer.print(" awaitingFirstLayout="); writer.print(mAwaitingFirstLayout ? "Y" : "N");
+        writer.print(" insets="); writer.print(Utilities.dumpRect(mSystemInsets));
+        writer.print(" [0x"); writer.print(id); writer.print("]");
+        writer.println();
+
+        if (mStack != null) {
+            mStack.dump(innerPrefix, writer);
+        }
+        if (mTaskStackView != null) {
+            mTaskStackView.dump(innerPrefix, writer);
         }
     }
 }

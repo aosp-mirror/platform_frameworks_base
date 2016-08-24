@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.view.WindowManager;
+
+import com.android.systemui.R;
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
@@ -30,25 +30,21 @@ public class SystemUIDialog extends AlertDialog {
     private final Context mContext;
 
     public SystemUIDialog(Context context) {
-        super(context, R.style.Theme_SystemUI_Dialog);
+        this(context, R.style.Theme_SystemUI_Dialog);
+    }
+
+    public SystemUIDialog(Context context, int theme) {
+        super(context, theme);
         mContext = context;
 
-        getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+        applyFlags(this);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
     }
 
     public void setShowForAllUsers(boolean show) {
-        if (show) {
-            getWindow().getAttributes().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        } else {
-            getWindow().getAttributes().privateFlags &=
-                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        }
+        setShowForAllUsers(this, show);
     }
 
     public void setMessage(int resId) {
@@ -61,5 +57,21 @@ public class SystemUIDialog extends AlertDialog {
 
     public void setNegativeButton(int resId, OnClickListener onClick) {
         setButton(BUTTON_NEGATIVE, mContext.getString(resId), onClick);
+    }
+
+    public static void setShowForAllUsers(AlertDialog dialog, boolean show) {
+        if (show) {
+            dialog.getWindow().getAttributes().privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        } else {
+            dialog.getWindow().getAttributes().privateFlags &=
+                    ~WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        }
+    }
+
+    public static void applyFlags(AlertDialog dialog) {
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL);
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
     }
 }

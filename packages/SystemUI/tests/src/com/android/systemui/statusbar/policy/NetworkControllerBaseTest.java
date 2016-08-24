@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -31,13 +28,13 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-
 import com.android.internal.telephony.cdma.EriInfo;
+import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
+import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -45,6 +42,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NetworkControllerBaseTest extends SysuiTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
@@ -95,21 +95,23 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mCallbackHandler = mock(CallbackHandler.class);
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataControllerImpl.class),
+                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults);
         setupNetworkController();
 
         // Trigger blank callbacks to always get the current state (some tests don't trigger
         // changes from default state).
-        mNetworkController.addSignalCallback(null);
+        mNetworkController.addSignalCallback(mock(SignalCallback.class));
         mNetworkController.addEmergencyListener(null);
     }
 
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
         mSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(true);
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
+        mNetworkController.handleSetUserSetupComplete(true);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
     }
@@ -136,7 +138,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
               = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                         mConfig, Looper.getMainLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
-                        mock(MobileDataControllerImpl.class), mMockSubDefaults);
+                        mock(DataUsageController.class), mMockSubDefaults);
 
       setupNetworkController();
 

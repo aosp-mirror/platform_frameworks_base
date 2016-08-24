@@ -27,12 +27,14 @@ interface IKeyChainService {
     // APIs used by KeyChain
     String requestPrivateKey(String alias);
     byte[] getCertificate(String alias);
+    byte[] getCaCertificates(String alias);
 
     // APIs used by CertInstaller
     void installCaCertificate(in byte[] caCertificate);
 
     // APIs used by DevicePolicyManager
-    boolean installKeyPair(in byte[] privateKey, in byte[] userCert, String alias);
+    boolean installKeyPair(in byte[] privateKey, in byte[] userCert, in byte[] certChain, String alias);
+    boolean removeKeyPair(String alias);
 
     // APIs used by Settings
     boolean deleteCaCertificate(String alias);

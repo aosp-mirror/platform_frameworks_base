@@ -17,6 +17,12 @@
 <!-- Colors specific to pre-Holo themes. -->
 <resources>
 
+    <!-- A bright Android-y green -->
+    <color name="legacy_green">#ff90df25</color>
+
+    <!-- A bright orange suitable for use in the early 2000s -->
+    <color name="legacy_orange">#fffea50b</color>
+
     <!-- Highlight colors for the legacy themes -->
     <eat-comment />
 
@@ -27,19 +33,17 @@
     <!-- Forward compatibility for Material-style theme colors -->
     <eat-comment />
 
-    <color name="legacy_primary_dark">#ff000000</color>
-    <color name="legacy_primary">#ffe6e6e6</color>
-    <color name="legacy_primary_light">#ffffffff</color>
-    <color name="legacy_control_activated">#ff90df25</color>
+    <color name="legacy_primary_dark">@color/black</color>
+    <color name="legacy_primary">#ff222222</color>
+    <color name="legacy_control_activated">@color/legacy_green</color>
     <color name="legacy_control_normal">#99ffffff</color>
-    <color name="legacy_button_pressed">#fffea50b</color>
+    <color name="legacy_button_pressed">@color/legacy_orange</color>
     <color name="legacy_button_normal">#f3dbdbdb</color>
 
-    <color name="legacy_light_primary_dark">@color/legacy_primary_dark</color>
-    <color name="legacy_light_primary">@color/legacy_primary</color>
-    <color name="legacy_light_primary_light">@color/legacy_primary_light</color>
-    <color name="legacy_light_control_activated">@color/legacy_control_activated</color>
+    <color name="legacy_light_primary_dark">@color/black</color>
+    <color name="legacy_light_primary">#ffe6e6e6</color>
+    <color name="legacy_light_control_activated">@color/legacy_green</color>
     <color name="legacy_light_control_normal">#99000000</color>
-    <color name="legacy_light_button_pressed">@color/legacy_button_pressed</color>
-    <color name="legacy_light_button_normal">@color/legacy_button_normal</color>
+    <color name="legacy_light_button_pressed">@color/legacy_orange</color>
+    <color name="legacy_light_button_normal">#f3dbdbdb</color>
 </resources>

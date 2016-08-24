@@ -15,13 +15,12 @@
 ** limitations under the License.
 */
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/floating_toolbar_height"
+    android:layout_height="wrap_content"
     android:padding="0dp"
-    android:layout_margin="0dp"
-    android:elevation="2dp"
+    android:layout_margin="@android:dimen/text_edit_floating_toolbar_margin"
+    android:elevation="@android:dimen/text_edit_floating_toolbar_elevation"
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:background="?attr/floatingToolbarPopupBackgroundDrawable"/>

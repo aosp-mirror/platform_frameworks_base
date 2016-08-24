@@ -15,6 +15,13 @@
  */
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MIN;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -23,7 +30,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
@@ -46,12 +55,14 @@ import java.util.Objects;
  * {@hide}
  */
 public final class NotificationRecord {
+    static final String TAG = "NotificationRecord";
+    static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     final StatusBarNotification sbn;
     final int mOriginalFlags;
+    private final Context mContext;
 
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
-    int score;
     /** Whether the notification was seen by the user via one of the notification listeners. */
     boolean mIsSeen;
 
@@ -82,16 +93,77 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
+    private int mUserImportance = IMPORTANCE_UNSPECIFIED;
+    private int mImportance = IMPORTANCE_UNSPECIFIED;
+    private CharSequence mImportanceExplanation = null;
+
+    private int mSuppressedVisualEffects = 0;
+    private String mUserExplanation;
+    private String mPeopleExplanation;
 
     @VisibleForTesting
-    public NotificationRecord(StatusBarNotification sbn, int score)
+    public NotificationRecord(Context context, StatusBarNotification sbn)
     {
         this.sbn = sbn;
-        this.score = score;
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
         mUpdateTimeMs = mCreationTimeMs;
+        mContext = context;
+        stats = new NotificationUsageStats.SingleNotificationStats();
+        mImportance = defaultImportance();
+    }
+
+    private int defaultImportance() {
+        final Notification n = sbn.getNotification();
+        int importance = IMPORTANCE_DEFAULT;
+
+        // Migrate notification flags to scores
+        if (0 != (n.flags & Notification.FLAG_HIGH_PRIORITY)) {
+            n.priority = Notification.PRIORITY_MAX;
+        }
+
+        switch (n.priority) {
+            case Notification.PRIORITY_MIN:
+                importance = IMPORTANCE_MIN;
+                break;
+            case Notification.PRIORITY_LOW:
+                importance = IMPORTANCE_LOW;
+                break;
+            case Notification.PRIORITY_DEFAULT:
+                importance = IMPORTANCE_DEFAULT;
+                break;
+            case Notification.PRIORITY_HIGH:
+                importance = IMPORTANCE_HIGH;
+                break;
+            case Notification.PRIORITY_MAX:
+                importance = IMPORTANCE_MAX;
+                break;
+        }
+        stats.requestedImportance = importance;
+
+        boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
+                || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
+                || n.sound != null
+                || n.vibrate != null;
+        stats.isNoisy = isNoisy;
+
+        if (!isNoisy && importance > IMPORTANCE_LOW) {
+            importance = IMPORTANCE_LOW;
+        }
+
+        if (isNoisy) {
+            if (importance < IMPORTANCE_DEFAULT) {
+                importance = IMPORTANCE_DEFAULT;
+            }
+        }
+
+        if (n.fullScreenIntent != null) {
+            importance = IMPORTANCE_MAX;
+        }
+
+        stats.naturalImportance = importance;
+        return importance;
     }
 
     // copy any notes that the ranking system may have made before the update
@@ -104,7 +176,10 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        // Don't copy mGlobalSortKey, recompute it.
+        if (previous.sbn.getOverrideGroupKey() != null && !sbn.isAppGroup()) {
+            sbn.setOverrideGroupKey(previous.sbn.getOverrideGroupKey());
+        }
+        // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
     public Notification getNotification() { return sbn.getNotification(); }
@@ -124,7 +199,7 @@ public final class NotificationRecord {
         pw.println(prefix + this);
         pw.println(prefix + "  uid=" + sbn.getUid() + " userId=" + sbn.getUserId());
         pw.println(prefix + "  icon=" + iconStr);
-        pw.println(prefix + "  pri=" + notification.priority + " score=" + sbn.getScore());
+        pw.println(prefix + "  pri=" + notification.priority);
         pw.println(prefix + "  key=" + sbn.getKey());
         pw.println(prefix + "  seen=" + mIsSeen);
         pw.println(prefix + "  groupKey=" + getGroupKey());
@@ -146,12 +221,14 @@ public final class NotificationRecord {
             final int N = notification.actions.length;
             for (int i=0; i<N; i++) {
                 final Notification.Action action = notification.actions[i];
-                pw.println(String.format("%s    [%d] \"%s\" -> %s",
-                        prefix,
-                        i,
-                        action.title,
-                        action.actionIntent.toString()
-                        ));
+                if (action != null) {
+                    pw.println(String.format("%s    [%d] \"%s\" -> %s",
+                            prefix,
+                            i,
+                            action.title,
+                            action.actionIntent == null ? "null" : action.actionIntent.toString()
+                    ));
+                }
             }
             pw.println(prefix + "  }");
         }
@@ -193,12 +270,18 @@ public final class NotificationRecord {
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
+        pw.println(prefix + "  mUserImportance="
+                + NotificationListenerService.Ranking.importanceToString(mUserImportance));
+        pw.println(prefix + "  mImportance="
+                + NotificationListenerService.Ranking.importanceToString(mImportance));
+        pw.println(prefix + "  mImportanceExplanation=" + mImportanceExplanation);
         pw.println(prefix + "  mIntercept=" + mIntercept);
         pw.println(prefix + "  mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "  mRankingTimeMs=" + mRankingTimeMs);
         pw.println(prefix + "  mCreationTimeMs=" + mCreationTimeMs);
         pw.println(prefix + "  mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "  mUpdateTimeMs=" + mUpdateTimeMs);
+        pw.println(prefix + "  mSuppressedVisualEffects= " + mSuppressedVisualEffects);
     }
 
 
@@ -226,15 +309,19 @@ public final class NotificationRecord {
     @Override
     public final String toString() {
         return String.format(
-                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s score=%d key=%s: %s)",
+                "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s: %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
-                this.sbn.getTag(), this.sbn.getScore(), this.sbn.getKey(),
+                this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
                 this.sbn.getNotification());
     }
 
     public void setContactAffinity(float contactAffinity) {
         mContactAffinity = contactAffinity;
+        if (mImportance < IMPORTANCE_DEFAULT &&
+                mContactAffinity > ValidateNotificationPeople.VALID_CONTACT) {
+            setImportance(IMPORTANCE_DEFAULT, getPeopleExplanation());
+        }
     }
 
     public float getContactAffinity() {
@@ -265,6 +352,54 @@ public final class NotificationRecord {
         return mPackageVisibility;
     }
 
+    public void setUserImportance(int importance) {
+        mUserImportance = importance;
+        applyUserImportance();
+    }
+
+    private String getUserExplanation() {
+        if (mUserExplanation == null) {
+            mUserExplanation =
+                    mContext.getString(com.android.internal.R.string.importance_from_user);
+        }
+        return mUserExplanation;
+    }
+
+    private String getPeopleExplanation() {
+        if (mPeopleExplanation == null) {
+            mPeopleExplanation =
+                    mContext.getString(com.android.internal.R.string.importance_from_person);
+        }
+        return mPeopleExplanation;
+    }
+
+    private void applyUserImportance() {
+        if (mUserImportance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+            mImportance = mUserImportance;
+            mImportanceExplanation = getUserExplanation();
+        }
+    }
+
+    public int getUserImportance() {
+        return mUserImportance;
+    }
+
+    public void setImportance(int importance, CharSequence explanation) {
+        if (importance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+            mImportance = importance;
+            mImportanceExplanation = explanation;
+        }
+        applyUserImportance();
+    }
+
+    public int getImportance() {
+        return mImportance;
+    }
+
+    public CharSequence getImportanceExplanation() {
+        return mImportanceExplanation;
+    }
+
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
         return mIntercept;
@@ -272,6 +407,14 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public void setSuppressedVisualEffects(int effects) {
+        mSuppressedVisualEffects = effects;
+    }
+
+    public int getSuppressedVisualEffects() {
+        return mSuppressedVisualEffects;
     }
 
     public boolean isCategory(String category) {
@@ -378,5 +521,9 @@ public final class NotificationRecord {
 
     public String getGroupKey() {
         return sbn.getGroupKey();
+    }
+
+    public boolean isImportanceFromUser() {
+        return mImportance == mUserImportance;
     }
 }

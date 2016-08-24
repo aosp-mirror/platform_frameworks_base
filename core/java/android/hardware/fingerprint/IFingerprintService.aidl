@@ -35,13 +35,14 @@ interface IFingerprintService {
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,
-            int flags);
+            int flags, String opPackageName);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int fingerId, int groupId, IFingerprintServiceReceiver receiver);
+    void remove(IBinder token, int fingerId, int groupId, int userId,
+            IFingerprintServiceReceiver receiver);
 
     // Rename the fingerprint specified by fingerId and groupId to the given name
     void rename(int fingerId, int groupId, String name);
@@ -75,4 +76,7 @@ interface IFingerprintService {
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
     void addLockoutResetCallback(IFingerprintServiceLockoutResetCallback callback);
+
+    // Explicitly set the active user (for enrolling work profile)
+    void setActiveUser(int uid);
 }

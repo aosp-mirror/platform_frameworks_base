@@ -33,13 +33,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -73,7 +73,7 @@ public class FontFamily_Delegate {
     private static final Map<String, FontInfo> sCache =
             new LinkedHashMap<String, FontInfo>(CACHE_SIZE) {
         @Override
-        protected boolean removeEldestEntry(Entry<String, FontInfo> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, FontInfo> eldest) {
             return size() > CACHE_SIZE;
         }
 
@@ -213,7 +213,7 @@ public class FontFamily_Delegate {
         return mValid;
     }
 
-    /*package*/ static Font loadFont(String path) {
+    private static Font loadFont(String path) {
         if (path.startsWith(SYSTEM_FONTS) ) {
             String relativePath = path.substring(SYSTEM_FONTS.length());
             File f = new File(sFontLocation, relativePath);
@@ -245,6 +245,13 @@ public class FontFamily_Delegate {
         return sFontLocation;
     }
 
+    // ---- delegate methods ----
+    @LayoutlibDelegate
+    /*package*/ static boolean addFont(FontFamily thisFontFamily, String path, int ttcIndex) {
+        final FontFamily_Delegate delegate = getDelegate(thisFontFamily.mNativePtr);
+        return delegate != null && delegate.addFont(path, ttcIndex);
+    }
+
     // ---- native methods ----
 
     @LayoutlibDelegate
@@ -270,35 +277,25 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFont(long nativeFamily, final String path) {
-        final FontFamily_Delegate delegate = getDelegate(nativeFamily);
-        if (delegate != null) {
-            if (sFontLocation == null) {
-                delegate.mPostInitRunnables.add(new Runnable() {
-                    @Override
-                    public void run() {
-                        delegate.addFont(path);
-                    }
-                });
-                return true;
-            }
-            return delegate.addFont(path);
-        }
+    /*package*/ static boolean nAddFont(long nativeFamily, ByteBuffer font, int ttcIndex) {
+        assert false : "The only client of this method has been overriden.";
         return false;
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, final String path,
-            final int weight, final boolean isItalic) {
+    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
+            int ttcIndex, List<FontListParser.Axis> listOfAxis,
+            int weight, boolean isItalic) {
+        assert false : "The only client of this method has been overriden.";
+        return false;
+    }
+
+    static boolean addFont(long nativeFamily, final String path, final int weight,
+            final boolean isItalic) {
         final FontFamily_Delegate delegate = getDelegate(nativeFamily);
         if (delegate != null) {
             if (sFontLocation == null) {
-                delegate.mPostInitRunnables.add(new Runnable() {
-                    @Override
-                    public void run() {
-                        delegate.addFont(path, weight, isItalic);
-                    }
-                });
+                delegate.mPostInitRunnables.add(() -> delegate.addFont(path, weight, isItalic));
                 return true;
             }
             return delegate.addFont(path, weight, isItalic);
@@ -309,6 +306,9 @@ public class FontFamily_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
         FontFamily_Delegate ffd = sManager.getDelegate(nativeFamily);
+        if (ffd == null) {
+            return false;
+        }
         ffd.mValid = true;
         if (mgr == null) {
             return false;
@@ -389,6 +389,15 @@ public class FontFamily_Delegate {
         mPostInitRunnables = null;
     }
 
+    private boolean addFont(final String path, int ttcIndex) {
+        // FIXME: support ttc fonts. Hack JRE??
+        if (sFontLocation == null) {
+            mPostInitRunnables.add(() -> addFont(path));
+            return true;
+        }
+        return addFont(path);
+    }
+
      private boolean addFont(@NonNull String path) {
          return addFont(path, DEFAULT_FONT_WEIGHT, path.endsWith(FONT_SUFFIX_ITALIC));
      }
@@ -452,6 +461,7 @@ public class FontFamily_Delegate {
     private FontInfo deriveFont(@NonNull FontInfo srcFont, @NonNull FontInfo outFont) {
         int desiredWeight = outFont.mWeight;
         int srcWeight = srcFont.mWeight;
+        assert srcFont.mFont != null;
         Font derivedFont = srcFont.mFont;
         // Embolden the font if required.
         if (desiredWeight >= BOLD_FONT_WEIGHT && desiredWeight - srcWeight > BOLD_FONT_WEIGHT_DELTA / 2) {

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2016, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- Layout for {@link com.android.systemui.tv.pip.PipControlButtonView}. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView android:id="@+id/button"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:focusable="true"
+        android:src="@drawable/tv_pip_button_focused"
+        android:importantForAccessibility="yes" />
+
+    <ImageView android:id="@+id/icon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:importantForAccessibility="no" />
+
+    <TextView android:id="@+id/desc"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:text="@string/pip_fullscreen"
+        android:alpha="0"
+        android:fontFamily="sans-serif"
+        android:textSize="12sp"
+        android:textColor="#EEEEEE"
+        android:importantForAccessibility="no" />
+</merge>

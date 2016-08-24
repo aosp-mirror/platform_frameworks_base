@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
@@ -175,7 +176,7 @@ public class InputMethodSubtypeSwitchingController {
         }
 
         private final TreeMap<InputMethodInfo, List<InputMethodSubtype>> mSortedImmis =
-                new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                new TreeMap<>(
                         new Comparator<InputMethodInfo>() {
                             @Override
                             public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
@@ -192,14 +193,9 @@ public class InputMethodSubtypeSwitchingController {
                             }
                         });
 
-        public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList() {
-            return getSortedInputMethodAndSubtypeList(true, false, false);
-        }
-
         public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeList(
-                boolean showSubtypes, boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
-            final ArrayList<ImeSubtypeListItem> imList =
-                    new ArrayList<ImeSubtypeListItem>();
+                boolean includeAuxiliarySubtypes, boolean isScreenLocked) {
+            final ArrayList<ImeSubtypeListItem> imList = new ArrayList<>();
             final HashMap<InputMethodInfo, List<InputMethodSubtype>> immis =
                     mSettings.getExplicitlyOrImplicitlyEnabledInputMethodsAndSubtypeListLocked(
                             mContext);
@@ -219,12 +215,12 @@ public class InputMethodSubtypeSwitchingController {
                     continue;
                 }
                 List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
-                HashSet<String> enabledSubtypeSet = new HashSet<String>();
+                HashSet<String> enabledSubtypeSet = new HashSet<>();
                 for (InputMethodSubtype subtype : explicitlyOrImplicitlyEnabledSubtypeList) {
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
                 final CharSequence imeLabel = imi.loadLabel(mPm);
-                if (showSubtypes && enabledSubtypeSet.size() > 0) {
+                if (enabledSubtypeSet.size() > 0) {
                     final int subtypeCount = imi.getSubtypeCount();
                     if (DEBUG) {
                         Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
@@ -289,8 +285,22 @@ public class InputMethodSubtypeSwitchingController {
             return -1;
         }
 
+        /**
+         * Provides the basic operation to implement bi-directional IME rotation.
+         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
+         * to {@code imi}.
+         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
+         * from which we find the adjacent IME subtype.
+         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
+         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
+         * does not have a subtype.
+         * @param forward {@code true} to do forward search the next IME subtype. Specify
+         * {@code false} to do backward search.
+         * @return The IME subtype found. {@code null} if no IME subtype is found.
+         */
+        @Nullable
         public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
-                InputMethodInfo imi, InputMethodSubtype subtype) {
+                InputMethodInfo imi, @Nullable InputMethodSubtype subtype, boolean forward) {
             if (imi == null) {
                 return null;
             }
@@ -302,8 +312,9 @@ public class InputMethodSubtypeSwitchingController {
                 return null;
             }
             final int N = mImeSubtypeList.size();
-            for (int offset = 1; offset < N; ++offset) {
-                // Start searching the next IME/subtype from the next of the current index.
+            for (int i = 1; i < N; ++i) {
+                // Start searching the next IME/subtype from +/- 1 indices.
+                final int offset = forward ? i : N - i;
                 final int candidateIndex = (currentIndex + offset) % N;
                 final ImeSubtypeListItem candidate = mImeSubtypeList.get(candidateIndex);
                 // Skip if searching inside the current IME only, but the candidate is not
@@ -375,8 +386,22 @@ public class InputMethodSubtypeSwitchingController {
             mUsageHistoryOfSubtypeListItemIndex[0] = currentItemIndex;
         }
 
+        /**
+         * Provides the basic operation to implement bi-directional IME rotation.
+         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
+         * to {@code imi}.
+         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
+         * from which we find the adjacent IME subtype.
+         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
+         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
+         * does not have a subtype.
+         * @param forward {@code true} to do forward search the next IME subtype. Specify
+         * {@code false} to do backward search.
+         * @return The IME subtype found. {@code null} if no IME subtype is found.
+         */
+        @Nullable
         public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
-                InputMethodInfo imi, InputMethodSubtype subtype) {
+                InputMethodInfo imi, @Nullable InputMethodSubtype subtype, boolean forward) {
             int currentUsageRank = getUsageRank(imi, subtype);
             if (currentUsageRank < 0) {
                 if (DEBUG) {
@@ -386,7 +411,8 @@ public class InputMethodSubtypeSwitchingController {
             }
             final int N = mUsageHistoryOfSubtypeListItemIndex.length;
             for (int i = 1; i < N; i++) {
-                final int subtypeListItemRank = (currentUsageRank + i) % N;
+                final int offset = forward ? i : N - i;
+                final int subtypeListItemRank = (currentUsageRank + offset) % N;
                 final int subtypeListItemIndex =
                         mUsageHistoryOfSubtypeListItemIndex[subtypeListItemRank];
                 final ImeSubtypeListItem subtypeListItem =
@@ -459,17 +485,31 @@ public class InputMethodSubtypeSwitchingController {
             mSwitchingUnawareRotationList = switchingUnawareRotationList;
         }
 
+        /**
+         * Provides the basic operation to implement bi-directional IME rotation.
+         * @param onlyCurrentIme {@code true} to limit the search space to IME subtypes that belong
+         * to {@code imi}.
+         * @param imi {@link InputMethodInfo} that will be used in conjunction with {@code subtype}
+         * from which we find the adjacent IME subtype.
+         * @param subtype {@link InputMethodSubtype} that will be used in conjunction with
+         * {@code imi} from which we find the next IME subtype.  {@code null} if the input method
+         * does not have a subtype.
+         * @param forward {@code true} to do forward search the next IME subtype. Specify
+         * {@code false} to do backward search.
+         * @return The IME subtype found. {@code null} if no IME subtype is found.
+         */
+        @Nullable
         public ImeSubtypeListItem getNextInputMethod(boolean onlyCurrentIme, InputMethodInfo imi,
-                InputMethodSubtype subtype) {
+                @Nullable InputMethodSubtype subtype, boolean forward) {
             if (imi == null) {
                 return null;
             }
             if (imi.supportsSwitchingToNextInputMethod()) {
                 return mSwitchingAwareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
-                        subtype);
+                        subtype, forward);
             } else {
                 return mSwitchingUnawareRotationList.getNextInputMethodLocked(onlyCurrentIme, imi,
-                        subtype);
+                        subtype, forward);
             }
         }
 
@@ -532,24 +572,25 @@ public class InputMethodSubtypeSwitchingController {
     public void resetCircularListLocked(Context context) {
         mSubtypeList = new InputMethodAndSubtypeList(context, mSettings);
         mController = ControllerImpl.createFrom(mController,
-                mSubtypeList.getSortedInputMethodAndSubtypeList());
+                mSubtypeList.getSortedInputMethodAndSubtypeList(
+                        false /* includeAuxiliarySubtypes */, false /* isScreenLocked */));
     }
 
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme, InputMethodInfo imi,
-            InputMethodSubtype subtype) {
+            InputMethodSubtype subtype, boolean forward) {
         if (mController == null) {
             if (DEBUG) {
                 Log.e(TAG, "mController shouldn't be null.");
             }
             return null;
         }
-        return mController.getNextInputMethod(onlyCurrentIme, imi, subtype);
+        return mController.getNextInputMethod(onlyCurrentIme, imi, subtype, forward);
     }
 
-    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(boolean showSubtypes,
+    public List<ImeSubtypeListItem> getSortedInputMethodAndSubtypeListLocked(
             boolean includingAuxiliarySubtypes, boolean isScreenLocked) {
         return mSubtypeList.getSortedInputMethodAndSubtypeList(
-                showSubtypes, includingAuxiliarySubtypes, isScreenLocked);
+                includingAuxiliarySubtypes, isScreenLocked);
     }
 
     public void dump(final Printer pw) {

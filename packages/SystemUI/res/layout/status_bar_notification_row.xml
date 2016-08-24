@@ -23,6 +23,14 @@
     android:clickable="true"
     >
 
+    <ViewStub
+        android:layout="@layout/notification_settings_icon_row"
+        android:id="@+id/settings_icon_row_stub"
+        android:inflatedId="@+id/notification_settings_icon_row"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        />
+
     <com.android.systemui.statusbar.NotificationBackgroundView
         android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
@@ -61,19 +69,16 @@
         />
 
     <ViewStub
-        android:layout="@layout/notification_expand_button"
-        android:id="@+id/more_button_stub"
-        android:inflatedId="@+id/notification_more_button_container"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_bottom_decor_height"
-        />
-
-    <ViewStub
         android:layout="@layout/notification_guts"
         android:id="@+id/notification_guts_stub"
         android:inflatedId="@+id/notification_guts"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         />
+
+    <com.android.systemui.statusbar.notification.FakeShadowView
+        android:id="@+id/fake_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.ExpandableNotificationRow>

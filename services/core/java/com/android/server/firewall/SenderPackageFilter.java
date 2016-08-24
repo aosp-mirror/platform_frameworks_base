@@ -20,6 +20,7 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
@@ -44,7 +45,10 @@ public class SenderPackageFilter implements Filter {
 
         int packageUid = -1;
         try {
-            packageUid = pm.getPackageUid(mPackageName, UserHandle.USER_OWNER);
+            // USER_SYSTEM here is not important. Only app id is used and getPackageUid() will
+            // return a uid whether the app is installed for a user or not.
+            packageUid = pm.getPackageUid(mPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                    UserHandle.USER_SYSTEM);
         } catch (RemoteException ex) {
             // handled below
         }

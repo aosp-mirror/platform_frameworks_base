@@ -1,0 +1,139 @@
+page.title=Support and Release Notes
+meta.keywords="preview", "wear"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+<p>
+  If you experience problems when developing and testing with the
+  Wear 2.0 Developer Preview, please file bugs at
+  <a href="https://g.co/wearpreviewbug">https://g.co/wearpreviewbug</a>.
+</p>
+
+<p>
+  To discuss issues or ideas with other developers working with Android Wear,
+  join the <a href="https://plus.google.com/communities/113381227473021565406">
+  Wear Developer Google+ community</a>.
+</p>
+
+<h2 id="dp">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p><em>Date: May 2016<br />
+      Builds: Wearable Support 2.0.0-alpha1, NVD36I <br />
+      Emulator support: x86 & ARM (32-bit)<br/>
+      </em></p>
+    </div>
+  </div>
+</div>
+
+
+<h3 id="general_advisories">General advisories</h3>
+
+<p>
+  This Developer Preview release is for app developers only and is designed for
+  use in compatibility testing and early development only.
+</p>
+
+<h4 id="deprecations">Deprecations</h4>
+
+
+<p>The following fields are deprecated in the Preview:</p>
+
+<ul>
+  <li>The <code>Notification.WearableExtender#setCustomSizePreset(int)</code>
+  method no longer accepts <code>SIZE_FULL_SCREEN</code> and this value is now
+  undefined.
+  </li>
+
+  <li>The <code>Notification.WearableExtender#setContentIcon(int)</code> method
+  is deprecated.
+  </li>
+</ul>
+
+<h3 id="known_issues">Known Issues</h3>
+
+
+<h4 id="notifications">Notifications</h4>
+
+
+<ul>
+  <li>This preview release does not include support for notification groups,
+  but will be supported in a future release.
+  </li>
+  <li>Tapping on next and previous controls in a notification while playing
+  music does not work.
+  </li>
+  <li>Bottom drawer actions user interface overlaps with media card
+  notifications.
+  </li>
+  <li>The system does not generate Smart Reply responses even if
+  <code>setAllowGeneratedReplies(true)</code> is set.
+  </li>
+</ul>
+
+
+<h4 id="complications">Complications</h4>
+
+<ul>
+  <li>Battery information is not synchronized between watch face and drop down
+  quick menu.
+  </li>
+  <li>Play music crashes when tapping on music complication in watch face.
+  </li>
+</ul>
+
+
+<h4 id="system_user_interface">System User Interface</h4>
+
+<ul>
+  <li>Pressing the hardware button in ambient mode triggers active mode with
+  the app launcher instead of active mode only.
+  </li>
+  <li>Double pressing the power hardware button while on the launcher causes
+  the watch screen to turn black.
+  </li>
+  <li>Dismissing multiple notifications can cause app to force close.
+  </li>
+  <li>Turning screen lock to off (Enable and disable) functionality is not
+  reliable.
+  </li>
+  <li>Airplane mode does not work from quick settings.
+  </li>
+  <li>Tapping Google keyboard English (United States) displays a <em>Settings
+  under construction</em> message.
+  </li>
+  <li>First calendar event notification must be dismissed in order to show the
+  rest of the event card.
+  </li>
+  <li>Unable to turn off the Wifi on wearable.
+  </li>
+  <li>Voice transcription may not work reliably at this time.
+  </li>
+</ul>
+
+
+<h4 id="companion_app">Companion App</h4>
+
+<ul>
+  <li>'More actions' via Companion app shows a blank screen on phone running
+  nyc-release and watch running feldspar-release.
+  </li>
+  <li>Select watch face on companion wear app will not change watch face on
+  wearable.
+  </li>
+</ul>
+
+
+<h4 id="devices">Devices</h4>
+
+<ul>
+  <li>On the Huawei Watch, selecting the language, followed by multiple
+  acknowledgement dialogues results in a black screen.
+  </li>
+  <li>On the LG Watch Urbane LTE, when answering call from the watch, the watch
+  does not provide audio from the caller.
+  </li>
+</ul>

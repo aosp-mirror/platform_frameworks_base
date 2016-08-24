@@ -18,7 +18,7 @@ package android.hardware;
 
 /**
  * This class represents a {@link android.hardware.Sensor Sensor} event and
- * holds informations such as the sensor's type, the time-stamp, accuracy and of
+ * holds information such as the sensor's type, the time-stamp, accuracy and of
  * course the sensor's {@link SensorEvent#values data}.
  *
  * <p>
@@ -163,7 +163,7 @@ public class SensorEvent {
      * </ul>
      * <p>
      * Typically the output of the gyroscope is integrated over time to
-     * calculate a rotation describing the change of angles over the timestep,
+     * calculate a rotation describing the change of angles over the time step,
      * for example:
      * </p>
      *
@@ -173,7 +173,7 @@ public class SensorEvent {
      *     private float timestamp;
      *
      *     public void onSensorChanged(SensorEvent event) {
-     *          // This timestep's delta rotation to be multiplied by the current rotation
+     *          // This time step's delta rotation to be multiplied by the current rotation
      *          // after computing it from the gyro sample data.
      *          if (timestamp != 0) {
      *              final float dT = (event.timestamp - timestamp) * NS2S;
@@ -192,8 +192,8 @@ public class SensorEvent {
      *                  axisZ /= omegaMagnitude;
      *              }
      *
-     *              // Integrate around this axis with the angular speed by the timestep
-     *              // in order to get a delta rotation from this sample over the timestep
+     *              // Integrate around this axis with the angular speed by the time step
+     *              // in order to get a delta rotation from this sample over the time step
      *              // We will convert this axis-angle representation of the delta rotation
      *              // into a quaternion before turning it into the rotation matrix.
      *              float thetaOverTwo = omegaMagnitude * dT / 2.0f;
@@ -396,7 +396,7 @@ public class SensorEvent {
      * dv = 216.7 *
      * (rh / 100.0 * 6.112 * Math.exp(17.62 * t / (243.12 + t)) / (273.15 + t));
      * </pre>
-     * 
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE Sensor.TYPE_AMBIENT_TEMPERATURE}:
      * </h4>
      *
@@ -433,9 +433,9 @@ public class SensorEvent {
      * Each field is a component of the estimated hard iron calibration.
      * The values are in micro-Tesla (uT).
      * </p>
-     * <p> Hard iron - These distortions arise due to the magnetized iron, steel or permanenet
+     * <p> Hard iron - These distortions arise due to the magnetized iron, steel or permanent
      * magnets on the device.
-     * Soft iron - These distortions arise due to the interaction with the earth's magentic
+     * Soft iron - These distortions arise due to the interaction with the earth's magnetic
      * field.
      * </p>
      * <h4> {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR}:</h4>
@@ -483,6 +483,101 @@ public class SensorEvent {
      * on it. In earlier versions, this used to be always 3 which has changed now. </p>
      *
      * @see GeomagneticField
+     *
+     * <h4> {@link android.hardware.Sensor#TYPE_DEVICE_ORIENTATION
+     * Sensor.TYPE_DEVICE_ORIENTATION}:</h4>
+     * The current device orientation will be available in values[0]. The only
+     * available values are:
+     * <ul>
+     * <li> 0: device is in default orientation (Y axis is vertical and points up)
+     * <li> 1: device is rotated 90 degrees counter-clockwise from default
+     *         orientation (X axis is vertical and points up)
+     * <li> 2: device is rotated 180 degrees from default orientation (Y axis is
+     *         vertical and points down)
+     * <li> 3: device is rotated 90 degrees clockwise from default orientation (X axis
+     *         is vertical and points down)
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_POSE_6DOF
+     * Sensor.TYPE_POSE_6DOF}:</h4>
+     *
+     * A TYPE_POSE_6DOF event consists of a rotation expressed as a quaternion and a translation
+     * expressed in SI units. The event also contains a delta rotation and translation that show
+     * how the device?s pose has changed since the previous sequence numbered pose.
+     * The event uses the cannonical Android Sensor axes.
+     *
+     *
+     * <ul>
+     * <li> values[0]: x*sin(&#952/2) </li>
+     * <li> values[1]: y*sin(&#952/2) </li>
+     * <li> values[2]: z*sin(&#952/2) </li>
+     * <li> values[3]: cos(&#952/2)   </li>
+     *
+     *
+     * <li> values[4]: Translation along x axis from an arbitrary origin. </li>
+     * <li> values[5]: Translation along y axis from an arbitrary origin. </li>
+     * <li> values[6]: Translation along z axis from an arbitrary origin. </li>
+     *
+     * <li> values[7]:  Delta quaternion rotation x*sin(&#952/2) </li>
+     * <li> values[8]:  Delta quaternion rotation y*sin(&#952/2) </li>
+     * <li> values[9]:  Delta quaternion rotation z*sin(&#952/2) </li>
+     * <li> values[10]: Delta quaternion rotation cos(&#952/2) </li>
+     *
+     * <li> values[11]: Delta translation along x axis. </li>
+     * <li> values[12]: Delta translation along y axis. </li>
+     * <li> values[13]: Delta translation along z axis. </li>
+     *
+     * <li> values[14]: Sequence number </li>
+     *
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_STATIONARY_DETECT
+     * Sensor.TYPE_STATIONARY_DETECT}:</h4>
+     *
+     * A TYPE_STATIONARY_DETECT event is produced if the device has been
+     * stationary for at least 5 seconds with a maximal latency of 5
+     * additional seconds. ie: it may take up anywhere from 5 to 10 seconds
+     * afte the device has been at rest to trigger this event.
+     *
+     * The only allowed value is 1.0.
+     *
+     * <ul>
+     *  <li> values[0]: 1.0 </li>
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_MOTION_DETECT
+     * Sensor.TYPE_MOTION_DETECT}:</h4>
+     *
+     * A TYPE_MOTION_DETECT event is produced if the device has been in
+     * motion  for at least 5 seconds with a maximal latency of 5
+     * additional seconds. ie: it may take up anywhere from 5 to 10 seconds
+     * afte the device has been at rest to trigger this event.
+     *
+     * The only allowed value is 1.0.
+     *
+     * <ul>
+     *  <li> values[0]: 1.0 </li>
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT
+     * Sensor.TYPE_HEART_BEAT}:</h4>
+     *
+     * A sensor of this type returns an event everytime a hear beat peak is
+     * detected.
+     *
+     * Peak here ideally corresponds to the positive peak in the QRS complex of
+     * an ECG signal.
+     *
+     * <ul>
+     *  <li> values[0]: confidence</li>
+     * </ul>
+     *
+     * <p>
+     * A confidence value of 0.0 indicates complete uncertainty - that a peak
+     * is as likely to be at the indicated timestamp as anywhere else.
+     * A confidence value of 1.0 indicates complete certainly - that a peak is
+     * completely unlikely to be anywhere else on the QRS complex.
+     * </p>
      */
     public final float[] values;
 

@@ -206,13 +206,34 @@ public class MediaRecorder
         /** Microphone audio source */
         public static final int MIC = 1;
 
-        /** Voice call uplink (Tx) audio source */
+        /** Voice call uplink (Tx) audio source.
+         * <p>
+         * Capturing from <code>VOICE_UPLINK</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_UPLINK = 2;
 
-        /** Voice call downlink (Rx) audio source */
+        /** Voice call downlink (Rx) audio source.
+         * <p>
+         * Capturing from <code>VOICE_DOWNLINK</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_DOWNLINK = 3;
 
-        /** Voice call uplink + downlink audio source */
+        /** Voice call uplink + downlink audio source
+         * <p>
+         * Capturing from <code>VOICE_CALL</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_CALL = 4;
 
         /** Microphone audio source with same orientation as camera if available, the main
@@ -251,6 +272,10 @@ public class MediaRecorder
          */
         public static final int REMOTE_SUBMIX = 8;
 
+        /** Microphone audio source tuned for unprocessed (raw) sound if available, behaves like
+         *  {@link #DEFAULT} otherwise. */
+        public static final int UNPROCESSED = 9;
+
         /**
          * Audio source for capturing broadcast radio tuner output.
          * @hide
@@ -271,6 +296,30 @@ public class MediaRecorder
          */
         @SystemApi
         public static final int HOTWORD = 1999;
+    }
+
+    // TODO make AudioSource static (API change) and move this method inside the AudioSource class
+    /**
+     * @hide
+     * @param source An audio source to test
+     * @return true if the source is only visible to system components
+     */
+    public static boolean isSystemOnlyAudioSource(int source) {
+        switch(source) {
+        case AudioSource.DEFAULT:
+        case AudioSource.MIC:
+        case AudioSource.VOICE_UPLINK:
+        case AudioSource.VOICE_DOWNLINK:
+        case AudioSource.VOICE_CALL:
+        case AudioSource.CAMCORDER:
+        case AudioSource.VOICE_RECOGNITION:
+        case AudioSource.VOICE_COMMUNICATION:
+        //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
+        case AudioSource.UNPROCESSED:
+            return false;
+        default:
+            return true;
+        }
     }
 
     /**
@@ -385,6 +434,7 @@ public class MediaRecorder
         public static final int H264 = 2;
         public static final int MPEG_4_SP = 3;
         public static final int VP8 = 4;
+        public static final int HEVC = 5;
     }
 
     /**
@@ -405,7 +455,7 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.REMOTE_SUBMIX;
+        return AudioSource.UNPROCESSED;
     }
 
     /**
@@ -805,6 +855,30 @@ public class MediaRecorder
      * @throws IllegalStateException if it is called before start()
      */
     public native void stop() throws IllegalStateException;
+
+    /**
+     * Pauses recording. Call this after start(). You may resume recording
+     * with resume() without reconfiguration, as opposed to stop(). It does
+     * nothing if the recording is already paused.
+     *
+     * When the recording is paused and resumed, the resulting output would
+     * be as if nothing happend during paused period, immediately switching
+     * to the resumed scene.
+     *
+     * @throws IllegalStateException if it is called before start() or after
+     * stop()
+     */
+    public native void pause() throws IllegalStateException;
+
+    /**
+     * Resumes recording. Call this after start(). It does nothing if the
+     * recording is not paused.
+     *
+     * @throws IllegalStateException if it is called before start() or after
+     * stop()
+     * @see android.media.MediaRecorder#pause
+     */
+    public native void resume() throws IllegalStateException;
 
     /**
      * Restarts the MediaRecorder to its idle state. After calling

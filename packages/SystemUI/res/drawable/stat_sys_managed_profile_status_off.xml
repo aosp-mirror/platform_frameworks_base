@@ -1,0 +1,53 @@
+<!--
+Copyright (C) 2015 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="23dp"
+    android:height="18dp"
+    android:viewportWidth="23"
+    android:viewportHeight="18">
+<!--
+    The asset contains a briefcase symbol of 15.26dp x 13.6dp in the center.
+-->
+    <path
+        android:pathData="M0,-6 L24,-6 L24,18 L0,18 L0,-6 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M13.9892,11.6542 L13.4088,11.6542 L13.4088,12.8152 L9.843,12.8152 L9.843,11.6542
+L4.4529,11.6542 L4.4529,14.6395 C4.4529,15.3029,4.95045,15.8005,5.61384,15.8005
+L17.4721,15.8005 C17.6379,15.8005,17.8038,15.8005,17.9696,15.7175
+L13.9892,11.6542 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M18.7159,13.8932 L18.7159,11.6542 L16.477,11.6542
+C17.3062,12.4835,18.1355,13.3127,18.7159,13.8932 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M6.85771,4.52272 L5.03337,4.52272
+C4.36998,4.52272,3.87243,5.02027,3.87243,5.68366 L3.87243,9.24942
+C3.87243,9.91282,4.36998,10.4104,5.03337,10.4104 L9.76008,10.4104
+L9.76008,9.24942 L11.5844,9.24942 L6.85771,4.52272 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M9.1796,4.35687 L9.1796,3.36177 L13.9063,3.36177 L13.9063,4.52272
+L9.34545,4.52272 C11.1698,6.34706,13.3258,8.5031,15.2331,10.4104
+L18.0525,10.4104 C18.7159,10.4104,19.2135,9.91282,19.2135,9.24942
+L19.2135,5.68366 C19.2135,5.02027,18.7159,4.52272,18.0525,4.52272
+L15.0673,4.52272 L15.0673,3.36177 L13.9063,2.20083 L9.1796,2.20083
+L8.10158,3.27885 C8.43328,3.61055,8.84791,4.02517,9.1796,4.35687 Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M3.281,3.42136 L4.51236,2.19 L18.585,16.2626 L17.3536,17.494 L3.281,3.42136 Z" />
+</vector>

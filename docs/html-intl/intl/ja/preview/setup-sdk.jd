@@ -1,207 +1,187 @@
-page.title=Preview SDK のセットアップ
-page.image=images/cards/card-set-up_16-9_2x.png
+page.title=Preview のセットアップ
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-sdk_2x.png
 
 @jd:body
 
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>本書の内容</h2>
-      <ol>
-        <li><a href="#get-as13">Android Studio 1.3 を入手する</a></li>
-        <li><a href="#get-sdk">Preview SDK を入手する</a></li>
-        <li><a href="#create-update">プロジェクトを作成または更新する</a></li>
-        <li><a href="#setup-test">テスト用にセットアップする</a></li>
-      </ol>
+<ol>
+  <li><a href="#get-as13">Android Studio 2.1 を入手する</a></li>
+  <li><a href="#get-sdk">Android N SDK を入手する</a>
+    <ol>
+      <li><a href="#docs-dl">リファレンス ドキュメント</a>
+    </ol>
+  </li>
+  <li><a href="#java8">Java 8 JDK を入手する</a></li>
+  <li><a href="#create-update">プロジェクトをアップデートまたは作成する</a></li>
+  <li><a href="#next">次のステップ</a></li>
+</ol>
   </div>
 </div>
 
-<p>M Developer Preview SDK は、Android SDK Manager から入手できます。このドキュメントは、Android SDK Manager の使用方法やプロジェクトの作成方法などの Android アプリ開発についての知識をお持ちの方を対象にしています。
+<p>このページで説明しているように、Android N Preview 向けのアプリを開発するには、デベロッパー環境をアップデートする必要があります。
+</p>
 
-Android アプリを初めて開発する場合は、まず <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a> のトレーニング レッスンをご覧ください。</a>
+<p>Android N システム イメージでアプリの互換性を簡単にテストするには、<a href="{@docRoot}preview/download.html">Android N 端末でのテスト</a>に関するガイドに従ってください。
+</p>
+
+<img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
+
+
+<h2 id="get-as13">Android Studio 2.1 を入手する</h2>
+
+<p>Android N プラットフォームには、Jack と呼ばれる新しいコンパイラーが必要な <a href="{@docRoot}preview/j8-jack.html">Java 8 の言語機能</a>のサポートが追加されています。
+現在、最新バージョンの Jack は、Android Studio 2.1 のみでサポートされています。したがって、Java 8 の言語機能を使用する場合は、Android Studio 2.1 を使用してアプリをビルドする必要があります。
+
+
+それ以外の合は、Jack コンパイラーを使用する必要はありません。ただし、以下に説明するように、Android N プラットフォームに対応する設定でコンパイルを行うには、JDK 8 にアップデートする必要があります。
 
 </p>
 
-<h2 id="get-as13">Android Studio 1.3 を入手する</h2>
-
-<p>Developer Preview は、現在プレビュー段階にある Android Studio 1.3 に最適化されています。
-Preview SDK をご使用になる場合は、Android Studio 1.3 のプレビュー版をインストールすることをお勧めします。
-</p>
-
-<p class="caution"><strong>注意:</strong> Android Studio 1.3 の Canary プレビューは、現在も開発中です。
-メインの開発用マシンを Developer Preview のテストに使用する場合、テスト用に 2 つ目の Android Studio をインストールできます。
+<p>既に Android Studio がインストールされている場合は、<strong>[Help] &gt; [Check for Update]</strong>（Mac では、<strong>[Android Studio] &gt; [Check for Updates]</strong>）をクリックして、Android Studio 2.1 以上であることを確認してください。
 
 </p>
 
-<p>Android Studio 1.3 プレビューをインストールするには: </p>
+<p>Android Studio 2.1 以上がない場合は、<a href="{@docRoot}studio/">こちらから Android Studio 2.1 をダウンロード</a>してください。
+</p>
+
+
+<h2 id="get-sdk">N Preview SDK を入手する</h2>
+
+<p>Android N API を使用して開発を開始するには、次のステップに従って、Android Studio に Android N Preview SDK をインストールする必要があります。
+</p>
 
 <ol>
-  <li><a href="{@docRoot}tools/studio/index.html">Android Studio</a> をダウンロードして起動します。
-
-  </li>
-
-  <li>[<strong>Settings</strong>] ウィンドウを開きます（Windows では、 <strong>[File] &gt; [Settings]</strong> を選択すると開くことができます）。
-<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Updates]</strong> を選択します。
-
-
-
-    <p class="aside">OSX では、Android Studio の [<strong>Preferences</strong>] ウィンドウで、[<strong>Appearance &amp; Behavior</strong>] パネルを見つけることができます。
-
-</p>
-  </li>
-
-  <li> [<strong>Updates</strong>] パネルで、<strong>[Automatically check updates for:] に
-[Canary Channel]</strong> を選択します。
-  </li>
-
-  <li>[<strong>Updates</strong>] パネルで、[<strong>Check Now</strong>] を選択して最新の Canary ビルドの有無を確認します。
-メッセージが表示されたら、最新の Canary ビルドをダウンロードしてインストールします。
-
-  </li>
-</ol>
-
-<h2 id="get-sdk">Preview SDK を入手する</h2>
-
-<p>開発環境に Preview SDK コンポーネントを追加するには: </p>
-
-<ol>
-  <li>Android Studio 1.3 プレビューを起動します。
-  </li>
-
-  <li>[<strong>Settings</strong>] ウィンドウを開きます（Windows では、 <strong>[File] &gt; [Settings]</strong> を選択すると開くことができます）。
-<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Updates]</strong> を選択します。
-
-
-
-    <p class="aside">OSX では、Android Studio の [<strong>Preferences</strong>] ウィンドウで、[<strong>Appearance &amp; Behavior</strong>] パネルを見つけることができます。
-
-</p>
-  </li>
-
-  <li>[<strong>Updates</strong>] パネルで、<strong>[Automatically check updates for:] に
-[Canary Channel]</strong> を、<strong>[Automatically check updates for Android SDK:] に
-[Preview Channel]</strong> を選択します。
-  </li>
-
-  <li>[<strong>Android SDK Manager</strong>] を起動します。（Android Studio 1.3 では、SDK Manager はスタンドアロン アプリケーションではなくなり Android Studio に統合されました。）
-
-
-  </li>
-
-  <li>[<strong>Platforms</strong>] セクションで、[<strong>Android MNC Preview</strong>] を選択します。
-
-  </li>
-
-  <li>[<strong>Tools</strong>] セクションで、最新の Android [<strong>SDK Tools</strong>]、[<strong>Platform-tools</strong>]、[<strong>Build-tools</strong>] を選択します。
-
-
-  </li>
-
-  <li>[<strong>Install packages</strong>] をクリックし、すべてのパッケージの使用許諾契約に同意します。
-
-  </li>
-
-  <li>[<strong>Settings</strong>] ウィンドウを開き、<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Android SDK]</strong> を選択し、M Developer Preview がインストールされていることを確認します。
-
+  <li><strong>[Tools] &gt; [Android] &gt; [SDK Manager]</strong> をクリックして、SDK Manager を開きます。
 </li>
 
-  <li>[<strong>Android SDK</strong>] パネルで、[<strong>SDK Platforms</strong>] を選択します。
-[<strong>Android MNC Preview</strong>] が [<em>Installed</em>] と表示されているはずです。
-また、[<strong>SDK Tools</strong>] タブを開き、最新のツールがインストールされていることを確認します。
+  <li>[<strong>SDK Platforms</strong>] タブで、[<strong>Android N Preview</strong>] チェックボックスをオンにします。
+</li>
+
+  <li>[<strong>SDK Tools</strong>] タブをクリックして、[<strong>Android SDK Build Tools</strong>]、[<strong>Android SDK Platform-Tools</strong>]、[<strong>Android SDK Tools</strong>] のチェック ボックスをオンにします。
+
 
 
   </li>
+
+  <li>[<strong>OK</strong>] をクリックして、インストールするパッケージの使用許諾に同意します。
+
+  </li>
 </ol>
-<p>上記の手順を完了すると、開発環境でプレビュー コンポーネントを利用できるようになります。
- </p>
 
-
-<h2 id="create-update">プロジェクトを作成または更新する</h2>
+<h3 id="docs-dl">N Preview のリファレンス ドキュメントを入手する</h3>
 
 <p>
-  プレビュー API を使用するには、プレビュー コンポーネントを使用するために開発プロジェクトを作成または更新する必要があります。
+  Android N API に関する詳細は、N Preview のリファレンス ドキュメントに記載されています。このドキュメントは、次の表からダウンロードできます。
+
+  このパッケージには、簡略化されたオフライン バージョンの Android デベロッパー ウェブサイト、Android N API のアップデートされた API リファレンス、API の比較レポートが含まれています。
+
 
 </p>
+
+<table>
+  <tr>
+    <th scope="col">ドキュメント</th>
+    <th scope="col">チェックサム</th>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap">
+    <a href="{@docRoot}shareables/preview/n-preview-3-docs.zip">n-preview-3-docs.zip</a></td>
+    <td width="100%">
+      MD5:19bcfd057a1f9dd01ffbb3d8ff7b8d81<br>
+      SHA-1:9224bd4445cd7f653c4c294d362ccb195a2101e7 
+    </td>
+  </tr>
+<table>
+
+
+
+<h2 id="java8">Java 8 JDK を入手する</h2>
+
+<p>Android N プラットフォームに対応する設定でアプリをコンパイルしたり、Android Studio 2.1 でいくつかのツールを使用したりするには、Java 8 Developer Kit（JDK 8）をインストールする必要があります。
+したがって、最新バージョンを持っていない場合は、すぐに JDK 8 をダウンロードしてください。
+</p>
+
+<p>その後、次のステップに従って Android Studio で JDK のバージョンを設定します。</p>
+
+<ol>
+  <li>Android Studio で Android プロジェクトを開いてから、<strong>[File] &gt; [Project Structure]</strong> を選択して、[Project Structure] ダイアログを開きます
+
+（または、<strong>[File] &gt; [Other Settings] &gt; [Default Project Structure]</strong> を選択すると、すべてのプロジェクトの既定値を設定できます）。
+
+
+   </li>
+   <li>ダイアログの左側のパネルで、[<strong>SDK Location</strong>] をクリックします。
+   </li>
+   <li>[<strong>JDK Location</strong>] 項目に Java 8 JDK の場所を入力し（ファイルをブラウジングするには、右側のボタンをクリックします）、[<strong>OK</strong>] をクリックします。
+
+
+   </li>
+</ol>
+
+<img src="{@docRoot}preview/images/studio-jdk-location.jpg" width="700" alt="" />
+
+
+<h2 id="create-update">プロジェクトをアップデートまたは作成する</h2>
+
+<p>
+  Android N API を使用するには、プロジェクトが適切に構成されている必要があります。
+</p>
+
+<p>Java 8 機能の使用を計画している場合は、<a href="{@docRoot}preview/j8-jack.html">Java 8 機能</a>を読んで、サポートされる Java 8 機能に関する情報と、プロジェクトで Jack コンパイラーを設定する方法を確認してください。
+
+
+</p>
+
+
+<h3 id="update">既存のプロジェクトをアップデートする</h3>
+
+<p>モジュールの <code>build.gradle</code> ファイルを開き、次のように値をアップデートします。
+
+
+</p>
+
+<pre>
+android {
+  compileSdkVersion <strong>'android-N'</strong>
+  buildToolsVersion <strong>'24.0.0-rc3'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'N'</strong>
+     targetSdkVersion <strong>'N'</strong>
+     ...
+  }
+  ...
+}</pre>
 
 
 <h3 id="create">新しいプロジェクトを作成する</h3>
 
-<p>
-  Preview SDK を使用してプロジェクトを作成するときには、Android Studio を使用することをお勧めします。<a href="{@docRoot}sdk/installing/create-project.html">Creating a Project</a> に記載されている手順に従い、プロジェクト ウィザードで [<em>Form Factors</em>] 画面が表示されるまで操作を進めます。
 
-次に、以下の手順に従い、Preview SDK 用に構成されたプロジェクトを作成します。
-
-</p>
-
-<ul>
-  <li>[<strong>Phone and Tablet</strong>] をチェックします。</li>
-  <li>[<strong>Minimum SDK</strong>] で、[<strong>MNC: Android M (Preview)</strong>] を選択します。
-</li>
-</ul>
-
-
-<h3 id="update">既存のプロジェクトを更新する</h3>
-
-<p>
-  既存のプロジェクトを使用する場合は、プロジェクト構成を変更してプレビュー API を有効にする必要があります。開発環境で、モジュールの <code>build.gradle</code> ファイルを開き、次のように値を設定します。
-
-
-</p>
-
-<ul>
-  <li><code>compileSdkVersion</code> に <code>'android-MNC'</code> を設定します。</li>
-  <li><code>minSdkVersion</code> に <code>'MNC'</code> を設定します。</li>
-  <li><code>targetSdkVersion</code> に <code>'MNC'</code> を設定します。</li>
-</ul>
-
-
-<h2 id="setup-test">テスト用にセットアップする</h2>
-
-<p>
-  Preview SDK でアプリをテストするには、プレビュー版のプラットフォームを使用して構成した端末または仮想端末が必要です。
-互換端末をお持ちの場合、テスト用にプレビュー プラットフォームをインストールできます。
-互換端末をお持ちでない場合は、テスト用に仮想端末を構成できます。
-</p>
-
-<h3 id="setup-device">物理端末をセットアップする</h3>
-
-<p>
-  Nexus 5、Nexus 6、Nexus 9、Android TV をお持ちの場合は、アプリのテスト用にこれらの端末にプレビュー システム イメージをインストールできます。Android Virtual Device Manager ツールを使用すると、Android Studio 内から仮想端末をプレビュー版のプラットフォームでセットアップできます。
-
-
-
-</p>
-
-<p class="caution">
-  <strong>重要:</strong> 端末にプレビュー イメージをインストールすると、<em>端末からすべてのデータが削除されます</em>。そのため、プレビュー イメージをインストールする前にすべてのデータをバックアップする必要があります。
-
-</p>
-
-<h3 id="setupAVD">仮想端末をセットアップする</h3>
-
-<p>
-  Android Virtual Device Manager ツールを使用すると、Android Studio 内からプレビュー版のプラットフォームで仮想端末をセットアップできます。
-
-</p>
-
-<p>AVD マネージャーで AVD を作成するには: </p>
+<p>Android N Preview SDK を使って、開発のために新しいプロジェクトを作成するには、次のステップを実行します。</p>
 
 <ol>
-  <li><a href="{@docRoot}preview/setup-sdk.html">Preview SDK のセットアップ</a>の説明に従って、開発環境に Preview SDK をインストールします。
+  <li><strong>[File] &gt; [New Project]</strong> をクリックし、対象とする Android 端末のページに到達するまでのステップを実行します。
 
-</li>
-  <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a> の手順に従います。
-
-以下の設定を使用します。
-    <ul>
-      <li><strong>端末:</strong> Nexus 5、Nexus 6、Nexus 9、Android TV</li>
-      <li><strong>対象:</strong> 
-       Android M (Preview) - API Level M</li>
-      <li><strong>ABI:</strong> x86</li>
-    </ul>
   </li>
+  <li>このページで、[<strong>Phone and Tablet</strong>] オプションを選択します。</li>
+  <li>[<strong>Phone and Tablet</strong>] オプションの下にある [<strong>Minimum SDK</strong>] オプション リストで、[<strong>N:
+
+Android API 23, N Preview (Preview)</strong>] を選択します。</li>
 </ol>
 
-<p>
-  テスト用の仮想端末の作成についての詳細は、<a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a> をご覧ください。
-</p>
+
+<h2 id="next">次のステップ</h2>
+
+<ul>
+  <li><a href="{@docRoot}preview/download.html">Android N 端末でのテスト</a>に関するガイドに従ってください。</li>
+  <li>Android N プラットフォームの詳細については、<a href="{@docRoot}preview/behavior-changes.html">動作の変更点</a>と <a href="{@docRoot}preview/api-overview.html">Android N API とその機能</a>をご覧ください。
+
+
+</li>
+</ul>
+

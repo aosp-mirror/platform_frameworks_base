@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -26,11 +27,15 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionInspector;
+import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 
 public class InputConnectionWrapper implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
     private final IInputContext mIInputContext;
-    
+    @MissingMethodFlags
+    private final int mMissingMethods;
+
     static class InputContextCallback extends IInputContextCallback.Stub {
         private static final String TAG = "InputConnectionWrapper.ICC";
         public int mSeq;
@@ -190,8 +195,10 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public InputConnectionWrapper(IInputContext inputContext) {
+    public InputConnectionWrapper(IInputContext inputContext,
+            @MissingMethodFlags final int missingMethods) {
         mIInputContext = inputContext;
+        mMissingMethods = missingMethods;
     }
 
     public CharSequence getTextAfterCursor(int length, int flags) {
@@ -229,8 +236,12 @@ public class InputConnectionWrapper implements InputConnection {
         }
         return value;
     }
-    
+
     public CharSequence getSelectedText(int flags) {
+        if (isMethodMissing(MissingMethodFlags.GET_SELECTED_TEXT)) {
+            // This method is not implemented.
+            return null;
+        }
         CharSequence value = null;
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
@@ -294,6 +305,10 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     public boolean commitCompletion(CompletionInfo text) {
+        if (isMethodMissing(MissingMethodFlags.COMMIT_CORRECTION)) {
+            // This method is not implemented.
+            return false;
+        }
         try {
             mIInputContext.commitCompletion(text);
             return true;
@@ -339,6 +354,10 @@ public class InputConnectionWrapper implements InputConnection {
     }
 
     public boolean setComposingRegion(int start, int end) {
+        if (isMethodMissing(MissingMethodFlags.SET_COMPOSING_REGION)) {
+            // This method is not implemented.
+            return false;
+        }
         try {
             mIInputContext.setComposingRegion(start, end);
             return true;
@@ -400,10 +419,23 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
     }
-    
+
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         try {
             mIInputContext.deleteSurroundingText(beforeLength, afterLength);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+        if (isMethodMissing(MissingMethodFlags.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS)) {
+            // This method is not implemented.
+            return false;
+        }
+        try {
+            mIInputContext.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -430,6 +462,10 @@ public class InputConnectionWrapper implements InputConnection {
 
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         boolean result = false;
+        if (isMethodMissing(MissingMethodFlags.REQUEST_CURSOR_UPDATES)) {
+            // This method is not implemented.
+            return false;
+        }
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
             mIInputContext.requestUpdateCursorAnchorInfo(cursorUpdateMode, callback.mSeq, callback);
@@ -444,5 +480,26 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
         return result;
+    }
+
+    public Handler getHandler() {
+        // Nothing should happen when called from input method.
+        return null;
+    }
+
+    public void closeConnection() {
+        // Nothing should happen when called from input method.
+    }
+
+    private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {
+        return (mMissingMethods & methodFlag) == methodFlag;
+    }
+
+    @Override
+    public String toString() {
+        return "InputConnectionWrapper{idHash=#"
+                + Integer.toHexString(System.identityHashCode(this))
+                + " mMissingMethods="
+                + InputConnectionInspector.getMissingMethodFlagsAsString(mMissingMethods) + "}";
     }
 }

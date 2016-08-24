@@ -1,0 +1,1188 @@
+page.title=支持和版本说明
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-support_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>本文内容</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">一般公告</a></li>
+      <li><a href="#new">DP3 的新功能</a></li>
+      <li><a href="#ki">已知问题</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  当您使用 Android N Developer Preview 进行开发和测试时，您可借助两个主要支持渠道：
+请在 <a href="https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> 提交有关设备、系统和 Google App 错误的错误。
+对于其他应用问题，请直接联系开发者。
+
+</p>
+
+<p>若要与其他参与 Android N 的开发者讨论问题或想法，请加入 <a href="{@docRoot}preview/dev-community">Developer Preview Google+ 社区</a>。
+</p>
+
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日期：2016 年 5 月<br>
+        构建：NPD35K<br>
+        模拟器支持：x86 &amp; ARM（32/64 位）<br>
+        Google Play 服务：8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">一般公告</h3>
+
+<p>
+  Developer Preview 版本适用于<strong>应用开发者和其他早期试用者</strong>，可用于日常使用、开发或兼容性测试。
+
+请注意关于版本的一般注意事项：
+
+</p>
+
+<ul>
+  <li>这个版本可能会在支持设备上出现不同的<strong>稳定性问题</strong>。
+用户可能会遇到系统不稳定，如内核错误和崩溃。
+
+  </li>
+
+  <li>有些应用<strong>可能无法在新的平台版本上如预期运行。</strong>
+这其中包括 Google 应用和其他应用。
+  </li>
+
+  <li>Developer Preview 3 已在以下设备上经过<strong>兼容性测试套件 (CTS) 批准</strong>：
+Nexus 5X、Nexus 6、Nexus 6P 和 Pixel C。依赖 CTS 批准构建的应用应能在这些设备上正常运行(例如 Android Pay)。
+
+
+  </li>
+
+  <li>Developer Preview 3 <strong>适用于所有支持设备：</strong>
+Nexus 5X、Nexus 6、Nexus 6P、Nexus 9、Nexus Player、Pixel C、General Mobile 4G (Android One) 以及 Sony Xperia Z3 (D6603 和
+  D6653 型号)。
+
+
+  </li>
+</ul>
+
+
+<h3 id="new">DP3 的新功能</h3>
+
+<h4 id="">面向 Android 的 VR 模式</h4>
+
+<p>
+  Android N 为新的 VR 模式增加了平台支持和优化，以使开发者能为用户打造高质量移动 VR 体验。
+增加了一些性能增强特性，包括允许 VR 应用访问某个专属的 CPU 核心。
+
+在您的应用中，您可以充分利用到专为 VR 设计的智能头部跟踪和立体声通知功能。
+最重要的是，Android N 的图形延时非常低。
+
+</p>
+
+<p>
+  如需更多信息，请参阅<a href="https://developers.google.com/vr/android/">面向 Android 的Google VR SDK</a>。
+</p>
+
+<h4 id="">持续性能模式</h4>
+
+<p>
+  为解决这些限制，Android N 包括了<a href="{@docRoot}preview/api-overview.html#sustained_performance_api">持续性能模式</a> 支持，帮助原始设备制造商 (OEM) 提供关于长期运行应用的设备性能能力的提示。
+
+应用开发者随后可以使用这些提示来根据可预测的一致设备性能水平调整长期应用。
+
+应用开发者只能在 Nexus 6P 设备的 Developer Preview 上尝试这项新的 API。
+
+</p>
+
+<h4>多进程 WebView</h4>
+
+<p>
+  从 Android N 中的版本 51 开始，WebView 将开发者选项“多进程 WebView”被启用时，在一个单独的沙盒进程中运行网页内容。
+
+WebView 团队正在寻求关于 N 中的兼容性和运行时性能的反馈，并随后将在未来 Android 版本中启用多进程 WebView。
+
+在这个版本中，可预期启动时间回归、总内存使用和软件渲染性能。
+
+</p>
+
+<p>
+  如果您在多进程模式中遇到意外问题，请告诉我们。
+请通过<a href="https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">提交错误</a>来联系 WebView 团队。
+
+</p>
+
+<h4 id="">键盘快捷键辅助工具</h4>
+
+<p>
+  在 Android N 中，用户可以按 <code>Meta+/</code> 触发<strong>键盘快捷键</strong>屏幕，它会显示系统和对焦的应用中可用的所有快捷键。
+
+开发者可以添加自己的快捷键，或者从他们的应用触发快捷键屏幕。
+请参阅<a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">键盘快捷键辅助工具</a>以了解详细信息。
+
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  DP3 引入了一项新的 <a href="{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a>，它通过公开流式传输 Pub/Sub API 来传递应用的当前窗口帧计时信息，允许应用监测其 UI 渲染性能。<code>FrameMetricsListener</code> 可用于从更高的粒度衡量生产中的交互级 UI 性能，无需 USB 连接。
+
+
+
+
+
+</p>
+
+<h4 id="api-changes">功能和 API 更改</h4>
+
+<dl>
+  <dt>
+    启动器快捷键和启动器快捷键 API
+  </dt>
+
+  <dd>
+    我们已经决定将这项功能推迟到未来的 Android 版本中。我们计划从下一个 Developer Preview 开始，从公开 Android N API 中移除启动器快捷键 API（ShortcutManager 等）。
+
+
+  </dd>
+
+  <dt>
+    WebView Javascript 在页面加载之前运行
+  </dt>
+
+  <dd>
+    从面向 Android N 的应用开始，JavaScript 上下文会在加载新页面时重置。
+目前，新 {@link android.webkit.WebView} 实例中加载的第一个页面会继承上下文。
+
+    想要在 {@link
+    android.webkit.WebView} 中注入 Javascript 的开发者应在页面开始加载后执行脚本。
+
+  </dd>
+
+  <dt>
+    不安全起点上的 WebView 地理定位
+  </dt>
+
+  <dd>
+    从面向 Android N 的应用开始，地理定位 API 将仅在安全的起点（通过 HTTPS）上被允许。
+此政策的目的是在用户使用不安全连接时保护他们的私人信息。
+
+  </dd>
+
+  <dt>
+    Data Saver
+  </dt>
+
+  <dd>
+    从 Developer Preview 3 开始，应用可以使用 Intent 来显示系统对话框，使用户能直接向 Data Saver 豁免白名单中添加应用。
+
+请参阅 <a href="{@docRoot}preview/api-overview.html#data_saver">Data Saver 文档</a>以了解详细信息。
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#number-blocking">号码屏蔽</a>
+  </dt>
+
+  <dd>
+    如果未经授权的用户试图屏蔽或取消屏蔽一个号码，操作会即时失败，并返回 {@link java.lang.SecurityException}。
+（之前，操作曾引发 {@link java.lang.UnsupportedOperationException} ）
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">快速设置图块 API</a>
+
+  </dt>
+
+  <dd>
+    系统现在使用 Activity 的元数据来决定图块模式。
+    （之前平铺模式是由 <code>TileService.onTileAdded()</code> 的返回值决定。）
+如需了解详细信息，请参阅可下载的 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 参考</a> 中的 
+<code>TileService.META_DATA_ACTIVE_TILE</code>。
+  </dd>
+</dl>
+
+<h4 id="dp3-fixes">修复开发者报告的问题</h4>
+
+<p>
+  开发者报告的许多问题都已得到修复，包括：
+</p>
+
+<ul>
+  <li>在 1 首歌后蓝牙音频播放中断（错误 <a href="https://code.google.com/p/android/issues/detail?id=206889">206889</a>）
+  </li>
+
+  <li>Pixel C 不断崩溃（错误 <a href="https://code.google.com/p/android/issues/detail?id=206962">206962</a>）
+  </li>
+
+  <li>时钟和 Toast 通知问题（错误 <a href="https://code.google.com/p/android/issues/detail?id=203094">203094</a>）
+  </li>
+
+  <li>当通过 USB C 电缆连接到 MacBook Pro 时，Pixel C 重新启动（错误 <a href="https://code.google.com/p/android/issues/detail?id=205432">205432</a>）
+
+  </li>
+
+  <li>日历偏移一天（错误 <a href="https://code.google.com/p/android/issues/detail?id=203002">203002</a>）
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo 返回无效数据（错误 <a href="https://code.google.com/p/android/issues/detail?id=203022">203022</a>）
+  </li>
+
+  <li>Nexus 6p，蓝牙一直断开（错误 <a href="https://code.google.com/p/android/issues/detail?id=208062">208062</a>）
+  </li>
+</ul>
+
+<p>如需已修复问题的完整清单，请参阅 <a href="https://goo.gl/6uCKtf">Issue Tracker</a>。
+</p>
+
+<h3 id="ki">已知问题</h3>
+
+<h4>无障碍功能</h4>
+
+<ul>
+  <li>将间距被设置为近最大水平时，无法侦听 TTS 输出。
+  </li>
+
+  <li>当用户添加工作资料时可能会使无障碍功能和设置中断。
+无障碍状态会在用户下一次触及相关设置时恢复。
+
+  </li>
+</ul>
+
+<h4>相机</h4>
+
+<ul>
+  <li>相机应用表现出了不稳定性；它可能会在各种情况下崩溃，例如当在多窗口模式下启动时。
+
+  </li>
+
+  <li>在全景模式下连按快门可能导致相机应用崩溃。
+
+  </li>
+</ul>
+
+<h4>音频</h4>
+<ul>
+  <li>平台音频播放器问题阻止某些应用程序的正常运行。
+例如，Skype 和其他应用程序受到此问题的影响。
+  </li>
+</ul>
+
+<h4>连接</h4>
+
+
+<ul>
+  <li>当蓝牙低功耗 (BLE) 外围角色设备公布一项服务和一项 BLE 中心角色设备相连时，外围角色设备很快会断开连接。
+
+
+  </li>
+
+  <li>当屏幕关闭时 Wi-Fi 连接可能丢失。
+  </li>
+
+  <li>RFCOMM 连接不稳定，可能导致数据损坏和悬挂的连接。
+
+  </li>
+
+  <li>活动网络状态（{@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} 和 {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}）可能会在一些受限制的后台情况下返回错误的值。
+
+  </li>
+</ul>
+
+
+<h4>
+  启动器
+</h4>
+
+<ul>
+  <li>默认启动器的所有应用托盘都可能在循环关闭/开启屏幕后无响应。
+返回到主屏幕并重新启动所有应用程序托盘可以解决这个问题。
+
+  </li>
+</ul>
+
+<h4>
+  键盘
+</h4>
+
+<ul>
+  <li>在将一个运行 Android 6.0 或更早版本的设备更新到 N Developer Preview 时，Google 键盘不会保留首选项数据，如最近的表情符号和声音设置。 
+
+
+  </li>
+
+  <li>Google Indic 托管键盘可能不稳定。
+  </li>
+
+  <li>当在密码字段中输入文本时，用户可以选择俄罗斯语作为输入语言，但键盘仍将为英语。
+这可以防止用户输入俄罗斯语的密码。
+
+  </li>
+</ul>
+
+<h4>
+  区域设置和语言
+</h4>
+
+<ul>
+  <li>当使用从右到左 (RTL) 的语言区域时，系统可能会在重新启动设备后意外切换到从左到右 (LTR) 表示。
+
+  </li>
+</ul>
+
+<h4>媒体</h4>
+
+<ul>
+  <li>Nexus 9 和 Nexus Player 上的媒体播放可能会不稳定，包括播放高清视频出现问题。
+
+  </li>
+</ul>
+
+<h4>
+  多窗口模式
+</h4>
+
+<ul>
+  <li>当在多窗口模式下改变屏幕方向时，设备可能会冻结。
+  </li>
+
+  <li>目前有几个应用程序出现了多窗口模式问题：
+    <ul>
+      <li>当把“Settings &gt; Display &gt; Screen brightness”对接到多窗口时，系统 UI 可能崩溃。
+
+      </li>
+
+      <li>在多窗口模式下启动时，相机应用可能会崩溃。
+      </li>
+
+      <li>在多窗口模式下启动时，YouTube 可能会崩溃。若要修复此问题，您可以在“Storage &gt; Apps &gt; YouTube”中清除 YouTube 应用数据。
+
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play 服务
+</h4>
+
+<ul>
+  <li>当用户选择一个使用 ASCII 范围外的字母和数字的系统语言区域时，通过 Google Play 服务使用 Google Cast 的应用可能会不稳定。
+
+
+  </li>
+</ul>
+
+<h4>
+  Android for Work 和 Google Apps 设备规范
+</h4>
+
+<ul>
+  <li>当用户在“设备规范状态”屏幕固定的情况下解锁设备时，设备规范应用可能会崩溃。
+
+  </li>
+
+  <li>在启用了基于文件的加密的情况下，在设置了工作资料并随后关闭工作后，用户必须解锁主个人资料屏幕锁定，以便能再次访问工作应用。
+
+
+  </li>
+
+  <li>在移除安全模式锁定并在多窗口下打开工作应用/个人应用时，设备重新启动。
+
+  </li>
+
+  <li>设置 DISALLOW_VPN_CONFIG 会导致设备规范客户端设置的 Always-on-VPN 显示同意对话框。
+
+  </li>
+
+  <li>在 VPN 以 Always-on-VPN 模式连接之前，流量不会锁定。
+  </li>
+</ul>
+
+<h4>
+  外部存储
+</h4>
+
+<ul>
+  <li>当用户将应用从内部存储移动到可采用的外部存储（可能包括 SD 卡和通过 USB 连接的设备）时，应用可能会变得不稳定。
+
+
+  </li>
+</ul>
+
+<h4>
+  Google Play 中的屏幕缩放和多 APK
+</h4>
+
+<ul>
+  <li>在运行 Android N 的设备上，Google Play 服务 9.0.83 错误地报告当前屏幕密度，而不是报告稳定屏幕密度。
+当屏幕缩放在这些设备上启用时，可能会导致 Google Play 选择一个为更小的屏幕设计的多 APK 应用版本。
+
+此问题已在下一版 Google Play 服务中得到修复，并将包含在以后的 Developer Preview 版本中。
+
+
+  </li>
+
+  <li>在运行 Android N 的设备上，Google Play 服务 9.0.83 版目前会报告 Vulkan 支持，但不会报告 Vulkan 版本。
+这可能会导致 Google Play 在有较高版本支持的设备上选择为较低的 Vulkan 支持而设计的多 APK 应用版本。
+
+目前，Google Play Store 不接受使用 Vulkan 版本定位的应用上传。
+这一支持将被添加到未来的 Google Play Store 中，并会在下一版 Google Play 服务（将包括在稍后的 Developer Preview 版本中）中得到修复，任何使用 Google Play 服务 9.0.83 版本的设备都将继续获得面向基本 Vulkan 支持的应用版本。
+
+
+
+
+  </li>
+</ul>
+
+<h4 id="">通知</h4>
+
+<ul>
+  <li>MessagingStyle 不显示发件人为“null”（自己）的通知。
+  </li>
+</ul>
+
+<h4 id="">开发者工具</h4>
+
+<ul>
+  <li>
+    <code>adb</code> 有时可能在使用 JDWP 调试时断开连接。
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+
+
+<!-- DP2 Release Notes Archive -->
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日期：2016 年 4 月<br>
+        构建：NPC91K、NPC91O<br>
+        模拟器支持：x86 &amp; ARM（32/64 位）<br>
+        Google Play 服务：8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp2-new">DP2 的新功能</h3>
+
+<ul>
+  <li>Vulkan（新的 3D 渲染 API）的平台支持，提供明晰、低开销的 GPU（图形处理单元）控制功能，同时大大提升绘图调用密集型应用的性能。
+
+有关详情，请参阅
+<a href="{@docRoot}ndk/guides/graphics/index.html"> 文档</a>。
+  </li>
+
+  <li>新人物表情符号，带肤色支持和新的 Unicode 9 字形。
+  在键盘在调色板中建立对它们的支持之前，肤色和新的表情符号将不会显示。
+开发者不需要进行任何操作便能使用这些新的表情符号，除非应用使用的是非系统字体。
+IME 开发者需要整合对新表情符号的支持。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">启动器快捷键 API</a>：
+应用可以使用 <code>ShortcutManager</code> 来向启动器发送应用内起点的快捷键。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">多窗口</a>：
+    您现在可以为 Activity 单独指定最小高度和最小宽度。
+此外，一些 API 名称已略有改变。
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">修复开发者报告的问题</h4>
+
+<p>
+  开发者报告的许多问题都已得到修复，包括：
+</p>
+
+<ul>
+  <li>无法连接到隐藏的 SSID 或非广播 Wi-Fi。（错误 <a href="https://code.google.com/p/android/issues/detail?id=203116">203116</a>）
+  </li>
+
+  <li>麦克风在整个活动期间保持静音状态。（错误 <a href="https://code.google.com/p/android/issues/detail?id=205922">205922</a>）
+  </li>
+
+  <li>更改多窗口焦点会暂停 YouTube。（错误 <a href="https://code.google.com/p/android/issues/detail?id=203424">203424</a>）
+  </li>
+
+  <li>直接回复可能关闭打开的活动。（错误 <a href="https://code.google.com/p/android/issues/detail?id=204411">204411</a>）
+  </li>
+
+  <li>各种稳定性修复。
+  </li>
+</ul>
+
+<h3 id="dp2-general">一般公告</h3>
+
+<p>
+  Developer Preview 版本仅针对<strong>应用开发者</strong>，仅适用于兼容性测试和早期开发。
+
+  请注意关于版本的一般注意事项：
+</p>
+
+<ul>
+
+  <li>开发工具组件和支持库已更新为 DP2 版本。
+确保为在开发 DP2 之前更新您的预览开发环境。
+如需有关设置您的开发环境的说明，请参阅 <a href="{@docRoot}preview/setup-sdk.html">设置 Preview</a>
+
+
+  </li>
+
+  <li>此版本在所有设备上都出现了不同的稳定性和性能问题，<strong>不适合在手机或平板电脑上的日常使用</strong>，特别是对于非开发人员。
+
+
+  </li>
+
+  <li>在此版本中，电池寿命和性能尚未优化：
+
+
+    <ul>
+      <li>系统和应用<strong>性能已知会周期性地减缓/卡顿</strong>，设备可能偶尔无响应。
+这些问题可能随着长时间使用而变得更迫切。
+
+      </li>
+
+      <li>电池寿命可能在此版本的屏幕开启和屏幕关闭用例里出现倒退。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>有些<strong>应用可能无法在 Developer Preview 2 上正常</strong>运行。这其中包括 Google 应用和其他应用。
+
+  </li>
+
+  <li>这个早期版本未经<strong>兼容性测试套件 (CTS) 批准</strong>。
+依赖 CTS 批准架构的应用无法运行（例如 Android Pay）。
+
+  </li>
+
+  <li>此预览版支持以下设备：Nexus 5X、Nexus 6、 Nexus 6P、Nexus 9、and Pixel C 以及 General Mobile 4G (Android One)。
+
+即将推出 Nexus Player 支持。
+  </li>
+
+
+  <li><a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> 已被更新，以处理 DP1 和 DP2 之间的 API 变更。
+
+  </li>
+</ul>
+
+<h3 id="dp2-ki">已知问题</h3>
+
+<h4>性能和电池</h4>
+
+<ul>
+  <li>系统和应用<strong>性能已知会周期性地减缓/卡顿</strong>，设备可能偶尔无响应。
+这些问题可能随着长时间使用而变得更迫切。
+
+  </li>
+</ul>
+
+<h4>Google 帐户</h4>
+
+<ul>
+  <li>在有些情况下，<code>AccountManagerService</code> 问题可能会阻止登录 Google 帐户。
+
+  </li>
+</ul>
+
+<h4>系统更新</h4>
+
+<ul>
+  <li>设备可能会在更新到 DP2 后立即重新启动。
+  </li>
+</ul>
+
+<h4>无障碍功能</h4>
+
+<ul>
+  <li>当间距被设置为近最大水平时，文本语音转换 (TTS) 输出侦听出现问题。
+
+  </li>
+</ul>
+
+<h4>蓝牙</h4>
+
+<ul>
+  <li>蓝牙低功耗 (LE) GATT 特征使用错误的写入类型，并且将不会被发送到远程设备。
+因此，举例来说，有些健身设备将无法运行。
+
+  </li>
+</ul>
+
+<h4>设置向导</h4>
+
+<ul>
+  <li>安装向导中的在新设备（或刚刚重置的设备）上从“Your Google Account”恢复数据的选项不可用。
+您必须在安装向导中选择“another Android device”来从现有设备恢复数据，或者将其设置为新设备。
+
+
+  </li>
+</ul>
+
+<h4>原始设备制造商 (OEM) 解锁</h4>
+
+<ul>
+  <li>在有些设备上，当运行 DP2 时，“Developer Options”中的 <strong>Enable OEM unlock</strong> 会变成灰色。
+<br>
+  <strong>解决方法：</strong>访问 <a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a> 来选择加入 Android Beta 计划（如果您尚未选择加入）。
+
+然后，选择退出并接受降级 OTA。
+选择退出会导致设备降级到 Android 6.0。现在，您应该可以在“Developer Options”中选择 <strong>Enable OEM unlock</strong>。
+
+当您降级设备时，个人数据将被删除；但是不管怎样，解锁引导装载程序仍会删除这些数据。
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>工作安全性挑战
+    <ul>
+      <li>在迁移到 N 后，或在用户创建工作资料之后，工作资料无法在密钥库中创建秘钥，直到用户更改了模式、PIN 码或密码，或设置了一项工作挑战为止。
+
+
+      </li>
+
+      <li>在直接启动模式下，对设备应用密码限制会导致工作资料被解锁，即使设备是锁定的。
+
+      这会使工作资料变得可以访问，即使它应受到设备锁屏的保护。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>Always on VPN
+    <ul>
+      <li>如果 Always On VPN 模式已打开，但 VPN 却不可用，这表示应用是通过普通网络链接。
+如果应用没有可用的 VPN 连接，这表示应用处于脱机状态。
+
+      </li>
+
+      <li>在 Always On 模式下，当设备以直接启动模式重新启动后，VPN 连接未建立，即使是在用户解锁安全锁屏之后。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>暂停软件包
+    <ul>
+      <li>设备管理员可以暂停关键系统软件包，这可能会导致意外的行为，如拨打电话，即使此时显示了“Telephone disabled”对话框。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>其他
+    <ul>
+      <li>如果当用户插入物理媒体（如 SD 卡）时 {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} 被设置为 true，设置应用会在启动时崩溃。
+
+      </li>
+
+      <li>工作资料中的第一次检查需要几分钟时间完成。
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>将连结数和非零之间的差值作为第一个连结数会导致 {@code vkCreateGraphicsPipeline()} 失败。
+</li>
+      <li>Vulkan 在预期纹理坐标上表现出错误的采样行为。</li>
+      <li>在 multithreadCmdBuffer 示例中，{@code vkCmdClearColorImage()} 会在运行 N-DP2 驱动程序时崩溃。
+</li>
+      <li>{@code vkGetPhysicalDeviceFormatProperties()} 的返回值并未给 {@code VkFormatProperties::linearTilingFeatures} 设置一个值，这会导致取 0 值作为结果。
+
+</li>
+      <li>Vulkan 浮点帧缓冲附件未能正确处理。</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V 着色器可能触发驱动程序断言。</li>
+      <li>一些管线配置可能导致 {@code vkCreateGraphicsPipeline()} 崩溃。
+</li>
+  </ul>
+</ul>
+
+<h4>设备特定问题</h4>
+
+<dl>
+  <dt>
+    <strong>Android One</strong>
+  </dt>
+
+  <dd>
+    当设备从插槽 1 切换到插槽2 SIM 时，数据连接失败。
+  </dd>
+
+  <dt>
+    <strong>Pixel C</strong>
+  </dt>
+
+  <dd>
+    无法切换语音搜索“Always On”选项。
+  </dd>
+
+  <dt>
+    <strong>Nexus 6</strong>
+  </dt>
+
+  <dd>
+    除 HDR+ 照片之外的纵向相机照片被损坏。
+
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    Nexus Player 上的 Netflix 高清内容播放可能失败。
+  </dd>
+
+  <dd>
+    任何依赖于动态视频分辨率变化的应用都可能会在 Nexus Player 上失败。
+
+  </dd>
+
+  <dd>
+    任何使用 VP9 视频编解码器的应用都可能会在 Nexus Player 上失败。
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日期：2016 年 3 月<br>
+        构建：NPC56P、NPC56R 已更新：NPC56W、NPC56X<br>
+        模拟器支持：x86 &amp; ARM（32/64 位）<br>
+        Google Play 服务：8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp1-general">一般公告</h3>
+
+<p>
+  Developer Preview 版本仅针对应用开发者，仅适用于兼容性测试和早期开发。
+请注意关于版本的一般注意事项：
+
+</p>
+<ul>
+  <li>此版本在所有设备上都出现了不同的稳定性和性能问题，<em>不适合在手机或平板电脑上的日常使用</em>，特别是对于非开发人员。
+
+
+  </li>
+
+  <li>系统和应用<strong>性能已知会周期性地减缓/卡顿</strong>，设备可能偶尔无响应。
+这些问题可能随着长时间使用而变得更迫切。
+
+  </li>
+
+  <li>电池寿命可能在此版本的屏幕开启和屏幕关闭用例里出现倒退。
+
+  </li>
+
+  <li>有些应用可能无法在 Developer Preview 1 上正常运行。这其中包括 Google 应用和其他应用。
+
+  </li>
+
+  <li>这个早期版本未经兼容性测试套件 (CTS) 批准。依赖 CTS 批准架构的应用将无法运行（例如 Android Pay）。
+
+  </li>
+
+  <li>此预览版支持以下设备：Nexus 5X、Nexus 6、 Nexus 6P、Nexus 9、Nexus Player、and Pixel C 以及 General Mobile 4G (Android One)。
+
+
+  </li>
+</ul>
+
+<h3 id="dp1-platform">平台问题</h3>
+
+<h4>性能和电池</h4>
+
+<ul>
+  <li>系统和应用性能已知会<strong>周期性地减缓/卡顿</strong>，设备可能偶尔无响应。
+这些问题可能随着长时间使用而变得更迫切。
+
+  </li>
+
+  <li>电池寿命可能在此版本的屏幕开启和屏幕关闭用例里出现倒退。
+
+  </li>
+</ul>
+<h4 id="dialer">拨号器</h4>
+
+<ul>
+  <li>拨号器应用不支持直接启动。这将稍后在 N Developer Preview 中解决。
+
+  </li>
+
+  <li>语音邮件播放无效。
+  </li>
+</ul>
+
+<h4>麦克风</h4>
+
+<ul>
+   <li>系统可能在多个应用中和重新启动时错误地保留麦克风静音状态。如果您在一项应用中将麦克风静音，并且此状态保留，打开有任何麦克风静音控件的应用，取消静音麦克风。</li>
+</ul>
+
+<h4 id="ui">系统 UI</h4>
+
+<ul>
+  <li>系统 UI 中的一些新增或修改字符串未被翻译成所有语言。
+
+  </li>
+
+  <li>概览 UI 仍在开发中，并且随时可能更改。例如，我们打算移除当用户切换应用时显示的计时器。
+
+
+  </li>
+
+  <li>设置控件和切换可能很慢，或出现无响应。
+  </li>
+
+  <li>通知的视觉设计可能随时更改。
+  </li>
+
+  <li>在 Gmail 应用中，包括在捆绑通知中的电子邮件直接存档无法正常运行。
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>工作安全性挑战
+    <ul>
+      <li>在迁移到 N 后，或在用户创建工作资料之后，工作资料无法在密钥库中创建秘钥，直到用户更改了模式、PIN 码或密码，或设置了一项工作挑战为止。
+
+
+      </li>
+
+      <li>在直接启动模式下，对设备应用密码限制会导致工作资料被解锁，即使设备是锁定的。
+
+      这会使工作资料变得可以访问，即使它应受到设备锁屏的保护。
+
+      </li>
+
+      <li>当用户输入了错误的密码和 PIN 码后，系统不会显示任何信息性消息；相反，它仅清除了输入字段。
+
+此问题不影响模式或指纹输入。
+      </li>
+
+      <li>在平板电脑上，后台显示的工作挑战小得不成比例。
+
+      </li>
+
+      <li>与 N Developer Preview 绑定的 <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">Google Apps 设备规范</a>版本尚不支持工作资料安全性挑战功能。
+
+
+        开发者应使用 <a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> 来测试此功能。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>Always on VPN
+    <ul>
+      <li>如果 Always On VPN 模式开启，但 VPN 却不可用，这表示应用未被指定为通过普通网络连接的 Always On 政策例外。
+
+除非应用被指定为 Always On 政策例外，否则当没有可用的 VPN 连接时，应用会处于脱机状态。
+
+        <ul>
+          <li>在 Always On 模式下，当设备以直接启动模式重新启动后，VPN 连接未建立，即使是在用户解锁安全锁屏之后。
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>改进的联系人
+    <ul>
+      <li>蓝牙 PBAP/MAP 不显示工作联系人的来电显示。
+下一个 Preview 版本将解决此问题。
+      </li>
+    </ul>
+  </li>
+
+  <li>工作模式
+    <ul>
+      <li>Google 即时桌面不显示工作模式是否开启。
+Google 即时桌面也不显示应用暂停状态。
+      </li>
+
+      <li>在用户关闭和开启工作模式后，系统不再显示工作资料应用小工具，如日历。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>暂停软件包
+  </li>
+
+  <li>设备管理员可以暂停关键系统软件包，这可能会导致意外的行为，如拨打电话，即使此时显示了“Telephone disabled”对话框。
+
+
+  </li>
+
+  <li>其他
+    <ul>
+      <li>如果当用户插入物理媒体（如 SD 卡）时 {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} 被设置为 true，设置应用会在启动时崩溃。
+
+      </li>
+
+      <li>当用户卸载然后重新安装一项应用后，{@code DPM.setPackagesSuspended} 状态不会持续。
+在卸载/重新安装后，应用应保持暂停，或者暂停的应用应无法卸载。
+
+
+      </li>
+
+      <li>工作资料中的第一次检查需要几分钟时间完成。
+这可能导致设备需要超过正常的时间才能在 Play EMM API 中可见。
+
+      </li>
+
+      <li>工作资料应用的通知不对安装在个人资料中的通知侦听器可见。
+其结果是，系统不能按预期显示通知。
+
+      </li>
+
+    </ul>
+  </li>
+</ul>
+
+<h4 >键盘</h4>
+
+<ul>
+  <li>键盘和 Android 设备之间的蓝牙配对可能不稳定。
+  </li>
+</ul>
+
+<h4 >视频</h4>
+
+<ul>
+<li>视频播放可能滞后并显示中断。</li>
+</ul>
+
+<h4>Wi-Fi</h4>
+
+<ul>
+  <li>Wi-Fi 发生了一些重构，可能改变 API 极端状况下的行为。
+具体来说，尝试连接特定网络，或尝试断开网络连接的应用应重新测试。
+
+  </li>
+
+  <li>旧版 DHCP 客户端已经从平台中移除。平台支持的唯一 DHCP 客户端是在 M 中引入的 DHCP 客户端。
+
+  </li>
+</ul>
+
+<h4>直接启动</h4>
+
+<ul>
+  <li>NFC 在第一次解锁前将无法运行。
+    <ul>
+      <li>当启用了蓝牙的电话重新启动时，蓝牙不会自动开启。
+您必须手动重新启用蓝牙。
+      </li>
+
+      <li>在某些情况下，默认铃声不在有来电和短信响起。
+此行为将在下一个 N Preview 版本中修复，但括一项例外（和解决方法）。
+
+      </li>
+
+      <li>在未刚刚清除数据的设备（自设置为直接启动模式以来至少已启动一次的设备），默认的通知铃声不响。
+
+用户可以通过从设置中手动选择铃声来解决此问题。
+
+      </li>
+
+      <li>在运行 N Developer Preview 版本的设备上，直接启动会默认启用。
+若要启用用于测试和开发的直接启动，前往“Developer Options”，然后点击“Convert to File Encryption”。
+
+      在这个开发者预览版本中，这要求恢复出厂设置为重新分配，并将您的设备格式重定为基于文件的加密。
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Android TV 画中画</h4>
+
+<ul>
+  <li>Recents UI 中的 PIP 集成并不全面，并且随时可能更改。
+
+    <ul>
+      <li>PIP 窗口的动画不顺畅。Preview 未来版本将改善这一点。
+
+      </li>
+    </ul>
+  </li>
+
+  <li style="list-style: none">Preview 未来版本将改善 PIP 的视觉设计和布局调整。
+
+  </li>
+</ul>
+
+<h4>错误报告</h4>
+
+<ul>
+  <li>错误报告并不总是能成功完成（作为一种解决方法，有时它们仍然可以通过内部存储空间内的文档提供程序访问。
+
+
+  </li>
+</ul>
+
+<h4>分屏多窗口</h4>
+
+<ul>
+  <li>当进入分屏模式时，应用可能会发生崩溃和意外的 UI 行为。
+有些应用必须由应用开发者修复。
+
+  </li>
+
+  <li>如果一个应用面向的是 N 之前的 Android 平台版本，应用可能无法运行，分屏 Toast 通知可能会多次显示。
+
+  </li>
+
+  <li>在使用有固定屏幕方向的应用的同事长按 Overview 按钮可能导致意外应用行为。
+
+  </li>
+
+  <li>在调整大小时应用可能会闪烁。
+  </li>
+
+  <li>动画尚未最后确定。
+  </li>
+</ul>
+
+<h4>输入方法</h4>
+
+<ul>
+  <li>当<b>使用系统语言</b>时 Google 键盘意外变回通用 Google 键盘，但 Google 键盘不支持系统语言首选项中选定的任何语言。
+
+它应恢复为 American English。
+
+    <p>
+      您可以通过添加至少一种 Google 键盘支持的语言来解决此问题。
+
+    </p>
+  </li>
+</ul>
+
+<h4>无障碍功能</h4>
+
+<ul>
+  <li>话语提示显示的功能问题包括可能导致系统崩溃或缺少话语提示语音反馈的通知、快速设置图块和多窗口显示。
+
+下一个 Preview 版本将解决这些问题。
+
+  </li>
+</ul>
+
+<h3 id="dp1-device-sp">特定于设备的说明和问题</h3>
+
+<h4>Nexus Player</h4>
+<ul>
+  <li>在这一版的 Preview 中，Nexus Player 预计会出现视频播放、应用兼容性和稳定性问题。
+
+  </li>
+</ul>
+
+<h4>Pixel C</h4>
+<ul>
+<li>多窗口调整大小可能会导致崩溃。</li>
+</ul>
+
+<h4>Nexus 9</h4>
+<ul>
+<li>Nexus 9 设备可能无法在通过 Android Beta 计划获得空中下载 (OTA) 更新后启动。
+要恢复此问题，您可以尝试手动安装 OTA 映像。
+如需了解详细信息，请参阅<a href="{@docRoot}preview/download-ota.html">应用设备 OTA 映像 </a>。
+
+</li>
+</ul>
+

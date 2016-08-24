@@ -17,9 +17,14 @@
 package android.graphics;
 
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.RenderResources;
+import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.layoutlib.bridge.impl.RenderAction;
 import com.android.resources.Density;
+import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.Nullable;
@@ -38,6 +43,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import libcore.util.NativeAllocationRegistry_Delegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.Bitmap
@@ -61,13 +67,14 @@ public final class Bitmap_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Bitmap_Delegate> sManager =
-            new DelegateManager<Bitmap_Delegate>(Bitmap_Delegate.class);
+            new DelegateManager<>(Bitmap_Delegate.class);
+    private static long sFinalizer = -1;
 
     // ---- delegate helper data ----
 
     // ---- delegate data ----
     private final Config mConfig;
-    private BufferedImage mImage;
+    private final BufferedImage mImage;
     private boolean mHasAlpha = true;
     private boolean mHasMipMap = false;      // TODO: check the default.
     private boolean mIsPremultiplied = true;
@@ -114,10 +121,25 @@ public final class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(File input, Set<BitmapCreateFlags> createFlags,
+    private static Bitmap createBitmap(File input, Set<BitmapCreateFlags> createFlags,
             Density density) throws IOException {
         // create a delegate with the content of the file.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input), Config.ARGB_8888);
+        BufferedImage image = ImageIO.read(input);
+        if (image == null && input.exists()) {
+            // There was a problem decoding the image, or the decoder isn't registered. Webp maybe.
+            // Replace with a broken image icon.
+            BridgeContext currentContext = RenderAction.getCurrentContext();
+            if (currentContext != null) {
+                RenderResources resources = currentContext.getRenderResources();
+                ResourceValue broken = resources.getFrameworkResource(ResourceType.DRAWABLE,
+                        "ic_menu_report_image");
+                File brokenFile = new File(broken.getValue());
+                if (brokenFile.exists()) {
+                    image = ImageIO.read(brokenFile);
+                }
+            }
+        }
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ARGB_8888);
 
         return createBitmap(delegate, createFlags, density.getDpiValue());
     }
@@ -281,13 +303,25 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(long nativeBitmap) {
-        sManager.removeJavaReferenceFor(nativeBitmap);
+    /*package*/ static Bitmap nativeCopyAshmemConfig(long nativeSrcBitmap, int nativeConfig) {
+        // Unused method; no implementation provided.
+        assert false;
+        return null;
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static long nativeGetNativeFinalizer() {
+        synchronized (Bitmap_Delegate.class) {
+            if (sFinalizer == -1) {
+                sFinalizer = NativeAllocationRegistry_Delegate.createFinalizer(sManager::removeJavaReferenceFor);
+            }
+            return sFinalizer;
+        }
     }
 
     @LayoutlibDelegate
     /*package*/ static boolean nativeRecycle(long nativeBitmap) {
-        sManager.removeJavaReferenceFor(nativeBitmap);
+        // In our case reycle() is a no-op. We will let the finalizer to dispose the bitmap.
         return true;
     }
 

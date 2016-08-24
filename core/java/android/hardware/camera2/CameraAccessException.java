@@ -114,12 +114,12 @@ public class CameraAccessException extends AndroidException {
     }
 
     public CameraAccessException(@AccessError int problem, String message) {
-        super(message);
+        super(getCombinedMessage(problem, message));
         mReason = problem;
     }
 
     public CameraAccessException(@AccessError int problem, String message, Throwable cause) {
-        super(message, cause);
+        super(getCombinedMessage(problem, message), cause);
         mReason = problem;
     }
 
@@ -151,4 +151,37 @@ public class CameraAccessException extends AndroidException {
         }
         return null;
     }
+
+    private static String getCombinedMessage(@AccessError int problem, String message) {
+        String problemString = getProblemString(problem);
+        return String.format("%s (%d): %s", problemString, problem, message);
+    }
+
+    private static String getProblemString(int problem) {
+        String problemString;
+        switch (problem) {
+            case CAMERA_IN_USE:
+                problemString = "CAMERA_IN_USE";
+                break;
+            case MAX_CAMERAS_IN_USE:
+                problemString = "MAX_CAMERAS_IN_USE";
+                break;
+            case CAMERA_DISCONNECTED:
+                problemString = "CAMERA_DISCONNECTED";
+                break;
+            case CAMERA_DISABLED:
+                problemString = "CAMERA_DISABLED";
+                break;
+            case CAMERA_ERROR:
+                problemString = "CAMERA_ERROR";
+                break;
+            case CAMERA_DEPRECATED_HAL:
+                problemString = "CAMERA_DEPRECATED_HAL";
+                break;
+            default:
+                problemString = "<UNKNOWN ERROR>";
+        }
+        return problemString;
+    }
+
 }

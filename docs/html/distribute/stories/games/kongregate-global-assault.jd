@@ -1,0 +1,78 @@
+page.title=Kongregate increases Global Assault installs by 92 percent with Store Listing Experiments
+page.metaDescription=Kongregate decided to use Store Listing Experiments to see if different artwork could impact the installs of their game Global Assault. They found that icons illustrating dynamic game play drove more installs from the store listing page than their existing icon.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/kongregate-global-assault.jpg
+page.timestamp=1456431511
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img
+  src="{@docRoot}images/distribute/stories/kongregate-global-assault-icon.png"
+  height="113" />
+</div>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.kongregate.mobile.globalassault.google">
+  Global Assault</a> is a free-to-play, 3D strategy RPG developed and produced
+  by Kongregate that was released in November 2014. Kongregate decided to use
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> to see if different artwork could impact their
+  installs. They found that icons illustrating dynamic game play drove more
+  installs from the store listing page than their existing icon.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  <a class="external-link"
+  href="https://play.google.com/store/apps/developer?id=Kongregate">
+  Kongregate</a> used a global store listing experiment in the Google Play
+  Developer Console to test three new icons. From previous internal tests, they
+  believed that their existing icon, the control, would perform best in terms of
+  installs.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  The results showed that one new icon, the ‘Chopper’ variant, outperformed the
+  control group by 92 percent in terms of installs. Based on these findings,
+  Kongregate changed Global Assault’s icon on Google Play to the ‘Chopper’
+  image.
+</p>
+
+
+  <img
+   src="{@docRoot}images/distribute/stories/kongregate-global-assault-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/kongregate-global-assault-screenshot.png 1x
+  {@docRoot}images/distribute/stories/kongregate-global-assault-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed achievements badges encourage unlock
+  </p>
+
+
+<p>
+  Jeff Gurian, Senior Marketing Director at Kongregate commented that “as a
+  publisher we are responsible for handling the marketing spend of our
+  developers. If we can improve conversion rates through art or graphics by even
+  0.5% it is extremely valuable to us — and the Store Listing Experiment tool
+  gives us the data we need to make those decisions.”
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Learn how to run
+  <a class="external-link"
+  href="https://support.google.com/googleplay/android-developer/answer/6227309">
+  Store Listing Experiments</a> and read our best practices for
+  <a href="https://developer.android.com/distribute/users/experiments.html">
+  running successful experiments</a>.
+</p>

@@ -16,23 +16,30 @@
 
 package android.media;
 
-import com.android.internal.database.SortCursor;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
 
+import com.android.internal.database.SortCursor;
+
+import libcore.io.Streams;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,9 +224,9 @@ public class RingtoneManager {
      */
     public static final int URI_COLUMN_INDEX = 2;
 
-    private Activity mActivity;
-    private Context mContext;
-    
+    private final Activity mActivity;
+    private final Context mContext;
+
     private Cursor mCursor;
 
     private int mType = TYPE_RINGTONE;
@@ -240,7 +247,8 @@ public class RingtoneManager {
      * @param activity The activity used to get a managed cursor.
      */
     public RingtoneManager(Activity activity) {
-        mContext = mActivity = activity;
+        mActivity = activity;
+        mContext = activity;
         setType(mType);
     }
 
@@ -252,6 +260,7 @@ public class RingtoneManager {
      * @param context The context to used to get a cursor.
      */
     public RingtoneManager(Context context) {
+        mActivity = null;
         mContext = context;
         setType(mType);
     }
@@ -265,7 +274,6 @@ public class RingtoneManager {
      * @see #EXTRA_RINGTONE_TYPE           
      */
     public void setType(int type) {
-
         if (mCursor != null) {
             throw new IllegalStateException(
                     "Setting filter columns should be done before querying for ringtones.");
@@ -635,7 +643,8 @@ public class RingtoneManager {
     public static Uri getActualDefaultRingtoneUri(Context context, int type) {
         String setting = getSettingForType(type);
         if (setting == null) return null;
-        final String uriString = Settings.System.getString(context.getContentResolver(), setting);
+        final String uriString = Settings.System.getStringForUser(context.getContentResolver(),
+                setting, context.getUserId());
         return uriString != null ? Uri.parse(uriString) : null;
     }
     
@@ -650,12 +659,48 @@ public class RingtoneManager {
      * @see #getActualDefaultRingtoneUri(Context, int)
      */
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
+        final ContentResolver resolver = context.getContentResolver();
+
         String setting = getSettingForType(type);
         if (setting == null) return;
-        Settings.System.putString(context.getContentResolver(), setting,
-                ringtoneUri != null ? ringtoneUri.toString() : null);
+        Settings.System.putStringForUser(resolver, setting,
+                ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
+
+        // Stream selected ringtone into cache so it's available for playback
+        // when CE storage is still locked
+        if (ringtoneUri != null) {
+            final Uri cacheUri = getCacheForType(type);
+            try (InputStream in = openRingtone(context, ringtoneUri);
+                    OutputStream out = resolver.openOutputStream(cacheUri)) {
+                Streams.copy(in, out);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to cache ringtone: " + e);
+            }
+        }
     }
-    
+
+    /**
+     * Try opening the given ringtone locally first, but failover to
+     * {@link IRingtonePlayer} if we can't access it directly. Typically happens
+     * when process doesn't hold
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
+     */
+    private static InputStream openRingtone(Context context, Uri uri) throws IOException {
+        final ContentResolver resolver = context.getContentResolver();
+        try {
+            return resolver.openInputStream(uri);
+        } catch (SecurityException | IOException e) {
+            Log.w(TAG, "Failed to open directly; attempting failover: " + e);
+            final IRingtonePlayer player = context.getSystemService(AudioManager.class)
+                    .getRingtonePlayer();
+            try {
+                return new ParcelFileDescriptor.AutoCloseInputStream(player.openRingtone(uri));
+            } catch (Exception e2) {
+                throw new IOException(e2);
+            }
+        }
+    }
+
     private static String getSettingForType(int type) {
         if ((type & TYPE_RINGTONE) != 0) {
             return Settings.System.RINGTONE;
@@ -667,7 +712,20 @@ public class RingtoneManager {
             return null;
         }
     }
-    
+
+    /** {@hide} */
+    public static Uri getCacheForType(int type) {
+        if ((type & TYPE_RINGTONE) != 0) {
+            return Settings.System.RINGTONE_CACHE_URI;
+        } else if ((type & TYPE_NOTIFICATION) != 0) {
+            return Settings.System.NOTIFICATION_SOUND_CACHE_URI;
+        } else if ((type & TYPE_ALARM) != 0) {
+            return Settings.System.ALARM_ALERT_CACHE_URI;
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Returns whether the given {@link Uri} is one of the default ringtones.
      * 

@@ -57,6 +57,15 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/submenuarrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:scaleType="center"
+        android:visibility="gone" />
+
     <!-- Checkbox, and/or radio button will be inserted here. -->
     
 </com.android.internal.view.menu.ListMenuItemView>

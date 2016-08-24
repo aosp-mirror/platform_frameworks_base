@@ -16,88 +16,86 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
+
 /**
- * TODO: Make this a public API?  Let's see how it goes with a few use
- * cases first.
  * @hide
  */
-public abstract class RemoteCallback implements Parcelable {
-    final Handler mHandler;
-    final IRemoteCallback mTarget;
-    
-    class DeliverResult implements Runnable {
-        final Bundle mResult;
-        
-        DeliverResult(Bundle result) {
-            mResult = result;
-        }
-        
-        public void run() {
-            onResult(mResult);
-        }
+@SystemApi
+public final class RemoteCallback implements Parcelable {
+
+    public interface OnResultListener {
+        public void onResult(Bundle result);
     }
-    
-    class LocalCallback extends IRemoteCallback.Stub {
-        public void sendResult(Bundle bundle) {
-            mHandler.post(new DeliverResult(bundle));
-        }
+
+    private final OnResultListener mListener;
+    private final Handler mHandler;
+    private final IRemoteCallback mCallback;
+
+    public RemoteCallback(OnResultListener listener) {
+        this(listener, null);
     }
-    
-    static class RemoteCallbackProxy extends RemoteCallback {
-        RemoteCallbackProxy(IRemoteCallback target) {
-            super(target);
+
+    public RemoteCallback(@NonNull OnResultListener listener, @Nullable Handler handler) {
+        if (listener == null) {
+            throw new NullPointerException("listener cannot be null");
         }
-        
-        protected void onResult(Bundle bundle) {
-        }
-    }
-    
-    public RemoteCallback(Handler handler) {
+        mListener = listener;
         mHandler = handler;
-        mTarget = new LocalCallback();
+        mCallback = new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(Bundle data) {
+                RemoteCallback.this.sendResult(data);
+            }
+        };
     }
-    
-     RemoteCallback(IRemoteCallback target) {
+
+    RemoteCallback(Parcel parcel) {
+        mListener = null;
         mHandler = null;
-        mTarget = target;
+        mCallback = IRemoteCallback.Stub.asInterface(
+                parcel.readStrongBinder());
     }
-    
-    public void sendResult(Bundle bundle) throws RemoteException {
-        mTarget.sendResult(bundle);
-    }
-    
-    protected abstract void onResult(Bundle bundle);
-    
-    public boolean equals(Object otherObj) {
-        if (otherObj == null) {
-            return false;
+
+    public void sendResult(@Nullable final Bundle result) {
+        // Do local dispatch
+        if (mListener != null) {
+            if (mHandler != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onResult(result);
+                    }
+                });
+            } else {
+                mListener.onResult(result);
+            }
+        // Do remote dispatch
+        } else {
+            try {
+                mCallback.sendResult(result);
+            } catch (RemoteException e) {
+                /* ignore */
+            }
         }
-        try {
-            return mTarget.asBinder().equals(((RemoteCallback)otherObj)
-                    .mTarget.asBinder());
-        } catch (ClassCastException e) {
-        }
-        return false;
     }
-    
-    public int hashCode() {
-        return mTarget.asBinder().hashCode();
-    }
-    
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeStrongBinder(mTarget.asBinder());
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeStrongBinder(mCallback.asBinder());
     }
 
     public static final Parcelable.Creator<RemoteCallback> CREATOR
             = new Parcelable.Creator<RemoteCallback>() {
-        public RemoteCallback createFromParcel(Parcel in) {
-            IBinder target = in.readStrongBinder();
-            return target != null ? new RemoteCallbackProxy(
-                    IRemoteCallback.Stub.asInterface(target)) : null;
+        public RemoteCallback createFromParcel(Parcel parcel) {
+            return new RemoteCallback(parcel);
         }
 
         public RemoteCallback[] newArray(int size) {

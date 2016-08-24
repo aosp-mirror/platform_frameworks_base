@@ -113,7 +113,6 @@ easier.
     <style name="Widget.DeviceDefault.Spinner.DropDown" parent="Widget.Material.Spinner.DropDown"/>
     <style name="Widget.DeviceDefault.StackView" parent="Widget.Material.StackView"/>
     <style name="Widget.DeviceDefault.TextSelectHandle" parent="Widget.Material.TextSelectHandle"/>
-    <style name="Widget.DeviceDefault.TextSuggestionsPopupWindow" parent="Widget.Material.TextSuggestionsPopupWindow"/>
     <style name="Widget.DeviceDefault.TextView.ListSeparator" parent="Widget.Material.TextView.ListSeparator"/>
     <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Material.TimePicker"/>
 
@@ -199,7 +198,6 @@ easier.
     <style name="Widget.DeviceDefault.Light.Spinner.DropDown" parent="Widget.Material.Light.Spinner.DropDown"/>
     <style name="Widget.DeviceDefault.Light.TextView.ListSeparator" parent="Widget.Material.Light.TextView.ListSeparator"/>
     <style name="Widget.DeviceDefault.Light.TimePicker" parent="Widget.Material.Light.TimePicker"/>
-    <style name="Widget.DeviceDefault.Light.TextSuggestionsPopupWindow" parent="Widget.Material.Light.TextSuggestionsPopupWindow"/>
 
     <!-- Text Appearance Styles -->
     <style name="TextAppearance.DeviceDefault" parent="TextAppearance.Material"/>

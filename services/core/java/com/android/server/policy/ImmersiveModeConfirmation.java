@@ -27,8 +27,12 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -45,6 +49,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.internal.R;
+import com.android.server.vr.VrManagerService;
 
 /**
  *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
@@ -66,6 +71,9 @@ public class ImmersiveModeConfirmation {
     private long mPanicTime;
     private WindowManager mWindowManager;
     private int mCurrentUserId;
+    // Local copy of vr mode enabled state, to avoid calling into VrManager with
+    // the lock held.
+    boolean mVrModeEnabled = false;
 
     public ImmersiveModeConfirmation(Context context) {
         mContext = context;
@@ -112,14 +120,29 @@ public class ImmersiveModeConfirmation {
         }
     }
 
-    public void immersiveModeChanged(String pkg, boolean isImmersiveMode,
+    void systemReady() {
+        IVrManager vrManager = IVrManager.Stub.asInterface(
+                ServiceManager.getService(VrManagerService.VR_MANAGER_BINDER_SERVICE));
+        if (vrManager != null) {
+            try {
+                vrManager.registerListener(mVrStateCallbacks);
+                mVrModeEnabled = vrManager.getVrModeState();
+            } catch (RemoteException re) {
+            }
+        }
+    }
+
+    public void immersiveModeChangedLw(String pkg, boolean isImmersiveMode,
             boolean userSetupComplete) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
             final boolean disabled = PolicyControl.disableImmersiveConfirmation(pkg);
             if (DEBUG) Slog.d(TAG, String.format("immersiveModeChanged() disabled=%s mConfirmed=%s",
                     disabled, mConfirmed));
-            if (!disabled && (DEBUG_SHOW_EVERY_TIME || !mConfirmed) && userSetupComplete) {
+            if (!disabled
+                    && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
+                    && userSetupComplete
+                    && !mVrModeEnabled) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
@@ -352,4 +375,15 @@ public class ImmersiveModeConfirmation {
             }
         }
     }
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) throws RemoteException {
+            mVrModeEnabled = enabled;
+            if (mVrModeEnabled) {
+                mHandler.removeMessages(H.SHOW);
+                mHandler.sendEmptyMessage(H.HIDE);
+            }
+        }
+    };
 }

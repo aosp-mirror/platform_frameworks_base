@@ -1,0 +1,60 @@
+toc:
+- title: Core App Quality
+  path: /distribute/essentials/quality/core.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 应用的核心质量
+
+- title: Tablet App Quality
+  path: /distribute/essentials/quality/tablets.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 平板电脑应用的质量
+
+- title: Wear App Quality
+  path: /distribute/essentials/quality/wear.html
+
+- title: TV App Quality
+  path: /distribute/essentials/quality/tv.html
+
+- title: Auto App Quality
+  path: /distribute/essentials/quality/auto.html
+
+- title: Building for Billions
+  path: /distribute/essentials/quality/billions.html
+
+- title: Launch Checklist
+  path: /distribute/tools/launch-checklist.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 发布检查清单
+
+- title: Localization Checklist
+  path: /distribute/tools/localization-checklist.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 本地化检查清单
+
+- title: Brand Guidelines
+  path: /distribute/tools/promote/brand.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 品牌指南
+
+- title: Device Art Generator
+  path: /distribute/tools/promote/device-art.html
+
+- title: Google Play Badges
+  path: https://play.google.com/intl/en_us/badges/
+  path_attributes:
+  - name: zh-cn-lang
+    value: Google Play 徽章生成器
+
+- title: Linking to Your Products
+  path: /distribute/tools/promote/linking.html
+  path_attributes:
+  - name: zh-cn-lang
+    value: 链接到您的商品
+
+- title: Alternative Distribution
+  path: /distribute/tools/open-distribution.html

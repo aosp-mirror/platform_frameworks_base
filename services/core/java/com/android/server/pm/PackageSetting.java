@@ -17,9 +17,11 @@
 package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Settings data for a particular package we know about.
@@ -32,10 +34,11 @@ final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int privateFlags) {
+            int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
+            List<String> childPackageNames) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags);
+                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames);
     }
 
     /**
@@ -77,5 +80,12 @@ final class PackageSetting extends PackageSettingBase {
 
     public boolean isSharedUser() {
         return sharedUser != null;
+    }
+
+    public boolean isMatch(int flags) {
+        if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+            return isSystem();
+        }
+        return true;
     }
 }

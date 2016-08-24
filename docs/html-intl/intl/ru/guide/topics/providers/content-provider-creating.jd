@@ -1,0 +1,1214 @@
+page.title=Создание поставщика контента
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>Содержание документа</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">Проектирование хранилища данных</a>
+    </li>
+    <li>
+        <a href="#ContentURI">Проектирование URI контента</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">Реализация класса ContentProvider</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">Необходимые методы</a>
+            </li>
+            <li>
+                <a href="#Query">Реализация метода query()</a>
+            </li>
+            <li>
+                <a href="#Insert">Реализация метода insert()</a>
+            </li>
+            <li>
+                <a href="#Delete">Реализация метода delete()</a>
+            </li>
+            <li>
+                <a href="#Update">Реализация метода update()</a>
+            </li>
+            <li>
+                <a href="#OnCreate">Реализация метода onCreate()</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">Реализация типов MIME поставщика контента</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">Типы MIME для таблиц</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">Типы MIME для файлов</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">Реализация класса-контракта</a>
+    </li>
+    <li>
+        <a href="#Permissions">Реализация разрешений поставщика контента</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">Элемент &lt;provider&gt;</a>
+    </li>
+    <li>
+        <a href="#Intents">Намерения и доступ к данным</a>
+    </li>
+</ol>
+<h2>Ключевые классы</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>Образцы кода по теме</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">
+Пример приложения Note Pad
+</a>
+        </li>
+    </ol>
+<h2>См. также:</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+Основные сведения о поставщике контента</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+Поставщик календаря</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    Поставщик контента управляет доступом к центральному репозиторию данных. Реализация
+поставщика включает один или несколько классов в приложении Android, а также элементы
+в файле манифеста. Один из классов реализует подкласс
+{@link android.content.ContentProvider}, который выступает в роли интерфейса между вашим поставщиком и
+другими приложениями. Несмотря на то, что поставщики контента изначально предназначены для предоставления доступа к данным
+другим приложениям, в вашем приложении, несомненно, могут содержаться операции, которые разрешают пользователю
+запрашивать и изменять данные, управляемые вашим поставщиком.
+</p>
+<p>
+    В данной статье представлены базовые инструкции по созданию поставщика контента и список необходимых для этого
+API-интерфейсов.
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">Подготовка к созданию поставщика</h2>
+<p>
+    Прежде чем приступить к созданию поставщика, выполните указанные ниже действия.
+</p>
+<ol>
+    <li>
+        <strong>Решите, нужен ли вообще вам поставщик контента</strong>. Поставщик
+контента требуется в случаях, если вы хотите реализовать в своем приложении одну или несколько следующих функций:
+        <ul>
+            <li>предоставление сложных данных или файлов другим приложениям;</li>
+            <li>предоставление пользователям возможности копировать сложные данные из вашего приложения в другие приложения;</li>
+            <li>предоставление настраиваемых поисковых подсказок с помощью платформы поиска.</li>
+        </ul>
+    <p>
+        Вам <em>не нужен</em> поставщик для работы с базой данных SQLite, если ее планируется использовать
+исключительно в вашем приложении.
+    </p>
+    </li>
+    <li>
+        Если вы еще не приняли окончательное решение, ознакомьтесь со
+статьей
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">Основные сведения о поставщике контента</a>, чтобы узнать подробнее о поставщиках контента.
+    </li>
+</ol>
+<p>
+    После этого можно приступать к созданию поставщика. Для этого выполните указанные ниже действия.
+</p>
+<ol>
+    <li>
+        Спроектируйте базовое хранилище для своих данных. Поставщик контента предоставляет данные двумя способами:
+        <dl>
+            <dt>
+                Данные для файлов
+            </dt>
+            <dd>
+                Данные, которые обычно поступают в файлы, такие как
+фотографии, аудио- или видеоданные. Файлы следует хранить в закрытом
+пространстве вашего приложения. В ответ на запрос файла из другого приложения
+ваш поставщик может предложить дескриптор для файла.
+            </dd>
+            <dt>
+                Структурированные данные
+            </dt>
+            <dd>
+                Данные, которые обычно поступают в базу данных, массив или аналогичную структуру.
+                Данные следует хранить в той форме, которая совместима с таблицами из строк и столбцов. Строка
+представляет собой объект, например, пользователя, позицию или учетную единицу. Столбец
+представляет собой некоторые данные об объекте, например, имя пользователя или стоимость единицы. Обычно
+данные такого типа хранятся в базе данных SQLite, однако вы можете использовать постоянное хранилище
+любого типа. Дополнительные сведения о типах хранилищ, доступных в системе
+Android, представлены в разделе
+<a href="#DataStorage">Проектирование хранилища данных</a>.
+            </dd>
+        </dl>
+    </li>
+    <li>
+        Определите конкретную реализацию класса {@link android.content.ContentProvider}
+и его необходимые методы. Этот класс выступает в роли интерфейса между вашими данными и остальной частью системы
+Android. Дополнительные сведения об этом классе представлены в разделе
+<a href="#ContentProvider">Реализация класса ContentProvider</a>.
+    </li>
+    <li>
+        Определите строку центра поставщика, его URI контента и имена столбцов. Если необходимо,
+чтобы приложение поставщика обрабатывало намерения, также необходимо определить действия намерений, дополнительные данные
+и флаги. Кроме того, необходимо определить разрешения, которые будут необходимы приложениям для доступа к вашим
+данным. Все эти значения следует определить как константы в отдельном
+классе-контракте; в дальнейшем этот класс можно предоставить другим разработчикам. Дополнительные сведения о
+ URI контента представлены в разделе
+<a href="#ContentURI">Проектирование URI контента</a>.
+        Дополнительные сведения о намерениях представлены в разделе
+<a href="#Intents">Намерения и доступ к данным</a>.
+    </li>
+    <li>
+        Добавьте другие дополнительные компоненты, например, демонстрационные данные или реализация адаптера
+{@link android.content.AbstractThreadedSyncAdapter}, который служит для синхронизации данных между
+поставщиком и облаком.
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">Проектирование хранилища данных</h2>
+<p>
+    Поставщик контента представляет собой интерфейс для передачи данных, сохраненных в структурированном формате. Прежде чем создавать
+интерфейс, определите способ хранения данных. Данные можно хранить
+в любой форме, а затем спроектировать интерфейс для чтения и записи данных при необходимости.
+</p>
+<p>
+    В Android имеются некоторые технологии хранения данных:
+</p>
+<ul>
+    <li>
+        В системе Android имеется API базы данных SQLite, который используется собственными поставщиками Android для
+хранения табличных данных. С помощью класса
+{@link android.database.sqlite.SQLiteOpenHelper} можно создавать базы данных, а класс
+{@link android.database.sqlite.SQLiteDatabase} представляет собой базовый класс для доступа
+к базам данных.
+        <p>
+            Обратите внимание, что вам не обязательно использовать базу данных для реализации своего репозитория. Поставщик представляет собой
+внешний набор таблиц, как в случае с реляционной базой данных, однако это
+не является требованием к внутренней реализации поставщика.
+        </p>
+    </li>
+    <li>
+        Для хранения данных файлов в Android предусмотрены различные API-интерфейсы для работы с файлами.
+        Дополнительные сведения о хранилище файлов представлены в статье
+<a href="{@docRoot}guide/topics/data/data-storage.html">Хранилище данных</a>. Если вы
+проектируете поставщик, который предлагает мультимедийные данные, такие как музыка или видео, можно создать поставщик,
+объединяющий табличные данные и файлы.
+    </li>
+    <li>
+        Для работы с сетевыми данными используйте классы в {@link java.net} и
+{@link android.net}. Вы также можете синхронизировать сетевые данные с локальным
+хранилищем данных (например, с базой данных), а затем предоставить такие данные в виде таблиц или файлов.
+        Такой тип синхронизации демонстрируется в
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">примере приложения адаптера синхронизации</a>.
+    </li>
+</ul>
+<h3 id="DataDesign">
+    Рекомендации по проектированию данных
+</h3>
+<p>
+    Вот несколько советов и рекомендаций, касающихся проектирования структуры данных поставщика:
+</p>
+<ul>
+    <li>
+        В табличных данных всегда должен быть столбец для «основного ключа», который поставщик хранит
+в виде уникального числового значения для каждой строки. Вы можете использовать это значение для связывания строки
+со строками в других таблицах (используя его в качестве «внешнего ключа»). Несмотря на то, что вы можете использовать любое имя
+для этого столбца, рекомендуется указать имя {@link android.provider.BaseColumns#_ID BaseColumns._ID},
+поскольку для связывания результатов запроса поставщика с
+{@link android.widget.ListView} необходимо, чтобы один из получаемых столбцов назывался
+<code>_ID</code>.
+    </li>
+    <li>
+        Если вы планируете предоставлять растровые изображения или очень большие фрагменты данных для файлов, то данные
+следует хранить в файлах, а затем предоставлять их косвенно вместо хранения таких данных прямо в
+таблице. В таком случае вам необходимо сообщить пользователям вашего поставщика о том, что для доступа к данным им потребуется воспользоваться методом
+{@link android.content.ContentResolver}.
+    </li>
+    <li>
+        Для хранения данных разного размера или с разной структурой используйте тип
+BLOB. Например, столбец BLOB можно использовать для хранения
+<a href="http://code.google.com/p/protobuf">буфера протокола</a> или
+<a href="http://www.json.org">структуры JSON</a>.
+        <p>
+            BLOB также можно использовать для реализации таблицы, <em>не зависящей от схемы</em>. В таблице
+такого типа определяются столбец основного ключа, столбец типа MIME и один
+или несколько общих столбцов BLOB. На смысл данных в столбцах BLOB
+указывает значение в столбце типа MIME. Благодаря этому в одной и той же таблице можно хранить строки
+разных типов. Примером таблицы, не зависящей от схемы, может служить таблица с данными поставщика
+контента
+{@link android.provider.ContactsContract.Data}.
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">Проектирование URI контента</h2>
+<p>
+    <strong>URI контента</strong> представляет собой URI, который определяет данные в поставщике. URI контента
+могут включать символическое имя всего поставщика (его <strong>центр</strong>) и
+имя, которое указывает на таблицу или файл (<strong>путь</strong>). Дополнительная часть URI с идентификатором
+указывает на отдельную строку в таблице. У каждого метода доступа к данным в классе
+{@link android.content.ContentProvider} имеется URI контента (в виде аргумента); благодаря этому вы можете
+определить таблицу, строку или файл для доступа.
+</p>
+<p>
+    Базовые сведения о URI контента представлены в
+статье
+<a href="{@docRoot}guide/topics/providers/content-provider-basics.html">Основные сведения о поставщике контента</a>.
+</p>
+<h3>Проектирование центра поставщика</h3>
+<p>
+    У поставщика обычно имеется только один центр, который выступает в качестве его внутреннего имени в системе Android. Во
+избежание конфликтов с другими поставщиками в качестве основы центра поставщика должны выступать сведения о владении доменом в Интернете
+(в обратном порядке). Поскольку эта рекомендация также применяется и к названиям пакетов Android,
+вы можете определить центр своего поставщика в виде расширения названия
+пакета, в котором содержится поставщик. Например, если пакет Android называется
+<code>com.example.&lt;appname&gt;</code>, то центром
+вашего поставщика должен быть <code>com.example.&lt;appname&gt;.provider</code>.
+</p>
+<h3>Проектирование структуры пути</h3>
+<p>
+    Обычно разработчики создают URI контента на основе центра поставщика, добавляя к нему путь, который указывает
+на отдельные таблицы. Например, если имеется две таблицы, <em>table1</em> и
+<em>table2</em>, центр поставщика из предыдущего примера следует объединить для формирования
+следующих URI контента:
+<code>com.example.&lt;appname&gt;.provider/table1</code> и
+<code>com.example.&lt;appname&gt;.provider/table2</code>. Пути не ограничены
+одним сегментом, и не на каждом уровне пути имеется таблица.
+</p>
+<h3>Обработка идентификаторов URI контента</h3>
+<p>
+    Обычно поставщики предоставляют доступ к одной строке в таблице путем принятия URI контента,
+в конце которого указано значение идентификатора строки. Также поставщики обычно проверяют совпадение
+значения идентификатора по столбцу <code>_ID</code> в таблице и предоставляют запрашиваемый доступ к
+соответствующей строке.
+</p>
+<p>
+    Это упрощает создание общего метода проектирования для приложений, получающих доступ к поставщику. Приложение
+отправляет запрос поставщику и отображает полученный в результате такого запроса объект {@link android.database.Cursor}
+в объекте {@link android.widget.ListView} с помощью {@link android.widget.CursorAdapter}.
+    Для определения {@link android.widget.CursorAdapter} необходимо, чтобы один из столбцов в объекте
+{@link android.database.Cursor} назывался <code>_ID</code>
+</p>
+<p>
+    Затем пользователь выбирает в пользовательском интерфейсе одну из отображаемых строк, чтобы просмотреть данные
+или изменить их. Приложение получает соответствующую строку из объекта{@link android.database.Cursor} в базовом объекте
+{@link android.widget.ListView}, получает значение <code>_ID</code> для этой строки, добавляет его к
+URI контента, а затем отправляет поставщику запрос на доступ. Затем поставщик может
+запросить или изменить строку, выбранную пользователем.
+</p>
+<h3>Шаблоны URI контента</h3>
+<p>
+    Чтобы помочь вам в выборе действия для выполнения со входящим URI контента, в API поставщика
+имеется класс {@link android.content.UriMatcher}, который сопоставляет шаблоны URI контента с
+целочисленными значениями. Такие целочисленные значения можно использовать в операторе <code>switch</code>,
+который выбирает подходящее действие для URI контента, которые соответствуют определенному шаблону.
+</p>
+<p>
+    Для определения совпадения URI контента с шаблоном используются подстановочные символы:
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>:</strong> соответствие строке любой длины с любыми допустимыми символами;
+        </li>
+        <li>
+            <strong><code>#</code>:</strong> соответствие строке любой длины с цифрами.
+        </li>
+    </ul>
+<p>
+    В качестве примера для проектирования и написания кода для обработки URI контента
+рекомендуется использовать центр поставщика<code>com.example.app.provider</code>, который распознает
+следующие URI контента, указывающие на таблицы:
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>: таблица <code>table1</code>;
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>: таблица
+<code>dataset1</code>;
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>: таблица
+<code>dataset2</code>;
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>: таблица <code>table3</code>.
+    </li>
+</ul>
+<p>
+    Поставщик также распознает следующие URI контента, если к ним добавлен идентификатор строки (например,
+<code>content://com.example.app.provider/table3/1</code> для строки с
+идентификатором<code>1</code> в таблице <code>table3</code>.
+</p>
+<p>
+    Возможно использование следующих шаблонов URI контента:
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        Совпадает с любым URI контента в поставщике.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>:
+    </dt>
+    <dd>
+        Совпадает с URI контента в таблицах <code>dataset1</code>
+и <code>dataset2</code>, однако не совпадает с URI контента в таблице <code>table1</code> или
+<code>table3</code>.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>: Совпадает с URI контента
+для отдельных строк в таблице <code>table3</code>, такими как
+<code>content://com.example.app.provider/table3/6</code> для строки с идентификатором
+<code>6</code>.
+    </dt>
+</dl>
+<p>
+    Во фрагменте кода ниже показано, как работают методы в классе {@link android.content.UriMatcher}.
+    Этот код обрабатывает URI для всей таблицы иначе, чем для URI
+для отдельной строки, используя шаблон URI контента
+<code>content://&lt;authority&gt;/&lt;path&gt;</code> для таблиц и шаблон
+<code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code> — для отдельных строк.
+</p>
+<p>
+    Метод {@link android.content.UriMatcher#addURI(String, String, int) addURI()} сопоставляет
+центр поставщика и его путь с целочисленным значением. Метод {@link android.content.UriMatcher#match(Uri)
+match()} возвращает целочисленное значение для URI. Оператор <code>switch</code>
+выбирает, следует ли ему выполнить запрос всей таблицы или только отдельной записи:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    Другой класс, {@link android.content.ContentUris}, предоставляет удобные методы для работы с частью
+<code>id</code> URI контента. Классы {@link android.net.Uri} и
+{@link android.net.Uri.Builder} содержат удобные методы для синтаксического анализа существующих объектов
+{@link android.net.Uri} и создания новых.
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">Реализация класса ContentProvider</h2>
+<p>
+    Экземпляр класса {@link android.content.ContentProvider} управляет доступом к структурированному набору данных
+ путем обработки запросов от других приложений. В конечном счете, при всех формах доступа
+вызывается метод {@link android.content.ContentResolver}, который затем вызывает конкретный метод
+{@link android.content.ContentProvider} для получения доступа.
+</p>
+<h3 id="RequiredAccess">Необходимые методы</h3>
+<p>
+    В абстрактном классе {@link android.content.ContentProvider} определены шесть абстрактных методов,
+которые необходимо реализовать в рамках вашего собственного конкретного подкласса. Все указанные ниже методы, кроме 
+{@link android.content.ContentProvider#onCreate() onCreate()}, вызываются клиентским приложением,
+которое пытается получить доступ к вашему поставщику контента.
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+query()}
+    </dt>
+    <dd>
+        Получение данных от поставщика. Использует аргументы для выбора таблицы для запроса,
+строк и столбцов, которые необходимо возвратить, и указания порядка сортировки результатов.
+        Возвращает данные в виде объекта {@link android.database.Cursor}.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        Вставка строки в ваш поставщик. Использует аргументы для выбора
+конечной таблицы и получения значений столбца, которые следует использовать. Возвращает URI контента
+для новой вставленной строки.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+update()}
+    </dt>
+    <dd>
+        Обновление существующих строк в поставщике. Использует аргументы для выбора
+таблицы и строк для обновления, а также для получения обновленных значений столбца. Возвращает количество обновленных строк.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        Удаление строк из поставщика. Использует аргументы для выбора
+таблицы и строк для удаления. Возвращает количество удаленных строк.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Возвращение типа MIME, соответствующего URI контента. Дополнительные сведения об этом методе представлены в разделе
+<a href="#MIMETypes">Реализация типов MIME поставщика контента</a>.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        Инициализация поставщика. Система Android вызывает этот метод сразу после
+создания вашего поставщика. Обратите внимание, что поставщик не будет создан до тех пор, пока объект
+{@link android.content.ContentResolver} не прекратит попытки получить доступ к нему.
+    </dd>
+</dl>
+<p>
+    Подпись этих методов аналогична подписи для идентичных методов в объекте
+{@link android.content.ContentResolver}.
+</p>
+<p>
+    При реализации этих методов следует учитывать указанные ниже моменты.
+</p>
+<ul>
+    <li>
+        Все эти методы, кроме {@link android.content.ContentProvider#onCreate() onCreate()},
+можно вызвать сразу из нескольких потоков, поэтому они должны быть реализованы с сохранением потокобезопасности. Дополнительные сведения об
+использовании нескольких потоков представлены в
+статье
+<a href="{@docRoot}guide/components/processes-and-threads.html">Процессы и потоки</a>.
+    </li>
+    <li>
+        Избегайте слишком длинных операций в методе {@link android.content.ContentProvider#onCreate()
+onCreate()}. Отложите выполнение задач инициализации до тех пор, пока они не потребуются.
+        Дополнительные сведения об этом представлены в разделе
+<a href="#OnCreate">Реализация метода onCreate</a>.
+    </li>
+    <li>
+        Несмотря на то, что вы должны реализовать эти методы, ваш код необязательно должен выполнять какие-либо другие действия, кроме
+возврата ожидаемого типа данных. Например, может потребоваться, чтобы другие приложения не имели возможности
+вставлять данные в некоторые таблицы. Для этого можно игнорировать вызов метода
+{@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} и возвратить
+0.
+    </li>
+</ul>
+<h3 id="Query">Реализация метода query()</h3>
+<p>
+    Метод
+{@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+ContentProvider.query()} должен возвращать объект {@link android.database.Cursor}, а при сбое выдавать
+{@link java.lang.Exception}. Если в качестве хранилища данных используется база данных SQLite,
+можно просто возвратить объект {@link android.database.Cursor}, который был возвращен одним из методов
+<code>query()</code> класса {@link android.database.sqlite.SQLiteDatabase}.
+    Если запрос не соответствует ни одной строке, следует возвратить экземпляр объекта{@link android.database.Cursor}, метод
+{@link android.database.Cursor#getCount()} которого возвращает 0.
+    <code>null</code> следует возвращать только в том случае, если во время обработки запроса произошла внутренняя ошибка.
+</p>
+<p>
+    Если вы не используете базу данных SQLite в качестве хранилища данных, обратитесь к одному из конкретных подклассов объекта
+{@link android.database.Cursor}. Например, класс {@link android.database.MatrixCursor}
+реализует объект cursor, в котором каждая строка представляет собой массив класса {@link java.lang.Object}. С помощью этого класса воспользуйтесь методом
+{@link android.database.MatrixCursor#addRow(Object[]) addRow()}, чтобы добавить новую строку.
+</p>
+<p>
+    Следует помнить, что система Android должна иметь возможность взаимодействовать с {@link java.lang.Exception}
+в пределах процесса. Система Android позволяет это делать для указанных ниже исключений, которые могут быть полезны при обработке
+ошибок запросов.
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException} (это исключение можно выдать в случае,
+если поставщик получает недопустимый URI контента);
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}.
+    </li>
+</ul>
+<h3 id="Insert">Реализация метода insert()</h3>
+<p>
+    Метод {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} добавляет новую
+строку в соответствующую строку, используя значения в аргументе
+{@link android.content.ContentValues}. Если в аргументе {@link android.content.ContentValues} отсутствует имя столбца,
+возможно, потребуется указать для него значение по умолчанию (либо в коде поставщика, либо в
+схеме базы данных).
+</p>
+<p>
+    Этот метод должен возвращать URI контента для новой строки. Для этого добавьте значение
+<code>_ID</code> новой строки (или иной основной ключ) к URI контента таблицы, используя метод
+{@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()}.
+</p>
+<h3 id="Delete">Реализация метода delete()</h3>
+<p>
+    Методу {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+необязательно фактически удалять строки из вашего хранилища данных. Если для работы с поставщиком используется адаптер синхронизации,
+рассмотрите возможность отметки удаленной строки флагом
+delete вместо окончательного удаления строки. Адаптер синхронизации может
+проверить наличие удаленных строк с флагом delete и удалить их с сервера перед удалением их из поставщика.
+</p>
+<h3 id="Update">Реализация метода update()</h3>
+<p>
+    Метод {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+update()} принимает тот же аргумент {@link android.content.ContentValues}, который используется методом
+{@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}, и те же аргументы
+<code>selection</code> и <code>selectionArgs</code>, которые используются методами
+{@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} и
+{@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+ContentProvider.query()}. Благодаря этому код можно повторно использовать между данными методами.
+</p>
+<h3 id="OnCreate">Реализация метода onCreate()</h3>
+<p>
+    Система Android вызывает метод {@link android.content.ContentProvider#onCreate()
+onCreate()} при запуске поставщика. В этом методе следует выполнять только быстро выполняющиеся задачи
+инициализации, а создание базы данных и загрузку данных отложить до момента фактического получения
+поставщиком запроса на данные. Слишком длинные операции в методе
+{@link android.content.ContentProvider#onCreate() onCreate()} приводят к увеличению времени
+запуска поставщика. В свою очередь, это увеличивает время отклика поставщика на запросы от других
+приложений.
+</p>
+<p>
+    Например, если вы используете базу данных SQLite,
+в методе
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} можно создать новый объект
+{@link android.database.sqlite.SQLiteOpenHelper}, а затем создать таблицы SQL при первом открытии базы данных. Чтобы упростить это, при первом вызове метода
+{@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+getWritableDatabase()} он автоматически вызывает метод
+{@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+SQLiteOpenHelper.onCreate()}.
+</p>
+<p>
+    В двух указанных ниже фрагментах кода иллюстрируется взаимодействие между методом
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} и методом
+{@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+SQLiteOpenHelper.onCreate()}. В первом фрагменте кода представлена реализация метода
+{@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    В следующем фрагменте кода представлена реализация метода
+{@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+SQLiteOpenHelper.onCreate()}, включая вспомогательный класс:
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">Реализация типов MIME для класса ContentProvider</h2>
+<p>
+    В классе {@link android.content.ContentProvider} предусмотрены два метода для возврата типов MIME:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Один из необходимых методов, который требуется реализовать для каждого поставщика.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        Метод, который нужно реализовать в случае, если поставщик предоставляет файлы.
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">Типы MIME для таблиц</h3>
+<p>
+    Метод {@link android.content.ContentProvider#getType(Uri) getType()} возвращает объект
+{@link java.lang.String} в формате MIME, который описывает тип данных, возвращаемых аргументом
+URI контента. Аргумент {@link android.net.Uri} может выступать в качестве шаблона, а не в виде определенного URI;
+в этом случае необходимо возвратить тип данных, связанный с URI контента, который соответствует
+шаблону.
+</p>
+<p>
+    Для общих типов данных, таких как текст, HTML или JPEG, метод
+{@link android.content.ContentProvider#getType(Uri) getType()} должен возвращать стандартный тип
+MIME. Полный список стандартных типов представлен на 
+веб-сайте
+<a href="http://www.iana.org/assignments/media-types/index.htm">IANA MIME Media Types</a>.
+</p>
+<p>
+    Для URI контента, которые указывают на одну или несколько строк табличных данных, метод
+{@link android.content.ContentProvider#getType(Uri) getType()} должен возвращать
+тип MIME в формате MIME поставщика, который имеется в системе Android:
+</p>
+<ul>
+    <li>
+        Часть типа: <code>vnd</code>
+    </li>
+    <li>
+        Часть подтипа:
+        <ul>
+            <li>
+    Если шаблон URI предназначен для одной строки: <code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    Если шаблон URI предназначен для нескольких строк: <code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        Часть поставщика: <code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            Вы указываете <code>&lt;name&gt;</code> и <code>&lt;type&gt;</code>.
+            Значение <code>&lt;name&gt;</code> должно быть уникальным глобально,
+а значение <code>&lt;type&gt;</code> должно быть уникальным для соответствующего шаблона
+URI. В качестве <code>&lt;name&gt;</code> рекомендуется использовать название вашей компании
+или часть названия пакета Android вашего приложения. В качестве
+<code>&lt;type&gt;</code> рекомендуется использовать строку, которая определяет связанную с
+URI таблицу.
+        </p>
+
+    </li>
+</ul>
+<p>
+    Например, если центром поставщика является
+<code>com.example.app.provider</code>, который предоставляет таблицу
+<code>table1</code>, то тип MIME для нескольких строк в таблице <code>table1</code> будет следующим:
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    Для одной строки в таблице <code>table1</code> тип MIME будет следующим:
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">Типы MIME для файлов</h3>
+<p>
+    Если поставщик предоставляет файлы, необходимо реализовать метод
+{@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}.
+    Этот метод возвращает массив {@link java.lang.String} с типами MIME для файлов,
+возвращаемых поставщиком для заданного URI контента. Предлагаемые поставщиком типы следует сортировать с помощью аргумента фильтра типов MIME,
+чтобы возвращались только те типы MIME, которые необходимо обработать клиенту.
+</p>
+<p>
+    Например, рассмотрим поставщик, который предоставляет фотографии в виде файлов в форматах <code>.jpg</code>,
+<code>.png</code> и <code>.gif</code>.
+    Если приложение вызывает метод {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+ContentResolver.getStreamTypes()} со строкой фильтра <code>image/*</code> (нечто вроде «изображения»),
+то метод {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+ContentProvider.getStreamTypes()}
+должен возвращать следующий массив:
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    Если же приложению требуются только файлы <code>.jpg</code>, то оно вызывает метод
+{@link android.content.ContentResolver#getStreamTypes(Uri, String)
+ContentResolver.getStreamTypes()} со строкой фильтра <code>*\/jpeg</code>; метод
+{@link android.content.ContentProvider#getStreamTypes(Uri, String)
+ContentProvider.getStreamTypes()} при этом должен возвращать следующее:
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    Если поставщик не предоставляет ни один из типов MIME, запрошенных в строке фильтра, то метод
+{@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+должен возвращать <code>null</code>.
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">Реализация класса-контракта</h2>
+<p>
+    Класс-контракт представляет собой класс <code>public final</code>, в котором содержатся определения констант для
+URI, имен столбцов, типов MIME и других метаданных поставщика. Класс
+устанавливает контрактные отношения между поставщиком и другими приложениями путем обеспечения 
+прямого доступа к поставщику даже в случае изменения фактических значений URI, имен столбцов и 
+т. д.
+</p>
+<p>
+    Класс-контракт также полезен для разработчиков тем, что в нем содержатся мнемонические имена для его констант,
+благодаря чему снижается риск того, что разработчики воспользуются неправильными значениями для имен столбцов или URI. Поскольку это класс,
+он может содержать документацию Javadoc. Интегрированные среды разработки, такие как
+Eclipse, могут автоматически заполнять имена констант из класса-контракта и отображать Javadoc для
+констант.
+</p>
+<p>
+    У разработчиков нет доступа к файлу класса-контракта из вашего приложения, однако они могут
+статически скомпилировать класс-контракт в свое приложение из предоставленного вами файла <code>.jar</code>.
+</p>
+<p>
+    Примом класса-контракта может служить класс
+{@link android.provider.ContactsContract} и его вложенные классы.
+</p>
+<h2 id="Permissions">Реализация разрешений поставщика контента</h2>
+<p>
+    Разрешения и доступ ко всем компонентам системы Android подробно описаны в статье
+<a href="{@docRoot}guide/topics/security/security.html">Безопасность и разрешения</a>.
+    Кроме того, в статье <a href="{@docRoot}guide/topics/data/data-storage.html">Хранилище данных</a>
+представлены сведения о безопасности и разрешениях, применяемых к различным типам хранилища.
+    Ниже приведен краткий обзор основных моментов.
+</p>
+<ul>
+    <li>
+        По умолчанию файлы с данными хранятся во внутреннем хранилище устройства и доступны только
+вашему приложению и поставщику.
+    </li>
+    <li>
+        Создаваемые вами базы данных {@link android.database.sqlite.SQLiteDatabase} также доступны только вашему
+приложению и поставщику.
+    </li>
+    <li>
+        Файлы с данными, которые вы сохраняете во внешнем хранилище, по умолчанию являются <em>общедоступными</em>, которые
+<em>может считать любой пользователь</em>. Вам не удастся использовать поставщик контента для ограничения доступа к файлам,
+которые хранятся во внешнем хранилище, поскольку приложения могут использовать другие вызовы API для их чтения или записи.
+    </li>
+    <li>
+        Вызовы метода для открытия или создания файлов или баз данных SQLite, находящихся во внутреннем хранилище на вашем устройстве,
+потенциально могут предоставить всем другим приложениям доступ как на запись, так и на чтение данных. Если вы используете
+внутренний файл или базу данных в качестве репозитория поставщика, выполнить чтение или запись данных в котором может
+любой пользователь, то разрешений, заданных в манифесте поставщика, будет явно недостаточно для
+защиты ваших данных. По умолчанию доступ к файлам и базам данных
+во внутреннем хранилище является закрытым, и вам не следует изменять параметры доступа к репозиторию вашего поставщика.
+    </li>
+</ul>
+<p>
+    При необходимости использовать разрешения поставщика контента для управления доступом к данным, данные
+следует хранить во внутренних файлах, в базах данных SQLite или в облаке (например,
+на удаленном сервере), а доступ к файлам и базам данных должен быть предоставлен только вашему приложению.
+</p>
+<h3>Реализация разрешений</h3>
+<p>
+    Любое приложение может выполнять чтение данных в поставщике или записывать их, даже если соответствующие данные
+являются закрытыми, поскольку по умолчанию для поставщика не заданы разрешения. Чтобы изменить эти настройки, 
+задайте разрешения для поставщика в файле манифеста с помощью атрибутов элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code> или его дочерних элементов. Можно задать разрешения, которые применяются ко всему поставщику
+или только к определенным таблицам, либо даже только к определенным записям или всему дереву.
+</p>
+<p>
+    Для задания разрешений используется один или несколько
+элементов <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> в файле манифеста. Чтобы разрешения
+были уникальными для поставщика, используйте области, аналогичные Java, для атрибута
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code>. Например, присвойте разрешению на чтение имя
+<code>com.example.app.provider.permission.READ_PROVIDER</code>.
+
+</p>
+<p>
+    Ниже перечислены области разрешений для поставщика, начиная с разрешений,
+которые применяются ко всему поставщику, и заканчивая более подробными разрешениями.
+    Более подробные разрешения имеют преимущество над разрешениями с более широкими областями.
+</p>
+<dl>
+    <dt>
+        Единичное разрешение на чтение/запись на уровне поставщика
+    </dt>
+    <dd>
+        Единичное разрешение, которое управляет доступом как на чтение, так и на запись для всего поставщика, которое задается с помощью атрибута
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>.
+    </dd>
+    <dt>
+        Отдельное разрешение на чтение/запись на уровне поставщика
+    </dt>
+    <dd>
+        Разрешение на чтение и запись для всего поставщика. Такие разрешения задаются с помощью атрибутов
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code> и
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code> элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Они имеют преимущественную силу над разрешением, заданным с помощью атрибута
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code>.
+    </dd>
+    <dt>
+        Разрешение на уровне пути
+    </dt>
+    <dd>
+        Разрешение на чтение, запись или чтение/запись для URI контента в поставщике. Каждый
+URI, которым необходимо управлять, задается с помощью дочернего элемента
+<code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Для каждого указываемого URI контента можно задать разрешение
+на чтение/запись, только чтение или только запись, либо все три разрешения. Разрешения на чтение и
+запись имеют преимущественную силу над разрешением на чтение/запись. Кроме того, разрешения на уровне пути
+имеют преимущественную силу над разрешениями на уровне поставщика.
+    </dd>
+    <dt>
+        Временное разрешение
+    </dt>
+    <dd>
+        Разрешения этого уровня предоставляют приложению временный доступ, даже если у приложения
+нет разрешений, которые обычно требуются. Функция временного доступа
+ограничивает набор разрешений, которые приложению необходимо запросить в своем
+манифесте. Если включены временные разрешения, единственными приложениями,
+которым требуются «постоянные» разрешения на работу с поставщиком, являются те, которые непрерывно получают доступ ко всем вашим
+данным.
+        <p>
+            Рассмотрим пример с разрешениями, которые необходимо реализовать для поставщика электронной почты и приложения, когда вам
+необходимо разрешить внешнему приложению для просмотра изображений отображать вложенные в письма фотографии
+из поставщика. Чтобы предоставить средству просмотра изображений требуемый доступ без запроса разрешений,
+задайте временные разрешения для URI контента фотографий. Спроектируйте ваше приложение для работы с электронной почтой таким образом,
+чтобы в случаях, когда пользователь желает отобразить фотографию, приложение отправляло намерение, в котором содержится
+URI контента фотографии и флаги разрешения для средства просмотра изображений. Затем средство просмотра изображений
+может отправить поставщику эл. почты запрос на получение фотографии, даже если у средства просмотра отсутствует обычное
+разрешение на чтение данных из поставщика.
+        </p>
+        <p>
+            Чтобы включить временные разрешения, задайте атрибут
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> для элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>, либо добавьте один или несколько дочерних элементов
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code>в ваш элемент
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>. Если вы используете временные разрешения, вам необходимо вызывать метод
+{@link android.content.Context#revokeUriPermission(Uri, int)
+Context.revokeUriPermission()} каждый раз, когда вы осуществляете удаленную поддержку URI контента
+из поставщика, а URI контента связан с временным разрешением.
+        </p>
+        <p>
+            Значение атрибута определяет, какая часть поставщика доступна.
+            Если для атрибута задано значение <code>true</code>, система предоставит временные
+разрешения для всего поставщика, отменяя тем самым любые другие разрешения, которые требуются
+на уровне поставщика или на уровне пути.
+        </p>
+        <p>
+            Если для флага задано значение <code>false</code>, вам необходимо добавить дочерние элементы
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> в свой элемент
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>. Каждый дочерний элемент задает URI контента,
+для которых предоставляется временное разрешение.
+        </p>
+        <p>
+            Чтобы делегировать приложению временный доступ, в намерении должны быть указаны флаги
+{@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} или
+{@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION} , либо оба флага. Эти флаги задаются с помощью метода
+{@link android.content.Intent#setFlags(int) setFlags()}.
+        </p>
+        <p>
+            Если атрибут <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> отсутствует, предполагается, что его значение
+<code>false</code>.
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">Элемент &lt;provider&gt;</h2>
+<p>
+    Как и компоненты {@link android.app.Activity} и {@link android.app.Service},
+подкласс класса {@link android.content.ContentProvider}
+должен быть определен в файле манифеста приложения с помощью элемента
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. Ниже указана информация, которую система Android получает из
+этого элемента.
+<dl>
+    <dt>
+        Центр поставщика
+(<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+android:authorities}</a>)
+    </dt>
+    <dd>
+        Символические имена, которые идентифицируют весь поставщик в системе. Дополнительные сведения об этом атрибуте представлены в
+разделе
+<a href="#ContentURI">Проектирование URI контента</a>.
+    </dd>
+    <dt>
+        Название класса поставщика
+(<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>)
+    </dt>
+    <dd>
+        Класс, который реализует класс {@link android.content.ContentProvider}. Дополнительные сведения об этом классе представлены в
+разделе
+<a href="#ContentProvider">Реализация класса ContentProvider</a>.
+    </dd>
+    <dt>
+        Разрешения
+    </dt>
+    <dd>
+        Атрибуты, которые определяют разрешения, необходимые другим приложениям для
+доступа к данным в поставщике:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>: флаг временного разрешения;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>: единичное разрешение на чтение/запись на уровне поставщика;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>: разрешение на чтение на уровне поставщика;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>: разрешение на запись на уровне поставщика.
+            </li>
+        </ul>
+        <p>
+            Дополнительные сведения о разрешениях и соответствующих атрибутах представлены в
+разделе
+<a href="#Permissions">Реализация разрешений поставщика контента</a>.
+        </p>
+    </dd>
+    <dt>
+        Атрибуты запуска и управления
+    </dt>
+    <dd>
+        Следующие атрибуты определяют порядок и время запуска поставщика системой Android, характеристики
+процесса поставщика, а также другие параметры выполнения:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>: флаг, позволяющий системе запускать поставщик;
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>: флаг, позволяющий другим приложениям использовать этот поставщик;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>: порядок запуска поставщика
+(относительно других поставщиков в одном и том же процессе);
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>: флаг, позволяющий системе запускать поставщик
+в том же процессе, что и вызывающий клиент;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>: название процесса, в котором
+запускается поставщик;
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>: флаг, указывающий на то, что данные в поставщике
+следует синхронизировать с данными на сервере.
+            </li>
+        </ul>
+        <p>
+            Полная документация по атрибутам представлена в статье, посвященной
+элементу
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+    <dt>
+        Информационные атрибуты
+    </dt>
+    <dd>
+        Дополнительный значок и метка для поставщика:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>: графический ресурс, содержащий значок для поставщика.
+                Значок отображается рядом с меткой поставщика в списке приложений в разделе
+<em>Настройки</em> &gt; <em>Приложения</em> &gt; <em>Все</em>.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>: информационная метка с описанием поставщика или его
+данных, либо обоих описаний. Метка отображается в списке приложений в разделе
+<em>Настройки</em> &gt; <em>Приложения</em> &gt; <em>Все</em>.
+            </li>
+        </ul>
+        <p>
+            Полная документация по атрибутам представлена в статье, посвященной
+элементу<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">Намерения и доступ к данным</h2>
+<p>
+    Приложения могут получать доступ к поставщику контента в обход с помощью объектов {@link android.content.Intent}.
+    Приложение при этом не вызывает какие-либо методы классов {@link android.content.ContentResolver} или
+{@link android.content.ContentProvider}. Вместо этого оно отправляет намерение, запускающе операцию,
+которая обычно является частью собственного приложения поставщика. Получение и отображение данных в своем пользовательском интерфейсе
+выполняет конечная операция. В зависимости от действия, указанного в намерении,
+конечная операция также может предложить пользователю внести изменения в данные поставщика.
+    В намерении также могут содержаться дополнительные данные, которые конечная операция отображает в
+пользовательском интерфейсе; затем пользователю предлагается возможность изменить эти данные, прежде чем использовать их для изменения
+данных в поставщике.
+</p>
+<p>
+
+</p>
+<p>
+    Возможно, доступ с помощью намерения потребуется использовать для обеспечения целостности данных. Для вставки,
+обновления и удаления данных в поставщике может существовать строго определенный программный код, реализующий его функциональные возможности. В
+этом случае предоставление другим приложениям прямого доступа для изменения данных
+может привести к тому, что данные станут недействительными. Если вы хотите предоставить разработчикам возможность доступа посредством намерений, вам следует тщательно задокументировать такую функцию.
+    Объясните им, почему доступ посредством намерений через пользовательский интерфейс вашего приложения намного лучше изменения
+данных посредством их кода.
+</p>
+<p>
+    Обработка входящего намерения для изменения данных поставщика ничем не отличается
+от обработки других намерений. Дополнительные сведения об использовании намерений представлены в статье
+<a href="{@docRoot}guide/components/intents-filters.html">Объекты Intent и фильтры объектов Intent</a>.
+</p>

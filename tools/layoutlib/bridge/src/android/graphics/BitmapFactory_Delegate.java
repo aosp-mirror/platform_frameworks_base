@@ -23,7 +23,7 @@ import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.Nullable;
-import android.content.res.BridgeResources.NinePatchInputStream;
+import com.android.layoutlib.bridge.util.NinePatchInputStream;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Bitmap_Delegate.BitmapCreateFlags;
 
@@ -121,5 +121,36 @@ import java.util.Set;
     @LayoutlibDelegate
     /*package*/ static boolean nativeIsSeekable(FileDescriptor fd) {
         return true;
+    }
+
+    /**
+     * Set the newly decoded bitmap's density based on the Options.
+     *
+     * Copied from {@link BitmapFactory#setDensityFromOptions(Bitmap, Options)}.
+     */
+    @LayoutlibDelegate
+    /*package*/ static void setDensityFromOptions(Bitmap outputBitmap, Options opts) {
+        if (outputBitmap == null || opts == null) return;
+
+        final int density = opts.inDensity;
+        if (density != 0) {
+            outputBitmap.setDensity(density);
+            final int targetDensity = opts.inTargetDensity;
+            if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
+                return;
+            }
+
+            // --- Change from original implementation begins ---
+            // LayoutLib doesn't scale the nine patch when decoding it. Hence, don't change the
+            // density of the source bitmap in case of ninepatch.
+
+            if (opts.inScaled) {
+            // --- Change from original implementation ends. ---
+                outputBitmap.setDensity(targetDensity);
+            }
+        } else if (opts.inBitmap != null) {
+            // bitmap was reused, ensure density is reset
+            outputBitmap.setDensity(Bitmap.getDefaultDensity());
+        }
     }
 }

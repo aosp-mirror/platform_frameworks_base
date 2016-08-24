@@ -58,6 +58,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Size;
 
@@ -363,13 +364,24 @@ public class CameraMetadataNative implements Parcelable {
      * Set the global client-side vendor tag descriptor to allow use of vendor
      * tags in camera applications.
      *
-     * @return int A native status_t value corresponding to one of the
-     * {@link CameraBinderDecorator} integer constants.
-     * @see CameraBinderDecorator#throwOnError
-     *
+     * @throws ServiceSpecificException
      * @hide
      */
-    public static native int nativeSetupGlobalVendorTagDescriptor();
+    public static void setupGlobalVendorTagDescriptor() throws ServiceSpecificException {
+        int err = nativeSetupGlobalVendorTagDescriptor();
+        if (err != 0) {
+            throw new ServiceSpecificException(err, "Failure to set up global vendor tags");
+        }
+    }
+
+    /**
+     * Set the global client-side vendor tag descriptor to allow use of vendor
+     * tags in camera applications.
+     *
+     * @return int An error code corresponding to one of the
+     * {@link ICameraService} error constants, or 0 on success.
+     */
+    private static native int nativeSetupGlobalVendorTagDescriptor();
 
     /**
      * Set a camera metadata field to a value. The field definitions can be

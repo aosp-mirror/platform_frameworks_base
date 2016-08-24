@@ -45,8 +45,8 @@ href="{@docRoot}tools/sdk/eclipse-adt.html#notes">ADT Plugin for Eclipse</a>.</l
 </ul>
 
 <p>To get started with the SDK, review the Quick Start summary on the <a
-href="{@docRoot}sdk/index.html">Android SDK download page</a> or read <a
-href="{@docRoot}sdk/installing/index.html">Installing the SDK</a> for detailed
+href="{@docRoot}studio/index.html">Android SDK download page</a> or read <a
+href="{@docRoot}studio/install.html">Installing the SDK</a> for detailed
 installation instructions. </p>
 
 
@@ -204,7 +204,7 @@ to upgrade to the latest version.</p>
 
 <p>For driver installation or
 upgrade instructions, see  <a
-href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a>.</p>
+href="{@docRoot}studio/run/win-usb.html">USB Driver for Windows</a>.</p>
 </p>
 
 <h3>Emulator Skins, Android 1.6 Platform</h3>
@@ -445,7 +445,7 @@ these USB drivers that you can install, to let you develop on the device:</p>
 
 <p>For driver installation or
 upgrade instructions, see  <a
-href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a>.</p>
+href="{@docRoot}studio/run/win-usb.html">USB Driver for Windows</a>.</p>
 </p>
 
 <h3>Resolved Issues, Changes</h3>

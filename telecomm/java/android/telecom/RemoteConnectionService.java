@@ -61,6 +61,7 @@ final class RemoteConnectionService {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
                 connection.setConnectionCapabilities(parcel.getConnectionCapabilities());
+                connection.setConnectionProperties(parcel.getConnectionProperties());
                 if (parcel.getHandle() != null
                     || parcel.getState() != Connection.STATE_DISCONNECTED) {
                     connection.setAddress(parcel.getHandle(), parcel.getHandlePresentation());
@@ -152,6 +153,17 @@ final class RemoteConnectionService {
             } else {
                 findConferenceForAction(callId, "setConnectionCapabilities")
                         .setConnectionCapabilities(connectionCapabilities);
+            }
+        }
+
+        @Override
+        public void setConnectionProperties(String callId, int connectionProperties) {
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setConnectionProperties")
+                        .setConnectionProperties(connectionProperties);
+            } else {
+                findConferenceForAction(callId, "setConnectionProperties")
+                        .setConnectionProperties(connectionProperties);
             }
         }
 
@@ -321,13 +333,28 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setExtras(String callId, Bundle extras) {
-            if (mConnectionById.containsKey(callId)) {
-                findConnectionForAction(callId, "setExtras")
-                        .setExtras(extras);
+        public void putExtras(String callId, Bundle extras) {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "putExtras").putExtras(extras);
             } else {
-                findConferenceForAction(callId, "setExtras")
-                        .setExtras(extras);
+                findConferenceForAction(callId, "putExtras").putExtras(extras);
+            }
+        }
+
+        @Override
+        public void removeExtras(String callId, List<String> keys) {
+            if (hasConnection(callId)) {
+                findConnectionForAction(callId, "removeExtra").removeExtras(keys);
+            } else {
+                findConferenceForAction(callId, "removeExtra").removeExtras(keys);
+            }
+        }
+
+        @Override
+        public void onConnectionEvent(String callId, String event, Bundle extras) {
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "onConnectionEvent").onConnectionEvent(event,
+                        extras);
             }
         }
     };

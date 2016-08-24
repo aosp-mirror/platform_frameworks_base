@@ -65,7 +65,8 @@ public interface IApplicationThread extends IInterface {
             boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
-            Configuration config, Configuration overrideConfig) throws RemoteException;
+            Configuration config, Configuration overrideConfig, boolean preserveWindow)
+            throws RemoteException;
     void scheduleNewIntent(List<ReferrerIntent> intent, IBinder token) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
@@ -95,10 +96,10 @@ public interface IApplicationThread extends IInterface {
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, ProfilerInfo profilerInfo, Bundle testArguments,
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
-            int debugMode, boolean openGlTrace, boolean trackAllocation,
+            int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, Configuration config,
-            CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException;
+            CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings)
+            throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
@@ -115,15 +116,20 @@ public interface IApplicationThread extends IInterface {
             int resultCode, String data, Bundle extras, boolean ordered,
             boolean sticky, int sendingUser, int processState) throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
-    void scheduleActivityConfigurationChanged(IBinder token, Configuration overrideConfig)
-            throws RemoteException;
+    void scheduleActivityConfigurationChanged(IBinder token, Configuration overrideConfig,
+            boolean reportToActivity) throws RemoteException;
     void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType)
             throws RemoteException;
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
+    // the package has been removed, clean up internal references
     static final int PACKAGE_REMOVED = 0;
     static final int EXTERNAL_STORAGE_UNAVAILABLE = 1;
+    // the package is being modified in-place, don't kill it and retain references to it
+    static final int PACKAGE_REMOVED_DONT_KILL = 2;
+    // a previously removed package was replaced with a new version [eg. upgrade, split added, ...]
+    static final int PACKAGE_REPLACED = 3;
     void dispatchPackageBroadcast(int cmd, String[] packages) throws RemoteException;
     void scheduleCrash(String msg) throws RemoteException;
     void dumpActivity(FileDescriptor fd, IBinder servicetoken, String prefix, String[] args)
@@ -137,8 +143,8 @@ public interface IApplicationThread extends IInterface {
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void unstableProviderDied(IBinder provider) throws RemoteException;
-    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType)
-            throws RemoteException;
+    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType,
+            int sessionId) throws RemoteException;
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
             throws RemoteException;
     void scheduleOnNewActivityOptions(IBinder token, ActivityOptions options)
@@ -150,6 +156,11 @@ public interface IApplicationThread extends IInterface {
     void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled) throws RemoteException;
     void scheduleEnterAnimationComplete(IBinder token) throws RemoteException;
     void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException;
+    void startBinderTracking() throws RemoteException;
+    void stopBinderTrackingAndDump(FileDescriptor fd) throws RemoteException;
+    void scheduleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) throws RemoteException;
+    void schedulePictureInPictureModeChanged(IBinder token, boolean isInPictureInPictureMode) throws RemoteException;
+    void scheduleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor voiceInteractor) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -208,4 +219,9 @@ public interface IApplicationThread extends IInterface {
     int BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
     int ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
+    int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
+    int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+57;
+    int SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
+    int SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
+    int SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+60;
 }

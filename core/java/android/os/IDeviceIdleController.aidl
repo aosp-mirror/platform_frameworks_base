@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.os.IMaintenanceActivityListener;
 import android.os.UserHandle;
 
 /** @hide */
@@ -24,10 +25,12 @@ interface IDeviceIdleController {
     void removePowerSaveWhitelistApp(String name);
     String[] getSystemPowerWhitelistExceptIdle();
     String[] getSystemPowerWhitelist();
+    String[] getUserPowerWhitelist();
     String[] getFullPowerWhitelistExceptIdle();
     String[] getFullPowerWhitelist();
     int[] getAppIdWhitelistExceptIdle();
     int[] getAppIdWhitelist();
+    int[] getAppIdUserWhitelist();
     int[] getAppIdTempWhitelist();
     boolean isPowerSaveWhitelistExceptIdleApp(String name);
     boolean isPowerSaveWhitelistApp(String name);
@@ -35,4 +38,6 @@ interface IDeviceIdleController {
     long addPowerSaveTempWhitelistAppForMms(String name, int userId, String reason);
     long addPowerSaveTempWhitelistAppForSms(String name, int userId, String reason);
     void exitIdle(String reason);
+    boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
+    void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
 }

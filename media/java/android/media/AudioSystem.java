@@ -227,7 +227,7 @@ public class AudioSystem
     }
 
     /**
-     * Handles events for the audio policy manager about dynamic audio policies
+     * Handles events from the audio policy manager about dynamic audio policies
      * @see android.media.audiopolicy.AudioPolicy
      */
     public interface DynamicPolicyCallback
@@ -267,6 +267,59 @@ public class AudioSystem
         }
     }
 
+    /**
+     * Handles events from the audio policy manager about recording events
+     * @see android.media.AudioManager.AudioRecordingCallback
+     */
+    public interface AudioRecordingCallback
+    {
+        /**
+         * Callback for recording activity notifications events
+         * @param event
+         * @param session
+         * @param source
+         * @param recordingFormat an array of ints containing respectively the client and device
+         *    recording configurations (2*3 ints), followed by the patch handle:
+         *    index 0: client format
+         *          1: client channel mask
+         *          2: client sample rate
+         *          3: device format
+         *          4: device channel mask
+         *          5: device sample rate
+         *          6: patch handle
+         */
+        void onRecordingConfigurationChanged(int event, int session, int source,
+                int[] recordingFormat);
+    }
+
+    private static AudioRecordingCallback sRecordingCallback;
+
+    public static void setRecordingCallback(AudioRecordingCallback cb) {
+        synchronized (AudioSystem.class) {
+            sRecordingCallback = cb;
+            native_register_recording_callback();
+        }
+    }
+
+    /**
+     * Callback from native for recording configuration updates.
+     * @param event
+     * @param session
+     * @param source
+     * @param recordingFormat see
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])} for
+     *     the description of the record format.
+     */
+    private static void recordingCallbackFromNative(int event, int session, int source,
+            int[] recordingFormat) {
+        AudioRecordingCallback cb = null;
+        synchronized (AudioSystem.class) {
+            cb = sRecordingCallback;
+        }
+        if (cb != null) {
+            cb.onRecordingConfigurationChanged(event, session, source, recordingFormat);
+        }
+    }
 
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
@@ -319,6 +372,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_AUX_LINE = 0x200000;
     public static final int DEVICE_OUT_SPEAKER_SAFE = 0x400000;
     public static final int DEVICE_OUT_IP = 0x800000;
+    public static final int DEVICE_OUT_BUS = 0x1000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -346,6 +400,7 @@ public class AudioSystem
                                               DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_SPEAKER_SAFE |
                                               DEVICE_OUT_IP |
+                                              DEVICE_OUT_BUS |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -385,6 +440,7 @@ public class AudioSystem
     public static final int DEVICE_IN_BLUETOOTH_A2DP = DEVICE_BIT_IN | 0x20000;
     public static final int DEVICE_IN_LOOPBACK = DEVICE_BIT_IN | 0x40000;
     public static final int DEVICE_IN_IP = DEVICE_BIT_IN | 0x80000;
+    public static final int DEVICE_IN_BUS = DEVICE_BIT_IN | 0x100000;
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -407,6 +463,7 @@ public class AudioSystem
                                              DEVICE_IN_BLUETOOTH_A2DP |
                                              DEVICE_IN_LOOPBACK |
                                              DEVICE_IN_IP |
+                                             DEVICE_IN_BUS |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -442,6 +499,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
     public static final String DEVICE_OUT_IP_NAME = "ip";
+    public static final String DEVICE_OUT_BUS_NAME = "bus";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -463,6 +521,7 @@ public class AudioSystem
     public static final String DEVICE_IN_BLUETOOTH_A2DP_NAME = "bt_a2dp";
     public static final String DEVICE_IN_LOOPBACK_NAME = "loopback";
     public static final String DEVICE_IN_IP_NAME = "ip";
+    public static final String DEVICE_IN_BUS_NAME = "bus";
 
     public static String getOutputDeviceName(int device)
     {
@@ -515,6 +574,8 @@ public class AudioSystem
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
         case DEVICE_OUT_IP:
             return DEVICE_OUT_IP_NAME;
+        case DEVICE_OUT_BUS:
+            return DEVICE_OUT_BUS_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
@@ -564,6 +625,8 @@ public class AudioSystem
             return DEVICE_IN_LOOPBACK_NAME;
         case DEVICE_IN_IP:
             return DEVICE_IN_IP_NAME;
+        case DEVICE_IN_BUS:
+            return DEVICE_IN_BUS_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);
@@ -575,7 +638,7 @@ public class AudioSystem
     public static final int PHONE_STATE_RINGING = 1;
     public static final int PHONE_STATE_INCALL = 2;
 
-    // device categories config for setForceUse, must match AudioSystem::forced_config
+    // device categories config for setForceUse, must match audio_policy_forced_cfg_t
     public static final int FORCE_NONE = 0;
     public static final int FORCE_SPEAKER = 1;
     public static final int FORCE_HEADPHONES = 2;
@@ -589,17 +652,20 @@ public class AudioSystem
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
     public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
-    private static final int NUM_FORCE_CONFIG = 13;
+    public static final int FORCE_ENCODED_SURROUND_NEVER = 13;
+    public static final int FORCE_ENCODED_SURROUND_ALWAYS = 14;
+    public static final int NUM_FORCE_CONFIG = 15;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
-    // usage for setForceUse, must match AudioSystem::force_use
+    // usage for setForceUse, must match audio_policy_force_use_t
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
     public static final int FOR_SYSTEM = 4;
     public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
-    private static final int NUM_FORCE_USE = 6;
+    public static final int FOR_ENCODED_SURROUND = 6;
+    private static final int NUM_FORCE_USE = 7;
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;
@@ -624,6 +690,11 @@ public class AudioSystem
     public static native boolean getMasterMute();
     public static native int getDevicesForStream(int stream);
 
+    /** @hide returns true if master mono is enabled. */
+    public static native boolean getMasterMono();
+    /** @hide enables or disables the master mono mode. */
+    public static native int setMasterMono(boolean mono);
+
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
     public static native int getPrimaryOutputSamplingRate();
     public static native int getPrimaryOutputFrameCount();
@@ -641,6 +712,8 @@ public class AudioSystem
 
     // declare this instance as having a dynamic policy callback handler
     private static native final void native_register_dynamic_policy_callback();
+    // declare this instance as having a recording configuration update callback handler
+    private static native final void native_register_recording_callback();
 
     // must be kept in sync with value in include/system/audio.h
     public static final int AUDIO_HW_SYNC_INVALID = 0;

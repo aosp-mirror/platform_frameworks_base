@@ -16,23 +16,24 @@
 #ifndef RENDERNODEPROPERTIES_H
 #define RENDERNODEPROPERTIES_H
 
-#include <algorithm>
-#include <stddef.h>
-#include <vector>
-#include <cutils/compiler.h>
-#include <androidfw/ResourceTypes.h>
-#include <utils/Log.h>
+#include "Caches.h"
+#include "DeviceInfo.h"
+#include "Rect.h"
+#include "RevealClip.h"
+#include "Outline.h"
+#include "utils/MathUtils.h"
 
 #include <SkCamera.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
 #include <SkXfermode.h>
 
-#include "Caches.h"
-#include "Rect.h"
-#include "RevealClip.h"
-#include "Outline.h"
-#include "utils/MathUtils.h"
+#include <algorithm>
+#include <stddef.h>
+#include <vector>
+#include <cutils/compiler.h>
+#include <androidfw/ResourceTypes.h>
+#include <utils/Log.h>
 
 class SkBitmap;
 class SkColorFilter;
@@ -203,8 +204,8 @@ public:
         return RP_SET(mPrimitiveFields.mProjectBackwards, shouldProject);
     }
 
-    bool setProjectionReceiver(bool shouldRecieve) {
-        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldRecieve);
+    bool setProjectionReceiver(bool shouldReceive) {
+        return RP_SET(mPrimitiveFields.mProjectionReceiver, shouldReceive);
     }
 
     bool isProjectionReceiver() const {
@@ -417,7 +418,7 @@ public:
         return false;
     }
 
-    float getLeft() const {
+    int getLeft() const {
         return mPrimitiveFields.mLeft;
     }
 
@@ -432,7 +433,7 @@ public:
         return false;
     }
 
-    float getTop() const {
+    int getTop() const {
         return mPrimitiveFields.mTop;
     }
 
@@ -447,7 +448,7 @@ public:
         return false;
     }
 
-    float getRight() const {
+    int getRight() const {
         return mPrimitiveFields.mRight;
     }
 
@@ -462,7 +463,7 @@ public:
         return false;
     }
 
-    float getBottom() const {
+    int getBottom() const {
         return mPrimitiveFields.mBottom;
     }
 
@@ -541,11 +542,15 @@ public:
         return mPrimitiveFields.mClippingFlags & CLIP_TO_BOUNDS;
     }
 
+    const Rect& getClipBounds() const {
+        return mPrimitiveFields.mClipBounds;
+    }
+
     void getClippingRectForFlags(uint32_t flags, Rect* outRect) const {
         if (flags & CLIP_TO_BOUNDS) {
             outRect->set(0, 0, getWidth(), getHeight());
             if (flags & CLIP_TO_CLIP_BOUNDS) {
-                outRect->intersect(mPrimitiveFields.mClipBounds);
+                outRect->doIntersect(mPrimitiveFields.mClipBounds);
             }
         } else {
             outRect->set(mPrimitiveFields.mClipBounds);
@@ -603,11 +608,17 @@ public:
                 && getOutline().getAlpha() != 0.0f;
     }
 
+    bool fitsOnLayer() const {
+        const DeviceInfo* deviceInfo = DeviceInfo::get();
+        return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize()
+                        && mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize()
+                        && mPrimitiveFields.mWidth > 0
+                        && mPrimitiveFields.mHeight > 0;
+    }
+
     bool promotedToLayer() const {
-        const int maxTextureSize = Caches::getInstance().maxTextureSize;
         return mLayerProperties.mType == LayerType::None
-                && mPrimitiveFields.mWidth <= maxTextureSize
-                && mPrimitiveFields.mHeight <= maxTextureSize
+                && fitsOnLayer()
                 && (mComputedFields.mNeedLayerForFunctors
                         || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
                                 && mPrimitiveFields.mAlpha < 1
@@ -621,25 +632,23 @@ public:
 private:
     // Rendering properties
     struct PrimitiveFields {
-        PrimitiveFields();
-
+        int mLeft = 0, mTop = 0, mRight = 0, mBottom = 0;
+        int mWidth = 0, mHeight = 0;
+        int mClippingFlags = CLIP_TO_BOUNDS;
+        float mAlpha = 1;
+        float mTranslationX = 0, mTranslationY = 0, mTranslationZ = 0;
+        float mElevation = 0;
+        float mRotation = 0, mRotationX = 0, mRotationY = 0;
+        float mScaleX = 1, mScaleY = 1;
+        float mPivotX = 0, mPivotY = 0;
+        bool mHasOverlappingRendering = false;
+        bool mPivotExplicitlySet = false;
+        bool mMatrixOrPivotDirty = false;
+        bool mProjectBackwards = false;
+        bool mProjectionReceiver = false;
+        Rect mClipBounds;
         Outline mOutline;
         RevealClip mRevealClip;
-        int mClippingFlags;
-        bool mProjectBackwards;
-        bool mProjectionReceiver;
-        float mAlpha;
-        bool mHasOverlappingRendering;
-        float mElevation;
-        float mTranslationX, mTranslationY, mTranslationZ;
-        float mRotation, mRotationX, mRotationY;
-        float mScaleX, mScaleY;
-        float mPivotX, mPivotY;
-        int mLeft, mTop, mRight, mBottom;
-        int mWidth, mHeight;
-        bool mPivotExplicitlySet;
-        bool mMatrixOrPivotDirty;
-        Rect mClipBounds;
     } mPrimitiveFields;
 
     SkMatrix* mStaticMatrix;

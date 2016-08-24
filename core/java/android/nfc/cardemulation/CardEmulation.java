@@ -156,7 +156,7 @@ public final class CardEmulation {
                 throw new UnsupportedOperationException();
             }
             try {
-                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)) {
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION, 0)) {
                     Log.e(TAG, "This device does not support card emulation");
                     throw new UnsupportedOperationException();
                 }

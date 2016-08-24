@@ -1,0 +1,696 @@
+page.title=﻿Testing Display Performance
+page.article=true
+page.image=images/cards/card-test-performance_2x.png
+page.keywords=performance, fps, tools
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#measure">Measuring UI Performance</a>
+          <ul>
+            <li><a href="#aggregate">Aggregate frame stats</a></li>
+            <li><a href="#timing-info">Precise frame timing info</a></li>
+            <li><a href="#timing-dump">Simple frame timing dump</a></li>
+            <li><a href="#collection-window">Controlling the window of stat collection</a></li>
+            <li><a href="#diagnose">Diagnosing performance regressions</a></li>
+            <li><a href="#resources">Additional resources</a></li>
+          </ul>
+        </li>
+        <li><a href="#automate">Automating UI Perfomance Tests</a>
+          <ul>
+            <li><a href="#ui-tests">Setting up UI tests</a></li>
+            <li><a href="#automated-tests">Setting up automated UI testing</a></li>
+            <li><a href="#triage">Triaging and fixing observed problems</a></li>
+          </ul>
+        </li>
+      </ol>
+
+  </div>
+</div>
+
+
+<p>
+  User interface (UI) performance testing ensures that your app not only meets its functional
+  requirements, but that user interactions with your app are buttery smooth, running at a
+  consistent 60 frames per second (<a href=
+  "https://www.youtube.com/watch?v=CaMTIgxCSqU&amp;index=25&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">why
+  60fps?</a>), without any dropped or delayed frames, or as we like to call it, <em>jank</em>. This
+  document explains tools available to measure UI performance, and lays out an approach to
+  integrate UI performance measurements into your testing practices.
+</p>
+
+
+<h2 id="measure">Measuring UI Performance</h2>
+
+<p>
+  In order to improve performance you first need the ability to measure the performance of
+  your system, and then diagnose and identify problems that may arrive from various parts of your
+  pipeline.
+</p>
+
+<p>
+  <em><a href="https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a></em> is an
+  Android tool that runs on the device and dumps interesting information about the status of system
+  services. Passing the <em>gfxinfo</em> command to dumpsys provides an output in logcat with
+  performance information relating to frames of animation that are occurring during the recording
+  phase.
+</p>
+
+<pre>
+&gt; adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt;
+</pre>
+
+<p>
+  This command can produce multiple different variants of frame timing data.
+</p>
+
+<h3 id="aggregate">Aggregate frame stats</h3>
+
+<p>
+  With the M Preview the command prints out aggregated analysis of frame data to logcat, collected
+  across the entire lifetime of the process. For example:
+</p>
+
+<pre class="noprettyprint">
+Stats since: 752958278148ns
+Total frames rendered: 82189
+Janky frames: 35335 (42.99%)
+90th percentile: 34ms
+95th percentile: 42ms
+99th percentile: 69ms
+Number Missed Vsync: 4706
+Number High input latency: 142
+Number Slow UI thread: 17270
+Number Slow bitmap uploads: 1542
+Number Slow draw: 23342
+</pre>
+
+<p>
+  These high level statistics convey at a high level the rendering performance of the app, as well
+  as its stability across many frames.
+</p>
+
+
+<h3 id="timing-info">Precise frame timing info</h3>
+
+<p>
+  With the M Preview comes a new command for gfxinfo, and that’s <em>framestats</em> which provides
+  extremely detailed frame timing information from recent frames, so that you can track down and
+  debug problems more accurately.
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; framestats
+</pre>
+
+<p>
+  This command prints out frame timing information, with nanosecond timestamps, from the last 120
+  frames produced by the app. Below is example raw output from adb dumpsys gfxinfo
+  &lt;PACKAGE_NAME&gt; framestats:
+</p>
+
+<pre class="noprettyprint">
+0,27965466202353,27965466202353,27965449758000,27965461202353,27965467153286,27965471442505,27965471925682,27965474025318,27965474588547,27965474860786,27965475078599,27965479796151,27965480589068,
+0,27965482993342,27965482993342,27965465835000,27965477993342,27965483807401,27965486875630,27965487288443,27965489520682,27965490184380,27965490568703,27965491408078,27965496119641,27965496619641,
+0,27965499784331,27965499784331,27965481404000,27965494784331,27965500785318,27965503736099,27965504201151,27965506776568,27965507298443,27965507515005,27965508405474,27965513495318,27965514061984,
+0,27965516575320,27965516575320,27965497155000,27965511575320,27965517697349,27965521276151,27965521734797,27965524350474,27965524884536,27965525160578,27965526020891,27965531371203,27965532114484,
+</pre>
+
+<p>
+  Each line of this output represents a frame produced by the app. Each line has a fixed number of
+  columns describing time spent in each stage of the frame-producing pipeline. The next section
+  describes this format in detail, including what each column represents.
+</p>
+
+
+<h4 id="fs-data-format">Framestats data format</h4>
+
+<p>
+  Since the block of data is output in CSV format, it's very straightforward to paste it to your
+  spreadsheet tool of choice, or collect and parse with a script. The following table explains the
+  format of the output data columns. All timestamps are in nanoseconds.
+</p>
+
+<ul>
+  <li>FLAGS
+    <ul>
+      <li>Rows with a ‘0’ for the FLAGS column can have their total frame time computed by
+      subtracting the INTENDED_VSYNC column from the FRAME_COMPLETED column.
+      </li>
+
+      <li>If this is non-zero the row should be ignored, as the frame has been determined as being
+      an outlier from normal performance, where it is expected that layout &amp; draw take longer
+      than 16ms. Here are a few reasons this could occur:
+        <ul>
+          <li>The window layout changed (such as the first frame of the application or after a
+          rotation)
+          </li>
+
+          <li>It is also possible the frame was skipped in which case some of the values will have
+          garbage timestamps. A frame can be skipped if for example it is out-running 60fps or if
+          nothing on-screen ended up being dirty, this is not necessarily a sign of a problem in
+          the app.
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>INTENDED_VSYNC
+    <ul>
+      <li>The intended start point for the frame. If this value is different from VSYNC, there
+      was work occurring on the UI thread that prevented it from responding to the vsync signal
+      in a timely fashion.
+      </li>
+    </ul>
+  </li>
+
+  <li>VSYNC
+    <ul>
+      <li>The time value that was used in all the vsync listeners and drawing for the frame
+      (Choreographer frame callbacks, animations, View.getDrawingTime(), etc…)
+      </li>
+
+      <li>To understand more about VSYNC and how it influences your application, check out the
+      <a href=
+      "https://www.youtube.com/watch?v=1iaHxmfZGGc&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=23">
+        Understanding VSYNC</a> video.
+      </li>
+    </ul>
+  </li>
+
+  <li>OLDEST_INPUT_EVENT
+    <ul>
+      <li>The timestamp of the oldest input event in the input queue, or Long.MAX_VALUE if
+      there were no input events for the frame.
+      </li>
+
+      <li>This value is primarily intended for platform work and has limited usefulness to app
+      developers.
+      </li>
+    </ul>
+  </li>
+
+  <li>NEWEST_INPUT_EVENT
+    <ul>
+      <li>The timestamp of the newest input event in the input queue, or 0 if there were no
+      input events for the frame.
+      </li>
+
+      <li>This value is primarily intended for platform work and has limited usefulness to app
+      developers.
+      </li>
+
+      <li>However it’s possible to get a rough idea of how much latency the app is adding by
+      looking at (FRAME_COMPLETED - NEWEST_INPUT_EVENT).
+      </li>
+    </ul>
+  </li>
+
+  <li>HANDLE_INPUT_START
+    <ul>
+      <li>The timestamp at which input events were dispatched to the application.
+      </li>
+
+      <li>By looking at the time between this and ANIMATION_START it is possible to measure how
+      long the application spent handling input events.
+      </li>
+
+      <li>If this number is high (&gt;2ms), this indicates the app is spending an unusually
+      long time processing input events, such as View.onTouchEvent(), which may indicate this
+      work needs to be optimized, or offloaded to a different thread. Note that there are some
+      scenarios, such as click events that launch new activities or similar, where it is
+      expected and acceptable that this number is large.
+      </li>
+    </ul>
+  </li>
+
+  <li>ANIMATION_START
+    <ul>
+      <li>The timestamp at which animations registered with Choreographer were run.
+      </li>
+
+      <li>By looking at the time between this and PERFORM_TRANVERSALS_START it is possible to
+      determine how long it took to evaluate all the animators (ObjectAnimator,
+      ViewPropertyAnimator, and Transitions being the common ones) that are running.
+      </li>
+
+      <li>If this number is high (&gt;2ms), check to see if your app has written any custom
+      animators or what fields ObjectAnimators are animating and ensure they are appropriate
+      for an animation.
+      </li>
+
+      <li>To learn more about Choreographer, check out the <a href=
+      "https://www.youtube.com/watch?v=Q8m9sHdyXnE">For Butter or Worse</a>
+      video.
+      </li>
+    </ul>
+  </li>
+
+  <li>PERFORM_TRAVERSALS_START
+    <ul>
+      <li>If you subtract out DRAW_START from this value, you can extract how long the layout
+      &amp; measure phases took to complete. (note, during a scroll, or animation, you would
+      hope this should be close to zero..)
+      </li>
+
+      <li>To learn more about the measure &amp; layout phases of the rendering pipeline, check
+      out the <a href=
+      "https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+        Invalidations, Layouts and Performance</a> video
+      </li>
+    </ul>
+  </li>
+
+  <li>DRAW_START
+    <ul>
+      <li>The time at which the draw phase of performTraversals started. This is the start
+      point of recording the display lists of any views that were invalidated.
+      </li>
+
+      <li>The time between this and SYNC_START is how long it took to call View.draw() on all
+      the invalidated views in the tree.
+      </li>
+
+      <li>For more information on the drawing model, see <a href=
+      "{@docRoot}guide/topics/graphics/hardware-accel.html#hardware-model">Hardware Acceleration</a>
+      or the <a href=
+      "https://www.youtube.com/watch?v=we6poP0kw6E&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu&amp;index=27">
+        Invalidations, Layouts and Performance</a> video
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_QUEUED
+    <ul>
+      <li>The time at which a sync request was sent to the RenderThread.
+      </li>
+
+      <li>This marks the point at which a message to start the sync
+      phase was sent to the RenderThread. If the time between this and
+      SYNC_START is substantial (&gt;0.1ms or so), it means that
+      the RenderThread was busy working on a different frame. Internally
+      this is used to differentiate between the frame doing too much work
+      and exceeding the 16ms budget and the frame being stalled due to
+      the previous frame exceeding the 16ms budget.
+      </li>
+    </ul>
+  </li>
+
+  <li>SYNC_START
+    <ul>
+      <li>The time at which the sync phase of the drawing started.
+      </li>
+
+      <li>If the time between this and ISSUE_DRAW_COMMANDS_START is substantial (&gt;0.4ms or
+      so), it typically indicates a lot of new Bitmaps were drawn which must be uploaded to the
+      GPU.
+      </li>
+
+      <li>To understand more about the sync phase, check out the <a href=
+      "https://www.youtube.com/watch?v=VzYkVL1n4M8&amp;index=24&amp;list=PLOU2XLYxmsIKEOXh5TwZEv89aofHzNCiu">
+        Profile GPU Rendering</a> video
+      </li>
+    </ul>
+  </li>
+
+  <li>ISSUE_DRAW_COMMANDS_START
+    <ul>
+      <li>The time at which the hardware renderer started issuing drawing commands to the GPU.
+      </li>
+
+      <li>The time between this and FRAME_COMPLETED gives a rough idea of how much GPU work the
+      app is producing. Problems like too much overdraw or inefficient rendering effects show
+      up here.
+      </li>
+    </ul>
+  </li>
+
+  <li>SWAP_BUFFERS
+    <ul>
+      <li>The time at which eglSwapBuffers was called, relatively uninteresting outside of
+      platform work.
+      </li>
+    </ul>
+  </li>
+
+  <li>FRAME_COMPLETED
+    <ul>
+      <li>All done! The total time spent working on this frame can be computed by doing
+      FRAME_COMPLETED - INTENDED_VSYNC.
+      </li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>
+  You can use this data in different ways. One simple but useful visualization is a
+  histogram showing the distribution of frames times (FRAME_COMPLETED - INTENDED_VSYNC) in
+  different latency buckets, see figure below. This graph tells us at a glance that most
+  frames were very good - well below the 16ms deadline (depicted in red), but a few frames
+  were significantly over the deadline. We can look at changes in this histogram over time
+  to see wholesale shifts or new outliers being created. You can also graph input latency,
+  time spent in layout, or other similar interesting metrics based on the many timestamps
+  in the data.
+</p>
+
+<img src="{@docRoot}images/performance-testing/perf-test-framestats.png">
+
+
+<h3 id="timing-dump">Simple frame timing dump</h3>
+
+<p>
+  If <strong>Profile GPU rendering</strong> is set to <strong>In adb shell dumpsys gfxinfo</strong>
+  in Developer Options, the <code>adb shell dumpsys gfxinfo</code> command prints out timing
+  information for the most recent 120 frames, broken into a few different categories with
+  tab-separated-values. This data can be useful for indicating which parts of the drawing pipeline
+  may be slow at a high level.
+</p>
+
+<p>
+  Similar to <a href="#fs-data-format">framestats</a> above, it's very
+  straightforward to paste it to your spreadsheet tool of choice, or collect and parse with
+  a script. The following graph shows a breakdown of where many frames produced by the app
+  were spending their time.
+</p>
+
+<img src="{@docRoot}images/performance-testing/perf-test-frame-latency.png">
+
+<p>
+  The result of running gfxinfo, copying the output, pasting it into a spreadsheet
+  application, and graphing the data as stacked bars.
+</p>
+
+<p>
+  Each vertical bar represents one frame of animation; its height represents the number of
+  milliseconds it took to compute that frame of animation. Each colored segment of the bar
+  represents a different stage of the rendering pipeline, so that you can see what parts of
+  your application may be creating a bottleneck. For more information on understanding the
+  rendering pipeline, and how to optimize for it, see the <a href=
+  "https://www.youtube.com/watch?v=we6poP0kw6E&amp;index=27&amp;list=PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE">
+  Invalidations Layouts and Performance</a> video.
+</p>
+
+
+<h3 id="collection-window">Controlling the window of stat collection</h3>
+
+<p>
+  Both the framestats and simple frame timings gather data over a very short window - about
+  two seconds worth of rendering. In order to precisely control this window of time - for
+  example, to constrain the data to a particular animation - you can reset all counters,
+  and aggregate statistics gathered.
+</p>
+
+<pre>
+&gt;adb shell dumpsys gfxinfo &lt;PACKAGE_NAME&gt; reset
+</pre>
+
+<p>
+  This can also be used in conjunction with the dumping commands themselves to collect and
+  reset at a regular cadence, capturing less-than-two-second windows of frames
+  continuously.
+</p>
+
+
+<h3 id="diagnose">Diagnosing performance regressions</h3>
+
+<p>
+  Identification of regressions is a good first step to tracking down problems, and
+  maintaining high application health. However, dumpsys just identifies the existence and
+  relative severity of problems. You still need to diagnose the particular cause of the
+  performance problems, and find appropriate ways to fix them. For that, it’s highly
+  recommended to use the <a href="{@docRoot}tools/help/systrace.html">systrace</a> tool.
+</p>
+
+
+<h3 id="resources">Additional resources</h3>
+
+<p>
+  For more information on how Android’s rendering pipeline works, common problems that you
+  can find there, and how to fix them, some of the following resources may be useful to
+  you:
+</p>
+
+<ul>
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=HXQhu6qfTVU">
+      Rendering Performance 101</a>
+  </li>
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=CaMTIgxCSqU">
+      Why 60fps?</a>
+  </li>
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=WH9AFhgwmDw">
+      Android, UI, and the GPU</a>
+  </li>
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=we6poP0kw6E">
+      Invalidations, Layouts, and Performance</a>
+  </li>
+  <li>
+    <a href="{@docRoot}studio/profile/systrace.html">
+      Analyzing UI Performance with Systrace</a>
+  </li>
+</ul>
+
+
+<h2 id="automate">Automating UI Perfomance Tests</h2>
+
+<p>
+  One approach to UI Performance testing is to simply have a human tester perform a set of
+  user operations on the target app, and either visually look for jank, or spend an very
+  large amount of time using a tool-driven approach to find it. But this manual approach is
+  fraught with peril - human ability to perceive frame rate changes varies tremendously,
+  and this is also time consuming, tedious, and error prone.
+</p>
+
+<p>
+  A more efficient approach is to log and analyze key performance metrics from automated UI
+  tests. The Android M developer preview includes new logging capabilities which make it
+  easy to determine the amount and severity of jank in your application’s animations, and
+  that can be used to build a rigorous process to determine your current performance and
+  track future performance objectives.
+</p>
+
+<p>
+  This article walks you through a recommended approach to using that data to automate your
+  performance testing.
+</p>
+
+<p>
+  This is mostly broken down into two key actions. Firstly, identifying what you're
+  testing, and how you’re testing it. and Secondly, setting up, and maintaining an
+  automated testing environment.
+</p>
+
+
+<h3 id="ui-tests">Setting up UI tests</h3>
+
+<p>
+  Before you can get started with automated testing, it’s important to determine a few high
+  level decisions, in order to properly understand your test space, and needs you may have.
+</p>
+
+<h4>
+  Identify key animations / flows to test
+</h4>
+
+<p>
+  Remember that bad performance is most visible to users when it interrupts a smooth
+  animation. As such, when identifying what types of UI actions to test for, it’s useful to
+  focus on the key animations that users see most, or are most important to their
+  experience. For example, here are some common scenarios that may be useful to identify:
+</p>
+
+<ul>
+  <li>Scrolling a primary ListView or RecyclerView
+  </li>
+
+  <li>Animations during async wait cycles
+  </li>
+
+  <li>Any animation that may have bitmap loading / manipulation in it
+  </li>
+
+  <li>Animations including Alpha Blending
+  </li>
+
+  <li>Custom View drawing with Canvas
+  </li>
+</ul>
+
+<p>
+  Work with engineers, designers, and product managers on your team to prioritize these key
+  product animations for test coverage.
+</p>
+
+<h4>
+  Define your future objectives and track against them
+</h4>
+
+<p>
+  From a high-level, it may be critical to identify your specific performance goals, and
+  focus on writing tests, and collecting data around them. For example:
+</p>
+
+<ul>
+  <li>Do you just want to begin tracking UI performance for the first time to learn more?
+  </li>
+
+  <li>Do you want to prevent regressions that might be introduced in the future?
+  </li>
+
+  <li>Are you at 90% of smooth frames today and want to get to 98% this quarter?
+  </li>
+
+  <li>Are you at 98% smooth frames and don’t want to regress?
+  </li>
+
+  <li>Is your goal to improve performance on low end devices?
+  </li>
+</ul>
+
+<p>
+  In all of these cases, you’ll want historical tracking which shows performance across
+  multiple versions of your application.
+</p>
+
+<h4>
+  Identify devices to test on
+</h4>
+
+<p>
+  Application performance varies depending on the device it's running on. Some devices may
+  contain less memory, less powerful GPUs, or slower CPU chips. This means that animations
+  which may perform well on one set of hardware, may not on others, and worse, may be a
+  result of a bottleneck in a different part of the pipeline. So, to account for this
+  variation in what a user might see, pick a range of devices to execute tests on, both
+  current high end devices, low end devices, tablets, etc. Look for variation in CPU
+  performance, RAM, screen density, size, and so on. Tests that pass on a high end device
+  may fail on a low end device.
+</p>
+
+<h4>
+  Basic frameworks for UI Testing
+</h4>
+
+<p>
+  Tool suites, like <a href=
+  "{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a> and
+  <a href="{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>, are
+  built to help automate the action of a user moving through your application. These are simple
+  frameworks which mimic user interaction with your device. To use these frameworks, you
+  effectively create unique scripts, which run through a set of user-actions, and play them
+  out on the device itself.
+</p>
+
+<p>
+  By combining these automated tests, alongside <code>dumpsys gfxinfo</code> you can quickly
+  create a reproducible system that allows you to execute a test, and measure the
+  performance information of that particular condition.
+</p>
+
+
+<h3 id="automated-tests">Setting up automated UI testing</h3>
+
+<p>
+  Once you have the ability to execute a UI test, and a pipeline to gather the data from a
+  single test, the next important step is to embrace a framework which can execute that
+  test multiple times, across multiple devices, and aggregate the resulting performance
+  data for further analysis by your development team.
+</p>
+
+<h4>
+  A framework for test automation
+</h4>
+
+<p>
+  It’s worth noting that UI testing frameworks (like <a href=
+  "{@docRoot}training/testing/ui-testing/uiautomator-testing.html">UI Automator</a>)
+  run on the target device/emulator directly. While performance gathering information done
+  by <em>dumpsys gfxinfo</em> is driven by a host machine, sending commands over ADB. To
+  help bridge the automation of these separate entities, <a href=
+  "{@docRoot}tools/help/monkeyrunner_concepts.html">MonkeyRunner</a> framework was
+  developed; A scripting system that runs on your host machine, which can issue commands to
+  a set of connected devices, as well as receive data from them.
+</p>
+
+<p>
+  Building a set of scripts for proper automation of UI Performance testing, at a minimum,
+  should be able to utilize monkeyRunner to accomplish the following tasks:
+</p>
+
+<ul>
+  <li>Load &amp; Launch a desired APK to a target device, devices, or emulator.
+  </li>
+
+  <li>Launch a UI Automator UI test, and allow it to be executed
+  </li>
+
+  <li>Collect performance information through <em>dumpsys gfxinfo</em><em>.</em>
+  </li>
+
+  <li>Aggregate information and display it back in a useful fashion to the developer.
+  </li>
+</ul>
+
+
+<h3 id="triage">Triaging and fixing observed problems</h3>
+
+<p>
+  Once problem patterns or regressions are identified, the next step is identifying and
+  applying the fix. If your automated test framework preserves precise timing breakdowns
+  for frames, it can help you scrutinize recent suspicious code/layout changes (in the case
+  of regression), or narrow down the part of the system you’re analyzing when you switch to
+  manual investigation. For manual investigation, <a href=
+  "{@docRoot}tools/help/systrace.html">systrace</a> is a great place to start, showing
+  precise timing information about every stage of the rendering pipeline, every thread and
+  core in the system, as well as any custom event markers you define.
+</p>
+
+<h4>
+  Properly profiling temporal timings
+</h4>
+
+<p>
+  It is important to note the difficulties in obtaining and measuring timings that come from
+  rendering performance. These numbers are, by nature, non deterministic, and often
+  fluctuate depending on the state of the system, amount of memory available, thermal
+  throttling, and the last time a sun flare hit your area of the earth. The point is that
+  you can run the same test, twice and get slightly different numbers that may be close to
+  each other, but not exact.
+</p>
+
+<p>
+  Properly gathering and profiling data in this manner means running the same test,
+  multiple times, and accumulating the results as an average, or median value. (for the
+  sake of simplicity, let’s call this a ‘batch’) This gives you the rough approximation of
+  the performance of the test, while not needing exact timings.
+</p>
+
+<p>
+  Batches can be used between code changes to see the relative impact of those changes on
+  performance. If the average frame rate for the pre-change Batch is larger than the
+  post-change batch, then you generally have an overall win wrt performance for that
+  particular change.
+</p>
+
+<p>
+  This means that any Automated UI testing you do should take this concept into
+  consideration, and also account for any anomalies that might occur during a test. For
+  example, if your application performance suddenly dips, due to some device issue (that
+  isn’t caused by your application) then you may want to re-run the batch in order to get
+  less chaotic timings.
+</p>
+
+<p>
+  So, how many times should you run a test, before the measurements become meaningful? 10
+  times should be the minimum, with higher numbers like 50 or 100 yielding more accurate
+  results (of course, you’re now trading off time for accuracy)
+</p>

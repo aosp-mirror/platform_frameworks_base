@@ -44,6 +44,7 @@ interface IAppOpsService {
     int checkAudioOperation(int code, int usage, int uid, String packageName);
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 
-    void setUserRestrictions(in Bundle restrictions, int userHandle);
+    void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
+    void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in String[] exceptionPackages);
     void removeUser(int userHandle);
 }

@@ -1,6 +1,7 @@
 page.title=ADT-1 Developer Kit
 page.tags="emote","e-mote","adt"
 fullpage=1
+nonavpage=true
 
 @jd:body
 

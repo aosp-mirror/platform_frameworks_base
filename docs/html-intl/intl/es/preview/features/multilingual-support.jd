@@ -1,0 +1,221 @@
+page.title=Idioma y configuración regional
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>En este documento:</h2>
+<ol>
+	  <li><a href="#preN">Desafíos para la resolución de recursos de idioma</a></li>
+    <li><a href="#postN">Mejoras de la estrategia de resolución de recursos</a></li>
+    <li><a href="#design">Diseño de la aplicación para permitir configuraciones regionales
+ adicionales</a></li>
+
+</ol>
+
+</div>
+</div>
+
+<p>Android N brinda un soporte mejorado para los usuarios de diferentes idiomas
+y les permite seleccionar múltiples configuraciones regionales en la configuración. Android N
+brinda esta capacidad expandiendo ampliamente la cantidad de configuraciones regionales compatibles
+y cambiando la forma en que el sistema resuelve los recursos. El nuevo método de resolución
+de recursos es más robusto y está diseñado para ser compatible con APK existentes, pero
+debes tener especial cuidado para detectar cualquier comportamiento inesperado. Por ejemplo, debes
+realizar pruebas para asegurarte de que tu aplicación muestre el idioma esperado de forma predeterminada. Además,
+si tu aplicación permite múltiples idiomas, debes asegurarte de que esta compatibilidad funcione
+como debería. Por último, debes tratar de asegurarte de que tu aplicación administre con facilidad
+los idiomas para los cuales no diseñaste explícitamente la aplicación.</p>
+
+<p>Al inicio de este documento, encontrarás una explicación sobre la estrategia de resolución de recursos anterior a
+Android N. Luego, encontrarás una descripción de la estrategia de resolución de recursos
+mejorada de Android N. Por último, encontrarás una explicación sobre cómo aprovechar
+la cantidad expandida de configuraciones regionales para permitir acceso a más usuarios de diferentes idiomas.</p>
+
+<h2 id="preN">Desafíos para la resolución de recursos de idioma</h2>
+
+<p>Antes de Android N, Android no siempre podía
+ hacer coincidir correctamente las configuraciones regionales de la aplicación y del sistema.</p>
+
+ <p>Por ejemplo, imagina que tienes la siguiente situación:</p>
+ <ul>
+ <li>El idioma predeterminado de la aplicación es {@code en_US} (inglés de EE. UU.), y también tiene
+ cadenas en español localizadas en archivos de recursos {@code es_ES}
+.</li>
+ <li> Se configura un dispositivo en {@code es_MX}. </li>
+
+<p>Cuando el código Java hace referencia a cadenas, el sistema carga
+ las cadenas del archivo de recursos ({@code en_US}) predeterminado, incluso si la aplicación tiene
+ recursos en español localizados en {@code es_ES}. Esto se debe a que, cuando el sistema
+ no puede encontrar una coincidencia exacta, continúa buscando recursos y se quita el
+ código del país de la configuración regional. Finalmente, si no se encuentra una coincidencia, el sistema regresa
+ a la configuración predeterminada, que es {@code en_US}. </p>
+
+
+<p>El sistema también usaba {@code en_US} de forma predeterminada si el usuario elegía un idioma que
+ no era compatible con la aplicación, como el francés. Por ejemplo:</p>
+
+<p class="table-caption" id="t-resource-res">
+<strong>Tabla 1.</strong> Resolución de recursos sin una coincidencia de configuración regional exacta.
+</p>
+<table>
+<tbody>
+<tr>
+<th>Configuración del usuario</th>
+<th>Recursos de la aplicación</th>
+<th>Resolución de recursos</th>
+</tr>
+<tr>
+<td>fr_CH</td>
+<td>
+Predeterminado (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+ <td>
+Intentar fr_CH =&gt; Error<br>
+Intentar fr =&gt; Error<br>
+Usar predeterminado (en)
+</td>
+ </tr>
+ </tbody>
+</table>
+
+
+<p>En este ejemplo, el sistema muestra las cadenas en inglés sin
+saber si el usuario comprende este idioma. Este comportamiento es muy común
+hoy en día. Android N debería reducir sustancialmente la frecuencia
+de resultados como este.</p>
+
+<h2 id="postN">Mejoras de la estrategia de resolución de recursos</h2>
+<p>Android N brinda una resolución de recursos más robusta y
+encuentra mejores recursos de forma automática. Sin embargo, para acelerar la resolución y mejorar la
+facilidad de mantenimiento, debes almacenar los recursos en el dialecto primario.
+ Por ejemplo, si antes almacenabas los recursos en español en el directorio {@code es-US}
+, pásalos al directorio {@code es-419}, que contiene la variante de Latinoamérica.
+ De forma similar, si tienes cadenas de recursos en una carpeta llamada {@code en-GB}, cámbiale
+ el nombre a {@code en-001} (inglés internacional), ya que el dialecto primario más común
+ para las cadenas en <code>en-GB</code> es {@code en-001}.
+ Los siguientes ejemplos explican por qué estas prácticas mejoran el desempeño
+ y la confiabilidad de la resolución de recursos.</p>
+
+<h3>Ejemplos de resolución de recursos</h3>
+
+<p>Con Android N, el caso descrito en la <strong>Tabla 1</strong> se resuelve
+de otra forma:</p>
+
+<p class="table-caption" id="t-improved-res">
+<strong>Tabla 2.</strong> Una estrategia de resolución mejorada para los casos en que no
+hay una coincidencia de configuración regional exacta.</p>
+<table>
+<tr>
+<th>Configuración del usuario</th>
+<th>Recursos de la aplicación</th>
+<th>Resolución de recursos</th>
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+</ol>
+</td>
+<td>
+Predeterminado (en)<br>
+de_DE<br>
+es_ES<br>
+fr_FR<br>
+it_IT<br>
+</td>
+<td>
+Intentar fr_CH =&gt; Error<br>
+Intentar fr =&gt; Error<br>
+Intentar secundario de fr =&gt; fr_FR<br>
+Usar fr_FR
+</td>
+</tr>
+
+</table>
+
+
+<p>Así, los recursos se muestran en francés en lugar de en inglés. Este ejemplo también muestra
+ por qué deberías almacenar las cadenas en francés en {@code fr} en lugar de en {@code fr_FR}
+ para Android N. Aquí, el procedimiento se basa en hacer coincidir el dialecto primario más cercano,
+ lo cual hace que la resolución sea más rápida y más predecible.</p>
+
+<p>Además de esta lógica de resolución mejorada, Android ofrece ahora más
+ idiomas de usuario de entre los cuales elegir. Volvamos a ver el ejemplo anterior con el idioma italiano
+ especificado como un idioma de usuario adicional, pero sin compatibilidad de la aplicación con el idioma francés.  </p>
+
+<p class="table-caption" id="t-2d-choice">
+<strong>Tabla 3.</strong> Resolución de recursos cuando la aplicación solo hace coincidir la
+configuración regional de segunda preferencia del usuario.</p>
+<table>
+<tr>
+<th>Configuración del usuario</th>
+<th>Recursos de la aplicación</th>
+<th>Resolución de recursos</th>
+
+</tr>
+<tr>
+<td><ol>
+<li> fr_CH</li>
+<li> it_CH</li>
+</ol>
+</td>
+<td>
+Predeterminado (en)<br>
+de_DE<br>
+es_ES<br>
+it_IT<br>
+</td>
+<td>
+Intentar fr_CH =&gt; Error<br>
+Intentar fr =&gt; Error<br>
+Intentar secundario de fr =&gt; Error<br>
+Intentar it_CH =&gt; Error<br>
+Intentar it =&gt; Error<br>
+Intentar secundario de it =&gt; it_IT<br>
+Usar it_IT
+</td>
+
+</tr>
+
+</table>
+<p>El usuario recibe la información en un idioma que comprende, si bien la aplicación no
+es compatible con el idioma francés.</p>
+
+
+<h2 id="design">Diseño de la aplicación para permitir configuraciones regionales adicionales</h2>
+<h3>API LocaleList</h3>
+
+<p>Android N incorpora una nueva API, {@code LocaleList.getDefault()},
+que les permite a las aplicaciones consultar directamente la lista de idiomas que ha especificado el usuario. Esta API
+ te permite crear un comportamiento de la aplicación
+ más sofisticado y una presentación de contenido más optimizada. Por ejemplo, las búsquedas
+ pueden mostrar resultados en múltiples idiomas según la configuración del usuario.  Las aplicaciones de navegadores
+ pueden evitar ofrecer la traducción de páginas que están en un idioma que el usuario comprende,
+ y las aplicaciones de teclado pueden habilitar automáticamente todos los diseños correctos. </p>
+
+<h3>Formateadores</h3>
+
+<p>Hasta Android 6.0 (API nivel 23), Android solo permitía una o dos
+ configuraciones regionales para muchos idiomas comunes
+ (en, es, ar, fr, ru). Debido a que había solo unas pocas variantes para cada idioma,
+las aplicaciones podían almacenar algunos números y fechas como cadenas preprogramadas
+en los archivos de recursos.  Sin embargo, con el conjunto ampliado de configuraciones regionales
+compatibles de Android, puede haber diferencias importantes
+en los formatos de fecha, hora, moneda e
+información similar, incluso dentro de una sola configuración regional. Preprogramar los formatos puede generar
+una experiencia confusa para los usuarios.  Por lo tanto, cuando desarrolles aplicaciones para Android,
+asegúrate de usar formateadores en lugar de preprogramar las cadenas de números y fechas.</p>
+
+<p>Un muy buen ejemplo es el árabe. Android N expandió su compatibilidad de
+una configuración regional, {@code ar_EG}, a 27 configuraciones regionales. Estas configuraciones regionales pueden compartir la mayoría de los recursos,
+pero algunas prefieren dígitos ASCII, mientras que otras prefieren dígitos nativos. Por ejemplo,
+cuando desees crear una oración con una variable de dígito, como
+"Elige un PIN de 4 dígitos", usa formateadores como se muestra a continuación:</p>
+
+<pre> format(locale, "Choose a %d-digit PIN", 4)</pre>

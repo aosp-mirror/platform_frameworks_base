@@ -31,6 +31,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.media.AudioFormat;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -616,7 +617,7 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onDetected(KeyphraseRecognitionEvent event) {
+        public void onKeyphraseDetected(KeyphraseRecognitionEvent event) {
             if (DBG) {
                 Slog.d(TAG, "onDetected(" + event + ")");
             } else {
@@ -626,6 +627,10 @@ public class AlwaysOnHotwordDetector {
                     new EventPayload(event.triggerInData, event.captureAvailable,
                             event.captureFormat, event.captureSession, event.data))
                     .sendToTarget();
+        }
+        @Override
+        public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
+            Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
         }
 
         @Override

@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.os.SELinux;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
@@ -71,6 +70,9 @@ public class LocalTransport extends BackupTransport {
     // The currently-active restore set always has the same (nonzero!) token
     private static final long CURRENT_SET_TOKEN = 1;
 
+    // Full backup size quota is set to reasonable value.
+    private static final long FULL_BACKUP_SIZE_QUOTA = 25 * 1024 * 1024;
+
     private Context mContext;
     private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
     private File mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
@@ -90,6 +92,7 @@ public class LocalTransport extends BackupTransport {
     private FileInputStream mSocketInputStream;
     private BufferedOutputStream mFullBackupOutputStream;
     private byte[] mFullBackupBuffer;
+    private long mFullBackupSize;
 
     private FileInputStream mCurFullRestoreStream;
     private FileOutputStream mFullRestoreSocketStream;
@@ -97,9 +100,6 @@ public class LocalTransport extends BackupTransport {
 
     private void makeDataDirs() {
         mCurrentSetDir.mkdirs();
-        if (!SELinux.restorecon(mCurrentSetDir)) {
-            Log.e(TAG, "SELinux restorecon failed for " + mCurrentSetDir);
-        }
         mCurrentSetFullDir.mkdir();
         mCurrentSetIncrementalDir.mkdir();
     }
@@ -314,8 +314,13 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public int checkFullBackupSize(long size) {
+        int result = TRANSPORT_OK;
         // Decline zero-size "backups"
-        final int result = (size > 0) ? TRANSPORT_OK : TRANSPORT_PACKAGE_REJECTED;
+        if (size <= 0) {
+            result = TRANSPORT_PACKAGE_REJECTED;
+        } else if (size > FULL_BACKUP_SIZE_QUOTA) {
+            result = TRANSPORT_QUOTA_EXCEEDED;
+        }
         if (result != TRANSPORT_OK) {
             if (DEBUG) {
                 Log.v(TAG, "Declining backup of size " + size);
@@ -339,6 +344,7 @@ public class LocalTransport extends BackupTransport {
         // sure to dup() our own copy of the socket fd.  Transports which run in
         // their own processes must not do this.
         try {
+            mFullBackupSize = 0;
             mSocket = ParcelFileDescriptor.dup(socket.getFileDescriptor());
             mSocketInputStream = new FileInputStream(mSocket.getFileDescriptor());
         } catch (IOException e) {
@@ -357,6 +363,11 @@ public class LocalTransport extends BackupTransport {
         if (mSocket == null) {
             Log.w(TAG, "Attempted sendBackupData before performFullBackup");
             return TRANSPORT_ERROR;
+        }
+
+        mFullBackupSize += numBytes;
+        if (mFullBackupSize > FULL_BACKUP_SIZE_QUOTA) {
+            return TRANSPORT_QUOTA_EXCEEDED;
         }
 
         if (numBytes > mFullBackupBuffer.length) {
@@ -699,4 +710,8 @@ public class LocalTransport extends BackupTransport {
         return TRANSPORT_OK;
     }
 
+    @Override
+    public long getBackupQuota(String packageName, boolean isFullBackup) {
+        return isFullBackup ? FULL_BACKUP_SIZE_QUOTA : Long.MAX_VALUE;
+    }
 }

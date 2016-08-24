@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_ALLOW;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
+import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -66,9 +67,6 @@ public class LockdownVpnTracker {
 
     private static final String ACTION_LOCKDOWN_RESET = "com.android.server.action.LOCKDOWN_RESET";
 
-    private static final String ACTION_VPN_SETTINGS = "android.net.vpn.SETTINGS";
-    private static final String EXTRA_PICK_LOCKDOWN = "android.net.vpn.PICK_LOCKDOWN";
-
     private static final int ROOT_UID = 0;
 
     private final Context mContext;
@@ -101,7 +99,6 @@ public class LockdownVpnTracker {
         mProfile = Preconditions.checkNotNull(profile);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
-        configIntent.putExtra(EXTRA_PICK_LOCKDOWN, true);
         mConfigIntent = PendingIntent.getActivity(mContext, 0, configIntent, 0);
 
         final Intent resetIntent = new Intent(ACTION_LOCKDOWN_RESET);
@@ -212,7 +209,9 @@ public class LockdownVpnTracker {
                 throw new RuntimeException("Problem setting firewall rules", e);
             }
 
-            mConnService.sendConnectedBroadcast(augmentNetworkInfo(egressInfo));
+            final NetworkInfo clone = new NetworkInfo(egressInfo);
+            augmentNetworkInfo(clone);
+            mConnService.sendConnectedBroadcast(clone);
         }
     }
 
@@ -239,9 +238,7 @@ public class LockdownVpnTracker {
             throw new RuntimeException("Problem setting firewall rules", e);
         }
 
-        synchronized (mStateLock) {
-            handleStateChangedLocked();
-        }
+        handleStateChangedLocked();
     }
 
     public void shutdown() {
@@ -325,13 +322,11 @@ public class LockdownVpnTracker {
         }
     }
 
-    public NetworkInfo augmentNetworkInfo(NetworkInfo info) {
+    public void augmentNetworkInfo(NetworkInfo info) {
         if (info.isConnected()) {
             final NetworkInfo vpnInfo = mVpn.getNetworkInfo();
-            info = new NetworkInfo(info);
             info.setDetailedState(vpnInfo.getDetailedState(), vpnInfo.getReason(), null);
         }
-        return info;
     }
 
     private void showNotification(int titleRes, int iconRes) {

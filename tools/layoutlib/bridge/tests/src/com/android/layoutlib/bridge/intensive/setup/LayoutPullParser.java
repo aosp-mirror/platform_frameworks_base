@@ -56,9 +56,7 @@ public class LayoutPullParser extends KXmlParser implements ILayoutPullParser{
     public LayoutPullParser(File layoutFile) {
         try {
             init(new FileInputStream(layoutFile));
-        } catch (XmlPullParserException e) {
-            throw new IOError(e);
-        } catch (FileNotFoundException e) {
+        } catch (XmlPullParserException | FileNotFoundException e) {
             throw new IOError(e);
         }
     }

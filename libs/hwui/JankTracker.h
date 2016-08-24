@@ -44,7 +44,9 @@ enum JankType {
 struct ProfileData {
     std::array<uint32_t, NUM_BUCKETS> jankTypeCounts;
     // See comments on kBucket* constants for what this holds
-    std::array<uint32_t, 55> frameCounts;
+    std::array<uint32_t, 57> frameCounts;
+    // Holds a histogram of frame times in 50ms increments from 150ms to 5s
+    std::array<uint16_t, 97> slowFrameCounts;
 
     uint32_t totalFrameCount;
     uint32_t jankFrameCount;

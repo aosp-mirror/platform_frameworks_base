@@ -1,0 +1,168 @@
+page.title=Duy trì Tính tương thích
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#Theme">Định nghĩa Kiểu Thay thế</a></li>
+  <li><a href="#Layouts">Cung cấp Bố trí Thay thế</a></li>
+  <li><a href="#SupportLib">Sử dụng Thư viện Hỗ trợ</a></li>
+  <li><a href="#CheckVersion">Kiểm tra Phiên bản Hệ thống</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Một số tính năng của Material Design như chủ đề Material và chuyển tiếp hoạt động tùy chỉnh
+chỉ sẵn có trên Android 5.0 (API mức 21) trở lên. Tuy nhiên, bạn có thể thiết kế ứng dụng của mình để tận dụng
+những tính năng này khi chạy trên thiết bị hỗ trợ material design mà vẫn tương thích
+với thiết bị đang chạy các bản phát hành Android trước đây.</p>
+
+
+<h2 id="Theme">Định nghĩa Kiểu Thay thế</h2>
+
+<p>Bạn có thể cấu hình ứng dụng của mình để sử dụng chủ đề material trên những thiết bị hỗ trợ và chuyển về
+chủ đề cũ hơn trên những thiết bị đang chạy phiên bản Android cũ hơn:</p>
+
+<ol>
+<li>Định nghĩa một chủ đề kế thừa từ một chủ đề cũ hơn (như Holo) trong
+    <code>res/values/styles.xml</code>.</li>
+<li>Định nghĩa một chủ đề với cùng tên và kế thừa chủ đề material trong
+    <code>res/values-v21/styles.xml</code>.</li>
+<li>Đặt chủ đề này làm chủ đề cho ứng dụng của bạn trong tệp bản kê khai.</li>
+</ol>
+
+<p class="note"><strong>Lưu ý:</strong>
+Nếu ứng dụng của bạn sử dụng chủ đề material nhưng không cung cấp chủ đề thay thế bằng cách này,
+ứng dụng của bạn sẽ không chạy trên phiên bản Android trước 5.0.
+</p>
+
+
+<h2 id="Layouts">Cung cấp Bố trí Thay thế</h2>
+
+<p>Nếu những bố trí mà bạn thiết kế theo hướng dẫn về material design không sử dụng bất cứ
+thuộc tính XML mới nào được giới thiệu trong Android 5.0 (API mức 21), chúng sẽ hoạt động trên các phiên bản
+Android trước đó. Nếu không, bạn có thể cung cấp bố trí thay thế. Bạn cũng có thể cung cấp
+bố trí thay thế để tùy chỉnh diện mạo ứng dụng của mình trên các phiên bản Android cũ hơn.</p>
+
+<p>Tạo tệp bố trí của bạn cho Android 5.0 (API mức 21) bên trong <code>res/layout-v21/</code> và
+tệp bố trí thay thế của bạn cho các phiên bản Android cũ hơn trong <code>res/layout/</code>.
+Ví dụ, <code>res/layout/my_activity.xml</code> là một bố trí thay thế cho
+<code>res/layout-v21/my_activity.xml</code>.</p>
+
+<p>Để tránh lặp mã, hãy định nghĩa kiểu của bạn bên trong <code>res/values/</code>, sửa đổi
+các kiểu trong <code>res/values-v21/</code> cho các API mới và sử dụng kế thừa kiểu, định nghĩa
+kiểu cơ bản trong <code>res/values/</code> và kế thừa từ những kiểu trong <code>res/values-v21/</code>.</p>
+
+
+<h2 id="SupportLib">Sử dụng Thư viện Hỗ trợ</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">Thư viện Hỗ trợ v7</a>
+r21 và cao hơn gồm những tính năng material design sau:</p>
+
+<ul>
+<li><a href="{@docRoot}training/material/theme.html">Các kiểu mang phong cách material design</a> cho một số widget
+    hệ thống khi bạn áp dụng một trong các chủ đề <code>Theme.AppCompat</code>.</li>
+<li><a href="{@docRoot}training/material/theme.html#ColorPalette">Thuộc tính chủ đề bảng màu</a>
+   trong các chủ đề <code>Theme.AppCompat</code>.</li>
+<li>Widget {@link android.support.v7.widget.RecyclerView} để <a href="{@docRoot}training/material/lists-cards.html#RecyclerView">hiển thị các bộ sưu tập
+    dữ liệu</a>.</li>
+<li>Widget {@link android.support.v7.widget.CardView} để <a href="{@docRoot}training/material/lists-cards.html#CardView">tạo thẻ</a>.</li>
+<li>Lớp {@link android.support.v7.graphics.Palette} để <a href="{@docRoot}training/material/drawables.html#ColorExtract">trích xuất màu nổi bật từ
+    hình ảnh</a>.</li>
+</ul>
+
+<h3>Widget hệ thống</h3>
+
+<p>Chủ đề <code>Theme.AppCompat</code> cung cấp các kiểu phong cách material design cho những widget này:</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>Bảng màu</h3>
+
+<p>Để có được các kiểu phong cách material design và tùy chỉnh bảng màu bằng Thư viện Hỗ trợ v7 
+của Android, hãy áp dụng một trong các chủ đề <code>Theme.AppCompat</code>:</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>Danh sách và Thẻ</h3>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} và {@link
+android.support.v7.widget.CardView} sẵn có trong các phiên bản Android cũ hơn thông qua
+Thư viện Hỗ trợ v7 của Android với những hạn chế sau:</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView} quay lại triển khai đổ bóng theo lập trình
+    bằng cách sử dụng phần đệm bổ sung.</li>
+<li>{@link android.support.v7.widget.CardView} không cắt hình những dạng xem con của nó có giao cắt với
+    các góc bo tròn.</li>
+</ul>
+
+
+<h3>Phụ thuộc</h3>
+
+<p>Để sử dụng những tính năng này trong các phiên bản Android trước 5.0 (API mức 21), hãy thêm
+Thư viện Hỗ trợ v7 của Android vào dự án của bạn như một <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Phần phụ thuộc Gradle</a>:</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">Kiểm tra Phiên bản Hệ thống</h2>
+
+<p>Những tính năng sau chỉ sẵn có trong Android 5.0 (API mức 21) trở lên:</p>
+
+<ul>
+<li>Chuyển tiếp hoạt động</li>
+<li>Phản hồi chạm</li>
+<li>Lộ ra hoạt hình</li>
+<li>Hoạt hình dựa trên đường dẫn</li>
+<li>Nội dung vẽ được véc-tơ</li>
+<li>Nhuộm màu nội dung vẽ được</li>
+</ul>
+
+<p>Để duy trì tính tương thích với các phiên bản Android cũ hơn, hãy kiểm tra {@link
+android.os.Build.VERSION#SDK_INT version} vào thời gian chạy trước khi bạn gọi ra API cho bất cứ tính năng nào
+sau đây:</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>Lưu ý:</strong> Để quy định ứng dụng của bạn hỗ trợ những phiên bản Android nào,
+hãy sử dụng thuộc tính <code>android:minSdkVersion</code> và <code>android:targetSdkVersion</code>
+trong tệp bản kê khai của bạn. Để sử dụng các tính năng của material design trong Android 5.0, hãy đặt
+thuộc tính <code>android:targetSdkVersion</code> thành <code>21</code>. Để biết thêm thông tin, hãy xem hướng dẫn
+ <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt; API
+</a>.</p>

@@ -267,4 +267,15 @@ public final class UsageStatsManager {
         } catch (RemoteException re) {
         }
     }
+
+    /**
+     * Inform usage stats that the carrier privileged apps access rules have changed.
+     * @hide
+     */
+    public void onCarrierPrivilegedAppsChanged() {
+        try {
+            mService.onCarrierPrivilegedAppsChanged();
+        } catch (RemoteException re) {
+        }
+    }
 }

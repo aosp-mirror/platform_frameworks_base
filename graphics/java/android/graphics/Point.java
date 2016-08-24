@@ -19,6 +19,8 @@ package android.graphics;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 
 /**
  * Point holds two integer coordinates
@@ -93,6 +95,11 @@ public class Point implements Parcelable {
     @Override
     public String toString() {
         return "Point(" + x + ", " + y + ")";
+    }
+
+    /** @hide */
+    public void printShortString(PrintWriter pw) {
+        pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
     }
 
     /**

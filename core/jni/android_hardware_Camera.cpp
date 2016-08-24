@@ -77,6 +77,7 @@ public:
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr,
                           camera_frame_metadata_t *metadata);
     virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void postRecordingFrameHandleTimestamp(nsecs_t timestamp, native_handle_t* handle);
     void postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata);
     void addCallbackBuffer(JNIEnv *env, jbyteArray cbb, int msgType);
     void setCallbackMode(JNIEnv *env, bool installed, bool manualMode);
@@ -349,6 +350,11 @@ void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, con
     postData(msgType, dataPtr, NULL);
 }
 
+void JNICameraContext::postRecordingFrameHandleTimestamp(nsecs_t, native_handle_t*) {
+    // This is not needed at app layer. This should not be called because JNICameraContext cannot
+    // start video recording.
+}
+
 void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata)
 {
     jobjectArray obj = NULL;
@@ -534,7 +540,7 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
         // Default path: hal version is don't care, do normal camera connect.
         camera = Camera::connect(cameraId, clientName,
-                Camera::USE_CALLING_UID);
+                Camera::USE_CALLING_UID, Camera::USE_CALLING_PID);
     } else {
         jint status = Camera::connectLegacy(cameraId, halVersion, clientName,
                 Camera::USE_CALLING_UID, camera);
@@ -567,6 +573,45 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
 
     // save context in opaque field
     env->SetLongField(thiz, fields.context, (jlong)context.get());
+
+    // Update default display orientation in case the sensor is reverse-landscape
+    CameraInfo cameraInfo;
+    status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
+    if (rc != NO_ERROR) {
+        return rc;
+    }
+    int defaultOrientation = 0;
+    switch (cameraInfo.orientation) {
+        case 0:
+            break;
+        case 90:
+            if (cameraInfo.facing == CAMERA_FACING_FRONT) {
+                defaultOrientation = 180;
+            }
+            break;
+        case 180:
+            defaultOrientation = 180;
+            break;
+        case 270:
+            if (cameraInfo.facing != CAMERA_FACING_FRONT) {
+                defaultOrientation = 180;
+            }
+            break;
+        default:
+            ALOGE("Unexpected camera orientation %d!", cameraInfo.orientation);
+            break;
+    }
+    if (defaultOrientation != 0) {
+        ALOGV("Setting default display orientation to %d", defaultOrientation);
+        rc = camera->sendCommand(CAMERA_CMD_SET_DISPLAY_ORIENTATION,
+                defaultOrientation, 0);
+        if (rc != NO_ERROR) {
+            ALOGE("Unable to update default orientation: %s (%d)",
+                    strerror(-rc), rc);
+            return rc;
+        }
+    }
+
     return NO_ERROR;
 }
 

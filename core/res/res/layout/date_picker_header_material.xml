@@ -19,27 +19,42 @@
               android:id="@+id/date_picker_header"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:paddingBottom="18dp"
-              android:paddingStart="?attr/dialogPreferredPadding"
-              android:paddingEnd="?attr/dialogPreferredPadding"
               android:orientation="vertical">
 
-    <!-- Top padding should stay on this view so that
-         the touch target is a bit larger. -->
-    <TextView
-        android:id="@+id/date_picker_header_year"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingStart="?attr/dialogPreferredPadding"
+        android:paddingEnd="?attr/dialogPreferredPadding"
         android:paddingTop="16dp"
-        android:textAppearance="@style/TextAppearance.Material.DatePicker.YearLabel" />
+        android:paddingBottom="18dp"
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
-    <TextView
-        android:id="@+id/date_picker_header_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
-        android:gravity="start"
-        android:maxLines="2"
-        android:ellipsize="none" />
+        <TextView
+            android:id="@+id/date_picker_header_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:includeFontPadding="false"
+            android:layout_marginStart="-8dp"
+            android:layout_marginEnd="-8dp"
+            android:layout_marginTop="-8dp"
+            android:layout_marginBottom="-8dp"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:textAppearance="@style/TextAppearance.Material.DatePicker.YearLabel"
+            android:nextFocusForward="@+id/prev" />
 
+        <TextView
+            android:id="@+id/date_picker_header_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
+            android:includeFontPadding="false"
+            android:gravity="start"
+            android:maxLines="2"
+            android:ellipsize="none" />
+    </LinearLayout>
 </LinearLayout>

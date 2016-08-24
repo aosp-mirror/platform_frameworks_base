@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.security.net.config.ApplicationConfig;
@@ -73,7 +74,6 @@ public class NetworkSecurityPolicy {
      * TLS or STARTTLS) is permitted for communicating with {@code hostname} for this process.
      *
      * @see #isCleartextTrafficPermitted()
-     * @hide
      */
     public boolean isCleartextTrafficPermitted(String hostname) {
         return libcore.net.NetworkSecurityPolicy.getInstance()
@@ -93,6 +93,14 @@ public class NetworkSecurityPolicy {
         libcore.net.NetworkSecurityPolicy.setInstance(policy);
     }
 
+    /**
+     * Handle an update to the system or user certificate stores.
+     * @hide
+     */
+    @TestApi
+    public void handleTrustStorageUpdate() {
+        ApplicationConfig.getDefaultInstance().handleTrustStorageUpdate();
+    }
 
     /**
      * Returns an {@link ApplicationConfig} based on the configuration for {@code packageName}.

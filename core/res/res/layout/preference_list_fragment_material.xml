@@ -24,18 +24,23 @@
     android:background="@android:color/transparent"
     android:layout_removeBorders="true">
 
-    <ListView android:id="@android:id/list"
-        style="?attr/preferenceFragmentListStyle"
+    <FrameLayout
+        android:id="@android:id/list_container"
         android:layout_width="match_parent"
         android:layout_height="0px"
-        android:layout_weight="1"
-        android:paddingTop="0dip"
-        android:paddingBottom="@dimen/preference_fragment_padding_bottom"
-        android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
-        android:clipToPadding="false"
-        android:drawSelectorOnTop="false"
-        android:cacheColorHint="@android:color/transparent"
-        android:scrollbarAlwaysDrawVerticalTrack="true" />
+        android:layout_weight="1">
+        <ListView android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="0dip"
+            android:paddingBottom="@dimen/preference_fragment_padding_bottom"
+            style="?attr/preferenceFragmentListStyle"
+            android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
+            android:clipToPadding="false"
+            android:drawSelectorOnTop="false"
+            android:cacheColorHint="@android:color/transparent"
+            android:scrollbarAlwaysDrawVerticalTrack="true" />
+    </FrameLayout>
 
     <TextView android:id="@android:id/empty"
         android:layout_width="match_parent"

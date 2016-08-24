@@ -17,6 +17,7 @@
 package android.app;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.IDropBoxManagerService;
 
@@ -36,7 +37,9 @@ import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
 import android.content.pm.ILauncherApps;
+import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
@@ -48,6 +51,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
+import android.hardware.location.ContextHubManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
 import android.hardware.radio.RadioManager;
@@ -61,9 +65,11 @@ import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
+import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityThread;
 import android.net.EthernetManager;
 import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
@@ -78,23 +84,28 @@ import android.net.wifi.IWifiScanner;
 import android.net.wifi.RttManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiScanner;
+import android.net.wifi.nan.IWifiNanManager;
+import android.net.wifi.nan.WifiNanManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.passpoint.IWifiPasspointManager;
-import android.net.wifi.passpoint.WifiPasspointManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.DropBoxManager;
+import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
+import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
+import android.os.IRecoverySystem;
 import android.os.IUserManager;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RecoverySystem;
 import android.os.ServiceManager;
 import android.os.SystemVibrator;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.os.health.SystemHealthManager;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
@@ -220,7 +231,7 @@ final class SystemServiceRegistry {
         SYSTEM_SERVICE_NAMES.put(android.text.ClipboardManager.class, Context.CLIPBOARD_SERVICE);
 
         registerService(Context.CONNECTIVITY_SERVICE, ConnectivityManager.class,
-                new StaticOuterContextServiceFetcher<ConnectivityManager>() {
+                new StaticApplicationContextServiceFetcher<ConnectivityManager>() {
             @Override
             public ConnectivityManager createService(Context context) {
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
@@ -240,14 +251,14 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<DevicePolicyManager>() {
             @Override
             public DevicePolicyManager createService(ContextImpl ctx) {
-                return DevicePolicyManager.create(ctx, ctx.mMainThread.getHandler());
+                return DevicePolicyManager.create(ctx);
             }});
 
         registerService(Context.DOWNLOAD_SERVICE, DownloadManager.class,
                 new CachedServiceFetcher<DownloadManager>() {
             @Override
             public DownloadManager createService(ContextImpl ctx) {
-                return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                return new DownloadManager(ctx);
             }});
 
         registerService(Context.BATTERY_SERVICE, BatteryManager.class,
@@ -265,9 +276,9 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.DROPBOX_SERVICE, DropBoxManager.class,
-                new StaticServiceFetcher<DropBoxManager>() {
+                new CachedServiceFetcher<DropBoxManager>() {
             @Override
-            public DropBoxManager createService() {
+            public DropBoxManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.DROPBOX_SERVICE);
                 IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
                 if (service == null) {
@@ -277,7 +288,7 @@ final class SystemServiceRegistry {
                     // DROPBOX_SERVICE is registered.
                     return null;
                 }
-                return new DropBoxManager(service);
+                return new DropBoxManager(ctx, service);
             }});
 
         registerService(Context.INPUT_SERVICE, InputManager.class,
@@ -374,6 +385,18 @@ final class SystemServiceRegistry {
                 }
                 return new PowerManager(ctx.getOuterContext(),
                         service, ctx.mMainThread.getHandler());
+            }});
+
+        registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,
+                new CachedServiceFetcher<RecoverySystem>() {
+            @Override
+            public RecoverySystem createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.RECOVERY_SERVICE);
+                IRecoverySystem service = IRecoverySystem.Stub.asInterface(b);
+                if (service == null) {
+                    Log.wtf(TAG, "Failed to get recovery service.");
+                }
+                return new RecoverySystem(service);
             }});
 
         registerService(Context.SEARCH_SERVICE, SearchManager.class,
@@ -478,16 +501,8 @@ final class SystemServiceRegistry {
             public WifiManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_SERVICE);
                 IWifiManager service = IWifiManager.Stub.asInterface(b);
-                return new WifiManager(ctx.getOuterContext(), service);
-            }});
-
-        registerService(Context.WIFI_PASSPOINT_SERVICE, WifiPasspointManager.class,
-                new CachedServiceFetcher<WifiPasspointManager>() {
-            @Override
-            public WifiPasspointManager createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.WIFI_PASSPOINT_SERVICE);
-                IWifiPasspointManager service = IWifiPasspointManager.Stub.asInterface(b);
-                return new WifiPasspointManager(ctx.getOuterContext(), service);
+                return new WifiManager(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.WIFI_P2P_SERVICE, WifiP2pManager.class,
@@ -499,13 +514,26 @@ final class SystemServiceRegistry {
                 return new WifiP2pManager(service);
             }});
 
+        registerService(Context.WIFI_NAN_SERVICE, WifiNanManager.class,
+                new StaticServiceFetcher<WifiNanManager>() {
+            @Override
+            public WifiNanManager createService() {
+                IBinder b = ServiceManager.getService(Context.WIFI_NAN_SERVICE);
+                IWifiNanManager service = IWifiNanManager.Stub.asInterface(b);
+                if (service == null) {
+                    return null;
+                }
+                return new WifiNanManager(service);
+            }});
+
         registerService(Context.WIFI_SCANNING_SERVICE, WifiScanner.class,
                 new CachedServiceFetcher<WifiScanner>() {
             @Override
             public WifiScanner createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_SCANNING_SERVICE);
                 IWifiScanner service = IWifiScanner.Stub.asInterface(b);
-                return new WifiScanner(ctx.getOuterContext(), service);
+                return new WifiScanner(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.WIFI_RTT_SERVICE, RttManager.class,
@@ -514,7 +542,8 @@ final class SystemServiceRegistry {
             public RttManager createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(Context.WIFI_RTT_SERVICE);
                 IRttManager service = IRttManager.Stub.asInterface(b);
-                return new RttManager(ctx.getOuterContext(), service);
+                return new RttManager(ctx.getOuterContext(), service,
+                        ConnectivityThread.getInstanceLooper());
             }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
@@ -530,7 +559,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<WindowManager>() {
             @Override
             public WindowManager createService(ContextImpl ctx) {
-                return new WindowManagerImpl(ctx.getDisplay());
+                return new WindowManagerImpl(ctx);
             }});
 
         registerService(Context.USER_SERVICE, UserManager.class,
@@ -562,9 +591,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<LauncherApps>() {
             @Override
             public LauncherApps createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.LAUNCHER_APPS_SERVICE);
-                ILauncherApps service = ILauncherApps.Stub.asInterface(b);
-                return new LauncherApps(ctx, service);
+                return new LauncherApps(ctx);
             }});
 
         registerService(Context.RESTRICTIONS_SERVICE, RestrictionsManager.class,
@@ -704,6 +731,50 @@ final class SystemServiceRegistry {
             public RadioManager createService(ContextImpl ctx) {
                 return new RadioManager(ctx);
             }});
+
+        registerService(Context.HARDWARE_PROPERTIES_SERVICE, HardwarePropertiesManager.class,
+                new CachedServiceFetcher<HardwarePropertiesManager>() {
+            @Override
+            public HardwarePropertiesManager createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(Context.HARDWARE_PROPERTIES_SERVICE);
+                    IHardwarePropertiesManager service =
+                            IHardwarePropertiesManager.Stub.asInterface(b);
+                    if (service == null) {
+                        Log.wtf(TAG, "Failed to get hardwareproperties service.");
+                        return null;
+                    }
+                    return new HardwarePropertiesManager(ctx, service);
+            }});
+
+        registerService(Context.SOUND_TRIGGER_SERVICE, SoundTriggerManager.class,
+                new CachedServiceFetcher<SoundTriggerManager>() {
+            @Override
+            public SoundTriggerManager createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE);
+                return new SoundTriggerManager(ctx, ISoundTriggerService.Stub.asInterface(b));
+            }});
+
+        registerService(Context.SHORTCUT_SERVICE, ShortcutManager.class,
+                new CachedServiceFetcher<ShortcutManager>() {
+            @Override
+            public ShortcutManager createService(ContextImpl ctx) {
+                return new ShortcutManager(ctx);
+            }});
+
+        registerService(Context.SYSTEM_HEALTH_SERVICE, SystemHealthManager.class,
+                new CachedServiceFetcher<SystemHealthManager>() {
+            @Override
+            public SystemHealthManager createService(ContextImpl ctx) {
+                return new SystemHealthManager();
+            }});
+
+        registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,
+                new CachedServiceFetcher<ContextHubManager>() {
+            @Override
+            public ContextHubManager createService(ContextImpl ctx) {
+                return new ContextHubManager(ctx.getOuterContext(),
+                  ctx.mMainThread.getHandler().getLooper());
+            }});
     }
 
     /**
@@ -796,22 +867,26 @@ final class SystemServiceRegistry {
     }
 
     /**
-     * Like StaticServiceFetcher, creates only one instance of the service per process, but when
-     * creating the service for the first time, passes it the outer context of the creating
-     * component.
+     * Like StaticServiceFetcher, creates only one instance of the service per application, but when
+     * creating the service for the first time, passes it the application context of the creating
+     * application.
      *
-     * TODO: Is this safe in the case where multiple applications share the same process?
      * TODO: Delete this once its only user (ConnectivityManager) is known to work well in the
      * case where multiple application components each have their own ConnectivityManager object.
      */
-    static abstract class StaticOuterContextServiceFetcher<T> implements ServiceFetcher<T> {
+    static abstract class StaticApplicationContextServiceFetcher<T> implements ServiceFetcher<T> {
         private T mCachedInstance;
 
         @Override
         public final T getService(ContextImpl ctx) {
-            synchronized (StaticOuterContextServiceFetcher.this) {
+            synchronized (StaticApplicationContextServiceFetcher.this) {
                 if (mCachedInstance == null) {
-                    mCachedInstance = createService(ctx.getOuterContext());
+                    Context appContext = ctx.getApplicationContext();
+                    // If the application context is null, we're either in the system process or
+                    // it's the application context very early in app initialization. In both these
+                    // cases, the passed-in ContextImpl will not be freed, so it's safe to pass it
+                    // to the service. http://b/27532714 .
+                    mCachedInstance = createService(appContext != null ? appContext : ctx);
                 }
                 return mCachedInstance;
             }

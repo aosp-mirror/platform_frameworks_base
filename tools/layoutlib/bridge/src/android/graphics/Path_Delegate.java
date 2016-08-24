@@ -57,6 +57,8 @@ public final class Path_Delegate {
     private static final DelegateManager<Path_Delegate> sManager =
             new DelegateManager<Path_Delegate>(Path_Delegate.class);
 
+    private static final float EPSILON = 1e-4f;
+
     // ---- delegate data ----
     private FillType mFillType = FillType.WINDING;
     private Path2D mPath = new Path2D.Double();
@@ -64,18 +66,21 @@ public final class Path_Delegate {
     private float mLastX = 0;
     private float mLastY = 0;
 
+    // true if the path contains does not contain a curve or line.
+    private boolean mCachedIsEmpty = true;
+
     // ---- Public Helper methods ----
 
     public static Path_Delegate getDelegate(long nPath) {
         return sManager.getDelegate(nPath);
     }
 
-    public Shape getJavaShape() {
+    public Path2D getJavaShape() {
         return mPath;
     }
 
     public void setJavaShape(Shape shape) {
-        mPath.reset();
+        reset();
         mPath.append(shape, false /*connect*/);
     }
 
@@ -84,7 +89,7 @@ public final class Path_Delegate {
     }
 
     public void setPathIterator(PathIterator iterator) {
-        mPath.reset();
+        reset();
         mPath.append(iterator, false /*connect*/);
     }
 
@@ -162,13 +167,13 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_setFillType(long nPath, int ft) {
+    public static void native_setFillType(long nPath, int ft) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
-        pathDelegate.mFillType = Path.sFillTypeArray[ft];
+        pathDelegate.setFillType(Path.sFillTypeArray[ft]);
     }
 
     @LayoutlibDelegate
@@ -383,21 +388,18 @@ public final class Path_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_addRoundRect(long nPath, float left, float top, float right,
             float bottom, float[] radii, int dir) {
-        // Java2D doesn't support different rounded corners in each corner, so just use the
-        // first value.
-        native_addRoundRect(nPath, left, top, right, bottom, radii[0], radii[1], dir);
 
-        // there can be a case where this API is used but with similar values for all corners, so
-        // in that case we don't warn.
-        // we only care if 2 corners are different so just compare to the next one.
-        for (int i = 0 ; i < 3 ; i++) {
-            if (radii[i * 2] != radii[(i + 1) * 2] || radii[i * 2 + 1] != radii[(i + 1) * 2 + 1]) {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                        "Different corner sizes are not supported in Path.addRoundRect.",
-                        null, null /*data*/);
-                break;
-            }
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
         }
+
+        float[] cornerDimensions = new float[radii.length];
+        for (int i = 0; i < radii.length; i++) {
+            cornerDimensions[i] = 2 * radii[i];
+        }
+        pathDelegate.mPath.append(new RoundRectangle(left, top, right - left, bottom - top,
+                cornerDimensions), false);
     }
 
     @LayoutlibDelegate
@@ -421,21 +423,13 @@ public final class Path_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_offset(long nPath, float dx, float dy, long dst_path) {
+    /*package*/ static void native_offset(long nPath, float dx, float dy) {
         Path_Delegate pathDelegate = sManager.getDelegate(nPath);
         if (pathDelegate == null) {
             return;
         }
 
-        // could be null if the int is 0;
-        Path_Delegate dstDelegate = sManager.getDelegate(dst_path);
-
-        pathDelegate.offset(dx, dy, dstDelegate);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_offset(long nPath, float dx, float dy) {
-        native_offset(nPath, dx, dy, 0);
+        pathDelegate.offset(dx, dy);
     }
 
     @LayoutlibDelegate
@@ -570,7 +564,7 @@ public final class Path_Delegate {
         return null;
     }
 
-    private static void addPath(long destPath, long srcPath, AffineTransform transform) {
+    public static void addPath(long destPath, long srcPath, AffineTransform transform) {
         Path_Delegate destPathDelegate = sManager.getDelegate(destPath);
         if (destPathDelegate == null) {
             return;
@@ -591,18 +585,44 @@ public final class Path_Delegate {
 
 
     /**
-     * Returns whether the path is empty.
-     * @return true if the path is empty.
+     * Returns whether the path already contains any points.
+     * Note that this is different to
+     * {@link #isEmpty} because if all elements are {@link PathIterator#SEG_MOVETO},
+     * {@link #isEmpty} will return true while hasPoints will return false.
      */
-    private boolean isEmpty() {
-        return mPath.getCurrentPoint() == null;
+    public boolean hasPoints() {
+        return !mPath.getPathIterator(null).isDone();
+    }
+
+    /**
+     * Returns whether the path is empty (contains no lines or curves).
+     * @see Path#isEmpty
+     */
+    public boolean isEmpty() {
+        if (!mCachedIsEmpty) {
+            return false;
+        }
+
+        float[] coords = new float[6];
+        mCachedIsEmpty = Boolean.TRUE;
+        for (PathIterator it = mPath.getPathIterator(null); !it.isDone(); it.next()) {
+            int type = it.currentSegment(coords);
+            if (type != PathIterator.SEG_MOVETO) {
+                // Once we know that the path is not empty, we do not need to check again unless
+                // Path#reset is called.
+                mCachedIsEmpty = false;
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
      * Fills the given {@link RectF} with the path bounds.
      * @param bounds the RectF to be filled.
      */
-    private void fillBounds(RectF bounds) {
+    public void fillBounds(RectF bounds) {
         Rectangle2D rect = mPath.getBounds2D();
         bounds.left = (float)rect.getMinX();
         bounds.right = (float)rect.getMaxX();
@@ -616,7 +636,7 @@ public final class Path_Delegate {
      * @param x The x-coordinate of the start of a new contour
      * @param y The y-coordinate of the start of a new contour
      */
-    private void moveTo(float x, float y) {
+    public void moveTo(float x, float y) {
         mPath.moveTo(mLastX = x, mLastY = y);
     }
 
@@ -630,7 +650,7 @@ public final class Path_Delegate {
      * @param dy The amount to add to the y-coordinate of the end of the
      *           previous contour, to specify the start of a new contour
      */
-    private void rMoveTo(float dx, float dy) {
+    public void rMoveTo(float dx, float dy) {
         dx += mLastX;
         dy += mLastY;
         mPath.moveTo(mLastX = dx, mLastY = dy);
@@ -644,8 +664,8 @@ public final class Path_Delegate {
      * @param x The x-coordinate of the end of a line
      * @param y The y-coordinate of the end of a line
      */
-    private void lineTo(float x, float y) {
-        if (isEmpty()) {
+    public void lineTo(float x, float y) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         mPath.lineTo(mLastX = x, mLastY = y);
@@ -661,10 +681,16 @@ public final class Path_Delegate {
      * @param dy The amount to add to the y-coordinate of the previous point on
      *           this contour, to specify a line
      */
-    private void rLineTo(float dx, float dy) {
-        if (isEmpty()) {
+    public void rLineTo(float dx, float dy) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
+
+        if (Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON) {
+            // The delta is so small that this shouldn't generate a line
+            return;
+        }
+
         dx += mLastX;
         dy += mLastY;
         mPath.lineTo(mLastX = dx, mLastY = dy);
@@ -680,7 +706,7 @@ public final class Path_Delegate {
      * @param x2 The x-coordinate of the end point on a quadratic curve
      * @param y2 The y-coordinate of the end point on a quadratic curve
      */
-    private void quadTo(float x1, float y1, float x2, float y2) {
+    public void quadTo(float x1, float y1, float x2, float y2) {
         mPath.quadTo(x1, y1, mLastX = x2, mLastY = y2);
     }
 
@@ -698,8 +724,8 @@ public final class Path_Delegate {
      * @param dy2 The amount to add to the y-coordinate of the last point on
      *            this contour, for the end point of a quadratic curve
      */
-    private void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
-        if (isEmpty()) {
+    public void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         dx1 += mLastX;
@@ -721,9 +747,9 @@ public final class Path_Delegate {
      * @param x3 The x-coordinate of the end point on a cubic curve
      * @param y3 The y-coordinate of the end point on a cubic curve
      */
-    private void cubicTo(float x1, float y1, float x2, float y2,
+    public void cubicTo(float x1, float y1, float x2, float y2,
                         float x3, float y3) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(0, 0);
         }
         mPath.curveTo(x1, y1, x2, y2, mLastX = x3, mLastY = y3);
@@ -734,9 +760,9 @@ public final class Path_Delegate {
      * current point on this contour. If there is no previous point, then a
      * moveTo(0,0) is inserted automatically.
      */
-    private void rCubicTo(float dx1, float dy1, float dx2, float dy2,
+    public void rCubicTo(float dx1, float dy1, float dx2, float dy2,
                          float dx3, float dy3) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         dx1 += mLastX;
@@ -764,7 +790,7 @@ public final class Path_Delegate {
      *                    mod 360.
      * @param forceMoveTo If true, always begin a new contour with the arc
      */
-    private void arcTo(float left, float top, float right, float bottom, float startAngle,
+    public void arcTo(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle,
             boolean forceMoveTo) {
         Arc2D arc = new Arc2D.Float(left, top, right - left, bottom - top, -startAngle,
@@ -778,7 +804,7 @@ public final class Path_Delegate {
      * Close the current contour. If the current point is not equal to the
      * first point of the contour, a line segment is automatically added.
      */
-    private void close() {
+    public void close() {
         mPath.closePath();
     }
 
@@ -797,7 +823,7 @@ public final class Path_Delegate {
      * @param bottom The bottom of a rectangle to add to the path
      * @param dir    The direction to wind the rectangle's contour
      */
-    private void addRect(float left, float top, float right, float bottom,
+    public void addRect(float left, float top, float right, float bottom,
                         int dir) {
         moveTo(left, top);
 
@@ -826,21 +852,14 @@ public final class Path_Delegate {
      *
      * @param dx  The amount in the X direction to offset the entire path
      * @param dy  The amount in the Y direction to offset the entire path
-     * @param dst The translated path is written here. If this is null, then
-     *            the original path is modified.
      */
-    public void offset(float dx, float dy, Path_Delegate dst) {
+    public void offset(float dx, float dy) {
         GeneralPath newPath = new GeneralPath();
 
         PathIterator iterator = mPath.getPathIterator(new AffineTransform(0, 0, dx, 0, 0, dy));
 
         newPath.append(iterator, false /*connect*/);
-
-        if (dst != null) {
-            dst.mPath = newPath;
-        } else {
-            mPath = newPath;
-        }
+        mPath = newPath;
     }
 
     /**

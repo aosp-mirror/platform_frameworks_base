@@ -1643,8 +1643,16 @@ public class GridView extends AbsListView {
 
         boolean handled = false;
         int action = event.getAction();
+        if (KeyEvent.isConfirmKey(keyCode)
+                && event.hasNoModifiers() && action != KeyEvent.ACTION_UP) {
+            handled = resurrectSelectionIfNeeded();
+            if (!handled && event.getRepeatCount() == 0 && getChildCount() > 0) {
+                keyPressed();
+                handled = true;
+            }
+        }
 
-        if (action != KeyEvent.ACTION_UP) {
+        if (!handled && action != KeyEvent.ACTION_UP) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     if (event.hasNoModifiers()) {
@@ -1671,28 +1679,6 @@ public class GridView extends AbsListView {
                         handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_DOWN);
                     } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
                         handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
-                    }
-                    break;
-
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER:
-                    if (event.hasNoModifiers()) {
-                        handled = resurrectSelectionIfNeeded();
-                        if (!handled
-                                && event.getRepeatCount() == 0 && getChildCount() > 0) {
-                            keyPressed();
-                            handled = true;
-                        }
-                    }
-                    break;
-
-                case KeyEvent.KEYCODE_SPACE:
-                    if (mPopup == null || !mPopup.isShowing()) {
-                        if (event.hasNoModifiers()) {
-                            handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_DOWN);
-                        } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                            handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_UP);
-                        }
                     }
                     break;
 
@@ -2418,7 +2404,7 @@ public class GridView extends AbsListView {
         }
 
         final LayoutParams lp = (LayoutParams) view.getLayoutParams();
-        final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
+        final boolean isHeading = lp != null && lp.viewType == ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
         final boolean isSelected = isItemChecked(position);
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
                 row, 1, column, 1, isHeading, isSelected);

@@ -27,7 +27,11 @@ import java.lang.annotation.Target;
  * will run all tests with this annotation.
  *
  * @see android.test.suitebuilder.SmokeTestSuiteBuilder
+ *
+ * @deprecated New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Smoke {

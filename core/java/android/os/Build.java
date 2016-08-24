@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -90,6 +91,12 @@ public class Build {
 
     /** The name of the hardware (from the kernel command line or /proc). */
     public static final String HARDWARE = getString("ro.hardware");
+
+    /**
+     * Whether this build was for an emulator device.
+     * @hide
+     */
+    public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
     /** A hardware serial number, if available.  Alphanumeric only, case-insensitive. */
     public static final String SERIAL = getString("ro.serialno");
@@ -660,6 +667,11 @@ public class Build {
          * </ul>
          */
         public static final int M = 23;
+
+        /**
+         * N is for ¯\_(ツ)_/¯.
+         */
+        public static final int N = 24;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -717,6 +729,9 @@ public class Build {
      * @hide
      */
     public static boolean isBuildConsistent() {
+        // Don't care on eng builds.  Incremental build may trigger false negative.
+        if ("eng".equals(TYPE)) return true;
+
         final String system = SystemProperties.get("ro.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
         final String bootimage = SystemProperties.get("ro.bootimage.build.fingerprint");
@@ -778,6 +793,19 @@ public class Build {
      */
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
+
+    /**
+     * Specifies whether the permissions needed by a legacy app should be
+     * reviewed before any of its components can run. A legacy app is one
+     * with targetSdkVersion < 23, i.e apps using the old permission model.
+     * If review is not required, permissions are reviewed before the app
+     * is installed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final boolean PERMISSIONS_REVIEW_REQUIRED =
+            SystemProperties.getInt("ro.permission_review_required", 0) == 1;
 
     /**
      * Returns the version string for the radio firmware.  May return

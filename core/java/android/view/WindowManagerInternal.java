@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
@@ -52,12 +54,12 @@ public abstract class WindowManagerInternal {
     public interface MagnificationCallbacks {
 
         /**
-         * Called when the bounds of the screen content that is magnified changed.
-         * Note that not the entire screen is magnified.
+         * Called when the region where magnification operates changes. Note that this isn't the
+         * entire screen. For example, IMEs are not magnified.
          *
-         * @param bounds The bounds.
+         * @param magnificationRegion the current magnification region
          */
-        public void onMagnifedBoundsChanged(Region bounds);
+        public void onMagnificationRegionChanged(Region magnificationRegion);
 
         /**
          * Called when an application requests a rectangle on the screen to allow
@@ -120,6 +122,13 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+      * An interface to be notified about hardware keyboard status.
+      */
+    public interface OnHardKeyboardStatusChangeListener {
+        public void onHardKeyboardStatusChange(boolean available);
+    }
+
+    /**
      * Request that the window manager call
      * {@link DisplayManagerInternal#performTraversalInTransactionFromWindowManager}
      * within a surface transaction at a later time.
@@ -135,7 +144,7 @@ public abstract class WindowManagerInternal {
      *
      * @param callbacks The callbacks to invoke.
      */
-    public abstract void setMagnificationCallbacks(MagnificationCallbacks callbacks);
+    public abstract void setMagnificationCallbacks(@Nullable MagnificationCallbacks callbacks);
 
     /**
      * Set by the accessibility layer to specify the magnification and panning to
@@ -146,6 +155,13 @@ public abstract class WindowManagerInternal {
      * @see #setMagnificationCallbacks(MagnificationCallbacks)
      */
     public abstract void setMagnificationSpec(MagnificationSpec spec);
+
+    /**
+     * Obtains the magnification regions.
+     *
+     * @param magnificationRegion the current magnification region
+     */
+    public abstract void getMagnificationRegion(@NonNull Region magnificationRegion);
 
     /**
      * Gets the magnification and translation applied to a window given its token.
@@ -231,4 +247,44 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
+
+    /**
+     * Retrieves a height of input method window.
+     */
+    public abstract int getInputMethodWindowVisibleHeight();
+
+    /**
+      * Saves last input method window for transition.
+      *
+      * Note that it is assumed that this method is called only by InputMethodManagerService.
+      */
+    public abstract void saveLastInputMethodWindowForTransition();
+
+    /**
+     * Clears last input method window for transition.
+     *
+     * Note that it is assumed that this method is called only by InputMethodManagerService.
+     */
+    public abstract void clearLastInputMethodWindowForTransition();
+
+    /**
+      * Returns true when the hardware keyboard is available.
+      */
+    public abstract boolean isHardKeyboardAvailable();
+
+    /**
+      * Sets the callback listener for hardware keyboard status changes.
+      *
+      * @param listener The listener to set.
+      */
+    public abstract void setOnHardKeyboardStatusChangeListener(
+        OnHardKeyboardStatusChangeListener listener);
+
+    /** Returns true if the stack with the input Id is currently visible. */
+    public abstract boolean isStackVisible(int stackId);
+
+    /**
+     * @return True if and only if the docked divider is currently in resize mode.
+     */
+    public abstract boolean isDockedDividerResizing();
 }

@@ -18,10 +18,8 @@ package com.android.server;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.util.Log;
 
 class BluetoothService extends SystemService {
-    private static final String TAG = "BluetoothService";
     private BluetoothManagerService mBluetoothManagerService;
 
     public BluetoothService(Context context) {
@@ -31,21 +29,25 @@ class BluetoothService extends SystemService {
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart: publishing BluetoothManagerService");
-        publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE, mBluetoothManagerService);
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
+            publishBinderService(BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE,
+                    mBluetoothManagerService);
+        } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             mBluetoothManagerService.handleOnBootPhase();
         }
     }
 
     @Override
     public void onSwitchUser(int userHandle) {
-        Log.d(TAG, "onSwitchUser: switching to user " + userHandle);
         mBluetoothManagerService.handleOnSwitchUser(userHandle);
+    }
+
+    @Override
+    public void onUnlockUser(int userHandle) {
+        mBluetoothManagerService.handleOnUnlockUser(userHandle);
     }
 }

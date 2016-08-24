@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.Widget;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -31,6 +32,7 @@ import android.net.http.SslCertificate;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
@@ -38,6 +40,7 @@ import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -252,6 +255,16 @@ import java.util.Map;
  * is loading.
  * </p>
  *
+ * <h3>HTML5 Geolocation API support</h3>
+ *
+ * <p>For applications targeting Android N and later releases
+ * (API level > {@link android.os.Build.VERSION_CODES#M}) the geolocation api is only supported on
+ * secure origins such as https. For such applications requests to geolocation api on non-secure
+ * origins are automatically denied without invoking the corresponding
+ * {@link WebChromeClient#onGeolocationPermissionsShowPrompt(String, GeolocationPermissions.Callback)}
+ * method.
+ * </p>
+ *
  * <h3>Layout size</h3>
  * <p>
  * It is recommended to set the WebView layout height to a fixed value or to
@@ -277,6 +290,23 @@ import java.util.Map;
  * Using a layout width of {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} is not
  * supported. If such a width is used the WebView will attempt to use the width of the parent
  * instead.
+ * </p>
+ *
+ * <h3>Metrics</h3>
+ *
+ * <p>
+ * WebView may upload anonymous diagnostic data to Google when the user has consented. This data
+ * helps Google improve WebView. Data is collected on a per-app basis for each app which has
+ * instantiated a WebView. An individual app can opt out of this feature by putting the following
+ * tag in its manifest:
+ * <pre>
+ * &lt;meta-data android:name="android.webkit.WebView.MetricsOptOut"
+ *            android:value="true" /&gt;
+ * </pre>
+ * </p>
+ * <p>
+ * Data will only be uploaded for a given app if the user has consented AND the app has not opted
+ * out.
  * </p>
  *
  */
@@ -870,6 +900,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Loads the given URL with the specified additional HTTP headers.
+     * <p>
+     * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
      * @param additionalHttpHeaders the additional headers to be used in the
@@ -886,6 +918,8 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Loads the given URL.
+     * <p>
+     * Also see compatibility note on {@link #evaluateJavascript}.
      *
      * @param url the URL of the resource to load
      */
@@ -962,6 +996,9 @@ public class WebView extends AbsoluteLayout
      * If the base URL uses any other scheme, then the data will be loaded into
      * the WebView as a plain string (i.e. not part of a data URL) and any URL-encoded
      * entities in the string will not be decoded.
+     * <p>
+     * Note that the baseUrl is sent in the 'Referer' HTTP header when
+     * requesting subresources (images, etc.) of the page loaded using this method.
      *
      * @param baseUrl the URL to use as the page's base URL. If null defaults to
      *                'about:blank'.
@@ -983,6 +1020,12 @@ public class WebView extends AbsoluteLayout
      * If non-null, |resultCallback| will be invoked with any result returned from that
      * execution. This method must be called on the UI thread and the callback will
      * be made on the UI thread.
+     * <p>
+     * Compatibility note. Applications targeting {@link android.os.Build.VERSION_CODES#N} or
+     * later, JavaScript state from an empty WebView is no longer persisted across navigations like
+     * {@link #loadUrl(String)}. For example, global variables and functions defined before calling
+     * {@link #loadUrl(String)} will not exist in the loaded page. Applications should use
+     * {@link #addJavascriptInterface} instead to persist JavaScript objects across navigations.
      *
      * @param script the JavaScript to execute.
      * @param resultCallback A callback to be invoked when the script execution
@@ -1470,11 +1513,12 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Pauses any extra processing associated with this WebView and its
-     * associated DOM, plugins, JavaScript etc. For example, if this WebView is
-     * taken offscreen, this could be called to reduce unnecessary CPU or
-     * network traffic. When this WebView is again "active", call onResume().
-     * Note that this differs from pauseTimers(), which affects all WebViews.
+     * Does a best-effort attempt to pause any processing that can be paused
+     * safely, such as animations and geolocation. Note that this call
+     * does not pause JavaScript. To pause JavaScript globally, use
+     * {@link #pauseTimers}.
+     *
+     * To resume WebView, call {@link #onResume}.
      */
     public void onPause() {
         checkThread();
@@ -1482,7 +1526,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Resumes a WebView after a previous call to onPause().
+     * Resumes a WebView after a previous call to {@link #onPause}.
      */
     public void onResume() {
         checkThread();
@@ -1846,7 +1890,7 @@ public class WebView extends AbsoluteLayout
      * <a href="https://html.spec.whatwg.org/multipage/comms.html#messagechannel">here
      * </a>
      *
-     * The returned message channels are entangled and already in started state.
+     * <p>The returned message channels are entangled and already in started state.</p>
      *
      * @return the two message ports that form the message channel.
      */
@@ -2151,6 +2195,10 @@ public class WebView extends AbsoluteLayout
 
         public void super_setLayoutParams(ViewGroup.LayoutParams params) {
             WebView.super.setLayoutParams(params);
+        }
+
+        public void super_startActivityForResult(Intent intent, int requestCode) {
+            WebView.super.startActivityForResult(intent, requestCode);
         }
 
         // ---- Access to non-public methods ----
@@ -2502,6 +2550,11 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
+    public boolean onDragEvent(DragEvent event) {
+        return mProvider.getViewDelegate().onDragEvent(event);
+    }
+
+    @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         // This method may be called in the constructor chain, before the WebView provider is
@@ -2588,6 +2641,33 @@ public class WebView extends AbsoluteLayout
     public void onFinishTemporaryDetach() {
         super.onFinishTemporaryDetach();
         mProvider.getViewDelegate().onFinishTemporaryDetach();
+    }
+
+    @Override
+    public Handler getHandler() {
+        return mProvider.getViewDelegate().getHandler(super.getHandler());
+    }
+
+    @Override
+    public View findFocus() {
+        return mProvider.getViewDelegate().findFocus(super.findFocus());
+    }
+
+    /**
+     * Receive the result from a previous call to {@link #startActivityForResult(Intent, int)}.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode The integer result code returned by the child activity
+     *                   through its setResult().
+     * @param data An Intent, which can return result data to the caller
+     *               (various data can be attached to Intent "extras").
+     * @hide
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mProvider.getViewDelegate().onActivityResult(requestCode, resultCode, data);
     }
 
     /** @hide */

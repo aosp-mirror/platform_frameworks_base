@@ -20,11 +20,12 @@
         package="com.android.vpndialogs">
 
     <uses-permission android:name="android.permission.CONTROL_VPN" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
 
     <application android:label="VpnDialogs"
             android:allowBackup="false" >
         <activity android:name=".ConfirmDialog"
-                android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert">
+                android:theme="@android:style/Theme.Material.Light.Dialog.Alert">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -32,7 +33,7 @@
         </activity>
 
         <activity android:name=".ManageDialog"
-                android:theme="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert"
+                android:theme="@android:style/Theme.Material.Light.Dialog.Alert"
                 android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

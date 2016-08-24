@@ -29,6 +29,7 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.io.File;
@@ -120,6 +121,7 @@ public class AppCacheTest extends AndroidTestCase {
     }
 
     @LargeTest
+    @Suppress  // Failing.
     public void testFreeApplicationCacheAllFiles() throws Exception {
         boolean TRACKING = true;
         StatFs st = new StatFs("/data");

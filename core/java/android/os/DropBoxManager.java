@@ -16,6 +16,9 @@
 
 package android.os;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.ByteArrayInputStream;
@@ -40,6 +43,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class DropBoxManager {
     private static final String TAG = "DropBoxManager";
+
+    private final Context mContext;
     private final IDropBoxManagerService mService;
 
     /** Flag value: Entry's content was deleted to save space. */
@@ -249,14 +254,20 @@ public class DropBoxManager {
     }
 
     /** {@hide} */
-    public DropBoxManager(IDropBoxManagerService service) { mService = service; }
+    public DropBoxManager(Context context, IDropBoxManagerService service) {
+        mContext = context;
+        mService = service;
+    }
 
     /**
      * Create a dummy instance for testing.  All methods will fail unless
      * overridden with an appropriate mock implementation.  To obtain a
      * functional instance, use {@link android.content.Context#getSystemService}.
      */
-    protected DropBoxManager() { mService = null; }
+    protected DropBoxManager() {
+        mContext = null;
+        mService = null;
+    }
 
     /**
      * Stores human-readable text.  The data may be discarded eventually (or even
@@ -267,7 +278,16 @@ public class DropBoxManager {
      * @param data value to store
      */
     public void addText(String tag, String data) {
-        try { mService.add(new Entry(tag, 0, data)); } catch (RemoteException e) {}
+        try {
+            mService.add(new Entry(tag, 0, data));
+        } catch (RemoteException e) {
+            if (e instanceof TransactionTooLargeException
+                    && mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                Log.e(TAG, "App sent too much data, so it was ignored", e);
+                return;
+            }
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -279,7 +299,16 @@ public class DropBoxManager {
      */
     public void addData(String tag, byte[] data, int flags) {
         if (data == null) throw new NullPointerException("data == null");
-        try { mService.add(new Entry(tag, 0, data, flags)); } catch (RemoteException e) {}
+        try {
+            mService.add(new Entry(tag, 0, data, flags));
+        } catch (RemoteException e) {
+            if (e instanceof TransactionTooLargeException
+                    && mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                Log.e(TAG, "App sent too much data, so it was ignored", e);
+                return;
+            }
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -297,7 +326,7 @@ public class DropBoxManager {
         try {
             mService.add(entry);
         } catch (RemoteException e) {
-            // ignore
+            throw e.rethrowFromSystemServer();
         } finally {
             entry.close();
         }
@@ -312,7 +341,11 @@ public class DropBoxManager {
      * @return whether events with that tag would be accepted
      */
     public boolean isTagEnabled(String tag) {
-        try { return mService.isTagEnabled(tag); } catch (RemoteException e) { return false; }
+        try {
+            return mService.isTagEnabled(tag);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -325,7 +358,11 @@ public class DropBoxManager {
      * @return the next entry, or null if there are no more entries
      */
     public Entry getNextEntry(String tag, long msec) {
-        try { return mService.getNextEntry(tag, msec); } catch (RemoteException e) { return null; }
+        try {
+            return mService.getNextEntry(tag, msec);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     // TODO: It may be useful to have some sort of notification mechanism

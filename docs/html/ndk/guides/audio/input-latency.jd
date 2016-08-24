@@ -1,0 +1,95 @@
+page.title=Audio Input Latency
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#check-list">Checklist</a></li>
+        <li><a href="#ways">Ways to Reduce Audio Input Latency</a></li>
+        <li><a href="#avoid">What to Avoid</a></li>
+      </ol>
+    </div>
+  </div>
+
+
+<p>This page provides guidelines to help you reduce audio input latency when recording with a
+built-in microphone or an external headset microphone.</p>
+
+<h2 id="check-list">Checklist</h2>
+
+<p>Here are a few important prerequisites:</p>
+
+<ul>
+  <li>You must use the Android-specific implementation of the
+  <a class="external-link" href="https://www.khronos.org/opensles/">OpenSL ES™</a> API.
+
+  <li>If you haven't already done so, download and install the
+  <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a>.</li>
+
+  <li>Many of the same requirements for low-latency audio output also apply to low-latency input,
+  so read the requirements for low-latency output in
+  <a href="{@docRoot}ndk/guides/audio/output-latency.html">Audio Output Latency</a>.</li>
+</ul>
+
+<h2 id="ways">Ways to Reduce Audio Input Latency</h2>
+
+<p>The following are some methods to help ensure low audio input latency:
+
+<ul>
+  <li>Suggest to your users, if your app relies on low-latency audio, that they use a headset
+(for example, by displaying a <em>Best with headphones</em> screen on first run). Note
+that just using the headset doesn’t guarantee the lowest possible latency. You may need to
+perform other steps to remove any unwanted signal processing from the audio path, such as by
+using the <a href="http://developer.android.com/reference/android/media/MediaRecorder.AudioSource.html#VOICE_RECOGNITION">
+VOICE_RECOGNITION</a> preset when recording.</li>
+
+  <li>It's difficult to test audio input and output latency in isolation. The best solution to
+determine the lowest possible audio input latency is to measure round-trip audio and divide
+by two.</li>
+ <li> Be prepared to handle nominal sample rates of 44,100 and 48,000 Hz as reported by
+<a href="{@docRoot}reference/android/media/AudioManager.html#getProperty(java.lang.String)">
+getProperty(String)</a> for
+<a href="{@docRoot}reference/android/media/AudioManager.html#PROPERTY_OUTPUT_SAMPLE_RATE">
+PROPERTY_OUTPUT_SAMPLE_RATE</a>. Other sample rates are possible, but rare.</li>
+
+  <li>Be prepared to handle the buffer size reported by
+<a href="{@docRoot}reference/android/media/AudioManager.html#getProperty(java.lang.String)">
+getProperty(String)</a> for
+<a href="{@docRoot}reference/android/media/AudioManager.html#PROPERTY_OUTPUT_FRAMES_PER_BUFFER">
+PROPERTY_OUTPUT_FRAMES_PER_BUFFER</a>. Typical buffer sizes include 96, 128, 160, 192, 240, 256,
+or 512 frames, but other values are possible.</li>
+</ul>
+
+<h2 id="avoid">What to Avoid</h2>
+
+<p>Be sure to take these things into account to help avoid latency issues:</p>
+
+<ul>
+  <li>Don’t assume that the speakers and microphones used in mobile devices generally have good
+acoustics. Due to their small size, the acoustics are generally poor so signal processing is
+added to improve the sound quality. This signal processing introduces latency.</li>
+
+  <li>Don't assume that your input and output callbacks are synchronized. For simultaneous input
+and output, separate buffer queue completion handlers are used for each side. There is no
+guarantee of the relative order of these callbacks or the synchronization of the audio clocks,
+even when both sides use the same sample rate. Your application should buffer the data with
+proper buffer synchronization.</li>
+
+  <li>Don't assume that the actual sample rate exactly matches the nominal sample rate. For
+example, if the nominal sample rate is 48,000 Hz, it is normal for the audio clock to advance
+at a slightly different rate than the operating system {@code CLOCK_MONOTONIC}. This is because
+the audio and system clocks may derive from different crystals.</li>
+
+  <li>Don't assume that the actual playback sample rate exactly matches the actual capture sample
+rate, especially if the endpoints are on separate paths. For example, if you are capturing from
+the on-device microphone at 48,000 Hz nominal sample rate, and playing on USB audio
+at 48,000 Hz nominal sample rate, the actual sample rates are likely to be slightly different
+from each other.</li>
+</ul>
+
+<p>A consequence of potentially independent audio clocks is the need for asynchronous sample rate
+conversion. A simple (though not ideal for audio quality) technique for asynchronous sample rate
+conversion is to duplicate or drop samples as needed near a zero-crossing point. More
+sophisticated conversions are possible.</p>

@@ -1,0 +1,390 @@
+page.title=背景最佳化
+page.metaDescription=對隱含式廣播的新限制。
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      此文件內容
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">CONNECTIVITY_ACTION 上的限制</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">在非計量付費連線上排程網路工作</a>
+
+      </li>
+
+      <li>
+        <a href="#monitor-conn">監視應用程式執行時的網路連線能力</a>
+
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">NEW_PICTURE 與 NEW_VIDEO 上的限制</a>
+
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">新的 JobInfo 方法</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">新的 JobParameter 方法</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">進一步最佳化您的應用程式</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  背景處理程序可能耗用大量的記憶體或電池電力。例如，隱含式廣播可能會啟動許多已註冊要接聽它的背景處理程序，即使那些處理程序可能不會執行太多工作。
+
+這可能會對裝置效能與使用者體驗兩者造成實質影響。
+
+</p>
+
+<p>
+  為減輕此問題，N Developer Preview 套用下列限制：
+
+</p>
+
+<ul>
+  <li>目標為 Preview 的應用程式，如果在宣示說明中註冊以接收廣播，則不會收到 {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} 廣播。
+在前景執行的應用程式，只要使用 {@link
+  android.content.Context#registerReceiver Context.registerReceiver()} 註冊 {@link android.content.BroadcastReceiver}，即可在主要執行緒中接聽 {@code CONNECTIVITY_CHANGE}。
+
+
+  </li>
+
+  <li>應用程式無法傳送或接收 {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} 廣播。這種最佳化方式會影響所有應用程式，而不只是目標為 Preview 的應用程式。
+
+  </li>
+</ul>
+
+<p>
+  Android 架構提供數種解決方案來減少這些隱含式廣播的需求。
+例如，{@link android.app.job.JobScheduler} 與 <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> 提供的健全機制，可在符合指定條件 (例如，連線到非計量付費網路) 的情況下排程網路操作。
+
+
+您甚至可以使用 {@link android.app.job.JobScheduler} 對內容提供者的變更採取因應動作。{@link android.app.job.JobInfo} 物件會封裝 {@link android.app.job.JobScheduler} 用來排程您的工作的參數。
+
+
+符合工作的條件時，系統會在應用程式的 {@link android.app.job.JobService} 上執行此工作。
+
+</p>
+
+<p>
+  在此文件中，我們將學習如何使用替代方法 (例如 
+  {@link android.app.job.JobScheduler}) 改寫您的應用程式以配合這些新的限制。
+
+</p>
+
+<h2 id="connectivity-action">
+  CONNECTIVITY_ACTION 上的限制
+</h2>
+
+<p>
+  目標為 N Developer Preview 的應用程式，如果在宣示說明中註冊以接收廣播，則不會收到 {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} 廣播，而相依於此廣播的處理程序將不會啟動。
+
+這可能會在裝置連線到非計量付費網路時，對想要接聽網路變更或執行大量網路活動的應用程式造成問題。
+
+Android 架構中已經有數個可以避過此限制的解決方案，但是選擇適當的方法取決於您想要應用程式完成什麼工作。
+
+
+</p>
+
+<p class="note">
+  <strong>注意：</strong>使用
+  {@link android.content.Context#registerReceiver Context.registerReceiver()}
+ 註冊的 {@link android.content.BroadcastReceiver} 會在應用程式位於前景時繼續接收這些廣播。
+</p>
+
+<h3 id="sched-jobs">
+  在非計量付費連線上排程網路工作
+</h3>
+
+<p>
+  使用 {@link android.app.job.JobInfo.Builder JobInfo.Builder} 類別建置 {@link android.app.job.JobInfo} 物件時，請套用 {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} 方法並傳遞 {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} 當做工作參數。
+下列程式碼範例會排程服務，讓它在裝置連線到非計量付費網路和收費時執行：
+
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  符合您工作的條件時，您的應用程式會收到一個回呼，在指定的 {@code JobService.class} 中執行{@link android.app.job.JobService#onStartJob onStartJob()} 方法。
+
+如果要檢視更多 {@link
+  android.app.job.JobScheduler} 實作的範例，請參閱 <a href="{@docRoot}samples/JobScheduler/index.html">JobScheduler 範例應用程式</a>。
+</p>
+
+<p>
+  使用 GMSCore 服務且目標為 Android 5.0 (API 層級 21) 或更低的應用程式，可以使用 <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> 並指定 {@code Task.NETWORK_STATE_UNMETERED}。
+
+</p>
+
+<h3 id="monitor-conn">
+  監視應用程式執行時的網路連線能力
+</h3>
+
+<p>
+  在前景執行的應用程式，只要使用註冊的 {@link
+  android.content.BroadcastReceiver} ，仍然可以接聽 {@code
+  CONNECTIVITY_CHANGE}。然而，{@link
+  android.net.ConnectivityManager} API 提供更建全的方法，只在符合指定的網路條件時才要求回呼。
+
+</p>
+
+<p>
+  {@link android.net.NetworkRequest} 物件以 {@link android.net.NetworkCapabilities} 的方式定義網路回呼的參數。
+您使用 {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder} 類別建立{@link android.net.NetworkRequest} 物件。接著 {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+ 會將 {@link android.net.NetworkRequest} 物件傳遞到系統。
+符合網路條件時，應用程式會收到回呼，執行它的 {@link
+  android.net.ConnectivityManager.NetworkCallback} 類別中定義的
+  {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} 方法。
+
+</p>
+
+<p>
+  應用程式會持續收到回呼，直到應用程式結束或呼叫
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()} 才停止。
+</p>
+
+<h2 id="media-broadcasts">
+  NEW_PICTURE 與 NEW_VIDEO 上的限制
+</h2>
+
+<p>
+  在 N Developer Preview 中，應用程式無法傳送或接收 {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} 廣播。在必須喚醒數個應用程式來處理新的影像或視訊時，此限制有助於降低對效能與使用者體驗的影響。
+
+N Developer Preview 擴充 {@link android.app.job.JobInfo} 與 {@link
+  android.app.job.JobParameters} 來提供替代解決方案。
+
+</p>
+
+<h3 id="new-jobinfo">
+  新的 JobInfo 方法
+</h3>
+
+<p>
+  為了在內容 URI 變更時觸發工作，N Developer Preview 使用下列方法擴充 {@link android.app.job.JobInfo} API：
+
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    封裝在內容 URI 變更時觸發工作所需的參數。
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    將 {@code TriggerContentUri} 物件傳遞到 {@link
+    android.app.job.JobInfo}。{@link android.database.ContentObserver} 會監視封裝的內容 URI。
+如果有多個 {@code
+    TriggerContentUri} 物件與工作關聯，即使系統只回報其中一個內容 URI 中的變更，也會提供一個回呼。
+
+  </dd>
+
+  <dd>
+    新增 {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} 旗標，以在特定 URI 的任何子系變更時觸發工作。
+此旗標對應傳遞到 {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()} 的 {@code notifyForDescendants} 參數。
+
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>注意：</strong>{@code TriggerContentUri()} 無法與 {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} 或 {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()} 結合使用。
+為了持續監視內容變更，請在應用程式的 {@link
+  android.app.job.JobService} 完成處理最近的回呼之前，排程新的
+  {@link android.app.job.JobInfo}。
+</p>
+
+<p>
+  下列範例程式碼會排程一個工作，在系統回報內容 URI {@code MEDIA_URI} 變更時觸發該工作：
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MEDIA_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  當系統回報指定內容 URI 中有變更時，您的應用程式會收到一個回呼，而且會傳遞一個 {@link android.app.job.JobParameters} 物件到 {@code MediaContentJob.class} 中的 {@link android.app.job.JobService#onStartJob onStartJob()} 方法。
+
+
+
+</p>
+
+<h3 id="new-jobparam">
+  新的 JobParameter 方法
+</h3>
+
+<p>
+  N Developer Preview 也擴充 {@link android.app.job.JobParameters} 以允許您的應用程式接收有關內容授權單位與觸發工作之 URI 的實用資訊：
+
+
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    傳回觸發工作之 URI 的陣列。如果沒有 URI 觸發工作 (例如，工作是因為期限到了或一些其他原因而觸發)，或是變更的 URI 數目大於 50 時，這將會是 {@code
+    null}。
+
+
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    傳回觸發工作之內容授權單位的字串陣列。
+    如果傳回的陣列不是 {@code null}，請使用 {@code getTriggeredContentUris()} 來擷取變更的 URI 的詳細資訊。
+
+  </dd>
+</dl>
+
+<p>
+  下列範例程式碼會覆寫 {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} 方法，並記錄觸發工作的內容授權單位與 URI：
+
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  進一步最佳化您的應用程式
+</h2>
+
+<p>
+  最佳化您的應用程式，讓它可以在低記憶體裝置上或低記憶體狀況下執行，這樣可以改進效能與使用者體驗。
+移除背景服務上的相依性與靜態註冊的隱含式廣播接收器，有助於讓您的應用程式在此類裝置上執行得更順暢。
+
+雖然 N Developer Preview 採取一些步驟來減少一些此類問題，但是還是建議您最佳化您的應用程式，讓它完全不必使用這些背景處理程序。
+
+
+
+</p>
+
+<p>
+  N Developer Preview 引進一些額外的 <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> 命令，您可以使用這些命令測試在那些背景處理程序停用時的應用程式行為：
+
+</p>
+
+<ul>
+  <li>如果要模擬隱含式廣播與背景服務無法使用的情況，請輸入下列命令：
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>如果要重新啟用隱含式廣播與背景服務，請輸入下列命令：
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

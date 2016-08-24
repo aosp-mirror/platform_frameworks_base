@@ -1,0 +1,121 @@
+page.title=Increase installs with Store Listing Experiments
+page.metaDescription=Run experiments to find the best possible Play Store listing page.
+page.image=images/cards/distribute/users/experiments.png
+page.tags="ab testing, experiments, testing"
+Xnonavpage=true
+
+@jd:body
+
+<p>
+  First impressions matter, so having the best possible Play Store listing page
+  for your app is vital. Store Listing Experiments let you test combinations of
+  text and graphics to find the ones that bring you the most installs.
+</p>
+
+<img src="{@docRoot}images/distribute/googleplay/hero-store-listing-experiment.png"
+  srcset="{@docRoot}images/distribute/googleplay/hero-store-listing-experiment.png 1x,
+      {@docRoot}images/distribute/googleplay/hero-store-listing-experiment_2x.png 2x"
+ width="460">
+
+<p>
+  Learn how to <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6227309"
+  class="external-link">get started with Store Listing Experiments.</a>
+</p>
+
+<h3 id="planning">Tips for planning a successful experiment</h3>
+<ul>
+  <li>Make sure that you have a question or objective in mind when designing
+  your experiments.
+  </li>
+
+  <li>Test one attribute at a time to get the clearest results, but test
+  similar changes in icons and feature graphics together, for example comparing
+  use of character art against objects from a game.
+  </li>
+
+  <li>Start testing with your app icon, because it can have a huge impact on
+  whether users pick your app from search results and category lists.
+  </li>
+
+  <li>Test all of your listing’s attributes; after icons, test screenshots and
+  short descriptions as they are seen by users from search results and category
+  lists. Test the feature graphic as a priority, as it has such a presence on
+  your store listing’s page.
+  </li>
+</ul>
+
+<h3 id="graphics">Tips for your graphics and text</h3>
+<ul>
+  <li>Create up to three alternatives for your hi-res icon, feature graphic,
+  screenshots, promo video, short description, and full description.
+  </li>
+
+  <li>Set up a Global experiment for graphics against your default language or
+  a Localized experiment for both text and graphics in a specific language.
+  Experiment with screenshots and their order.
+  </li>
+
+  <li>Be bold about testing different artwork, but iterate on the results to
+  confirm and improve your findings.
+  </li>
+
+  <li>Make sure short descriptions clearly demonstrate an app or game’s value
+  to users.
+  </li>
+</ul>
+
+<h3 id="success">Tips for running successful experiments</h3>
+<ul>
+  <li>Test one asset at a time, unless testing completely different designs for
+  a store listing page against one another.
+  </li>
+
+  <li>Run your experiment for at least 7 days, even if you have enough traffic
+  to get meaningful results in a few days. Depending on the percentage of your
+  audience you’re showing the experiment too and the traffic on your listings
+  page it may take anything from a few days to several weeks to get a
+  result.
+  </li>
+
+  <li>Run your experiments with 50 percent of your audience, the maximum
+  allowed, to get results faster; particularly for localized tests that may be
+  visible to only a small percentage of your users.
+  </li>
+
+  <li>Check the banner on the Experiments page to see progress. Once enough
+  data has been collected the winner is displayed and you can apply it to your
+  store listing.
+  </li>
+</ul>
+
+<p style="clear:both">
+</p>
+
+<!-- TBA
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="successes">See how other developers have successfully run Store
+  Listing Experiments
+</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/experiments/successes"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3"
+  data-maxResults="9"></div>
+  </div>
+-->
+
+<div class="dynamic-grid">
+<div class="headerLine">
+<h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/googleplay/experiments/related"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x6"
+  data-maxResults="6"></div>
+  </div>

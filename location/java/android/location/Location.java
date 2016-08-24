@@ -78,32 +78,51 @@ public class Location implements Parcelable {
      */
     public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
 
+    /**
+     * Bit mask for mFieldsMask indicating the presence of mAltitude.
+     */
+    private static final byte HAS_ALTITUDE_MASK = 1;
+    /**
+     * Bit mask for mFieldsMask indicating the presence of mSpeed.
+     */
+    private static final byte HAS_SPEED_MASK = 2;
+    /**
+     * Bit mask for mFieldsMask indicating the presence of mBearing.
+     */
+    private static final byte HAS_BEARING_MASK = 4;
+    /**
+     * Bit mask for mFieldsMask indicating the presence of mAccuracy.
+     */
+    private static final byte HAS_ACCURACY_MASK = 8;
+    /**
+     * Bit mask for mFieldsMask indicating location is from a mock provider.
+     */
+    private static final byte HAS_MOCK_PROVIDER_MASK = 16;
+
+    // Cached data to make bearing/distance computations more efficient for the case
+    // where distanceTo and bearingTo are called in sequence.  Assume this typically happens
+    // on the same thread for caching purposes.
+    private static ThreadLocal<BearingDistanceCache> sBearingDistanceCache
+            = new ThreadLocal<BearingDistanceCache>() {
+        @Override
+        protected BearingDistanceCache initialValue() {
+            return new BearingDistanceCache();
+        }
+    };
+
     private String mProvider;
     private long mTime = 0;
     private long mElapsedRealtimeNanos = 0;
     private double mLatitude = 0.0;
     private double mLongitude = 0.0;
-    private boolean mHasAltitude = false;
     private double mAltitude = 0.0f;
-    private boolean mHasSpeed = false;
     private float mSpeed = 0.0f;
-    private boolean mHasBearing = false;
     private float mBearing = 0.0f;
-    private boolean mHasAccuracy = false;
     private float mAccuracy = 0.0f;
     private Bundle mExtras = null;
-    private boolean mIsFromMockProvider = false;
 
-    // Cache the inputs and outputs of computeDistanceAndBearing
-    // so calls to distanceTo() and bearingTo() can share work
-    private double mLat1 = 0.0;
-    private double mLon1 = 0.0;
-    private double mLat2 = 0.0;
-    private double mLon2 = 0.0;
-    private float mDistance = 0.0f;
-    private float mInitialBearing = 0.0f;
-    // Scratchpad
-    private final float[] mResults = new float[2];
+    // A bitmask of fields present in this object (see HAS_* constants defined above).
+    private byte mFieldsMask = 0;
 
     /**
      * Construct a new Location with a named provider.
@@ -131,18 +150,14 @@ public class Location implements Parcelable {
         mProvider = l.mProvider;
         mTime = l.mTime;
         mElapsedRealtimeNanos = l.mElapsedRealtimeNanos;
+        mFieldsMask = l.mFieldsMask;
         mLatitude = l.mLatitude;
         mLongitude = l.mLongitude;
-        mHasAltitude = l.mHasAltitude;
         mAltitude = l.mAltitude;
-        mHasSpeed = l.mHasSpeed;
         mSpeed = l.mSpeed;
-        mHasBearing = l.mHasBearing;
         mBearing = l.mBearing;
-        mHasAccuracy = l.mHasAccuracy;
         mAccuracy = l.mAccuracy;
         mExtras = (l.mExtras == null) ? null : new Bundle(l.mExtras);
-        mIsFromMockProvider = l.mIsFromMockProvider;
     }
 
     /**
@@ -152,18 +167,14 @@ public class Location implements Parcelable {
         mProvider = null;
         mTime = 0;
         mElapsedRealtimeNanos = 0;
+        mFieldsMask = 0;
         mLatitude = 0;
         mLongitude = 0;
-        mHasAltitude = false;
         mAltitude = 0;
-        mHasSpeed = false;
         mSpeed = 0;
-        mHasBearing = false;
         mBearing = 0;
-        mHasAccuracy = false;
         mAccuracy = 0;
         mExtras = null;
-        mIsFromMockProvider = false;
     }
 
     /**
@@ -257,11 +268,13 @@ public class Location implements Parcelable {
             int deg = Integer.parseInt(degrees);
             double min;
             double sec = 0.0;
+            boolean secPresent = false;
 
             if (st.hasMoreTokens()) {
                 min = Integer.parseInt(minutes);
                 String seconds = st.nextToken();
                 sec = Double.parseDouble(seconds);
+                secPresent = true;
             } else {
                 min = Double.parseDouble(minutes);
             }
@@ -273,11 +286,15 @@ public class Location implements Parcelable {
             if ((deg < 0.0) || (deg > 179 && !isNegative180)) {
                 throw new IllegalArgumentException("coordinate=" + coordinate);
             }
-            if (min < 0 || min > 59) {
+
+            // min must be in [0, 59] if seconds are present, otherwise [0.0, 60.0)
+            if (min < 0 || min >= 60 || (secPresent && (min > 59))) {
                 throw new IllegalArgumentException("coordinate=" +
                         coordinate);
             }
-            if (sec < 0 || sec > 59) {
+
+            // sec must be in [0.0, 60.0)
+            if (sec < 0 || sec >= 60) {
                 throw new IllegalArgumentException("coordinate=" +
                         coordinate);
             }
@@ -291,7 +308,7 @@ public class Location implements Parcelable {
     }
 
     private static void computeDistanceAndBearing(double lat1, double lon1,
-        double lat2, double lon2, float[] results) {
+        double lat2, double lon2, BearingDistanceCache results) {
         // Based on http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
         // using the "Inverse Formula" (section 4)
 
@@ -376,19 +393,19 @@ public class Location implements Parcelable {
         }
 
         float distance = (float) (b * A * (sigma - deltaSigma));
-        results[0] = distance;
-        if (results.length > 1) {
-            float initialBearing = (float) Math.atan2(cosU2 * sinLambda,
-                cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
-            initialBearing *= 180.0 / Math.PI;
-            results[1] = initialBearing;
-            if (results.length > 2) {
-                float finalBearing = (float) Math.atan2(cosU1 * sinLambda,
-                    -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
-                finalBearing *= 180.0 / Math.PI;
-                results[2] = finalBearing;
-            }
-        }
+        results.mDistance = distance;
+        float initialBearing = (float) Math.atan2(cosU2 * sinLambda,
+            cosU1 * sinU2 - sinU1 * cosU2 * cosLambda);
+        initialBearing *= 180.0 / Math.PI;
+        results.mInitialBearing = initialBearing;
+        float finalBearing = (float) Math.atan2(cosU1 * sinLambda,
+                -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
+        finalBearing *= 180.0 / Math.PI;
+        results.mFinalBearing = finalBearing;
+        results.mLat1 = lat1;
+        results.mLat2 = lat2;
+        results.mLon1 = lon1;
+        results.mLon2 = lon2;
     }
 
     /**
@@ -414,8 +431,16 @@ public class Location implements Parcelable {
         if (results == null || results.length < 1) {
             throw new IllegalArgumentException("results is null or has length < 1");
         }
+        BearingDistanceCache cache = sBearingDistanceCache.get();
         computeDistanceAndBearing(startLatitude, startLongitude,
-            endLatitude, endLongitude, results);
+                endLatitude, endLongitude, cache);
+        results[0] = cache.mDistance;
+        if (results.length > 1) {
+            results[1] = cache.mInitialBearing;
+            if (results.length > 2) {
+                results[2] = cache.mFinalBearing;
+            }
+        }
     }
 
     /**
@@ -427,21 +452,14 @@ public class Location implements Parcelable {
      * @return the approximate distance in meters
      */
     public float distanceTo(Location dest) {
+        BearingDistanceCache cache = sBearingDistanceCache.get();
         // See if we already have the result
-        synchronized (mResults) {
-            if (mLatitude != mLat1 || mLongitude != mLon1 ||
-                dest.mLatitude != mLat2 || dest.mLongitude != mLon2) {
-                computeDistanceAndBearing(mLatitude, mLongitude,
-                    dest.mLatitude, dest.mLongitude, mResults);
-                mLat1 = mLatitude;
-                mLon1 = mLongitude;
-                mLat2 = dest.mLatitude;
-                mLon2 = dest.mLongitude;
-                mDistance = mResults[0];
-                mInitialBearing = mResults[1];
-            }
-            return mDistance;
+        if (mLatitude != cache.mLat1 || mLongitude != cache.mLon1 ||
+            dest.mLatitude != cache.mLat2 || dest.mLongitude != cache.mLon2) {
+            computeDistanceAndBearing(mLatitude, mLongitude,
+                dest.mLatitude, dest.mLongitude, cache);
         }
+        return cache.mDistance;
     }
 
     /**
@@ -455,21 +473,14 @@ public class Location implements Parcelable {
      * @return the initial bearing in degrees
      */
     public float bearingTo(Location dest) {
-        synchronized (mResults) {
-            // See if we already have the result
-            if (mLatitude != mLat1 || mLongitude != mLon1 ||
-                            dest.mLatitude != mLat2 || dest.mLongitude != mLon2) {
-                computeDistanceAndBearing(mLatitude, mLongitude,
-                    dest.mLatitude, dest.mLongitude, mResults);
-                mLat1 = mLatitude;
-                mLon1 = mLongitude;
-                mLat2 = dest.mLatitude;
-                mLon2 = dest.mLongitude;
-                mDistance = mResults[0];
-                mInitialBearing = mResults[1];
-            }
-            return mInitialBearing;
+        BearingDistanceCache cache = sBearingDistanceCache.get();
+        // See if we already have the result
+        if (mLatitude != cache.mLat1 || mLongitude != cache.mLon1 ||
+                        dest.mLatitude != cache.mLat2 || dest.mLongitude != cache.mLon2) {
+            computeDistanceAndBearing(mLatitude, mLongitude,
+                dest.mLatitude, dest.mLongitude, cache);
         }
+        return cache.mInitialBearing;
     }
 
     /**
@@ -585,7 +596,7 @@ public class Location implements Parcelable {
      * True if this location has an altitude.
      */
     public boolean hasAltitude() {
-        return mHasAltitude;
+        return (mFieldsMask & HAS_ALTITUDE_MASK) != 0;
     }
 
     /**
@@ -605,7 +616,7 @@ public class Location implements Parcelable {
      */
     public void setAltitude(double altitude) {
         mAltitude = altitude;
-        mHasAltitude = true;
+        mFieldsMask |= HAS_ALTITUDE_MASK;
     }
 
     /**
@@ -616,14 +627,14 @@ public class Location implements Parcelable {
      */
     public void removeAltitude() {
         mAltitude = 0.0f;
-        mHasAltitude = false;
+        mFieldsMask &= ~HAS_ALTITUDE_MASK;
     }
 
     /**
      * True if this location has a speed.
      */
     public boolean hasSpeed() {
-        return mHasSpeed;
+        return (mFieldsMask & HAS_SPEED_MASK) != 0;
     }
 
     /**
@@ -642,7 +653,7 @@ public class Location implements Parcelable {
      */
     public void setSpeed(float speed) {
         mSpeed = speed;
-        mHasSpeed = true;
+        mFieldsMask |= HAS_SPEED_MASK;
     }
 
     /**
@@ -653,14 +664,14 @@ public class Location implements Parcelable {
      */
     public void removeSpeed() {
         mSpeed = 0.0f;
-        mHasSpeed = false;
+        mFieldsMask &= ~HAS_SPEED_MASK;
     }
 
     /**
      * True if this location has a bearing.
      */
     public boolean hasBearing() {
-        return mHasBearing;
+        return (mFieldsMask & HAS_BEARING_MASK) != 0;
     }
 
     /**
@@ -692,7 +703,7 @@ public class Location implements Parcelable {
             bearing -= 360.0f;
         }
         mBearing = bearing;
-        mHasBearing = true;
+        mFieldsMask |= HAS_BEARING_MASK;
     }
 
     /**
@@ -703,7 +714,7 @@ public class Location implements Parcelable {
      */
     public void removeBearing() {
         mBearing = 0.0f;
-        mHasBearing = false;
+        mFieldsMask &= ~HAS_BEARING_MASK;
     }
 
     /**
@@ -713,7 +724,7 @@ public class Location implements Parcelable {
      * accuracy.
      */
     public boolean hasAccuracy() {
-        return mHasAccuracy;
+        return (mFieldsMask & HAS_ACCURACY_MASK) != 0;
     }
 
     /**
@@ -751,7 +762,7 @@ public class Location implements Parcelable {
      */
     public void setAccuracy(float accuracy) {
         mAccuracy = accuracy;
-        mHasAccuracy = true;
+        mFieldsMask |= HAS_ACCURACY_MASK;
     }
 
     /**
@@ -762,7 +773,7 @@ public class Location implements Parcelable {
      */
     public void removeAccuracy() {
         mAccuracy = 0.0f;
-        mHasAccuracy = false;
+        mFieldsMask &= ~HAS_ACCURACY_MASK;
     }
 
     /**
@@ -780,7 +791,7 @@ public class Location implements Parcelable {
     @SystemApi
     public boolean isComplete() {
         if (mProvider == null) return false;
-        if (!mHasAccuracy) return false;
+        if (!hasAccuracy()) return false;
         if (mTime == 0) return false;
         if (mElapsedRealtimeNanos == 0) return false;
         return true;
@@ -798,8 +809,8 @@ public class Location implements Parcelable {
     @SystemApi
     public void makeComplete() {
         if (mProvider == null) mProvider = "?";
-        if (!mHasAccuracy) {
-            mHasAccuracy = true;
+        if (!hasAccuracy()) {
+            mFieldsMask |= HAS_ACCURACY_MASK;
             mAccuracy = 100.0f;
         }
         if (mTime == 0) mTime = System.currentTimeMillis();
@@ -838,7 +849,7 @@ public class Location implements Parcelable {
         s.append("Location[");
         s.append(mProvider);
         s.append(String.format(" %.6f,%.6f", mLatitude, mLongitude));
-        if (mHasAccuracy) s.append(String.format(" acc=%.0f", mAccuracy));
+        if (hasAccuracy()) s.append(String.format(" acc=%.0f", mAccuracy));
         else s.append(" acc=???");
         if (mTime == 0) {
             s.append(" t=?!?");
@@ -849,10 +860,10 @@ public class Location implements Parcelable {
             s.append(" et=");
             TimeUtils.formatDuration(mElapsedRealtimeNanos / 1000000L, s);
         }
-        if (mHasAltitude) s.append(" alt=").append(mAltitude);
-        if (mHasSpeed) s.append(" vel=").append(mSpeed);
-        if (mHasBearing) s.append(" bear=").append(mBearing);
-        if (mIsFromMockProvider) s.append(" mock");
+        if (hasAltitude()) s.append(" alt=").append(mAltitude);
+        if (hasSpeed()) s.append(" vel=").append(mSpeed);
+        if (hasBearing()) s.append(" bear=").append(mBearing);
+        if (isFromMockProvider()) s.append(" mock");
 
         if (mExtras != null) {
             s.append(" {").append(mExtras).append('}');
@@ -873,18 +884,14 @@ public class Location implements Parcelable {
             Location l = new Location(provider);
             l.mTime = in.readLong();
             l.mElapsedRealtimeNanos = in.readLong();
+            l.mFieldsMask = in.readByte();
             l.mLatitude = in.readDouble();
             l.mLongitude = in.readDouble();
-            l.mHasAltitude = in.readInt() != 0;
             l.mAltitude = in.readDouble();
-            l.mHasSpeed = in.readInt() != 0;
             l.mSpeed = in.readFloat();
-            l.mHasBearing = in.readInt() != 0;
             l.mBearing = in.readFloat();
-            l.mHasAccuracy = in.readInt() != 0;
             l.mAccuracy = in.readFloat();
-            l.mExtras = in.readBundle();
-            l.mIsFromMockProvider = in.readInt() != 0;
+            l.mExtras = Bundle.setDefusable(in.readBundle(), true);
             return l;
         }
 
@@ -904,18 +911,14 @@ public class Location implements Parcelable {
         parcel.writeString(mProvider);
         parcel.writeLong(mTime);
         parcel.writeLong(mElapsedRealtimeNanos);
+        parcel.writeByte(mFieldsMask);
         parcel.writeDouble(mLatitude);
         parcel.writeDouble(mLongitude);
-        parcel.writeInt(mHasAltitude ? 1 : 0);
         parcel.writeDouble(mAltitude);
-        parcel.writeInt(mHasSpeed ? 1 : 0);
         parcel.writeFloat(mSpeed);
-        parcel.writeInt(mHasBearing ? 1 : 0);
         parcel.writeFloat(mBearing);
-        parcel.writeInt(mHasAccuracy ? 1 : 0);
         parcel.writeFloat(mAccuracy);
         parcel.writeBundle(mExtras);
-        parcel.writeInt(mIsFromMockProvider? 1 : 0);
     }
 
     /**
@@ -940,7 +943,7 @@ public class Location implements Parcelable {
      * Attaches an extra {@link Location} to this Location.
      *
      * @param key the key associated with the Location extra
-     * @param location the Location to attach
+     * @param value the Location to attach
      * @hide
      */
     public void setExtraLocation(String key, Location value) {
@@ -956,7 +959,7 @@ public class Location implements Parcelable {
      * @return true if this Location came from a mock provider, false otherwise
      */
     public boolean isFromMockProvider() {
-        return mIsFromMockProvider;
+        return (mFieldsMask & HAS_MOCK_PROVIDER_MASK) != 0;
     }
 
     /**
@@ -967,6 +970,24 @@ public class Location implements Parcelable {
      */
     @SystemApi
     public void setIsFromMockProvider(boolean isFromMockProvider) {
-        mIsFromMockProvider = isFromMockProvider;
+        if (isFromMockProvider) {
+            mFieldsMask |= HAS_MOCK_PROVIDER_MASK;
+        } else {
+            mFieldsMask &= ~HAS_MOCK_PROVIDER_MASK;
+        }
+    }
+
+    /**
+     * Caches data used to compute distance and bearing (so successive calls to {@link #distanceTo}
+     * and {@link #bearingTo} don't duplicate work.
+     */
+    private static class BearingDistanceCache {
+        private double mLat1 = 0.0;
+        private double mLon1 = 0.0;
+        private double mLat2 = 0.0;
+        private double mLon2 = 0.0;
+        private float mDistance = 0.0f;
+        private float mInitialBearing = 0.0f;
+        private float mFinalBearing = 0.0f;
     }
 }

@@ -25,8 +25,6 @@ screen configuration</li>
   <ol>
     <li><a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-    <li><a
-href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
   </ol>
 
 </div>

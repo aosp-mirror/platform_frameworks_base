@@ -16,6 +16,8 @@
 
 package android.printservice;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +30,8 @@ import android.os.RemoteException;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -191,30 +195,29 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
-     * attribute, this extra is used to pass in the currently constructed {@link
-     * PrintJobInfo} to your activity allowing you to modify it. After you are
-     * done, you must return the modified {@link PrintJobInfo} via the same extra.
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity} attribute,
+     * this extra is used to pass in the currently constructed {@link PrintJobInfo} to your activity
+     * allowing you to modify it. After you are done, you must return the modified
+     * {@link PrintJobInfo} via the same extra.
      * <p>
-     * You cannot modify the passed in {@link PrintJobInfo} directly, rather you
-     * should build another one using the {@link PrintJobInfo.Builder} class. You
-     * can specify any standard properties and add advanced, printer specific,
-     * ones via {@link PrintJobInfo.Builder#putAdvancedOption(String, String)
-     * PrintJobInfo.Builder.putAdvancedOption(String, String)} and {@link
-     * PrintJobInfo.Builder#putAdvancedOption(String, int)
-     * PrintJobInfo.Builder.putAdvancedOption(String, int)}. The advanced options
-     * are not interpreted by the system, they will not be visible to applications,
-     * and can only be accessed by your print service via {@link
-     * PrintJob#getAdvancedStringOption(String) PrintJob.getAdvancedStringOption(String)}
-     * and {@link PrintJob#getAdvancedIntOption(String) PrintJob.getAdvancedIntOption(String)}.
+     * You cannot modify the passed in {@link PrintJobInfo} directly, rather you should build
+     * another one using the {@link android.print.PrintJobInfo.Builder PrintJobInfo.Builder} class.
+     * You can specify any standard properties and add advanced, printer specific, ones via
+     * {@link android.print.PrintJobInfo.Builder#putAdvancedOption(String, String)
+     * PrintJobInfo.Builder.putAdvancedOption(String, String)} and
+     * {@link android.print.PrintJobInfo.Builder#putAdvancedOption(String, int)
+     * PrintJobInfo.Builder.putAdvancedOption(String, int)}. The advanced options are not
+     * interpreted by the system, they will not be visible to applications, and can only be accessed
+     * by your print service via {@link PrintJob#getAdvancedStringOption(String)
+     * PrintJob.getAdvancedStringOption(String)} and {@link PrintJob#getAdvancedIntOption(String)
+     * PrintJob.getAdvancedIntOption(String)}.
      * </p>
      * <p>
-     * If the advanced print options activity offers changes to the standard print
-     * options, you can get the current {@link android.print.PrinterInfo} using the
-     * {@link #EXTRA_PRINTER_INFO} extra which will allow you to present the user
-     * with UI options supported by the current printer. For example, if the current
-     * printer does not support a given media size, you should not offer it in the
-     * advanced print options UI.
+     * If the advanced print options activity offers changes to the standard print options, you can
+     * get the current {@link android.print.PrinterInfo PrinterInfo} using the
+     * {@link #EXTRA_PRINTER_INFO} extra which will allow you to present the user with UI options
+     * supported by the current printer. For example, if the current printer does not support a
+     * given media size, you should not offer it in the advanced print options UI.
      * </p>
      *
      * @see #EXTRA_PRINTER_INFO
@@ -275,9 +278,10 @@ public abstract class PrintService extends Service {
     /**
      * Callback asking you to create a new {@link PrinterDiscoverySession}.
      *
+     * @return The created session.
      * @see PrinterDiscoverySession
      */
-    protected abstract PrinterDiscoverySession onCreatePrinterDiscoverySession();
+    protected abstract @Nullable PrinterDiscoverySession onCreatePrinterDiscoverySession();
 
     /**
      * Called when cancellation of a print job is requested. The service
@@ -325,7 +329,7 @@ public abstract class PrintService extends Service {
                 final int printJobInfoCount = printJobInfos.size();
                 printJobs = new ArrayList<PrintJob>(printJobInfoCount);
                 for (int i = 0; i < printJobInfoCount; i++) {
-                    printJobs.add(new PrintJob(printJobInfos.get(i), mClient));
+                    printJobs.add(new PrintJob(this, printJobInfos.get(i), mClient));
                 }
             }
             if (printJobs != null) {
@@ -343,8 +347,9 @@ public abstract class PrintService extends Service {
      * @param localId A locally unique id in the context of your print service.
      * @return Global printer id.
      */
-    public final PrinterId generatePrinterId(String localId) {
+    public @NonNull final PrinterId generatePrinterId(String localId) {
         throwIfNotCalledOnMainThread();
+        localId = Preconditions.checkNotNull(localId, "localId cannot be null");
         return new PrinterId(new ComponentName(getPackageName(),
                 getClass().getName()), localId);
     }
@@ -368,6 +373,7 @@ public abstract class PrintService extends Service {
                 mHandler.sendEmptyMessage(ServiceHandler.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
             }
 
+            @Override
             public void startPrinterDiscovery(List<PrinterId> priorityList) {
                 mHandler.obtainMessage(ServiceHandler.MSG_START_PRINTER_DISCOVERY,
                         priorityList).sendToTarget();
@@ -387,6 +393,12 @@ public abstract class PrintService extends Service {
             @Override
             public void startPrinterStateTracking(PrinterId printerId) {
                 mHandler.obtainMessage(ServiceHandler.MSG_START_PRINTER_STATE_TRACKING,
+                        printerId).sendToTarget();
+            }
+
+            @Override
+            public void requestCustomPrinterIcon(PrinterId printerId) {
+                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_CUSTOM_PRINTER_ICON,
                         printerId).sendToTarget();
             }
 
@@ -423,10 +435,11 @@ public abstract class PrintService extends Service {
         public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
         public static final int MSG_VALIDATE_PRINTERS = 5;
         public static final int MSG_START_PRINTER_STATE_TRACKING = 6;
-        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
-        public static final int MSG_ON_PRINTJOB_QUEUED = 8;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 9;
-        public static final int MSG_SET_CLIENT = 10;
+        public static final int MSG_REQUEST_CUSTOM_PRINTER_ICON = 7;
+        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 8;
+        public static final int MSG_ON_PRINTJOB_QUEUED = 9;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 10;
+        public static final int MSG_SET_CLIENT = 11;
 
         public ServiceHandler(Looper looper) {
             super(looper, null, true);
@@ -508,6 +521,17 @@ public abstract class PrintService extends Service {
                     }
                 } break;
 
+                case MSG_REQUEST_CUSTOM_PRINTER_ICON: {
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "MSG_REQUEST_CUSTOM_PRINTER_ICON "
+                                + getPackageName());
+                    }
+                    if (mDiscoverySession != null) {
+                        PrinterId printerId = (PrinterId) message.obj;
+                        mDiscoverySession.requestCustomPrinterIcon(printerId);
+                    }
+                } break;
+
                 case MSG_STOP_PRINTER_STATE_TRACKING: {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "MSG_STOP_PRINTER_STATE_TRACKING "
@@ -525,7 +549,7 @@ public abstract class PrintService extends Service {
                                 + getPackageName());
                     }
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
-                    onRequestCancelPrintJob(new PrintJob(printJobInfo, mClient));
+                    onRequestCancelPrintJob(new PrintJob(PrintService.this, printJobInfo, mClient));
                 } break;
 
                 case MSG_ON_PRINTJOB_QUEUED: {
@@ -537,7 +561,7 @@ public abstract class PrintService extends Service {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Queued: " + printJobInfo);
                     }
-                    onPrintJobQueued(new PrintJob(printJobInfo, mClient));
+                    onPrintJobQueued(new PrintJob(PrintService.this, printJobInfo, mClient));
                 } break;
 
                 case MSG_SET_CLIENT: {

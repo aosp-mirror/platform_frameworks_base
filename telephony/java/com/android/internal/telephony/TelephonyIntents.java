@@ -167,28 +167,6 @@ public class TelephonyIntents {
             = "android.intent.action.ANY_DATA_STATE";
 
     /**
-     * Broadcast Action: Occurs when a data connection connects to a provisioning apn
-     * and is broadcast by the low level data connection code.
-     * The intent will have the following extra values:</p>
-     * <dl>
-     *   <dt>apn</dt><dd>A string that is the APN associated with this connection.</dd>
-     *   <dt>apnType</dt><dd>A string array of APN types associated with this connection.
-     *      The APN type {@code *} is a special type that means this APN services all types.</dd>
-     *   <dt>linkProperties</dt><dd>{@code LinkProperties} for this APN.</dd>
-     *   <dt>linkCapabilities</dt><dd>The {@code LinkCapabilities} for this APN.</dd>
-     *   <dt>iface</dt><dd>A string that is the name of the interface.</dd>
-     * </dl>
-     *
-     * <p class="note">
-     * Requires the READ_PHONE_STATE permission.
-     *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN
-            = "android.intent.action.DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN";
-
-    /**
      * Broadcast Action: An attempt to establish a data connection has failed.
      * The intent will have the following extra values:</p>
      * <dl>
@@ -406,6 +384,9 @@ public class TelephonyIntents {
      *   <li><em>phones radio access family </em> - A RadioAccessFamily
      *   array, contain phone ID and new radio access family for each phone.</li>
      * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
      */
     public static final String ACTION_SET_RADIO_CAPABILITY_DONE =
             "android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE";
@@ -417,4 +398,38 @@ public class TelephonyIntents {
      */
     public static final String ACTION_SET_RADIO_CAPABILITY_FAILED =
             "android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED";
+
+    /**
+     * <p>Broadcast Action: when data connections get redirected with validation failure.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>redirectUrl</li><dd>A string with the redirection url info.</dd>
+     *   <li>subId</li><dd>Sub Id which associated the data redirection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     */
+    public static final String ACTION_DATA_CONNECTION_REDIRECTED =
+            "android.intent.action.REDIRECTION_DETECTED";
+    /**
+     * <p>Broadcast Action: when data connections setup fails.
+     * intended for sim/account status checks and only sent to the specified carrier app
+     * feedback is via carrier/system APIs to report cold-sim, out-of-credit-sim, etc
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li>apnType</li><dd>A string with the apn type.</dd>
+     *   <li>errorCode</li><dd>A integer with dataFailCause.</dd>
+     *   <li>subId</dt><li>Sub Id which associated the data redirection.</dd>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system. </p>
+     */
+    public static final String ACTION_REQUEST_NETWORK_FAILED =
+            "android.intent.action.REQUEST_NETWORK_FAILED";
+
+    /**
+     * Broadcast action to trigger CI OMA-DM Session.
+     */
+    public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
+            "com.android.omadm.service.CONFIGURATION_UPDATE";
 }

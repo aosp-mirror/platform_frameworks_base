@@ -25,63 +25,48 @@
         android:maxCollapsedHeightSmall="56dp"
         android:id="@id/contentPanel">
 
-    <LinearLayout
+    <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alwaysShow="true"
             android:elevation="8dp"
             android:paddingStart="16dp"
             android:background="@color/white" >
+        <TextView android:id="@+id/profile_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="48dp"
+                  android:layout_marginEnd="8dp"
+                  android:paddingStart="8dp"
+                  android:paddingEnd="8dp"
+                  android:visibility="gone"
+                  style="?attr/borderlessButtonStyle"
+                  android:textAppearance="?attr/textAppearanceButton"
+                  android:textColor="@color/material_deep_teal_500"
+                  android:gravity="center_vertical"
+                  android:layout_alignParentTop="true"
+                  android:layout_alignParentRight="true"
+                  android:singleLine="true"/>
         <ImageView android:id="@+id/title_icon"
                    android:layout_width="24dp"
                    android:layout_height="24dp"
-                   android:layout_gravity="start|center_vertical"
                    android:layout_marginEnd="16dp"
                    android:visibility="gone"
-                   android:scaleType="fitCenter" />
+                   android:scaleType="fitCenter"
+                   android:layout_below="@id/profile_button"
+                   android:layout_alignParentLeft="true"
+                   />
         <TextView android:id="@+id/title"
-                  android:layout_width="0dp"
                   android:layout_height="wrap_content"
-                  android:layout_weight="1"
+                  android:layout_width="wrap_content"
                   android:textAppearance="?attr/textAppearanceMedium"
                   android:textSize="14sp"
                   android:gravity="start|center_vertical"
                   android:paddingEnd="?attr/dialogPreferredPadding"
                   android:paddingTop="12dp"
-                  android:paddingBottom="12dp" />
-        <LinearLayout android:id="@+id/profile_button"
-                      android:layout_width="wrap_content"
-                      android:layout_height="48dp"
-                      android:layout_marginTop="4dp"
-                      android:layout_marginEnd="4dp"
-                      android:paddingStart="8dp"
-                      android:paddingEnd="8dp"
-                      android:paddingTop="4dp"
-                      android:paddingBottom="4dp"
-                      android:focusable="true"
-                      android:visibility="gone"
-                      style="?attr/borderlessButtonStyle">
-            <ImageView android:id="@+id/icon"
-                       android:layout_width="24dp"
-                       android:layout_height="24dp"
-                       android:layout_gravity="start|center_vertical"
-                       android:layout_marginStart="4dp"
-                       android:layout_marginEnd="16dp"
-                       android:layout_marginTop="12dp"
-                       android:layout_marginBottom="12dp"
-                       android:scaleType="fitCenter" />
-            <TextView android:id="@id/text1"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="start|center_vertical"
-                      android:layout_marginEnd="16dp"
-                      android:textAppearance="?attr/textAppearanceButton"
-                      android:textColor="?attr/textColorPrimary"
-                      android:minLines="1"
-                      android:maxLines="1"
-                      android:ellipsize="marquee" />
-        </LinearLayout>
-    </LinearLayout>
+                  android:paddingBottom="12dp"
+                  android:layout_below="@id/profile_button"
+                  android:layout_toRightOf="@id/title_icon"/>
+    </RelativeLayout>
 
     <ListView
             android:layout_width="match_parent"

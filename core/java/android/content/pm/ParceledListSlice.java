@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,6 +50,10 @@ public class ParceledListSlice<T extends Parcelable> implements Parcelable {
     private static final int MAX_IPC_SIZE = IBinder.MAX_IPC_SIZE;
 
     private final List<T> mList;
+
+    public static <T extends Parcelable> ParceledListSlice<T> emptyList() {
+        return new ParceledListSlice<T>(Collections.<T> emptyList());
+    }
 
     public ParceledListSlice(List<T> list) {
         mList = list;

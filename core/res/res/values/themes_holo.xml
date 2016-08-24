@@ -133,6 +133,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Holo.Widget.PopupMenu.Small</item>
 
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
+
         <!-- Button styles -->
         <item name="buttonStyle">@style/Widget.Holo.Button</item>
 
@@ -243,11 +247,10 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_material</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.Holo.TextSuggestionsPopupWindow</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_dark</item>
 
         <!-- Widget styles -->
@@ -463,6 +466,9 @@ please see themes_device_defaults.xml.
 
         <item name="editTextColor">?attr/textColorPrimary</item>
         <item name="editTextBackground">@drawable/edit_text_holo_light</item>
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
 
         <item name="candidatesTextStyleSpans">@string/candidates_style</item>
 
@@ -582,11 +588,10 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_material</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.Holo.Light.TextSuggestionsPopupWindow</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_light</item>
 
         <!-- Widget styles -->

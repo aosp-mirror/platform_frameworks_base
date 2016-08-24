@@ -36,10 +36,10 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.android.internal.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,6 +104,18 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 0x00000008;
 
+    /**
+     * Capability: This accessibility service can control display magnification.
+     * @see android.R.styleable#AccessibilityService_canControlMagnification
+     */
+    public static final int CAPABILITY_CAN_CONTROL_MAGNIFICATION = 0x00000010;
+
+    /**
+     * Capability: This accessibility service can perform gestures.
+     * @see android.R.styleable#AccessibilityService_canPerformGestures
+     */
+    public static final int CAPABILITY_CAN_PERFORM_GESTURES = 0x00000020;
+
     private static final SparseArray<CapabilityInfo> sAvailableCapabilityInfos =
             new SparseArray<CapabilityInfo>();
     static {
@@ -123,6 +135,14 @@ public class AccessibilityServiceInfo implements Parcelable {
                 new CapabilityInfo(CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS,
                         R.string.capability_title_canRequestFilterKeyEvents,
                         R.string.capability_desc_canRequestFilterKeyEvents));
+        sAvailableCapabilityInfos.put(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                new CapabilityInfo(CAPABILITY_CAN_CONTROL_MAGNIFICATION,
+                        R.string.capability_title_canControlMagnification,
+                        R.string.capability_desc_canControlMagnification));
+        sAvailableCapabilityInfos.put(CAPABILITY_CAN_PERFORM_GESTURES,
+                new CapabilityInfo(CAPABILITY_CAN_PERFORM_GESTURES,
+                        R.string.capability_title_canPerformGestures,
+                        R.string.capability_desc_canPerformGestures));
     }
 
     /**
@@ -266,12 +286,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * This flag requests from the system to filter key events. If this flag
      * is set the accessibility service will receive the key events before
-     * applications allowing it implement global shortcuts. Setting this flag
-     * does not guarantee that this service will filter key events since only
-     * one service can do so at any given time. This avoids user confusion due
-     * to behavior change in case different key filtering services are enabled.
-     * If there is already another key filtering service enabled, this one will
-     * not receive key events.
+     * applications allowing it implement global shortcuts.
      * <p>
      * Services that want to set this flag have to declare this capability
      * in their meta-data by setting the attribute {@link android.R.attr
@@ -303,6 +318,9 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.R.styleable#AccessibilityService_canRetrieveWindowContent
      */
     public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
+
+    /** {@hide} */
+    public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
     /**
      * The event types an {@link AccessibilityService} is interested in.
@@ -502,6 +520,14 @@ public class AccessibilityServiceInfo implements Parcelable {
                     .AccessibilityService_canRequestFilterKeyEvents, false)) {
                 mCapabilities |= CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS;
             }
+            if (asAttributes.getBoolean(com.android.internal.R.styleable
+                    .AccessibilityService_canControlMagnification, false)) {
+                mCapabilities |= CAPABILITY_CAN_CONTROL_MAGNIFICATION;
+            }
+            if (asAttributes.getBoolean(com.android.internal.R.styleable
+                    .AccessibilityService_canPerformGestures, false)) {
+                mCapabilities |= CAPABILITY_CAN_PERFORM_GESTURES;
+            }
             TypedValue peekedValue = asAttributes.peekValue(
                     com.android.internal.R.styleable.AccessibilityService_description);
             if (peekedValue != null) {
@@ -602,6 +628,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
      * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
      * @see #CAPABILITY_FILTER_KEY_EVENTS
+     * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
+     * @see #CAPABILITY_CAN_PERFORM_GESTURES
      */
     public int getCapabilities() {
         return mCapabilities;
@@ -617,6 +645,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
      * @see #CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
      * @see #CAPABILITY_FILTER_KEY_EVENTS
+     * @see #CAPABILITY_CAN_CONTROL_MAGNIFICATION
+     * @see #CAPABILITY_CAN_PERFORM_GESTURES
      *
      * @hide
      */
@@ -657,6 +687,12 @@ public class AccessibilityServiceInfo implements Parcelable {
             return description.toString().trim();
         }
         return null;
+    }
+
+    /** {@hide} */
+    public boolean isDirectBootAware() {
+        return ((flags & FLAG_FORCE_DIRECT_BOOT_AWARE) != 0)
+                || mResolveInfo.serviceInfo.directBootAware;
     }
 
     /**
@@ -917,6 +953,10 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY";
             case CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS:
                 return "CAPABILITY_CAN_FILTER_KEY_EVENTS";
+            case CAPABILITY_CAN_CONTROL_MAGNIFICATION:
+                return "CAPABILITY_CAN_CONTROL_MAGNIFICATION";
+            case CAPABILITY_CAN_PERFORM_GESTURES:
+                return "CAPABILITY_CAN_PERFORM_GESTURES";
             default:
                 return "UNKNOWN";
         }

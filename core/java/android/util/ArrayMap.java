@@ -60,9 +60,14 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     private static final int CACHE_SIZE = 10;
 
     /**
+     * Special hash array value that indicates the container is immutable.
+     */
+    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
+
+    /**
      * @hide Special immutable empty ArrayMap.
      */
-    public static final ArrayMap EMPTY = new ArrayMap(true);
+    public static final ArrayMap EMPTY = new ArrayMap<>(-1);
 
     /**
      * Caches of small array objects to avoid spamming garbage.  The cache
@@ -75,11 +80,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     static Object[] mTwiceBaseCache;
     static int mTwiceBaseCacheSize;
 
-    /**
-     * Special hash array value that indicates the container is immutable.
-     */
-    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
-
+    final boolean mIdentityHashCode;
     int[] mHashes;
     Object[] mArray;
     int mSize;
@@ -236,30 +237,32 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * will grow once items are added to it.
      */
     public ArrayMap() {
-        mHashes = EmptyArray.INT;
-        mArray = EmptyArray.OBJECT;
-        mSize = 0;
+        this(0, false);
     }
 
     /**
      * Create a new ArrayMap with a given initial capacity.
      */
     public ArrayMap(int capacity) {
-        if (capacity == 0) {
+        this(capacity, false);
+    }
+
+    /** {@hide} */
+    public ArrayMap(int capacity, boolean identityHashCode) {
+        mIdentityHashCode = identityHashCode;
+
+        // If this is immutable, use the sentinal EMPTY_IMMUTABLE_INTS
+        // instance instead of the usual EmptyArray.INT. The reference
+        // is checked later to see if the array is allowed to grow.
+        if (capacity < 0) {
+            mHashes = EMPTY_IMMUTABLE_INTS;
+            mArray = EmptyArray.OBJECT;
+        } else if (capacity == 0) {
             mHashes = EmptyArray.INT;
             mArray = EmptyArray.OBJECT;
         } else {
             allocArrays(capacity);
         }
-        mSize = 0;
-    }
-
-    private ArrayMap(boolean immutable) {
-        // If this is immutable, use the sentinal EMPTY_IMMUTABLE_INTS
-        // instance instead of the usual EmptyArray.INT. The reference
-        // is checked later to see if the array is allowed to grow.
-        mHashes = immutable ? EMPTY_IMMUTABLE_INTS : EmptyArray.INT;
-        mArray = EmptyArray.OBJECT;
         mSize = 0;
     }
 
@@ -336,7 +339,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the index of the key if it exists, else a negative integer.
      */
     public int indexOfKey(Object key) {
-        return key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        return key == null ? indexOfNull()
+                : indexOf(key, mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
     }
 
     int indexOfValue(Object value) {
@@ -437,7 +441,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             hash = 0;
             index = indexOfNull();
         } else {
-            hash = key.hashCode();
+            hash = mIdentityHashCode ? System.identityHashCode(key) : key.hashCode();
             index = indexOf(key, hash);
         }
         if (index >= 0) {
@@ -488,7 +492,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public void append(K key, V value) {
         int index = mSize;
-        final int hash = key == null ? 0 : key.hashCode();
+        final int hash = key == null ? 0
+                : (mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
         if (index >= mHashes.length) {
             throw new IllegalStateException("Array is full");
         }

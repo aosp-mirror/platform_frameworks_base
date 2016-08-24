@@ -42,11 +42,14 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
+import com.android.layoutlib.bridge.android.graphics.NopCanvas;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
+import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.util.Pair;
+import com.android.util.PropertiesMap;
 
 import android.animation.AnimationThread;
 import android.animation.Animator;
@@ -59,9 +62,11 @@ import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
+import android.os.Looper;
 import android.preference.Preference_Delegate;
 import android.view.AttachInfo_Accessor;
 import android.view.BridgeInflater;
+import android.view.Choreographer_Delegate;
 import android.view.IWindowManager;
 import android.view.IWindowManagerImpl;
 import android.view.Surface;
@@ -110,6 +115,8 @@ import static com.android.layoutlib.bridge.util.ReflectionUtils.isInstanceOf;
  */
 public class RenderSessionImpl extends RenderAction<SessionParams> {
 
+    private static final Canvas NOP_CANVAS = new NopCanvas();
+
     // scene state
     private RenderSession mScene;
     private BridgeXmlBlockParser mBlockParser;
@@ -120,12 +127,17 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private int mMeasuredScreenWidth = -1;
     private int mMeasuredScreenHeight = -1;
     private boolean mIsAlphaChannelImage;
+    /** If >= 0, a frame will be executed */
+    private long mElapsedFrameTimeNanos = -1;
+    /** True if one frame has been already executed to start the animations */
+    private boolean mFirstFrameExecuted = false;
 
     // information being returned through the API
     private BufferedImage mImage;
     private List<ViewInfo> mViewInfoList;
     private List<ViewInfo> mSystemViewInfoList;
     private Layout.Builder mLayoutBuilder;
+    private boolean mNewRenderSize;
 
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -192,6 +204,88 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
+     * Measures the the current layout if needed (see {@link #invalidateRenderingSize}).
+     */
+    private void measure(@NonNull SessionParams params) {
+        // only do the screen measure when needed.
+        if (mMeasuredScreenWidth != -1) {
+            return;
+        }
+
+        RenderingMode renderingMode = params.getRenderingMode();
+        HardwareConfig hardwareConfig = params.getHardwareConfig();
+
+        mNewRenderSize = true;
+        mMeasuredScreenWidth = hardwareConfig.getScreenWidth();
+        mMeasuredScreenHeight = hardwareConfig.getScreenHeight();
+
+        if (renderingMode != RenderingMode.NORMAL) {
+            int widthMeasureSpecMode = renderingMode.isHorizExpand() ?
+                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                    : MeasureSpec.EXACTLY;
+            int heightMeasureSpecMode = renderingMode.isVertExpand() ?
+                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                    : MeasureSpec.EXACTLY;
+
+            // We used to compare the measured size of the content to the screen size but
+            // this does not work anymore due to the 2 following issues:
+            // - If the content is in a decor (system bar, title/action bar), the root view
+            //   will not resize even with the UNSPECIFIED because of the embedded layout.
+            // - If there is no decor, but a dialog frame, then the dialog padding prevents
+            //   comparing the size of the content to the screen frame (as it would not
+            //   take into account the dialog padding).
+
+            // The solution is to first get the content size in a normal rendering, inside
+            // the decor or the dialog padding.
+            // Then measure only the content with UNSPECIFIED to see the size difference
+            // and apply this to the screen size.
+
+            // first measure the full layout, with EXACTLY to get the size of the
+            // content as it is inside the decor/dialog
+            @SuppressWarnings("deprecation")
+            Pair<Integer, Integer> exactMeasure = measureView(
+                    mViewRoot, mContentRoot.getChildAt(0),
+                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
+
+            // now measure the content only using UNSPECIFIED (where applicable, based on
+            // the rendering mode). This will give us the size the content needs.
+            @SuppressWarnings("deprecation")
+            Pair<Integer, Integer> result = measureView(
+                    mContentRoot, mContentRoot.getChildAt(0),
+                    mMeasuredScreenWidth, widthMeasureSpecMode,
+                    mMeasuredScreenHeight, heightMeasureSpecMode);
+
+            // now look at the difference and add what is needed.
+            if (renderingMode.isHorizExpand()) {
+                int measuredWidth = exactMeasure.getFirst();
+                int neededWidth = result.getFirst();
+                if (neededWidth > measuredWidth) {
+                    mMeasuredScreenWidth += neededWidth - measuredWidth;
+                }
+                if (mMeasuredScreenWidth < measuredWidth) {
+                    // If the screen width is less than the exact measured width,
+                    // expand to match.
+                    mMeasuredScreenWidth = measuredWidth;
+                }
+            }
+
+            if (renderingMode.isVertExpand()) {
+                int measuredHeight = exactMeasure.getSecond();
+                int neededHeight = result.getSecond();
+                if (neededHeight > measuredHeight) {
+                    mMeasuredScreenHeight += neededHeight - measuredHeight;
+                }
+                if (mMeasuredScreenHeight < measuredHeight) {
+                    // If the screen height is less than the exact measured height,
+                    // expand to match.
+                    mMeasuredScreenHeight = measuredHeight;
+                }
+            }
+        }
+    }
+
+    /**
      * Inflates the layout.
      * <p>
      * {@link #acquire(long)} must have been called before this.
@@ -237,6 +331,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             setActiveToolbar(view, context, params);
 
+            measure(params);
+            measureView(mViewRoot, null /*measuredView*/,
+                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
+            mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+                    false);
+
             return SUCCESS.createResult();
         } catch (PostInflateException e) {
             return ERROR_INFLATION.createResult(e.getMessage(), e);
@@ -249,6 +351,42 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             return ERROR_INFLATION.createResult(t.getMessage(), t);
         }
+    }
+
+    /**
+     * Sets the time for which the next frame will be selected. The time is the elapsed time from
+     * the current system nanos time. You
+     */
+    public void setElapsedFrameTimeNanos(long nanos) {
+        mElapsedFrameTimeNanos = nanos;
+    }
+
+    /**
+     * Renders the given view hierarchy to the passed canvas and returns the result of the render
+     * operation.
+     * @param canvas an optional canvas to render the views to. If null, only the measure and
+     * layout steps will be executed.
+     */
+    private static Result render(@NonNull BridgeContext context, @NonNull ViewGroup viewRoot,
+            @Nullable Canvas canvas, int width, int height) {
+        // measure again with the size we need
+        // This must always be done before the call to layout
+        measureView(viewRoot, null /*measuredView*/,
+                width, MeasureSpec.EXACTLY,
+                height, MeasureSpec.EXACTLY);
+
+        // now do the layout.
+        viewRoot.layout(0, 0, width, height);
+        handleScrolling(context, viewRoot);
+
+        if (canvas == null) {
+            return SUCCESS.createResult();
+        }
+
+        AttachInfo_Accessor.dispatchOnPreDraw(viewRoot);
+        viewRoot.draw(canvas);
+
+        return SUCCESS.createResult();
     }
 
     /**
@@ -276,100 +414,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 return ERROR_NOT_INFLATED.createResult();
             }
 
-            RenderingMode renderingMode = params.getRenderingMode();
+            measure(params);
+
             HardwareConfig hardwareConfig = params.getHardwareConfig();
-
-            // only do the screen measure when needed.
-            boolean newRenderSize = false;
-            if (mMeasuredScreenWidth == -1) {
-                newRenderSize = true;
-                mMeasuredScreenWidth = hardwareConfig.getScreenWidth();
-                mMeasuredScreenHeight = hardwareConfig.getScreenHeight();
-
-                if (renderingMode != RenderingMode.NORMAL) {
-                    int widthMeasureSpecMode = renderingMode.isHorizExpand() ?
-                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                            : MeasureSpec.EXACTLY;
-                    int heightMeasureSpecMode = renderingMode.isVertExpand() ?
-                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                            : MeasureSpec.EXACTLY;
-
-                    // We used to compare the measured size of the content to the screen size but
-                    // this does not work anymore due to the 2 following issues:
-                    // - If the content is in a decor (system bar, title/action bar), the root view
-                    //   will not resize even with the UNSPECIFIED because of the embedded layout.
-                    // - If there is no decor, but a dialog frame, then the dialog padding prevents
-                    //   comparing the size of the content to the screen frame (as it would not
-                    //   take into account the dialog padding).
-
-                    // The solution is to first get the content size in a normal rendering, inside
-                    // the decor or the dialog padding.
-                    // Then measure only the content with UNSPECIFIED to see the size difference
-                    // and apply this to the screen size.
-
-                    // first measure the full layout, with EXACTLY to get the size of the
-                    // content as it is inside the decor/dialog
-                    @SuppressWarnings("deprecation")
-                    Pair<Integer, Integer> exactMeasure = measureView(
-                            mViewRoot, mContentRoot.getChildAt(0),
-                            mMeasuredScreenWidth, MeasureSpec.EXACTLY,
-                            mMeasuredScreenHeight, MeasureSpec.EXACTLY);
-
-                    // now measure the content only using UNSPECIFIED (where applicable, based on
-                    // the rendering mode). This will give us the size the content needs.
-                    @SuppressWarnings("deprecation")
-                    Pair<Integer, Integer> result = measureView(
-                            mContentRoot, mContentRoot.getChildAt(0),
-                            mMeasuredScreenWidth, widthMeasureSpecMode,
-                            mMeasuredScreenHeight, heightMeasureSpecMode);
-
-                    // now look at the difference and add what is needed.
-                    if (renderingMode.isHorizExpand()) {
-                        int measuredWidth = exactMeasure.getFirst();
-                        int neededWidth = result.getFirst();
-                        if (neededWidth > measuredWidth) {
-                            mMeasuredScreenWidth += neededWidth - measuredWidth;
-                        }
-                        if (mMeasuredScreenWidth < measuredWidth) {
-                            // If the screen width is less than the exact measured width,
-                            // expand to match.
-                            mMeasuredScreenWidth = measuredWidth;
-                        }
-                    }
-
-                    if (renderingMode.isVertExpand()) {
-                        int measuredHeight = exactMeasure.getSecond();
-                        int neededHeight = result.getSecond();
-                        if (neededHeight > measuredHeight) {
-                            mMeasuredScreenHeight += neededHeight - measuredHeight;
-                        }
-                        if (mMeasuredScreenHeight < measuredHeight) {
-                            // If the screen height is less than the exact measured height,
-                            // expand to match.
-                            mMeasuredScreenHeight = measuredHeight;
-                        }
-                    }
-                }
-            }
-
-            // measure again with the size we need
-            // This must always be done before the call to layout
-            measureView(mViewRoot, null /*measuredView*/,
-                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
-                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
-
-            // now do the layout.
-            mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
-
-            handleScrolling(mViewRoot);
-
+            Result renderResult = SUCCESS.createResult();
             if (params.isLayoutOnly()) {
                 // delete the canvas and image to reset them on the next full rendering
                 mImage = null;
                 mCanvas = null;
             } else {
-                AttachInfo_Accessor.dispatchOnPreDraw(mViewRoot);
-
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.
                 boolean newImage = false;
@@ -380,7 +433,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // it doesn't get cached.
                 boolean disableBitmapCaching = Boolean.TRUE.equals(params.getFlag(
                     RenderParamsFlags.FLAG_KEY_DISABLE_BITMAP_CACHING));
-                if (newRenderSize || mCanvas == null || disableBitmapCaching) {
+                if (mNewRenderSize || mCanvas == null || disableBitmapCaching) {
+                    mNewRenderSize = false;
                     if (params.getImageFactory() != null) {
                         mImage = params.getImageFactory().getImage(
                                 mMeasuredScreenWidth,
@@ -428,14 +482,28 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     gc.dispose();
                 }
 
-                mViewRoot.draw(mCanvas);
+                if (mElapsedFrameTimeNanos >= 0) {
+                    long initialTime = System_Delegate.nanoTime();
+                    if (!mFirstFrameExecuted) {
+                        // We need to run an initial draw call to initialize the animations
+                        render(getContext(), mViewRoot, NOP_CANVAS, mMeasuredScreenWidth, mMeasuredScreenHeight);
+
+                        // The first frame will initialize the animations
+                        Choreographer_Delegate.doFrame(initialTime);
+                        mFirstFrameExecuted = true;
+                    }
+                    // Second frame will move the animations
+                    Choreographer_Delegate.doFrame(initialTime + mElapsedFrameTimeNanos);
+                }
+                renderResult = render(getContext(), mViewRoot, mCanvas, mMeasuredScreenWidth,
+                        mMeasuredScreenHeight);
             }
 
             mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
                     false);
 
             // success!
-            return SUCCESS.createResult();
+            return renderResult;
         } catch (Throwable e) {
             // get the real cause of the exception.
             Throwable t = e;
@@ -463,7 +531,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @return the measured width/height if measuredView is non-null, null otherwise.
      */
     @SuppressWarnings("deprecation")  // For the use of Pair
-    private Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
+    private static Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
             int width, int widthMode, int height, int heightMode) {
         int w_spec = MeasureSpec.makeMeasureSpec(width, widthMode);
         int h_spec = MeasureSpec.makeMeasureSpec(height, heightMode);
@@ -1032,25 +1100,29 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Set the vertical scroll position on all the components with the "scrollY" attribute. If the
-     * component supports nested scrolling attempt that first, then use the unconsumed scroll part
-     * to scroll the content in the component.
+     * Set the scroll position on all the components with the "scrollX" and "scrollY" attribute. If
+     * the component supports nested scrolling attempt that first, then use the unconsumed scroll
+     * part to scroll the content in the component.
      */
-    private void handleScrolling(View view) {
-        BridgeContext context = getContext();
-        int scrollPos = context.getScrollYPos(view);
-        if (scrollPos != 0) {
+    private static void handleScrolling(BridgeContext context, View view) {
+        int scrollPosX = context.getScrollXPos(view);
+        int scrollPosY = context.getScrollYPos(view);
+        if (scrollPosX != 0 || scrollPosY != 0) {
             if (view.isNestedScrollingEnabled()) {
                 int[] consumed = new int[2];
-                if (view.startNestedScroll(DesignLibUtil.SCROLL_AXIS_VERTICAL)) {
-                    view.dispatchNestedPreScroll(0, scrollPos, consumed, null);
-                    view.dispatchNestedScroll(consumed[0], consumed[1], 0, scrollPos, null);
+                int axis = scrollPosX != 0 ? View.SCROLL_AXIS_HORIZONTAL : 0;
+                axis |= scrollPosY != 0 ? View.SCROLL_AXIS_VERTICAL : 0;
+                if (view.startNestedScroll(axis)) {
+                    view.dispatchNestedPreScroll(scrollPosX, scrollPosY, consumed, null);
+                    view.dispatchNestedScroll(consumed[0], consumed[1], scrollPosX, scrollPosY,
+                            null);
                     view.stopNestedScroll();
-                    scrollPos -= consumed[1];
+                    scrollPosX -= consumed[0];
+                    scrollPosY -= consumed[1];
                 }
             }
-            if (scrollPos != 0) {
-                view.scrollBy(0, scrollPos);
+            if (scrollPosX != 0 || scrollPosY != 0) {
+                view.scrollTo(scrollPosX, scrollPosY);
             }
         }
 
@@ -1060,7 +1132,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         ViewGroup group = (ViewGroup) view;
         for (int i = 0; i < group.getChildCount(); i++) {
             View child = group.getChildAt(i);
-            handleScrolling(child);
+            handleScrolling(context, child);
         }
     }
 
@@ -1251,14 +1323,20 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             return null;
         }
 
+        ViewParent parent = view.getParent();
         ViewInfo result;
         if (isContentFrame) {
+            // Account for parent scroll values when calculating the bounding box
+            int scrollX = parent != null ? ((View)parent).getScrollX() : 0;
+            int scrollY = parent != null ? ((View)parent).getScrollY() : 0;
+
             // The view is part of the layout added by the user. Hence,
             // the ViewCookie may be obtained only through the Context.
             result = new ViewInfo(view.getClass().getName(),
                     getContext().getViewKey(view),
-                    view.getLeft(), view.getTop() + offset, view.getRight(),
-                    view.getBottom() + offset, view, view.getLayoutParams());
+                    -scrollX + view.getLeft(), -scrollY + view.getTop() + offset,
+                    -scrollX + view.getRight(), -scrollY + view.getBottom() + offset,
+                    view, view.getLayoutParams());
         } else {
             // We are part of the system decor.
             SystemViewInfo r = new SystemViewInfo(view.getClass().getName(),
@@ -1286,7 +1364,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     // its parent is of type ActionMenuView. We can also check if the view is
                     // instanceof ActionMenuItemView but that will fail for menus using
                     // actionProviderClass.
-                    ViewParent parent = view.getParent();
                     while (parent != mViewRoot && parent instanceof ViewGroup) {
                         if (parent instanceof ActionMenuView) {
                             r.setViewType(ViewType.ACTION_BAR_MENU);
@@ -1361,8 +1438,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         return mSystemViewInfoList;
     }
 
-    public Map<String, String> getDefaultProperties(Object viewObject) {
-        return getContext().getDefaultPropMap(viewObject);
+    public Map<Object, PropertiesMap> getDefaultProperties() {
+        return getContext().getDefaultProperties();
     }
 
     public void setScene(RenderSession session) {
@@ -1371,5 +1448,35 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     public RenderSession getSession() {
         return mScene;
+    }
+
+    public void dispose() {
+        boolean createdLooper = false;
+        if (Looper.myLooper() == null) {
+            // Detaching the root view from the window will try to stop any running animations.
+            // The stop method checks that it can run in the looper so, if there is no current
+            // looper, we create a temporary one to complete the shutdown.
+            Bridge.prepareThread();
+            createdLooper = true;
+        }
+        AttachInfo_Accessor.detachFromWindow(mViewRoot);
+        if (mCanvas != null) {
+            mCanvas.release();
+            mCanvas = null;
+        }
+        if (mViewInfoList != null) {
+            mViewInfoList.clear();
+        }
+        if (mSystemViewInfoList != null) {
+            mSystemViewInfoList.clear();
+        }
+        mImage = null;
+        mViewRoot = null;
+        mContentRoot = null;
+
+        if (createdLooper) {
+            Bridge.cleanupThread();
+            Choreographer_Delegate.dispose();
+        }
     }
 }

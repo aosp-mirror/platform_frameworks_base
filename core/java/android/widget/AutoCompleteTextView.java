@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.DrawableRes;
 import android.content.Context;
+import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -28,10 +29,12 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
@@ -94,6 +97,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     static final int EXPAND_MAX = 3;
 
+    /** Context used to inflate the popup window or dialog. */
+    private final Context mPopupContext;
+
+    private final ListPopupWindow mPopup;
+    private final PassThroughClickListener mPassThroughClickListener;
+
     private CharSequence mHintText;
     private TextView mHintView;
     private int mHintResource;
@@ -102,7 +111,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private Filter mFilter;
     private int mThreshold;
 
-    private ListPopupWindow mPopup;
     private int mDropDownAnchorId;
 
     private AdapterView.OnItemClickListener mItemClickListener;
@@ -122,71 +130,172 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // Set to false when the list is hidden to prevent asynchronous updates to popup the list again.
     private boolean mPopupCanBeUpdated = true;
 
-    private PassThroughClickListener mPassThroughClickListener;
     private PopupDataSetObserver mObserver;
 
+    /**
+     * Constructs a new auto-complete text view with the given context's theme.
+     *
+     * @param context The Context the view is running in, through which it can
+     *                access the current theme, resources, etc.
+     */
     public AutoCompleteTextView(Context context) {
         this(context, null);
     }
 
+    /**
+     * Constructs a new auto-complete text view with the given context's theme
+     * and the supplied attribute set.
+     *
+     * @param context The Context the view is running in, through which it can
+     *                access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     */
     public AutoCompleteTextView(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.autoCompleteTextViewStyle);
     }
 
+    /**
+     * Constructs a new auto-complete text view with the given context's theme,
+     * the supplied attribute set, and default style attribute.
+     *
+     * @param context The Context the view is running in, through which it can
+     *                access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for
+     *                     defaults.
+     */
     public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
+    /**
+     * Constructs a new auto-complete text view with the given context's theme,
+     * the supplied attribute set, and default styles.
+     *
+     * @param context The Context the view is running in, through which it can
+     *                access the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for
+     *                     defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *                    supplies default values for the view, used only if
+     *                    defStyleAttr is 0 or can not be found in the theme.
+     *                    Can be 0 to not look for defaults.
+     */
     public AutoCompleteTextView(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        this(context, attrs, defStyleAttr, defStyleRes, null);
+    }
 
-        mPopup = new ListPopupWindow(context, attrs, defStyleAttr, defStyleRes);
-        mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
+    /**
+     * Constructs a new auto-complete text view with the given context, the
+     * supplied attribute set, default styles, and the theme against which the
+     * completion popup should be inflated.
+     *
+     * @param context The context against which the view is inflated, which
+     *                provides access to the current theme, resources, etc.
+     * @param attrs The attributes of the XML tag that is inflating the view.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for
+     *                     defaults.
+     * @param defStyleRes A resource identifier of a style resource that
+     *                    supplies default values for the view, used only if
+     *                    defStyleAttr is 0 or can not be found in the theme.
+     *                    Can be 0 to not look for defaults.
+     * @param popupTheme The theme against which the completion popup window
+     *                   should be inflated. May be {@code null} to use the
+     *                   view theme. If set, this will override any value
+     *                   specified by
+     *                   {@link android.R.styleable#AutoCompleteTextView_popupTheme}.
+     */
+    public AutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes, Theme popupTheme) {
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
 
+        if (popupTheme != null) {
+            mPopupContext = new ContextThemeWrapper(context, popupTheme);
+        } else {
+            final int popupThemeResId = a.getResourceId(
+                    R.styleable.AutoCompleteTextView_popupTheme, 0);
+            if (popupThemeResId != 0) {
+                mPopupContext = new ContextThemeWrapper(context, popupThemeResId);
+            } else {
+                mPopupContext = context;
+            }
+        }
+
+        // Load attributes used within the popup against the popup context.
+        final TypedArray pa;
+        if (mPopupContext != context) {
+            pa = mPopupContext.obtainStyledAttributes(
+                    attrs, R.styleable.AutoCompleteTextView, defStyleAttr, defStyleRes);
+        } else {
+            pa = a;
+        }
+
+        final Drawable popupListSelector = pa.getDrawable(
+                R.styleable.AutoCompleteTextView_dropDownSelector);
+        final int popupWidth = pa.getLayoutDimension(
+                R.styleable.AutoCompleteTextView_dropDownWidth, LayoutParams.WRAP_CONTENT);
+        final int popupHeight = pa.getLayoutDimension(
+                R.styleable.AutoCompleteTextView_dropDownHeight, LayoutParams.WRAP_CONTENT);
+        final int popupHintLayoutResId = pa.getResourceId(
+                R.styleable.AutoCompleteTextView_completionHintView, R.layout.simple_dropdown_hint);
+        final CharSequence popupHintText = pa.getText(
+                R.styleable.AutoCompleteTextView_completionHint);
+
+        if (pa != a) {
+            pa.recycle();
+        }
+
+        mPopup = new ListPopupWindow(mPopupContext, attrs, defStyleAttr, defStyleRes);
+        mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        mPopup.setPromptPosition(ListPopupWindow.POSITION_PROMPT_BELOW);
+        mPopup.setListSelector(popupListSelector);
+        mPopup.setOnItemClickListener(new DropDownItemClickListener());
+
+        // For dropdown width, the developer can specify a specific width, or
+        // MATCH_PARENT (for full screen width), or WRAP_CONTENT (to match the
+        // width of the anchored view).
+        mPopup.setWidth(popupWidth);
+        mPopup.setHeight(popupHeight);
+
+        // Completion hint must be set after specifying hint layout.
+        mHintResource = popupHintLayoutResId;
+        setCompletionHint(popupHintText);
+
+        // Get the anchor's id now, but the view won't be ready, so wait to
+        // actually get the view and store it in mDropDownAnchorView lazily in
+        // getDropDownAnchorView later. Defaults to NO_ID, in which case the
+        // getDropDownAnchorView method will simply return this TextView, as a
+        // default anchoring point.
+        mDropDownAnchorId = a.getResourceId(
+                R.styleable.AutoCompleteTextView_dropDownAnchor, View.NO_ID);
+
         mThreshold = a.getInt(R.styleable.AutoCompleteTextView_completionThreshold, 2);
 
-        mPopup.setListSelector(a.getDrawable(R.styleable.AutoCompleteTextView_dropDownSelector));
-
-        // Get the anchor's id now, but the view won't be ready, so wait to actually get the
-        // view and store it in mDropDownAnchorView lazily in getDropDownAnchorView later.
-        // Defaults to NO_ID, in which case the getDropDownAnchorView method will simply return
-        // this TextView, as a default anchoring point.
-        mDropDownAnchorId = a.getResourceId(R.styleable.AutoCompleteTextView_dropDownAnchor,
-                View.NO_ID);
-        
-        // For dropdown width, the developer can specify a specific width, or MATCH_PARENT
-        // (for full screen width) or WRAP_CONTENT (to match the width of the anchored view).
-        mPopup.setWidth(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownWidth,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        mPopup.setHeight(a.getLayoutDimension(R.styleable.AutoCompleteTextView_dropDownHeight,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        mHintResource = a.getResourceId(R.styleable.AutoCompleteTextView_completionHintView,
-                R.layout.simple_dropdown_hint);
-        
-        mPopup.setOnItemClickListener(new DropDownItemClickListener());
-        setCompletionHint(a.getText(R.styleable.AutoCompleteTextView_completionHint));
+        a.recycle();
 
         // Always turn on the auto complete input type flag, since it
         // makes no sense to use this widget without it.
         int inputType = getInputType();
-        if ((inputType&EditorInfo.TYPE_MASK_CLASS)
-                == EditorInfo.TYPE_CLASS_TEXT) {
+        if ((inputType & EditorInfo.TYPE_MASK_CLASS) == EditorInfo.TYPE_CLASS_TEXT) {
             inputType |= EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE;
             setRawInputType(inputType);
         }
 
-        a.recycle();
-
         setFocusable(true);
 
         addTextChangedListener(new MyWatcher());
-        
+
         mPassThroughClickListener = new PassThroughClickListener();
         super.setOnClickListener(mPassThroughClickListener);
     }
@@ -222,8 +331,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         mHintText = hint;
         if (hint != null) {
             if (mHintView == null) {
-                final TextView hintView = (TextView) LayoutInflater.from(getContext()).inflate(
-                        mHintResource, null).findViewById(com.android.internal.R.id.text1);
+                final TextView hintView = (TextView) LayoutInflater.from(mPopupContext).inflate(
+                        mHintResource, null).findViewById(R.id.text1);
                 hintView.setText(mHintText);
                 mHintView = hintView;
                 mPopup.setPromptView(hintView);
@@ -1007,7 +1116,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
 
-        if (mTemporaryDetach) {
+        if (isTemporarilyDetached()) {
             // If we are temporarily in the detach state, then do nothing.
             return;
         }

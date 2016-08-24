@@ -63,7 +63,7 @@ ART. This document discusses some of these issues.</p>
 java.lang.System#gc() System.gc()} to prompt garbage collection (GC). This should be
 far less necessary with ART, particularly if you're invoking garbage collection
 to prevent <a
-href="{@docRoot}/tools/debugging/debugging-memory.html#LogMessages"><code>GC_FOR_ALLOC</code></a>-type
+href="{@docRoot}tools/debugging/debugging-memory.html#LogMessages"><code>GC_FOR_ALLOC</code></a>-type
 occurrences or to reduce fragmentation. You can verify which runtime is in use
 by calling {@link java.lang.System#getProperty(java.lang.String)
 System.getProperty("java.vm.version")}. If ART is in use, the property's value

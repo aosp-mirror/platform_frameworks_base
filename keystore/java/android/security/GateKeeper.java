@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -32,7 +33,7 @@ public abstract class GateKeeper {
 
     public static IGateKeeperService getService() {
         IGateKeeperService service = IGateKeeperService.Stub.asInterface(
-                ServiceManager.getService("android.service.gatekeeper.IGateKeeperService"));
+                ServiceManager.getService(Context.GATEKEEPER_SERVICE));
         if (service == null) {
             throw new IllegalStateException("Gatekeeper service not available");
         }

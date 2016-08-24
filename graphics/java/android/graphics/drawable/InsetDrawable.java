@@ -22,14 +22,17 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 import java.io.IOException;
 
@@ -58,7 +61,7 @@ public class InsetDrawable extends DrawableWrapper {
      * No-arg constructor used by drawable inflation.
      */
     InsetDrawable() {
-        this(new InsetState(null), null);
+        this(new InsetState(null, null), null);
     }
 
     /**
@@ -67,7 +70,7 @@ public class InsetDrawable extends DrawableWrapper {
      * @param drawable The drawable to inset.
      * @param inset Inset in pixels around the drawable.
      */
-    public InsetDrawable(Drawable drawable, int inset) {
+    public InsetDrawable(@Nullable Drawable drawable, int inset) {
         this(drawable, inset, inset, inset, inset);
     }
 
@@ -80,9 +83,9 @@ public class InsetDrawable extends DrawableWrapper {
      * @param insetRight Right inset in pixels.
      * @param insetBottom Bottom inset in pixels.
      */
-    public InsetDrawable(Drawable drawable, int insetLeft, int insetTop,int insetRight,
-            int insetBottom) {
-        this(new InsetState(null), null);
+    public InsetDrawable(@Nullable Drawable drawable, int insetLeft, int insetTop,
+            int insetRight, int insetBottom) {
+        this(new InsetState(null, null), null);
 
         mState.mInsetLeft = insetLeft;
         mState.mInsetTop = insetTop;
@@ -93,69 +96,23 @@ public class InsetDrawable extends DrawableWrapper {
     }
 
     @Override
-    public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
+    public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.InsetDrawable);
+
+        // Inflation will advance the XmlPullParser and AttributeSet.
         super.inflate(r, parser, attrs, theme);
 
-        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.InsetDrawable);
         updateStateFromTypedArray(a);
-        inflateChildDrawable(r, parser, attrs, theme);
         verifyRequiredAttributes(a);
         a.recycle();
     }
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
-        // If we're not waiting on a theme, verify required attributes.
-        if (getDrawable() == null && (mState.mThemeAttrs == null
-                || mState.mThemeAttrs[R.styleable.InsetDrawable_drawable] == 0)) {
-            throw new XmlPullParserException(a.getPositionDescription()
-                    + ": <inset> tag requires a 'drawable' attribute or "
-                    + "child tag defining a drawable");
-        }
-    }
-
     @Override
-    void updateStateFromTypedArray(TypedArray a) {
-        super.updateStateFromTypedArray(a);
+    public void applyTheme(@NonNull Theme t) {
+        super.applyTheme(t);
 
-        final InsetState state = mState;
-        final int N = a.getIndexCount();
-        for (int i = 0; i < N; i++) {
-            final int attr = a.getIndex(i);
-            switch (attr) {
-                case R.styleable.InsetDrawable_drawable:
-                    final Drawable dr = a.getDrawable(attr);
-                    if (dr != null) {
-                        setDrawable(dr);
-                    }
-                    break;
-                case R.styleable.InsetDrawable_inset:
-                    final int inset = a.getDimensionPixelOffset(attr, Integer.MIN_VALUE);
-                    if (inset != Integer.MIN_VALUE) {
-                        state.mInsetLeft = inset;
-                        state.mInsetTop = inset;
-                        state.mInsetRight = inset;
-                        state.mInsetBottom = inset;
-                    }
-                    break;
-                case R.styleable.InsetDrawable_insetLeft:
-                    state.mInsetLeft = a.getDimensionPixelOffset(attr, state.mInsetLeft);
-                    break;
-                case R.styleable.InsetDrawable_insetTop:
-                    state.mInsetTop = a.getDimensionPixelOffset(attr, state.mInsetTop);
-                    break;
-                case R.styleable.InsetDrawable_insetRight:
-                    state.mInsetRight = a.getDimensionPixelOffset(attr, state.mInsetRight);
-                    break;
-                case R.styleable.InsetDrawable_insetBottom:
-                    state.mInsetBottom = a.getDimensionPixelOffset(attr, state.mInsetBottom);
-                    break;
-            }
-        }
-    }
-
-    @Override
-    public void applyTheme(Theme t) {
         final InsetState state = mState;
         if (state == null) {
             return;
@@ -167,15 +124,52 @@ public class InsetDrawable extends DrawableWrapper {
                 updateStateFromTypedArray(a);
                 verifyRequiredAttributes(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }
         }
+    }
 
-        // The drawable may have changed as a result of applying the theme, so
-        // apply the theme to the wrapped drawable last.
-        super.applyTheme(t);
+    private void verifyRequiredAttributes(@NonNull TypedArray a) throws XmlPullParserException {
+        // If we're not waiting on a theme, verify required attributes.
+        if (getDrawable() == null && (mState.mThemeAttrs == null
+                || mState.mThemeAttrs[R.styleable.InsetDrawable_drawable] == 0)) {
+            throw new XmlPullParserException(a.getPositionDescription()
+                    + ": <inset> tag requires a 'drawable' attribute or "
+                    + "child tag defining a drawable");
+        }
+    }
+
+    private void updateStateFromTypedArray(@NonNull TypedArray a) {
+        final InsetState state = mState;
+        if (state == null) {
+            return;
+        }
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        // Inset attribute may be overridden by more specific attributes.
+        if (a.hasValue(R.styleable.InsetDrawable_inset)) {
+            final int inset = a.getDimensionPixelOffset(R.styleable.InsetDrawable_inset, 0);
+            state.mInsetLeft = inset;
+            state.mInsetTop = inset;
+            state.mInsetRight = inset;
+            state.mInsetBottom = inset;
+        }
+
+        state.mInsetLeft = a.getDimensionPixelOffset(
+                R.styleable.InsetDrawable_insetLeft, state.mInsetLeft);
+        state.mInsetRight = a.getDimensionPixelOffset(
+                R.styleable.InsetDrawable_insetRight, state.mInsetRight);
+        state.mInsetTop = a.getDimensionPixelOffset(
+                R.styleable.InsetDrawable_insetTop, state.mInsetTop);
+        state.mInsetBottom = a.getDimensionPixelOffset(
+                R.styleable.InsetDrawable_insetBottom, state.mInsetBottom);
     }
 
     @Override
@@ -228,12 +222,20 @@ public class InsetDrawable extends DrawableWrapper {
 
     @Override
     public int getIntrinsicWidth() {
-        return getDrawable().getIntrinsicWidth() + mState.mInsetLeft + mState.mInsetRight;
+        final int childWidth = getDrawable().getIntrinsicWidth();
+        if (childWidth < 0) {
+            return -1;
+        }
+        return childWidth + mState.mInsetLeft + mState.mInsetRight;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return getDrawable().getIntrinsicHeight() + mState.mInsetTop + mState.mInsetBottom;
+        final int childHeight = getDrawable().getIntrinsicHeight();
+        if (childHeight < 0) {
+            return -1;
+        }
+        return childHeight + mState.mInsetTop + mState.mInsetBottom;
     }
 
     @Override
@@ -243,30 +245,72 @@ public class InsetDrawable extends DrawableWrapper {
 
     @Override
     DrawableWrapperState mutateConstantState() {
-        mState = new InsetState(mState);
+        mState = new InsetState(mState, null);
         return mState;
     }
 
     static final class InsetState extends DrawableWrapper.DrawableWrapperState {
+        private int[] mThemeAttrs;
+
         int mInsetLeft = 0;
         int mInsetTop = 0;
         int mInsetRight = 0;
         int mInsetBottom = 0;
 
-        InsetState(InsetState orig) {
-            super(orig);
+        InsetState(@Nullable InsetState orig, @Nullable Resources res) {
+            super(orig, res);
 
             if (orig != null) {
                 mInsetLeft = orig.mInsetLeft;
                 mInsetTop = orig.mInsetTop;
                 mInsetRight = orig.mInsetRight;
                 mInsetBottom = orig.mInsetBottom;
+
+                if (orig.mDensity != mDensity) {
+                    applyDensityScaling(orig.mDensity, mDensity);
+                }
             }
         }
 
         @Override
-        public Drawable newDrawable(Resources res) {
-            return new InsetDrawable(this, res);
+        void onDensityChanged(int sourceDensity, int targetDensity) {
+            super.onDensityChanged(sourceDensity, targetDensity);
+
+            applyDensityScaling(sourceDensity, targetDensity);
+        }
+
+        /**
+         * Called when the constant state density changes to scale
+         * density-dependent properties specific to insets.
+         *
+         * @param sourceDensity the previous constant state density
+         * @param targetDensity the new constant state density
+         */
+        private void applyDensityScaling(int sourceDensity, int targetDensity) {
+            mInsetLeft = Bitmap.scaleFromDensity(mInsetLeft, sourceDensity, targetDensity);
+            mInsetTop = Bitmap.scaleFromDensity(mInsetTop, sourceDensity, targetDensity);
+            mInsetRight = Bitmap.scaleFromDensity(mInsetRight, sourceDensity, targetDensity);
+            mInsetBottom = Bitmap.scaleFromDensity(mInsetBottom, sourceDensity, targetDensity);
+        }
+
+        @Override
+        public Drawable newDrawable(@Nullable Resources res) {
+            // If this drawable is being created for a different density,
+            // just create a new constant state and call it a day.
+            final InsetState state;
+            if (res != null) {
+                final int densityDpi = res.getDisplayMetrics().densityDpi;
+                final int density = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
+                if (density != mDensity) {
+                    state = new InsetState(this, res);
+                } else {
+                    state = this;
+                }
+            } else {
+                state = this;
+            }
+
+            return new InsetDrawable(state, res);
         }
     }
 
@@ -274,7 +318,7 @@ public class InsetDrawable extends DrawableWrapper {
      * The one constructor to rule them all. This is called by all public
      * constructors to set the state and initialize local properties.
      */
-    private InsetDrawable(InsetState state, Resources res) {
+    private InsetDrawable(@NonNull InsetState state, @Nullable Resources res) {
         super(state, res);
 
         mState = state;

@@ -1,0 +1,390 @@
+page.title=Tối ưu hóa Chạy ngầm
+page.metaDescription=Các hạn chế mới đối với truyền phát không biểu thị.
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Trong tài liệu này
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">Các hạn chế về CONNECTIVITY_ACTION</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">Lên lịch Tác vụ Mạng trên Kết nối
+        Không đo lưu lượng</a>
+      </li>
+
+      <li>
+        <a href="#monitor-conn">Theo dõi Kết nối Mạng Trong khi Ứng dụng
+        đang Chạy</a>
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">Các hạn chế về NEW_PICTURE và
+        NEW_VIDEO</a>
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">Các phương thức JobInfo Mới</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">Các phương thức JobParameter Mới</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">Tối ưu hóa thêm Ứng dụng của bạn</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Các tiến trình chạy ngầm có thể tiêu tốn bộ nhớ và pin. Ví dụ, một
+  truyền phát không biểu thị có thể bắt đầu nhiều tiến trình chạy ngầm đã đăng ký
+  để theo dõi chúng, ngay cả khi các tiến trình đó có thể không làm việc nhiều. Điều này có thể có
+  ảnh hưởng lớn đến cả hiệu suất của thiết bị lẫn trải nghiệm của người dùng.
+</p>
+
+<p>
+  Để loại bỏ vấn đề này, N Developer Preview áp dụng các hạn chế
+  sau:
+</p>
+
+<ul>
+  <li>Các ứng dụng nhắm đến Preview không nhận được truyền phát {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} nếu chúng 
+  đăng ký nhận truyền phát trong bản kê khai của chúng. Các ứng dụng đang chạy ở tiền cảnh
+  vẫn có thể theo dõi {@code CONNECTIVITY_CHANGE} trên luồng chính của chúng bằng cách
+  đăng ký{@link android.content.BroadcastReceiver} với {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}.
+  </li>
+
+  <li>Ứng dụng không thể gửi hoặc nhận các truyền phát {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} hoặc {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Việc tối ưu này
+  tác động đến mọi ứng dụng, không chỉ các ứng dụng nhắm đến Preview.
+  </li>
+</ul>
+
+<p>
+  Khuôn khổ Android cung cấp một số giải pháp để giảm thiểu sự cần thiết đối với
+  các truyền phát không biểu thị. Ví dụ, {@link android.app.job.JobScheduler}
+  và <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> cung cấp một cơ chế lên lịch hiệu quả
+  cho các hoạt động mạng khi đáp ứng các điều kiện được chỉ định, ví dụ như kết nối tới mạng
+ không đo lưu lượng. Bây giờ bạn cũng có thể sử dụng {@link android.app.job.JobScheduler}
+  để phản ứng lại với các thay đổi đối với các trình cung cấp nội dung. Các đối tượng {@link android.app.job.JobInfo}
+  gói gọn các tham số {@link android.app.job.JobScheduler}
+  dùng để lên lịch tác vụ của bạn. Khi đáp ứng được các điều kiện của tác vụ, hệ thống
+  sẽ thực thi tác vụ này trên {@link android.app.job.JobService} của ứng dụng của bạn.
+</p>
+
+<p>
+  Trong tài liệu này, chúng ta sẽ tìm hiểu cách sử dụng các phương thức thay thế, chẳng hạn như
+  {@link android.app.job.JobScheduler}, để thích ứng ứng dụng của bạn với các hạn chế
+  mới này.
+</p>
+
+<h2 id="connectivity-action">
+  Các hạn chế về CONNECTIVITY_ACTION
+</h2>
+
+<p>
+  Các ứng dụng nhắm đến N Developer Preview không nhận được truyền phát {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} nếu chúng
+  đăng ký nhận truyền phát trong bản kê khai của chúng, và các tiến trình phụ thuộc vào truyền phát này
+  sẽ không khởi động. Điều này cũng đặt ra một vấn đề cho ứng dụng
+  về việc theo dõi thay đổi mạng hoặc thực hiện các hoạt động mạng hàng loạt khi
+  thiết bị kết nối với một mạng không đo lưu lượng. Một số giải pháp để tránh khỏi hạn chế này
+  đã tồn tại trong khuôn khổ Android, nhưng chọn được một giải pháp phù hợp
+  phụ thuộc vào những gì bạn muốn ứng dụng của bạn hoàn thành.
+</p>
+
+<p class="note">
+  <strong>Lưu ý:</strong> Một{@link android.content.BroadcastReceiver} có đăng ký
+  {@link android.content.Context#registerReceiver Context.registerReceiver()}
+  tiếp tục nhận các truyền phát này trong khi ứng dụng đang ở tiền cảnh.
+</p>
+
+<h3 id="sched-jobs">
+  Lên lịch Tác vụ Mạng trên Kết nối Không đo lưu lượng
+</h3>
+
+<p>
+  Khi sử dụng lớp{@link android.app.job.JobInfo.Builder JobInfo.Builder} 
+  để xây dựng đối tượng {@link android.app.job.JobInfo} của bạn, hãy áp dụng phương thức {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} và chuyển {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} dưới dạng một tham số tác vụ. Đoạn mã mẫu sau
+  lên lịch một dịch vụ để chạy khi thiết bị kết nối với một mạng
+  không đo lưu lượng và đang sạc:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  Khi các điều kiện cho tác vụ của bạn đã được đáp ứng, ứng dụng của bạn sẽ nhận được lệnh gọi lại để chạy 
+  phương thức{@link android.app.job.JobService#onStartJob onStartJob()}trong
+  {@code JobService.class} được chỉ định. Để xem thêm các ví dụ về triển khai {@link
+  android.app.job.JobScheduler} , hãy xem <a href="{@docRoot}samples/JobScheduler/index.html">ứng dụng mẫu JobScheduler</a>.
+</p>
+
+<p>
+  Các ứng dụng sử dụng dịch vụ GMSCore, và nhắm đến Android 5.0 (API mức 21)
+  hoặc thấp hơn, có thể sử dụng <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> và quy định {@code Task.NETWORK_STATE_UNMETERED}.
+</p>
+
+<h3 id="monitor-conn">
+  Theo dõi Kết nối Mạng Trong khi Ứng dụng đang Chạy
+</h3>
+
+<p>
+  Các ứng dụng đang chạy ở tiền cảnh vẫn có thể theo dõi {@code
+  CONNECTIVITY_CHANGE} bằng một{@link
+  android.content.BroadcastReceiver} đã đăng ký. Tuy nhiên, API {@link
+  android.net.ConnectivityManager} cung cấp phương thức yêu cầu lệnh gọi lại hiệu quả hơn
+  chỉ khi đáp ứng được các điều kiện được chỉ định.
+</p>
+
+<p>
+  Các đối tượng {@link android.net.NetworkRequest} định nghĩa các tham số của
+  lệnh gọi lại mạng xét về  {@link android.net.NetworkCapabilities}. Bạn
+  tạo các đối tượng {@link android.net.NetworkRequest} bằng lớp {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder}. {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+  rồi chuyển đối tượng{@link android.net.NetworkRequest} sang hệ thống. Khi
+  đáp ứng được các điều kiện mạng, ứng dụng nhận lệnh gọi lại để thực thi phương thức
+  {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} như được định nghĩa trong lớp {@link
+  android.net.ConnectivityManager.NetworkCallback} của nó.
+</p>
+
+<p>
+  Ứng dụng tiếp tục nhận lệnh gọi lại cho đến khi ứng dụng tồn tại hoặc nó gọi
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()}.
+</p>
+
+<h2 id="media-broadcasts">
+  Các hạn chế về NEW_PICTURE và NEW_VIDEO
+</h2>
+
+<p>
+  Trong N Developer Preview, ứng dụng không thể gửi hoặc nhận các truyền phát {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} hoặc {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Hạn chế này giúp
+  loại bỏ các tác động về hiệu suất và trải nghiệm của người dùng khi một số ứng dụng phải
+  thức dậy để xử lý một ảnh hoặc video mới. N Developer Preview
+  mở rộng {@link android.app.job.JobInfo} và {@link
+  android.app.job.JobParameters} để cung cấp một giải pháp thay thế.
+</p>
+
+<h3 id="new-jobinfo">
+  Các phương thức JobInfo Mới
+</h3>
+
+<p>
+  Để kích hoạt tác vụ khi thay đổi URI nội dung, N Developer Preview sẽ mở rộng
+  API{@link android.app.job.JobInfo} bằng các phương thức sau:
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    Gói gọn các tham số yêu cầu để kích hoạt tác vụ khi thay đổi URI nội dung.
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    Chuyển một đối tượng {@code TriggerContentUri} đến {@link
+    android.app.job.JobInfo}. Một {@link android.database.ContentObserver}
+    sẽ theo dõi URI nội dung được gói gọn. Nếu có nhiều đối tượng {@code
+    TriggerContentUri} được liên kết với một tác vụ, hệ thống sẽ cung cấp
+    lệnh gọi lại ngay cả khi hệ thống báo cáo có sự thay đổi chỉ ở trong một trong những URI nội dung.
+  </dd>
+
+  <dd>
+    Thêm cờ {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} để
+    kích hoạt tác vụ nếu bất kỳ kế nhiệm nào của URI đã cho thay đổi. Cờ này
+    tương ứng với tham số {@code notifyForDescendants} đã chuyển đến {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()}.
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>Lưu ý:</strong> {@code TriggerContentUri()} không thể được sử dụng 
+  kết hợp với {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} hoặc {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()}. Để tiếp tục theo dõi các thay đổi nội dung, hãy lên lịch một
+  {@link android.app.job.JobInfo} mới trước khi {@link
+  android.app.job.JobService} của ứng dụng hoàn thành xử lý lệnh gọi lại gần đây nhất.
+</p>
+
+<p>
+  Đoạn mã mẫu sau lên lịch kích hoạt một tác vụ khi hệ thống báo cáo
+  có sự thay đổi về URI nội dung, {@code MEDIA_URI}:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MEDIA_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  Khi hệ thống báo cáo có sự thay đổi trong (các) URI nội dung được chỉ định, ứng dụng của bạn
+  sẽ nhận được lệnh gọi lại và một đối tượng {@link android.app.job.JobParameters} được chuyển sang
+  phương thức {@link android.app.job.JobService#onStartJob onStartJob()}
+  trong {@code MediaContentJob.class}.
+</p>
+
+<h3 id="new-jobparam">
+  Các phương thức JobParameter Mới
+</h3>
+
+<p>
+  N Developer Preview cũng mở rộng {@link android.app.job.JobParameters} để
+  cho phép ứng dụng của bạn nhận thông tin hữu ích về những gì thẩm quyền nội dung
+  và các URI đã kích hoạt tác vụ:
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    Trả về mảng URI đã kích hoạt tác vụ đó. Kết quả trả về có thể bằng {@code
+    null} nếu không có URI nào kích hoạt  tác vụ (ví dụ như, tác vụ đã được
+    kích hoạt do thời hạn hoặc lý do khác), hoặc số các URI
+    bị thay đổi nhiều hơn 50.
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    Trả về mảng xâu thẩm quyền nội dung đã kích hoạt tác vụ đó.
+    Nếu mảng được trả về không phải {@code null}, hãy dùng {@code getTriggeredContentUris()}
+    để truy xuất chi tiết về URI nào đã thay đổi.
+  </dd>
+</dl>
+
+<p>
+  Mã mẫu sau sẽ ghi đè lên phương thức {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} và 
+  và ghi lại các thẩm quyền nội dung và URI đã kích hoạt tác vụ.
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  Tối ưu hóa thêm Ứng dụng của bạn
+</h2>
+
+<p>
+  Tối ưu hóa ứng dụng của bạn để chạy trên các thiết bị có bộ nhớ ít, hoặc đang trong điều kiện
+  bộ nhớ ít có thể cải thiện hiệu suất và trải nghiệm của người dùng. Loại bỏ
+  các thành phần phụ thuộc trên các dịch vụ chạy ngầm và bộ thu truyền phát không biểu thị đã đăng ký tĩnh
+  có thể giúp ứng dụng của bạn chạy tốt hơn trên các thiết bị như vậy. Mặc dù
+  N Developer Preview thực hiện các bước để giảm bớt một vài trong số các vấn đề này, nhưng chúng tôi 
+  khuyến nghị bạn nên tối ưu ứng dụng của bạn để chạy hoàn toàn không cần sử dụng
+  các tiến trình chạy ngầm này.
+</p>
+
+<p>
+  N Developer Preview giới thiệu một số lệnh <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> bổ sung mà
+  bạn có thể sử dụng để kiểm thử hành vi của ứng dụng bằng các tiến trình chạy ngầm đã bị vô hiệu hóa đó:
+</p>
+
+<ul>
+  <li>Để mô phỏng các điều kiện trong đó các truyền phát không biểu thị và dịch vụ chạy ngầm
+  không có sẵn, hãy nhập lệnh sau:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>Để kích hoạt lại các truyền phát không biểu thị và dịch vụ chạy ngầm, hãy nhập
+  lệnh sau:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

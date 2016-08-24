@@ -39,7 +39,19 @@ namespace {
  */
 #include "data/basic/basic_arsc.h"
 
+/**
+ * Include a binary library resource table.
+ *
+ * Package: com.android.test.basic
+ */
 #include "data/lib/lib_arsc.h"
+
+/**
+ * Include a system resource table.
+ *
+ * Package: android
+ */
+#include "data/system/system_arsc.h"
 
 TEST(ResTableTest, shouldLoadSuccessfully) {
     ResTable table;
@@ -116,6 +128,11 @@ TEST(ResTableTest, libraryThemeIsAppliedCorrectly) {
     Res_value val;
     uint32_t specFlags = 0;
     ssize_t index = theme.getAttribute(lib::R::attr::attr1, &val, &specFlags);
+    ASSERT_GE(index, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(700), val.data);
+
+    index = theme.getAttribute(lib::R::attr::attr2, &val, &specFlags);
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(700), val.data);
@@ -282,4 +299,67 @@ TEST(ResTableTest, U16StringToInt) {
     testU16StringToInt(u"0x1ffffffff", 0U, false, true);
 }
 
+TEST(ResTableTest, ShareButDontModifyResTable) {
+    ResTable sharedTable;
+    ASSERT_EQ(NO_ERROR, sharedTable.add(basic_arsc, basic_arsc_len));
+
+    ResTable_config param;
+    memset(&param, 0, sizeof(param));
+    param.language[0] = 'v';
+    param.language[1] = 's';
+    sharedTable.setParameters(&param);
+
+    // Check that we get the default value for @integer:number1
+    Res_value val;
+    ssize_t block = sharedTable.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(600), val.data);
+
+    // Create a new table that shares the entries of the shared table.
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(&sharedTable, false));
+
+    // Set a new configuration on the new table.
+    memset(&param, 0, sizeof(param));
+    param.language[0] = 's';
+    param.language[1] = 'v';
+    param.country[0] = 'S';
+    param.country[1] = 'E';
+    table.setParameters(&param);
+
+    // Check that we get a new value in the new table.
+    block = table.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(400), val.data);
+
+    // Check that we still get the old value in the shared table.
+    block = sharedTable.getResource(base::R::integer::number1, &val, MAY_NOT_BE_BAG);
+    ASSERT_GE(block, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(600), val.data);
 }
+
+TEST(ResTableTest, GetConfigurationsReturnsUniqueList) {
+    ResTable table;
+    ASSERT_EQ(NO_ERROR, table.add(system_arsc, system_arsc_len));
+    ASSERT_EQ(NO_ERROR, table.add(basic_arsc, basic_arsc_len));
+
+    ResTable_config configSv;
+    memset(&configSv, 0, sizeof(configSv));
+    configSv.language[0] = 's';
+    configSv.language[1] = 'v';
+
+    Vector<ResTable_config> configs;
+    table.getConfigurations(&configs);
+
+    EXPECT_EQ(1, std::count(configs.begin(), configs.end(), configSv));
+
+    Vector<String8> locales;
+    table.getLocales(&locales);
+
+    EXPECT_EQ(1, std::count(locales.begin(), locales.end(), String8("sv")));
+}
+
+} // namespace

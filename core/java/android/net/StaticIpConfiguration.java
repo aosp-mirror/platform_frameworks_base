@@ -131,7 +131,7 @@ public class StaticIpConfiguration implements Parcelable {
             str.append(" ").append(dnsServer.getHostAddress());
         }
 
-        str.append(" ] Domains");
+        str.append(" ] Domains ");
         if (domains != null) str.append(domains);
         return str.toString();
     }

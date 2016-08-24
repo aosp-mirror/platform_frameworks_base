@@ -94,6 +94,12 @@ public class AlsaCardsParser {
         public String textFormat() {
           return mCardName + " : " + mCardDescription;
         }
+
+        public void log(int listIndex) {
+            Slog.d(TAG, "" + listIndex +
+                " [" + mCardNum + " " + mCardName + " : " + mCardDescription +
+                " usb:" + mIsUsb);
+        }
     }
 
     public AlsaCardsParser() {}
@@ -169,9 +175,41 @@ public class AlsaCardsParser {
 
     // return -1 if none found
     public int getDefaultUsbCard() {
+        // save the current list of devices
+        ArrayList<AlsaCardsParser.AlsaCardRecord> prevRecs = mCardRecords;
+        if (DEBUG) {
+            LogDevices("Previous Devices:", prevRecs);
+        }
+
+        // get the new list of devices
+        scan();
+        if (DEBUG) {
+            LogDevices("Current Devices:", mCardRecords);
+        }
+
+        // Calculate the difference between the old and new device list
+        ArrayList<AlsaCardRecord> newRecs = getNewCardRecords(prevRecs);
+        if (DEBUG) {
+            LogDevices("New Devices:", newRecs);
+        }
+
         // Choose the most-recently added EXTERNAL card
+        // Check recently added devices
+        for (AlsaCardRecord rec : newRecs) {
+            if (DEBUG) {
+                Slog.d(TAG, rec.mCardName + " card:" + rec.mCardNum + " usb:" + rec.mIsUsb);
+            }
+            if (rec.mIsUsb) {
+                // Found it
+                return rec.mCardNum;
+            }
+        }
+
         // or return the first added EXTERNAL card?
-        for (AlsaCardRecord rec : mCardRecords) {
+        for (AlsaCardRecord rec : prevRecs) {
+            if (DEBUG) {
+                Slog.d(TAG, rec.mCardName + " card:" + rec.mCardNum + " usb:" + rec.mIsUsb);
+            }
             if (rec.mIsUsb) {
                 return rec.mCardNum;
             }
@@ -183,10 +221,16 @@ public class AlsaCardsParser {
     public int getDefaultCard() {
         // return an external card if possible
         int card = getDefaultUsbCard();
+        if (DEBUG) {
+            Slog.d(TAG, "getDefaultCard() default usb card:" + card);
+        }
 
         if (card < 0 && getNumCardRecords() > 0) {
             // otherwise return the (internal) card with the highest number
             card = getCardRecordAt(getNumCardRecords() - 1).mCardNum;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "  returns card:" + card);
         }
         return card;
     }
@@ -221,5 +265,14 @@ public class AlsaCardsParser {
                 Slog.i(TAG, cardRec.textFormat());
             }
         }
+    }
+
+    static public void LogDevices(String caption, ArrayList<AlsaCardRecord> deviceList) {
+        Slog.d(TAG, caption + " ----------------");
+        int listIndex = 0;
+        for (AlsaCardRecord device : deviceList) {
+            device.log(listIndex++);
+        }
+        Slog.d(TAG, "----------------");
     }
 }

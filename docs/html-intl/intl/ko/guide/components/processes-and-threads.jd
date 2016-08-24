@@ -1,0 +1,411 @@
+page.title=프로세스 및 스레드
+page.tags=수명 주기, 배경
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+<ol>
+<li><a href="#Processes">프로세스</a>
+  <ol>
+    <li><a href="#Lifecycle">프로세스 수명 주기</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">스레드</a>
+  <ol>
+    <li><a href="#WorkerThreads">작업자 스레드</a></li>
+    <li><a href="#ThreadSafe">스레드로부터 안전한 메서드</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">프로세스 간 통신</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>애플리케이션 구성 요소가 시작되고 애플리케이션에 실행 중인 다른 구성 요소가 없으면
+Android 시스템은 하나의 실행 스레드로 애플리케이션의 Linux 프로세스를
+시작합니다. 기본적으로 같은 애플리케이션의 모든 구성 요소는 같은 프로세스와 스레드에서 실행됩니다
+("기본" 스레드라고 합니다). 애플리케이션 구성 요소가 시작되고 (애플리케이션의 다른 구성 요소가 존재해서) 
+해당 애플리케이션의 프로세스가 이미 존재하면 해당 구성 요소는
+프로세스 내에서 시작되고 같은 실행 스레드를 사용합니다. 하지만 애플리케이션 내의 
+여러 가지 구성 요소가 각자 별도의 프로세스에서 실행되도록 할 수도 있고, 어느 프로세스에든 추가 스레드를 
+만들 수 있습니다.</p>
+
+<p>이 문서는 프로세스와 스레드가 Android 애플리케이션에서 작동하는 방식을 설명합니다.</p>
+
+
+<h2 id="Processes">프로세스</h2>
+
+<p>기본적으로 같은 애플리케이션의 모든 구성 요소는 같은 프로세스와 스레드에서 실행되고,
+대부분의 애플리케이션은 이를 바꿔서는 안 됩니다. 그러나 어느 프로세스가 특정 구성 요소에 속하는지
+확인해야 할 경우 매니페스트 파일에서 확인할 수 있습니다.</p>
+
+<p>구성 요소 &mdash;<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>와 <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a> 및 <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a>&mdash;의 각 유형에 대한 매니페스트 항목은 구성 요소를 실행할 프로세스를 지정하는 {@code android:process} 속성을 지원합니다.
+ 이러한 속성을 설정하여 각 구성 요소를 자체 프로세스에서 실행시키거나 
+다른 구성 요소를 제외한 일부 구성 요소만 프로세스를 공유하게 할 수 있습니다  또한, 
+{@code android:process}를 설정하여 다른 애플리케이션의 구성 요소를 같은 프로세스에서 실행시킬 수 있습니다.
+단, 이는 애플리케이션이 같은 Linux 사용자 ID를 공유하고 같은 인증서에
+서명되었을 경우에 한합니다.</p>
+
+<p><a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> 요소도 {@code android:process} 속성을 지원하여,
+모든 구성 요소에 적용되는 기본값을 설정합니다.</p>
+
+<p>Android는 어느 시점엔가 프로세스를 종료하기로 결정할 수도 있습니다. 즉 메모리가 부족하거나, 사용자에게 더욱 즉각적인 서비스를 제공하는 
+다른 프로세스가 이 프로세스의 중단을 필요로 하는 경우 등입니다. 그러면 중단된 
+프로세스에서 실행되고 있던 애플리케이션 구성 요소도 따라서 소멸됩니다.  그와 같은 구성 요소가 할 작업이 다시 생기면 
+그에 대한 프로세스도 다시 시작됩니다.</p>
+
+<p>어느 프로세스를 삭제할지 결정할 때, Android 시스템은 
+사용자에 대한 이들의 상대적 중요성을 가늠합니다.  예를 들어, 눈에 보이는 액티비티를 호스팅하는 프로세스와 비교하여 
+화면에 보이지 않는 액티비티를 호스팅하는 프로세스를 쉽게 종료할 수 있습니다. 프로세스 종료 결정은 
+해당 프로세스에서 실행되는 구성 요소의 상태에 따라 달라집니다. 종료할 
+프로세스를 결정하는 데 사용하는 규칙은 아래에 설명되어 있습니다. </p>
+
+
+<h3 id="Lifecycle">프로세스 수명 주기</h3>
+
+<p>Android 시스템은 최대한 오래 애플리케이션 프로세스를 유지하려고 시도하지만,
+결국 오래된 프로세스를 제거하고 새 프로세스나 더 중요한 프로세스에 사용할 메모리를 확보해야 합니다.  유지할 
+프로세스와 종료할 프로세스를 결정하기 위해
+시스템은 프로세스에서 실행되는 구성 요소와 해당 구성 요소의 상태에 기초하여 각 프로세스에 
+"중요 계층"을 부여합니다.  중요도가 낮은 
+프로세스가 먼저 제거되고, 그 다음으로 중요도가 낮은 프로세스를 제거하는 식으로
+필요에 따라 시스템 리소스를 회복하는 것입니다.</p>
+
+<p>중요 계층에는 다섯 가지 단계가 있습니다. 다음 목록은 
+중요도 순서에 따른 프로세스 유형을 나타낸 것입니다(첫 번째 프로세스가 <em>가장 중요하고</em> 
+<em>마지막으로 종료됩니다)</em>.</p>
+
+<ol>
+  <li><b>전경 프로세스</b>
+    <p>사용자가 현재 진행하는 작업에 필요한 프로세스입니다.  다음 조건 중 
+하나가 참일 경우 프로세스가 전경에 있는 것으로 간주합니다.</p>
+
+      <ul>
+        <li>사용자와 상호 작용하는 {@link android.app.Activity}를 호스팅할 경우({@link
+android.app.Activity}의 {@link android.app.Activity#onResume onResume()} 메서드가 호출되었을 경우
+).</li>
+
+        <li>사용자와 상호 작용하는 액티비티에 바인딩된 {@link android.app.Service}를 호스팅할 경우.
+</li>
+
+        <li>"전경에서" 실행되는 {@link android.app.Service}를 호스팅할 경우(
+해당 서비스가 {@link android.app.Service#startForeground startForeground()}를 호출했을 경우).
+
+        <li>수명 주기 콜백 중 하나를 실행하는 {@link android.app.Service}를 호스팅할 경우
+({@link android.app.Service#onCreate onCreate()}, {@link android.app.Service#onStart
+onStart()} 또는 {@link android.app.Service#onDestroy onDestroy()}).</li>
+
+        <li>{@link
+android.content.BroadcastReceiver#onReceive onReceive()} 메서드를 실행하는 {@link android.content.BroadcastReceiver}를 호스팅할 경우.</li>
+    </ul>
+
+    <p>일반적으로, 주어진 시간에 존재하는 전경 프로세스는 몇 개밖에 되지 않습니다.  이들은 최후의 
+수단으로서만 종료됩니다. 즉, 메모리가 너무 부족해 계속 실행할 수 없는 경우를 말합니다.  일반적으로 그 시점이 되면 
+기기가 메모리 페이징 상태에 도달한 것이므로 전경 프로세스 몇 개를 중단해야만 
+사용자 인터페이스의 반응성을 유지할 수 있습니다.</p></li>
+
+  <li><b>가시적 프로세스</b>
+    <p>전경 구성 요소는 없지만 
+사용자가 화면에서 보는 것에 영향을 미칠 수 있는 프로세스입니다. 다음 조건 중 하나가 참이면 
+가시적 프로세스로 간주합니다.</p>
+
+      <ul>
+        <li>전경에 있지는 않지만 사용자에게 보이는 {@link android.app.Activity}를 호스팅할 경우
+({@link android.app.Activity#onPause onPause()} 메서드가 호출되었을 경우). 
+예를 들어 이것은 전경 액티비티가 대화를 시작하여 이전 액티비티가 그 뒤에 보일 경우
+ 발생합니다.</li>
+
+        <li>눈에 보이는(또는 전경) 액티비티에 바인딩된 {@link android.app.Service}를 호스팅할 경우.
+</li>
+      </ul>
+
+      <p>가시적인 프로세스는 매우 중요도가 높은 것으로 취급하고 모든 전경 프로세스를 실행하는 데 필요할 경우에만 
+종료됩니다. </p>
+    </li>
+
+  <li><b>서비스 프로세스</b>
+    <p>{@link
+android.content.Context#startService startService()} 메서드로 시작되었지만 두 개의 상위 계층 분류에 
+들어가지 않는 서비스를 실행하는 프로세스입니다. 서비스 프로세스는 사용자가 보는 것과 직접 연결되어 있지는 않지만, 
+일반적으로 사용자가 신경 쓰는 작업을 하므로(배경에서 음악 재생 또는 네트워크에서 데이터 다운로드) 
+시스템은 모든 전경 및 가시적 프로세스와 함께 실행할 만큼 메모리가 충분하지 않을 경우에만 
+프로세스를 중단합니다. </p>
+  </li>
+
+  <li><b>배경 프로세스</b>
+    <p>현재 사용자에게 보이지 않는 액티비티를 보유한 프로세스입니다(액티비티의 
+{@link android.app.Activity#onStop onStop()} 메서드가 호출되었습니다). 이와 같은 프로세스는 
+사용자 환경에 직접적 영향을 미치지 않고, 시스템은 언제든 이 프로세스를 중단시켜 
+전경,
+가시적 또는 서비스 프로세스를 위한 메모리를 확보할 수 있습니다. 보통 한번에 실행 중인 배경 프로세스가 많은 편이므로 이들은 
+LRU(최저 사용 빈도) 목록에 보관하여 사용자가 가장 최근에 본 액티비티가 있는 
+프로세스가 가장 마지막에 중단되도록 합니다. 액티비티가 수명 주기 메서드를 올바르게 구현하고 
+자신의 현재 상태를 저장할 경우, 사용자가 액티비티로 다시 이동할 때 액티비티가 모든 가시적 상태를 
+복원하므로 프로세스를 중단시키더라도 사용자 환경에는 눈에 띄게 영향을 미치지 
+않습니다. 상태 저장과 복원에 관한 정보는 <a href="{@docRoot}guide/components/activities.html#SavingActivityState">액티비티</a>
+문서를 참조하십시오.</p>
+  </li>
+
+  <li><b>빈 프로세스</b>
+    <p>활성 애플리케이션 구성 요소를 보유하지 않은 프로세스입니다.  이런 프로세스를 
+유지하는 유일한 이유는 다음에 내부 구성 요소를 실행할 때 시작 시간을 절약하기 위한 캐싱 
+때문입니다.  시스템은 프로세스 캐시와 기본 커널 캐시 사이에서 전반적인 시스템 리소스의 균형을 맞추기 위해
+이 프로세스를 중단시키는 경우가 많습니다.</p>
+  </li>
+</ol>
+
+
+  <p>Android는 프로세스에서 현재 활성 상태인 구성 요소의 중요도에 따라 
+프로세스에 가장 높은 수준을 부여합니다.  예를 들어, 프로세스가 서비스와 가시적 액티비티를 호스팅할 경우, 
+해당 프로세스는 서비스 프로세스가 아니라 가시적 프로세스 등급이 부여됩니다.</p>
+
+  <p>또한, 프로세스의 등급은 다른 프로세스가 이에 의존할 경우 상승할 수 있습니다.
+즉, 다른 프로세스에 서비스를 제공하는 프로세스가 서비스 제공 대상 프로세스보다 
+등급이 낮은 경우는 있을 수 없습니다. 예를 들어 프로세스 A의 콘텐츠 제공자가 프로세스 B의 클라이언트에 서비스를 제공하거나 
+프로세스 A의 서비스가 프로세스 B의 구성 요소에 바인딩되어 있을 경우 프로세스 A는 항상 중요도가 
+프로세스 B와 같거나 그보다 높습니다.</p>
+
+  <p>서비스를 실행하는 프로세스가 배경 액티비티가 포함된 프로세스보다 높으므로, 
+장기 작업을 시작하는 액티비티는 작업자 스레드만 생성하기보다는 해당 작업에 대한 <a href="{@docRoot}guide/components/services.html">서비스</a>를 시작하는 것이 좋습니다.
+이는 특히 작업이 해당 액티비티보다 오래 지속될 경우 더욱 중요합니다. 
+예를 들어, 웹사이트에 사진을 업로드하는 액티비티가 업로드를 수행하는 서비스를 시작해야 
+사용자가 액티비티를 떠나더라도 배경에서 업로드를 지속할 수 있습니다. 
+서비스를 사용하면 액티비티에 어떤 일이 발생하든 해당 작업에 반드시 
+"서비스 프로세스" 우선 순위 이상이 부여됩니다. 이것이 브로드캐스트 수신기가 시간이 오래 걸리는 작업을 
+스레드에 넣기보다는 서비스를 사용해야 하는 것과 같은 이유입니다.</p>
+
+
+
+
+<h2 id="Threads">스레드</h2>
+
+<p> 애플리케이션이 시작되면 시스템이 애플리케이션에 대한 실행의 스레드를 생성하며, 이를 
+"기본"이라고 합니다. 이 스레드는 드로어블 이벤트를 포함하여 적절한 사용자 인터페이스 위젯에 
+이벤트를 발송하는 역할을 맡기 때문에 중요합니다. 이것은 Android UI 도구 키트의 구성 요소({@link
+android.widget}과 {@link android.view} 패키지의 구성 요소)와 개발자의 애플리케이션이
+상호 작용하는 스레드이기도 합니다. 따라서 기본 스레드는 
+UI 스레드라고 불릴 때도 있습니다.</p>
+
+<p>시스템은 구성 요소의 각 인스턴스에 대해 별도의 스레드를 생성하지 <em>않습니다</em>. 같은 
+프로세스에서 실행되는 모든 구성 요소는 UI 스레드에서 시작되고, 각 구성 요소를 호출하는 시스템이
+해당 스레드에서 발송됩니다. 따라서 
+시스템 콜백에 응답하는 메서드(사용자 작업을 보고하는 {@link android.view.View#onKeyDown onKeyDown()} 또는 
+수명 주기 콜백 메서드)는 항상 프로세스의 UI 스레드에서 실행됩니다.</p>
+
+<p>예를 들어, 사용자가 화면의 버튼을 터치하면, 앱 UI 스레드가 위젯에 터치 이벤트를 발송하고,
+위젯은 눌린 상태를 설정하고 이벤트 대기열에 
+무효화 요청을 게시합니다. UI 스레드가 이 요청을 대기열에서 해제하고 위젯에 스스로를 다시 
+그려야 한다고 알립니다.</p>
+
+<p>앱이 사용자 상호작용에 응답하여 집약적인 작업을 수행할 때는 이 단일 스레드 모델은
+애플리케이션을 제대로 구현하지 않으면 낮은 성능을 보일 수 있습니다. 특히,
+모든 것이 UI 스레드에서 발생하고 네트워크 액세스나 데이터 베이스 쿼리 등의 긴 작업을 수행하면 
+UI가 통째로 차단됩니다. 스레드가 차단되면 드로잉 이벤트를 포함하여 
+모든 이벤트가 발송되지 않습니다. 사용자가 보기에는 애플리케이션이 
+중단된 것처럼 보입니다. 더 나쁜 경우, UI 스레드가 몇 초 이상 차단되어 있으면
+(현재 약 5초) 사용자에게 악명 높은 "<a href="http://developer.android.com/guide/practices/responsiveness.html">애플리케이션이 응답하지 
+않습니다</a>"(ANR) 대화가 표시됩니다. 그러면 사용자가 여러분의 애플리케이션을 종료 할 수도 있고, 불만족한 경우 앱을 
+제거할 수도 있습니다.</p>
+
+<p>또한, Andoid UI 도구 키트는 스레드로부터 안전하지 <em>않습니다</em>. 따라서 UI를 
+작업자 스레드에서 조작해서는 안 됩니다. 사용자 인터페이스 조작 작업은 모두 UI 
+스레드에서 해야만 합니다. 결론적으로, Android의 단일 스레드 모델에는 두 가지 단순한 규칙이 있습니다.</p>
+
+<ol>
+<li>UI 스레드를 차단하지 마십시오.
+<li>Ui 스레드 외부에서 Android UI 도구 키트에 액세스하지 마십시오.
+</ol>
+
+<h3 id="WorkerThreads">작업자 스레드</h3>
+
+<p>위에 설명한 단일 스레드 모델로 인해, 애플리케이션 UI의 반응성을 위해서는 
+UI 스레드를 차단하지 않는 것이 매우 중요합니다. 수행해야 할 작업이 있는데 
+이들이 즉각적인 조치를 요하지 않는 경우, 이런 작업은 반드시 별도의 스레드에서 수행해야 합니다("배경" 또는 
+"작업자" 스레드).</p>
+
+<p>예를 들어, 아래는 별도의 스레드에서 이미지를 다운로드하고 이를 
+{@link android.widget.ImageView}에 표시하는 클릭 수신기에 대한 몇 가지 코드입니다.</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>처음에는 네트워크 작업을 처리하기 위한 새 스레드를 생성하므로 
+아무 문제 없이 작동하는 것처럼 보입니다. 하지만, 이것은 단일 스레드된 모델의 두 번째 규칙 즉, '<em>UI 스레드 외부에서 
+Android UI 도구 키트에 액세스하지 마세요.</em>'를 위반합니다. 이 샘플은 UI 스레드 대신 작업자 스레드에서 {@link
+android.widget.ImageView}를 수정합니다. 이렇게 되면 
+정의되지 않고 예기치 못한 동작이 발생하는 결과를 초래할 수 있고, 이는 추적하기 어려워 시간도 오래 걸립니다.</p>
+
+<p>이 문제를 해결하기 위해 Android는 다른 스레드에서 UI 스레드에 액세스하는 여러 가지 방식을
+제안합니다. 다음은 몇 가지 유용한 메서드 목록입니다.</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>예를 들어 위의 코드를 수정하려면 {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)} 메서드를 사용하면 됩니다.</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>이 구현은 이제 스레드로부터 안전합니다. 네트워크 작업은 별도의 스레드에서 수행된 반면 
+{@link android.widget.ImageView}는 UI 스레드에서 조작되었기 때문입니다.</p>
+
+<p>그러나, 작업이 복잡해질수록 이런 종류의 코드가 더 복잡해질 수 있고 유지 관리하기 
+까다로워질 수 있습니다. 더 복잡한 상호 작용을 작업자 스레드로 처리하려면, 작업자 스레드에서 
+{@link android.os.Handler}를 사용하여 UI 스레드에서 전달 받은 메시지를 처리하는 방안을 
+고려해보십시오. 하지만 최선의 해결책은 {@link android.os.AsyncTask} 클래스를 확장하는 방법일 것입니다. 
+이것은 UI와 상호 작용해야 하는 작업자 스레드 작업의 실행을 단순화합니다.</p>
+
+
+<h4 id="AsyncTask">AsyncTask 사용</h4>
+
+<p>{@link android.os.AsyncTask}를 사용하면 사용자 인터페이스에서 비동기식 작업을 수행할 수 
+있게 해줍니다. 이것은 작업자 스레드에서 차단 작업을 수행하고 그런 다음 그 결과를 UI 스레드에 
+게시하며, 개발자가 직접 스레드 및/또는 처리기를 처리할 필요가 없습니다.</p>
+
+<p>이를 사용하려면 우선 {@link android.os.AsyncTask}를 하위 클래스로 한 다음 {@link
+android.os.AsyncTask#doInBackground doInBackground()} 콜백 메서드를 구현해야 합니다. 이것은 여러 가지 
+배경 스레드에서 실행됩니다. UI를 업데이트하려면 {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}를 구현해야 합니다. 이는 {@link
+android.os.AsyncTask#doInBackground doInBackground()}로부터의 결과를 전달하며 UI 스레드에서 실행되므로, 
+안전하게 UI를 업데이트할 수 있습니다. 그런 다음 UI 스레드에서 {@link android.os.AsyncTask#execute execute()}를 
+호출하여 해당 작업을 실행하면 됩니다.</p>
+
+<p>예를 들어, 이런 방식으로 {@link android.os.AsyncTask}를 사용하여
+이전의 예시를 구현할 수 있습니다.</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+    
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>이제 UI는 안전하고 코드는 더욱 단순해졌습니다. 작업을 작업자 스레드에서 수행되어야 하는 
+부분과 UI 스레드에서 수행되어야 하는 부분으로 구분하기 때문입니다.</p>
+
+<p>이 클래스를 사용하는 법을 완전히 숙지하려면 {@link android.os.AsyncTask} 참조를 
+읽어보시는 것이 좋습니다. 개괄적인 작동 방식은 아래에 간략히 소개해 놓았습니다.</p>
+
+<ul>
+<li>매개 변수의 유형, 진행률 값과 작업의 최종 값을 제네릭을 사용하여 
+지정할 수 있습니다.</li>
+<li>메서드 {@link android.os.AsyncTask#doInBackground doInBackground()}는 작업자 스레드에서 자동으로
+실행됩니다.</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}, {@link
+android.os.AsyncTask#onPostExecute onPostExecute()} 및 {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()}는 모두 UI 스레드에서 호출됩니다.</li>
+<li>{@link android.os.AsyncTask#doInBackground doInBackground()}가 반환한 값이 
+{@link android.os.AsyncTask#onPostExecute onPostExecute()}로 전송됩니다.</li>
+<li>언제든 {@link android.os.AsyncTask#publishProgress publishProgress()}를 {@link
+android.os.AsyncTask#doInBackground doInBackground()}에서 호출하여 UI 스레드에서 {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()}를 실행하도록 할 수 있습니다.</li>
+<li>모든 스레드에서 언제든 작업을 취소할 수 있습니다.</li>
+</ul>
+
+<p class="caution"><strong>주의:</strong> 작업자 스레드를 사용할 때 마주칠 수 있는 또 한 가지 문제는 
+<a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 구성 변경</a>으로 인해 액티비티가 예기치 못하게 다시 시작되는 것입니다
+(예를 들어 사용자가 화면 방향을 바꾸는 경우). 이 경우 작업자 스레드를 소멸시킬 수 있습니다. 
+스레드가 재시작될 때 작업을 지속하는 방법과 액티비티가 제거되었을 때 작업을 적절히 취소하는 방법은
+<a href="http://code.google.com/p/shelves/">Shelves</a> 샘플 애플리케이션의 소스 코드를 참조하십시오.</p>
+
+
+<h3 id="ThreadSafe">스레드로부터 안전한 메서드</h3>
+
+<p> 어떤 경우에는 구현하는 메서드가 하나 이상의 스레드에서 호출되는 일도 있습니다. 따라서 
+이를 스레드로부터 안전하게 작성해야만 합니다. </p>
+
+<p>이것은 주로 원격으로 호출할 수 있는 메서드에 대해 참입니다. 예를 들어 <a href="{@docRoot}guide/components/bound-services.html">바인딩된 서비스</a> 내의 메서드 등이 해당됩니다. 
+{@link android.os.IBinder}에서 구현된 메서드가 
+{@link android.os.IBinder IBinder}가 실행되는 프로세스에서 호출될 경우, 해당 메서드는 발신자의 스레드에서 실행됩니다. 
+그러나 호출이 다른 프로세스에서 발생하면, 해당 메서드는 시스템이 
+{@link android.os.IBinder
+IBinder}와 같은 프로세스에 유지하는 스레드 풀에서 선택된 스레드에서 실행됩니다(프로세스의 UI 스레드에서 실행되지 않습니다).  예를 들어, 어느 서비스의 
+{@link android.app.Service#onBind onBind()} 메서드는 해당 서비스 
+프로세스의 UI 스레드에서 호출되고, {@link android.app.Service#onBind
+onBind()}가 반환하는 객체에서 구현된 메서드는(예: RPC 메서드를 구현하는 하위 클래스) 해당 풀 안의 여러 스레드에서 
+호출되게 됩니다. 서비스에 클라이언트가 하나 이상 있을 수 있으므로, 하나 이상의 풀이
+동시에 같은 {@link android.os.IBinder IBinder} 메서드에 참여할 수 있습니다. 그러므로 {@link android.os.IBinder
+IBinder} 메서드는 스레드로부터 안전하게 구현되어야 합니다.</p>
+
+<p> 마찬가지로 콘텐츠 제공자는 다른 프로세스에서 발생한 데이터 요청을 수신할 수 있습니다.
+{@link android.content.ContentResolver}와 {@link android.content.ContentProvider}
+클래스가 세부적인 프로세스 간 통신의 관리 방식을 숨길 수는 있지만, 이러한 요청에 응답하는 {@link
+android.content.ContentProvider} 메서드(&mdash;{@link
+android.content.ContentProvider#query query()}, {@link android.content.ContentProvider#insert
+insert()}, {@link android.content.ContentProvider#delete delete()}, {@link
+android.content.ContentProvider#update update()} 및 {@link android.content.ContentProvider#getType
+getType()} 메서드&mdash;)가 프로세스의 UI 스레드가 아니라
+콘텐츠 제공자 프로세스의 스레드 풀에서 호출됩니다.  이러한 메서드가 동시에 몇 개의 스레드에서 호출될 수 있으므로,
+스레드로부터 안전하게 구현되어야 합니다. </p>
+
+
+<h2 id="IPC">프로세스 간 통신</h2>
+
+<p>Android는 원격 프로시저 호출(RPC)을 사용한 프로세스 간 통신(IPC) 메커니즘을 제공합니다. 
+여기서 메서드는 액티비티나 다른 애플리케이션 구성 요소에 호출되지만 
+원격으로 (또 다른 프로세스에서) 실행되고, 결과는 모두 발신자에게 되돌려 
+보냅니다. 메서드 호출과 메서드의 데이터는 운영 체제가 이해할 수 있는 수준으로 분해되고, 
+로컬 프로세스와 주소 공간에서 원격 프로세스와 주소 공간으로 전송된 다음 
+다시 결합되어 여기서 호출에 다시 응답합니다.  그런 다음 반환 값이 
+반대 방향으로 전송됩니다.  Android가 이와 같은 IPC 트랜잭션을 수행하는 데 필요한 
+모든 코드를 제공하므로, 개발자는 그저 RPC 프로그래밍 인터페이스를 정의하고 구현하는 데에만 집중하면 됩니다. </p>
+
+<p>IPC를 수행하려면 애플리케이션이 반드시 서비스에 바인딩되어야만 하며, 이때 {@link
+android.content.Context#bindService bindService()}를 사용해야 합니다. 자세한 정보는 <a href="{@docRoot}guide/components/services.html">서비스</a> 개발자 가이드를 참조하십시오.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->

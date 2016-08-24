@@ -33,4 +33,10 @@
         android:layout_height="match_parent"
         android:src="@android:color/white"
         android:visibility="gone" />
+    <com.android.systemui.screenshot.ScreenshotSelectorView
+        android:id="@+id/global_screenshot_selector"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:pointerIcon="crosshair"/>
 </FrameLayout>

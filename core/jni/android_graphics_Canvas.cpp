@@ -18,13 +18,15 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include <Canvas.h>
+#include <androidfw/ResourceTypes.h>
+#include <hwui/Canvas.h>
+#include <hwui/Paint.h>
+#include <hwui/Typeface.h>
+#include <minikin/Layout.h>
+
+#include "Bitmap.h"
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
-#include "Paint.h"
-#include "TypefaceImpl.h"
-
-#include "MinikinUtils.h"
 
 namespace android {
 
@@ -34,8 +36,12 @@ static Canvas* get_canvas(jlong canvasHandle) {
     return reinterpret_cast<Canvas*>(canvasHandle);
 }
 
-static void finalizer(JNIEnv* env, jobject clazz, jlong canvasHandle) {
-    delete get_canvas(canvasHandle);
+static void delete_canvas(Canvas* canvas) {
+    delete canvas;
+}
+
+static jlong getNativeFinalizer(JNIEnv* env, jobject clazz) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&delete_canvas));
 }
 
 // Native wrapper constructor used by Canvas(Bitmap)
@@ -69,25 +75,30 @@ static jint getHeight(JNIEnv*, jobject, jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
 }
 
+static void setHighContrastText(JNIEnv*, jobject, jlong canvasHandle, jboolean highContrastText) {
+    Canvas* canvas = get_canvas(canvasHandle);
+    canvas->setHighContrastText(highContrastText);
+}
+
 static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->getSaveCount());
 }
 
 static jint save(JNIEnv*, jobject, jlong canvasHandle, jint flagsHandle) {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->save(flags));
 }
 
 static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
                       jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
 }
 
 static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
                            jfloat r, jfloat b, jint alpha, jint flagsHandle) {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
@@ -255,6 +266,13 @@ static void drawRect(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jflo
     get_canvas(canvasHandle)->drawRect(left, top, right, bottom, *paint);
 }
 
+static void drawRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong regionHandle,
+                       jlong paintHandle) {
+    const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
+    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawRegion(*region, *paint);
+}
+
 static void drawRoundRect(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jfloat top,
                           jfloat right, jfloat bottom, jfloat rx, jfloat ry, jlong paintHandle) {
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -318,6 +336,39 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
                                            indices, indexCount, *paint);
 }
 
+static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHandle,
+        jlong chunkHandle, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        jlong paintHandle, jint dstDensity, jint srcDensity) {
+
+    Canvas* canvas = get_canvas(canvasHandle);
+    Bitmap* bitmap = reinterpret_cast<Bitmap*>(bitmapHandle);
+    SkBitmap skiaBitmap;
+    bitmap->getSkBitmap(&skiaBitmap);
+    const android::Res_png_9patch* chunk = reinterpret_cast<android::Res_png_9patch*>(chunkHandle);
+    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+
+    if (CC_LIKELY(dstDensity == srcDensity || dstDensity == 0 || srcDensity == 0)) {
+        canvas->drawNinePatch(skiaBitmap, *chunk, left, top, right, bottom, paint);
+    } else {
+        canvas->save(SaveFlags::MatrixClip);
+
+        SkScalar scale = dstDensity / (float)srcDensity;
+        canvas->translate(left, top);
+        canvas->scale(scale, scale);
+
+        Paint filteredPaint;
+        if (paint) {
+            filteredPaint = *paint;
+        }
+        filteredPaint.setFilterQuality(kLow_SkFilterQuality);
+
+        canvas->drawNinePatch(skiaBitmap, *chunk, 0, 0, (right-left)/scale, (bottom-top)/scale,
+                &filteredPaint);
+
+        canvas->restore();
+    }
+}
+
 static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject jbitmap,
                        jfloat left, jfloat top, jlong paintHandle, jint canvasDensity,
                        jint screenDensity, jint bitmapDensity) {
@@ -338,7 +389,7 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject
             canvas->drawBitmap(bitmap, left, top, paint);
         }
     } else {
-        canvas->save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas->save(SaveFlags::MatrixClip);
         SkScalar scale = canvasDensity / (float)bitmapDensity;
         canvas->translate(left, top);
         canvas->scale(scale, scale);
@@ -423,115 +474,13 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
                                              vertA.ptr(), colorA.ptr(), paint);
 }
 
-class DrawTextFunctor {
-public:
-    DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
-                    const SkPaint& paint, float x, float y, MinikinRect& bounds,
-                    float totalAdvance)
-            : layout(layout), canvas(canvas), glyphs(glyphs), pos(pos), paint(paint),
-              x(x), y(y), bounds(bounds), totalAdvance(totalAdvance) { }
-
-    void operator()(size_t start, size_t end) {
-        if (canvas->drawTextAbsolutePos()) {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = x + layout.getX(i);
-                pos[2 * i + 1] = y + layout.getY(i);
-            }
-        } else {
-            for (size_t i = start; i < end; i++) {
-                glyphs[i] = layout.getGlyphId(i);
-                pos[2 * i] = layout.getX(i);
-                pos[2 * i + 1] = layout.getY(i);
-            }
-        }
-
-        size_t glyphCount = end - start;
-        canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
-                         bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom,
-                         totalAdvance);
-    }
-private:
-    const Layout& layout;
-    Canvas* canvas;
-    uint16_t* glyphs;
-    float* pos;
-    const SkPaint& paint;
-    float x;
-    float y;
-    MinikinRect& bounds;
-    float totalAdvance;
-};
-
-// Same values used by Skia
-#define kStdStrikeThru_Offset   (-6.0f / 21.0f)
-#define kStdUnderline_Offset    (1.0f / 9.0f)
-#define kStdUnderline_Thickness (1.0f / 18.0f)
-
-void drawTextDecorations(Canvas* canvas, float x, float y, float length, const SkPaint& paint) {
-    uint32_t flags;
-    SkDrawFilter* drawFilter = canvas->getDrawFilter();
-    if (drawFilter) {
-        SkPaint paintCopy(paint);
-        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
-        flags = paintCopy.getFlags();
-    } else {
-        flags = paint.getFlags();
-    }
-    if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
-        SkScalar left = x;
-        SkScalar right = x + length;
-        float textSize = paint.getTextSize();
-        float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
-        if (flags & SkPaint::kUnderlineText_Flag) {
-            SkScalar top = y + textSize * kStdUnderline_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdUnderline_Offset + 0.5f * strokeWidth;
-            canvas->drawRect(left, top, right, bottom, paint);
-        }
-        if (flags & SkPaint::kStrikeThruText_Flag) {
-            SkScalar top = y + textSize * kStdStrikeThru_Offset - 0.5f * strokeWidth;
-            SkScalar bottom = y + textSize * kStdStrikeThru_Offset + 0.5f * strokeWidth;
-            canvas->drawRect(left, top, right, bottom, paint);
-        }
-    }
-}
-
-void drawText(Canvas* canvas, const uint16_t* text, int start, int count, int contextCount,
-             float x, float y, int bidiFlags, const Paint& origPaint, TypefaceImpl* typeface) {
-    // minikin may modify the original paint
-    Paint paint(origPaint);
-
-    Layout layout;
-    MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, start, count, contextCount);
-
-    size_t nGlyphs = layout.nGlyphs();
-    uint16_t* glyphs = new uint16_t[nGlyphs];
-    float* pos = new float[nGlyphs * 2];
-
-    x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
-
-    MinikinRect bounds;
-    layout.getBounds(&bounds);
-    if (!canvas->drawTextAbsolutePos()) {
-        bounds.offset(x, y);
-    }
-
-    DrawTextFunctor f(layout, canvas, glyphs, pos, paint, x, y, bounds, layout.getAdvance());
-    MinikinUtils::forFontRun(layout, &paint, f);
-
-    drawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
-
-    delete[] glyphs;
-    delete[] pos;
-}
-
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
                           jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    drawText(get_canvas(canvasHandle), jchars + index, 0, count, count, x, y,
+    get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -540,10 +489,10 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
                            jint start, jint end, jfloat x, jfloat y, jint bidiFlags,
                            jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    drawText(get_canvas(canvasHandle), jchars + start, 0, count, count, x, y,
+    get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
                                        bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
 }
@@ -552,11 +501,11 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
                              jint count, jint contextIndex, jint contextCount, jfloat x, jfloat y,
                              jboolean isRtl, jlong paintHandle, jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
-    drawText(get_canvas(canvasHandle), jchars + contextIndex, index - contextIndex, count,
+    get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
@@ -566,57 +515,15 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
                               jfloat x, jfloat y, jboolean isRtl, jlong paintHandle,
                               jlong typefaceHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
-    drawText(get_canvas(canvasHandle), jchars + contextStart, start - contextStart, count,
+    get_canvas(canvasHandle)->drawText(jchars + contextStart, start - contextStart, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
     env->ReleaseStringChars(text, jchars);
-}
-
-class DrawTextOnPathFunctor {
-public:
-    DrawTextOnPathFunctor(const Layout& layout, Canvas* canvas, float hOffset,
-                float vOffset, const Paint& paint, const SkPath& path)
-            : layout(layout), canvas(canvas), hOffset(hOffset), vOffset(vOffset),
-                paint(paint), path(path) {
-    }
-    void operator()(size_t start, size_t end) {
-        uint16_t glyphs[1];
-        for (size_t i = start; i < end; i++) {
-            glyphs[0] = layout.getGlyphId(i);
-            float x = hOffset + layout.getX(i);
-            float y = vOffset + layout.getY(i);
-            canvas->drawTextOnPath(glyphs, 1, path, x, y, paint);
-        }
-    }
-private:
-    const Layout& layout;
-    Canvas* canvas;
-    float hOffset;
-    float vOffset;
-    const Paint& paint;
-    const SkPath& path;
-};
-
-static void drawTextOnPath(Canvas* canvas, const uint16_t* text, int count, int bidiFlags,
-                           const SkPath& path, float hOffset, float vOffset,
-                           const Paint& paint, TypefaceImpl* typeface) {
-    Paint paintCopy(paint);
-    Layout layout;
-    MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);
-    hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
-
-    // Set align to left for drawing, as we don't want individual
-    // glyphs centered or right-aligned; the offset above takes
-    // care of all alignment.
-    paintCopy.setTextAlign(Paint::kLeft_Align);
-
-    DrawTextOnPathFunctor f(layout, canvas, hOffset, vOffset, paintCopy, path);
-    MinikinUtils::forFontRun(layout, &paintCopy, f);
 }
 
 static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
@@ -625,11 +532,11 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
                                 jlong typefaceHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
-    drawTextOnPath(get_canvas(canvasHandle), jchars + index, count, bidiFlags, *path,
+    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count, bidiFlags, *path,
                    hOffset, vOffset, *paint, typeface);
 
     env->ReleaseCharArrayElements(text, jchars, 0);
@@ -640,12 +547,12 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
                                  jint bidiFlags, jlong paintHandle, jlong typefaceHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(typefaceHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
-    drawTextOnPath(get_canvas(canvasHandle), jchars, count, bidiFlags, *path,
+    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, bidiFlags, *path,
                    hOffset, vOffset, *paint, typeface);
 
     env->ReleaseStringChars(text, jchars);
@@ -666,56 +573,59 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
-    {"finalizer", "(J)V", (void*) CanvasJNI::finalizer},
+    {"getNativeFinalizer", "()J", (void*) CanvasJNI::getNativeFinalizer},
     {"initRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
-    {"native_setBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
-    {"native_isOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
-    {"native_getWidth","(J)I", (void*) CanvasJNI::getWidth},
-    {"native_getHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"native_save","(JI)I", (void*) CanvasJNI::save},
-    {"native_saveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
-    {"native_saveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
-    {"native_getSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
-    {"native_restore","(JZ)V", (void*) CanvasJNI::restore},
-    {"native_restoreToCount","(JIZ)V", (void*) CanvasJNI::restoreToCount},
-    {"native_getCTM", "(JJ)V", (void*)CanvasJNI::getCTM},
-    {"native_setMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
-    {"native_concat","(JJ)V", (void*) CanvasJNI::concat},
-    {"native_rotate","(JF)V", (void*) CanvasJNI::rotate},
-    {"native_scale","(JFF)V", (void*) CanvasJNI::scale},
-    {"native_skew","(JFF)V", (void*) CanvasJNI::skew},
-    {"native_translate","(JFF)V", (void*) CanvasJNI::translate},
-    {"native_getClipBounds","(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
-    {"native_quickReject","(JJ)Z", (void*) CanvasJNI::quickRejectPath},
-    {"native_quickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
-    {"native_clipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
-    {"native_clipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"native_clipRegion","(JJI)Z", (void*) CanvasJNI::clipRegion},
-    {"native_drawColor","(JII)V", (void*) CanvasJNI::drawColor},
-    {"native_drawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
-    {"native_drawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
-    {"native_drawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
-    {"native_drawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
-    {"native_drawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
-    {"native_drawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
-    {"native_drawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
-    {"native_drawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
-    {"native_drawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
-    {"native_drawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
-    {"native_drawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
-    {"nativeDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nativeDrawBitmapMatrix", "(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"native_drawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
-    {"native_drawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nativeDrawBitmapMesh", "(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"native_drawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
-    {"native_drawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
-    {"native_drawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"native_drawTextRun","(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"native_drawTextOnPath","(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"native_drawTextOnPath","(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nativeSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
+    {"native_setBitmap", "!(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
+    {"native_isOpaque","!(J)Z", (void*) CanvasJNI::isOpaque},
+    {"native_getWidth","!(J)I", (void*) CanvasJNI::getWidth},
+    {"native_getHeight","!(J)I", (void*) CanvasJNI::getHeight},
+    {"native_setHighContrastText","!(JZ)V", (void*) CanvasJNI::setHighContrastText},
+    {"native_save","!(JI)I", (void*) CanvasJNI::save},
+    {"native_saveLayer","!(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
+    {"native_saveLayerAlpha","!(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
+    {"native_getSaveCount","!(J)I", (void*) CanvasJNI::getSaveCount},
+    {"native_restore","!(JZ)V", (void*) CanvasJNI::restore},
+    {"native_restoreToCount","!(JIZ)V", (void*) CanvasJNI::restoreToCount},
+    {"native_getCTM", "!(JJ)V", (void*)CanvasJNI::getCTM},
+    {"native_setMatrix","!(JJ)V", (void*) CanvasJNI::setMatrix},
+    {"native_concat","!(JJ)V", (void*) CanvasJNI::concat},
+    {"native_rotate","!(JF)V", (void*) CanvasJNI::rotate},
+    {"native_scale","!(JFF)V", (void*) CanvasJNI::scale},
+    {"native_skew","!(JFF)V", (void*) CanvasJNI::skew},
+    {"native_translate","!(JFF)V", (void*) CanvasJNI::translate},
+    {"native_getClipBounds","!(JLandroid/graphics/Rect;)Z", (void*) CanvasJNI::getClipBounds},
+    {"native_quickReject","!(JJ)Z", (void*) CanvasJNI::quickRejectPath},
+    {"native_quickReject","!(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
+    {"native_clipRect","!(JFFFFI)Z", (void*) CanvasJNI::clipRect},
+    {"native_clipPath","!(JJI)Z", (void*) CanvasJNI::clipPath},
+    {"native_clipRegion","!(JJI)Z", (void*) CanvasJNI::clipRegion},
+    {"native_drawColor","!(JII)V", (void*) CanvasJNI::drawColor},
+    {"native_drawPaint","!(JJ)V", (void*) CanvasJNI::drawPaint},
+    {"native_drawPoint", "!(JFFJ)V", (void*) CanvasJNI::drawPoint},
+    {"native_drawPoints", "!(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
+    {"native_drawLine", "!(JFFFFJ)V", (void*) CanvasJNI::drawLine},
+    {"native_drawLines", "!(J[FIIJ)V", (void*) CanvasJNI::drawLines},
+    {"native_drawRect","!(JFFFFJ)V", (void*) CanvasJNI::drawRect},
+    {"native_drawRegion", "!(JJJ)V", (void*) CanvasJNI::drawRegion },
+    {"native_drawRoundRect","!(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
+    {"native_drawCircle","!(JFFFJ)V", (void*) CanvasJNI::drawCircle},
+    {"native_drawOval","!(JFFFFJ)V", (void*) CanvasJNI::drawOval},
+    {"native_drawArc","!(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
+    {"native_drawPath","!(JJJ)V", (void*) CanvasJNI::drawPath},
+    {"nativeDrawVertices", "!(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
+    {"native_drawNinePatch", "!(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
+    {"native_drawBitmap","!(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
+    {"nativeDrawBitmapMatrix", "!(JLandroid/graphics/Bitmap;JJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+    {"native_drawBitmap","!(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
+    {"native_drawBitmap", "!(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+    {"nativeDrawBitmapMesh", "!(JLandroid/graphics/Bitmap;II[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+    {"native_drawText","!(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
+    {"native_drawText","!(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
+    {"native_drawTextRun","!(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
+    {"native_drawTextRun","!(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
+    {"native_drawTextOnPath","!(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
+    {"native_drawTextOnPath","!(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
+    {"nativeSetDrawFilter", "!(JJ)V", (void*) CanvasJNI::setDrawFilter},
     {"freeCaches", "()V", (void*) CanvasJNI::freeCaches},
     {"freeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches}
 };

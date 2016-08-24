@@ -16,7 +16,7 @@
 -->
 
 <objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="6665"
+    android:duration="4444"
     android:interpolator="@android:anim/linear_interpolator"
     android:propertyName="rotation"
     android:repeatCount="-1"

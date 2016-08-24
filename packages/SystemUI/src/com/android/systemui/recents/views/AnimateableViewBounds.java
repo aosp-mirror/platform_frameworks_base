@@ -19,56 +19,90 @@ package com.android.systemui.recents.views;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
-import com.android.systemui.recents.RecentsConfiguration;
+
+import com.android.systemui.recents.misc.Utilities;
 
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {
 
-    RecentsConfiguration mConfig;
+    private static final float MIN_ALPHA = 0.1f;
+    private static final float MAX_ALPHA = 0.8f;
 
-    TaskView mSourceView;
+    View mSourceView;
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mClipRect = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mClipBounds = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
+    Rect mLastClipBounds = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     int mCornerRadius;
+    @ViewDebug.ExportedProperty(category="recents")
     float mAlpha = 1f;
-    final float mMinAlpha = 0.25f;
 
-    public AnimateableViewBounds(TaskView source, int cornerRadius) {
-        mConfig = RecentsConfiguration.getInstance();
+    public AnimateableViewBounds(View source, int cornerRadius) {
         mSourceView = source;
         mCornerRadius = cornerRadius;
-        setClipBottom(getClipBottom());
+    }
+
+    /**
+     * Resets the right and bottom clip for this view.
+     */
+    public void reset() {
+        mClipRect.set(-1, -1, -1, -1);
+        updateClipBounds();
     }
 
     @Override
     public void getOutline(View view, Outline outline) {
-        outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
-        outline.setRoundRect(mClipRect.left, mClipRect.top,
-                mSourceView.getWidth() - mClipRect.right,
-                mSourceView.getHeight() - mClipRect.bottom,
-                mCornerRadius);
+        outline.setAlpha(Utilities.mapRange(mAlpha, MIN_ALPHA, MAX_ALPHA));
+        if (mCornerRadius > 0) {
+            outline.setRoundRect(mClipRect.left, mClipRect.top,
+                    mSourceView.getWidth() - mClipRect.right,
+                    mSourceView.getHeight() - mClipRect.bottom,
+                    mCornerRadius);
+        } else {
+            outline.setRect(mClipRect.left, mClipRect.top,
+                    mSourceView.getWidth() - mClipRect.right,
+                    mSourceView.getHeight() - mClipRect.bottom);
+        }
     }
 
-    /** Sets the view outline alpha. */
+    /**
+     * Sets the view outline alpha.
+     */
     void setAlpha(float alpha) {
         if (Float.compare(alpha, mAlpha) != 0) {
             mAlpha = alpha;
+            // TODO, If both clip and alpha change in the same frame, only invalidate once
             mSourceView.invalidateOutline();
         }
+    }
+
+    /**
+     * @return the outline alpha.
+     */
+    public float getAlpha() {
+        return mAlpha;
+    }
+
+    /** Sets the top clip. */
+    public void setClipTop(int top) {
+        mClipRect.top = top;
+        updateClipBounds();
+    }
+
+    /** Returns the top clip. */
+    public int getClipTop() {
+        return mClipRect.top;
     }
 
     /** Sets the bottom clip. */
     public void setClipBottom(int bottom) {
-        if (bottom != mClipRect.bottom) {
-            mClipRect.bottom = bottom;
-            mSourceView.invalidateOutline();
-            updateClipBounds();
-            if (!mConfig.useHardwareLayers) {
-                mSourceView.mThumbnailView.updateThumbnailVisibility(
-                        bottom - mSourceView.getPaddingBottom());
-            }
-        }
+        mClipRect.bottom = bottom;
+        updateClipBounds();
     }
 
     /** Returns the bottom clip. */
@@ -77,9 +111,14 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     }
 
     private void updateClipBounds() {
-        mClipBounds.set(mClipRect.left, mClipRect.top,
-                mSourceView.getWidth() - mClipRect.right,
-                mSourceView.getHeight() - mClipRect.bottom);
-        mSourceView.setClipBounds(mClipBounds);
+        mClipBounds.set(Math.max(0, mClipRect.left), Math.max(0, mClipRect.top),
+                mSourceView.getWidth() - Math.max(0, mClipRect.right),
+                mSourceView.getHeight() - Math.max(0, mClipRect.bottom));
+        if (!mLastClipBounds.equals(mClipBounds)) {
+            mSourceView.setClipBounds(mClipBounds);
+            // TODO, If both clip and alpha change in the same frame, only invalidate once
+            mSourceView.invalidateOutline();
+            mLastClipBounds.set(mClipBounds);
+        }
     }
 }

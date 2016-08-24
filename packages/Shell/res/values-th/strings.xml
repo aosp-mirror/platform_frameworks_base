@@ -17,10 +17,27 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"จับภาพรายงานข้อบกพร่องแล้ว"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"กำลังสร้างรายงานข้อบกพร่อง <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"บันทึกรายงานข้อบกพร่อง <xliff:g id="ID">#%d</xliff:g> แล้ว"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"กำลังเพิ่มรายละเอียดในรายงานข้อบกพร่อง"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"โปรดรอสักครู่…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"กวาดไปทางซ้ายเพื่อแชร์รายงานข้อบกพร่อง"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณ"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"รายงานข้อบกพร่องมีข้อมูลจากไฟล์บันทึกต่างๆ ของระบบ รวมถึงข้อมูลส่วนตัว แชร์รายงานข้อบกพร่องกับแอปและบุคคลที่คุณไว้ใจเท่านั้น"</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"แสดงข้อความนี้ในครั้งต่อไป"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณโดยไม่มีภาพหน้าจอ หรือรอให้ภาพหน้าจอเสร็จสมบูรณ์"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"รายงานข้อบกพร่องมีข้อมูลจากไฟล์บันทึกต่างๆ ของระบบ ซึ่งอาจรวมถึงข้อมูลที่คุณพิจารณาว่าละเอียดอ่อน (เช่น การใช้งานแอปและข้อมูลตำแหน่ง) โปรดแชร์รายงานข้อบกพร่องกับแอปและบุคคลที่คุณเชื่อถือเท่านั้น"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ไม่ต้องแสดงอีก"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"รายงานข้อบกพร่อง"</string>
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"ไม่สามารถอ่านไฟล์รายงานข้อบกพร่อง"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ไม่สามารถเพิ่มรายละเอียดรายงานข้อบกพร่องลงในไฟล์ ZIP"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"ไม่มีชื่อ"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"รายละเอียด"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ภาพหน้าจอ"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"จับภาพหน้าจอสำเร็จแล้ว"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ไม่สามารถจับภาพหน้าจอได้"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"รายละเอียดรายงานข้อบกพร่อง <xliff:g id="ID">#%d</xliff:g>"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ชื่อไฟล์"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ชื่อข้อบกพร่อง"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"สรุปข้อบกพร่อง"</string>
+    <string name="save" msgid="4781509040564835759">"บันทึก"</string>
 </resources>

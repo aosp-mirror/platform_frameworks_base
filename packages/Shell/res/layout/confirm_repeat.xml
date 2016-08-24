@@ -38,5 +38,5 @@
         android:id="@android:id/checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/bugreport_confirm_repeat" />
+        android:text="@string/bugreport_confirm_dont_repeat" />
 </LinearLayout>

@@ -18,14 +18,20 @@ package android.content;
 
 import android.annotation.AttrRes;
 import android.annotation.CheckResult;
+import android.annotation.ColorInt;
+import android.annotation.ColorRes;
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -49,8 +55,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
 import android.util.AttributeSet;
-import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.WindowManager;
 
@@ -76,40 +82,49 @@ public abstract class Context {
      * File creation mode: the default mode, where the created file can only
      * be accessed by the calling application (or all applications sharing the
      * same user ID).
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      */
     public static final int MODE_PRIVATE = 0x0000;
+
     /**
+     * File creation mode: allow all other applications to have read access to
+     * the created file.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
+     * mode will throw a {@link SecurityException}.
+     *
      * @deprecated Creating world-readable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
-     * File creation mode: allow all other applications to have read access
-     * to the created file.
-     * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_WRITEABLE
+     *             to cause security holes in applications. It is strongly
+     *             discouraged; instead, applications should use more formal
+     *             mechanism for interactions such as {@link ContentProvider},
+     *             {@link BroadcastReceiver}, and {@link android.app.Service}.
+     *             There are no guarantees that this access mode will remain on
+     *             a file, such as when it goes through a backup and restore.
+     * @see android.support.v4.content.FileProvider
+     * @see Intent#FLAG_GRANT_WRITE_URI_PERMISSION
      */
     @Deprecated
     public static final int MODE_WORLD_READABLE = 0x0001;
+
     /**
+     * File creation mode: allow all other applications to have write access to
+     * the created file.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
+     * mode will throw a {@link SecurityException}.
+     *
      * @deprecated Creating world-writable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
-     * File creation mode: allow all other applications to have write access
-     * to the created file.
-     * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
+     *             to cause security holes in applications. It is strongly
+     *             discouraged; instead, applications should use more formal
+     *             mechanism for interactions such as {@link ContentProvider},
+     *             {@link BroadcastReceiver}, and {@link android.app.Service}.
+     *             There are no guarantees that this access mode will remain on
+     *             a file, such as when it goes through a backup and restore.
+     * @see android.support.v4.content.FileProvider
+     * @see Intent#FLAG_GRANT_WRITE_URI_PERMISSION
      */
     @Deprecated
     public static final int MODE_WORLD_WRITEABLE = 0x0002;
+
     /**
      * File creation mode: for use with {@link #openFileOutput}, if the file
      * already exists then write data to the end of the existing file
@@ -154,6 +169,16 @@ public abstract class Context {
      * @see SQLiteDatabase#enableWriteAheadLogging
      */
     public static final int MODE_ENABLE_WRITE_AHEAD_LOGGING = 0x0008;
+
+    /**
+     * Database open flag: when set, the database is opened without support for
+     * localized collators.
+     *
+     * @see #openOrCreateDatabase(String, int, CursorFactory)
+     * @see #openOrCreateDatabase(String, int, CursorFactory, DatabaseErrorHandler)
+     * @see SQLiteDatabase#NO_LOCALIZED_COLLATORS
+     */
+    public static final int MODE_NO_LOCALIZED_COLLATORS = 0x0010;
 
     /** @hide */
     @IntDef(flag = true,
@@ -260,6 +285,12 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
+     * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
+     */
+    public static final int BIND_ALLOW_WHITELIST_MANAGEMENT = 0x01000000;
+
+    /**
      * @hide Flag for {@link #bindService}: Like {@link #BIND_FOREGROUND_SERVICE},
      * but only applies while the device is awake.
      */
@@ -312,10 +343,46 @@ public abstract class Context {
      */
     public static final int BIND_NOT_VISIBLE = 0x40000000;
 
-    /** Return an AssetManager instance for your application's package. */
+    /**
+     * Flag for {@link #bindService}: The service being bound is an
+     * {@link android.R.attr#isolatedProcess isolated},
+     * {@link android.R.attr#externalService external} service.  This binds the service into the
+     * calling application's package, rather than the package in which the service is declared.
+     * <p>
+     * When using this flag, the code for the service being bound will execute under the calling
+     * application's package name and user ID.  Because the service must be an isolated process,
+     * it will not have direct access to the application's data, though.
+     *
+     * The purpose of this flag is to allow applications to provide services that are attributed
+     * to the app using the service, rather than the application providing the service.
+     * </p>
+     */
+    public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
+
+    /**
+     * Returns an AssetManager instance for the application's package.
+     * <p>
+     * <strong>Note:</strong> Implementations of this method should return
+     * an AssetManager instance that is consistent with the Resources instance
+     * returned by {@link #getResources()}. For example, they should share the
+     * same {@link Configuration} object.
+     *
+     * @return an AssetManager instance for the application's package
+     * @see #getResources()
+     */
     public abstract AssetManager getAssets();
 
-    /** Return a Resources instance for your application's package. */
+    /**
+     * Returns a Resources instance for the application's package.
+     * <p>
+     * <strong>Note:</strong> Implementations of this method should return
+     * a Resources instance that is consistent with the AssetManager instance
+     * returned by {@link #getAssets()}. For example, they should share the
+     * same {@link Configuration} object.
+     *
+     * @return a Resources instance for the application's package
+     * @see #getAssets()
+     */
     public abstract Resources getResources();
 
     /** Return PackageManager instance to find global package information. */
@@ -436,8 +503,8 @@ public abstract class Context {
      * @throws android.content.res.Resources.NotFoundException if the given ID
      *         does not exist.
      */
-    @Nullable
-    public final int getColor(int id) {
+    @ColorInt
+    public final int getColor(@ColorRes int id) {
         return getResources().getColor(id, getTheme());
     }
 
@@ -454,7 +521,7 @@ public abstract class Context {
      *         does not exist.
      */
     @Nullable
-    public final Drawable getDrawable(int id) {
+    public final Drawable getDrawable(@DrawableRes int id) {
         return getResources().getDrawable(id, getTheme());
     }
 
@@ -471,7 +538,7 @@ public abstract class Context {
      *         does not exist.
      */
     @Nullable
-    public final ColorStateList getColorStateList(int id) {
+    public final ColorStateList getColorStateList(@ColorRes int id) {
         return getResources().getColorStateList(id, getTheme());
     }
 
@@ -592,13 +659,13 @@ public abstract class Context {
     public abstract String getPackageCodePath();
 
     /**
-     * {@hide}
-     * Return the full path to the shared prefs file for the given prefs group name.
-     *
-     * <p>Note: this is not generally useful for applications, since they should
-     * not be directly accessing the file system.
+     * @hide
+     * @deprecated use {@link #getSharedPreferencesPath(String)}
      */
-    public abstract File getSharedPrefsFile(String name);
+    @Deprecated
+    public File getSharedPrefsFile(String name) {
+        return getSharedPreferencesPath(name);
+    }
 
     /**
      * Retrieve and hold the contents of the preferences file 'name', returning
@@ -611,18 +678,69 @@ public abstract class Context {
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * default operation.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      */
-    public abstract SharedPreferences getSharedPreferences(String name,
-            int mode);
+    public abstract SharedPreferences getSharedPreferences(String name, int mode);
+
+    /**
+     * Retrieve and hold the contents of the preferences file, returning
+     * a SharedPreferences through which you can retrieve and modify its
+     * values.  Only one instance of the SharedPreferences object is returned
+     * to any callers for the same name, meaning they will see each other's
+     * edits as soon as they are made.
+     *
+     * @param file Desired preferences file. If a preferences file by this name
+     * does not exist, it will be created when you retrieve an
+     * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
+     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
+     * default operation.
+     *
+     * @return The single {@link SharedPreferences} instance that can be used
+     *         to retrieve and modify the preference values.
+     *
+     * @see #getSharedPreferencesPath(String)
+     * @see #MODE_PRIVATE
+     * @removed
+     */
+    public abstract SharedPreferences getSharedPreferences(File file, int mode);
+
+    /**
+     * Move an existing shared preferences file from the given source storage
+     * context to this context. This is typically used to migrate data between
+     * storage locations after an upgrade, such as moving to device protected
+     * storage.
+     *
+     * @param sourceContext The source context which contains the existing
+     *            shared preferences to move.
+     * @param name The name of the shared preferences file.
+     * @return {@code true} if the move was successful or if the shared
+     *         preferences didn't exist in the source context, otherwise
+     *         {@code false}.
+     * @see #createDeviceProtectedStorageContext()
+     */
+    public abstract boolean moveSharedPreferencesFrom(Context sourceContext, String name);
+
+    /** @removed */
+    @Deprecated
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        return moveSharedPreferencesFrom(sourceContext, name);
+    }
+
+    /**
+     * Delete an existing shared preferences file.
+     *
+     * @param name The name (unique in the application package) of the shared
+     *            preferences file.
+     * @return {@code true} if the shared preferences file was successfully
+     *         deleted; else {@code false}.
+     * @see #getSharedPreferences(String, int)
+     */
+    public abstract boolean deleteSharedPreferences(String name);
 
     /**
      * Open a private file associated with this Context's application package
@@ -651,14 +769,11 @@ public abstract class Context {
      * @param name The name of the file to open; can not contain path
      *            separators.
      * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
-     *            default operation, {@link #MODE_APPEND} to append to an
-     *            existing file, {@link #MODE_WORLD_READABLE} and
-     *            {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     *            default operation. Use {@link #MODE_APPEND} to append to an
+     *            existing file.
      * @return The resulting {@link FileOutputStream}.
      * @see #MODE_APPEND
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #openFileInput
      * @see #fileList
      * @see #deleteFile
@@ -701,6 +816,38 @@ public abstract class Context {
      * @see #getDir
      */
     public abstract File getFileStreamPath(String name);
+
+    /**
+     * Returns the absolute path on the filesystem where a file created with
+     * {@link #getSharedPreferences(String, int)} is stored.
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     *
+     * @param name The name of the shared preferences for which you would like
+     *            to get a path.
+     * @return An absolute path to the given file.
+     * @see #getSharedPreferences(String, int)
+     * @removed
+     */
+    public abstract File getSharedPreferencesPath(String name);
+
+    /**
+     * Returns the absolute path to the directory on the filesystem where all
+     * private files belonging to this app are stored. Apps should not use this
+     * path directly; they should instead use {@link #getFilesDir()},
+     * {@link #getCacheDir()}, {@link #getDir(String, int)}, or other storage
+     * APIs on this class.
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     * <p>
+     * No additional permissions are required for the calling app to read or
+     * write files under the returned path.
+     *
+     * @see ApplicationInfo#dataDir
+     */
+    public abstract File getDataDir();
 
     /**
      * Returns the absolute path to the directory on the filesystem where files
@@ -1205,8 +1352,7 @@ public abstract class Context {
      * @param name Name of the directory to retrieve.  This is a directory
      * that is created as part of your application data.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE} and
-     * {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * default operation.
      *
      * @return A {@link File} object for the requested directory.  The directory
      * will have been created if it does not already exist.
@@ -1217,23 +1363,22 @@ public abstract class Context {
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
-     * application package.  Create the database file if it doesn't exist.
+     * application package. Create the database file if it doesn't exist.
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     *     default operation, {@link #MODE_WORLD_READABLE}
-     *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
-     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
+     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
+     *            default operation. Use
+     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
+     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
+     *            to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
-     *     cursor when query is called.
-     *
+     *            cursor when query is called.
      * @return The contents of a newly created database with the given name.
-     * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
+     * @throws android.database.sqlite.SQLiteException if the database file
+     *             could not be opened.
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
+     * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
@@ -1241,32 +1386,58 @@ public abstract class Context {
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
-     * application package.  Creates the database file if it doesn't exist.
-     *
-     * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
-     * used to handle corruption when sqlite reports database corruption.</p>
+     * application package. Creates the database file if it doesn't exist.
+     * <p>
+     * Accepts input param: a concrete instance of {@link DatabaseErrorHandler}
+     * to be used to handle corruption when sqlite reports database corruption.
+     * </p>
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     *     default operation, {@link #MODE_WORLD_READABLE}
-     *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
-     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
+     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
+     *            default operation. Use
+     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
+     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
+     *            to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
-     *     cursor when query is called.
-     * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
-     * corruption. if null, {@link android.database.DefaultDatabaseErrorHandler} is assumed.
+     *            cursor when query is called.
+     * @param errorHandler the {@link DatabaseErrorHandler} to be used when
+     *            sqlite reports database corruption. if null,
+     *            {@link android.database.DefaultDatabaseErrorHandler} is
+     *            assumed.
      * @return The contents of a newly created database with the given name.
-     * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
+     * @throws android.database.sqlite.SQLiteException if the database file
+     *             could not be opened.
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
+     * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase
      */
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
             int mode, CursorFactory factory,
             @Nullable DatabaseErrorHandler errorHandler);
+
+    /**
+     * Move an existing database file from the given source storage context to
+     * this context. This is typically used to migrate data between storage
+     * locations after an upgrade, such as migrating to device protected
+     * storage.
+     * <p>
+     * The database must be closed before being moved.
+     *
+     * @param sourceContext The source context which contains the existing
+     *            database to move.
+     * @param name The name of the database file.
+     * @return {@code true} if the move was successful or if the database didn't
+     *         exist in the source context, otherwise {@code false}.
+     * @see #createDeviceProtectedStorageContext()
+     */
+    public abstract boolean moveDatabaseFrom(Context sourceContext, String name);
+
+    /** @removed */
+    @Deprecated
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+        return moveDatabaseFrom(sourceContext, name);
+    }
 
     /**
      * Delete an existing private SQLiteDatabase associated with this Context's
@@ -1374,7 +1545,7 @@ public abstract class Context {
      * @see #startActivity(Intent, Bundle)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent);
+    public abstract void startActivity(@RequiresPermission Intent intent);
 
     /**
      * Version of {@link #startActivity(Intent)} that allows you to specify the
@@ -1386,7 +1557,7 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    public void startActivityAsUser(Intent intent, UserHandle user) {
+    public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1415,7 +1586,8 @@ public abstract class Context {
      * @see #startActivity(Intent)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivity(Intent intent, @Nullable Bundle options);
+    public abstract void startActivity(@RequiresPermission Intent intent,
+            @Nullable Bundle options);
 
     /**
      * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
@@ -1431,7 +1603,8 @@ public abstract class Context {
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
-    public void startActivityAsUser(Intent intent, @Nullable Bundle options, UserHandle userId) {
+    public void startActivityAsUser(@RequiresPermission Intent intent, @Nullable Bundle options,
+            UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -1474,7 +1647,7 @@ public abstract class Context {
      * @see #startActivities(Intent[], Bundle)
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivities(Intent[] intents);
+    public abstract void startActivities(@RequiresPermission Intent[] intents);
 
     /**
      * Launch multiple new activities.  This is generally the same as calling
@@ -1500,7 +1673,7 @@ public abstract class Context {
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
-    public abstract void startActivities(Intent[] intents, Bundle options);
+    public abstract void startActivities(@RequiresPermission Intent[] intents, Bundle options);
 
     /**
      * @hide
@@ -1601,7 +1774,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendBroadcast(Intent intent);
+    public abstract void sendBroadcast(@RequiresPermission Intent intent);
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
@@ -1627,7 +1800,7 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendBroadcast(Intent intent,
+    public abstract void sendBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
 
 
@@ -1717,7 +1890,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendOrderedBroadcast(Intent intent,
+    public abstract void sendOrderedBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
 
     /**
@@ -1760,7 +1933,7 @@ public abstract class Context {
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
      */
-    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+    public abstract void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -1834,7 +2007,8 @@ public abstract class Context {
      * @param user UserHandle to send the intent to.
      * @see #sendBroadcast(Intent)
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
 
     /**
      * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
@@ -1851,8 +2025,8 @@ public abstract class Context {
      *
      * @see #sendBroadcast(Intent, String)
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission);
 
 
     /**
@@ -1873,8 +2047,8 @@ public abstract class Context {
      *
      * @hide
      */
-    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission, int appOp);
+    public abstract void sendBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission, int appOp);
 
     /**
      * Version of
@@ -1906,8 +2080,8 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      */
-    public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
-            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+    public abstract void sendOrderedBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable  Bundle initialExtras);
 
@@ -1959,7 +2133,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
-    public abstract void sendStickyBroadcast(Intent intent);
+    public abstract void sendStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
      * <p>Version of {@link #sendStickyBroadcast} that allows you to
@@ -2008,7 +2182,7 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      */
     @Deprecated
-    public abstract void sendStickyOrderedBroadcast(Intent intent,
+    public abstract void sendStickyOrderedBroadcast(@RequiresPermission Intent intent,
             BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -2032,7 +2206,7 @@ public abstract class Context {
      * @see #sendStickyBroadcast
      */
     @Deprecated
-    public abstract void removeStickyBroadcast(Intent intent);
+    public abstract void removeStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
      * <p>Version of {@link #sendStickyBroadcast(Intent)} that allows you to specify the
@@ -2054,7 +2228,16 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      */
     @Deprecated
-    public abstract void sendStickyBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
+
+    /**
+     * @hide
+     * This is just here for sending CONNECTIVITY_ACTION.
+     */
+    @Deprecated
+    public abstract void sendStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user, Bundle options);
 
     /**
      * <p>Version of
@@ -2090,7 +2273,7 @@ public abstract class Context {
      * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     @Deprecated
-    public abstract void sendStickyOrderedBroadcastAsUser(Intent intent,
+    public abstract void sendStickyOrderedBroadcastAsUser(@RequiresPermission Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
@@ -2117,7 +2300,8 @@ public abstract class Context {
      * @see #sendStickyBroadcastAsUser
      */
     @Deprecated
-    public abstract void removeStickyBroadcastAsUser(Intent intent, UserHandle user);
+    public abstract void removeStickyBroadcastAsUser(@RequiresPermission Intent intent,
+            UserHandle user);
 
     /**
      * Register a BroadcastReceiver to be run in the main activity thread.  The
@@ -2278,6 +2462,15 @@ public abstract class Context {
      * <p>This function will throw {@link SecurityException} if you do not
      * have permission to start the given service.
      *
+     * <p class="note"><strong>Note:</strong> Each call to startService()
+     * results in significant work done by the system to manage service
+     * lifecycle surrounding the processing of the intent, which can take
+     * multiple milliseconds of CPU time. Due to this cost, startService()
+     * should not be used for frequent intent delivery to a service, and only
+     * for scheduling significant work. Use {@link #bindService bound services}
+     * for high frequency calls.
+     * </p>
+     *
      * @param service Identifies the service to be started.  The Intent must be either
      *      fully explicit (supplying a component name) or specify a specific package
      *      name it is targetted to.  Additional values
@@ -2381,8 +2574,8 @@ public abstract class Context {
      * @see #BIND_DEBUG_UNBIND
      * @see #BIND_NOT_FOREGROUND
      */
-    public abstract boolean bindService(Intent service, @NonNull ServiceConnection conn,
-            @BindServiceFlags int flags);
+    public abstract boolean bindService(@RequiresPermission Intent service,
+            @NonNull ServiceConnection conn, @BindServiceFlags int flags);
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)}, but with an explicit userHandle
@@ -2391,8 +2584,19 @@ public abstract class Context {
      */
     @SystemApi
     @SuppressWarnings("unused")
-    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+    public boolean bindServiceAsUser(@RequiresPermission Intent service, ServiceConnection conn,
             int flags, UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Same as {@link #bindService(Intent, ServiceConnection, int, UserHandle)}, but with an
+     * explicit non-null Handler to run the ServiceConnection callbacks on.
+     *
+     * @hide
+     */
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            Handler handler, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2460,7 +2664,7 @@ public abstract class Context {
             NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
-            WIFI_PASSPOINT_SERVICE,
+            WIFI_NAN_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
@@ -2511,6 +2715,10 @@ public abstract class Context {
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
             RADIO_SERVICE,
+            HARDWARE_PROPERTIES_SERVICE,
+            //@hide: SOUND_TRIGGER_SERVICE,
+            SHORTCUT_SERVICE,
+            //@hide: CONTEXTHUB_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2572,6 +2780,8 @@ public abstract class Context {
      * <dt> {@link #NETWORK_STATS_SERVICE} ("netstats")
      * <dd> A {@link android.app.usage.NetworkStatsManager NetworkStatsManager} for querying network
      * usage statistics.
+     * <dt> {@link #HARDWARE_PROPERTIES_SERVICE} ("hardware_properties")
+     * <dd> A {@link android.os.HardwarePropertiesManager} for accessing hardware properties.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2633,6 +2843,8 @@ public abstract class Context {
      * @see android.app.job.JobScheduler
      * @see #NETWORK_STATS_SERVICE
      * @see android.app.usage.NetworkStatsManager
+     * @see android.os.HardwarePropertiesManager
+     * @see #HARDWARE_PROPERTIES_SERVICE
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
@@ -2687,6 +2899,16 @@ public abstract class Context {
      * you're running long tasks.
      */
     public static final String POWER_SERVICE = "power";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.RecoverySystem} for accessing the recovery system
+     * service.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String RECOVERY_SERVICE = "recovery";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -2902,17 +3124,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.wifi.passpoint.WifiPasspointManager} for handling management of
-     * Wi-Fi passpoint access.
-     *
-     * @see #getSystemService
-     * @see android.net.wifi.passpoint.WifiPasspointManager
-     * @hide
-     */
-    public static final String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.wifi.p2p.WifiP2pManager} for handling management of
      * Wi-Fi peer-to-peer connections.
      *
@@ -2920,6 +3131,17 @@ public abstract class Context {
      * @see android.net.wifi.p2p.WifiP2pManager
      */
     public static final String WIFI_P2P_SERVICE = "wifip2p";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.net.wifi.nan.WifiNanManager} for handling management of
+     * Wi-Fi NAN discovery and connections.
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.nan.WifiNanManager
+     * @hide PROPOSED_NAN_API
+     */
+    public static final String WIFI_NAN_SERVICE = "wifinan";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
@@ -3087,6 +3309,16 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String VOICE_INTERACTION_MANAGER_SERVICE = "voiceinteraction";
+
+    /**
+     * Use with {@link #getSystemService} to access the
+     * {@link com.android.server.voiceinteraction.SoundTriggerService}.
+     *
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
+
 
     /**
      * Use with {@link #getSystemService} to retrieve an
@@ -3373,6 +3605,51 @@ public abstract class Context {
      * @hide
      */
     public static final String RADIO_SERVICE = "radio";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.HardwarePropertiesManager} for accessing the hardware properties service.
+     *
+     * @see #getSystemService
+     */
+    public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
+
+    /**
+     * TODO Javadoc
+     *
+     * @see #getSystemService
+     * @see android.content.pm.ShortcutManager
+     *
+     * @hide
+     */
+    public static final String SHORTCUT_SERVICE = "shortcut";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.hardware.location.ContextHubManager} for accessing context hubs.
+     *
+     * @see #getSystemService
+     * @see android.hardware.location.ContextHubManager
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String CONTEXTHUB_SERVICE = "contexthub";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.health.SystemHealthManager} for accessing system health (battery, power,
+     * memory, etc) metrics.
+     *
+     * @see #getSystemService
+     */
+    public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";
+
+    /**
+     * Gatekeeper Service.
+     * @hide
+     */
+    public static final String GATEKEEPER_SERVICE = "android.service.gatekeeper.IGateKeeperService";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -3805,6 +4082,22 @@ public abstract class Context {
     public static final int CONTEXT_RESTRICTED = 0x00000004;
 
     /**
+     * Flag for use with {@link #createPackageContext}: point all file APIs at
+     * device-protected storage.
+     *
+     * @hide
+     */
+    public static final int CONTEXT_DEVICE_PROTECTED_STORAGE = 0x00000008;
+
+    /**
+     * Flag for use with {@link #createPackageContext}: point all file APIs at
+     * credential-protected storage.
+     *
+     * @hide
+     */
+    public static final int CONTEXT_CREDENTIAL_PROTECTED_STORAGE = 0x00000010;
+
+    /**
      * @hide Used to indicate we should tell the activity manager about the process
      * loading this code.
      */
@@ -3863,7 +4156,8 @@ public abstract class Context {
      *
      * @hide
      */
-    public abstract int getUserId();
+    @TestApi
+    public abstract @UserIdInt int getUserId();
 
     /**
      * Return a new Context object for the current Context but whose resources
@@ -3904,6 +4198,76 @@ public abstract class Context {
     public abstract Context createDisplayContext(@NonNull Display display);
 
     /**
+     * Return a new Context object for the current Context but whose storage
+     * APIs are backed by device-protected storage.
+     * <p>
+     * On devices with direct boot, data stored in this location is encrypted
+     * with a key tied to the physical device, and it can be accessed
+     * immediately after the device has booted successfully, both
+     * <em>before and after</em> the user has authenticated with their
+     * credentials (such as a lock pattern or PIN).
+     * <p>
+     * Because device-protected data is available without user authentication,
+     * you should carefully limit the data you store using this Context. For
+     * example, storing sensitive authentication tokens or passwords in the
+     * device-protected area is strongly discouraged.
+     * <p>
+     * If the underlying device does not have the ability to store
+     * device-protected and credential-protected data using different keys, then
+     * both storage areas will become available at the same time. They remain as
+     * two distinct storage locations on disk, and only the window of
+     * availability changes.
+     * <p>
+     * Each call to this method returns a new instance of a Context object;
+     * Context objects are not shared, however common state (ClassLoader, other
+     * Resources for the same configuration) may be so the Context itself can be
+     * fairly lightweight.
+     *
+     * @see #isDeviceProtectedStorage()
+     */
+    public abstract Context createDeviceProtectedStorageContext();
+
+    /** @removed */
+    @Deprecated
+    public Context createDeviceEncryptedStorageContext() {
+        return createDeviceProtectedStorageContext();
+    }
+
+    /**
+     * Return a new Context object for the current Context but whose storage
+     * APIs are backed by credential-protected storage. This is the default
+     * storage area for apps unless
+     * {@link android.R.attr#defaultToDeviceProtectedStorage} was requested.
+     * <p>
+     * On devices with direct boot, data stored in this location is encrypted
+     * with a key tied to user credentials, which can be accessed
+     * <em>only after</em> the user has entered their credentials (such as a
+     * lock pattern or PIN).
+     * <p>
+     * If the underlying device does not have the ability to store
+     * device-protected and credential-protected data using different keys, then
+     * both storage areas will become available at the same time. They remain as
+     * two distinct storage locations on disk, and only the window of
+     * availability changes.
+     * <p>
+     * Each call to this method returns a new instance of a Context object;
+     * Context objects are not shared, however common state (ClassLoader, other
+     * Resources for the same configuration) may be so the Context itself can be
+     * fairly lightweight.
+     *
+     * @see #isCredentialProtectedStorage()
+     * @hide
+     */
+    @SystemApi
+    public abstract Context createCredentialProtectedStorageContext();
+
+    /** @removed */
+    @Deprecated
+    public Context createCredentialEncryptedStorageContext() {
+        return createCredentialProtectedStorageContext();
+    }
+
+    /**
      * Gets the display adjustments holder for this context.  This information
      * is provided on a per-application or activity basis and is used to simulate lower density
      * display metrics for legacy applications and restricted screen sizes.
@@ -3915,6 +4279,11 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * @hide
+     */
+    public abstract Display getDisplay();
+
+    /**
      * Indicates whether this Context is restricted.
      *
      * @return {@code true} if this Context is restricted, {@code false} otherwise.
@@ -3923,5 +4292,35 @@ public abstract class Context {
      */
     public boolean isRestricted() {
         return false;
+    }
+
+    /**
+     * Indicates if the storage APIs of this Context are backed by
+     * device-protected storage.
+     *
+     * @see #createDeviceProtectedStorageContext()
+     */
+    public abstract boolean isDeviceProtectedStorage();
+
+    /** @removed */
+    @Deprecated
+    public boolean isDeviceEncryptedStorage() {
+        return isDeviceProtectedStorage();
+    }
+
+    /**
+     * Indicates if the storage APIs of this Context are backed by
+     * credential-protected storage.
+     *
+     * @see #createCredentialProtectedStorageContext()
+     * @hide
+     */
+    @SystemApi
+    public abstract boolean isCredentialProtectedStorage();
+
+    /** @removed */
+    @Deprecated
+    public boolean isCredentialEncryptedStorage() {
+        return isCredentialProtectedStorage();
     }
 }

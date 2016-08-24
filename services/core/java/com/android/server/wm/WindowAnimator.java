@@ -18,30 +18,43 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static com.android.server.wm.WindowManagerService.DEBUG_KEYGUARD;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_ACTION_PENDING;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+import static android.view.WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
+import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
+import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
+import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
+import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
+import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.content.Context;
-import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.Choreographer;
-
-import com.android.server.wm.WindowManagerService.LayoutFields;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,7 +64,7 @@ import java.util.ArrayList;
  * on behalf of WindowManagerService.
  */
 public class WindowAnimator {
-    private static final String TAG = "WindowAnimator";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowAnimator" : TAG_WM;
 
     /** How long to give statusbar to clear the private keyguard flag when animating out */
     private static final long KEYGUARD_ANIM_TIMEOUT_MS = 1000;
@@ -59,9 +72,10 @@ public class WindowAnimator {
     final WindowManagerService mService;
     final Context mContext;
     final WindowManagerPolicy mPolicy;
+    private final WindowSurfacePlacer mWindowPlacerLocked;
 
     /** Is any window animating? */
-    boolean mAnimating;
+    private boolean mAnimating;
 
     /** Is any app window animating? */
     boolean mAppWindowAnimating;
@@ -84,14 +98,12 @@ public class WindowAnimator {
     int mBulkUpdateParams = 0;
     Object mLastWindowFreezeSource;
 
-    SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators =
-            new SparseArray<DisplayContentsAnimator>(2);
+    SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
 
     boolean mInitialized = false;
 
     boolean mKeyguardGoingAway;
-    boolean mKeyguardGoingAwayToNotificationShade;
-    boolean mKeyguardGoingAwayDisableWindowAnimations;
+    int mKeyguardGoingAwayFlags;
 
     /** Use one animation for all entering activities after keyguard is dismissed. */
     Animation mPostKeyguardExitAnimation;
@@ -101,6 +113,10 @@ public class WindowAnimator {
     static final int KEYGUARD_SHOWN         = 1;
     static final int KEYGUARD_ANIMATING_OUT = 2;
     int mForceHiding = KEYGUARD_NOT_SHOWN;
+
+    // When set to true the animator will go over all windows after an animation frame is posted and
+    // check if some got replaced and can be removed.
+    private boolean mRemoveReplacedWindows = false;
 
     private String forceHidingToString() {
         switch (mForceHiding) {
@@ -115,6 +131,7 @@ public class WindowAnimator {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
+        mWindowPlacerLocked = service.mWindowPlacerLocked;
 
         mAnimationFrameCallback = new Choreographer.FrameCallback() {
             public void doFrame(long frameTimeNs) {
@@ -158,13 +175,14 @@ public class WindowAnimator {
                     appAnimator.wasAnimating = appAnimator.animating;
                     if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
                         appAnimator.animating = true;
-                        mAnimating = mAppWindowAnimating = true;
+                        setAnimating(true);
+                        mAppWindowAnimating = true;
                     } else if (appAnimator.wasAnimating) {
                         // stopped animating, do one more pass through the layout
                         setAppLayoutChanges(appAnimator,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
                                 "appToken " + appAnimator.mAppToken + " done", displayId);
-                        if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
+                        if (DEBUG_ANIM) Slog.v(TAG,
                                 "updateWindowsApps...: done animating " + appAnimator.mAppToken);
                     }
                 }
@@ -176,13 +194,16 @@ public class WindowAnimator {
                 final AppWindowAnimator appAnimator = exitingAppTokens.get(i).mAppAnimator;
                 appAnimator.wasAnimating = appAnimator.animating;
                 if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
-                    mAnimating = mAppWindowAnimating = true;
+                    setAnimating(true);
+                    mAppWindowAnimating = true;
                 } else if (appAnimator.wasAnimating) {
                     // stopped animating, do one more pass through the layout
-                    setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                        "exiting appToken " + appAnimator.mAppToken + " done", displayId);
-                    if (WindowManagerService.DEBUG_ANIM) Slog.v(TAG,
-                            "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
+                    setAppLayoutChanges(appAnimator,
+                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
+                            "exiting appToken " + appAnimator.mAppToken + " done", displayId);
+                    if (DEBUG_ANIM) Slog.v(TAG,
+                            "updateWindowsApps...: done animating exiting "
+                                    + appAnimator.mAppToken);
                 }
             }
         }
@@ -206,8 +227,8 @@ public class WindowAnimator {
 
         if (appShowWhenLocked != null) {
             allowWhenLocked |= appShowWhenLocked == win.mAppToken
-                    // Show all SHOW_WHEN_LOCKED windows while they're animating
-                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.isAnimatingLw()
+                    // Show all SHOW_WHEN_LOCKED windows if some apps are shown over lockscreen
+                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
                     // Show error dialogs over apps that dismiss keyguard.
                     || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
@@ -215,13 +236,23 @@ public class WindowAnimator {
         // Only hide windows if the keyguard is active and not animating away.
         boolean keyguardOn = mPolicy.isKeyguardShowingOrOccluded()
                 && mForceHiding != KEYGUARD_ANIMATING_OUT;
-        return keyguardOn && !allowWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY);
+        boolean hideDockDivider = win.mAttrs.type == TYPE_DOCK_DIVIDER
+                && win.getDisplayContent().getDockedStackLocked() == null;
+        return keyguardOn && !allowWhenLocked && (win.getDisplayId() == Display.DEFAULT_DISPLAY)
+                || hideDockDivider;
     }
 
     private void updateWindowsLocked(final int displayId) {
         ++mAnimTransactionSequence;
 
         final WindowList windows = mService.getWindowListLocked(displayId);
+
+        final boolean keyguardGoingAwayToShade =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_TO_SHADE) != 0;
+        final boolean keyguardGoingAwayNoAnimation =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS) != 0;
+        final boolean keyguardGoingAwayWithWallpaper =
+                (mKeyguardGoingAwayFlags & KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER) != 0;
 
         if (mKeyguardGoingAway) {
             for (int i = windows.size() - 1; i >= 0; i--) {
@@ -241,6 +272,8 @@ public class WindowAnimator {
                         winAnimator.mAnimationIsEntrance = false;
                         winAnimator.mAnimationStartTime = -1;
                         winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
                     }
                 } else {
                     if (DEBUG_KEYGUARD) Slog.d(TAG,
@@ -258,62 +291,47 @@ public class WindowAnimator {
         boolean startingInUnForceHiding = false;
         ArrayList<WindowStateAnimator> unForceHiding = null;
         WindowState wallpaper = null;
+        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
             final int flags = win.mAttrs.flags;
             boolean canBeForceHidden = mPolicy.canBeForceHidden(win, win.mAttrs);
             boolean shouldBeForceHidden = shouldForceHide(win);
-            if (winAnimator.mSurfaceControl != null) {
+            if (winAnimator.hasSurface()) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
                 winAnimator.mWasAnimating = nowAnimating;
-                mAnimating |= nowAnimating;
+                orAnimating(nowAnimating);
 
-                boolean appWindowAnimating = winAnimator.mAppAnimator != null
-                        && winAnimator.mAppAnimator.animating;
-                boolean wasAppWindowAnimating = winAnimator.mAppAnimator != null
-                        && winAnimator.mAppAnimator.wasAnimating;
-                boolean anyAnimating = appWindowAnimating || nowAnimating;
-                boolean anyWasAnimating = wasAppWindowAnimating || wasAnimating;
-
-                try {
-                    if (anyAnimating && !anyWasAnimating) {
-                        win.mClient.onAnimationStarted(winAnimator.mAnimatingMove ? -1
-                                : winAnimator.mKeyguardGoingAwayAnimation ? 1
-                                : 0);
-                    } else if (!anyAnimating && anyWasAnimating) {
-                        win.mClient.onAnimationStopped();
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to dispatch window animation state change.", e);
-                }
-
-                if (WindowManagerService.DEBUG_WALLPAPER) {
+                if (DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
                             ", nowAnimating=" + nowAnimating);
                 }
 
-                if (wasAnimating && !winAnimator.mAnimating && mService.mWallpaperTarget == win) {
+                if (wasAnimating && !winAnimator.mAnimating
+                        && wallpaperController.isWallpaperTarget(win)) {
                     mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                     setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
                             WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-                    if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                        mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 2",
+                    if (DEBUG_LAYOUT_REPEATS) {
+                        mWindowPlacerLocked.debugLayoutRepeats(
+                                "updateWindowsAndWallpaperLocked 2",
                                 getPendingLayoutChanges(Display.DEFAULT_DISPLAY));
                     }
                 }
 
                 if (mPolicy.isForceHiding(win.mAttrs)) {
                     if (!wasAnimating && nowAnimating) {
-                        if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_ANIM ||
-                                WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                        if (DEBUG_KEYGUARD || DEBUG_ANIM ||
+                                DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Animation started that could impact force hide: " + win);
                         mBulkUpdateParams |= SET_FORCE_HIDING_CHANGED;
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 3",
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 3",
                                     getPendingLayoutChanges(displayId));
                         }
                         mService.mFocusMayChange = true;
@@ -330,7 +348,7 @@ public class WindowAnimator {
                             mForceHiding = win.isDrawnLw() ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
                         }
                     }
-                    if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                    if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
                             "Force hide " + forceHidingToString()
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
@@ -345,7 +363,7 @@ public class WindowAnimator {
                             // Was already hidden
                             continue;
                         }
-                        if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                        if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Now policy hidden: " + win);
                     } else {
                         boolean applyExistingExitAnimation = mPostKeyguardExitAnimation != null
@@ -367,7 +385,7 @@ public class WindowAnimator {
                             win.hideLw(false, false);
                             continue;
                         }
-                        if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                        if (DEBUG_KEYGUARD || DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Now policy shown: " + win);
                         if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
                                 && win.mAttachedWindow == null) {
@@ -387,17 +405,21 @@ public class WindowAnimator {
                             if (DEBUG_KEYGUARD) Slog.v(TAG,
                                     "Applying existing Keyguard exit animation to new window: win="
                                             + win);
-                            Animation a = mPolicy.createForceHideEnterAnimation(
-                                    false, mKeyguardGoingAwayToNotificationShade);
-                            winAnimator.setAnimation(a, mPostKeyguardExitAnimation.getStartTime());
+
+                            Animation a = mPolicy.createForceHideEnterAnimation(false,
+                                    keyguardGoingAwayToShade);
+                            winAnimator.setAnimation(a, mPostKeyguardExitAnimation.getStartTime(),
+                                    STACK_CLIP_BEFORE_ANIM);
                             winAnimator.mKeyguardGoingAwayAnimation = true;
+                            winAnimator.mKeyguardGoingAwayWithWallpaper
+                                    = keyguardGoingAwayWithWallpaper;
                         }
                         final WindowState currentFocus = mService.mCurrentFocus;
                         if (currentFocus == null || currentFocus.mLayer < win.mLayer) {
                             // We are showing on top of the current
                             // focus, so re-evaluate focus to make
                             // sure it is correct.
-                            if (WindowManagerService.DEBUG_FOCUS_LIGHT) Slog.v(TAG,
+                            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG,
                                     "updateWindowsLocked: setting mFocusMayChange true");
                             mService.mFocusMayChange = true;
                         }
@@ -406,8 +428,9 @@ public class WindowAnimator {
                         mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
                         setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 4",
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 4",
                                     getPendingLayoutChanges(Display.DEFAULT_DISPLAY));
                         }
                     }
@@ -425,13 +448,14 @@ public class WindowAnimator {
             }
 
             final AppWindowToken atoken = win.mAppToken;
-            if (winAnimator.mDrawState == WindowStateAnimator.READY_TO_SHOW) {
+            if (winAnimator.mDrawState == READY_TO_SHOW) {
                 if (atoken == null || atoken.allDrawn) {
                     if (winAnimator.performShowLocked()) {
                         setPendingLayoutChanges(displayId,
                                 WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
-                        if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                            mService.debugLayoutRepeats("updateWindowsAndWallpaperLocked 5",
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mWindowPlacerLocked.debugLayoutRepeats(
+                                    "updateWindowsAndWallpaperLocked 5",
                                     getPendingLayoutChanges(displayId));
                         }
                     }
@@ -456,18 +480,20 @@ public class WindowAnimator {
         // being force-hidden, apply the appropriate animation to them if animations are not
         // disabled.
         if (unForceHiding != null) {
-            if (!mKeyguardGoingAwayDisableWindowAnimations) {
+            if (!keyguardGoingAwayNoAnimation) {
                 boolean first = true;
                 for (int i=unForceHiding.size()-1; i>=0; i--) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     Animation a = mPolicy.createForceHideEnterAnimation(
                             wallpaperInUnForceHiding && !startingInUnForceHiding,
-                            mKeyguardGoingAwayToNotificationShade);
+                            keyguardGoingAwayToShade);
                     if (a != null) {
                         if (DEBUG_KEYGUARD) Slog.v(TAG,
                                 "Starting keyguard exit animation on window " + winAnimator.mWin);
-                        winAnimator.setAnimation(a);
+                        winAnimator.setAnimation(a, STACK_CLIP_BEFORE_ANIM);
                         winAnimator.mKeyguardGoingAwayAnimation = true;
+                        winAnimator.mKeyguardGoingAwayWithWallpaper
+                                = keyguardGoingAwayWithWallpaper;
                         if (first) {
                             mPostKeyguardExitAnimation = a;
                             mPostKeyguardExitAnimation.setStartTime(mCurrentTime);
@@ -482,11 +508,10 @@ public class WindowAnimator {
 
 
             // Wallpaper is going away in un-force-hide motion, animate it as well.
-            if (!wallpaperInUnForceHiding && wallpaper != null
-                    && !mKeyguardGoingAwayDisableWindowAnimations) {
+            if (!wallpaperInUnForceHiding && wallpaper != null && !keyguardGoingAwayNoAnimation) {
                 if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
                 Animation a = mPolicy.createForceHideWallpaperExitAnimation(
-                        mKeyguardGoingAwayToNotificationShade);
+                        keyguardGoingAwayToShade);
                 if (a != null) {
                     wallpaper.mWinAnimator.setAnimation(a);
                 }
@@ -523,7 +548,7 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (winAnimator.mSurfaceControl == null) {
+            if (winAnimator.mSurfaceController == null || !winAnimator.hasSurface()) {
                 continue;
             }
 
@@ -546,7 +571,7 @@ public class WindowAnimator {
                         }
                     }
                 }
-                mAnimating = true;
+                setAnimating(true);
             }
 
             // If this window's app token is running a detached wallpaper
@@ -571,7 +596,7 @@ public class WindowAnimator {
         } // end forall windows
 
         if (mWindowDetachedWallpaper != detachedWallpaper) {
-            if (WindowManagerService.DEBUG_WALLPAPER) Slog.v(TAG,
+            if (DEBUG_WALLPAPER) Slog.v(TAG,
                     "Detached wallpaper changed from " + mWindowDetachedWallpaper
                     + " to " + detachedWallpaper);
             mWindowDetachedWallpaper = detachedWallpaper;
@@ -601,11 +626,12 @@ public class WindowAnimator {
                         if (appAnimator.freezingScreen) {
                             appAnimator.showAllWindowsLocked();
                             mService.unsetAppFreezingScreenLocked(wtoken, false, true);
-                            if (WindowManagerService.DEBUG_ORIENTATION) Slog.i(TAG,
+                            if (DEBUG_ORIENTATION) Slog.i(TAG,
                                     "Setting mOrientationChangeComplete=true because wtoken "
                                     + wtoken + " numInteresting=" + wtoken.numInterestingWindows
                                     + " numDrawn=" + wtoken.numDrawnWindows);
-                            // This will set mOrientationChangeComplete and cause a pass through layout.
+                            // This will set mOrientationChangeComplete and cause a pass through
+                            // layout.
                             setAppLayoutChanges(appAnimator,
                                     WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
                                     "testTokenMayBeDrawnLocked: freezingScreen", displayId);
@@ -616,7 +642,7 @@ public class WindowAnimator {
 
                             // We can now show all of the drawn windows!
                             if (!mService.mOpeningApps.contains(wtoken)) {
-                                mAnimating |= appAnimator.showAllWindowsLocked();
+                                orAnimating(appAnimator.showAllWindowsLocked());
                             }
                         }
                     }
@@ -635,13 +661,13 @@ public class WindowAnimator {
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
-        mAnimating = false;
+        setAnimating(false);
         mAppWindowAnimating = false;
-        if (WindowManagerService.DEBUG_WINDOW_TRACE) {
+        if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
         }
 
-        if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
+        if (SHOW_TRANSACTIONS) Slog.i(
                 TAG, ">>> OPEN TRANSACTION animateLocked");
         SurfaceControl.openTransaction();
         SurfaceControl.setAnimationTransaction();
@@ -656,7 +682,7 @@ public class WindowAnimator {
                         displayAnimator.mScreenRotationAnimation;
                 if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
                     if (screenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
-                        mAnimating = true;
+                        setAnimating(true);
                     } else {
                         mBulkUpdateParams |= SET_UPDATE_ROTATION;
                         screenRotationAnimation.kill();
@@ -696,8 +722,9 @@ public class WindowAnimator {
                     screenRotationAnimation.updateSurfacesInTransaction();
                 }
 
-                mAnimating |= mService.getDisplayContentLocked(displayId).animateDimLayers();
-
+                orAnimating(mService.getDisplayContentLocked(displayId).animateDimLayers());
+                orAnimating(mService.getDisplayContentLocked(displayId).getDockedDividerController()
+                        .animate(mCurrentTime));
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (mService.mAccessibilityController != null
                         && displayId == Display.DEFAULT_DISPLAY) {
@@ -705,11 +732,13 @@ public class WindowAnimator {
                 }
             }
 
+            if (mService.mDragState != null) {
+                mAnimating |= mService.mDragState.stepAnimationLocked(mCurrentTime);
+            }
+
             if (mAnimating) {
                 mService.scheduleAnimationLocked();
             }
-
-            mService.setFocusedStackLayer();
 
             if (mService.mWatermark != null) {
                 mService.mWatermark.drawIfNeeded();
@@ -718,7 +747,7 @@ public class WindowAnimator {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
             SurfaceControl.closeTransaction();
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(
+            if (SHOW_TRANSACTIONS) Slog.i(
                     TAG, "<<< CLOSE TRANSACTION animateLocked");
         }
 
@@ -737,39 +766,75 @@ public class WindowAnimator {
 
         boolean doRequest = false;
         if (mBulkUpdateParams != 0) {
-            doRequest = mService.copyAnimToLayoutParamsLocked();
+            doRequest = mWindowPlacerLocked.copyAnimToLayoutParamsLocked();
         }
 
         if (hasPendingLayoutChanges || doRequest) {
-            mService.requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
+        }
+
+        if (mAnimating && !wasAnimating && Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
         }
 
         if (!mAnimating && wasAnimating) {
-            mService.requestTraversalLocked();
+            mWindowPlacerLocked.requestTraversal();
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
+            }
         }
-        if (WindowManagerService.DEBUG_WINDOW_TRACE) {
+
+        if (mRemoveReplacedWindows) {
+            removeReplacedWindowsLocked();
+        }
+
+        mService.stopUsingSavedSurfaceLocked();
+        mService.destroyPreservedSurfaceLocked();
+        mService.mWindowPlacerLocked.destroyPendingSurfaces();
+
+        if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
-                + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
-                + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
-                + Integer.toHexString(getPendingLayoutChanges(Display.DEFAULT_DISPLAY)));
+                    + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
+                    + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
+                    + Integer.toHexString(getPendingLayoutChanges(Display.DEFAULT_DISPLAY)));
         }
     }
 
-    static String bulkUpdateParamsToString(int bulkUpdateParams) {
+    private void removeReplacedWindowsLocked() {
+        if (SHOW_TRANSACTIONS) Slog.i(
+                TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
+        SurfaceControl.openTransaction();
+        try {
+            for (int i = mService.mDisplayContents.size() - 1; i >= 0; i--) {
+                DisplayContent display = mService.mDisplayContents.valueAt(i);
+                final WindowList windows = mService.getWindowListLocked(display.getDisplayId());
+                for (int j = windows.size() - 1; j >= 0; j--) {
+                    windows.get(j).maybeRemoveReplacedWindow();
+                }
+            }
+        } finally {
+            SurfaceControl.closeTransaction();
+            if (SHOW_TRANSACTIONS) Slog.i(
+                    TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
+        }
+        mRemoveReplacedWindows = false;
+    }
+
+    private static String bulkUpdateParamsToString(int bulkUpdateParams) {
         StringBuilder builder = new StringBuilder(128);
-        if ((bulkUpdateParams & LayoutFields.SET_UPDATE_ROTATION) != 0) {
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_UPDATE_ROTATION) != 0) {
             builder.append(" UPDATE_ROTATION");
         }
-        if ((bulkUpdateParams & LayoutFields.SET_WALLPAPER_MAY_CHANGE) != 0) {
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE) != 0) {
             builder.append(" WALLPAPER_MAY_CHANGE");
         }
-        if ((bulkUpdateParams & LayoutFields.SET_FORCE_HIDING_CHANGED) != 0) {
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED) != 0) {
             builder.append(" FORCE_HIDING_CHANGED");
         }
-        if ((bulkUpdateParams & LayoutFields.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
             builder.append(" ORIENTATION_CHANGE_COMPLETE");
         }
-        if ((bulkUpdateParams & LayoutFields.SET_TURN_ON_SCREEN) != 0) {
+        if ((bulkUpdateParams & WindowSurfacePlacer.SET_TURN_ON_SCREEN) != 0) {
             builder.append(" TURN_ON_SCREEN");
         }
         return builder.toString();
@@ -845,8 +910,9 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             if (displayId == windows.get(i).getDisplayId()) {
                 setPendingLayoutChanges(displayId, changes);
-                if (WindowManagerService.DEBUG_LAYOUT_REPEATS) {
-                    mService.debugLayoutRepeats(reason, getPendingLayoutChanges(displayId));
+                if (DEBUG_LAYOUT_REPEATS) {
+                    mWindowPlacerLocked.debugLayoutRepeats(reason,
+                            getPendingLayoutChanges(displayId));
                 }
                 break;
             }
@@ -875,7 +941,23 @@ public class WindowAnimator {
         return getDisplayContentsAnimatorLocked(displayId).mScreenRotationAnimation;
     }
 
+    void requestRemovalOfReplacedWindows(WindowState win) {
+        mRemoveReplacedWindows = true;
+    }
+
     private class DisplayContentsAnimator {
         ScreenRotationAnimation mScreenRotationAnimation = null;
+    }
+
+    boolean isAnimating() {
+        return mAnimating;
+    }
+
+    void setAnimating(boolean animating) {
+        mAnimating = animating;
+    }
+
+    void orAnimating(boolean animating) {
+        mAnimating |= animating;
     }
 }

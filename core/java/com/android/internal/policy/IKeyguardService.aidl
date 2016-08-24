@@ -50,9 +50,12 @@ oneway interface IKeyguardService {
      * Called when the device has finished going to sleep.
      *
      * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
-     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     *            or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     * @param cameraGestureTriggered whether the camera gesture was triggered between
+     *                               {@link #onStartedGoingToSleep} and this method; if it's been
+     *                               triggered, we shouldn't lock the device.
      */
-    void onFinishedGoingToSleep(int reason);
+    void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered);
 
     /**
      * Called when the device has started waking up.

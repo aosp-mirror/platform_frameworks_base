@@ -1,0 +1,391 @@
+page.title=Otimizações em segundo plano
+page.metaDescription=Novas restrições a transmissões implícitas.
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Neste documento
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">Restrições sobre CONNECTIVITY_ACTION</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">Agendamento de trabalhos de rede em conexões
+ ilimitadas</a>
+      </li>
+
+      <li>
+        <a href="#monitor-conn">Monitoramento de conectividade de rede durante a execução
+ do aplicativo</a>
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">Restrições sobre NEW_PICTURE e
+ NEW_VIDEO</a>
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">Novos métodos JobInfo</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">Novos métodos JobParameter</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">Otimização adicional do aplicativo</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Os processos em segundo plano podem fazer uso intensivo de memória e bateria. Por exemplo, uma
+ transmissão implícita poderá iniciar diversos processos em segundo plano registrados
+ para escutá-la, mesmo se esses processos não forem muito usados. Isso pode afetar
+ substancialmente o desempenho do dispositivo e a experiência do usuário.
+</p>
+
+<p>
+  Para aliviar esse problema, o Android N aplica as seguintes
+restrições:
+</p>
+
+<ul>
+  <li>Os aplicativos direcionados ao Preview não receberão transmissões {@link
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
+ registrados para recebê-las no seu manifesto. Os aplicativos em execução ainda
+poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal registrando um 
+{@link android.content.BroadcastReceiver} em {@link
+ android.content.Context#registerReceiver Context.registerReceiver()}.
+  </li>
+
+  <li>Os aplicativos não podem enviar nem receber transmissões {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}. Essa otimização
+ afeta todos os aplicativos e não apenas os direcionados ao Preview.
+  </li>
+</ul>
+
+<p>
+  Se o seu aplicativo usar qualquer uma dessas intenções, remova as dependências delas
+ assim que possível para direcionar corretamente os dispositivos Android N.
+  A estrutura do Android oferece diversas soluções para reduzir a necessidade dessas
+ transmissões implícitas. Por exemplo, {@link android.app.job.JobScheduler}
+ e <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> oferecem mecanismos robustos para agendar operações
+ de rede quando ocorrem condições especificadas, como conexão a uma
+ rede ilimitada. Agora, você também pode usar {@link android.app.job.JobScheduler}
+ para reagir a mudanças em provedores de conteúdo. Os objetos {@link android.app.job.JobInfo}
+ encapsulam os parâmetros usados por {@link android.app.job.JobScheduler}
+ para agendar o seu trabalho. Quando as condições do trabalho forem atendidas, o sistema
+ executará o trabalho no {@link android.app.job.JobService} do seu aplicativo.
+</p>
+
+<p>
+  Neste documento, veremos como usar métodos alternativos, como
+ {@link android.app.job.JobScheduler}, para adaptar seu aplicativo a essas novas
+ restrições.
+</p>
+
+<h2 id="connectivity-action">
+  Restrições sobre CONNECTIVITY_ACTION
+</h2>
+
+<p>
+  Os aplicativos direcionados ao Android N não receberão transmissões {@link
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
+ registrados para recebê-las no seu manifesto e os processos que dependerem dessas
+ transmissões não serão iniciados. Isso pode ser um problema para aplicativos que quiserem
+ escutar mudanças de rede ou executar atividades de rede em massa quando o
+ dispositivo se conectar a uma rede ilimitada. Já existem várias soluções para contornar essa
+ restrição na estrutura do Android, mas a escolha da solução correta
+ depende do que o aplicativo pretende realizar.
+</p>
+
+<p class="note">
+  <strong>Observação:</strong> Um {@link android.content.BroadcastReceiver} registrado em 
+ {@link android.content.Context#registerReceiver Context.registerReceiver()}
+ continuará a receber essas transmissões enquanto o aplicativo estiver em execução.
+</p>
+
+<h3 id="sched-jobs">
+  Agendamento de trabalhos de rede em conexões ilimitadas
+</h3>
+
+<p>
+  Ao usar a classe {@link android.app.job.JobInfo.Builder JobInfo.Builder}
+ para compilar o objeto {@link android.app.job.JobInfo}, aplique o método {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} e passe {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} como parâmetro do trabalho. O código a seguir
+ agendará a execução de um serviço quando o dispositivo se conectar a uma rede
+ ilimitada e estiver carregando:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  Quando as condições para o trabalho forem atendidas, o aplicativo receberá um retorno de chamada para executar
+ o método {@link android.app.job.JobService#onStartJob onStartJob()} na
+ {@code JobService.class} especificada. Para ver mais exemplos da implementação de {@link
+  android.app.job.JobScheduler}, consulte o <a href="{@docRoot}samples/JobScheduler/index.html">aplicativo de exemplo do JobScheduler</a>.
+</p>
+
+<p>
+  Os aplicativos que usarem serviços do GMSCore e forem direcionados ao Android 5.0 (nível da API 21)
+ ou anterior poderão usar <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> e especificar {@code Task.NETWORK_STATE_UNMETERED}.
+</p>
+
+<h3 id="monitor-conn">
+  Monitoramento de conectividade de rede durante a execução do aplicativo
+</h3>
+
+<p>
+  Os aplicativos em execução ainda poderão escutar {@code CONNECTIVITY_CHANGE} com um
+ {@link android.content.BroadcastReceiver} registrado. No entanto, a API {@link
+ android.net.ConnectivityManager} oferece um método mais robusto para solicitar
+ um retorno de chamada apenas quando condições de rede especificadas são atendidas.
+</p>
+
+<p>
+  Os objetos {@link android.net.NetworkRequest} definem os parâmetros do
+ retorno de chamada de rede em termos de {@link android.net.NetworkCapabilities}. Objetos
+ {@link android.net.NetworkRequest} são criados com a classe {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder}. Em seguida, {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+ passa o objeto {@link android.net.NetworkRequest} ao sistema. Quando
+ as condições de rede forem atendidas, o aplicativo receberá um retorno de chamada para executar o
+ método {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} definido em sua classe {@link
+  android.net.ConnectivityManager.NetworkCallback}.
+</p>
+
+<p>
+  O aplicativo continuará a receber retornos de chamada até que o aplicativo encerre ou chame 
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()}.
+</p>
+
+<h2 id="media-broadcasts">
+  Restrições sobre NEW_PICTURE e NEW_VIDEO
+</h2>
+
+<p>
+  No Android N, os aplicativos não conseguem enviar nem receber transmissões {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}. Essa restrição ajuda a
+ aliviar os impactos no desempenho e na experiência de usuário quando vários aplicativos devem
+ despertar para processar uma nova imagem ou vídeo. O Android N
+ estende {@link android.app.job.JobInfo} e {@link
+ android.app.job.JobParameters} para oferecer uma solução alternativa.
+</p>
+
+<h3 id="new-jobinfo">
+  Novos métodos JobInfo
+</h3>
+
+<p>
+  Para acionar trabalhos em mudanças de URI de conteúdo, o Android N estende
+ a API {@link android.app.job.JobInfo} com os seguintes métodos:
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    Encapsula os parâmetros necessários para acionar um trabalho quando ocorrem mudanças de URI de conteúdo.
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    Passa um objeto {@code TriggerContentUri} para {@link
+    android.app.job.JobInfo}. Um {@link android.database.ContentObserver}
+ monitora o URI de conteúdo encapsulado. Se houver vários objetos {@code
+    TriggerContentUri} associados a um trabalho, o sistema fornecerá um
+ retorno de chamada, mesmo se indicar uma mudança em apenas um dos URIs de conteúdo.
+  </dd>
+
+  <dd>
+    Adicione o sinalizador {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} para
+ acionar o trabalho em caso de mudança em qualquer um dos descendentes do URI especificado. Esse indicador
+ corresponde ao parâmetro {@code notifyForDescendants} passado para {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()}.
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>Observação:</strong> não é possível usar {@code TriggerContentUri()}
+ juntamente com {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} ou {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()}. Para monitorar continuamente mudanças de conteúdo, agende um novo
+ {@link android.app.job.JobInfo} antes que o {@link
+  android.app.job.JobService} do aplicativo encerre o processamento do retorno de chamada mais recente.
+</p>
+
+<p>
+  O exemplo de código a seguir agenda um trabalho que será acionado quando o sistema indicar
+ uma mudança no URI de conteúdo {@code MEDIA_URI}:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  Quando o sistema indicar uma mudança nos URIs de conteúdo especificados, o aplicativo
+ receberá um retorno de chamada e um objeto {@link android.app.job.JobParameters} será
+ passado para o método {@link android.app.job.JobService#onStartJob onStartJob()}
+ na {@code MediaContentJob.class}.
+</p>
+
+<h3 id="new-jobparam">
+  Novos métodos JobParameter
+</h3>
+
+<p>
+  O Android N também estende {@link android.app.job.JobParameters} para
+ permitir que o aplicativo receba informações úteis sobre quais autoridades de conteúdo
+ e URIs acionaram o trabalho:
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    Retorna uma matriz de URIs que acionaram o trabalho. O retorno será {@code
+    null} se o trabalho não foi acionado por URIs (por exemplo, o trabalho foi
+ acionado devido a um prazo ou por outro motivo) ou o número de URIs modificados
+ for maior que 50.
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    Retorna uma matriz de strings de autoridades de conteúdo que acionaram o trabalho.
+    Se a matriz retornada não for {@code null}, use {@code getTriggeredContentUris()}
+ para recuperar os detalhes sobre quais URIs foram modificados.
+  </dd>
+</dl>
+
+<p>
+  O exemplo de código a seguir substitui o método {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} e
+ registra as autoridades de conteúdo e URIs que acionaram o trabalho:
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  Otimização adicional do aplicativo
+</h2>
+
+<p>
+  A otimização dos aplicativos para execução em dispositivos com pouca memória ou em
+ condições de pouca memória pode melhorar o desempenho e a experiência do usuário. A remoção de
+ dependências de serviços em segundo plano e receptores de transmissão
+ implícita registrados estatisticamente pode aprimorar a execução do aplicativo nesses dispositivos. Embora
+ o Android N avance na redução de alguns desses problemas,
+ recomendamos que você otimize os aplicativos para execução sem o uso desses
+ processos em segundo plano.
+</p>
+
+<p>
+  O Android N introduz alguns comandos adicionais do <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> que
+ podem ser usados para testar o comportamento do aplicativo de teste com esses processos em segundo plano desativados:
+</p>
+
+<ul>
+  <li>Para simular condições em que transmissões implícitas e serviços em segundo plano
+ não estão disponíveis, insira o seguinte comando:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>Para reativar transmissões implícitas e serviços em segundo plano, insira o
+ seguinte comando:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

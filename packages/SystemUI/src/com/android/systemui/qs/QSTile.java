@@ -16,23 +16,30 @@
 
 package com.android.systemui.qs;
 
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.qs.external.TileServices;
+import com.android.systemui.statusbar.phone.ManagedProfileController;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -40,10 +47,15 @@ import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
@@ -52,30 +64,32 @@ import java.util.Objects;
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
  */
-public abstract class QSTile<TState extends State> implements Listenable {
-    protected final String TAG = "QSTile." + getClass().getSimpleName();
-    protected static final boolean DEBUG = Log.isLoggable("QSTile", Log.DEBUG);
+public abstract class QSTile<TState extends State> {
+    protected final String TAG = "Tile." + getClass().getSimpleName();
+    protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
     protected final Host mHost;
     protected final Context mContext;
     protected final H mHandler;
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    private final ArraySet<Object> mListeners = new ArraySet<>();
 
-    private Callback mCallback;
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     protected TState mState = newTileState();
     private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
 
-    abstract protected TState newTileState();
+    private String mTileSpec;
+
+    public abstract TState newTileState();
     abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
 
     /**
      * Declare the category of this tile.
      *
-     * Categories are defined in {@link com.android.internal.logging.MetricsLogger}
-     * or if there is no relevant existing category you may define one in
-     * {@link com.android.systemui.qs.QSTile}.
+     * Categories are defined in {@link com.android.internal.logging.MetricsProto.MetricsEvent}
+     * by editing frameworks/base/proto/src/metrics_constants.proto.
      */
     abstract public int getMetricsCategory();
 
@@ -85,24 +99,55 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler = new H(host.getLooper());
     }
 
-    public boolean supportsDualTargets() {
-        return false;
+    /**
+     * Adds or removes a listening client for the tile. If the tile has one or more
+     * listening client it will go into the listening state.
+     */
+    public void setListening(Object listener, boolean listening) {
+        if (listening) {
+            if (mListeners.add(listener) && mListeners.size() == 1) {
+                if (DEBUG) Log.d(TAG, "setListening " + true);
+                mHandler.obtainMessage(H.SET_LISTENING, 1, 0).sendToTarget();
+            }
+        } else {
+            if (mListeners.remove(listener) && mListeners.size() == 0) {
+                if (DEBUG) Log.d(TAG, "setListening " + false);
+                mHandler.obtainMessage(H.SET_LISTENING, 0, 0).sendToTarget();
+            }
+        }
+    }
+
+    public String getTileSpec() {
+        return mTileSpec;
+    }
+
+    public void setTileSpec(String tileSpec) {
+        mTileSpec = tileSpec;
     }
 
     public Host getHost() {
         return mHost;
     }
 
-    public QSTileView createTileView(Context context) {
-        return new QSTileView(context);
+    public QSIconView createTileView(Context context) {
+        return new QSIconView(context);
     }
 
     public DetailAdapter getDetailAdapter() {
         return null; // optional
     }
 
+    /**
+     * Is a startup check whether this device currently supports this tile.
+     * Should not be used to conditionally hide tiles.  Only checked on tile
+     * creation or whether should be shown in edit screen.
+     */
+    public boolean isAvailable() {
+        return true;
+    }
+
     public interface DetailAdapter {
-        int getTitle();
+        CharSequence getTitle();
         Boolean getToggleState();
         View createDetailView(Context context, View convertView, ViewGroup parent);
         Intent getSettingsIntent();
@@ -112,8 +157,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     // safe to call from any thread
 
-    public void setCallback(Callback callback) {
-        mHandler.obtainMessage(H.SET_CALLBACK, callback).sendToTarget();
+    public void addCallback(Callback callback) {
+        mHandler.obtainMessage(H.ADD_CALLBACK, callback).sendToTarget();
+    }
+
+    public void removeCallback(Callback callback) {
+        mHandler.obtainMessage(H.REMOVE_CALLBACK, callback).sendToTarget();
+    }
+
+    public void removeCallbacks() {
+        mHandler.sendEmptyMessage(H.REMOVE_CALLBACKS);
     }
 
     public void click() {
@@ -132,7 +185,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0).sendToTarget();
     }
 
-    protected final void refreshState() {
+    public final void refreshState() {
         refreshState(null);
     }
 
@@ -170,18 +223,30 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     // call only on tile worker looper
 
-    private void handleSetCallback(Callback callback) {
-        mCallback = callback;
-        handleRefreshState(null);
+    private void handleAddCallback(Callback callback) {
+        mCallbacks.add(callback);
+        callback.onStateChanged(mState);
+    }
+
+    private void handleRemoveCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
+    private void handleRemoveCallbacks() {
+        mCallbacks.clear();
     }
 
     protected void handleSecondaryClick() {
-        // optional
+        // Default to normal click.
+        handleClick();
     }
 
     protected void handleLongClick() {
-        // optional
+        MetricsLogger.action(mContext, MetricsEvent.ACTION_QS_LONG_PRESS, getTileSpec());
+        mHost.startActivityDismissingKeyguard(getLongClickIntent());
     }
+
+    public abstract Intent getLongClickIntent();
 
     protected void handleClearState() {
         mTmpState = newTileState();
@@ -198,12 +263,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     private void handleStateChanged() {
         boolean delayAnnouncement = shouldAnnouncementBeDelayed();
-        if (mCallback != null) {
-            mCallback.onStateChanged(mState);
+        if (mCallbacks.size() != 0) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onStateChanged(mState);
+            }
             if (mAnnounceNextStateChange && !delayAnnouncement) {
                 String announcement = composeChangeAnnouncement();
                 if (announcement != null) {
-                    mCallback.onAnnouncementRequested(announcement);
+                    mCallbacks.get(0).onAnnouncementRequested(announcement);
                 }
             }
         }
@@ -219,20 +286,20 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     private void handleShowDetail(boolean show) {
-        if (mCallback != null) {
-            mCallback.onShowDetail(show);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onShowDetail(show);
         }
     }
 
     private void handleToggleStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onToggleStateChanged(state);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onToggleStateChanged(state);
         }
     }
 
     private void handleScanStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onScanStateChanged(state);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onScanStateChanged(state);
         }
     }
 
@@ -240,13 +307,30 @@ public abstract class QSTile<TState extends State> implements Listenable {
         handleRefreshState(null);
     }
 
+    protected abstract void setListening(boolean listening);
+
     protected void handleDestroy() {
         setListening(false);
-        mCallback = null;
+        mCallbacks.clear();
     }
 
+    protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
+        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                userRestriction, ActivityManager.getCurrentUser());
+        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+                userRestriction, ActivityManager.getCurrentUser())) {
+            state.disabledByPolicy = true;
+            state.enforcedAdmin = admin;
+        } else {
+            state.disabledByPolicy = false;
+            state.enforcedAdmin = null;
+        }
+    }
+
+    public abstract CharSequence getTileLabel();
+
     protected final class H extends Handler {
-        private static final int SET_CALLBACK = 1;
+        private static final int ADD_CALLBACK = 1;
         private static final int CLICK = 2;
         private static final int SECONDARY_CLICK = 3;
         private static final int LONG_CLICK = 4;
@@ -257,6 +341,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int SCAN_STATE_CHANGED = 9;
         private static final int DESTROY = 10;
         private static final int CLEAR_STATE = 11;
+        private static final int REMOVE_CALLBACKS = 12;
+        private static final int REMOVE_CALLBACK = 13;
+        private static final int SET_LISTENING = 14;
 
         private H(Looper looper) {
             super(looper);
@@ -266,13 +353,25 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public void handleMessage(Message msg) {
             String name = null;
             try {
-                if (msg.what == SET_CALLBACK) {
-                    name = "handleSetCallback";
-                    handleSetCallback((QSTile.Callback)msg.obj);
+                if (msg.what == ADD_CALLBACK) {
+                    name = "handleAddCallback";
+                    handleAddCallback((QSTile.Callback) msg.obj);
+                } else if (msg.what == REMOVE_CALLBACKS) {
+                    name = "handleRemoveCallbacks";
+                    handleRemoveCallbacks();
+                } else if (msg.what == REMOVE_CALLBACK) {
+                    name = "handleRemoveCallback";
+                    handleRemoveCallback((QSTile.Callback) msg.obj);
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
-                    mAnnounceNextStateChange = true;
-                    handleClick();
+                    if (mState.disabledByPolicy) {
+                        Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
+                                mContext, mState.enforcedAdmin);
+                        mHost.startActivityDismissingKeyguard(intent);
+                    } else {
+                        mAnnounceNextStateChange = true;
+                        handleClick();
+                    }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
                     handleSecondaryClick();
@@ -300,6 +399,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == CLEAR_STATE) {
                     name = "handleClearState";
                     handleClearState();
+                } else if (msg.what == SET_LISTENING) {
+                    name = "setListening";
+                    setListening(msg.arg1 != 0);
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
@@ -322,12 +424,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public interface Host {
         void startActivityDismissingKeyguard(Intent intent);
         void startActivityDismissingKeyguard(PendingIntent intent);
+        void startRunnableDismissingKeyguard(Runnable runnable);
         void warn(String message, Throwable t);
         void collapsePanels();
+        void animateToggleQSExpansion();
+        void openPanels();
         Looper getLooper();
         Context getContext();
         Collection<QSTile<?>> getTiles();
-        void setCallback(Callback callback);
+        void addCallback(Callback callback);
+        void removeCallback(Callback callback);
         BluetoothController getBluetoothController();
         LocationController getLocationController();
         RotationLockController getRotationLockController();
@@ -337,6 +443,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
         CastController getCastController();
         FlashlightController getFlashlightController();
         KeyguardMonitor getKeyguardMonitor();
+        UserSwitcherController getUserSwitcherController();
+        UserInfoController getUserInfoController();
+        BatteryController getBatteryController();
+        TileServices getTileServices();
+        NightModeController getNightModeController();
+        void removeTile(String tileSpec);
+        ManagedProfileController getManagedProfileController();
+
 
         public interface Callback {
             void onTilesChanged();
@@ -346,9 +460,35 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public static abstract class Icon {
         abstract public Drawable getDrawable(Context context);
 
+        public Drawable getInvisibleDrawable(Context context) {
+            return getDrawable(context);
+        }
+
         @Override
         public int hashCode() {
             return Icon.class.hashCode();
+        }
+
+        public int getPadding() {
+            return 0;
+        }
+    }
+
+    public static class DrawableIcon extends Icon {
+        protected final Drawable mDrawable;
+
+        public DrawableIcon(Drawable drawable) {
+            mDrawable = drawable;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return mDrawable;
+        }
+
+        @Override
+        public Drawable getInvisibleDrawable(Context context) {
+            return mDrawable;
         }
     }
 
@@ -372,11 +512,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         @Override
         public Drawable getDrawable(Context context) {
-            Drawable d = context.getDrawable(mResId);
-            if (d instanceof Animatable) {
-                ((Animatable) d).start();
-            }
-            return d;
+            return context.getDrawable(mResId);
+        }
+
+        @Override
+        public Drawable getInvisibleDrawable(Context context) {
+            return context.getDrawable(mResId);
         }
 
         @Override
@@ -391,68 +532,65 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected class AnimationIcon extends ResourceIcon {
-        private boolean mAllowAnimation;
+        private final int mAnimatedResId;
 
-        public AnimationIcon(int resId) {
-            super(resId);
-        }
-
-        public void setAllowAnimation(boolean allowAnimation) {
-            mAllowAnimation = allowAnimation;
+        public AnimationIcon(int resId, int staticResId) {
+            super(staticResId);
+            mAnimatedResId = resId;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
-            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) context.getDrawable(mResId)
-                    .getConstantState().newDrawable();
-            d.start();
-            if (mAllowAnimation) {
-                mAllowAnimation = false;
-            } else {
-                d.stop(); // skip directly to end state
-            }
-            return d;
-        }
-    }
-
-    protected enum UserBoolean {
-        USER_TRUE(true, true),
-        USER_FALSE(true, false),
-        BACKGROUND_TRUE(false, true),
-        BACKGROUND_FALSE(false, false);
-        public final boolean value;
-        public final boolean userInitiated;
-        private UserBoolean(boolean userInitiated, boolean value) {
-            this.value = value;
-            this.userInitiated = userInitiated;
+            return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
         }
     }
 
     public static class State {
-        public boolean visible;
         public Icon icon;
-        public String label;
-        public String contentDescription;
-        public String dualLabelContentDescription;
+        public CharSequence label;
+        public CharSequence contentDescription;
+        public CharSequence dualLabelContentDescription;
+        public CharSequence minimalContentDescription;
         public boolean autoMirrorDrawable = true;
+        public boolean disabledByPolicy;
+        public EnforcedAdmin enforcedAdmin;
+        public String minimalAccessibilityClassName;
+        public String expandedAccessibilityClassName;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
             if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
-            final boolean changed = other.visible != visible
-                    || !Objects.equals(other.icon, icon)
+            final boolean changed = !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.contentDescription, contentDescription)
                     || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
                     || !Objects.equals(other.dualLabelContentDescription,
-                    dualLabelContentDescription);
-            other.visible = visible;
+                    dualLabelContentDescription)
+                    || !Objects.equals(other.minimalContentDescription,
+                    minimalContentDescription)
+                    || !Objects.equals(other.minimalAccessibilityClassName,
+                    minimalAccessibilityClassName)
+                    || !Objects.equals(other.expandedAccessibilityClassName,
+                    expandedAccessibilityClassName)
+                    || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
+                    || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
+            other.minimalContentDescription = minimalContentDescription;
+            other.minimalAccessibilityClassName = minimalAccessibilityClassName;
+            other.expandedAccessibilityClassName = expandedAccessibilityClassName;
             other.autoMirrorDrawable = autoMirrorDrawable;
+            other.disabledByPolicy = disabledByPolicy;
+            if (enforcedAdmin == null) {
+                other.enforcedAdmin = null;
+            } else if (other.enforcedAdmin == null) {
+                other.enforcedAdmin = new EnforcedAdmin(enforcedAdmin);
+            } else {
+                enforcedAdmin.copyTo(other.enforcedAdmin);
+            }
             return changed;
         }
 
@@ -463,12 +601,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         protected StringBuilder toStringBuilder() {
             final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
-            sb.append("visible=").append(visible);
             sb.append(",icon=").append(icon);
             sb.append(",label=").append(label);
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
+            sb.append(",minimalContentDescription=").append(minimalContentDescription);
+            sb.append(",minimalAccessibilityClassName=").append(minimalAccessibilityClassName);
+            sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);
             sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
+            sb.append(",disabledByPolicy=").append(disabledByPolicy);
+            sb.append(",enforcedAdmin=").append(enforcedAdmin);
             return sb.append(']');
         }
     }
@@ -492,8 +634,19 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
     }
 
-    public static final class SignalState extends State {
-        public boolean enabled;
+    public static class AirplaneBooleanState extends BooleanState {
+        public boolean isAirplaneMode;
+
+        @Override
+        public boolean copyTo(State other) {
+            final AirplaneBooleanState o = (AirplaneBooleanState) other;
+            final boolean changed = super.copyTo(other) || o.isAirplaneMode != isAirplaneMode;
+            o.isAirplaneMode = isAirplaneMode;
+            return changed;
+        }
+    }
+
+    public static final class SignalState extends BooleanState {
         public boolean connected;
         public boolean activityIn;
         public boolean activityOut;
@@ -504,12 +657,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         public boolean copyTo(State other) {
             final SignalState o = (SignalState) other;
-            final boolean changed = o.enabled != enabled
-                    || o.connected != connected || o.activityIn != activityIn
+            final boolean changed = o.connected != connected || o.activityIn != activityIn
                     || o.activityOut != activityOut
                     || o.overlayIconId != overlayIconId
                     || o.isOverlayIconWide != isOverlayIconWide;
-            o.enabled = enabled;
             o.connected = connected;
             o.activityIn = activityIn;
             o.activityOut = activityOut;
@@ -522,7 +673,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         protected StringBuilder toStringBuilder() {
             final StringBuilder rt = super.toStringBuilder();
-            rt.insert(rt.length() - 1, ",enabled=" + enabled);
             rt.insert(rt.length() - 1, ",connected=" + connected);
             rt.insert(rt.length() - 1, ",activityIn=" + activityIn);
             rt.insert(rt.length() - 1, ",activityOut=" + activityOut);

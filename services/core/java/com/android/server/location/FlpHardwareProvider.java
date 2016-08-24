@@ -16,19 +16,18 @@
 
 package com.android.server.location;
 
+import android.content.Context;
 import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
 import android.hardware.location.GeofenceHardwareRequestParcelable;
 import android.hardware.location.IFusedLocationHardware;
 import android.hardware.location.IFusedLocationHardwareSink;
-import android.location.IFusedGeofenceHardware;
 import android.location.FusedBatchOptions;
+import android.location.IFusedGeofenceHardware;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
-
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -301,7 +300,6 @@ public class FlpHardwareProvider {
     private native void nativeRequestBatchedLocation(int lastNLocations);
     private native void nativeFlushBatchedLocations();
     private native void nativeInjectLocation(Location location);
-    // TODO [Fix] sort out the lifetime of the instance
     private native void nativeCleanup();
 
     // FlpDiagnosticsInterface members
@@ -339,6 +337,11 @@ public class FlpHardwareProvider {
 
     public IFusedGeofenceHardware getGeofenceHardware() {
         return mGeofenceHardwareService;
+    }
+
+    public void cleanup() {
+        Log.i(TAG, "Calling nativeCleanup()");
+        nativeCleanup();
     }
 
     private final IFusedLocationHardware mLocationHardware = new IFusedLocationHardware.Stub() {

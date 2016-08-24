@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.SystemClock;
@@ -259,7 +260,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations;
         }
     }

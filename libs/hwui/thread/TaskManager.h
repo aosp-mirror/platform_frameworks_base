@@ -20,9 +20,10 @@
 #include <utils/Mutex.h>
 #include <utils/String8.h>
 #include <utils/Thread.h>
-#include <utils/Vector.h>
 
 #include "Signal.h"
+
+#include <vector>
 
 namespace android {
 namespace uirenderer {
@@ -89,7 +90,7 @@ private:
 
         // Lock for the list of tasks
         mutable Mutex mLock;
-        Vector<TaskWrapper> mTasks;
+        std::vector<TaskWrapper> mTasks;
 
         // Signal used to wake up the thread when a new
         // task is available in the list
@@ -98,7 +99,7 @@ private:
         const String8 mName;
     };
 
-    Vector<sp<WorkerThread> > mThreads;
+    std::vector<sp<WorkerThread> > mThreads;
 };
 
 }; // namespace uirenderer

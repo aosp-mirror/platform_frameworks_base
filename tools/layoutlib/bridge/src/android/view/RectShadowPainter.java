@@ -44,6 +44,11 @@ public class RectShadowPainter {
     private static final float PERPENDICULAR_ANGLE = 90f;
 
     public static void paintShadow(Outline viewOutline, float elevation, Canvas canvas) {
+        Rect outline = new Rect();
+        if (!viewOutline.getRect(outline)) {
+            throw new IllegalArgumentException("Outline is not a rect shadow");
+        }
+
         float shadowSize = elevationToShadow(elevation);
         int saved = modifyCanvas(canvas, shadowSize);
         if (saved == -1) {
@@ -54,8 +59,7 @@ public class RectShadowPainter {
             cornerPaint.setStyle(Style.FILL);
             Paint edgePaint = new Paint(cornerPaint);
             edgePaint.setAntiAlias(false);
-            Rect outline = viewOutline.mRect;
-            float radius = viewOutline.mRadius;
+            float radius = viewOutline.getRadius();
             float outerArcRadius = radius + shadowSize;
             int[] colors = {START_COLOR, START_COLOR, END_COLOR};
             cornerPaint.setShader(new RadialGradient(0, 0, outerArcRadius, colors,

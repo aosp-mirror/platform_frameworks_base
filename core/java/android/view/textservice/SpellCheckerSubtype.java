@@ -16,6 +16,10 @@
 
 package android.view.textservice;
 
+import com.android.internal.inputmethod.InputMethodUtils;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
@@ -33,29 +37,71 @@ import java.util.Locale;
 /**
  * This class is used to specify meta information of a subtype contained in a spell checker.
  * Subtype can describe locale (e.g. en_US, fr_FR...) used for settings.
+ *
+ * @see SpellCheckerInfo
+ *
+ * @attr ref android.R.styleable#SpellChecker_Subtype_label
+ * @attr ref android.R.styleable#SpellChecker_Subtype_languageTag
+ * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeLocale
+ * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeExtraValue
+ * @attr ref android.R.styleable#SpellChecker_Subtype_subtypeId
  */
 public final class SpellCheckerSubtype implements Parcelable {
     private static final String TAG = SpellCheckerSubtype.class.getSimpleName();
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
+    /**
+     * @hide
+     */
+    public static final int SUBTYPE_ID_NONE = 0;
+    private static final String SUBTYPE_LANGUAGE_TAG_NONE = "";
 
+    private final int mSubtypeId;
     private final int mSubtypeHashCode;
     private final int mSubtypeNameResId;
     private final String mSubtypeLocale;
+    private final String mSubtypeLanguageTag;
     private final String mSubtypeExtraValue;
     private HashMap<String, String> mExtraValueHashMapCache;
 
     /**
-     * Constructor
+     * Constructor.
+     *
+     * <p>There is no public API that requires developers to instantiate custom
+     * {@link SpellCheckerSubtype} object.  Hence so far there is no need to make this constructor
+     * available in public API.</p>
+     *
+     * @param nameId The name of the subtype
+     * @param locale The locale supported by the subtype
+     * @param languageTag The BCP-47 Language Tag associated with this subtype.
+     * @param extraValue The extra value of the subtype
+     * @param subtypeId The subtype ID that is supposed to be stable during package update.
+     *
+     * @hide
+     */
+    public SpellCheckerSubtype(int nameId, String locale, String languageTag, String extraValue,
+            int subtypeId) {
+        mSubtypeNameResId = nameId;
+        mSubtypeLocale = locale != null ? locale : "";
+        mSubtypeLanguageTag = languageTag != null ? languageTag : SUBTYPE_LANGUAGE_TAG_NONE;
+        mSubtypeExtraValue = extraValue != null ? extraValue : "";
+        mSubtypeId = subtypeId;
+        mSubtypeHashCode = mSubtypeId != SUBTYPE_ID_NONE ?
+                mSubtypeId : hashCodeInternal(mSubtypeLocale, mSubtypeExtraValue);
+    }
+
+    /**
+     * Constructor.
      * @param nameId The name of the subtype
      * @param locale The locale supported by the subtype
      * @param extraValue The extra value of the subtype
+     *
+     * @deprecated There is no public API that requires developers to directly instantiate custom
+     * {@link SpellCheckerSubtype} objects right now.  Hence only the system is expected to be able
+     * to instantiate {@link SpellCheckerSubtype} object.
      */
     public SpellCheckerSubtype(int nameId, String locale, String extraValue) {
-        mSubtypeNameResId = nameId;
-        mSubtypeLocale = locale != null ? locale : "";
-        mSubtypeExtraValue = extraValue != null ? extraValue : "";
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeExtraValue);
+        this(nameId, locale, SUBTYPE_LANGUAGE_TAG_NONE, extraValue, SUBTYPE_ID_NONE);
     }
 
     SpellCheckerSubtype(Parcel source) {
@@ -64,8 +110,12 @@ public final class SpellCheckerSubtype implements Parcelable {
         s = source.readString();
         mSubtypeLocale = s != null ? s : "";
         s = source.readString();
+        mSubtypeLanguageTag = s != null ? s : "";
+        s = source.readString();
         mSubtypeExtraValue = s != null ? s : "";
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeExtraValue);
+        mSubtypeId = source.readInt();
+        mSubtypeHashCode = mSubtypeId != SUBTYPE_ID_NONE ?
+                mSubtypeId : hashCodeInternal(mSubtypeLocale, mSubtypeExtraValue);
     }
 
     /**
@@ -77,9 +127,24 @@ public final class SpellCheckerSubtype implements Parcelable {
 
     /**
      * @return the locale of the subtype
+     *
+     * @deprecated Use {@link #getLanguageTag()} instead.
      */
+    @Deprecated
+    @NonNull
     public String getLocale() {
         return mSubtypeLocale;
+    }
+
+    /**
+     * @return the BCP-47 Language Tag of the subtype.  Returns an empty string when no Language Tag
+     * is specified.
+     *
+     * @see Locale#forLanguageTag(String)
+     */
+    @NonNull
+    public String getLanguageTag() {
+        return mSubtypeLanguageTag;
     }
 
     /**
@@ -138,31 +203,31 @@ public final class SpellCheckerSubtype implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof SpellCheckerSubtype) {
             SpellCheckerSubtype subtype = (SpellCheckerSubtype) o;
+            if (subtype.mSubtypeId != SUBTYPE_ID_NONE || mSubtypeId != SUBTYPE_ID_NONE) {
+                return (subtype.hashCode() == hashCode());
+            }
             return (subtype.hashCode() == hashCode())
-                && (subtype.getNameResId() == getNameResId())
-                && (subtype.getLocale().equals(getLocale()))
-                && (subtype.getExtraValue().equals(getExtraValue()));
+                    && (subtype.getNameResId() == getNameResId())
+                    && (subtype.getLocale().equals(getLocale()))
+                    && (subtype.getLanguageTag().equals(getLanguageTag()))
+                    && (subtype.getExtraValue().equals(getExtraValue()));
         }
         return false;
     }
 
     /**
+     * @return {@link Locale} constructed from {@link #getLanguageTag()}. If the Language Tag is not
+     * specified, then try to construct from {@link #getLocale()}
+     *
+     * <p>TODO: Consider to make this a public API, or move this to support lib.</p>
      * @hide
      */
-    public static Locale constructLocaleFromString(String localeStr) {
-        if (TextUtils.isEmpty(localeStr))
-            return null;
-        String[] localeParams = localeStr.split("_", 3);
-        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
-        // because localeStr is not empty.
-        if (localeParams.length == 1) {
-            return new Locale(localeParams[0]);
-        } else if (localeParams.length == 2) {
-            return new Locale(localeParams[0], localeParams[1]);
-        } else if (localeParams.length == 3) {
-            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
+    @Nullable
+    public Locale getLocaleObject() {
+        if (!TextUtils.isEmpty(mSubtypeLanguageTag)) {
+            return Locale.forLanguageTag(mSubtypeLanguageTag);
         }
-        return null;
+        return InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
     }
 
     /**
@@ -177,7 +242,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final Locale locale = constructLocaleFromString(mSubtypeLocale);
+        final Locale locale = getLocaleObject();
         final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
             return localeStr;
@@ -200,7 +265,9 @@ public final class SpellCheckerSubtype implements Parcelable {
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(mSubtypeNameResId);
         dest.writeString(mSubtypeLocale);
+        dest.writeString(mSubtypeLanguageTag);
         dest.writeString(mSubtypeExtraValue);
+        dest.writeInt(mSubtypeId);
     }
 
     public static final Parcelable.Creator<SpellCheckerSubtype> CREATOR

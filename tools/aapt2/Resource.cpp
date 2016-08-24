@@ -15,7 +15,7 @@
  */
 
 #include "Resource.h"
-#include "StringPiece.h"
+#include "util/StringPiece.h"
 
 #include <map>
 #include <string>
@@ -28,7 +28,7 @@ StringPiece16 toString(ResourceType type) {
         case ResourceType::kAnimator:      return u"animator";
         case ResourceType::kArray:         return u"array";
         case ResourceType::kAttr:          return u"attr";
-        case ResourceType::kAttrPrivate:   return u"attr";
+        case ResourceType::kAttrPrivate:   return u"^attr-private";
         case ResourceType::kBool:          return u"bool";
         case ResourceType::kColor:         return u"color";
         case ResourceType::kDimen:         return u"dimen";
@@ -36,7 +36,6 @@ StringPiece16 toString(ResourceType type) {
         case ResourceType::kFraction:      return u"fraction";
         case ResourceType::kId:            return u"id";
         case ResourceType::kInteger:       return u"integer";
-        case ResourceType::kIntegerArray:  return u"integer-array";
         case ResourceType::kInterpolator:  return u"interpolator";
         case ResourceType::kLayout:        return u"layout";
         case ResourceType::kMenu:          return u"menu";
@@ -65,7 +64,6 @@ static const std::map<StringPiece16, ResourceType> sResourceTypeMap {
         { u"fraction", ResourceType::kFraction },
         { u"id", ResourceType::kId },
         { u"integer", ResourceType::kInteger },
-        { u"integer-array", ResourceType::kIntegerArray },
         { u"interpolator", ResourceType::kInterpolator },
         { u"layout", ResourceType::kLayout },
         { u"menu", ResourceType::kMenu },
@@ -85,6 +83,14 @@ const ResourceType* parseResourceType(const StringPiece16& str) {
         return nullptr;
     }
     return &iter->second;
+}
+
+bool operator<(const ResourceKey& a, const ResourceKey& b) {
+    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
+}
+
+bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b) {
+    return std::tie(a.name, a.config) < std::tie(b.name, b.config);
 }
 
 } // namespace aapt

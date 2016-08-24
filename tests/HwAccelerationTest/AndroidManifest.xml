@@ -347,8 +347,44 @@
         </activity>
 
         <activity
+                android:name="SingleFrameTextureViewTestActivity"
+                android:label="TextureView/SingleFrameTextureViewTest">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="HardwareCanvasSurfaceViewActivity"
                 android:label="SurfaceView/HardwareCanvas">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="MovingSurfaceViewActivity"
+                android:label="SurfaceView/Animated Movement">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="GetBitmapSurfaceViewActivity"
+                android:label="SurfaceView/GetBitmap with Camera source">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="VideoViewCaptureActivity"
+                android:label="SurfaceView/GetBitmap with Video source">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />
@@ -938,6 +974,15 @@
         <activity
                 android:name="RevealActivity"
                 android:label="Animation/Reveal Animation">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="MultiProducerActivity"
+                android:label="Threads/Multiple Producers">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />

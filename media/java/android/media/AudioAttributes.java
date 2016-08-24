@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -223,10 +224,29 @@ public final class AudioAttributes implements Parcelable {
     @SystemApi
     public final static int FLAG_BYPASS_MUTE = 0x1 << 7;
 
+    /**
+     * Flag requesting a low latency path when creating an AudioTrack.
+     * When using this flag, the sample rate must match the native sample rate
+     * of the device. Effects processing is also unavailable.
+     *
+     * Note that if this flag is used without specifying a bufferSizeInBytes then the
+     * AudioTrack's actual buffer size may be too small. It is recommended that a fairly
+     * large buffer should be specified when the AudioTrack is created.
+     * Then the actual size can be reduced by calling
+     * {@link AudioTrack#setBufferSizeInFrames(int)}. The buffer size can be optimized
+     * by lowering it after each write() call until the audio glitches, which is detected by calling
+     * {@link AudioTrack#getUnderrunCount()}. Then the buffer size can be increased
+     * until there are no glitches.
+     * This tuning step should be done while playing silence.
+     * This technique provides a compromise between latency and glitch rate.
+     */
+    public final static int FLAG_LOW_LATENCY = 0x1 << 8;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE;
-    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC;
+            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY;
+    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
+            FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
@@ -234,6 +254,7 @@ public final class AudioAttributes implements Parcelable {
     private int mFlags = 0x0;
     private HashSet<String> mTags;
     private String mFormattedTags;
+    private Bundle mBundle; // lazy-initialized, may be null
 
     private AudioAttributes() {
     }
@@ -287,6 +308,20 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * @hide
+     * Return the Bundle of data.
+     * @return a copy of the Bundle for this instance, may be null.
+     */
+    @SystemApi
+    public Bundle getBundle() {
+        if (mBundle == null) {
+            return mBundle;
+        } else {
+            return new Bundle(mBundle);
+        }
+    }
+
+    /**
+     * @hide
      * Return the set of tags.
      * @return a read-only set of all tags stored as strings.
      */
@@ -319,6 +354,7 @@ public final class AudioAttributes implements Parcelable {
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
         private HashSet<String> mTags = new HashSet<String>();
+        private Bundle mBundle;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -357,6 +393,9 @@ public final class AudioAttributes implements Parcelable {
             aa.mFlags = mFlags;
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
+            if (mBundle != null) {
+                aa.mBundle = new Bundle(mBundle);
+            }
             return aa;
         }
 
@@ -433,12 +472,32 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Sets the combination of flags.
-         * @param flags the {@link AudioAttributes#FLAG_AUDIBILITY_ENFORCED} flag.
+         * @param flags a combination of {@link AudioAttributes#FLAG_AUDIBILITY_ENFORCED},
+         *    {@link AudioAttributes#FLAG_HW_AV_SYNC}.
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Adds a Bundle of data
+         * @param bundle a non-null Bundle
+         * @return the same builder instance
+         */
+        @SystemApi
+        public Builder addBundle(@NonNull Bundle bundle) {
+            if (bundle == null) {
+                throw new IllegalArgumentException("Illegal null bundle");
+            }
+            if (mBundle == null) {
+                mBundle = new Bundle(bundle);
+            } else {
+                mBundle.putAll(bundle);
+            }
             return this;
         }
 
@@ -520,8 +579,9 @@ public final class AudioAttributes implements Parcelable {
          * instance with {@link AudioRecord#AudioRecord(AudioAttributes, AudioFormat, int)}.
          * @param preset one of {@link MediaRecorder.AudioSource#DEFAULT},
          *     {@link MediaRecorder.AudioSource#MIC}, {@link MediaRecorder.AudioSource#CAMCORDER},
-         *     {@link MediaRecorder.AudioSource#VOICE_RECOGNITION} or
-         *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
+         *     {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
+         *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION} or
+         *     {@link MediaRecorder.AudioSource#UNPROCESSED}
          * @return the same Builder instance.
          */
         @SystemApi
@@ -532,6 +592,7 @@ public final class AudioAttributes implements Parcelable {
                 case MediaRecorder.AudioSource.CAMCORDER:
                 case MediaRecorder.AudioSource.VOICE_RECOGNITION:
                 case MediaRecorder.AudioSource.VOICE_COMMUNICATION:
+                case MediaRecorder.AudioSource.UNPROCESSED:
                     mSource = preset;
                     break;
                 default:
@@ -573,6 +634,10 @@ public final class AudioAttributes implements Parcelable {
      * see definition of kAudioAttributesMarshallTagFlattenTags
      */
     public final static int FLATTEN_TAGS = 0x1;
+
+    private final static int ATTR_PARCEL_IS_NULL_BUNDLE = -1977;
+    private final static int ATTR_PARCEL_IS_VALID_BUNDLE = 1980;
+
     /**
      * When adding tags for writeToParcel(Parcel, int), add them in the list of flags (| NEW_FLAG)
      */
@@ -590,6 +655,12 @@ public final class AudioAttributes implements Parcelable {
             dest.writeStringArray(tagsArray);
         } else if ((flags & FLATTEN_TAGS) == FLATTEN_TAGS) {
             dest.writeString(mFormattedTags);
+        }
+        if (mBundle == null) {
+            dest.writeInt(ATTR_PARCEL_IS_NULL_BUNDLE);
+        } else {
+            dest.writeInt(ATTR_PARCEL_IS_VALID_BUNDLE);
+            dest.writeBundle(mBundle);
         }
     }
 
@@ -609,6 +680,16 @@ public final class AudioAttributes implements Parcelable {
                 mTags.add(tagsArray[i]);
             }
             mFormattedTags = TextUtils.join(";", mTags);
+        }
+        switch (in.readInt()) {
+            case ATTR_PARCEL_IS_NULL_BUNDLE:
+                mBundle = null;
+                break;
+            case ATTR_PARCEL_IS_VALID_BUNDLE:
+                mBundle = new Bundle(in.readBundle());
+                break;
+            default:
+                Log.e(TAG, "Illegal value unmarshalling AudioAttributes, can't initialize bundle");
         }
     }
 
@@ -644,7 +725,7 @@ public final class AudioAttributes implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags);
+        return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags, mBundle);
     }
 
     @Override
@@ -653,7 +734,8 @@ public final class AudioAttributes implements Parcelable {
                 + " usage=" + mUsage
                 + " content=" + mContentType
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
-                + " tags=" + mFormattedTags);
+                + " tags=" + mFormattedTags
+                + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
     }
 
     /** @hide */

@@ -58,7 +58,7 @@ without sacrificing compatibility or usability on the smaller screens.  It may s
 though multiple APK support is the best solution, but this often isn’t the case.  The <a
 href="{@docRoot}google/play/publishing/multiple-apks.html#ApiLevelOptions">Using Single APK
 Instead</a> section of the multiple APK developer guide includes some useful information on how to
-accomplish this with a single APK, including use of our support library. You should also read the 
+accomplish this with a single APK, including use of our support library. You should also read the
 guide to <a href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>,
 and there’s even a <a
 href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">support library</a> you
@@ -118,7 +118,7 @@ everything else".  Coloring in the chart also makes intra-team communication eas
 now simply refer to each APK as "blue", "green", or "red", no matter how many different screen types
 it covers.</p>
 
-<h2 id="CreateLibrary">Put All Common Code and Resources in a Library Project.</h2>
+<h2 id="CreateLibrary">Put All Common Code and Resources in a Library Project</h2>
 <p>Whether you’re modifying an existing Android application or starting one from scratch, this is
 the first thing that you should do to the codebase, and by the far the most important.  Everything
 that goes into the library project only needs to be updated once (think language-localized strings,
@@ -126,18 +126,9 @@ color themes, bugs fixed in shared code), which improves your development time a
 likelihood of mistakes that could have been easily avoided.</p>
 
 <p class="note"><strong>Note:</strong>  While the implementation details of how to create and
-include library projects are beyond the scope of this lesson, you can get up to speed quickly on
-their creation at the following links:</p>
-<ul>
-<li><a
-href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
-a library project (Eclipse)</a></li>
-<li><a
-href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
-a library project (Command line)</a></li>
-</ul>
-
-
+include library projects are beyond the scope of this lesson, you can get up to speed
+by reading <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 <p>If you’re converting an existing application to use multiple APK support,
 scour your codebase for every localized string file, list of values, theme
@@ -156,7 +147,7 @@ to the library section without screwing anything up.</p>
 
 <h2 id="CreateAPKs">Create New APK Projects</h2>
 <p>There should be a separate Android project for each APK you’re going to release.  For easy
-organization, place the library project and all related APK projects under the same parent folder. 
+organization, place the library project and all related APK projects under the same parent folder.
 Also remember that each APK needs to have the same package name, although they don’t necessarily
 need to share the package name with the library.  If you were to have 3 APKs following the scheme
 described earlier, your root directory might look like this:</p>
@@ -295,7 +286,7 @@ makes things needlessly complicated, and increases the opportunity for errors.
 Also note that instead of taking advantage of the default values (small and
 normal are always true by default), the manifests explicitly set the value for
 each screen size.  This can save you headaches down the line.  For instance, a manifest with a
-target SDK of &lt; 9 will have xlarge automatically set to false, since that size didn’t exist yet. 
+target SDK of &lt; 9 will have xlarge automatically set to false, since that size didn’t exist yet.
 So be explicit!
 </p>
 

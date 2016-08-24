@@ -20,7 +20,7 @@
 #include <cutils/compiler.h>
 #include <SkCanvas.h>
 
-#include "Canvas.h"
+#include "hwui/Canvas.h"
 
 namespace android {
 namespace uirenderer {
@@ -47,7 +47,7 @@ protected:
     virtual SkSurface* onNewSurface(const SkImageInfo&, const SkSurfaceProps&) override;
 
     virtual void willSave() override;
-    virtual SaveLayerStrategy willSaveLayer(const SkRect*, const SkPaint*, SaveFlags) override;
+    virtual SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
     virtual void willRestore() override;
 
     virtual void didConcat(const SkMatrix&) override;
@@ -63,11 +63,9 @@ protected:
     virtual void onDrawBitmap(const SkBitmap&, SkScalar left, SkScalar top,
                               const SkPaint*) override;
     virtual void onDrawBitmapRect(const SkBitmap&, const SkRect* src, const SkRect& dst,
-                                  const SkPaint* paint, DrawBitmapRectFlags flags) override;
+                                  const SkPaint* paint, SrcRectConstraint) override;
     virtual void onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& center,
                                   const SkRect& dst, const SkPaint*) override;
-    virtual void onDrawSprite(const SkBitmap&, int left, int top,
-                              const SkPaint*) override;
     virtual void onDrawVertices(VertexMode, int vertexCount, const SkPoint vertices[],
                                 const SkPoint texs[], const SkColor colors[], SkXfermode*,
                                 const uint16_t indices[], int indexCount,

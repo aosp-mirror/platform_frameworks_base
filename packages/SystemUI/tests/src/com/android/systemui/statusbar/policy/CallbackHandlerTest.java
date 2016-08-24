@@ -19,12 +19,10 @@ import android.os.HandlerThread;
 import android.telephony.SubscriptionInfo;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;

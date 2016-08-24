@@ -77,23 +77,23 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"올바른 PUK 코드를 다시 입력하세요. 입력을 반복해서 시도하면 SIM을 영구적으로 사용할 수 없게 됩니다."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 코드가 일치하지 않음"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"패턴 시도 횟수가 너무 많음"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 이 태블릿은 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 이 휴대전화는 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 태블릿은 재설정되며 모든 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 휴대전화는 재설정되며 모든 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 태블릿은 재설정되며 모든 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 휴대전화는 재설정되며 모든 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 이 사용자는 삭제되며 모든 사용자 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 직장 프로필이 삭제되고 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 직장 프로필이 삭제되고 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"태블릿 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필이 삭제되고 모든 프로필 데이터가 삭제됩니다."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"휴대전화 잠금 해제에 <xliff:g id="NUMBER_0">%1$d</xliff:g>번 실패했습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>번 더 실패하면 직장 프로필이 삭제되고 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"태블릿 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필이 삭제되며 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필이 삭제되며 모든 프로필 데이터가 삭제됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN 코드가 잘못되었습니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM PIN 코드가 잘못되었습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
@@ -108,17 +108,19 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK 작업이 실패했습니다."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"코드 승인 완료"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"서비스 불가"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"입력 방법 전환"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"비행기 모드"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"기기를 다시 시작하려면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"기기를 다시 시작하려면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"기기를 다시 시작하려면 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"보안 강화를 위해 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"보안 강화를 위해 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"보안 강화를 위해 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"프로필을 전환하려면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"프로필을 전환하려면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"기기가 다시 시작되면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"기기가 다시 시작되면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"기기가 다시 시작되면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"보안 강화를 위해 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"보안 강화를 위해 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"보안 강화를 위해 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"프로필을 전환하려면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"프로필을 전환하려면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"기기 관리자가 기기를 잠금 설정함"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"기기가 수동으로 잠금 설정됨"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>

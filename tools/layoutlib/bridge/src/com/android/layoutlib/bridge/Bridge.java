@@ -24,6 +24,7 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.layoutlib.bridge.util.DynamicIdMap;
@@ -183,7 +184,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     private static LayoutLog sCurrentLog = sDefaultLog;
 
-    private static final int LAST_SUPPORTED_FEATURE = Features.RECYCLER_VIEW_ADAPTER;
+    private static final int LAST_SUPPORTED_FEATURE = Features.THEME_PREVIEW_NAVIGATION_BAR;
 
     @Override
     public int getApiLevel() {
@@ -408,7 +409,9 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     /**
      * Starts a layout session by inflating and rendering it. The method returns a
      * {@link RenderSession} on which further actions can be taken.
-     *
+     * <p/>
+     * If {@link SessionParams} includes the {@link RenderParamsFlags#FLAG_DO_NOT_RENDER_ON_CREATE},
+     * this method will only inflate the layout but will NOT render it.
      * @param params the {@link SessionParams} object with all the information necessary to create
      *           the scene.
      * @return a new {@link RenderSession} object that contains the result of the layout.
@@ -424,7 +427,10 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 lastResult = scene.init(params.getTimeout());
                 if (lastResult.isSuccess()) {
                     lastResult = scene.inflate();
-                    if (lastResult.isSuccess()) {
+
+                    boolean doNotRenderOnCreate = Boolean.TRUE.equals(
+                            params.getFlag(RenderParamsFlags.FLAG_DO_NOT_RENDER_ON_CREATE));
+                    if (lastResult.isSuccess() && !doNotRenderOnCreate) {
                         lastResult = scene.render(true /*freshRender*/);
                     }
                 }
@@ -531,7 +537,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Note that while this can be called several time, the first call to {@link #cleanupThread()}
      * will do the clean-up, and make the thread unable to do further scene actions.
      */
-    public static void prepareThread() {
+    public synchronized static void prepareThread() {
         // we need to make sure the Looper has been initialized for this thread.
         // this is required for View that creates Handler objects.
         if (Looper.myLooper() == null) {
@@ -545,7 +551,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Note that it doesn't matter how many times {@link #prepareThread()} was called, a single
      * call to this will prevent the thread from doing further scene actions
      */
-    public static void cleanupThread() {
+    public synchronized static void cleanupThread() {
         // clean up the looper
         Looper_Accessor.cleanupThread();
     }

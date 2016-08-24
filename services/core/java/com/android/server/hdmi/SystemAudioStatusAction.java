@@ -68,10 +68,8 @@ final class SystemAudioStatusAction extends HdmiCecFeatureAction {
         // the audio amplifier is unknown.
         tv().setAudioStatus(false, Constants.UNKNOWN_VOLUME);
 
-        int uiCommand = tv().isSystemAudioActivated()
-                ? HdmiCecKeycode.CEC_KEYCODE_RESTORE_VOLUME_FUNCTION  // SystemAudioMode: ON
-                : HdmiCecKeycode.CEC_KEYCODE_MUTE_FUNCTION;           // SystemAudioMode: OFF
-        sendUserControlPressedAndReleased(mAvrAddress, uiCommand);
+        sendUserControlPressedAndReleased(mAvrAddress,
+                HdmiCecKeycode.getMuteKey(!tv().isSystemAudioActivated()));
 
         // Still return SUCCESS to callback.
         finishWithCallback(HdmiControlManager.RESULT_SUCCESS);

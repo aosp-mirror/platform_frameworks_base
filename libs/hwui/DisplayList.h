@@ -17,10 +17,6 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_H
 #define ANDROID_HWUI_DISPLAY_LIST_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <SkCamera.h>
 #include <SkMatrix.h>
 
@@ -31,7 +27,6 @@
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
@@ -40,8 +35,11 @@
 #include "Debug.h"
 #include "CanvasProperty.h"
 #include "DeferredDisplayList.h"
+#include "GlFunctorLifecycleListener.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+
+#include <vector>
 
 class SkBitmap;
 class SkPaint;
@@ -58,11 +56,18 @@ class OpenGLRenderer;
 class Rect;
 class Layer;
 
-class ClipRectOp;
-class SaveLayerOp;
-class SaveOp;
-class RestoreToCountOp;
+#if HWUI_NEW_OPS
+struct RecordedOp;
+struct RenderNodeOp;
+
+typedef RecordedOp BaseOpType;
+typedef RenderNodeOp NodeOpType;
+#else
 class DrawRenderNodeOp;
+
+typedef DisplayListOp BaseOpType;
+typedef DrawRenderNodeOp NodeOpType;
+#endif
 
 /**
  * Holds data used in the playback a tree of DisplayLists.
@@ -106,70 +111,104 @@ struct ReplayStateStruct : public PlaybackStateStruct {
 };
 
 /**
+ * Functor that can be used for objects with data in both UI thread and RT to keep the data
+ * in sync. This functor, when added to DisplayList, will be call during DisplayList sync.
+ */
+struct PushStagingFunctor {
+    PushStagingFunctor() {}
+    virtual ~PushStagingFunctor() {}
+    virtual void operator ()() {}
+};
+
+struct FunctorContainer {
+    Functor* functor;
+    GlFunctorLifecycleListener* listener;
+};
+
+/**
  * Data structure that holds the list of commands used in display list stream
  */
-class DisplayListData {
+class DisplayList {
     friend class DisplayListCanvas;
+    friend class RecordingCanvas;
 public:
     struct Chunk {
-        // range of included ops in DLD::displayListOps
+        // range of included ops in DisplayList::ops()
         size_t beginOpIndex;
         size_t endOpIndex;
 
-        // range of included children in DLD::mChildren
+        // range of included children in DisplayList::children()
         size_t beginChildIndex;
         size_t endChildIndex;
 
         // whether children with non-zero Z in the chunk should be reordered
         bool reorderChildren;
+#if HWUI_NEW_OPS
+        const ClipBase* reorderClip;
+#endif
     };
 
-    DisplayListData();
-    ~DisplayListData();
+    DisplayList();
+    ~DisplayList();
 
-    // pointers to all ops within display list, pointing into allocator data
-    Vector<DisplayListOp*> displayListOps;
-
-    // index of DisplayListOp restore, after which projected descendents should be drawn
+    // index of DisplayListOp restore, after which projected descendants should be drawn
     int projectionReceiveIndex;
 
-    Vector<const SkBitmap*> bitmapResources;
-    Vector<const SkPath*> pathResources;
-    Vector<const Res_png_9patch*> patchResources;
+    const LsaVector<Chunk>& getChunks() const { return chunks; }
+    const LsaVector<BaseOpType*>& getOps() const { return ops; }
 
-    std::vector<std::unique_ptr<const SkPaint>> paints;
-    std::vector<std::unique_ptr<const SkRegion>> regions;
-    Vector<Functor*> functors;
+    const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
-    const Vector<Chunk>& getChunks() const {
-        return chunks;
-    }
+    const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
+    const LsaVector<FunctorContainer>& getFunctors() const { return functors; }
+    const LsaVector<PushStagingFunctor*>& getPushStagingFunctors() { return pushStagingFunctors; }
 
-    size_t addChild(DrawRenderNodeOp* childOp);
-    const Vector<DrawRenderNodeOp*>& children() { return mChildren; }
+    size_t addChild(NodeOpType* childOp);
+
 
     void ref(VirtualLightRefBase* prop) {
-        mReferenceHolders.push(prop);
+        referenceHolders.push_back(prop);
     }
 
     size_t getUsedSize() {
         return allocator.usedSize();
     }
     bool isEmpty() {
+#if HWUI_NEW_OPS
+        return ops.empty();
+#else
         return !hasDrawOps;
+#endif
     }
 
 private:
-    Vector< sp<VirtualLightRefBase> > mReferenceHolders;
-
-    // list of children display lists for quick, non-drawing traversal
-    Vector<DrawRenderNodeOp*> mChildren;
-
-    Vector<Chunk> chunks;
-
-    // allocator into which all ops were allocated
+    // allocator into which all ops and LsaVector arrays allocated
     LinearAllocator allocator;
-    bool hasDrawOps;
+    LinearStdAllocator<void*> stdAllocator;
+
+    LsaVector<Chunk> chunks;
+    LsaVector<BaseOpType*> ops;
+
+    // list of Ops referring to RenderNode children for quick, non-drawing traversal
+    LsaVector<NodeOpType*> children;
+
+    // Resources - Skia objects + 9 patches referred to by this DisplayList
+    LsaVector<const SkBitmap*> bitmapResources;
+    LsaVector<const SkPath*> pathResources;
+    LsaVector<const Res_png_9patch*> patchResources;
+    LsaVector<std::unique_ptr<const SkPaint>> paints;
+    LsaVector<std::unique_ptr<const SkRegion>> regions;
+    LsaVector< sp<VirtualLightRefBase> > referenceHolders;
+
+    // List of functors
+    LsaVector<FunctorContainer> functors;
+
+    // List of functors that need to be notified of pushStaging. Note that this list gets nothing
+    // but a callback during sync DisplayList, unlike the list of functors defined above, which
+    // gets special treatment exclusive for webview.
+    LsaVector<PushStagingFunctor*> pushStagingFunctors;
+
+    bool hasDrawOps; // only used if !HWUI_NEW_OPS
 
     void cleanupResources();
 };

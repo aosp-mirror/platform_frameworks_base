@@ -38,13 +38,14 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The main programming interface for the DRM framework. An application must instantiate this class
  * to access DRM agents through the DRM framework.
  *
  */
-public class DrmManagerClient {
+public class DrmManagerClient implements AutoCloseable {
     /**
      * Indicates that a request was successful or that no error occurred.
      */
@@ -61,6 +62,7 @@ public class DrmManagerClient {
     HandlerThread mEventThread;
     private static final String TAG = "DrmManagerClient";
 
+    private final AtomicBoolean mClosed = new AtomicBoolean();
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     static {
@@ -117,7 +119,6 @@ public class DrmManagerClient {
 
     private int mUniqueId;
     private long mNativeContext;
-    private volatile boolean mReleased;
     private Context mContext;
     private InfoHandler mInfoHandler;
     private EventHandler mEventHandler;
@@ -261,41 +262,47 @@ public class DrmManagerClient {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mCloseGuard != null) {
-                mCloseGuard.warnIfOpen();
-            }
-            release();
+            mCloseGuard.warnIfOpen();
+            close();
         } finally {
             super.finalize();
         }
     }
 
     /**
-     * Releases resources associated with the current session of DrmManagerClient.
-     *
-     * It is considered good practice to call this method when the {@link DrmManagerClient} object
-     * is no longer needed in your application. After release() is called,
-     * {@link DrmManagerClient} is no longer usable since it has lost all of its required resource.
+     * Releases resources associated with the current session of
+     * DrmManagerClient. It is considered good practice to call this method when
+     * the {@link DrmManagerClient} object is no longer needed in your
+     * application. After this method is called, {@link DrmManagerClient} is no
+     * longer usable since it has lost all of its required resource.
      */
-    public void release() {
-        if (mReleased) return;
-        mReleased = true;
-
-        if (mEventHandler != null) {
-            mEventThread.quit();
-            mEventThread = null;
-        }
-        if (mInfoHandler != null) {
-            mInfoThread.quit();
-            mInfoThread = null;
-        }
-        mEventHandler = null;
-        mInfoHandler = null;
-        mOnEventListener = null;
-        mOnInfoListener = null;
-        mOnErrorListener = null;
-        _release(mUniqueId);
+    @Override
+    public void close() {
         mCloseGuard.close();
+        if (mClosed.compareAndSet(false, true)) {
+            if (mEventHandler != null) {
+                mEventThread.quit();
+                mEventThread = null;
+            }
+            if (mInfoHandler != null) {
+                mInfoThread.quit();
+                mInfoThread = null;
+            }
+            mEventHandler = null;
+            mInfoHandler = null;
+            mOnEventListener = null;
+            mOnInfoListener = null;
+            mOnErrorListener = null;
+            _release(mUniqueId);
+        }
+    }
+
+    /**
+     * @deprecated replaced by {@link #close()}.
+     */
+    @Deprecated
+    public void release() {
+        close();
     }
 
     /**

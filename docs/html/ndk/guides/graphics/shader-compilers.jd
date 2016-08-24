@@ -1,0 +1,194 @@
+page.title=Vulkan Shader Compilers on Android
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#aot">AOT Compilation</a></li>
+        <li><a href="#runtime">Runtime Compilation</a></li>
+        <li><a href="#integrating">Integrating Into your Project</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+A Vulkan app must manage shaders differently from the way an OpenGL ES app does so:
+In OpenGL ES, you provide a shader as a set of strings forming the source text of a
+GLSL shader program. By contrast, the Vulkan API requires you to provide a shader in
+the form of an entry point in a <a href=”https://www.khronos.org/spir”>SPIR-V</a> module.
+</p>
+
+<p>
+The NDK includes a runtime library for compiling GLSL into SPIR-V.
+The runtime library is the same as the one in the
+<a href="https://github.com/google/shaderc">Shaderc</a> open source project, and use the same
+<a href="https://github.com/KhronosGroup/glslang">Glslang GLSL</a> reference compiler as a
+back end. By default, the Shaderc version of the
+compiler assumes you are compiling for Vulkan.  After checking whether your code is valid for
+Vulkan, the compiler automatically enables the {@code KHR_vulkan_glsl} extension. The Shaderc
+version of the compiler also generates Vulkan-compliant SPIR-V code.
+</p>
+
+<p>
+You can choose to compile SPIR-V modules into your Vulkan app during development, a
+practice called <em>ahead-of-time</em>, or <em>AOT</em>, compiling. Alternatively,
+you can have your app compile them from shipped or procedurally generated shader
+source when needed during runtime. This practice is called <em>runtime compiling</em>.
+</p>
+
+<p>
+The rest of this page provides more detail about each practice, and then explains
+how to integrate shader compilation into your Vulkan app.
+</p>
+
+<h2 id=”aot”>AOT Compilation</h2>
+
+<p>
+For AOT compilation, we recommend the <em>glslc</em> command-line compiler from GLSL to SPIR-V.
+This compiler is available from the <a href="https://github.com/google/shaderc">Shaderc</a>
+project.</a>Many of its command-line options are similar to those of GCC and Clang, allowing
+you to integrate glslc into build systems easily.
+</p>
+
+<p>
+The glslc tool compiles a single-source file to a SPIR-V module with a single shader
+entry point.  By default, the output file has the same name as that of the source file,
+but with the {@code .spv} extension appended.
+</p>
+
+<p>
+You use filename extensions to tell the glslc tool which graphics shader stage to compile,
+or whether a compute shader is being compiled. For information on how to use these filename
+extensions, and options you can use with the tool, see
+<a href="https://github.com/google/shaderc/tree/master/glslc#user-content-shader-stage-specification">
+Shader stage specification</a> in the
+<a href="https://github.com/google/shaderc/tree/master/glslc">
+glslc</a> manual.
+</p>
+
+<h2 id="runtime">Runtime Compilation</h2>
+
+<p>
+For JIT compilation of shaders during runtime, the NDK provides the libshaderc library,
+which has both C and C++ APIs.
+</p>
+
+<p>
+C++ applications should use the C++ API. We recommend that apps in other languages
+use the C API, because the C ABI is lower level, and likely to provide better stability.
+</p>
+
+<p>
+The following example shows how to use the C++ API:
+</p>
+
+<pre>
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;shaderc/shaderc.hpp&gt;
+
+std::vector&lt;uint32_t&gt; compile_file(const std::string& name,
+                                   shaderc_shader_kind kind,
+                                   const std::string& data) {
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+
+  // Like -DMY_DEFINE=1
+  options.AddMacroDefinition("MY_DEFINE", "1");
+
+  shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(
+      data.c_str(), data.size(), kind, name.c_str(), options);
+
+  if (module.GetCompilationStatus() !=
+      shaderc_compilation_status_success) {
+    std::cerr << module.GetErrorMessage();
+  }
+
+  std::vector&lt;uint32_t&gt; result(module.cbegin(), module.cend());
+  return result;
+}
+</pre>
+
+
+
+<h2 id=”integrating”>Integrating into Your Projects</h2>
+
+<p>
+You can integrate the Vulkan shader compiler into your app using either the project's
+{@code Android.mk} file or Gradle.
+</p>
+
+<h3 id=”androidmk”>Android.mk</h3>
+
+<p>
+Perform the following steps to use your project's {@code Android.mk}
+file to integrate the shader compiler.
+</p>
+
+<ol>
+<li>
+Include the following lines in your Android.mk file:
+<pre class="no-pretty-print">
+include $(CLEAR_VARS)
+     ...
+LOCAL_STATIC_LIBRARIES := shaderc
+     ...
+include $(BUILD_SHARED_LIBRARY)
+
+$(call import-module, third_party/shaderc)
+</pre>
+</li>
+
+<li>
+Set APP_STL to one of {@code c++_static}, {@code c++_shared}, {@code gnustl_static},
+or {@code gnustl_shared}.
+</li>
+</ol>
+
+
+
+<h3 id=”gradle”>Gradle</h3>
+
+<ol>
+<li>
+In a terminal window, navigate to
+{@code &lt;ndk_root&gt;/sources/third_party/shaderc/}.
+</li>
+
+<li>
+Run the following command:
+
+<pre class="no-pretty-print">
+$ ../../../ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk \
+APP_STL:=&lt;stl_version&gt; APP_ABI=all libshaderc_combined
+</pre>
+
+<p>
+This command places two folders in &lt;ndk_root&gt;/sources/third_party/shaderc/. The directory
+structure is as follows:
+</p>
+
+<pre class="no-pretty-print">
+include/
+  shaderc/
+    shaderc.h
+    shaderc.hpp
+libs/
+  &lt;stl_version&gt;/
+    {all of the abis}
+       libshaderc.a
+</pre>
+</li>
+
+<li>
+Add includes and link lines as you normally would for external libraries.
+</li>
+<p>
+The STL that you use to build your program must match the {@code stl} specified in
+{@code stl_version}.
+Only {@code c++_static}, {@code c++_shared}, {@code gnustl_static}, and
+{@code gnustl_shared} are supported.
+</p>

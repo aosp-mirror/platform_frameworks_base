@@ -48,11 +48,8 @@
     <LinearLayout
         android:id="@+id/search_edit_frame"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_gravity="center_vertical"
-        android:layout_marginTop="4dip"
-        android:layout_marginBottom="4dip"
         android:layout_marginStart="8dip"
         android:layout_marginEnd="8dip"
         android:orientation="horizontal"
@@ -71,7 +68,7 @@
         <LinearLayout
             android:id="@+id/search_plate"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal">
@@ -81,8 +78,7 @@
                 android:layout_height="36dip"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:minWidth="@dimen/search_view_text_min_width"
-                android:layout_gravity="bottom"
+                android:layout_gravity="center_vertical"
                 android:paddingStart="@dimen/dropdownitem_text_padding_left"
                 android:paddingEnd="@dimen/dropdownitem_text_padding_right"
                 android:singleLine="true"
@@ -113,7 +109,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
-    
+
             <ImageView
                 android:id="@+id/search_go_btn"
                 android:layout_width="wrap_content"

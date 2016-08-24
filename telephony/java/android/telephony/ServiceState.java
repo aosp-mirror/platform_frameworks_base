@@ -36,7 +36,8 @@ import android.telephony.Rlog;
 public class ServiceState implements Parcelable {
 
     static final String LOG_TAG = "PHONE";
-    static final boolean DBG = true;
+    static final boolean DBG = false;
+    static final boolean VDBG = false;  // STOPSHIP if true
 
     /**
      * Normal operation condition, the phone is registered
@@ -153,6 +154,17 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public static final int RIL_RADIO_TECHNOLOGY_IWLAN = 18;
+
+    /** @hide */
+    public static final int RIL_RADIO_CDMA_TECHNOLOGY_BITMASK =
+            (1 << (RIL_RADIO_TECHNOLOGY_IS95A - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_IS95B - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_1xRTT - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_0 - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_A - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_B - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EHRPD - 1));
+
     /**
      * Available registration states for GSM, UMTS and CDMA.
      */
@@ -818,7 +830,7 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setDataRegState(int state) {
         mDataRegState = state;
-        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
+        if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
     }
 
     public void setRoaming(boolean roaming) {
@@ -906,7 +918,7 @@ public class ServiceState implements Parcelable {
 
     /**
      * In CDMA, mOperatorAlphaLong can be set from the ERI text.
-     * This is done from the CDMAPhone and not from the CdmaServiceStateTracker.
+     * This is done from the GsmCdmaPhone and not from the ServiceStateTracker.
      *
      * @hide
      */
@@ -1006,7 +1018,8 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setRilDataRadioTechnology(int rt) {
         this.mRilDataRadioTechnology = rt;
-        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRadioTechnology=" + mRilDataRadioTechnology);
+        if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setRilDataRadioTechnology=" +
+                mRilDataRadioTechnology);
     }
 
     /** @hide */
@@ -1141,16 +1154,8 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public static boolean hasCdma(int radioTechnologyBitmask) {
-        int cdmaBitmask = (RIL_RADIO_TECHNOLOGY_IS95A
-                | RIL_RADIO_TECHNOLOGY_IS95B
-                | RIL_RADIO_TECHNOLOGY_1xRTT
-                | RIL_RADIO_TECHNOLOGY_EVDO_0
-                | RIL_RADIO_TECHNOLOGY_EVDO_A
-                | RIL_RADIO_TECHNOLOGY_EVDO_B
-                | RIL_RADIO_TECHNOLOGY_EHRPD);
-
-        return ((radioTechnologyBitmask & cdmaBitmask) != 0);
+    public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
+        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
     }
 
     /** @hide */

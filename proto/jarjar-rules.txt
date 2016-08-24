@@ -1,0 +1,2 @@
+rule com.google.protobuf.nano.** com.android.framework.protobuf.nano.@1
+

@@ -1,0 +1,84 @@
+toc:
+- title: Getting Started
+  path: /ndk/guides/index.html
+  section:
+  - title: Setup
+    path: /ndk/guides/setup.html
+  - title: Concepts
+    path: /ndk/guides/concepts.html
+
+- title: Building
+  path: /ndk/guides/build.html
+  section:
+  - title: Android.mk
+    path: /ndk/guides/android_mk.html
+  - title: Application.mk
+    path: /ndk/guides/application_mk.html
+  - title: ndk-build
+    path: /ndk/guides/ndk-build.html
+  - title: Standalone Toolchain
+    path: /ndk/guides/standalone_toolchain.html
+
+- title: Architectures and CPUs
+  path: /ndk/guides/arch.html
+  section:
+  - title: ABI Management
+    path: /ndk/guides/abis.html
+  - title: NEON
+    path: /ndk/guides/cpu-arm-neon.html
+  - title: x86
+    path: /ndk/guides/x86.html
+  - title: x86-64
+    path: /ndk/guides/x86-64.html
+  - title: MIPS
+    path: /ndk/guides/mips.html
+  - title: The cpufeatures Library
+    path: /ndk/guides/cpu-features.html
+
+- title: Debugging
+  path: /ndk/guides/debug.html
+  section:
+  - title: ndk-gdb
+    path: /ndk/guides/ndk-gdb.html
+  - title: ndk-stack
+    path: /ndk/guides/ndk-stack.html
+
+- title: Libraries
+  path: /ndk/guides/libs.html
+  section:
+  - title: Prebuilt Libraries
+    path: /ndk/guides/prebuilts.html
+  - title: C++ Support
+    path: /ndk/guides/cpp-support.html
+  - title: Stable APIs
+    path: /ndk/guides/stable_apis.html
+
+- title: Audio
+  path: /ndk/guides/audio/index.html
+  section:
+  - title: Basics
+    path: /ndk/guides/audio/basics.html
+  - title: OpenSL ES for Android
+    path: /ndk/guides/audio/opensl-for-android.html
+  - title: Audio Input Latency
+    path: /ndk/guides/audio/input-latency.html
+  - title: Audio Output Latency
+    path: /ndk/guides/audio/output-latency.html
+  - title: Floating-Point Audio
+    path: /ndk/guides/audio/floating-point.html
+  - title: Sample Rates
+    path: /ndk/guides/audio/sample-rates.html
+  - title: OpenSL ES Programming Notes
+    path: /ndk/guides/audio/opensl-prog-notes.html
+
+- title: Vulkan
+  path: /ndk/guides/graphics/index.html
+  section:
+  - title: Getting Started
+    path: /ndk/guides/graphics/getting-started.html
+  - title: Design Guidelines
+    path: /ndk/guides/graphics/design-notes.html
+  - title: Shader Compilers
+    path: /ndk/guides/graphics/shader-compilers.html
+  - title: Validation Layers
+    path: /ndk/guides/graphics/validation-layer.html

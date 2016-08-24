@@ -49,7 +49,7 @@ static struct {
     jmethodID onDeviceError;
 } gDeviceCallbackClassInfo;
 
-static int handleLooperEvents(int fd, int events, void* data) {
+static int handleLooperEvents(int /* fd */, int events, void* data) {
     Device* d = reinterpret_cast<Device*>(data);
     return d->handleEvents(events);
 }
@@ -183,7 +183,7 @@ std::unique_ptr<uint8_t[]> getData(JNIEnv* env, jbyteArray javaArray, size_t& ou
     return data;
 }
 
-static jlong openDevice(JNIEnv* env, jclass clazz, jstring rawName, jint id, jint vid, jint pid,
+static jlong openDevice(JNIEnv* env, jclass /* clazz */, jstring rawName, jint id, jint vid, jint pid,
         jbyteArray rawDescriptor, jobject queue, jobject callback) {
     ScopedUtfChars name(env, rawName);
     if (name.c_str() == nullptr) {
@@ -202,7 +202,7 @@ static jlong openDevice(JNIEnv* env, jclass clazz, jstring rawName, jint id, jin
     return reinterpret_cast<jlong>(d);
 }
 
-static void sendReport(JNIEnv* env, jclass clazz, jlong ptr,jbyteArray rawReport) {
+static void sendReport(JNIEnv* env, jclass /* clazz */, jlong ptr,jbyteArray rawReport) {
     size_t size;
     std::unique_ptr<uint8_t[]> report = getData(env, rawReport, size);
     uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
@@ -211,7 +211,7 @@ static void sendReport(JNIEnv* env, jclass clazz, jlong ptr,jbyteArray rawReport
     }
 }
 
-static void closeDevice(JNIEnv* env, jclass clazz, jlong ptr) {
+static void closeDevice(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     uhid::Device* d = reinterpret_cast<uhid::Device*>(ptr);
     if (d) {
         delete d;

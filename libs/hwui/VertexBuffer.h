@@ -17,7 +17,7 @@
 #ifndef ANDROID_HWUI_VERTEX_BUFFER_H
 #define ANDROID_HWUI_VERTEX_BUFFER_H
 
-#include "utils/MathUtils.h"
+#include <algorithm>
 
 namespace android {
 namespace uirenderer {
@@ -118,7 +118,7 @@ public:
         TYPE* end = current + vertexCount;
         mBounds.set(current->x, current->y, current->x, current->y);
         for (; current < end; current++) {
-            mBounds.expandToCoverVertex(current->x, current->y);
+            mBounds.expandToCover(current->x, current->y);
         }
     }
 
@@ -129,10 +129,10 @@ public:
     unsigned int getSize() const { return mByteCount; }
     unsigned int getIndexCount() const { return mIndexCount; }
     void updateIndexCount(unsigned int newCount)  {
-        mIndexCount = MathUtils::min(newCount, mAllocatedIndexCount);
+        mIndexCount = std::min(newCount, mAllocatedIndexCount);
     }
     void updateVertexCount(unsigned int newCount)  {
-        mVertexCount = MathUtils::min(newCount, mAllocatedVertexCount);
+        mVertexCount = std::min(newCount, mAllocatedVertexCount);
     }
     MeshFeatureFlags getMeshFeatureFlags() const { return mMeshFeatureFlags; }
     void setMeshFeatureFlags(int flags) {

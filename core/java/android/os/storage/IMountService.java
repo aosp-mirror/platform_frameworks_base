@@ -21,6 +21,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 
 /**
@@ -758,6 +760,22 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
+            public boolean isConvertibleToFBE() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                boolean _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_isConvertibleToFBE, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt() != 0;
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
             public StorageVolume[] getVolumeList(int uid, String packageName, int flags)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
@@ -1182,14 +1200,16 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void createNewUserDir(int userHandle, String path) throws RemoteException {
+            public void createUserKey(int userId, int serialNumber, boolean ephemeral)
+                    throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeInt(userHandle);
-                    _data.writeString(path);
-                    mRemote.transact(Stub.TRANSACTION_createNewUserDir, _data, _reply, 0);
+                    _data.writeInt(userId);
+                    _data.writeInt(serialNumber);
+                    _data.writeInt(ephemeral ? 1 : 0);
+                    mRemote.transact(Stub.TRANSACTION_createUserKey, _data, _reply, 0);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
@@ -1198,18 +1218,161 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void deleteUserKey(int userHandle) throws RemoteException {
+            public void destroyUserKey(int userId) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
-                    _data.writeInt(userHandle);
-                    mRemote.transact(Stub.TRANSACTION_deleteUserKey, _data, _reply, 0);
+                    _data.writeInt(userId);
+                    mRemote.transact(Stub.TRANSACTION_destroyUserKey, _data, _reply, 0);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
                     _data.recycle();
                 }
+            }
+
+            @Override
+            public void addUserKeyAuth(int userId, int serialNumber,
+                    byte[] token, byte[] secret) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    _data.writeInt(serialNumber);
+                    _data.writeByteArray(token);
+                    _data.writeByteArray(secret);
+                    mRemote.transact(Stub.TRANSACTION_addUserKeyAuth, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void fixateNewestUserKeyAuth(int userId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    mRemote.transact(Stub.TRANSACTION_fixateNewestUserKeyAuth, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void unlockUserKey(int userId, int serialNumber,
+                    byte[] token, byte[] secret) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    _data.writeInt(serialNumber);
+                    _data.writeByteArray(token);
+                    _data.writeByteArray(secret);
+                    mRemote.transact(Stub.TRANSACTION_unlockUserKey, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void lockUserKey(int userId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    mRemote.transact(Stub.TRANSACTION_lockUserKey, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public boolean isUserKeyUnlocked(int userId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                boolean _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    mRemote.transact(Stub.TRANSACTION_isUserKeyUnlocked, _data, _reply, 0);
+                    _reply.readException();
+                    _result = 0 != _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            @Override
+            public void prepareUserStorage(
+                    String volumeUuid, int userId, int serialNumber, int flags)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volumeUuid);
+                    _data.writeInt(userId);
+                    _data.writeInt(serialNumber);
+                    _data.writeInt(flags);
+                    mRemote.transact(Stub.TRANSACTION_prepareUserStorage, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void destroyUserStorage(String volumeUuid, int userId, int flags)
+                    throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(volumeUuid);
+                    _data.writeInt(userId);
+                    _data.writeInt(flags);
+                    mRemote.transact(Stub.TRANSACTION_destroyUserStorage, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                ParcelFileDescriptor _result = null;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(name);
+                    mRemote.transact(Stub.TRANSACTION_mountAppFuse, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.<ParcelFileDescriptor>readParcelable(
+                            ClassLoader.getSystemClassLoader());
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
             }
         }
 
@@ -1326,8 +1489,23 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_benchmark = IBinder.FIRST_CALL_TRANSACTION + 59;
         static final int TRANSACTION_setDebugFlags = IBinder.FIRST_CALL_TRANSACTION + 60;
 
-        static final int TRANSACTION_createNewUserDir = IBinder.FIRST_CALL_TRANSACTION + 62;
-        static final int TRANSACTION_deleteUserKey = IBinder.FIRST_CALL_TRANSACTION + 63;
+        static final int TRANSACTION_createUserKey = IBinder.FIRST_CALL_TRANSACTION + 61;
+        static final int TRANSACTION_destroyUserKey = IBinder.FIRST_CALL_TRANSACTION + 62;
+
+        static final int TRANSACTION_unlockUserKey = IBinder.FIRST_CALL_TRANSACTION + 63;
+        static final int TRANSACTION_lockUserKey = IBinder.FIRST_CALL_TRANSACTION + 64;
+        static final int TRANSACTION_isUserKeyUnlocked = IBinder.FIRST_CALL_TRANSACTION + 65;
+
+        static final int TRANSACTION_prepareUserStorage = IBinder.FIRST_CALL_TRANSACTION + 66;
+        static final int TRANSACTION_destroyUserStorage = IBinder.FIRST_CALL_TRANSACTION + 67;
+
+        static final int TRANSACTION_isConvertibleToFBE = IBinder.FIRST_CALL_TRANSACTION + 68;
+
+        static final int TRANSACTION_mountAppFuse = IBinder.FIRST_CALL_TRANSACTION + 69;
+
+        static final int TRANSACTION_addUserKeyAuth = IBinder.FIRST_CALL_TRANSACTION + 70;
+
+        static final int TRANSACTION_fixateNewestUserKeyAuth = IBinder.FIRST_CALL_TRANSACTION + 71;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1724,6 +1902,13 @@ public interface IMountService extends IInterface {
                     reply.writeString(contents);
                     return true;
                 }
+                case TRANSACTION_isConvertibleToFBE: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int resultCode = isConvertibleToFBE() ? 1 : 0;
+                    reply.writeNoException();
+                    reply.writeInt(resultCode);
+                    return true;
+                }
                 case TRANSACTION_resizeSecureContainer: {
                     data.enforceInterface(DESCRIPTOR);
                     String id;
@@ -1884,19 +2069,89 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
-                case TRANSACTION_createNewUserDir: {
+                case TRANSACTION_createUserKey: {
                     data.enforceInterface(DESCRIPTOR);
-                    int userHandle = data.readInt();
-                    String path = data.readString();
-                    createNewUserDir(userHandle, path);
+                    int userId = data.readInt();
+                    int serialNumber = data.readInt();
+                    boolean ephemeral = data.readInt() != 0;
+                    createUserKey(userId, serialNumber, ephemeral);
                     reply.writeNoException();
                     return true;
                 }
-                case TRANSACTION_deleteUserKey: {
+                case TRANSACTION_destroyUserKey: {
                     data.enforceInterface(DESCRIPTOR);
-                    int userHandle = data.readInt();
-                    deleteUserKey(userHandle);
+                    int userId = data.readInt();
+                    destroyUserKey(userId);
                     reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_addUserKeyAuth: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    int serialNumber = data.readInt();
+                    byte[] token = data.createByteArray();
+                    byte[] secret = data.createByteArray();
+                    addUserKeyAuth(userId, serialNumber, token, secret);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_fixateNewestUserKeyAuth: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    fixateNewestUserKeyAuth(userId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_unlockUserKey: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    int serialNumber = data.readInt();
+                    byte[] token = data.createByteArray();
+                    byte[] secret = data.createByteArray();
+                    unlockUserKey(userId, serialNumber, token, secret);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_lockUserKey: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    lockUserKey(userId);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_isUserKeyUnlocked: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    boolean result = isUserKeyUnlocked(userId);
+                    reply.writeNoException();
+                    reply.writeInt(result ? 1 : 0);
+                    return true;
+                }
+                case TRANSACTION_prepareUserStorage: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volumeUuid = data.readString();
+                    int userId = data.readInt();
+                    int serialNumber = data.readInt();
+                    int _flags = data.readInt();
+                    prepareUserStorage(volumeUuid, userId, serialNumber, _flags);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_destroyUserStorage: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String volumeUuid = data.readString();
+                    int userId = data.readInt();
+                    int _flags = data.readInt();
+                    destroyUserStorage(volumeUuid, userId, _flags);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_mountAppFuse: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String name = data.readString();
+                    ParcelFileDescriptor fd = mountAppFuse(name);
+                    reply.writeNoException();
+                    reply.writeParcelable(fd, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
                     return true;
                 }
             }
@@ -2081,7 +2336,12 @@ public interface IMountService extends IInterface {
 
     /**
      * Determines the encryption state of the volume.
-     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible values.
+     * @return a numerical value. See {@code ENCRYPTION_STATE_*} for possible
+     * values.
+     * Note that this has been replaced in most cases by the APIs in
+     * StorageManager (see isEncryptable and below)
+     * This is still useful to get the error state when encryption has failed
+     * and CryptKeeper needs to throw up a screen advising the user what to do
      */
     public int getEncryptionState() throws RemoteException;
 
@@ -2168,6 +2428,8 @@ public interface IMountService extends IInterface {
      */
     public String getField(String field) throws RemoteException;
 
+    public boolean isConvertibleToFBE() throws RemoteException;
+
     public int resizeSecureContainer(String id, int sizeMb, String key) throws RemoteException;
 
     /**
@@ -2209,18 +2471,21 @@ public interface IMountService extends IInterface {
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback)
             throws RemoteException;
 
-    /**
-     * Creates the user data directory, possibly encrypted
-     * @param userHandle Handle of the user whose directory we are creating
-     * @param path Path at which to create the directory.
-     */
-    public void createNewUserDir(int userHandle, String path)
-        throws RemoteException;
+    public void createUserKey(int userId, int serialNumber, boolean ephemeral)
+            throws RemoteException;
+    public void destroyUserKey(int userId) throws RemoteException;
+    public void addUserKeyAuth(int userId, int serialNumber,
+            byte[] token, byte[] secret) throws RemoteException;
+    public void fixateNewestUserKeyAuth(int userId) throws RemoteException;
 
-    /**
-     * Securely delete the user's encryption key
-     * @param userHandle Handle of the user whose key we are deleting
-     */
-    public void deleteUserKey(int userHandle)
-        throws RemoteException;
+    public void unlockUserKey(int userId, int serialNumber,
+            byte[] token, byte[] secret) throws RemoteException;
+    public void lockUserKey(int userId) throws RemoteException;
+    public boolean isUserKeyUnlocked(int userId) throws RemoteException;
+
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber,
+            int flags) throws RemoteException;
+    public void destroyUserStorage(String volumeUuid, int userId, int flags) throws RemoteException;
+
+    public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }

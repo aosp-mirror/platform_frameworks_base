@@ -22,18 +22,17 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
-#include <androidfw/ResourceTypes.h>
-
+#include <utils/Looper.h>
 #include <cutils/properties.h>
 
 #include <SkBitmap.h>
 #include <SkRegion.h>
 
-#include <DisplayListCanvas.h>
 #include <Rect.h>
 #include <RenderNode.h>
 #include <CanvasProperty.h>
-#include <Paint.h>
+#include <hwui/Canvas.h>
+#include <hwui/Paint.h>
 #include <renderthread/RenderProxy.h>
 
 #include "core_jni_helpers.h"
@@ -42,48 +41,60 @@ namespace android {
 
 using namespace uirenderer;
 
-static struct {
-    jmethodID set;
-} gRectClassInfo;
+jmethodID gRunnableMethodId;
+
+static JNIEnv* jnienv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
+class InvokeRunnableMessage : public MessageHandler {
+public:
+    InvokeRunnableMessage(JNIEnv* env, jobject runnable) {
+        mRunnable = env->NewGlobalRef(runnable);
+        env->GetJavaVM(&mVm);
+    }
+
+    virtual ~InvokeRunnableMessage() {
+        jnienv(mVm)->DeleteGlobalRef(mRunnable);
+    }
+
+    virtual void handleMessage(const Message&) {
+        jnienv(mVm)->CallVoidMethod(mRunnable, gRunnableMethodId);
+    }
+
+private:
+    JavaVM* mVm;
+    jobject mRunnable;
+};
+
+class GlFunctorReleasedCallbackBridge : public GlFunctorLifecycleListener {
+public:
+    GlFunctorReleasedCallbackBridge(JNIEnv* env, jobject javaCallback) {
+        mLooper = Looper::getForThread();
+        mMessage = new InvokeRunnableMessage(env, javaCallback);
+    }
+
+    virtual void onGlFunctorReleased(Functor* functor) override {
+        mLooper->sendMessage(mMessage, 0);
+    }
+
+private:
+    sp<Looper> mLooper;
+    sp<InvokeRunnableMessage> mMessage;
+};
 
 // ----------------------------------------------------------------------------
 // Setup
 // ----------------------------------------------------------------------------
 
-static void android_view_DisplayListCanvas_setViewport(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint width, jint height) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->setViewport(width, height);
-}
-
-static void android_view_DisplayListCanvas_setHighContrastText(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jboolean highContrastText) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->setHighContrastText(highContrastText);
-}
-
 static void android_view_DisplayListCanvas_insertReorderBarrier(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jboolean reorderEnable) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->insertReorderBarrier(reorderEnable);
-}
-
-static void android_view_DisplayListCanvas_prepare(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->prepare();
-}
-
-static void android_view_DisplayListCanvas_prepareDirty(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jint left, jint top, jint right, jint bottom) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->prepareDirty(left, top, right, bottom);
-}
-
-static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
-        jlong rendererPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    renderer->finish();
+        jlong canvasPtr, jboolean reorderEnable) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->insertReorderBarrier(reorderEnable);
 }
 
 // ----------------------------------------------------------------------------
@@ -91,10 +102,14 @@ static void android_view_DisplayListCanvas_finish(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayListCanvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong functorPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+        jlong canvasPtr, jlong functorPtr, jobject releasedCallback) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
-    renderer->callDrawGLFunction(functor);
+    sp<GlFunctorReleasedCallbackBridge> bridge;
+    if (releasedCallback) {
+        bridge = new GlFunctorReleasedCallbackBridge(env, releasedCallback);
+    }
+    canvas->callDrawGLFunction(functor, bridge.get());
 }
 
 // ----------------------------------------------------------------------------
@@ -119,21 +134,10 @@ static jint android_view_DisplayListCanvas_getMaxTextureHeight(JNIEnv* env, jobj
 // Drawing
 // ----------------------------------------------------------------------------
 
-static void android_view_DisplayListCanvas_drawPatch(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jobject jbitmap, jlong patchPtr,
-        float left, float top, float right, float bottom, jlong paintPtr) {
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(patchPtr);
-    Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
-}
-
 static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
+        jlong canvasPtr, jlong leftPropPtr, jlong topPropPtr, jlong rightPropPtr,
         jlong bottomPropPtr, jlong rxPropPtr, jlong ryPropPtr, jlong paintPropPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* leftProp = reinterpret_cast<CanvasPropertyPrimitive*>(leftPropPtr);
     CanvasPropertyPrimitive* topProp = reinterpret_cast<CanvasPropertyPrimitive*>(topPropPtr);
     CanvasPropertyPrimitive* rightProp = reinterpret_cast<CanvasPropertyPrimitive*>(rightPropPtr);
@@ -141,47 +145,17 @@ static void android_view_DisplayListCanvas_drawRoundRectProps(JNIEnv* env, jobje
     CanvasPropertyPrimitive* rxProp = reinterpret_cast<CanvasPropertyPrimitive*>(rxPropPtr);
     CanvasPropertyPrimitive* ryProp = reinterpret_cast<CanvasPropertyPrimitive*>(ryPropPtr);
     CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
-    renderer->drawRoundRect(leftProp, topProp, rightProp, bottomProp, rxProp, ryProp, paintProp);
+    canvas->drawRoundRect(leftProp, topProp, rightProp, bottomProp, rxProp, ryProp, paintProp);
 }
 
 static void android_view_DisplayListCanvas_drawCircleProps(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+        jlong canvasPtr, jlong xPropPtr, jlong yPropPtr, jlong radiusPropPtr, jlong paintPropPtr) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     CanvasPropertyPrimitive* xProp = reinterpret_cast<CanvasPropertyPrimitive*>(xPropPtr);
     CanvasPropertyPrimitive* yProp = reinterpret_cast<CanvasPropertyPrimitive*>(yPropPtr);
     CanvasPropertyPrimitive* radiusProp = reinterpret_cast<CanvasPropertyPrimitive*>(radiusPropPtr);
     CanvasPropertyPaint* paintProp = reinterpret_cast<CanvasPropertyPaint*>(paintPropPtr);
-    renderer->drawCircle(xProp, yProp, radiusProp, paintProp);
-}
-
-static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong regionPtr, jlong paintPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    SkRegion* region = reinterpret_cast<SkRegion*>(regionPtr);
-    Paint* paint = reinterpret_cast<Paint*>(paintPtr);
-    if (paint->getStyle() != Paint::kFill_Style ||
-            (paint->isAntiAlias() && !renderer->isCurrentTransformSimple())) {
-        SkRegion::Iterator it(*region);
-        while (!it.done()) {
-            const SkIRect& r = it.rect();
-            renderer->drawRect(r.fLeft, r.fTop, r.fRight, r.fBottom, *paint);
-            it.next();
-        }
-    } else {
-        int count = 0;
-        Vector<float> rects;
-        SkRegion::Iterator it(*region);
-        while (!it.done()) {
-            const SkIRect& r = it.rect();
-            rects.push(r.fLeft);
-            rects.push(r.fTop);
-            rects.push(r.fRight);
-            rects.push(r.fBottom);
-            count += 4;
-            it.next();
-        }
-        renderer->drawRects(rects.array(), count, paint);
-    }
+    canvas->drawCircle(xProp, yProp, radiusProp, paintProp);
 }
 
 // ----------------------------------------------------------------------------
@@ -189,20 +163,28 @@ static void android_view_DisplayListCanvas_drawRegionAsRects(JNIEnv* env, jobjec
 // ----------------------------------------------------------------------------
 
 static jlong android_view_DisplayListCanvas_finishRecording(JNIEnv* env,
-        jobject clazz, jlong rendererPtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
-    return reinterpret_cast<jlong>(renderer->finishRecording());
+        jobject clazz, jlong canvasPtr) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    return reinterpret_cast<jlong>(canvas->finishRecording());
 }
 
-static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz) {
-    return reinterpret_cast<jlong>(new DisplayListCanvas);
+static jlong android_view_DisplayListCanvas_createDisplayListCanvas(JNIEnv* env, jobject clazz,
+        jint width, jint height) {
+    return reinterpret_cast<jlong>(Canvas::create_recording_canvas(width, height));
 }
+
+static void android_view_DisplayListCanvas_resetDisplayListCanvas(JNIEnv* env, jobject clazz,
+        jlong canvasPtr, jint width, jint height) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
+    canvas->resetRecording(width, height);
+}
+
 
 static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
-        jobject clazz, jlong rendererPtr, jlong renderNodePtr) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+        jobject clazz, jlong canvasPtr, jlong renderNodePtr) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderer->drawRenderNode(renderNode);
+    canvas->drawRenderNode(renderNode);
 }
 
 // ----------------------------------------------------------------------------
@@ -210,10 +192,10 @@ static void android_view_DisplayListCanvas_drawRenderNode(JNIEnv* env,
 // ----------------------------------------------------------------------------
 
 static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
-        jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
-    DisplayListCanvas* renderer = reinterpret_cast<DisplayListCanvas*>(rendererPtr);
+        jlong canvasPtr, jlong layerPtr) {
+    Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
-    renderer->drawLayer(layer, x, y);
+    canvas->drawLayer(layer);
 }
 
 // ----------------------------------------------------------------------------
@@ -226,10 +208,10 @@ static jboolean android_view_DisplayListCanvas_isAvailable(JNIEnv* env, jobject 
         // not in the emulator
         return JNI_TRUE;
     }
-    // In the emulator this property will be set to 1 when hardware GLES is
+    // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
     // enabled, 0 otherwise. On old emulator versions it will be undefined.
-    property_get("ro.kernel.qemu.gles", prop, "0");
-    return atoi(prop) == 1 ? JNI_TRUE : JNI_FALSE;
+    property_get("qemu.gles", prop, "0");
+    return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -249,31 +231,25 @@ android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject java
 const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
-    { "nIsAvailable",       "()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
-    { "nSetViewport",       "(JII)V",          (void*) android_view_DisplayListCanvas_setViewport },
-    { "nSetHighContrastText","(JZ)V",          (void*) android_view_DisplayListCanvas_setHighContrastText },
-    { "nInsertReorderBarrier","(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
-    { "nPrepare",           "(J)V",            (void*) android_view_DisplayListCanvas_prepare },
-    { "nPrepareDirty",      "(JIIII)V",        (void*) android_view_DisplayListCanvas_prepareDirty },
-    { "nFinish",            "(J)V",            (void*) android_view_DisplayListCanvas_finish },
+    { "nIsAvailable",       "!()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
+    { "nInsertReorderBarrier","!(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
-    { "nCallDrawGLFunction", "(JJ)V",          (void*) android_view_DisplayListCanvas_callDrawGLFunction },
+    { "nCallDrawGLFunction", "!(JJLjava/lang/Runnable;)V",
+            (void*) android_view_DisplayListCanvas_callDrawGLFunction },
 
-    { "nDrawPatch",         "(JLandroid/graphics/Bitmap;JFFFFJ)V",     (void*) android_view_DisplayListCanvas_drawPatch },
+    { "nDrawRoundRect",     "!(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
+    { "nDrawCircle",        "!(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
 
-    { "nDrawRects",         "(JJJ)V",          (void*) android_view_DisplayListCanvas_drawRegionAsRects },
-    { "nDrawRoundRect",     "(JJJJJJJJ)V",     (void*) android_view_DisplayListCanvas_drawRoundRectProps },
-    { "nDrawCircle",        "(JJJJJ)V",        (void*) android_view_DisplayListCanvas_drawCircleProps },
+    { "nFinishRecording",   "!(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
+    { "nDrawRenderNode",    "!(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
 
-    { "nFinishRecording",   "(J)J",            (void*) android_view_DisplayListCanvas_finishRecording },
-    { "nDrawRenderNode",    "(JJ)V",           (void*) android_view_DisplayListCanvas_drawRenderNode },
+    { "nCreateDisplayListCanvas", "!(II)J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nResetDisplayListCanvas", "!(JII)V",     (void*) android_view_DisplayListCanvas_resetDisplayListCanvas },
 
-    { "nCreateDisplayListCanvas", "()J",     (void*) android_view_DisplayListCanvas_createDisplayListCanvas },
+    { "nDrawLayer",               "!(JJ)V",     (void*) android_view_DisplayListCanvas_drawLayer },
 
-    { "nDrawLayer",               "(JJFF)V",   (void*) android_view_DisplayListCanvas_drawLayer },
-
-    { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
-    { "nGetMaximumTextureHeight", "()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
+    { "nGetMaximumTextureWidth",  "!()I",       (void*) android_view_DisplayListCanvas_getMaxTextureWidth },
+    { "nGetMaximumTextureHeight", "!()I",       (void*) android_view_DisplayListCanvas_getMaxTextureHeight },
 };
 
 static JNINativeMethod gActivityThreadMethods[] = {
@@ -282,8 +258,8 @@ static JNINativeMethod gActivityThreadMethods[] = {
 };
 
 int register_android_view_DisplayListCanvas(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
-    gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
+    jclass runnableClass = FindClassOrDie(env, "java/lang/Runnable");
+    gRunnableMethodId = GetMethodIDOrDie(env, runnableClass, "run", "()V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

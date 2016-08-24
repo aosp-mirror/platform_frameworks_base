@@ -32,10 +32,12 @@
 
 #include "SkPaint.h"
 #include "SkTypeface.h"
-#include "MinikinSkia.h"
-#include "MinikinUtils.h"
-#include "Paint.h"
-#include "minikin/LineBreaker.h"
+#include <hwui/MinikinSkia.h>
+#include <hwui/MinikinUtils.h>
+#include <hwui/Paint.h>
+#include <minikin/FontCollection.h>
+#include <minikin/LineBreaker.h>
+#include <minikin/MinikinFont.h>
 
 namespace android {
 
@@ -154,7 +156,7 @@ static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
         jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
     LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
     Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(nativeTypeface);
+    Typeface* typeface = reinterpret_cast<Typeface*>(nativeTypeface);
     FontCollection *font;
     MinikinPaint minikinPaint;
     FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, &font, paint, typeface);

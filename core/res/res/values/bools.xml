@@ -19,14 +19,9 @@
     <bool name="kg_center_small_widgets_vertically">false</bool>
     <bool name="kg_top_align_page_shrink_on_bouncer_visible">true</bool>
     <bool name="action_bar_embed_tabs">true</bool>
-    <bool name="action_bar_embed_tabs_pre_jb">false</bool>
     <bool name="split_action_bar_is_narrow">true</bool>
     <bool name="preferences_prefer_dual_pane">false</bool>
     <bool name="show_ongoing_ime_switcher">true</bool>
     <bool name="action_bar_expanded_action_views_exclusive">true</bool>
     <bool name="target_honeycomb_needs_options_menu">true</bool>
-
-    <!-- Whether to allow vertically stacked button bars. This is disabled for
-         configurations with a small (e.g. less than 320dp) screen height. -->
-    <bool name="allow_stacked_button_bar">false</bool>
 </resources>

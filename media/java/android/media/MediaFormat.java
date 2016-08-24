@@ -16,6 +16,10 @@
 
 package android.media;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,9 +46,11 @@ import java.util.Map;
  * <tr><td>{@link #KEY_HEIGHT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
  *         for encoders, readable in the output format of decoders</b></td></tr>
- * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td>required for <b>encoders</b>,
+ *         optional for <b>decoders</b></td></tr>
  * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
-* <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
@@ -64,6 +70,7 @@ import java.util.Map;
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_CHANNEL_COUNT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_SAMPLE_RATE}</td><td>Integer</td><td></td></tr>
+ * <tr><td>{@link #KEY_PCM_ENCODING}</td><td>Integer</td><td>optional</td></tr>
  * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if <em>decoding</em> AAC audio content, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
  * <tr><td>{@link #KEY_AAC_PROFILE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired profile.</td></tr>
  * <tr><td>{@link #KEY_AAC_SBR_MODE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired SBR mode.</td></tr>
@@ -107,6 +114,7 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
+    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
 
     /**
      * MIME type for WebVTT subtitle data.
@@ -177,10 +185,18 @@ public final class MediaFormat {
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
 
     /**
-     * A key describing the bitrate in bits/sec.
+     * A key describing the average bitrate in bits/sec.
      * The associated value is an integer
      */
     public static final String KEY_BIT_RATE = "bitrate";
+
+    /**
+     * A key describing the max bitrate in bits/sec.
+     * This is usually over a one-second sliding window (e.g. over any window of one second).
+     * The associated value is an integer
+     * @hide
+     */
+    public static final String KEY_MAX_BIT_RATE = "max-bitrate";
 
     /**
      * A key describing the color format of the content in a video format.
@@ -190,9 +206,41 @@ public final class MediaFormat {
 
     /**
      * A key describing the frame rate of a video format in frames/sec.
-     * The associated value is an integer or a float.
+     * The associated value is normally an integer when the value is used by the platform,
+     * but video codecs also accept float configuration values.
+     * Specifically, {@link MediaExtractor#getTrackFormat MediaExtractor} provides an integer
+     * value corresponding to the frame rate information of the track if specified and non-zero.
+     * Otherwise, this key is not present. {@link MediaCodec#configure MediaCodec} accepts both
+     * float and integer values. This represents the desired operating frame rate if the
+     * {@link #KEY_OPERATING_RATE} is not present and {@link #KEY_PRIORITY} is {@code 0}
+     * (realtime). For video encoders this value corresponds to the intended frame rate,
+     * although encoders are expected
+     * to support variable frame rate based on {@link MediaCodec.BufferInfo#presentationTimeUs
+     * buffer timestamp}. This key is not used in the {@code MediaCodec}
+     * {@link MediaCodec#getInputFormat input}/{@link MediaCodec#getOutputFormat output} formats,
+     * nor by {@link MediaMuxer#addTrack MediaMuxer}.
      */
     public static final String KEY_FRAME_RATE = "frame-rate";
+
+    /**
+     * A key describing the raw audio sample encoding/format.
+     *
+     * <p>The associated value is an integer, using one of the
+     * {@link AudioFormat}.ENCODING_PCM_ values.</p>
+     *
+     * <p>This is an optional key for audio decoders and encoders specifying the
+     * desired raw audio sample format during {@link MediaCodec#configure
+     * MediaCodec.configure(&hellip;)} call. Use {@link MediaCodec#getInputFormat
+     * MediaCodec.getInput}/{@link MediaCodec#getOutputFormat OutputFormat(&hellip;)}
+     * to confirm the actual format. For the PCM decoder this key specifies both
+     * input and output sample encodings.</p>
+     *
+     * <p>This key is also used by {@link MediaExtractor} to specify the sample
+     * format of audio data, if it is specified.</p>
+     *
+     * <p>If this key is missing, the raw audio sample format is signed 16-bit short.</p>
+     */
+    public static final String KEY_PCM_ENCODING = "pcm-encoding";
 
     /**
      * A key describing the capture rate of a video format in frames/sec.
@@ -217,6 +265,20 @@ public final class MediaFormat {
     public static final String KEY_I_FRAME_INTERVAL = "i-frame-interval";
 
     /**
+    * An optional key describing the period of intra refresh in frames. This is an
+    * optional parameter that applies only to video encoders. If encoder supports it
+    * ({@link MediaCodecInfo.CodecCapabilities#FEATURE_IntraRefresh}), the whole
+    * frame is completely refreshed after the specified period. Also for each frame,
+    * a fix subset of macroblocks must be intra coded which leads to more constant bitrate
+    * than inserting a key frame. This key is recommended for video streaming applications
+    * as it provides low-delay and good error-resilience. This key is ignored if the
+    * video encoder does not support the intra refresh feature. Use the output format to
+    * verify that this feature was enabled.
+    * The associated value is an integer.
+    */
+    public static final String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
+
+   /**
      * A key describing the temporal layering schema.  This is an optional parameter
      * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
@@ -233,17 +295,19 @@ public final class MediaFormat {
      * Stride (or row increment) is the difference between the index of a pixel
      * and that of the pixel directly underneath. For YUV 420 formats, the
      * stride corresponds to the Y plane; the stride of the U and V planes can
-     * be calculated based on the color format.
+     * be calculated based on the color format, though it is generally undefined
+     * and depends on the device and release.
      * The associated value is an integer, representing number of bytes.
      */
     public static final String KEY_STRIDE = "stride";
 
     /**
      * A key describing the plane height of a multi-planar (YUV) video bytebuffer layout.
-     * Slice height (or plane height) is the number of rows that must be skipped to get
-     * from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
+     * Slice height (or plane height/vertical stride) is the number of rows that must be skipped
+     * to get from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
      * the offset of the U plane is sliceHeight * stride. The height of the U/V planes
-     * can be calculated based on the color format.
+     * can be calculated based on the color format, though it is generally undefined
+     * and depends on the device and release.
      * The associated value is an integer, representing number of rows.
      */
     public static final String KEY_SLICE_HEIGHT = "slice-height";
@@ -467,7 +531,8 @@ public final class MediaFormat {
      * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is used as a hint, and is only supported for codecs
-     * that specify a profile.
+     * that specify a profile. Note: Codecs are free to use all the available
+     * coding tools at the specified profile.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
@@ -546,6 +611,121 @@ public final class MediaFormat {
 
     /** @hide */
     public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
+
+    // The following color aspect values must be in sync with the ones in HardwareAPI.h.
+    /**
+     * An optional key describing the color primaries, white point and
+     * luminance factors for video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_STANDARD_ values.
+     */
+    public static final String KEY_COLOR_STANDARD = "color-standard";
+
+    /** BT.709 color chromacity coordinates with KR = 0.2126, KB = 0.0722. */
+    public static final int COLOR_STANDARD_BT709 = 1;
+
+    /** BT.601 625 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    public static final int COLOR_STANDARD_BT601_PAL = 2;
+
+    /** BT.601 525 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    public static final int COLOR_STANDARD_BT601_NTSC = 4;
+
+    /** BT.2020 color chromacity coordinates with KR = 0.2627, KB = 0.0593. */
+    public static final int COLOR_STANDARD_BT2020 = 6;
+
+    /** @hide */
+    @IntDef({
+        COLOR_STANDARD_BT709,
+        COLOR_STANDARD_BT601_PAL,
+        COLOR_STANDARD_BT601_NTSC,
+        COLOR_STANDARD_BT2020,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorStandard {}
+
+    /**
+     * An optional key describing the opto-electronic transfer function used
+     * for the video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_TRANSFER_ values.
+     */
+    public static final String KEY_COLOR_TRANSFER = "color-transfer";
+
+    /** Linear transfer characteristic curve. */
+    public static final int COLOR_TRANSFER_LINEAR = 1;
+
+    /** SMPTE 170M transfer characteristic curve used by BT.601/BT.709/BT.2020. This is the curve
+     *  used by most non-HDR video content. */
+    public static final int COLOR_TRANSFER_SDR_VIDEO = 3;
+
+    /** SMPTE ST 2084 transfer function. This is used by some HDR video content. */
+    public static final int COLOR_TRANSFER_ST2084 = 6;
+
+    /** ARIB STD-B67 hybrid-log-gamma transfer function. This is used by some HDR video content. */
+    public static final int COLOR_TRANSFER_HLG = 7;
+
+    /** @hide */
+    @IntDef({
+        COLOR_TRANSFER_LINEAR,
+        COLOR_TRANSFER_SDR_VIDEO,
+        COLOR_TRANSFER_ST2084,
+        COLOR_TRANSFER_HLG,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorTransfer {}
+
+    /**
+     * An optional key describing the range of the component values of the video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_RANGE_ values.
+     */
+    public static final String KEY_COLOR_RANGE = "color-range";
+
+    /** Limited range. Y component values range from 16 to 235 for 8-bit content.
+     *  Cr, Cy values range from 16 to 240 for 8-bit content.
+     *  This is the default for video content. */
+    public static final int COLOR_RANGE_LIMITED = 2;
+
+    /** Full range. Y, Cr and Cb component values range from 0 to 255 for 8-bit content. */
+    public static final int COLOR_RANGE_FULL = 1;
+
+    /** @hide */
+    @IntDef({
+        COLOR_RANGE_LIMITED,
+        COLOR_RANGE_FULL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ColorRange {}
+
+    /**
+     * An optional key describing the static metadata of HDR (high-dynamic-range) video content.
+     *
+     * The associated value is a ByteBuffer. This buffer contains the raw contents of the
+     * Static Metadata Descriptor (including the descriptor ID) of an HDMI Dynamic Range and
+     * Mastering InfoFrame as defined by CTA-861.3. This key must be provided to video decoders
+     * for HDR video content unless this information is contained in the bitstream and the video
+     * decoder supports an HDR-capable profile. This key must be provided to video encoders for
+     * HDR video content.
+     */
+    public static final String KEY_HDR_STATIC_INFO = "hdr-static-info";
+
+    /**
+     * A key describing a unique ID for the content of a media track.
+     *
+     * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings
+     * of the same track (e.g. float audio tracks for FLAC and WAV may be expressed as two
+     * tracks via MediaExtractor: a normal PCM track for backward compatibility, and a float PCM
+     * track for added fidelity. Similarly, Dolby Vision extractor may provide a baseline SDR
+     * version of a DV track.) This key can be used to identify which MediaExtractor tracks refer
+     * to the same underlying content.
+     * </p>
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_TRACK_ID = "track-id";
 
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;

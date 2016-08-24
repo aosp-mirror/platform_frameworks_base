@@ -1,0 +1,390 @@
+page.title=Оптимизация фоновых процессов
+page.metaDescription=Новые ограничения для неявных широковещательных сообщений.
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Содержание документа
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">Ограничения для CONNECTIVITY_ACTION</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">Планирование сетевых заданий для безлимитных
+подключений</a>
+      </li>
+
+      <li>
+        <a href="#monitor-conn">Отслеживание сетевого подключения во время работы
+приложения</a>
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">Ограничения для NEW_PICTURE и
+NEW_VIDEO</a>
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">Новые методы JobInfo</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">Новые методы JobParameter</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">Дальнейшая оптимизация приложения</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Фоновые процессы могут потреблять много памяти и заряда аккумулятора. Например,
+неявное широковещательное сообщение может запускать множество фоновых процессов,
+которые его прослушивают, даже если они сами не выполняют полезной работы. Это
+может значительно снизить производительность устройства и быстродействие пользовательского интерфейса.
+</p>
+
+<p>
+  Чтобы устранить подобные проблемы, в N Developer Preview применяются следующие
+ограничения.
+</p>
+
+<ul>
+  <li>Приложения для версии Preview не получают рассылок {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, если они
+зарегистрированы для их получения в манифесте. Приложения в активном режиме
+по-прежнему могут прослушивать {@code CONNECTIVITY_CHANGE} в главном потоке,
+зарегистрировав {@link android.content.BroadcastReceiver} с помощью метода {@link
+android.content.Context#registerReceiver Context.registerReceiver()}.
+  </li>
+
+  <li>Приложения не могут отправлять или получать широковещательные сообщения {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} и {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Эта оптимизация
+затрагивает все приложения, а не только предназначенные для версии Preview.
+  </li>
+</ul>
+
+<p>
+  Платформа Android предоставляет несколько решений, позволяющих отказаться
+от таких неявных рассылок. Например, в {@link android.app.job.JobScheduler}
+и <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> реализованы надежные механизмы для планирования сетевых
+операций, которые запускаются при выполнении определенных условий, таких как наличие безлимитной
+сети. Теперь вы также можете использовать {@link android.app.job.JobScheduler}
+, чтобы реагировать на изменения поставщиков контента. В объектах {@link android.app.job.JobInfo}
+инкапсулированы параметры, которые {@link android.app.job.JobScheduler}
+использует для планирования заданий. Если условия задания выполнены, система
+выполняет его через {@link android.app.job.JobService} вашего приложения.
+</p>
+
+<p>
+  Здесь мы рассмотрим, как использовать альтернативные методы, такие как
+{@link android.app.job.JobScheduler}, для адаптации приложения к новым
+ограничениям.
+</p>
+
+<h2 id="connectivity-action">
+  Ограничения для CONNECTIVITY_ACTION
+</h2>
+
+<p>
+  Приложения для N Developer Preview не получают широковещательные сообщения {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION}, если они
+зарегистрированы для их получения в своем манифесте. При этом процессы, которые зависят от этого
+широковещательного сообщения, не запускаются. Это может вызвать проблемы для приложений, которым необходимо
+прослушивать изменения сети или выполнять
+массовые сетевые операции, когда устройство подключается к безлимитной сети. Платформа Android уже предоставляет ряд способов обойти
+это ограничение, но выбор нужного метода
+зависит от того, чего вы хотите добиться от приложения.
+</p>
+
+<p class="note">
+  <strong>Примечание.</strong> Объект {@link android.content.BroadcastReceiver}, зарегистрированный с помощью метода
+{@link android.content.Context#registerReceiver Context.registerReceiver()},
+продолжает получать такие рассылки, если приложение работает в активном режиме.
+</p>
+
+<h3 id="sched-jobs">
+  Планирование сетевых заданий для безлимитных подключений
+</h3>
+
+<p>
+  При использовании класса {@link android.app.job.JobInfo.Builder JobInfo.Builder} для создания
+объекта {@link android.app.job.JobInfo} примените метод {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} и передайте {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} в качестве параметра задания. В следующем примере кода
+служба запускается, если устройство подключается к безлимитной
+сети и заряжается:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  Если условия задания выполнены, приложение получает обратный вызов для запуска
+метода {@link android.app.job.JobService#onStartJob onStartJob()} в указанном
+классе {@code JobService.class}. Другие примеры реализации {@link
+  android.app.job.JobScheduler} см. в <a href="{@docRoot}samples/JobScheduler/index.html">примере приложения JobScheduler</a>.
+</p>
+
+<p>
+  В приложениях, использующих службы GMSCore и предназначенных для Android 5.0 (уровень API 21)
+или предыдущих версий, можно воспользоваться <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> и указать {@code Task.NETWORK_STATE_UNMETERED}.
+</p>
+
+<h3 id="monitor-conn">
+  Отслеживание сетевого подключения во время работы приложения
+</h3>
+
+<p>
+  Приложения в активном режиме по-прежнему могут прослушивать {@code
+  CONNECTIVITY_CHANGE} с помощью зарегистрированного объекта {@link
+  android.content.BroadcastReceiver}. Однако в API-интерфейсе {@link
+  android.net.ConnectivityManager} есть более надежный метод для запроса
+обратного вызова только при выполнении указанных сетевых условий.
+</p>
+
+<p>
+  В объектах {@link android.net.NetworkRequest} параметры
+сетевого обратного вызова задаются с помощью {@link android.net.NetworkCapabilities}. Объекты {@link android.net.NetworkRequest} создаются
+с использованием класса {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder}. Затем метод {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+ передает объект {@link android.net.NetworkRequest} системе. Если
+сетевые условия выполнены, приложение получает обратный вызов для выполнения метода
+  {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()}, определенного в своем классе {@link
+  android.net.ConnectivityManager.NetworkCallback}.
+</p>
+
+<p>
+  Приложение продолжает получать обратные вызовы, пока оно не будет закрыто или не будет вызван метод
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()}.
+</p>
+
+<h2 id="media-broadcasts">
+  Ограничения для NEW_PICTURE и NEW_VIDEO
+</h2>
+
+<p>
+  В N Developer Preview приложения не могут отправлять или получать широковещательные сообщения {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} и {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Это ограничение
+ позволяет улучшить производительность, если для обработки нового изображения или видео должны
+ активироваться несколько приложений. N Developer Preview
+ расширяет классы {@link android.app.job.JobInfo} и {@link
+  android.app.job.JobParameters}, что дает разработчикам альтернативное решение.
+</p>
+
+<h3 id="new-jobinfo">
+  Новые методы JobInfo
+</h3>
+
+<p>
+  Для активации заданий при изменении URI контента в N Developer Preview
+ были добавлены следующие методы для API-интерфейса {@link android.app.job.JobInfo}.
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    Инкапсулирует параметры, необходимые для активации задания при изменении URI контента.
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    Передает объект {@code TriggerContentUri} в контейнер {@link
+    android.app.job.JobInfo}. Объект {@link android.database.ContentObserver}
+    отслеживает инкапсулированный URI контента. Если с заданием связано несколько объектов {@code
+    TriggerContentUri}, система предоставляет
+ обратный вызов, даже если изменился только один из URI контента.
+  </dd>
+
+  <dd>
+    Добавьте флаг {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS}, чтобы
+ активировать задание при изменении любых потомков указанного URI. Этот флаг
+ соответствует параметру {@code notifyForDescendants}, переданному методу {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()}.
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>Примечание.</strong> Метод {@code TriggerContentUri()} не может использоваться
+ вместе с {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} или {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()}. Чтобы непрерывно отслеживать изменения контента, запланируйте новый объект задания
+  {@link android.app.job.JobInfo}, прежде чем {@link
+  android.app.job.JobService} завершит обработку последнего обратного вызова.
+</p>
+
+<p>
+  В следующем примере кода планируется задание, которое активируется, когда система сообщает
+ об изменении URI контента {@code MEDIA_URI}:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MEDIA_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  Если система сообщает об изменении указанных URI контента, приложение
+ получает обратный вызов, а объект {@link android.app.job.JobParameters} передается
+ методу {@link android.app.job.JobService#onStartJob onStartJob()}
+ в {@code MediaContentJob.class}.
+</p>
+
+<h3 id="new-jobparam">
+  Новые методы JobParameter
+</h3>
+
+<p>
+  В N Developer Preview также расширен класс {@link android.app.job.JobParameters}, чтобы
+ приложения могли получать полезные сведения о том, какие источники контента
+ и URI инициировали задание.
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    Возвращает массив URI, которые активировали задание. Возвращается значение {@code
+    null}, если ни один URI не инициировал задание (например, задание было
+    активировано по времени или из-за другой причины), или число измененных
+    URI больше 50.
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    Возвращает строковый массив источников контента, которые активировали задание.
+    Если возвращенный массив не равен {@code null}, используйте метод {@code getTriggeredContentUris()},
+    чтобы получить сведения об измененных URI.
+  </dd>
+</dl>
+
+<p>
+  В следующем примере кода перегружается метод {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} и
+ записываются источники и URI контента, вызвавшие задание:
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  Дальнейшая оптимизация приложения
+</h2>
+
+<p>
+  Оптимизация приложений для устройств с малым объемом памяти
+ или для условий с ограниченным объемом памяти помогает улучшить производительность и удобство работы пользователей. Удаление
+ зависимостей от фоновых служб и статически зарегистрированных приемников неявных широковещательных сообщений
+ способно помочь приложению более эффективно работать на таких устройствах. Хотя
+ на платформе N Developer Preview приняты меры для устранения некоторых из этих проблем,
+ рекомендуется оптимизировать приложения, полностью отказавшись
+ от подобных фоновых процессов.
+</p>
+
+<p>
+  В N Developer Preview представлен ряд дополнительных команд <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>, с помощью
+ которых можно тестировать поведение приложения с отключенными фоновыми процессами.
+</p>
+
+<ul>
+  <li>Для эмуляции условий, в которых неявные широковещательные сообщения и фоновые службы
+ недоступны, введите следующую команду:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>Чтобы снова включить неявные широковещательные сообщения и фоновые службы, введите
+ следующую команду:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

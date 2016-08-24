@@ -74,6 +74,8 @@ public final class Sm {
             runGetPrimaryStorageUuid();
         } else if ("set-force-adoptable".equals(op)) {
             runSetForceAdoptable();
+        } else if ("set-sdcardfs".equals(op)) {
+            runSetSdcardfs();
         } else if ("partition".equals(op)) {
             runPartition();
         } else if ("mount".equals(op)) {
@@ -86,6 +88,10 @@ public final class Sm {
             runBenchmark();
         } else if ("forget".equals(op)) {
             runForget();
+        } else if ("set-emulate-fbe".equals(op)) {
+            runSetEmulateFbe();
+        } else if ("get-fbe-mode".equals(op)) {
+            runGetFbeMode();
         } else {
             throw new IllegalArgumentException();
         }
@@ -135,6 +141,38 @@ public final class Sm {
         final boolean forceAdoptable = Boolean.parseBoolean(nextArg());
         mSm.setDebugFlags(forceAdoptable ? StorageManager.DEBUG_FORCE_ADOPTABLE : 0,
                 StorageManager.DEBUG_FORCE_ADOPTABLE);
+    }
+
+    public void runSetSdcardfs() throws RemoteException {
+        final int mask = StorageManager.DEBUG_SDCARDFS_FORCE_ON
+                | StorageManager.DEBUG_SDCARDFS_FORCE_OFF;
+        switch (nextArg()) {
+            case "on":
+                mSm.setDebugFlags(StorageManager.DEBUG_SDCARDFS_FORCE_ON, mask);
+                break;
+            case "off":
+                mSm.setDebugFlags(StorageManager.DEBUG_SDCARDFS_FORCE_OFF, mask);
+                break;
+            case "default":
+                mSm.setDebugFlags(0, mask);
+                break;
+        }
+    }
+
+    public void runSetEmulateFbe() throws RemoteException {
+        final boolean emulateFbe = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(emulateFbe ? StorageManager.DEBUG_EMULATE_FBE : 0,
+                StorageManager.DEBUG_EMULATE_FBE);
+    }
+
+    public void runGetFbeMode() {
+        if (StorageManager.isFileEncryptedNativeOnly()) {
+            System.out.println("native");
+        } else if (StorageManager.isFileEncryptedEmulatedOnly()) {
+            System.out.println("emulated");
+        } else {
+            System.out.println("none");
+        }
     }
 
     public void runPartition() throws RemoteException {
@@ -204,6 +242,8 @@ public final class Sm {
         System.err.println("       sm benchmark VOLUME");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
+        System.err.println("");
+        System.err.println("       sm set-emulate-fbe [true|false]");
         System.err.println("");
         return 1;
     }

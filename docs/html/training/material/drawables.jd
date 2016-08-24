@@ -14,6 +14,8 @@ page.title=Working with Drawables
 <ul>
   <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
   <li><a href="{@docRoot}design/material/index.html">Material design on Android</a></li>
+  <li><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></li>
+  <li><a href="{@docRoot}tools/help/image-asset-studio.html">Image Asset Studio</a></li>
 </ul>
 </div>
 </div>
@@ -68,7 +70,7 @@ provide a listener instead.</p>
 <code>Palette</code> class, such as <code>Palette.getVibrantColor</code>.</p>
 
 <p>To use the {@link android.support.v7.graphics.Palette} class in your project, add the following
-<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle dependency</a> to your
+<a href="{@docRoot}studio/build/index.html#dependencies">Gradle dependency</a> to your
 app's module:</p>
 
 <pre>

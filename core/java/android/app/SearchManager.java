@@ -686,8 +686,7 @@ public class SearchManager
         try {
             return mService.getGlobalSearchActivities();
         } catch (RemoteException ex) {
-            Log.e(TAG, "getGlobalSearchActivities() failed: " + ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -698,8 +697,7 @@ public class SearchManager
         try {
             return mService.getGlobalSearchActivity();
         } catch (RemoteException ex) {
-            Log.e(TAG, "getGlobalSearchActivity() failed: " + ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -716,8 +714,7 @@ public class SearchManager
         try {
             return mService.getWebSearchActivity();
         } catch (RemoteException ex) {
-            Log.e(TAG, "getWebSearchActivity() failed: " + ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -850,8 +847,7 @@ public class SearchManager
         try {
             return mService.getSearchableInfo(componentName);
         } catch (RemoteException ex) {
-            Log.e(TAG, "getSearchableInfo() failed: " + ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -935,8 +931,7 @@ public class SearchManager
         try {
             return mService.getSearchablesInGlobalSearch();
         } catch (RemoteException e) {
-            Log.e(TAG, "getSearchablesInGlobalSearch() failed: " + e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -958,8 +953,7 @@ public class SearchManager
             }
             return intent;
         } catch (RemoteException re) {
-            Log.e(TAG, "getAssistIntent() failed: " + re);
-            return null;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -977,7 +971,7 @@ public class SearchManager
             }
             mService.launchAssist(args);
         } catch (RemoteException re) {
-            Log.e(TAG, "launchAssist() failed: " + re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -995,8 +989,7 @@ public class SearchManager
             }
             return mService.launchLegacyAssist(hint, userHandle, args);
         } catch (RemoteException re) {
-            Log.e(TAG, "launchAssist() failed: " + re);
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 }

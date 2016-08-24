@@ -19,7 +19,10 @@ package com.android.internal.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Slog;
+
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
@@ -27,6 +30,7 @@ import libcore.io.Streams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Represents a connection to {@code installd}. Allows multiple connect and
@@ -42,12 +46,28 @@ public class InstallerConnection {
     private OutputStream mOut;
     private LocalSocket mSocket;
 
+    private volatile Object mWarnIfHeld;
+
     private final byte buf[] = new byte[1024];
 
     public InstallerConnection() {
     }
 
+    /**
+     * Yell loudly if someone tries making future calls while holding a lock on
+     * the given object.
+     */
+    public void setWarnIfHeld(Object warnIfHeld) {
+        Preconditions.checkState(mWarnIfHeld == null);
+        mWarnIfHeld = Preconditions.checkNotNull(warnIfHeld);
+    }
+
     public synchronized String transact(String cmd) {
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
+        }
+
         if (!connect()) {
             Slog.e(TAG, "connection failed");
             return "-1";
@@ -83,39 +103,84 @@ public class InstallerConnection {
         }
     }
 
-    public int execute(String cmd) {
-        String res = transact(cmd);
-        try {
-            return Integer.parseInt(res);
-        } catch (NumberFormatException ex) {
-            return -1;
+    public String[] execute(String cmd, Object... args) throws InstallerException {
+        final StringBuilder builder = new StringBuilder(cmd);
+        for (Object arg : args) {
+            String escaped;
+            if (arg == null) {
+                escaped = "";
+            } else {
+                escaped = String.valueOf(arg);
+            }
+            if (escaped.indexOf('\0') != -1 || escaped.indexOf(' ') != -1 || "!".equals(escaped)) {
+                throw new InstallerException(
+                        "Invalid argument while executing " + cmd + " " + Arrays.toString(args));
+            }
+            if (TextUtils.isEmpty(escaped)) {
+                escaped = "!";
+            }
+            builder.append(' ').append(escaped);
         }
+        final String[] resRaw = transact(builder.toString()).split(" ");
+        int res = -1;
+        try {
+            res = Integer.parseInt(resRaw[0]);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored) {
+        }
+        if (res != 0) {
+            throw new InstallerException(
+                    "Failed to execute " + cmd + " " + Arrays.toString(args) + ": " + res);
+        }
+        return resRaw;
     }
 
-    public int dexopt(String apkPath, int uid, String instructionSet,
-            int dexoptNeeded, int dexFlags) {
-        return dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
-                null /*outputPath*/, dexFlags);
+    public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
+            int dexFlags, String compilerFilter, String volumeUuid, String sharedLibraries)
+            throws InstallerException {
+        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded, null /*outputPath*/, dexFlags,
+                compilerFilter, volumeUuid, sharedLibraries);
     }
 
-    public int dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, String outputPath, int dexFlags) {
-        StringBuilder builder = new StringBuilder("dexopt");
-        builder.append(' ');
-        builder.append(apkPath);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(instructionSet);
-        builder.append(' ');
-        builder.append(dexoptNeeded);
-        builder.append(' ');
-        builder.append(outputPath != null ? outputPath : "!");
-        builder.append(' ');
-        builder.append(dexFlags);
-        return execute(builder.toString());
+    public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+            int dexoptNeeded, String outputPath, int dexFlags, String compilerFilter,
+            String volumeUuid, String sharedLibraries) throws InstallerException {
+        execute("dexopt",
+                apkPath,
+                uid,
+                pkgName,
+                instructionSet,
+                dexoptNeeded,
+                outputPath,
+                dexFlags,
+                compilerFilter,
+                volumeUuid,
+                sharedLibraries);
+    }
+
+    private boolean safeParseBooleanResult(String[] res) throws InstallerException {
+        if ((res == null) || (res.length != 2)) {
+            throw new InstallerException("Invalid size result: " + Arrays.toString(res));
+        }
+
+        // Just as a sanity check. Anything != "true" will be interpreted as false by parseBoolean.
+        if (!res[1].equals("true") && !res[1].equals("false")) {
+            throw new InstallerException("Invalid boolean result: " + Arrays.toString(res));
+        }
+
+        return Boolean.parseBoolean(res[1]);
+    }
+
+    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
+        final String[] res = execute("merge_profiles", uid, pkgName);
+
+        return safeParseBooleanResult(res);
+    }
+
+    public boolean dumpProfiles(String gid, String packageName, String codePaths)
+            throws InstallerException {
+        final String[] res = execute("dump_profiles", gid, packageName, codePaths);
+
+        return safeParseBooleanResult(res);
     }
 
     private boolean connect() {
@@ -209,11 +274,19 @@ public class InstallerConnection {
 
     public void waitForConnection() {
         for (;;) {
-            if (execute("ping") >= 0) {
+            try {
+                execute("ping");
                 return;
+            } catch (InstallerException ignored) {
             }
             Slog.w(TAG, "installd not ready");
             SystemClock.sleep(1000);
+        }
+    }
+
+    public static class InstallerException extends Exception {
+        public InstallerException(String detailMessage) {
+            super(detailMessage);
         }
     }
 }

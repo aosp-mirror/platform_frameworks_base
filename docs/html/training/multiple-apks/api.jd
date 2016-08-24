@@ -149,17 +149,9 @@ color themes, bugs fixed in shared code), which improves your development time a
 likelihood of mistakes that could have been easily avoided.</p>
 
 <p class="note"><strong>Note:</strong>  While the implementation details of how to create and
-include library projects are beyond the scope of this lesson, you can get up to speed quickly on
-their creation at the following links:</p>
-<ul>
-<li><a
-href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
-a library project (Eclipse)</a></li>
-<li><a
-href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
-a library project (Command line)</a></li>
-</ul>
-
+include library projects are beyond the scope of this lesson, you can get up to speed
+by reading <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 <p>If you’re converting an existing application to use multiple APK support,
 scour your codebase for every localized string file, list of values, theme
@@ -176,7 +168,7 @@ to the library section without screwing anything up.</p>
 
 <h2 id="CreateAPKs">Create New APK Projects</h2>
 <p>There should be a separate Android project for each APK you’re going to release.  For easy
-organization, place the library project and all related APK projects under the same parent folder. 
+organization, place the library project and all related APK projects under the same parent folder.
 Also remember that each APK needs to have the same package name, although they don’t necessarily
 need to share the package name with the library.  If you were to have 3 APKs following the scheme
 described earlier, your root directory might look like this:</p>
@@ -278,7 +270,7 @@ green &#8805; blue.  Therefore we can effectively collapse the chart to look lik
 </table>
 
 <p>
-Now, let’s further assume that the Red APK has some requirement on it that the other two don’t.  
+Now, let’s further assume that the Red APK has some requirement on it that the other two don’t.
 <a href="{@docRoot}google/play/filters.html">Filters on Google Play</a> page of
 the Android Developer guide has a whole list of possible culprits.  For the
 sake of example, let’s assume that red requires a front-facing camera.  In fact, the entire point of

@@ -1362,8 +1362,8 @@ public class WifiP2pManager {
     public void setMiracastMode(int mode) {
         try {
             mService.setMiracastMode(mode);
-        } catch(RemoteException e) {
-           // ignore
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1378,7 +1378,7 @@ public class WifiP2pManager {
         try {
             return mService.getMessenger();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1393,7 +1393,7 @@ public class WifiP2pManager {
         try {
             return mService.getP2pStateMachineMessenger();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -847,6 +847,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * to make forward progress from the partial results and avoid waiting for the completed
          * result.</p>
          *
+         * <p>For a particular request, {@link #onCaptureProgressed} may happen before or after
+         * {@link #onCaptureStarted}.</p>
+         *
          * <p>Each request will generate at least {@code 1} partial results, and at most
          * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT} partial results.</p>
          *
@@ -985,6 +988,30 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          */
         public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session,
                 int sequenceId) {
+            // default empty implementation
+        }
+
+        /**
+         * <p>This method is called if a single buffer for a capture could not be sent to its
+         * destination surface.</p>
+         *
+         * <p>If the whole capture failed, then {@link #onCaptureFailed} will be called instead. If
+         * some but not all buffers were captured but the result metadata will not be available,
+         * then onCaptureFailed will be invoked with {@link CaptureFailure#wasImageCaptured}
+         * returning true, along with one or more calls to {@link #onCaptureBufferLost} for the
+         * failed outputs.</p>
+         *
+         * @param session
+         *            The session returned by {@link CameraDevice#createCaptureSession}
+         * @param request
+         *            The request that was given to the CameraDevice
+         * @param target
+         *            The target Surface that the buffer will not be produced for
+         * @param frameNumber
+         *            The frame number for the request
+         */
+        public void onCaptureBufferLost(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
             // default empty implementation
         }
     }

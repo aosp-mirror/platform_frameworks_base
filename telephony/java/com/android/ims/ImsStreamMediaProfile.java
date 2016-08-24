@@ -51,6 +51,16 @@ public class ImsStreamMediaProfile implements Parcelable {
     public static final int AUDIO_QUALITY_GSM_EFR = 8;
     public static final int AUDIO_QUALITY_GSM_FR = 9;
     public static final int AUDIO_QUALITY_GSM_HR = 10;
+    public static final int AUDIO_QUALITY_G711U = 11;
+    public static final int AUDIO_QUALITY_G723 = 12;
+    public static final int AUDIO_QUALITY_G711A = 13;
+    public static final int AUDIO_QUALITY_G722 = 14;
+    public static final int AUDIO_QUALITY_G711AB = 15;
+    public static final int AUDIO_QUALITY_G729 = 16;
+    public static final int AUDIO_QUALITY_EVS_NB = 17;
+    public static final int AUDIO_QUALITY_EVS_WB = 18;
+    public static final int AUDIO_QUALITY_EVS_SWB = 19;
+    public static final int AUDIO_QUALITY_EVS_FB = 20;
 
    /**
      * Video information
@@ -76,7 +86,7 @@ public class ImsStreamMediaProfile implements Parcelable {
     }
 
     public ImsStreamMediaProfile() {
-        mAudioQuality = AUDIO_QUALITY_AMR_WB;
+        mAudioQuality = AUDIO_QUALITY_NONE;
         mAudioDirection = DIRECTION_SEND_RECEIVE;
         mVideoQuality = VIDEO_QUALITY_NONE;
         mVideoDirection = DIRECTION_INVALID;

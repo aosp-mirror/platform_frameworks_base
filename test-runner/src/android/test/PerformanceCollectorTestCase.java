@@ -30,6 +30,7 @@ import android.os.PerformanceCollector.PerformanceResultsWriter;
  *
  * {@hide} Not needed for SDK.
  */
+@Deprecated
 public interface PerformanceCollectorTestCase {
     public PerformanceCollector mPerfCollector = new PerformanceCollector();
 

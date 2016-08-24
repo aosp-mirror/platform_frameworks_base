@@ -1,0 +1,159 @@
+page.title=ICU4J Android 框架 API
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>本文内容：</h2>
+<ol>
+    <li><a href="#relation">与 ICU4J 的关系</a></li>
+    <li><a href="#migration">从 ICU4J 迁移至 android.icu API </a></li>
+    <li><a href="#licence">授权</a></li>
+</ol>
+
+<h2>另请参阅</h2>
+<ol>
+  <li>
+    <a class="external-link" href="http://userguide.icu-project.org">ICU4J 的文档</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="http://site.icu-project.org/#TOC-What-is-ICU-">ICU4J 支持的最新标准</a>
+
+  </li>
+</ol>
+</div>
+</div>
+
+<p>
+  ICU4J 是一个广泛使用的开源 Java 库集合，为软件应用提供 Unicode 和全球化支持。
+Android N 在 {@code android.icu} 软件包下显示 Android 框架中的 ICU4J API 子集，供应用开发者使用。
+
+这些 API 使用设备上具有的本地化数据。
+因此，您可以通过不将 ICU4J 库编译到 APK 来减少 APK 占用空间；相反，您可以只在框架中调用它们。
+
+（在此情况下，您可能想要提供<a href="{@docRoot}google/play/publishing/multiple-apks.html">多个版本的 APK</a>，这样，运行比 Android N 低的 Android 版本的用户可以下载包含 ICU4J 库的应用版本。）
+
+
+
+</p>
+
+<p>
+  本文档开头提供了有关支持这些库所需的最低 Android API 级别的一些基本信息。
+然后，介绍关于 Android 特定的 ICU4J 实现您需要了解的内容。
+最后，介绍如何在 Android 框架中使用 ICU4J API。
+
+</p>
+
+<h2 id="relation">与 ICU4J 的关系</h2>
+
+<p>
+  Android N 通过
+<code>android.icu</code> 软件包（而非 <code>com.ibm.icu</code>）显示 ICU4J API 的子集。由于种种原因，Android 框架可能选择不显示 ICU4J API；例如，Android N 不显示一些已弃用的 API 或 ICU 团队尚未将其声明为“稳定”的 API。
+
+
+
+由于 ICU 团队将来会弃用这些 API，因此，Android 也会将其标记为已弃用，但将继续包含它们。
+
+</p>
+
+<p class="table-caption"><strong>表 1.</strong> Android N 中使用的 ICU 和 CLDR 版本。
+</p>
+<table>
+<tr>
+<th>Android API 级别</th>
+<th>ICU 版本</th>
+<th>CLDR 版本</th>
+</tr>
+<tr>
+<td>Android N</td>
+<td>56</td>
+<td>28</td>
+</tr>
+</table>
+
+<p>以下是几点注意事项：</p>
+
+<ul>
+<li>ICU4J Android 框架 API 不包含所有的 ICU4J API。</li>
+<li>NDK 开发者应了解 Android ICU4C 不受支持。</li>
+<li>Android 框架中的 API 不会取代 Android 对<a href="{@docRoot}guide/topics/resources/localization.html">使用资源进行本地化</a>的支持。
+
+</li>
+</ul>
+
+<h2 id="migration">从 com.ibm.icu 迁移至 android.icu 软件包</h2>
+
+<p>
+  如果您已在应用中使用 ICU4J API，且
+<code>android.icu</code> API 符合您的要求，那么要迁移至框架 API，需要将 Java 导入从 <code>com.ibm.icu</code> 更改为 <code>android.icu</code>。
+
+然后，您可以从 APK 移除您自己的 ICU4J 文件的副本。
+
+</p>
+
+<p class="note">
+  <b>注</b>：ICU4J 框架 API 使用 {@code android.icu}
+命名空间，而不是 {@code com.ibm.icu}。这是为了避免在包含自己的 {@code com.ibm.icu} 库的 APK 中出现命名空间冲突。
+
+</p>
+
+<h3 id="migrate-from-android">
+  从其他 Android SDK API 迁移至 android.icu API
+</h3>
+
+<p>
+  <code>java</code> 和 <code>android</code> 软件包中的某些类与在 ICU4J 中找到的一些类等效。
+不过，ICU4J 通常为标准和语言提供更广泛的支持。
+
+</p>
+<p>下面是一些入门示例：</p>
+<table>
+<tr>
+<th>类</th>
+<th>替代项</th>
+</tr>
+<tr>
+<td><code>java.lang.Character</code> </td>
+<td><code>android.icu.lang.UCharacter</code> </td>
+</tr>
+<tr>
+<td><code>java.text.BreakIterator</code> </td>
+<td><code>android.icu.text.BreakIterator</code> </td>
+</tr>
+<tr>
+<td><code>java.text.DecimalFormat</code> </td>
+<td><code>android.icu.text.DecimalFormat</code> </td>
+</tr>
+<tr>
+<td><code>java.util.Calendar</code></td>
+<td>
+<code>android.icu.util.Calendar</code></td>
+</tr>
+<tr>
+<td><code>android.text.BidiFormatter</code>
+ </td>
+<td><code>android.icu.text.Bidi</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateFormat</code>
+ </td>
+<td><code>android.icu.text.DateFormat</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateUtils</code> </td>
+<td><code>android.icu.text.DateFormat</code>
+<code>android.icu.text.RelativeDateTimeFormatter</code>
+</td>
+</tr>
+</table>
+
+<h2 id="licence">授权</h2>
+
+<p>
+  ICU4J 按照 ICU 许可发布。如需了解详情，请参阅 <a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU 用户指南</a>。
+
+</p>

@@ -16,7 +16,9 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -45,12 +48,16 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -59,6 +66,12 @@ import java.util.Set;
 public final class TvInputInfo implements Parcelable {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputInfo";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TYPE_TUNER, TYPE_OTHER, TYPE_COMPOSITE, TYPE_SVIDEO, TYPE_SCART, TYPE_COMPONENT,
+            TYPE_VGA, TYPE_DVI, TYPE_HDMI, TYPE_DISPLAY_PORT})
+    public @interface Type {}
 
     // Should be in sync with frameworks/base/core/res/res/values/attrs.xml
     /**
@@ -103,64 +116,38 @@ public final class TvInputInfo implements Parcelable {
     public static final int TYPE_DISPLAY_PORT = 1008;
 
     /**
-     * The ID of the TV input to provide to the setup activity and settings activity.
+     * Used as a String extra field in setup intents created by {@link #createSetupIntent()} to
+     * supply the ID of a specific TV input to set up.
      */
     public static final String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
 
-    private static final SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
-
-    private static final String XML_START_TAG_NAME = "tv-input";
-    private static final String DELIMITER_INFO_IN_ID = "/";
-    private static final String PREFIX_HDMI_DEVICE = "HDMI";
-    private static final String PREFIX_HARDWARE_DEVICE = "HW";
-    private static final int LENGTH_HDMI_PHYSICAL_ADDRESS = 4;
-    private static final int LENGTH_HDMI_DEVICE_ID = 2;
-
     private final ResolveInfo mService;
+
     private final String mId;
-    private final String mParentId;
     private final int mType;
     private final boolean mIsHardwareInput;
 
-    // Attributes from XML meta data.
-    private String mSetupActivity;
-    private String mSettingsActivity;
-
-    private HdmiDeviceInfo mHdmiDeviceInfo;
-    private int mLabelRes;
-    private String mLabel;
-    private Icon mIcon;
+    // TODO: Remove mIconUri when createTvInputInfo() is removed.
     private Uri mIconUri;
-    private boolean mIsConnectedToHdmiSwitch;
 
-    static {
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
-                TYPE_OTHER);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_TUNER, TYPE_TUNER);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPOSITE, TYPE_COMPOSITE);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SVIDEO, TYPE_SVIDEO);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SCART, TYPE_SCART);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPONENT, TYPE_COMPONENT);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_VGA, TYPE_VGA);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DVI, TYPE_DVI);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_HDMI, TYPE_HDMI);
-        sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DISPLAY_PORT,
-                TYPE_DISPLAY_PORT);
-    }
+    private final CharSequence mLabel;
+    private final int mLabelResId;
+    private final Icon mIcon;
+    private final Icon mIconStandby;
+    private final Icon mIconDisconnected;
 
-    /**
-     * Create a new instance of the TvInputInfo class,
-     * instantiating it from the given Context and ResolveInfo.
-     *
-     * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @hide
-     */
-    public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service)
-            throws XmlPullParserException, IOException {
-        return createTvInputInfo(context, service, generateInputIdForComponentName(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name)),
-                null, TYPE_TUNER, false, 0, null, null, null, false);
-    }
+    // Attributes from XML meta data.
+    private final String mSetupActivity;
+    private final String mSettingsActivity;
+    private final boolean mCanRecord;
+    private final int mTunerCount;
+
+    // Attributes specific to HDMI
+    private final HdmiDeviceInfo mHdmiDeviceInfo;
+    private final boolean mIsConnectedToHdmiSwitch;
+    private final String mParentId;
+
+    private final Bundle mExtras;
 
     /**
      * Create a new instance of the TvInputInfo class, instantiating it from the given Context,
@@ -175,18 +162,20 @@ public final class TvInputInfo implements Parcelable {
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             HdmiDeviceInfo hdmiDeviceInfo, String parentId, String label, Uri iconUri)
                     throws XmlPullParserException, IOException {
-        boolean isConnectedToHdmiSwitch = (hdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
-        TvInputInfo input = createTvInputInfo(context, service, generateInputIdForHdmiDevice(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hdmiDeviceInfo), parentId, TYPE_HDMI, true, 0, label, null, iconUri,
-                isConnectedToHdmiSwitch);
-        input.mHdmiDeviceInfo = hdmiDeviceInfo;
-        return input;
+        TvInputInfo info = new TvInputInfo.Builder(context, service)
+                .setHdmiDeviceInfo(hdmiDeviceInfo)
+                .setParentId(parentId)
+                .setLabel(label)
+                .build();
+        info.mIconUri = iconUri;
+        return info;
     }
 
     /**
@@ -201,18 +190,19 @@ public final class TvInputInfo implements Parcelable {
      * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
      *            {@code null}, the application icon of {@code service} will be loaded.
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             HdmiDeviceInfo hdmiDeviceInfo, String parentId, int labelRes, Icon icon)
             throws XmlPullParserException, IOException {
-        boolean isConnectedToHdmiSwitch = (hdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
-        TvInputInfo input = createTvInputInfo(context, service, generateInputIdForHdmiDevice(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hdmiDeviceInfo), parentId, TYPE_HDMI, true, labelRes, null, icon, null,
-                isConnectedToHdmiSwitch);
-        input.mHdmiDeviceInfo = hdmiDeviceInfo;
-        return input;
+        return new TvInputInfo.Builder(context, service)
+                .setHdmiDeviceInfo(hdmiDeviceInfo)
+                .setParentId(parentId)
+                .setLabel(labelRes)
+                .setIcon(icon)
+                .build();
     }
 
     /**
@@ -227,15 +217,19 @@ public final class TvInputInfo implements Parcelable {
      *            {@link android.content.ContentResolver#openInputStream}. If it is {@code null},
      *            the application icon of {@code service} will be loaded.
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             TvInputHardwareInfo hardwareInfo, String label, Uri iconUri)
                     throws XmlPullParserException, IOException {
-        int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
-        return createTvInputInfo(context, service, generateInputIdForHardware(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType, true, 0, label, null, iconUri, false);
+        TvInputInfo info = new TvInputInfo.Builder(context, service)
+                .setTvInputHardwareInfo(hardwareInfo)
+                .setLabel(label)
+                .build();
+        info.mIconUri = iconUri;
+        return info;
     }
 
     /**
@@ -249,96 +243,42 @@ public final class TvInputInfo implements Parcelable {
      * @param icon The {@link android.graphics.drawable.Icon} to load the icon image. If it is
      *            {@code null}, the application icon of {@code service} will be loaded.
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     @SystemApi
     public static TvInputInfo createTvInputInfo(Context context, ResolveInfo service,
             TvInputHardwareInfo hardwareInfo, int labelRes, Icon icon)
             throws XmlPullParserException, IOException {
-        int inputType = sHardwareTypeToTvInputType.get(hardwareInfo.getType(), TYPE_TUNER);
-        return createTvInputInfo(context, service, generateInputIdForHardware(
-                new ComponentName(service.serviceInfo.packageName, service.serviceInfo.name),
-                hardwareInfo), null, inputType, true, labelRes, null, icon, null, false);
+        return new TvInputInfo.Builder(context, service)
+                .setTvInputHardwareInfo(hardwareInfo)
+                .setLabel(labelRes)
+                .setIcon(icon)
+                .build();
     }
 
-    private static TvInputInfo createTvInputInfo(Context context, ResolveInfo service, String id,
-            String parentId, int inputType, boolean isHardwareInput, int labelRes, String label,
-            Icon icon, Uri iconUri, boolean isConnectedToHdmiSwitch)
-                    throws XmlPullParserException, IOException {
-        ServiceInfo si = service.serviceInfo;
-        PackageManager pm = context.getPackageManager();
-        XmlResourceParser parser = null;
-        try {
-            parser = si.loadXmlMetaData(pm, TvInputService.SERVICE_META_DATA);
-            if (parser == null) {
-                throw new XmlPullParserException("No " + TvInputService.SERVICE_META_DATA
-                        + " meta-data for " + si.name);
-            }
-
-            Resources res = pm.getResourcesForApplication(si.applicationInfo);
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.START_TAG) {
-            }
-
-            String nodeName = parser.getName();
-            if (!XML_START_TAG_NAME.equals(nodeName)) {
-                throw new XmlPullParserException(
-                        "Meta-data does not start with tv-input-service tag in " + si.name);
-            }
-
-            TvInputInfo input = new TvInputInfo(service, id, parentId, inputType, isHardwareInput);
-            TypedArray sa = res.obtainAttributes(attrs,
-                    com.android.internal.R.styleable.TvInputService);
-            input.mSetupActivity = sa.getString(
-                    com.android.internal.R.styleable.TvInputService_setupActivity);
-            if (DEBUG) {
-                Log.d(TAG, "Setup activity loaded. [" + input.mSetupActivity + "] for " + si.name);
-            }
-            if (inputType == TYPE_TUNER && TextUtils.isEmpty(input.mSetupActivity)) {
-                throw new XmlPullParserException("Setup activity not found in " + si.name);
-            }
-            input.mSettingsActivity = sa.getString(
-                    com.android.internal.R.styleable.TvInputService_settingsActivity);
-            if (DEBUG) {
-                Log.d(TAG, "Settings activity loaded. [" + input.mSettingsActivity + "] for "
-                        + si.name);
-            }
-            sa.recycle();
-
-            input.mLabelRes = labelRes;
-            input.mLabel = label;
-            input.mIcon = icon;
-            input.mIconUri = iconUri;
-            input.mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
-            return input;
-        } catch (NameNotFoundException e) {
-            throw new XmlPullParserException("Unable to create context for: " + si.packageName);
-        } finally {
-            if (parser != null) {
-                parser.close();
-            }
-        }
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param service The ResolveInfo returned from the package manager about this TV input service.
-     * @param id ID of this TV input. Should be generated via generateInputId*().
-     * @param parentId ID of this TV input's parent input. {@code null} if none exists.
-     * @param type The type of this TV input service.
-     * @param isHardwareInput {@code true} if this TV input represents a hardware device.
-     *         {@code false} otherwise.
-     */
-    private TvInputInfo(ResolveInfo service, String id, String parentId, int type,
-            boolean isHardwareInput) {
+    private TvInputInfo(ResolveInfo service, String id, int type, boolean isHardwareInput,
+            CharSequence label, int labelResId, Icon icon, Icon iconStandby, Icon iconDisconnected,
+            String setupActivity, String settingsActivity, boolean canRecord, int tunerCount,
+            HdmiDeviceInfo hdmiDeviceInfo, boolean isConnectedToHdmiSwitch, String parentId,
+            Bundle extras) {
         mService = service;
         mId = id;
-        mParentId = parentId;
         mType = type;
         mIsHardwareInput = isHardwareInput;
+        mLabel = label;
+        mLabelResId = labelResId;
+        mIcon = icon;
+        mIconStandby = iconStandby;
+        mIconDisconnected = iconDisconnected;
+        mSetupActivity = setupActivity;
+        mSettingsActivity = settingsActivity;
+        mCanRecord = canRecord;
+        mTunerCount = tunerCount;
+        mHdmiDeviceInfo = hdmiDeviceInfo;
+        mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
+        mParentId = parentId;
+        mExtras = extras;
     }
 
     /**
@@ -414,8 +354,37 @@ public final class TvInputInfo implements Parcelable {
     /**
      * Returns the type of this TV input.
      */
+    @Type
     public int getType() {
         return mType;
+    }
+
+    /**
+     * Returns the number of tuners this TV input has.
+     *
+     * <p>This method is valid only for inputs of type {@link #TYPE_TUNER}. For inputs of other
+     * types, it returns 0.
+     *
+     * <p>Tuners correspond to physical/logical resources that allow reception of TV signal. Having
+     * <i>N</i> tuners means that the TV input is capable of receiving <i>N</i> different channels
+     * concurrently.
+     */
+    public int getTunerCount() {
+        return mTunerCount;
+    }
+
+    /**
+     * Returns {@code true} if this TV input can record TV programs, {@code false} otherwise.
+     */
+    public boolean canRecord() {
+        return mCanRecord;
+    }
+
+    /**
+     * Returns domain-specific extras associated with this TV input.
+     */
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -466,9 +435,7 @@ public final class TvInputInfo implements Parcelable {
      * @param context Supplies a {@link Context} used to check if this TV input is hidden.
      * @return {@code true} if the user marked this TV input hidden in settings. {@code false}
      *         otherwise.
-     * @hide
      */
-    @SystemApi
     public boolean isHidden(Context context) {
         return TvInputSettings.isHidden(context, mId, UserHandle.myUserId());
     }
@@ -481,9 +448,9 @@ public final class TvInputInfo implements Parcelable {
      *         a label, its name is returned.
      */
     public CharSequence loadLabel(@NonNull Context context) {
-        if (mLabelRes != 0) {
-            return context.getPackageManager().getText(mService.serviceInfo.packageName, mLabelRes,
-                    null);
+        if (mLabelResId != 0) {
+            return context.getPackageManager().getText(mService.serviceInfo.packageName,
+                    mLabelResId, null);
         } else if (!TextUtils.isEmpty(mLabel)) {
             return mLabel;
         }
@@ -496,9 +463,7 @@ public final class TvInputInfo implements Parcelable {
      * @param context Supplies a {@link Context} used to load the custom label.
      * @return a CharSequence containing the TV input's custom label. {@code null} if there is no
      *         custom label.
-     * @hide
      */
-    @SystemApi
     public CharSequence loadCustomLabel(Context context) {
         return TvInputSettings.getCustomLabel(context, mId, UserHandle.myUserId());
     }
@@ -527,6 +492,36 @@ public final class TvInputInfo implements Parcelable {
         return loadServiceIcon(context);
     }
 
+    /**
+     * Loads the user-displayed icon for this TV input per input state.
+     *
+     * @param context Supplies a {@link Context} used to load the icon.
+     * @param state The input state. Should be one of the followings.
+     *              {@link TvInputManager#INPUT_STATE_CONNECTED},
+     *              {@link TvInputManager#INPUT_STATE_CONNECTED_STANDBY} and
+     *              {@link TvInputManager#INPUT_STATE_DISCONNECTED}.
+     * @return a Drawable containing the TV input's icon for the given state or {@code null} if such
+     *         an icon is not defined.
+     * @hide
+     */
+    @SystemApi
+    public Drawable loadIcon(@NonNull Context context, int state) {
+        if (state == TvInputManager.INPUT_STATE_CONNECTED) {
+            return loadIcon(context);
+        } else if (state == TvInputManager.INPUT_STATE_CONNECTED_STANDBY) {
+            if (mIconStandby != null) {
+                return mIconStandby.loadDrawable(context);
+            }
+        } else if (state == TvInputManager.INPUT_STATE_DISCONNECTED) {
+            if (mIconDisconnected != null) {
+                return mIconDisconnected.loadDrawable(context);
+            }
+        } else {
+            throw new IllegalArgumentException("Unknown state: " + state);
+        }
+        return null;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -548,7 +543,24 @@ public final class TvInputInfo implements Parcelable {
         }
 
         TvInputInfo obj = (TvInputInfo) o;
-        return mId.equals(obj.mId);
+        return Objects.equals(mService, obj.mService)
+                && TextUtils.equals(mId, obj.mId)
+                && mType == obj.mType
+                && mIsHardwareInput == obj.mIsHardwareInput
+                && TextUtils.equals(mLabel, obj.mLabel)
+                && Objects.equals(mIconUri, obj.mIconUri)
+                && mLabelResId == obj.mLabelResId
+                && Objects.equals(mIcon, obj.mIcon)
+                && Objects.equals(mIconStandby, obj.mIconStandby)
+                && Objects.equals(mIconDisconnected, obj.mIconDisconnected)
+                && TextUtils.equals(mSetupActivity, obj.mSetupActivity)
+                && TextUtils.equals(mSettingsActivity, obj.mSettingsActivity)
+                && mCanRecord == obj.mCanRecord
+                && mTunerCount == obj.mTunerCount
+                && Objects.equals(mHdmiDeviceInfo, obj.mHdmiDeviceInfo)
+                && mIsConnectedToHdmiSwitch == obj.mIsConnectedToHdmiSwitch
+                && TextUtils.equals(mParentId, obj.mParentId)
+                && Objects.equals(mExtras, obj.mExtras);
     }
 
     @Override
@@ -566,19 +578,24 @@ public final class TvInputInfo implements Parcelable {
      */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeString(mParentId);
         mService.writeToParcel(dest, flags);
-        dest.writeString(mSetupActivity);
-        dest.writeString(mSettingsActivity);
+        dest.writeString(mId);
         dest.writeInt(mType);
         dest.writeByte(mIsHardwareInput ? (byte) 1 : 0);
-        dest.writeParcelable(mHdmiDeviceInfo, flags);
-        dest.writeParcelable(mIcon, flags);
+        TextUtils.writeToParcel(mLabel, dest, flags);
         dest.writeParcelable(mIconUri, flags);
-        dest.writeInt(mLabelRes);
-        dest.writeString(mLabel);
+        dest.writeInt(mLabelResId);
+        dest.writeParcelable(mIcon, flags);
+        dest.writeParcelable(mIconStandby, flags);
+        dest.writeParcelable(mIconDisconnected, flags);
+        dest.writeString(mSetupActivity);
+        dest.writeString(mSettingsActivity);
+        dest.writeByte(mCanRecord ? (byte) 1 : 0);
+        dest.writeInt(mTunerCount);
+        dest.writeParcelable(mHdmiDeviceInfo, flags);
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
+        dest.writeString(mParentId);
+        dest.writeBundle(mExtras);
     }
 
     private Drawable loadServiceIcon(Context context) {
@@ -587,46 +604,6 @@ public final class TvInputInfo implements Parcelable {
             return null;
         }
         return mService.serviceInfo.loadIcon(context.getPackageManager());
-    }
-
-    /**
-     * Used to generate an input id from a ComponentName.
-     *
-     * @param name the component name for generating an input id.
-     * @return the generated input id for the given {@code name}.
-     */
-    private static String generateInputIdForComponentName(ComponentName name) {
-        return name.flattenToShortString();
-    }
-
-    /**
-     * Used to generate an input id from a ComponentName and HdmiDeviceInfo.
-     *
-     * @param name the component name for generating an input id.
-     * @param deviceInfo HdmiDeviceInfo describing this TV input.
-     * @return the generated input id for the given {@code name} and {@code deviceInfo}.
-     */
-    private static String generateInputIdForHdmiDevice(
-            ComponentName name, HdmiDeviceInfo deviceInfo) {
-        // Example of the format : "/HDMI%04X%02X"
-        String format = DELIMITER_INFO_IN_ID + PREFIX_HDMI_DEVICE
-                + "%0" + LENGTH_HDMI_PHYSICAL_ADDRESS + "X"
-                + "%0" + LENGTH_HDMI_DEVICE_ID + "X";
-        return name.flattenToShortString() + String.format(Locale.ENGLISH, format,
-                deviceInfo.getPhysicalAddress(), deviceInfo.getId());
-    }
-
-    /**
-     * Used to generate an input id from a ComponentName and TvInputHardwareInfo
-     *
-     * @param name the component name for generating an input id.
-     * @param hardwareInfo TvInputHardwareInfo describing this TV input.
-     * @return the generated input id for the given {@code name} and {@code hardwareInfo}.
-     */
-    private static String generateInputIdForHardware(
-            ComponentName name, TvInputHardwareInfo hardwareInfo) {
-        return name.flattenToShortString() + DELIMITER_INFO_IN_ID + PREFIX_HARDWARE_DEVICE
-                + hardwareInfo.getDeviceId();
     }
 
     public static final Parcelable.Creator<TvInputInfo> CREATOR =
@@ -643,19 +620,358 @@ public final class TvInputInfo implements Parcelable {
     };
 
     private TvInputInfo(Parcel in) {
-        mId = in.readString();
-        mParentId = in.readString();
         mService = ResolveInfo.CREATOR.createFromParcel(in);
-        mSetupActivity = in.readString();
-        mSettingsActivity = in.readString();
+        mId = in.readString();
         mType = in.readInt();
         mIsHardwareInput = in.readByte() == 1;
-        mHdmiDeviceInfo = in.readParcelable(null);
-        mIcon = in.readParcelable(null);
+        mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mIconUri = in.readParcelable(null);
-        mLabelRes = in.readInt();
-        mLabel = in.readString();
+        mLabelResId = in.readInt();
+        mIcon = in.readParcelable(null);
+        mIconStandby = in.readParcelable(null);
+        mIconDisconnected = in.readParcelable(null);
+        mSetupActivity = in.readString();
+        mSettingsActivity = in.readString();
+        mCanRecord = in.readByte() == 1;
+        mTunerCount = in.readInt();
+        mHdmiDeviceInfo = in.readParcelable(null);
         mIsConnectedToHdmiSwitch = in.readByte() == 1;
+        mParentId = in.readString();
+        mExtras = in.readBundle();
+    }
+
+    /**
+     * A convenience builder for creating {@link TvInputInfo} objects.
+     */
+    public static final class Builder {
+        private static final int LENGTH_HDMI_PHYSICAL_ADDRESS = 4;
+        private static final int LENGTH_HDMI_DEVICE_ID = 2;
+
+        private static final String XML_START_TAG_NAME = "tv-input";
+        private static final String DELIMITER_INFO_IN_ID = "/";
+        private static final String PREFIX_HDMI_DEVICE = "HDMI";
+        private static final String PREFIX_HARDWARE_DEVICE = "HW";
+
+        private static final SparseIntArray sHardwareTypeToTvInputType = new SparseIntArray();
+        static {
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_OTHER_HARDWARE,
+                    TYPE_OTHER);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_TUNER, TYPE_TUNER);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPOSITE,
+                    TYPE_COMPOSITE);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SVIDEO, TYPE_SVIDEO);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_SCART, TYPE_SCART);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_COMPONENT,
+                    TYPE_COMPONENT);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_VGA, TYPE_VGA);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DVI, TYPE_DVI);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_HDMI, TYPE_HDMI);
+            sHardwareTypeToTvInputType.put(TvInputHardwareInfo.TV_INPUT_TYPE_DISPLAY_PORT,
+                    TYPE_DISPLAY_PORT);
+        }
+
+        private final Context mContext;
+        private final ResolveInfo mResolveInfo;
+        private CharSequence mLabel;
+        private int mLabelResId;
+        private Icon mIcon;
+        private Icon mIconStandby;
+        private Icon mIconDisconnected;
+        private String mSetupActivity;
+        private String mSettingsActivity;
+        private Boolean mCanRecord;
+        private Integer mTunerCount;
+        private TvInputHardwareInfo mTvInputHardwareInfo;
+        private HdmiDeviceInfo mHdmiDeviceInfo;
+        private String mParentId;
+        private Bundle mExtras;
+
+        /**
+         * Constructs a new builder for {@link TvInputInfo}.
+         *
+         * @param context A Context of the application package implementing this class.
+         * @param component The name of the application component to be used for the
+         *            {@link TvInputService}.
+         */
+        public Builder(Context context, ComponentName component) {
+            mContext = context;
+            Intent intent = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(component);
+            mResolveInfo = context.getPackageManager().resolveService(intent,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        }
+
+        /**
+         * Constructs a new builder for {@link TvInputInfo}.
+         *
+         * @param resolveInfo The ResolveInfo returned from the package manager about this TV input
+         *            service.
+         * @hide
+         */
+        public Builder(Context context, ResolveInfo resolveInfo) {
+            if (context == null) {
+                throw new IllegalArgumentException("context cannot be null");
+            }
+            if (resolveInfo == null) {
+                throw new IllegalArgumentException("resolveInfo cannot be null");
+            }
+            mContext = context;
+            mResolveInfo = resolveInfo;
+        }
+
+        /**
+         * Sets the icon.
+         *
+         * @param icon The icon that represents this TV input.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setIcon(Icon icon) {
+            this.mIcon = icon;
+            return this;
+        }
+
+        /**
+         * Sets the icon for a given input state.
+         *
+         * @param icon The icon that represents this TV input for the given state.
+         * @param state The input state. Should be one of the followings.
+         *              {@link TvInputManager#INPUT_STATE_CONNECTED},
+         *              {@link TvInputManager#INPUT_STATE_CONNECTED_STANDBY} and
+         *              {@link TvInputManager#INPUT_STATE_DISCONNECTED}.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setIcon(Icon icon, int state) {
+            if (state == TvInputManager.INPUT_STATE_CONNECTED) {
+                this.mIcon = icon;
+            } else if (state == TvInputManager.INPUT_STATE_CONNECTED_STANDBY) {
+                this.mIconStandby = icon;
+            } else if (state == TvInputManager.INPUT_STATE_DISCONNECTED) {
+                this.mIconDisconnected = icon;
+            } else {
+                throw new IllegalArgumentException("Unknown state: " + state);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the label.
+         *
+         * @param label The text to be used as label.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setLabel(CharSequence label) {
+            if (mLabelResId != 0) {
+                throw new IllegalStateException("Resource ID for label is already set.");
+            }
+            this.mLabel = label;
+            return this;
+        }
+
+        /**
+         * Sets the label.
+         *
+         * @param resId The resource ID of the text to use.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setLabel(@StringRes int resId) {
+            if (mLabel != null) {
+                throw new IllegalStateException("Label text is already set.");
+            }
+            this.mLabelResId = resId;
+            return this;
+        }
+
+        /**
+         * Sets the HdmiDeviceInfo.
+         *
+         * @param hdmiDeviceInfo The HdmiDeviceInfo for a HDMI CEC logical device.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setHdmiDeviceInfo(HdmiDeviceInfo hdmiDeviceInfo) {
+            if (mTvInputHardwareInfo != null) {
+                Log.w(TAG, "TvInputHardwareInfo will not be used to build this TvInputInfo");
+                mTvInputHardwareInfo = null;
+            }
+            this.mHdmiDeviceInfo = hdmiDeviceInfo;
+            return this;
+        }
+
+        /**
+         * Sets the parent ID.
+         *
+         * @param parentId The parent ID.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setParentId(String parentId) {
+            this.mParentId = parentId;
+            return this;
+        }
+
+        /**
+         * Sets the TvInputHardwareInfo.
+         *
+         * @param tvInputHardwareInfo
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        @SystemApi
+        public Builder setTvInputHardwareInfo(TvInputHardwareInfo tvInputHardwareInfo) {
+            if (mHdmiDeviceInfo != null) {
+                Log.w(TAG, "mHdmiDeviceInfo will not be used to build this TvInputInfo");
+                mHdmiDeviceInfo = null;
+            }
+            this.mTvInputHardwareInfo = tvInputHardwareInfo;
+            return this;
+        }
+
+        /**
+         * Sets the tuner count. Valid only for {@link #TYPE_TUNER}.
+         *
+         * @param tunerCount The number of tuners this TV input has.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         */
+        public Builder setTunerCount(int tunerCount) {
+            this.mTunerCount = tunerCount;
+            return this;
+        }
+
+        /**
+         * Sets whether this TV input can record TV programs or not.
+         *
+         * @param canRecord Whether this TV input can record TV programs.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         */
+        public Builder setCanRecord(boolean canRecord) {
+            this.mCanRecord = canRecord;
+            return this;
+        }
+
+        /**
+         * Sets domain-specific extras associated with this TV input.
+         *
+         * @param extras Domain-specific extras associated with this TV input. Keys <em>must</em> be
+         *            a scoped name, i.e. prefixed with a package name you own, so that different
+         *            developers will not create conflicting keys.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         */
+        public Builder setExtras(Bundle extras) {
+            this.mExtras = extras;
+            return this;
+        }
+
+        /**
+         * Creates a {@link TvInputInfo} instance with the specified fields. Most of the information
+         * is obtained by parsing the AndroidManifest and {@link TvInputService#SERVICE_META_DATA}
+         * for the {@link TvInputService} this TV input implements.
+         *
+         * @return TvInputInfo containing information about this TV input.
+         */
+        public TvInputInfo build() {
+            ComponentName componentName = new ComponentName(mResolveInfo.serviceInfo.packageName,
+                    mResolveInfo.serviceInfo.name);
+            String id;
+            int type;
+            boolean isHardwareInput = false;
+            boolean isConnectedToHdmiSwitch = false;
+
+            if (mHdmiDeviceInfo != null) {
+                id = generateInputId(componentName, mHdmiDeviceInfo);
+                type = TYPE_HDMI;
+                isHardwareInput = true;
+                isConnectedToHdmiSwitch = (mHdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
+            } else if (mTvInputHardwareInfo != null) {
+                id = generateInputId(componentName, mTvInputHardwareInfo);
+                type = sHardwareTypeToTvInputType.get(mTvInputHardwareInfo.getType(), TYPE_TUNER);
+                isHardwareInput = true;
+            } else {
+                id = generateInputId(componentName);
+                type = TYPE_TUNER;
+            }
+            parseServiceMetadata(type);
+            return new TvInputInfo(mResolveInfo, id, type, isHardwareInput, mLabel, mLabelResId,
+                    mIcon, mIconStandby, mIconDisconnected, mSetupActivity, mSettingsActivity,
+                    mCanRecord == null ? false : mCanRecord, mTunerCount == null ? 0 : mTunerCount,
+                    mHdmiDeviceInfo, isConnectedToHdmiSwitch, mParentId, mExtras);
+        }
+
+        private static String generateInputId(ComponentName name) {
+            return name.flattenToShortString();
+        }
+
+        private static String generateInputId(ComponentName name, HdmiDeviceInfo hdmiDeviceInfo) {
+            // Example of the format : "/HDMI%04X%02X"
+            String format = DELIMITER_INFO_IN_ID + PREFIX_HDMI_DEVICE
+                    + "%0" + LENGTH_HDMI_PHYSICAL_ADDRESS + "X"
+                    + "%0" + LENGTH_HDMI_DEVICE_ID + "X";
+            return name.flattenToShortString() + String.format(Locale.ENGLISH, format,
+                    hdmiDeviceInfo.getPhysicalAddress(), hdmiDeviceInfo.getId());
+        }
+
+        private static String generateInputId(ComponentName name,
+                TvInputHardwareInfo tvInputHardwareInfo) {
+            return name.flattenToShortString() + DELIMITER_INFO_IN_ID + PREFIX_HARDWARE_DEVICE
+                    + tvInputHardwareInfo.getDeviceId();
+        }
+
+        private void parseServiceMetadata(int inputType) {
+            ServiceInfo si = mResolveInfo.serviceInfo;
+            PackageManager pm = mContext.getPackageManager();
+            try (XmlResourceParser parser =
+                         si.loadXmlMetaData(pm, TvInputService.SERVICE_META_DATA)) {
+                if (parser == null) {
+                    throw new IllegalStateException("No " + TvInputService.SERVICE_META_DATA
+                            + " meta-data found for " + si.name);
+                }
+
+                Resources res = pm.getResourcesForApplication(si.applicationInfo);
+                AttributeSet attrs = Xml.asAttributeSet(parser);
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && type != XmlPullParser.START_TAG) {
+                }
+
+                String nodeName = parser.getName();
+                if (!XML_START_TAG_NAME.equals(nodeName)) {
+                    throw new IllegalStateException("Meta-data does not start with "
+                            + XML_START_TAG_NAME + " tag for " + si.name);
+                }
+
+                TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.TvInputService);
+                mSetupActivity = sa.getString(
+                        com.android.internal.R.styleable.TvInputService_setupActivity);
+                if (inputType == TYPE_TUNER && TextUtils.isEmpty(mSetupActivity)) {
+                    throw new IllegalStateException("Setup activity not found for " + si.name);
+                }
+                mSettingsActivity = sa.getString(
+                        com.android.internal.R.styleable.TvInputService_settingsActivity);
+                if (mCanRecord == null) {
+                    mCanRecord = sa.getBoolean(
+                            com.android.internal.R.styleable.TvInputService_canRecord, false);
+                }
+                if (mTunerCount == null && inputType == TYPE_TUNER) {
+                    mTunerCount = sa.getInt(
+                            com.android.internal.R.styleable.TvInputService_tunerCount, 1);
+                }
+                sa.recycle();
+            } catch (IOException | XmlPullParserException e) {
+                throw new IllegalStateException("Failed reading meta-data for " + si.packageName, e);
+            } catch (NameNotFoundException e) {
+                throw new IllegalStateException("No resources found for " + si.packageName, e);
+            }
+        }
     }
 
     /**
@@ -748,6 +1064,15 @@ public final class TvInputInfo implements Parcelable {
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_HIDDEN_INPUTS, builder.toString(), userId);
+
+            // Notify of the TvInputInfo changes.
+            TvInputManager tm = (TvInputManager) context.getSystemService(Context.TV_INPUT_SERVICE);
+            for (String inputId : hiddenInputIds) {
+                TvInputInfo info = tm.getTvInputInfo(inputId);
+                if (info != null) {
+                    tm.updateTvInputInfo(info);
+                }
+            }
         }
 
         /**
@@ -778,6 +1103,15 @@ public final class TvInputInfo implements Parcelable {
             }
             Settings.Secure.putStringForUser(context.getContentResolver(),
                     Settings.Secure.TV_INPUT_CUSTOM_LABELS, builder.toString(), userId);
+
+            // Notify of the TvInputInfo changes.
+            TvInputManager tm = (TvInputManager) context.getSystemService(Context.TV_INPUT_SERVICE);
+            for (String inputId : customLabels.keySet()) {
+                TvInputInfo info = tm.getTvInputInfo(inputId);
+                if (info != null) {
+                    tm.updateTvInputInfo(info);
+                }
+            }
         }
 
         private static void ensureValidField(String value) {

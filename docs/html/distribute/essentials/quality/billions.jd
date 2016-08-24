@@ -1,0 +1,788 @@
+page.title=Building for Billions
+page.metaDescription=Best practices on how to optimize Android apps for low- and no-bandwidth and low-cost devices. 
+page.image=/distribute/images/billions-guidelines.png
+
+@jd:body
+
+<!-- table of contents -->
+<div id="qv-wrapper"><div id="qv">
+<h2><a href="#connectivity">Connectivity</a></h2>
+ <ol>
+  <li><a href="#images">Optimize images</a></li>
+  <li><a href="#network">Optimize networking</a></li>
+  <li><a href="#transfer">Fine-tune data transfer</a></li>
+ </ol>
+<h2><a href="#capability">Device Capability</a></h2>
+ <ol>
+  <li><a href="#screens">Support varying screen sizes</a></li>
+  <li><a href="#compatibility">Backward compatibility</a></li>
+  <li><a href="#memory">Efficient memory usage</a></li>
+ </ol>
+  
+<h2><a href="#cost">Data Cost</a></h2>
+ <ol>
+  <li><a href="#appsize">Reduce app size</a></li>
+  <li><a href="#configurablenetwork">Offer configurable network usage</a></li>
+ </ol>
+
+<h2><a href="#consumption">Battery Consumption</a></h2>
+ <ol>
+  <li><a href="#consumption-reduce">Reduce battery consumption</a></li>
+  <li><a href="#consumption-benchmark">Benchmark battery usage</a></li>
+ </ol>
+
+<h2><a href="#contentsection">Content</a></h2>
+ <ol>
+  <li><a href="#content-responsive">Fast and responsive UI</a></li>
+  <li><a href="#ui">UI Best practices</a></li>
+  <li><a href="#localization">Localization</a></li>
+ </ol>
+</div>
+</div>
+
+<!-- intro -->
+<p>Internet use—and smartphone penetration—is growing fastest in markets with
+ low, intermittent, or expensive connectivity. Successful apps in these 
+ markets need to perform across a variety of speeds and devices, as well as 
+ conserve and share information about battery and data consumption.</p>
+
+<p>To help you address these important considerations, we’ve compiled the
+ following checklist. These do not follow a particular order, and as 
+ always it's a good idea to research particularities of any market or country 
+ you're targeting. 
+</p>
+
+<!-- connectivity -->
+<div class="headerLine">
+  <h2 id="connectivity">Connectivity</h2>
+</div>
+
+<p>Over half of the users in the world still experience your app over 2G
+ connections. To improve their experience, optimize for no- and low-connection
+ speeds. For offline and slow connections: store data, queue requests, and handle
+ images for optimal performance.
+</p>
+
+<h3 id="images">Optimize images</h3>
+<h4 id="images-format">Serve WebP images</h4>
+ <ul>
+  <li>Serve <a
+   href="https://developers.google.com/speed/webp/">WebP</a> files over the 
+   network. WebP reduces image load times, saves network bandwidth, and often 
+   results in smaller file sizes than its PNG and JPG counterparts, with at 
+   least the same image quality. Even at lossy settings, WebP can produce a 
+   nearly identical image. Android has had lossy <a 
+   href="{@docRoot}guide/appendix/media-formats.html">WebP support</a> since 
+   Android 4.0 (API level 14: Ice Cream Sandwich) and support for lossless / 
+   transparent WebP since Android 4.2 (API level 17: Jelly Bean).</li>
+ </ul>
+<h4 id="images-sizing">Dynamic image sizing</h4>
+ <ul>
+  <li>Have your apps request images at the targeted rendering size, and have
+   your server provide those images to fit; the target rendering size will 
+   vary based on device specifications. Doing this minimizes the network 
+   overhead and reduces the amount of memory needed to hold each image, 
+   resulting in improved performance and user satisfaction.</li>
+  <li>Your user experience degrades when users are waiting for images to
+   download. Using appropriate image sizes helps to address these issues. 
+   Consider making image size requests based on network type or network 
+   quality; this size could be smaller than the target rendering size.</li>
+  <li>Dynamic placeholders like <a
+   href="{@docRoot}reference/android/support/v7/graphics/Palette.html">
+   pre-computed palette values</a> or low-resolution thumbnails can improve 
+   the user experience while the image is being fetched.</li>
+ </ul>
+<h4 id="images-libraries">Use image loading libraries</h4>
+ <ul>
+  <li>Your app should not have to fetch any image more than once. Image
+   loading libraries such as <a class="external-link" 
+   href="https://github.com/bumptech/glide">Glide</a> and  <a 
+   class="external-link" href="http://square.github.io/picasso/">Picasso</a> 
+   fetch the image, cache it, and provide hooks into your Views to show 
+   placeholder images until the actual images are ready. Because images are 
+   cached, these libraries return the local copy the next time they are 
+   requested.</li>
+  <li>Image-loading libraries manage their cache, holding onto the most recent
+   images so that your app storage doesn’t grow indefinitely.</li>
+ </ul>
+
+<h3 id="network">Optimize networking</h3>
+<h4 id="network-offline">Make your app usable offline</h4>
+ <ul>
+  <li>In places like subways, planes, elevators, and parking garages, it is
+   common for devices to lose network connectivity. Creating a useful offline 
+   state results in users being able to interact with the app at all times, by 
+   presenting cached information. Ensure that your app is usable offline or 
+   when network connectivity is poor by storing data locally, caching data, 
+   and queuing outbound requests for when connectivity is restored.</li>
+  <li>Where possible, apps should not notify users that connectivity has
+   been lost. It is only when the user performs an operation where connectivity 
+   is essential that the user needs to be notified.</li>
+  <li>When a device lacks connectivity, your app should batch up network
+   requests&mdash;on behalf of the user&mdash;that can be executed when 
+   connectivity is restored. An example of this is an email client that allows 
+   users to compose, send, read, move, and delete existing mails even when the 
+   device is offline. These operations can be cached and executed when 
+   connectivity is restored. In doing so, the app is able to provide a similar 
+   user experience whether the device is online or offline.</li>
+ </ul>
+<h4 id="network-arch">Use GcmNetworkManager and/or Content Providers</h4>
+ <ul>
+  <li>Ensure that your app stores all data on disk via a database or similar
+   structure so that it performs optimally regardless of network conditions 
+   (for example, via SQLite + ContentProvider). The <a 
+   href="https://developers.google.com/cloud-messaging/network-manager">
+   GCM Network Manager</a> 
+   (<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+   <code>GcmNetworkManager</code></a>) can result in a robust mechanism to 
+   sync data with servers while <a 
+   href="{@docRoot}guide/topics/providers/content-providers.html">content 
+   providers</a> ({@link android.content.ContentProvider}) cache that data, 
+   combining to provide an architecture that enables a useful offline state.</li>
+  <li>Apps should cache content that is fetched from the network. Before making
+   subsequent requests, apps should display locally cached data. This ensures 
+   that the app is functional regardless of whether the device is offline or 
+   on a slow/unreliable network.</li>
+ </ul>
+<h4 id="network-duplicate">Deduplicate network requests</h4>
+ <ul>
+  <li>An offline-first architecture initially tries to fetch data from local
+   storage and, failing that, requests the data from the network. After being 
+   retrieved from the network, the data is cached locally for future 
+   retrieval. This helps to ensure that network requests for the same piece of 
+   data only occur once—the rest of the requests are satisfied locally. To 
+   achieve this, use a local database for long-lived data (usually 
+   {@link android.database.sqlite} or 
+   {@link android.content.SharedPreferences}).</li>
+  <li>An offline-first architecture always looks for data locally first, then
+   makes the request over the network. The response is cached and then returned 
+   locally. Such an architecture simplifies an app’s flow between offline and 
+   online states as one side fetches from the network to the cache, while the 
+   other retrieves data from the cache to present to the user.</li>
+  <li>For transitory data, use a bounded disk cache such as a <a class="external-link"
+   href="https://github.com/JakeWharton/DiskLruCache"><code>DiskLruCache</code>
+   </a>. Data that doesn’t typically change should only be requested once over 
+   the network and cached for future use. Examples of such data are images and 
+   non-temporal documents like news articles or social posts.</li>
+ </ul>
+
+<h3 id="transfer">Fine-tune data transfer</h3>
+<h4 id="transfer-prioritize">Prioritize bandwidth</h4>
+ <ul>
+  <li>Writers of apps should not assume that any network that the device is
+   connected to is long-lasting or reliable. For this reason, apps should 
+   prioritize network requests to display the most useful information to the 
+   user as soon as possible.</li>
+  <li>Presenting users with visible and relevant information immediately is a
+   better user experience than making them wait for information that might not 
+   be necessary. This reduces the time that the user has to wait and 
+   increases the usefulness of the app on slow networks.</li>
+  <li>To achieve this, sequence your network requests such that text is
+   fetched before rich media. Text requests tend to be smaller, compress 
+   better, and hence transfer faster, meaning that your app can display useful 
+   content quickly. For more information on managing network requests, visit 
+   the Android training on <a 
+   href="{@docRoot}training/basics/network-ops/managing.html">Managing Network 
+   Usage</a>.</li>
+ </ul>
+<h4 id="network-bandwidth">Use less bandwidth on slower connections</h4>
+ <ul>
+  <li>The ability for your app to transfer data in a timely fashion is
+   dependent on the network connection. Detecting the quality of the network 
+   and adjusting the way your app uses it can help provide an excellent user 
+   experience.</li>
+  <li>You can use the following methods to detect the underlying network
+   quality. Using the data from these methods, your app should tailor its use 
+   of the network to continue to provide a timely response to user actions:
+    <ul>
+     <li>{@link android.net.ConnectivityManager}>
+     {@link android.net.ConnectivityManager#isActiveNetworkMetered}</li>
+     <li>{@link android.net.ConnectivityManager}>
+     {@link android.net.ConnectivityManager#getActiveNetworkInfo}</li>
+     <li>{@link android.net.ConnectivityManager}>
+     {@link android.net.ConnectivityManager#getNetworkCapabilities}</li>
+     <li>{@link android.telephony.TelephonyManager}>
+     {@link android.telephony.TelephonyManager#getNetworkType}</li>
+    </ul>
+  </li>
+  <li>On slower connections, consider downloading only lower-resolution media
+   or perhaps none at all. This ensures that your users are still able to use 
+   the app on slow connections. Where you don’t have an image or the image is 
+   still loading, you should always show a placeholder. You can create a 
+   dynamic placeholder by using the <a 
+   href="{@docRoot}tools/support-library/features.html#v7-palette">
+   Palette library</a> to generate placeholder colors that match the target 
+   image.</li>
+  <li>Prioritize network requests such that text is fetched before rich media.
+   Text requests tend to be smaller, compress better, and hence transfer 
+   faster, meaning that your app can display useful content quickly. For more 
+   information on adjusting bandwidth based on network connection, see the 
+   Android training on <a 
+   href="{@docRoot}training/basics/network-ops/managing.html">Managing Network 
+   Usage</a>.</li>
+ </ul>
+<h4 id="network-behavior">Detect network changes, then change app behavior</h4>
+ <ul>
+  <li>Network quality is not static; it changes based on location, network
+   traffic, and local population density. Apps should detect changes in 
+   network and adjust bandwidth accordingly. By doing so, your app can tailor 
+   the user experience to the network quality. Detect network state using 
+   these methods:
+    <ul>
+     <li>{@link android.net.ConnectivityManager}>
+     {@link android.net.ConnectivityManager#getActiveNetworkInfo}</li>
+     <li>{@link android.net.ConnectivityManager}>
+     {@link android.net.ConnectivityManager#getNetworkCapabilities}</li>
+     <li>{@link android.telephony.TelephonyManager}>
+     {@link android.telephony.TelephonyManager#getDataState}</li>
+    </ul>
+  </li>
+  <li>As the network quality degrades, scale down the number and size of
+   requests. As the connection quality improves, you can scale up your 
+   requests to optimal levels.</li>
+  <li>On higher quality, unmetered networks, consider <a
+   href="{@docRoot}training/efficient-downloads/efficient-network-access.html#PrefetchData">
+   prefetching data</a> to make it available ahead of time. From a user 
+   experience standpoint, this might mean that news reader apps only fetch 
+   three articles at a time on 2G but fetch twenty articles at a time on 
+   Wi-Fi. For more information on adjusting app behavior based on network changes, 
+   visit the Android training on <a 
+   href="{@docRoot}training/monitoring-device-state/connectivity-monitoring.html">
+   Monitoring the Connectivity Status</a>.</li>
+  <li>The broadcast <a
+   href="{@docRoot}reference/android/net/ConnectivityManager.html#CONNECTIVITY_ACTION">
+   <code>CONNECTIVITY_CHANGE</code></a> is sent when a change in network 
+   connectivity occurs. When your app is in the foreground, you can call <a 
+   href="{@docRoot}reference/android/content/Context.html#registerReceiver(android.content.BroadcastReceiver,%20android.content.IntentFilter)">
+   <code>registerReceiver</code></a> to receive this broadcast. After receiving 
+   the broadcast, you should reevaluate the current network state and adjust 
+   your UI and network usage appropriately. You should not declare this receiver 
+   in your manifest, as it will no longer function beginning with Android N. 
+   For more details see <a href="{@docRoot}preview/behavior-changes.html">
+   Android N behavior changes</a>.</li>
+ </ul>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/connectivity"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<!-- capability -->
+<div class="headerLine">
+  <h2 id="capability">Device Capability</h2>
+</div>
+<p>Reaching new users means supporting an increasing variety of Android
+ platform versions and device specifications. Optimize for common RAM and 
+ screen sizes and resolutions to improve the user experience. </p>
+
+<h3 id="screens">Support varying screen sizes</h3>
+<h4 id="screens-dp">Use density-independent pixels (dp)</h4>
+ <ul>
+  <li>Defining layout dimensions with pixels is a problem because different
+   screens have different pixel densities, so the same number of pixels may 
+   correspond to different physical sizes on different devices. The 
+   density-independent pixel (dp) corresponds to the physical size of a pixel 
+   at 160 dots per inch (mdpi density).</li>
+  <li>Defining layouts with dp ensures that the physical size of your user
+   interface is consistent regardless of device. Visit the Android 
+   guide on <a 
+   href="https://developer.android.com/guide/practices/screens_support.html">
+   Supporting Multiple Screens</a> for best practices using 
+   density-independent pixels.</li>
+ </ul>
+<h4 id="screens-density">Test graphics on ldpi/mdpi screen densities</h4>
+ <ul>
+  <li>Ensure that your app layouts work well on low- and medium-density
+   (ldpi/mdpi) screens because these are <a 
+   href="https://developer.android.com/about/dashboards/index.html#Screens">
+   common densities</a>, especially in lower-cost devices. Testing on 
+   lower-density screens helps to validate that your layouts are legible on 
+   lower-density screens.</li>
+  <li>Lower-density screens can result in unclear text where the finer details
+   aren't visible. The Material Design guidelines describe <a 
+   class="external-link" href="https://www.google.com/design/spec/layout/metrics-keylines.html">
+   metrics and keylines</a> to ensure that your layouts can scale across 
+   screen densities.</li>
+  <li>Devices with lower-density screens tend to have lower hardware
+   specifications. To ensure that your app performs well on these devices, 
+   consider reducing or eliminating heavy loads, such as animations and 
+   transitions. For more information on supporting different densities, see 
+   the Android training on <a 
+   href="https://developer.android.com/training/multiscreen/screendensities.html">
+   Supporting Different Densities</a>.</li>
+ </ul>
+<h4 id="screens-sizes">Test layouts on small/medium screen sizes</h4>
+ <ul>
+  <li>Validate that your layouts scale down by testing on smaller screens. As
+   screen sizes shrink, be very selective about visible UI elements, because 
+   there is limited space for them.</li>
+  <li>Devices with smaller screens tend to have lower hardware specifications.
+   To ensure that your app performs well on these devices, try reducing or 
+   eliminating heavy loads, such as animations or transitions. For more 
+   information on supporting different screen sizes, see the Android 
+   training on <a 
+   href="https://developer.android.com/training/multiscreen/screendensities.html">
+   Supporting Different Screen Sizes</a>.</li>
+ </ul>
+
+<h3 id="compatibility">Backward compatibility</h3>
+<h4 id="compatibility-sdkversion">Set your targetSdkVersion and minSdkVersion
+ appropriately</h4>
+ <ul>
+  <li>Apps should build and target a recent version of Android to ensure most
+   current behavior across a broad range of devices; this still provides 
+   backward compatibility to older versions. Here are the best practices for 
+   targeting API levels appropriately:
+    <ul>
+     <li><a
+      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">
+      {@code targetSdkVersion}</a> should be the latest version of Android. 
+      Targeting the most recent version ensures that your app inherits newer 
+      runtime behaviors when running newer versions of Android. Be sure to 
+      test your app on newer Android versions when updating the 
+      targetSdkVersion as it can affect app behavior.</li>
+     <li><a
+      href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">
+      {@code minSdkVersion}</a> sets the minimum supported Android version. 
+      Use Android 4.0 (API level 14: Ice Cream Sandwich) or Android 4.1 (API 
+      level 16: Jelly Bean)—these versions give maximum coverage for modern 
+      devices. Setting {@code minSdkVersion} also results in the Android build 
+      tools reporting incorrect use of new APIs that might not be available in 
+      older versions of the platform. By doing so, developers are protected 
+      from inadvertently breaking backward compatibility.</li>
+    </ul>
+  </li>
+  <li>Consult the <a
+   href="https://developer.android.com/about/dashboards/index.html#Platform">
+   Android dashboards</a>, the <a class="external-link" 
+   href="https://play.google.com/apps/publish/">Google Play Developer 
+   Console</a> for your app, and industry research in your target markets to 
+   gauge which versions of Android to target, based on your target users.</li>
+ </ul>
+<h4 id="compatibility-libraries">Use the Android Support libraries</h4>
+ <ul>
+  <li>Ensure your app provides a consistent experience across OS versions by
+   using the Google-provided support libraries such as AppCompat and the Design
+    Support Library. The Android Support Library package is a set of code 
+    libraries that provides backward-compatible versions of Android framework 
+    APIs as well as features that are only available through the library APIs.
+    </li>
+  <li>Some of the the highlights include:
+  <ul>
+   <li>v4 & v7 support library: Many framework APIs for older versions of
+    Android such as {@link android.support.v4.view.ViewPager}, 
+    {@link android.app.ActionBar}, 
+    {@link android.support.v7.widget.RecyclerView}, and 
+    {@link android.support.v7.graphics.Palette}.</li>
+   <li><a href="{@docRoot}tools/support-library/features.html#design">Design
+    Support</a> library: APIs to support adding Material Design components 
+    and patterns to your apps.</li>
+   <li><a href="{@docRoot}tools/support-library/features.html#multidex">
+    Multidex Support</a> library: provides support for large apps that have 
+    more than 65K methods. This can happen if your app is using many 
+    libraries.</li> 
+  </ul>
+  </li>
+  <li>For more information on the available support libraries, see the <a
+   href="https://developer.android.com/tools/support-library/features.html">
+   Support Libraries Features</a> section of the Android Developer site.</li>
+ </ul>
+<h4 id="compatibility-playservices">Use Google Play services</h4>
+ <ul>
+  <li>Google Play services brings the best of Google APIs independent of
+   Android platform version. Consider using features from Google Play services 
+   to offer the most streamlined Google experience on Android devices.</li>
+  <li>Google Play services also include useful APIs such as <a 
+   href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+   <code>GcmNetworkManager</code></a>, which provides much of Android 5.0’s 
+   {@link android.app.job.JobScheduler} API for older versions of Android. </li>
+  <li>Updates to Google Play services are distributed automatically by the
+   Google Play Store, and new versions of the client library are delivered 
+   through the Android SDK Manager. </li>
+ </ul>
+<h3 id="memory">Efficient memory usage</h3>
+<h4 id="memory-footprint">Reduce memory footprint on low-cost devices</h4>
+ <ul>
+  <li>Adjusting your memory footprint dynamically helps to ensure compatibility
+   across devices with different RAM configurations.</li>
+  <li>Methods such as {@link android.app.ActivityManager#isLowRamDevice} and
+   {@link android.app.ActivityManager#getMemoryClass()} help determine memory 
+   constraints at runtime. Based on this information, you can scale down your 
+   memory usage. As an example, you can use lower resolution images on low memory 
+   devices.</li>
+  <li>For more information on managing your app’s memory, see the Android
+   training on <a href="{@docRoot}training/articles/memory.html">Managing 
+   Your App's Memory</a>.</li>
+ </ul>
+<h4 id="memory-longprocesses">Avoid long-running processes</h4>
+ <ul>
+  <li>Long-running processes stay resident in memory and can result in slowing
+   down the device. In most situations, your app should wake up for a given 
+   event, process data, and shut down. You should use <a 
+   href="https://developers.google.com/cloud-messaging">Google Cloud Messaging 
+   (GCM)</a> and/or <a 
+   href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+   <code>GcmNetworkManager</code></a> to avoid long running background 
+   services and reduce memory pressure on the user’s device.</li>
+ </ul>
+<h4 id="memory-benchmark">Benchmark memory usage</h4>
+ <ul>
+  <li>Android Studio provides memory benchmarking and profiling tools, enabling
+   you to measure memory usage at run time. Benchmarking your app’s memory
+    footprint enables you to monitor memory usage over multiple versions of 
+    the app. This can help catch unintentional memory footprint growth. These 
+    tools can be used in the following ways:
+  <ul>
+   <li>Use the <a
+    href="{@docRoot}tools/performance/memory-monitor/index.html">Memory 
+    Monitor</a> tool to find out whether undesirable garbage collection (GC) 
+    event patterns might be causing performance problems.</li> 
+   <li>Run <a
+    href="{@docRoot}tools/performance/heap-viewer/index.html">Heap Viewer</a>
+    to identify object types that get or stay allocated unexpectedly or 
+    unnecessarily.</li>
+   <li>Use <a
+   href="{@docRoot}tools/performance/allocation-tracker/index.html">
+   Allocation Tracker</a> to identify where in your code the problem might 
+   be.</li>
+  </ul>
+  </li>
+  <li>For more information on benchmarking memory usage, see the <a
+   href="{@docRoot}tools/performance/comparison.html">
+   Memory Profilers</a> tools on the Android Developers site.</li>
+ </ul>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/capability"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<!-- cost -->
+<div class="headerLine">
+  <h2 id="cost">Data Cost</h2>
+</div>
+<p>Data plans in some countries can cost upwards of 10% of monthly income.
+ Conserve data and give control to optimize user experience. Reduce data 
+ consumption and give users control over your app’s use of data.</p>
+
+<h3 id="appsize">Reduce app size</h3>
+<h4 id="appsize-graphics">Reduce APK graphical asset size</h4>
+ <ul>
+  <li>Graphical assets are often the largest contributor to the size of the
+   APK. Optimizing these can result in smaller downloads and thus faster 
+   installation times for users.</li>
+  <li>For graphical assets like icons, use Scalable Vector Graphics (SVG)
+   format. SVG images are relatively tiny in size and can be rendered at 
+   runtime to any resolution. The <a 
+   href="{@docRoot}tools/support-library/index.html">Android Support</a> 
+   library provides a backward-compatible implementation for vector resources as 
+   far back as Android 2.1 (API level 7). Get started with vectors with <a 
+   class="external-link" 
+   href="https://medium.com/@chrisbanes/appcompat-v23-2-age-of-the-vectors-91cbafa87c88">
+   this Medium post</a>. </li>
+  <li>For non-vector images, like photos, use <a
+   href="https://developers.google.com/speed/webp/">WebP</a>. WebP reduces 
+   image load times, saves network bandwidth, and is proven to result in 
+   smaller file sizes than its PNG and JPG counterparts, with at least the 
+   same image quality. Even at lossy settings, WebP can produce a nearly 
+   identical image. Android has had lossy WebP support since Android 4.0 (API 
+   level 14: Ice Cream Sandwich) and support for lossless / transparent WebP since Android 4.2 (API level 17: Jelly Bean).</li>
+  <li>If you have many large images across multiple densities, consider
+   using <a href="{@docRoot}google/play/publishing/multiple-apks.html">Multiple 
+   APK support</a> to split your APK by density. This results in builds 
+   targeted for specific densities, meaning users with low-density devices 
+   won’t have to incur the penalty of unused high-density assets.</li>
+  <li>A detailed guide on reducing your APK size can be found in <a
+   class="external-link" href="https://medium.com/@wkalicinski/smallerapk-part-4-multi-apk-through-abi-and-density-splits-477083989006">
+   series of Medium posts</a>.</li>
+ </ul>
+<h4 id="appsize-code">Reduce code size</h4>
+ <ul>
+  <li>Be careful about using external libraries because not all libraries are
+   meant to be used in mobile apps. Ensure that the libraries your app is 
+   using are optimized for mobile use.</li>
+  <li>Every library in your Android project is adding potentially unused code
+   to your APK. There are also some libraries that aren’t designed with mobile 
+   development in mind. These libraries can end up contributing to significant 
+   APK bloat.</li>
+  <li>Consider optimizing your compiled code using a tool such as <a
+   href="{@docRoot}tools/help/proguard.html">ProGuard</a>. ProGuard identifies 
+   code that isn’t being used and removes it from your APK. Also <a 
+   class="external-link" 
+   href="http://tools.android.com/tech-docs/new-build-system/resource-shrinking">
+   enable resource shrinking</a> at build time by setting 
+   <code>minifyEnabled=true</code>, <code>shrinkResources=true</code> in 
+   <code>build.gradle</code>—this automatically removes unused resources from 
+   your APK.</li>
+  <li>When using Google Play services, you should <a
+   href="{@docRoot}google/play-services/setup.html#add_google_play_services_to_your_project">
+   selectively include</a> only the necessary APIs into your APK.</li>
+  <li>For more information on reducing code size in your APK, see the Android
+   training on how to <a 
+   href="{@docRoot}training/articles/memory.html#DependencyInjection">Avoid 
+   dependency injection frameworks</a>.</li>
+ </ul>
+<h4 id="appsize-external">Allow app to be moved to external (SD) storage</h4>
+ <ul>
+  <li>Low-cost devices often come with little on-device storage. Users can
+   extend this with SD cards; however, apps need to explicitly declare that 
+   they support being installed to external storage before users can move them.
+  </li>
+  <li>Allow your app to be installed to external storage using the <a
+   href="{@docRoot}guide/topics/manifest/manifest-element.html#install"><code>
+   android:installLocation</code></a> flag in your AndroidManifest. For more 
+   information on enabling your app to be moved to external storage, see the 
+   Android guide on <a 
+   href="{@docRoot}guide/topics/data/install-location.html">App Install 
+   Location</a>.</li>
+ </ul>
+
+<h4 id="appsize-postinstall">Reduce post-install app disk usage</h4>
+ <ul>
+  <li>Keeping your app’s disk usage low means that users are less likely to
+   uninstall your app when the device is low on free space. When using caches, 
+   it’s important to apply bounds around your caches—this prevents your app’s 
+   disk usage from growing indefinitely. Be sure you put your cached data in 
+   {@link android.content.Context#getCacheDir()}—the system can delete files 
+   placed here as needed, so they won’t show up as storage committed to the 
+   app.</li>
+ </ul>
+
+<h3 id="configurablenetwork">Offer configurable network usage</h3>
+<h4 id="configurablenetwork-onboarding">Provide onboarding experiences for 
+subjective user choices</h4>
+ <ul>
+  <li>Apps that allow users to reduce data usage are well received, even if
+   they demand heavy data requirements. If your app uses a considerable amount 
+   of bandwidth (for example, video streaming apps), you can provide an 
+   onboarding experience for users to configure network usage. For example, 
+   you could allow the user to force lower-bitrate video streams on cellular 
+   networks. </li>
+  <li>Additional settings for users to control data syncing, prefetching, and
+   network usage behavior (for example, prefetch all starred news categories on 
+   Wi-Fi only), also help users tailor your app’s behavior to their needs.</li>
+  <li>For more information on managing network usage, see the Android training
+   on <a href="{@docRoot}training/basics/network-ops/managing.html">Managing 
+   Network Usage</a>.</li>
+ </ul>
+<h4 id="configurablenetwork-preferences">Provide a network preferences 
+screen</h4>
+ <ul>
+  <li>You can navigate to the app’s network settings from outside the app by
+   means of a network preferences screen. You can invoke this screen from 
+   either the system settings screen or the system data usage screen.</li>
+  <li>To provide a network preferences screen that users can access from within
+   your app as well as from the system settings, in your app include an 
+   activity that supports the 
+   {@link android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} action.</li>
+  <li>For further information on adding a network preferences screen, see the
+   Android training on <a 
+   href="{@docRoot}training/basics/network-ops/managing.html#prefs">
+   Implementing a Preferences Activity</a>.</li>
+ </ul>
+
+
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/cost"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
+<!-- consumption -->
+<div class="headerLine">
+  <h2 id="consumption">Battery Consumption</h2>
+</div>
+<p>Access to reliable power supplies varies, and outages can disrupt planned 
+charges. Defend your users' batteries against unnecessary drain by benchmarking 
+your battery use,  avoiding wakelocks, scheduling tasks, and monitoring sensor 
+requests.</p>
+<h3 id="consumption-reduce">Reduce battery consumption</h3>
+ <ul>
+  <li>Your app should do minimal activity when in the background and when the
+   device is running on battery power.</li>
+  <li><a href="{@docRoot}reference/android/os/PowerManager.WakeLock.html">Wake
+   locks</a> are mechanisms to keep devices on so that they can perform 
+   background activities. Avoid using wake locks because they prevent the 
+   device from going into low-power states.</li>
+  <li>To reduce the number of device wake-ups, batch network activity. For more
+   information on batching, see the Android training on <a 
+   href="{@docRoot}training/efficient-downloads/efficient-network-access.html">
+   Optimizing Downloads for Efficient Network Access</a>.</li>
+  <li><a 
+   href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+   <code>GcmNetworkManager</code></a> schedules tasks and lets Google Play 
+   services batch operations across the system. This greatly 
+   simplifies the implementation of common patterns, such as waiting for 
+   network connectivity, device charging state, retries, and backoff. Use 
+   <code>GcmNetworkManager</code> to perform non-essential background activity 
+   when the device is charging and is connected to an unmetered network.</li>
+  <li>Sensors, like GPS, can also have a significant drain on the battery. The
+   recommended way to request location is to use the FusedLocationProvider API. 
+   The <a 
+   href="https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi">FusedLocationProvider</a> API manages the 
+   underlying location technology and provides a simple API so that you can 
+   specify requirements&mdash;like high accuracy or low power&mdash;at a high 
+   level. It also optimizes the device's use of battery power by caching 
+   locations and batching requests across apps. For  more information on the 
+   ideal ways to request location, see the <a 
+   href="{@docRoot}training/location/retrieve-current.html">Getting the Last 
+   Known Location</a> training guide.
+  </li>
+ </ul>
+<h3 id="consumption-benchmark">Benchmark battery usage</h3>
+ <ul>
+  <li>Benchmarking your app’s usage in a controlled environment helps you
+   understand the battery-heavy tasks in your app. It is a good practice to 
+   benchmark your app’s battery usage to gauge efficiency and track changes 
+   over time.
+</li>
+  <li><a
+   href="{@docRoot}tools/performance/batterystats-battery-historian/index.html">
+   Batterystats</a> collects battery data about your apps, and <a 
+   href="{@docRoot}tools/performance/batterystats-battery-historian/index.html">
+   Battery Historian</a> converts that data into an HTML visualization. For 
+   more information on reducing battery usage, see the Android training on <a 
+   href="{@docRoot}training/monitoring-device-state/index.html">Optimizing 
+   Battery Life</a>.</li>
+ </ul>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/consumption"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+<!-- content -->
+<div class="headerLine">
+  <h2 id="contentsection">Content</h2>
+</div>
+<p>Make sure that your app works well on a variety of screens: offering good,
+ crisp graphics and appropriate layouts on low resolution and physically small 
+ screens. Ensure that your app is designed to be easily localized by 
+ accommodating the variations between languages: allow for spacing, density, 
+ order, emphasis, and wording variations. Also make sure that date, time, and 
+ the like are internationalized and displayed according to the phone’s 
+ settings.</p>
+
+<h3 id="content-responsive">Fast and responsive UI</h3>
+<h4 id="content-feedback">Touch feedback on all touchable items</h4>
+ <ul>
+  <li>Touch feedback adds a tactile feeling to the user interface. You should
+   ensure your app provides touch feedback on all touchable elements to reduce 
+   the perceived app latency as much as possible.
+</li>
+  <li><a
+   href="https://www.google.com/design/spec/animation/responsive-interaction.html">
+   Responsive interaction</a> encourages deeper exploration of an app by 
+   creating timely, logical, and delightful screen reactions to user input. 
+   Responsive interaction elevates an app from an information-delivery service 
+   to an experience that communicates using multiple visual and tactile 
+   responses.</li>
+  <li>For more information, see the Android training on <a
+   href="{@docRoot}training/material/animations.html#Touch">Customizing Touch 
+   Feedback</a>.</li>
+ </ul>
+<h4 id="content-interactive">UI should always be interactive</h4>
+ <ul>
+  <li>Apps that are unresponsive when performing background activity feel slow
+   and reduce user satisfaction. Ensure your app always has a responsive UI 
+   regardless of any background activity. Achieve this by performing network 
+   operations or any heavy-duty operations in a background thread—keep the UI 
+   thread as idle as you can.</li>
+  <li>Material Design apps use minimal visual changes when your app is loading
+   content by representing each operation with a single activity indicator. 
+   Avoid blocking dialogs with <a  
+   href="https://www.google.com/design/spec/components/progress-activity.html">
+   loading indicators</a>.</li>
+  <li><a
+   href="http://www.google.com/design/spec/patterns/empty-states.html">Empty 
+   states</a> occur when the regular content of a view can’t be shown. It might 
+   be a list that has no items or a search that returns no results. Avoid 
+   completely empty states. The most basic empty state displays a 
+   non-interactive image and a text tagline. Where you don’t have an image, or 
+   the image is still loading, you should always show either a static 
+   placeholder, or create a dynamic placeholder by using the <a 
+   href="{@docRoot}tools/support-library/features.html#v7-palette">Palette 
+   library</a> to generate placeholder colors that match the target image.</li>
+  <li>For more information, see the Android training on <a
+   href="{@docRoot}training/articles/perf-anr.html">Keeping Your App 
+   Responsive</a>.</li>
+ </ul>
+<h4 id="content-60fps">Target 60 frames per second on low-cost devices</h4>
+ <ul>
+  <li>Ensure that your app always runs fast and smoothly, even on low-cost
+   devices.</li>
+  <li>Overdraw can significantly slow down your app—it occurs when the pixels
+   are being drawn more than once per pass. An example of this is when you have 
+   an image with a button placed on top of it. While some overdraw is 
+   unavoidable, it should be minimized to ensure a smooth frame rate. Perform 
+   <a href="{@docRoot}tools/performance/debug-gpu-overdraw/index.html">Debug 
+   GPU overdraw</a> on your app to ensure it is minimized.</li>
+  <li>Android devices refresh the screen at 60 frames per second (fps), meaning
+   your app has to update the screen within roughly 16 milliseconds. <a 
+   href="{@docRoot}tools/performance/profile-gpu-rendering/index.html">Profile 
+   your app</a> using on-device tools to see if and when your app is not 
+   meeting this 16-ms average.</li>
+  <li>Reduce or remove animations on low-cost devices to lessen the burden on
+   the device’s CPU and GPU.  For more information, see the Android training on 
+   <a href="{@docRoot}training/improving-layouts/index.html">Improving Layout 
+   Performance</a>. </li>
+ </ul>
+<h4 id="content-firstload">If anticipated start speed is low, use launch screen 
+on first load</h4>
+ <ul>
+  <li>The launch screen is a user’s first experience of your application.
+   Launching your app while displaying a blank canvas increases its perceived 
+   loading time, so consider using a placeholder UI or a branded launch screen 
+   to reduce the perceived loading time.</li>
+  <li>A<a href="https://www.google.com/design/spec/patterns/launch-screens.html#launch-screens-types-of-launch-screens">
+   placeholder UI</a> is the most seamless launch transition, appropriate for 
+   both app launches and in-app activity transitions.</li>
+  <li><a
+   href="https://www.google.com/design/spec/patterns/launch-screens.html#launch-screens-placeholder-ui">
+   Branded launch screens</a> provide momentary brand exposure, freeing the UI 
+   to focus on content.</li>
+  <li>For more information on implementing splash screens, see the <a
+   href="https://www.google.com/design/spec/patterns/launch-screens.html">
+   Launch screens</a> section of the Material Design spec.</li>
+ </ul>
+<h3 id="ui">UI best practices</h3>
+ <ul>
+  <li><a
+   href="https://www.google.com/design/spec/material-design/introduction.html">
+   Material Design</a> is a visual language that synthesizes the classic 
+   principles of good design with the innovation and possibility of technology 
+   and science. Material Design aims to develop a single underlying system that 
+   allows for a unified experience across platforms and device sizes. Consider 
+   using key Material Design components so that users intuitively know how to 
+   use your app.</li>
+  <li>Ready-to-use Material Design components are available via the <a
+   href="{@docRoot}tools/support-library/features.html#design">Design Support 
+   library</a>. These components are supported in Android 2.1 (API level 7) and 
+   above.</li>
+ </ul>
+<h3 id="localization">Localization</h3>
+ <ul>
+  <li>Your users could be from any part of the world and their first language
+   may not be yours. If you don’t present your app in a language that your 
+   users can read, it is a missed opportunity. You should therefore 
+   localize your app for key regional languages.</li>
+  <li>To learn more, visit the Android training on <a 
+ href="{@docRoot}training/basics/supporting-devices/languages.html">
+ Supporting Different Languages</a>.</li>
+ </ul>
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/content"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>

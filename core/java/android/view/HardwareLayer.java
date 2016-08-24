@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -33,10 +34,10 @@ import com.android.internal.util.VirtualRefBasePtr;
  * @hide
  */
 final class HardwareLayer {
-    private HardwareRenderer mRenderer;
+    private ThreadedRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
-    private HardwareLayer(HardwareRenderer renderer, long deferredUpdater) {
+    private HardwareLayer(ThreadedRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
@@ -51,8 +52,8 @@ final class HardwareLayer {
      * @param paint The paint used when the layer is drawn into the destination canvas.
      * @see View#setLayerPaint(android.graphics.Paint)
      */
-    public void setLayerPaint(Paint paint) {
-        nSetLayerPaint(mFinalizer.get(), paint.getNativeInstance());
+    public void setLayerPaint(@Nullable Paint paint) {
+        nSetLayerPaint(mFinalizer.get(), paint != null ? paint.getNativeInstance() : 0);
         mRenderer.pushLayerUpdate(this);
     }
 
@@ -140,7 +141,7 @@ final class HardwareLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    static HardwareLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
+    static HardwareLayer adoptTextureLayer(ThreadedRenderer renderer, long layer) {
         return new HardwareLayer(renderer, layer);
     }
 
@@ -150,8 +151,4 @@ final class HardwareLayer {
     private static native void nSetSurfaceTexture(long layerUpdater,
             SurfaceTexture surface, boolean isAlreadyAttached);
     private static native void nUpdateSurfaceTexture(long layerUpdater);
-    private static native void nUpdateRenderLayer(long layerUpdater, long displayList,
-            int left, int top, int right, int bottom);
-
-    private static native int nGetTexName(long layerUpdater);
 }

@@ -1,0 +1,12 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.app.admin
+
+210001 security_adb_shell_interactive
+210002 security_adb_shell_command               (command|3)
+210003 security_adb_sync_recv                   (path|3)
+210004 security_adb_sync_send                   (path|3)
+210005 security_app_process_start               (process|3),(start_time|2|3),(uid|1),(pid|1),(seinfo|3),(sha256|3)
+210006 security_keyguard_dismissed
+210007 security_keyguard_dismiss_auth_attempt   (success|1),(method_strength|1)
+210008 security_keyguard_secured

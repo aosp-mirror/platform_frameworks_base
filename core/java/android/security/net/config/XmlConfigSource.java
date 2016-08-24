@@ -3,9 +3,11 @@ package android.security.net.config;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.Pair;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,20 +36,29 @@ public class XmlConfigSource implements ConfigSource {
     private final Object mLock = new Object();
     private final int mResourceId;
     private final boolean mDebugBuild;
+    private final int mTargetSdkVersion;
 
     private boolean mInitialized;
     private NetworkSecurityConfig mDefaultConfig;
     private Set<Pair<Domain, NetworkSecurityConfig>> mDomainMap;
     private Context mContext;
 
+    @VisibleForTesting
     public XmlConfigSource(Context context, int resourceId) {
         this(context, resourceId, false);
     }
 
+    @VisibleForTesting
     public XmlConfigSource(Context context, int resourceId, boolean debugBuild) {
+        this(context, resourceId, debugBuild, Build.VERSION_CODES.CUR_DEVELOPMENT);
+    }
+
+    public XmlConfigSource(Context context, int resourceId, boolean debugBuild,
+            int targetSdkVersion) {
         mResourceId = resourceId;
         mContext = context;
         mDebugBuild = debugBuild;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     public Set<Pair<Domain, NetworkSecurityConfig>> getPerDomainConfigs() {
@@ -100,7 +111,7 @@ public class XmlConfigSource implements ConfigSource {
         if (parser.next() != XmlPullParser.TEXT) {
             throw new ParserException(parser, "Missing pin digest");
         }
-        String digest = parser.getText();
+        String digest = parser.getText().trim();
         byte[] decodedDigest = null;
         try {
             decodedDigest = Base64.decode(digest, 0);
@@ -157,7 +168,7 @@ public class XmlConfigSource implements ConfigSource {
         if (parser.next() != XmlPullParser.TEXT) {
             throw new ParserException(parser, "Domain name missing");
         }
-        String domain = parser.getText().toLowerCase(Locale.US);
+        String domain = parser.getText().trim().toLowerCase(Locale.US);
         if (parser.next() != XmlPullParser.END_TAG) {
             throw new ParserException(parser, "domain contains additional elements");
         }
@@ -328,7 +339,7 @@ public class XmlConfigSource implements ConfigSource {
                 }
                 if (mDebugBuild) {
                     debugConfigBuilder =
-                            parseConfigEntry(parser, seenDomains, null, CONFIG_DEBUG).get(0).first;
+                            parseConfigEntry(parser, null, null, CONFIG_DEBUG).get(0).first;
                 } else {
                     XmlUtils.skipCurrentTag(parser);
                 }
@@ -337,11 +348,16 @@ public class XmlConfigSource implements ConfigSource {
                 XmlUtils.skipCurrentTag(parser);
             }
         }
+        // If debug is true and there was no debug-overrides in the file check for an extra
+        // _debug resource.
+        if (mDebugBuild && debugConfigBuilder == null) {
+            debugConfigBuilder = parseDebugOverridesResource();
+        }
 
         // Use the platform default as the parent of the base config for any values not provided
         // there. If there is no base config use the platform default.
         NetworkSecurityConfig.Builder platformDefaultBuilder =
-                NetworkSecurityConfig.getDefaultBuilder();
+                NetworkSecurityConfig.getDefaultBuilder(mTargetSdkVersion);
         addDebugAnchorsIfNeeded(debugConfigBuilder, platformDefaultBuilder);
         if (baseConfigBuilder != null) {
             baseConfigBuilder.setParent(platformDefaultBuilder);
@@ -372,6 +388,43 @@ public class XmlConfigSource implements ConfigSource {
         }
         mDefaultConfig = baseConfigBuilder.build();
         mDomainMap = configs;
+    }
+
+    private NetworkSecurityConfig.Builder parseDebugOverridesResource()
+            throws IOException, XmlPullParserException, ParserException {
+        Resources resources = mContext.getResources();
+        String packageName = resources.getResourcePackageName(mResourceId);
+        String entryName = resources.getResourceEntryName(mResourceId);
+        int resId = resources.getIdentifier(entryName + "_debug", "xml", packageName);
+        // No debug-overrides resource was found, nothing to parse.
+        if (resId == 0) {
+            return null;
+        }
+        NetworkSecurityConfig.Builder debugConfigBuilder = null;
+        // Parse debug-overrides out of the _debug resource.
+        try (XmlResourceParser parser = resources.getXml(resId)) {
+            XmlUtils.beginDocument(parser, "network-security-config");
+            int outerDepth = parser.getDepth();
+            boolean seenDebugOverrides = false;
+            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                if ("debug-overrides".equals(parser.getName())) {
+                    if (seenDebugOverrides) {
+                        throw new ParserException(parser, "Only one debug-overrides allowed");
+                    }
+                    if (mDebugBuild) {
+                        debugConfigBuilder =
+                                parseConfigEntry(parser, null, null, CONFIG_DEBUG).get(0).first;
+                    } else {
+                        XmlUtils.skipCurrentTag(parser);
+                    }
+                    seenDebugOverrides = true;
+                } else {
+                    XmlUtils.skipCurrentTag(parser);
+                }
+            }
+        }
+
+        return debugConfigBuilder;
     }
 
     public static class ParserException extends Exception {

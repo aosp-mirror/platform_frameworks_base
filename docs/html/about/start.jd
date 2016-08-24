@@ -64,6 +64,6 @@ available in the <a href="{@docRoot}distribute/index.html">Distribute</a> sectio
 
 <h2>Go!</h2>
 <p>Get started by installing <a
-href="{@docRoot}sdk/index.html">Android Studio</a>&mdash;the official IDE for Android development,
+href="{@docRoot}studio/index.html">Android Studio</a>&mdash;the official IDE for Android development,
 which includes the Android SDK tools. Then when you're ready to begin coding, follow the training
 for <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.</p>

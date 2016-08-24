@@ -1590,6 +1590,41 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
     /**
+     * <p>The amount of additional sensitivity boost applied to output images
+     * after RAW sensor data is captured.</p>
+     * <p>Some camera devices support additional digital sensitivity boosting in the
+     * camera processing pipeline after sensor RAW image is captured.
+     * Such a boost will be applied to YUV/JPEG format output images but will not
+     * have effect on RAW output formats like RAW_SENSOR, RAW10, RAW12 or RAW_OPAQUE.</p>
+     * <p>This key will be <code>null</code> for devices that do not support any RAW format
+     * outputs. For devices that do support RAW format outputs, this key will always
+     * present, and if a device does not support post RAW sensitivity boost, it will
+     * list <code>100</code> in this key.</p>
+     * <p>If the camera device cannot apply the exact boost requested, it will reduce the
+     * boost to the nearest supported value.
+     * The final boost value used will be available in the output capture result.</p>
+     * <p>For devices that support post RAW sensitivity boost, the YUV/JPEG output images
+     * of such device will have the total sensitivity of
+     * <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} / 100</code>
+     * The sensitivity of RAW format images will always be <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</code></p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
+     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * <p><b>Units</b>: ISO arithmetic units, the same as {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</p>
+     * <p><b>Range of valid values:</b><br>
+     * {@link CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE android.control.postRawSensitivityBoostRange}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
+     * @see CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST =
+            new Key<Integer>("android.control.postRawSensitivityBoost", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -2244,6 +2279,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * requested, it will reduce the gain to the nearest supported
      * value. The final sensitivity used will be available in the
      * output capture result.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
+     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
      * <p><b>Units</b>: ISO arithmetic units</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</p>
@@ -2252,6 +2289,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
      * @see CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY

@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
-#include <cmath>
-
-#include <utils/Log.h>
+#include "Patch.h"
 
 #include "Caches.h"
-#include "Patch.h"
 #include "Properties.h"
 #include "UvMapper.h"
 #include "utils/MathUtils.h"
+
+#include <algorithm>
+#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -191,10 +189,10 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     const uint32_t oldQuadCount = quadCount;
     quadCount++;
 
-    x1 = MathUtils::max(x1, 0.0f);
-    x2 = MathUtils::max(x2, 0.0f);
-    y1 = MathUtils::max(y1, 0.0f);
-    y2 = MathUtils::max(y2, 0.0f);
+    x1 = std::max(x1, 0.0f);
+    x2 = std::max(x2, 0.0f);
+    y1 = std::max(y1, 0.0f);
+    y2 = std::max(y2, 0.0f);
 
     // Skip degenerate and transparent (empty) quads
     if ((mColors[oldQuadCount] == 0) || x1 >= x2 || y1 >= y2) {
@@ -208,8 +206,7 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
 
     // Record all non empty quads
     if (hasEmptyQuads) {
-        Rect bounds(x1, y1, x2, y2);
-        quads.add(bounds);
+        quads.emplace_back(x1, y1, x2, y2);
     }
 
     mUvMapper.map(u1, v1, u2, v2);

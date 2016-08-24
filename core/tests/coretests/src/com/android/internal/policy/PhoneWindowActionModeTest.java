@@ -18,6 +18,7 @@ package com.android.internal.policy;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.KeyEvent;
@@ -31,9 +32,12 @@ import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.util.List;
+
 /**
  * Tests {@link PhoneWindow}'s {@link ActionMode} related methods.
  */
+@SmallTest
 public final class PhoneWindowActionModeTest
         extends ActivityInstrumentationTestCase2<PhoneWindowActionModeTestActivity> {
 

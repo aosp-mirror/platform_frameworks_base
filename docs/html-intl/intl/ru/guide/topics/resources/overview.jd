@@ -1,0 +1,103 @@
+page.title=Обзор ресурсов
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Темы</h2>
+  <ol>
+    <li><a href="providing-resources.html">Предоставление ресурсов</a></li>
+    <li><a href="accessing-resources.html">Доступ к ресурсам</a></li>
+    <li><a href="runtime-changes.html">Обработка изменений в режиме выполнения</a></li>
+    <li><a href="localization.html">Локализация</a></li>
+  </ol>
+
+  <h2>Дополнительные материалы</h2>
+  <ol>
+    <li><a href="available-resources.html">Типы ресурсов</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>Необходимо обязательно экспортировать ресурсы, такие как изображения и строки, из кода
+приложения, чтобы можно было обрабатывать их независимо. Кроме того, экспорт
+ресурсов позволяет предоставлять альтернативные ресурсы для поддержки конфигураций
+конкретных устройств, например, различные языки или размеры экранов. Значение этого возрастает по мере того, как
+появляется все больше устройств Android с разными конфигурациями. Чтобы обеспечить
+совместимость с различными конфигурациями, необходимо организовать ресурсы
+в каталоге {@code res/} проекта с использованием различных подкаталогов для группирования ресурсов по типу и
+конфигурации.</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Рисунок 1.</strong> Два разных устройства, каждое из которых использует макет по умолчанию
+(приложение не предоставляет альтернативных макетов).</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Рисунок 2</strong>. Два разных устройства, каждое из которых использует свой макет, разработанный для
+экранов разных размеров.</p>
+</div>
+
+<p>Для ресурсов любого типа можно указать ресурс <em>по умолчанию</em> и несколько
+<em>альтернативных</em> ресурсов для приложения:</p>
+<ul>
+  <li>Ресурсы по умолчанию должны использоваться независимо от
+конфигурации устройства или в том случае, когда отсутствуют альтернативные ресурсы, соответствующие
+текущей конфигурации.</li>
+  <li>Альтернативные ресурсы предназначены для работы с определенными
+конфигурациями. Чтобы указать, что группа ресурсов предназначена для определенной конфигурации,
+добавьте соответствующий квалификатор к имени каталога.</li>
+</ul>
+
+<p>Например, несмотря на то, что макет пользовательского интерфейса по умолчанию
+сохранен в каталоге {@code res/layout/}, можно указать другой макет для
+использования на экране с альбомной ориентацией, сохранив его в каталоге {@code res/layout-land/}
+. Android автоматически применяет соответствующие ресурсы, сопоставляя текущую конфигурацию
+устройства с именами каталогов ресурсов.</p>
+
+<p>На рисунке 1 показано, как система применяет одинаковый макет для
+двух разных устройств, когда альтернативные ресурсы отсутствуют. На рисунке 2 показано
+то же приложение, когда для больших экранов добавлен альтернативный ресурс макета.</p>
+
+<p>В следующих документах содержится полное руководство по организации ресурсов приложения,
+указания альтернативных ресурсов, доступа к ним из приложения и т. д.:</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">Предоставление ресурсов</a></strong></dt>
+  <dd>Типы ресурсов, которые можно предоставлять в приложении, место их сохранения и способы создания
+альтернативных ресурсов для определенных конфигураций устройств.</dd>
+  <dt><strong><a href="accessing-resources.html">Доступ к ресурсам</a></strong></dt>
+  <dd>Способ использования предоставленных ресурсов: путем ссылки на них из кода приложения
+или из других ресурсов XML.</dd>
+  <dt><strong><a href="runtime-changes.html">Обработка изменений в режиме выполнения</a></strong></dt>
+  <dd>Управление изменениями конфигурации во время выполнения операции.</dd>
+  <dt><strong><a href="localization.html">Локализация</a></strong></dt>
+  <dd>Руководство по локализации приложения «снизу вверх» с помощью альтернативных ресурсов. Хотя это лишь
+один из примеров использования альтернативных ресурсов, он очень важен для охвата более широкой аудитории
+пользователей.</dd>
+  <dt><strong><a href="available-resources.html">Типы ресурсов</a></strong></dt>
+  <dd>Ссылка на различные типы ресурсов, которые вы можете предоставлять, с описанием элементов XML,
+атрибутов и синтаксиса. Например, эта ссылка показывает, как создать ресурс для меню
+, рисунков, анимаций приложения и т. д.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

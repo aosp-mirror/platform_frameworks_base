@@ -17,15 +17,17 @@
 package android.animation;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
-import android.view.Choreographer;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -64,7 +66,7 @@ import java.util.HashMap;
  * </div>
  */
 @SuppressWarnings("unchecked")
-public class ValueAnimator extends Animator {
+public class ValueAnimator extends Animator implements AnimationHandler.AnimationFrameCallback {
     private static final String TAG = "ValueAnimator";
     private static final boolean DEBUG = false;
 
@@ -72,14 +74,6 @@ public class ValueAnimator extends Animator {
      * Internal constants
      */
     private static float sDurationScale = 1.0f;
-
-    /**
-     * Values used with internal variable mPlayingState to indicate the current state of an
-     * animation.
-     */
-    static final int STOPPED    = 0; // Not yet playing
-    static final int RUNNING    = 1; // Playing normally
-    static final int SEEKED     = 2; // Seeked to some time value
 
     /**
      * Internal variables
@@ -130,24 +124,9 @@ public class ValueAnimator extends Animator {
      */
     private boolean mResumed = false;
 
-
-    // The static sAnimationHandler processes the internal timing loop on which all animations
-    // are based
-    /**
-     * @hide
-     */
-    protected static ThreadLocal<AnimationHandler> sAnimationHandler =
-            new ThreadLocal<AnimationHandler>();
-
     // The time interpolator to be used if none is set on the animation
     private static final TimeInterpolator sDefaultInterpolator =
             new AccelerateDecelerateInterpolator();
-
-    /**
-     * Used to indicate whether the animation is currently playing in reverse. This causes the
-     * elapsed fraction to be inverted to calculate the appropriate values.
-     */
-    private boolean mPlayingBackwards = false;
 
     /**
      * Flag to indicate whether this animator is playing in reverse mode, specifically
@@ -159,36 +138,20 @@ public class ValueAnimator extends Animator {
     private boolean mReversing;
 
     /**
-     * This variable tracks the current iteration that is playing. When mCurrentIteration exceeds the
-     * repeatCount (if repeatCount!=INFINITE), the animation ends
+     * Tracks the overall fraction of the animation, ranging from 0 to mRepeatCount + 1
      */
-    private int mCurrentIteration = 0;
+    private float mOverallFraction = 0f;
 
     /**
      * Tracks current elapsed/eased fraction, for querying in getAnimatedFraction().
+     * This is calculated by interpolating the fraction (range: [0, 1]) in the current iteration.
      */
     private float mCurrentFraction = 0f;
 
     /**
-     * Tracks whether a startDelay'd animation has begun playing through the startDelay.
+     * Tracks the time (in milliseconds) when the last frame arrived.
      */
-    private boolean mStartedDelay = false;
-
-    /**
-     * Tracks the time at which the animation began playing through its startDelay. This is
-     * different from the mStartTime variable, which is used to track when the animation became
-     * active (which is when the startDelay expired and the animation was added to the active
-     * animations list).
-     */
-    private long mDelayStartTime;
-
-    /**
-     * Flag that represents the current state of the animation. Used to figure out when to start
-     * an animation (if state == STOPPED). Also used to end an animation that
-     * has been cancel()'d or end()'d since the last animation frame. Possible values are
-     * STOPPED, RUNNING, SEEKED.
-     */
-    int mPlayingState = STOPPED;
+    private long mLastFrameTime = 0;
 
     /**
      * Additional playing state to indicate whether an animator has been start()'d. There is
@@ -219,17 +182,22 @@ public class ValueAnimator extends Animator {
      */
     boolean mInitialized = false;
 
+    /**
+     * Flag that tracks whether animation has been requested to end.
+     */
+    private boolean mAnimationEndRequested = false;
+
     //
     // Backing variables
     //
 
     // How long the animation should last in ms
-    private long mDuration = (long)(300 * sDurationScale);
-    private long mUnscaledDuration = 300;
+    private long mDuration = 300;
 
-    // The amount of time in ms to delay starting the animation after start() is called
+    // The amount of time in ms to delay starting the animation after start() is called. Note
+    // that this start delay is unscaled. When there is a duration scale set on the animator, the
+    // scaling factor will be applied to this delay.
     private long mStartDelay = 0;
-    private long mUnscaledStartDelay = 0;
 
     // The number of times the animation will repeat. The default is 0, which means the animation
     // will play only once
@@ -269,6 +237,11 @@ public class ValueAnimator extends Animator {
      * Public constants
      */
 
+    /** @hide */
+    @IntDef({RESTART, REVERSE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RepeatMode {}
+
     /**
      * When the animation reaches the end and <code>repeatCount</code> is INFINITE
      * or a positive value, the animation restarts from the beginning.
@@ -284,7 +257,6 @@ public class ValueAnimator extends Animator {
      * the animation indefinitely.
      */
     public static final int INFINITE = -1;
-
 
     /**
      * @hide
@@ -381,6 +353,11 @@ public class ValueAnimator extends Animator {
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
      *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
+     *
      * <p>Since ValueAnimator does not know how to animate between arbitrary Objects, this
      * factory method also takes a TypeEvaluator object that the ValueAnimator will use
      * to perform that interpolation.
@@ -462,6 +439,11 @@ public class ValueAnimator extends Animator {
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
      *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
+     *
      * <p>If there are already multiple sets of values defined for this ValueAnimator via more
      * than one PropertyValuesHolder object, this method will set the values for the first
      * of those objects.</p>
@@ -539,7 +521,6 @@ public class ValueAnimator extends Animator {
         }
     }
 
-
     /**
      * Sets the length of the animation. The default duration is 300 milliseconds.
      *
@@ -555,13 +536,12 @@ public class ValueAnimator extends Animator {
             throw new IllegalArgumentException("Animators cannot have negative duration: " +
                     duration);
         }
-        mUnscaledDuration = duration;
-        updateScaledDuration();
+        mDuration = duration;
         return this;
     }
 
-    private void updateScaledDuration() {
-        mDuration = (long)(mUnscaledDuration * sDurationScale);
+    private long getScaledDuration() {
+        return (long)(mDuration * sDurationScale);
     }
 
     /**
@@ -571,7 +551,16 @@ public class ValueAnimator extends Animator {
      */
     @Override
     public long getDuration() {
-        return mUnscaledDuration;
+        return mDuration;
+    }
+
+    @Override
+    public long getTotalDuration() {
+        if (mRepeatCount == INFINITE) {
+            return DURATION_INFINITE;
+        } else {
+            return mStartDelay + (mDuration * (mRepeatCount + 1));
+        }
     }
 
     /**
@@ -585,7 +574,7 @@ public class ValueAnimator extends Animator {
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
     public void setCurrentPlayTime(long playTime) {
-        float fraction = mUnscaledDuration > 0 ? (float) playTime / mUnscaledDuration : 1;
+        float fraction = mDuration > 0 ? (float) playTime / mDuration : 1;
         setCurrentFraction(fraction);
     }
 
@@ -608,207 +597,104 @@ public class ValueAnimator extends Animator {
      */
     public void setCurrentFraction(float fraction) {
         initAnimation();
-        if (fraction < 0) {
-            fraction = 0;
-        }
-        int iteration = (int) fraction;
-        if (fraction == 1) {
-            iteration -= 1;
-        } else if (fraction > 1) {
-            if (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE) {
-                if (mRepeatMode == REVERSE) {
-                    mPlayingBackwards = (iteration % 2) != 0;
-                }
-                fraction = fraction % 1f;
-            } else {
-                fraction = 1;
-                iteration -= 1;
-            }
-        } else {
-            mPlayingBackwards = mReversing;
-        }
-        mCurrentIteration = iteration;
-        long seekTime = (long) (mDuration * fraction);
+        fraction = clampFraction(fraction);
+        long seekTime = (long) (getScaledDuration() * fraction);
         long currentTime = AnimationUtils.currentAnimationTimeMillis();
         mStartTime = currentTime - seekTime;
         mStartTimeCommitted = true; // do not allow start time to be compensated for jank
-        if (mPlayingState != RUNNING) {
+        if (!isPulsingInternal()) {
+            // If the animation loop hasn't started, the startTime will be adjusted in the first
+            // frame based on seek fraction.
             mSeekFraction = fraction;
-            mPlayingState = SEEKED;
         }
-        if (mPlayingBackwards) {
-            fraction = 1f - fraction;
+        mOverallFraction = fraction;
+        final float currentIterationFraction = getCurrentIterationFraction(fraction);
+        animateValue(currentIterationFraction);
+    }
+
+    /**
+     * Calculates current iteration based on the overall fraction. The overall fraction will be
+     * in the range of [0, mRepeatCount + 1]. Both current iteration and fraction in the current
+     * iteration can be derived from it.
+     */
+    private int getCurrentIteration(float fraction) {
+        fraction = clampFraction(fraction);
+        // If the overall fraction is a positive integer, we consider the current iteration to be
+        // complete. In other words, the fraction for the current iteration would be 1, and the
+        // current iteration would be overall fraction - 1.
+        double iteration = Math.floor(fraction);
+        if (fraction == iteration && fraction > 0) {
+            iteration--;
         }
-        animateValue(fraction);
+        return (int) iteration;
+    }
+
+    /**
+     * Calculates the fraction of the current iteration, taking into account whether the animation
+     * should be played backwards. E.g. When the animation is played backwards in an iteration,
+     * the fraction for that iteration will go from 1f to 0f.
+     */
+    private float getCurrentIterationFraction(float fraction) {
+        fraction = clampFraction(fraction);
+        int iteration = getCurrentIteration(fraction);
+        float currentFraction = fraction - iteration;
+        return shouldPlayBackward(iteration) ? 1f - currentFraction : currentFraction;
+    }
+
+    /**
+     * Clamps fraction into the correct range: [0, mRepeatCount + 1]. If repeat count is infinite,
+     * no upper bound will be set for the fraction.
+     *
+     * @param fraction fraction to be clamped
+     * @return fraction clamped into the range of [0, mRepeatCount + 1]
+     */
+    private float clampFraction(float fraction) {
+        if (fraction < 0) {
+            fraction = 0;
+        } else if (mRepeatCount != INFINITE) {
+            fraction = Math.min(fraction, mRepeatCount + 1);
+        }
+        return fraction;
+    }
+
+    /**
+     * Calculates the direction of animation playing (i.e. forward or backward), based on 1)
+     * whether the entire animation is being reversed, 2) repeat mode applied to the current
+     * iteration.
+     */
+    private boolean shouldPlayBackward(int iteration) {
+        if (iteration > 0 && mRepeatMode == REVERSE &&
+                (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
+            // if we were seeked to some other iteration in a reversing animator,
+            // figure out the correct direction to start playing based on the iteration
+            if (mReversing) {
+                return (iteration % 2) == 0;
+            } else {
+                return (iteration % 2) != 0;
+            }
+        } else {
+            return mReversing;
+        }
     }
 
     /**
      * Gets the current position of the animation in time, which is equal to the current
      * time minus the time that the animation started. An animation that is not yet started will
-     * return a value of zero.
+     * return a value of zero, unless the animation has has its play time set via
+     * {@link #setCurrentPlayTime(long)} or {@link #setCurrentFraction(float)}, in which case
+     * it will return the time that was set.
      *
      * @return The current position in time of the animation.
      */
     public long getCurrentPlayTime() {
-        if (!mInitialized || mPlayingState == STOPPED) {
+        if (!mInitialized || (!mStarted && mSeekFraction < 0)) {
             return 0;
         }
-        return AnimationUtils.currentAnimationTimeMillis() - mStartTime;
-    }
-
-    /**
-     * This custom, static handler handles the timing pulse that is shared by
-     * all active animations. This approach ensures that the setting of animation
-     * values will happen on the UI thread and that all animations will share
-     * the same times for calculating their values, which makes synchronizing
-     * animations possible.
-     *
-     * The handler uses the Choreographer for executing periodic callbacks.
-     *
-     * @hide
-     */
-    @SuppressWarnings("unchecked")
-    protected static class AnimationHandler {
-        // The per-thread list of all active animations
-        /** @hide */
-        protected final ArrayList<ValueAnimator> mAnimations = new ArrayList<ValueAnimator>();
-
-        // Used in doAnimationFrame() to avoid concurrent modifications of mAnimations
-        private final ArrayList<ValueAnimator> mTmpAnimations = new ArrayList<ValueAnimator>();
-
-        // The per-thread set of animations to be started on the next animation frame
-        /** @hide */
-        protected final ArrayList<ValueAnimator> mPendingAnimations = new ArrayList<ValueAnimator>();
-
-        /**
-         * Internal per-thread collections used to avoid set collisions as animations start and end
-         * while being processed.
-         * @hide
-         */
-        protected final ArrayList<ValueAnimator> mDelayedAnims = new ArrayList<ValueAnimator>();
-        private final ArrayList<ValueAnimator> mEndingAnims = new ArrayList<ValueAnimator>();
-        private final ArrayList<ValueAnimator> mReadyAnims = new ArrayList<ValueAnimator>();
-
-        private final Choreographer mChoreographer;
-        private boolean mAnimationScheduled;
-        private long mLastFrameTime;
-
-        private AnimationHandler() {
-            mChoreographer = Choreographer.getInstance();
+        if (mSeekFraction >= 0) {
+            return (long) (mDuration * mSeekFraction);
         }
-
-        /**
-         * Start animating on the next frame.
-         */
-        public void start() {
-            scheduleAnimation();
-        }
-
-        void doAnimationFrame(long frameTime) {
-            mLastFrameTime = frameTime;
-
-            // mPendingAnimations holds any animations that have requested to be started
-            // We're going to clear mPendingAnimations, but starting animation may
-            // cause more to be added to the pending list (for example, if one animation
-            // starting triggers another starting). So we loop until mPendingAnimations
-            // is empty.
-            while (mPendingAnimations.size() > 0) {
-                ArrayList<ValueAnimator> pendingCopy =
-                        (ArrayList<ValueAnimator>) mPendingAnimations.clone();
-                mPendingAnimations.clear();
-                int count = pendingCopy.size();
-                for (int i = 0; i < count; ++i) {
-                    ValueAnimator anim = pendingCopy.get(i);
-                    // If the animation has a startDelay, place it on the delayed list
-                    if (anim.mStartDelay == 0) {
-                        anim.startAnimation(this);
-                    } else {
-                        mDelayedAnims.add(anim);
-                    }
-                }
-            }
-
-            // Next, process animations currently sitting on the delayed queue, adding
-            // them to the active animations if they are ready
-            int numDelayedAnims = mDelayedAnims.size();
-            for (int i = 0; i < numDelayedAnims; ++i) {
-                ValueAnimator anim = mDelayedAnims.get(i);
-                if (anim.delayedAnimationFrame(frameTime)) {
-                    mReadyAnims.add(anim);
-                }
-            }
-            int numReadyAnims = mReadyAnims.size();
-            if (numReadyAnims > 0) {
-                for (int i = 0; i < numReadyAnims; ++i) {
-                    ValueAnimator anim = mReadyAnims.get(i);
-                    anim.startAnimation(this);
-                    anim.mRunning = true;
-                    mDelayedAnims.remove(anim);
-                }
-                mReadyAnims.clear();
-            }
-
-            // Now process all active animations. The return value from animationFrame()
-            // tells the handler whether it should now be ended
-            int numAnims = mAnimations.size();
-            for (int i = 0; i < numAnims; ++i) {
-                mTmpAnimations.add(mAnimations.get(i));
-            }
-            for (int i = 0; i < numAnims; ++i) {
-                ValueAnimator anim = mTmpAnimations.get(i);
-                if (mAnimations.contains(anim) && anim.doAnimationFrame(frameTime)) {
-                    mEndingAnims.add(anim);
-                }
-            }
-            mTmpAnimations.clear();
-            if (mEndingAnims.size() > 0) {
-                for (int i = 0; i < mEndingAnims.size(); ++i) {
-                    mEndingAnims.get(i).endAnimation(this);
-                }
-                mEndingAnims.clear();
-            }
-
-            // Schedule final commit for the frame.
-            mChoreographer.postCallback(Choreographer.CALLBACK_COMMIT, mCommit, null);
-
-            // If there are still active or delayed animations, schedule a future call to
-            // onAnimate to process the next frame of the animations.
-            if (!mAnimations.isEmpty() || !mDelayedAnims.isEmpty()) {
-                scheduleAnimation();
-            }
-        }
-
-        void commitAnimationFrame(long frameTime) {
-            final long adjustment = frameTime - mLastFrameTime;
-            final int numAnims = mAnimations.size();
-            for (int i = 0; i < numAnims; ++i) {
-                mAnimations.get(i).commitAnimationFrame(adjustment);
-            }
-        }
-
-        private void scheduleAnimation() {
-            if (!mAnimationScheduled) {
-                mChoreographer.postCallback(Choreographer.CALLBACK_ANIMATION, mAnimate, null);
-                mAnimationScheduled = true;
-            }
-        }
-
-        // Called by the Choreographer.
-        final Runnable mAnimate = new Runnable() {
-            @Override
-            public void run() {
-                mAnimationScheduled = false;
-                doAnimationFrame(mChoreographer.getFrameTime());
-            }
-        };
-
-        // Called by the Choreographer.
-        final Runnable mCommit = new Runnable() {
-            @Override
-            public void run() {
-                commitAnimationFrame(mChoreographer.getFrameTime());
-            }
-        };
+        float durationScale = sDurationScale == 0 ? 1 : sDurationScale;
+        return (long) ((AnimationUtils.currentAnimationTimeMillis() - mStartTime) / durationScale);
     }
 
     /**
@@ -819,19 +705,24 @@ public class ValueAnimator extends Animator {
      */
     @Override
     public long getStartDelay() {
-        return mUnscaledStartDelay;
+        return mStartDelay;
     }
 
     /**
      * The amount of time, in milliseconds, to delay starting the animation after
-     * {@link #start()} is called.
-
+     * {@link #start()} is called. Note that the start delay should always be non-negative. Any
+     * negative start delay will be clamped to 0 on N and above.
+     *
      * @param startDelay The amount of the delay, in milliseconds
      */
     @Override
     public void setStartDelay(long startDelay) {
-        this.mStartDelay = (long)(startDelay * sDurationScale);
-        mUnscaledStartDelay = startDelay;
+        // Clamp start delay to non-negative range.
+        if (startDelay < 0) {
+            Log.w(TAG, "Start delay should always be non-negative");
+            startDelay = 0;
+        }
+        mStartDelay = startDelay;
     }
 
     /**
@@ -843,11 +734,15 @@ public class ValueAnimator extends Animator {
      *
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
+     *
+     * Note that this method should be called from the same thread that {@link #start()} is
+     * called in order to check the frame delay for that animation. A runtime exception will be
+     * thrown if the calling thread does not have a Looper.
      *
      * @return the requested time between frames, in milliseconds
      */
     public static long getFrameDelay() {
-        return Choreographer.getFrameDelay();
+        return AnimationHandler.getInstance().getFrameDelay();
     }
 
     /**
@@ -860,10 +755,14 @@ public class ValueAnimator extends Animator {
      * The frame delay may be ignored when the animation system uses an external timing
      * source, such as the display refresh rate (vsync), to govern animations.
      *
+     * Note that this method should be called from the same thread that {@link #start()} is
+     * called in order to have the new frame delay take effect on that animation. A runtime
+     * exception will be thrown if the calling thread does not have a Looper.
+     *
      * @param frameDelay the requested time between frames, in milliseconds
      */
     public static void setFrameDelay(long frameDelay) {
-        Choreographer.setFrameDelay(frameDelay);
+        AnimationHandler.getInstance().setFrameDelay(frameDelay);
     }
 
     /**
@@ -934,7 +833,7 @@ public class ValueAnimator extends Animator {
      *
      * @param value {@link #RESTART} or {@link #REVERSE}
      */
-    public void setRepeatMode(int value) {
+    public void setRepeatMode(@RepeatMode int value) {
         mRepeatMode = value;
     }
 
@@ -943,6 +842,7 @@ public class ValueAnimator extends Animator {
      *
      * @return either one of {@link #REVERSE} or {@link #RESTART}
      */
+    @RepeatMode
     public int getRepeatMode() {
         return mRepeatMode;
     }
@@ -1069,47 +969,40 @@ public class ValueAnimator extends Animator {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         mReversing = playBackwards;
-        mPlayingBackwards = playBackwards;
-        if (playBackwards && mSeekFraction != -1) {
-            if (mSeekFraction == 0 && mCurrentIteration == 0) {
-                // special case: reversing from seek-to-0 should act as if not seeked at all
-                mSeekFraction = 0;
-            } else if (mRepeatCount == INFINITE) {
-                mSeekFraction = 1 - (mSeekFraction % 1);
+        // Special case: reversing from seek-to-0 should act as if not seeked at all.
+        if (playBackwards && mSeekFraction != -1 && mSeekFraction != 0) {
+            if (mRepeatCount == INFINITE) {
+                // Calculate the fraction of the current iteration.
+                float fraction = (float) (mSeekFraction - Math.floor(mSeekFraction));
+                mSeekFraction = 1 - fraction;
             } else {
-                mSeekFraction = 1 + mRepeatCount - (mCurrentIteration + mSeekFraction);
-            }
-            mCurrentIteration = (int) mSeekFraction;
-            mSeekFraction = mSeekFraction % 1;
-        }
-        if (mCurrentIteration > 0 && mRepeatMode == REVERSE &&
-                (mCurrentIteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
-            // if we were seeked to some other iteration in a reversing animator,
-            // figure out the correct direction to start playing based on the iteration
-            if (playBackwards) {
-                mPlayingBackwards = (mCurrentIteration % 2) == 0;
-            } else {
-                mPlayingBackwards = (mCurrentIteration % 2) != 0;
+                mSeekFraction = 1 + mRepeatCount - mSeekFraction;
             }
         }
-        int prevPlayingState = mPlayingState;
-        mPlayingState = STOPPED;
         mStarted = true;
-        mStartedDelay = false;
         mPaused = false;
-        updateScaledDuration(); // in case the scale factor has changed since creation time
-        AnimationHandler animationHandler = getOrCreateAnimationHandler();
-        animationHandler.mPendingAnimations.add(this);
-        if (mStartDelay == 0) {
-            // This sets the initial value of the animation, prior to actually starting it running
-            if (prevPlayingState != SEEKED) {
+        mRunning = false;
+        // Resets mLastFrameTime when start() is called, so that if the animation was running,
+        // calling start() would put the animation in the
+        // started-but-not-yet-reached-the-first-frame phase.
+        mLastFrameTime = 0;
+        AnimationHandler animationHandler = AnimationHandler.getInstance();
+        animationHandler.addAnimationFrameCallback(this, (long) (mStartDelay * sDurationScale));
+
+        if (mStartDelay == 0 || mSeekFraction >= 0) {
+            // If there's no start delay, init the animation and notify start listeners right away
+            // to be consistent with the previous behavior. Otherwise, postpone this until the first
+            // frame after the start delay.
+            startAnimation();
+            if (mSeekFraction == -1) {
+                // No seek, start at play time 0. Note that the reason we are not using fraction 0
+                // is because for animations with 0 duration, we want to be consistent with pre-N
+                // behavior: skip to the final value immediately.
                 setCurrentPlayTime(0);
+            } else {
+                setCurrentFraction(mSeekFraction);
             }
-            mPlayingState = STOPPED;
-            mRunning = true;
-            notifyStartListeners();
         }
-        animationHandler.start();
     }
 
     @Override
@@ -1119,47 +1012,62 @@ public class ValueAnimator extends Animator {
 
     @Override
     public void cancel() {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
+
+        // If end has already been requested, through a previous end() or cancel() call, no-op
+        // until animation starts again.
+        if (mAnimationEndRequested) {
+            return;
+        }
+
         // Only cancel if the animation is actually running or has been started and is about
         // to run
-        AnimationHandler handler = getOrCreateAnimationHandler();
-        if (mPlayingState != STOPPED
-                || handler.mPendingAnimations.contains(this)
-                || handler.mDelayedAnims.contains(this)) {
-            // Only notify listeners if the animator has actually started
-            if ((mStarted || mRunning) && mListeners != null) {
-                if (!mRunning) {
-                    // If it's not yet running, then start listeners weren't called. Call them now.
-                    notifyStartListeners();
-                }
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                for (AnimatorListener listener : tmpListeners) {
-                    listener.onAnimationCancel(this);
-                }
+        // Only notify listeners if the animator has actually started
+        if ((mStarted || mRunning) && mListeners != null) {
+            if (!mRunning) {
+                // If it's not yet running, then start listeners weren't called. Call them now.
+                notifyStartListeners();
             }
-            endAnimation(handler);
+            ArrayList<AnimatorListener> tmpListeners =
+                    (ArrayList<AnimatorListener>) mListeners.clone();
+            for (AnimatorListener listener : tmpListeners) {
+                listener.onAnimationCancel(this);
+            }
         }
+        endAnimation();
+
     }
 
     @Override
     public void end() {
-        AnimationHandler handler = getOrCreateAnimationHandler();
-        if (!handler.mAnimations.contains(this) && !handler.mPendingAnimations.contains(this)) {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be run on Looper threads");
+        }
+        if (!mRunning) {
             // Special case if the animation has not yet started; get it ready for ending
-            mStartedDelay = false;
-            startAnimation(handler);
+            startAnimation();
             mStarted = true;
         } else if (!mInitialized) {
             initAnimation();
         }
-        animateValue(mPlayingBackwards ? 0f : 1f);
-        endAnimation(handler);
+        animateValue(shouldPlayBackward(mRepeatCount) ? 0f : 1f);
+        endAnimation();
     }
 
     @Override
     public void resume() {
-        if (mPaused) {
+        if (Looper.myLooper() == null) {
+            throw new AndroidRuntimeException("Animators may only be resumed from the same " +
+                    "thread that the animator was started on");
+        }
+        if (mPaused && !mResumed) {
             mResumed = true;
+            if (mPauseTime > 0) {
+                AnimationHandler handler = AnimationHandler.getInstance();
+                handler.addAnimationFrameCallback(this, 0);
+            }
         }
         super.resume();
     }
@@ -1176,7 +1084,7 @@ public class ValueAnimator extends Animator {
 
     @Override
     public boolean isRunning() {
-        return (mPlayingState == RUNNING || mRunning);
+        return mRunning;
     }
 
     @Override
@@ -1193,15 +1101,15 @@ public class ValueAnimator extends Animator {
      */
     @Override
     public void reverse() {
-        mPlayingBackwards = !mPlayingBackwards;
-        if (mPlayingState == RUNNING) {
+        if (isPulsingInternal()) {
             long currentTime = AnimationUtils.currentAnimationTimeMillis();
             long currentPlayTime = currentTime - mStartTime;
-            long timeLeft = mDuration - currentPlayTime;
+            long timeLeft = getScaledDuration() - currentPlayTime;
             mStartTime = currentTime - timeLeft;
             mStartTimeCommitted = true; // do not allow start time to be compensated for jank
             mReversing = !mReversing;
         } else if (mStarted) {
+            mReversing = !mReversing;
             end();
         } else {
             start(true);
@@ -1219,13 +1127,15 @@ public class ValueAnimator extends Animator {
     /**
      * Called internally to end an animation by removing it from the animations list. Must be
      * called on the UI thread.
-     * @hide
      */
-    protected void endAnimation(AnimationHandler handler) {
-        handler.mAnimations.remove(this);
-        handler.mPendingAnimations.remove(this);
-        handler.mDelayedAnims.remove(this);
-        mPlayingState = STOPPED;
+    private void endAnimation() {
+        if (mAnimationEndRequested) {
+            return;
+        }
+        AnimationHandler handler = AnimationHandler.getInstance();
+        handler.removeCallback(this);
+
+        mAnimationEndRequested = true;
         mPaused = false;
         if ((mStarted || mRunning) && mListeners != null) {
             if (!mRunning) {
@@ -1242,9 +1152,8 @@ public class ValueAnimator extends Animator {
         mRunning = false;
         mStarted = false;
         mStartListenersCalled = false;
-        mPlayingBackwards = false;
         mReversing = false;
-        mCurrentIteration = 0;
+        mLastFrameTime = 0;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
@@ -1255,18 +1164,32 @@ public class ValueAnimator extends Animator {
      * Called internally to start an animation by adding it to the active animations list. Must be
      * called on the UI thread.
      */
-    private void startAnimation(AnimationHandler handler) {
+    private void startAnimation() {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
         }
+
+        mAnimationEndRequested = false;
         initAnimation();
-        handler.mAnimations.add(this);
-        if (mStartDelay > 0 && mListeners != null) {
-            // Listeners were already notified in start() if startDelay is 0; this is
-            // just for delayed animations
+        mRunning = true;
+        if (mSeekFraction >= 0) {
+            mOverallFraction = mSeekFraction;
+        } else {
+            mOverallFraction = 0f;
+        }
+        if (mListeners != null) {
             notifyStartListeners();
         }
+    }
+
+    /**
+     * Internal only: This tracks whether the animation has gotten on the animation loop. Note
+     * this is different than {@link #isRunning()} in that the latter tracks the time after start()
+     * is called (or after start delay if any), which may be before the animation loop starts.
+     */
+    private boolean isPulsingInternal() {
+        return mLastFrameTime > 0;
     }
 
     /**
@@ -1276,53 +1199,16 @@ public class ValueAnimator extends Animator {
         return "animator";
     }
 
-
-    /**
-     * Internal function called to process an animation frame on an animation that is currently
-     * sleeping through its <code>startDelay</code> phase. The return value indicates whether it
-     * should be woken up and put on the active animations queue.
-     *
-     * @param currentTime The current animation time, used to calculate whether the animation
-     * has exceeded its <code>startDelay</code> and should be started.
-     * @return True if the animation's <code>startDelay</code> has been exceeded and the animation
-     * should be added to the set of active animations.
-     */
-    private boolean delayedAnimationFrame(long currentTime) {
-        if (!mStartedDelay) {
-            mStartedDelay = true;
-            mDelayStartTime = currentTime;
-        }
-        if (mPaused) {
-            if (mPauseTime < 0) {
-                mPauseTime = currentTime;
-            }
-            return false;
-        } else if (mResumed) {
-            mResumed = false;
-            if (mPauseTime > 0) {
-                // Offset by the duration that the animation was paused
-                mDelayStartTime += (currentTime - mPauseTime);
-            }
-        }
-        long deltaTime = currentTime - mDelayStartTime;
-        if (deltaTime > mStartDelay) {
-            // startDelay ended - start the anim and record the mStartTime appropriately
-            mStartTime = mDelayStartTime + mStartDelay;
-            mStartTimeCommitted = true; // do not allow start time to be compensated for jank
-            mPlayingState = RUNNING;
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Applies an adjustment to the animation to compensate for jank between when
      * the animation first ran and when the frame was drawn.
+     * @hide
      */
-    void commitAnimationFrame(long adjustment) {
+    public void commitAnimationFrame(long frameTime) {
         if (!mStartTimeCommitted) {
             mStartTimeCommitted = true;
-            if (mPlayingState == RUNNING && adjustment > 0) {
+            long adjustment = frameTime - mLastFrameTime;
+            if (adjustment > 0) {
                 mStartTime += adjustment;
                 if (DEBUG) {
                     Log.d(TAG, "Adjusted start time by " + adjustment + " ms: " + toString());
@@ -1341,50 +1227,36 @@ public class ValueAnimator extends Animator {
      *
      * @param currentTime The current time, as tracked by the static timing handler
      * @return true if the animation's duration, including any repetitions due to
-     * <code>repeatCount</code>, has been exceeded and the animation should be ended.
+     * <code>repeatCount</code> has been exceeded and the animation should be ended.
      */
-    boolean animationFrame(long currentTime) {
+    boolean animateBasedOnTime(long currentTime) {
         boolean done = false;
-        switch (mPlayingState) {
-        case RUNNING:
-        case SEEKED:
-            float fraction = mDuration > 0 ? (float)(currentTime - mStartTime) / mDuration : 1f;
-            if (mDuration == 0 && mRepeatCount != INFINITE) {
-                // Skip to the end
-                mCurrentIteration = mRepeatCount;
-                if (!mReversing) {
-                    mPlayingBackwards = false;
-                }
-            }
-            if (fraction >= 1f) {
-                if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
-                    // Time to repeat
-                    if (mListeners != null) {
-                        int numListeners = mListeners.size();
-                        for (int i = 0; i < numListeners; ++i) {
-                            mListeners.get(i).onAnimationRepeat(this);
-                        }
+        if (mRunning) {
+            final long scaledDuration = getScaledDuration();
+            final float fraction = scaledDuration > 0 ?
+                    (float)(currentTime - mStartTime) / scaledDuration : 1f;
+            final float lastFraction = mOverallFraction;
+            final boolean newIteration = (int) fraction > (int) lastFraction;
+            final boolean lastIterationFinished = (fraction >= mRepeatCount + 1) &&
+                    (mRepeatCount != INFINITE);
+            if (scaledDuration == 0) {
+                // 0 duration animator, ignore the repeat count and skip to the end
+                done = true;
+            } else if (newIteration && !lastIterationFinished) {
+                // Time to repeat
+                if (mListeners != null) {
+                    int numListeners = mListeners.size();
+                    for (int i = 0; i < numListeners; ++i) {
+                        mListeners.get(i).onAnimationRepeat(this);
                     }
-                    if (mRepeatMode == REVERSE) {
-                        mPlayingBackwards = !mPlayingBackwards;
-                    }
-                    mCurrentIteration += (int) fraction;
-                    fraction = fraction % 1f;
-                    mStartTime += mDuration;
-                    // Note: We do not need to update the value of mStartTimeCommitted here
-                    // since we just added a duration offset.
-                } else {
-                    done = true;
-                    fraction = Math.min(fraction, 1.0f);
                 }
+            } else if (lastIterationFinished) {
+                done = true;
             }
-            if (mPlayingBackwards) {
-                fraction = 1f - fraction;
-            }
-            animateValue(fraction);
-            break;
+            mOverallFraction = clampFraction(fraction);
+            float currentIterationFraction = getCurrentIterationFraction(mOverallFraction);
+            animateValue(currentIterationFraction);
         }
-
         return done;
     }
 
@@ -1393,24 +1265,30 @@ public class ValueAnimator extends Animator {
      *
      * @param frameTime The frame time.
      * @return true if the animation has ended.
+     * @hide
      */
-    final boolean doAnimationFrame(long frameTime) {
-        if (mPlayingState == STOPPED) {
-            mPlayingState = RUNNING;
+    public final void doAnimationFrame(long frameTime) {
+        AnimationHandler handler = AnimationHandler.getInstance();
+        if (mLastFrameTime == 0) {
+            // First frame
+            handler.addOneShotCommitCallback(this);
+            if (mStartDelay > 0) {
+                startAnimation();
+            }
             if (mSeekFraction < 0) {
                 mStartTime = frameTime;
             } else {
-                long seekTime = (long) (mDuration * mSeekFraction);
+                long seekTime = (long) (getScaledDuration() * mSeekFraction);
                 mStartTime = frameTime - seekTime;
                 mSeekFraction = -1;
             }
             mStartTimeCommitted = false; // allow start time to be compensated for jank
         }
+        mLastFrameTime = frameTime;
         if (mPaused) {
-            if (mPauseTime < 0) {
-                mPauseTime = frameTime;
-            }
-            return false;
+            mPauseTime = frameTime;
+            handler.removeCallback(this);
+            return;
         } else if (mResumed) {
             mResumed = false;
             if (mPauseTime > 0) {
@@ -1418,13 +1296,18 @@ public class ValueAnimator extends Animator {
                 mStartTime += (frameTime - mPauseTime);
                 mStartTimeCommitted = false; // allow start time to be compensated for jank
             }
+            handler.addOneShotCommitCallback(this);
         }
         // The frame time might be before the start time during the first frame of
         // an animation.  The "current time" must always be on or after the start
         // time to avoid animating frames at negative time intervals.  In practice, this
         // is very rare and only happens when seeking backwards.
         final long currentTime = Math.max(frameTime, mStartTime);
-        return animationFrame(currentTime);
+        boolean finished = animateBasedOnTime(currentTime);
+
+        if (finished) {
+            endAnimation();
+        }
     }
 
     /**
@@ -1472,12 +1355,8 @@ public class ValueAnimator extends Animator {
             anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>(mUpdateListeners);
         }
         anim.mSeekFraction = -1;
-        anim.mPlayingBackwards = false;
         anim.mReversing = false;
-        anim.mCurrentIteration = 0;
         anim.mInitialized = false;
-        anim.mPlayingState = STOPPED;
-        anim.mStartedDelay = false;
         anim.mStarted = false;
         anim.mRunning = false;
         anim.mPaused = false;
@@ -1485,9 +1364,11 @@ public class ValueAnimator extends Animator {
         anim.mStartListenersCalled = false;
         anim.mStartTime = 0;
         anim.mStartTimeCommitted = false;
+        anim.mAnimationEndRequested = false;
         anim.mPauseTime = 0;
+        anim.mLastFrameTime = 0;
+        anim.mOverallFraction = 0;
         anim.mCurrentFraction = 0;
-        anim.mDelayStartTime = 0;
 
         PropertyValuesHolder[] oldValues = mValues;
         if (oldValues != null) {
@@ -1528,32 +1409,7 @@ public class ValueAnimator extends Animator {
      * @hide
      */
     public static int getCurrentAnimationsCount() {
-        AnimationHandler handler = sAnimationHandler.get();
-        return handler != null ? handler.mAnimations.size() : 0;
-    }
-
-    /**
-     * Clear all animations on this thread, without canceling or ending them.
-     * This should be used with caution.
-     *
-     * @hide
-     */
-    public static void clearAllAnimations() {
-        AnimationHandler handler = sAnimationHandler.get();
-        if (handler != null) {
-            handler.mAnimations.clear();
-            handler.mPendingAnimations.clear();
-            handler.mDelayedAnims.clear();
-        }
-    }
-
-    private static AnimationHandler getOrCreateAnimationHandler() {
-        AnimationHandler handler = sAnimationHandler.get();
-        if (handler == null) {
-            handler = new AnimationHandler();
-            sAnimationHandler.set(handler);
-        }
-        return handler;
+        return AnimationHandler.getAnimationCount();
     }
 
     @Override

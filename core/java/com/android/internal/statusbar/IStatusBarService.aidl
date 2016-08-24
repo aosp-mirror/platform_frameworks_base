@@ -16,6 +16,8 @@
 
 package com.android.internal.statusbar;
 
+import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -36,16 +38,16 @@ interface IStatusBarService
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
-    void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
-    void expandSettingsPanel();
-    void setCurrentUser(int newUserId);
+    void expandSettingsPanel(String subPanel);
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
-    void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
-            out int[] switches, out List<IBinder> binders);
+    void registerStatusBar(IStatusBar callbacks, out List<String> iconSlots,
+            out List<StatusBarIcon> iconList,
+            out int[] switches, out List<IBinder> binders, out Rect fullscreenStackBounds,
+            out Rect dockedStackBounds);
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
@@ -60,34 +62,8 @@ interface IStatusBarService
             in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
     void setSystemUiVisibility(int vis, int mask, String cause);
-    void setWindowState(int window, int state);
 
-    void showRecentApps(boolean triggeredFromAltTab);
-    void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-    void toggleRecentApps();
-    void preloadRecentApps();
-    void cancelPreloadRecentApps();
-
-    /**
-     * Notifies the status bar that an app transition is pending to delay applying some flags with
-     * visual impact until {@link #appTransitionReady} is called.
-     */
-    void appTransitionPending();
-
-    /**
-     * Notifies the status bar that a pending app transition has been cancelled.
-     */
-    void appTransitionCancelled();
-
-    /**
-     * Notifies the status bar that an app transition is now being executed.
-     *
-     * @param statusBarAnimationsStartTime the desired start time for all visual animations in the
-     *        status bar caused by this app transition in uptime millis
-     * @param statusBarAnimationsDuration the duration for all visual animations in the status
-     *        bar caused by this app transition in millis
-     */
-    void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
-
-    void startAssist(in Bundle args);
+    void addTile(in ComponentName tile);
+    void remTile(in ComponentName tile);
+    void clickTile(in ComponentName tile);
 }

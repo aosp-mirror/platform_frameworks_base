@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:lib="http://schemas.android.com/apk/res/android.appcompat">
+    <style name="App">
+        <item name="android:background">@color/primary</item>
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+    <attr name="custom" format="reference" />
+    <style name="Pop">
+        <item name="custom">@android:drawable/btn_default</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <string name="yo">@string/wow</string>
+
+    <declare-styleable name="View">
+        <attr name="custom" />
+        <attr name="decor">
+            <enum name="no-border" value="0"/>
+            <enum name="border" value="1"/>
+            <enum name="shadow" value="2"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

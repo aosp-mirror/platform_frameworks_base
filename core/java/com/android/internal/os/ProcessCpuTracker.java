@@ -34,9 +34,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 public class ProcessCpuTracker {
@@ -67,10 +69,10 @@ public class ProcessCpuTracker {
     static final int PROCESS_STAT_UTIME = 2;
     static final int PROCESS_STAT_STIME = 3;
 
-    /** Stores user time and system time in 100ths of a second. */
+    /** Stores user time and system time in jiffies. */
     private final long[] mProcessStatsData = new long[4];
 
-    /** Stores user time and system time in 100ths of a second.  Used for
+    /** Stores user time and system time in jiffies.  Used for
      * public API to retrieve CPU use for a process.  Must lock while in use. */
     private final long[] mSinglePidStatsData = new long[4];
 
@@ -146,6 +148,9 @@ public class ProcessCpuTracker {
 
     private long mCurrentSampleRealTime;
     private long mLastSampleRealTime;
+
+    private long mCurrentSampleWallTime;
+    private long mLastSampleWallTime;
 
     private long mBaseUserTime;
     private long mBaseSystemTime;
@@ -305,6 +310,7 @@ public class ProcessCpuTracker {
 
         final long nowUptime = SystemClock.uptimeMillis();
         final long nowRealtime = SystemClock.elapsedRealtime();
+        final long nowWallTime = System.currentTimeMillis();
 
         final long[] sysCpu = mSystemCpuData;
         if (Process.readProcFile("/proc/stat", SYSTEM_CPU_FORMAT,
@@ -367,6 +373,8 @@ public class ProcessCpuTracker {
         mCurrentSampleTime = nowUptime;
         mLastSampleRealTime = mCurrentSampleRealTime;
         mCurrentSampleRealTime = nowRealtime;
+        mLastSampleWallTime = mCurrentSampleWallTime;
+        mCurrentSampleWallTime = nowWallTime;
 
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         try {
@@ -710,6 +718,8 @@ public class ProcessCpuTracker {
     }
 
     final public String printCurrentState(long now) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
         buildWorkingProcs();
 
         StringWriter sw = new StringWriter();
@@ -727,6 +737,11 @@ public class ProcessCpuTracker {
             pw.print(mCurrentSampleTime-now);
             pw.print("ms later");
         }
+        pw.print(" (");
+        pw.print(sdf.format(new Date(mLastSampleWallTime)));
+        pw.print(" to ");
+        pw.print(sdf.format(new Date(mCurrentSampleWallTime)));
+        pw.print(")");
 
         long sampleTime = mCurrentSampleTime - mLastSampleTime;
         long sampleRealTime = mCurrentSampleRealTime - mLastSampleRealTime;

@@ -18,9 +18,15 @@
 
 package com.android.commands.am;
 
+import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityManager.RESIZE_MODE_USER;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -38,11 +44,12 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.InstrumentationInfo;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +57,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -59,6 +67,8 @@ import android.util.ArrayMap;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BaseCommand;
+import com.android.internal.util.HexDump;
+import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -66,18 +76,28 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 public class Am extends BaseCommand {
 
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
+    // Is the object moving in a positive direction?
+    private static final boolean MOVING_FORWARD = true;
+    // Is the object moving in the horizontal plan?
+    private static final boolean MOVING_HORIZONTALLY = true;
+    // Is the object current point great then its target point?
+    private static final boolean GREATER_THAN_TARGET = true;
+    // Amount we reduce the stack size by when testing a task re-size.
+    private static final int STACK_BOUNDS_INSET = 10;
+
     private IActivityManager mAm;
+    private IPackageManager mPm;
 
     private int mStartFlags = 0;
     private boolean mWaitOption = false;
@@ -90,6 +110,7 @@ public class Am extends BaseCommand {
     private String mProfileFile;
     private int mSamplingInterval;
     private boolean mAutoStop;
+    private int mStackId;
 
     /**
      * Command-line entry point.
@@ -102,10 +123,11 @@ public class Am extends BaseCommand {
 
     @Override
     public void onShowUsage(PrintStream out) {
-        out.println(
+        PrintWriter pw = new PrintWriter(out);
+        pw.println(
                 "usage: am [subcommand] [options]\n" +
                 "usage: am start [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
-                "               [--sampling INTERVAL] [-R COUNT] [-S] [--opengl-trace]\n" +
+                "               [--sampling INTERVAL] [-R COUNT] [-S]\n" +
                 "               [--track-allocation] [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -123,6 +145,7 @@ public class Am extends BaseCommand {
                 "       am clear-debug-app\n" +
                 "       am set-watch-heap <PROCESS> <MEM-LIMIT>\n" +
                 "       am clear-watch-heap\n" +
+                "       am bug-report [--progress]\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
@@ -134,22 +157,32 @@ public class Am extends BaseCommand {
                 "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
-                "       am stop-user [-w] <USER_ID>\n" +
+                "       am unlock-user <USER_ID> [TOKEN_HEX]\n" +
+                "       am stop-user [-w] [-f] <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
-                "       am stack split <STACK_ID> <v|h> [INTENT]\n" +
+                "       am stack resize-animated <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]\n" +
+                "       am stack size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]\n" +
+                "       am stack move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
+                "       am stack remove <STACK_ID>\n" +
                 "       am task lock <TASK_ID>\n" +
                 "       am task lock stop\n" +
-                "       am task resizeable <TASK_ID> [true|false]\n" +
+                "       am task resizeable <TASK_ID> [0 (unresizeable) | 1 (crop_windows) | 2 (resizeable) | 3 (resizeable_and_pipable)]\n" +
                 "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am task drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
+                "       am task size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
                 "       am get-config\n" +
+                "       am suppress-resize-config-changes <true|false>\n" +
                 "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
                 "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
                 "       am send-trim-memory [--user <USER_ID>] <PROCESS>\n" +
                 "               [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]\n" +
+                "       am get-current-user\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -162,10 +195,10 @@ public class Am extends BaseCommand {
                 "    -R: repeat the activity launch <COUNT> times.  Prior to each repeat,\n" +
                 "        the top activity will be finished.\n" +
                 "    -S: force stop the target app before starting the activity\n" +
-                "    --opengl-trace: enable tracing of OpenGL functions\n" +
                 "    --track-allocation: enable tracking of object allocations\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
+                "    --stack <STACK_ID>: Specify into which stack should the activity be put." +
                 "\n" +
                 "am startservice: start a Service.  Options are:\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
@@ -193,7 +226,8 @@ public class Am extends BaseCommand {
                 "    --receiver-permission <PERMISSION>: Require receiver to hold permission.\n" +
                 "\n" +
                 "am instrument: start an Instrumentation.  Typically this target <COMPONENT>\n" +
-                "  is the form <TEST_PACKAGE>/<RUNNER_CLASS>.  Options are:\n" +
+                "  is the form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there \n" +
+                "  is only one instrumentation.  Options are:\n" +
                 "    -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT).  Use with\n" +
                 "        [-e perf true] to generate raw output for performance measurements.\n" +
                 "    -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a\n" +
@@ -206,6 +240,11 @@ public class Am extends BaseCommand {
                 "    --no-window-animation: turn off window animations while running.\n" +
                 "    --abi <ABI>: Launch the instrumented process with the selected ABI.\n"  +
                 "        This assumes that the process supports the selected ABI.\n" +
+                "\n" +
+                "am trace-ipc: Trace IPC transactions.\n" +
+                "  start: start tracing IPC transactions.\n" +
+                "  stop: stop tracing IPC transactions and dump the results to file.\n" +
+                "    --dump-file <FILE>: Specify the file the trace should be dumped to.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
@@ -229,8 +268,9 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am clear-watch-heap: clear the previously set-watch-heap.\n" +
                 "\n" +
-                "am bug-report: request bug report generation; will launch UI\n" +
-                "    when done to select where it should be delivered.\n" +
+                "am bug-report: request bug report generation; will launch a notification\n" +
+                "    when done to select where it should be delivered. Options are: \n" +
+                "   --progress: will launch a notification right away to show its progress.\n" +
                 "\n" +
                 "am monitor: start monitoring for crashes or ANRs.\n" +
                 "    --gdb: start gdbserv on the given port at crash/ANR\n" +
@@ -261,89 +301,70 @@ public class Am extends BaseCommand {
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit start or switch to it.\n" +
                 "  -w: wait for stop-user to complete.\n" +
+                "  -f: force stop even if there are related users that cannot be stopped.\n" +
                 "\n" +
                 "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>" +
-                ".\n" +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.\n" +
                 "\n" +
-                "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally\n" +
-                "   starting the new stack with [INTENT] if specified. If [INTENT] isn't\n" +
-                "   specified and the current stack has more than one task, then the top task\n" +
-                "   of the current task will be moved to the new stack. Command will also force\n" +
-                "   all current tasks in both stacks to be resizeable.\n" +
+                "am stack resize-docked-stack: change docked stack to <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "   and supplying temporary different task bounds indicated by\n" +
+                "   <TASK_LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "\n" +
+                "am stack size-docked-stack-test: test command for sizing docked stack by\n" +
+                "   <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom\n" +
+                "   applying the optional [DELAY_MS] between each step.\n" +
+                "\n" +
+                "am stack move-top-activity-to-pinned-stack: moves the top activity from\n" +
+                "   <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the\n" +
+                "   bounds of the pinned stack.\n" +
+                "\n" +
+                "am stack positiontask: place <TASK_ID> in <STACK_ID> at <POSITION>" +
                 "\n" +
                 "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
+                "am stack remove: remove stack <STACK_ID>.\n" +
+                "\n" +
                 "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run.\n" +
                 "\n" +
                 "am task lock stop: end the current task lock.\n" +
                 "\n" +
-                "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
+                "am task resizeable: change resizeable mode of <TASK_ID>.\n" +
+                "   0 (unresizeable) | 1 (crop_windows) | 2 (resizeable) | 3 (resizeable_and_pipable)\n" +
                 "\n" +
                 "am task resize: makes sure <TASK_ID> is in a stack with the specified bounds.\n" +
                 "   Forces the task to be resizeable and creates a stack if no existing stack\n" +
                 "   has the specified bounds.\n" +
                 "\n" +
+                "am task drag-task-test: test command for dragging/moving <TASK_ID> by\n" +
+                "   <STEP_SIZE> increments around the screen applying the optional [DELAY_MS]\n" +
+                "   between each step.\n" +
+                "\n" +
+                "am task size-task-test: test command for sizing <TASK_ID> by <STEP_SIZE>" +
+                "   increments within the screen applying the optional [DELAY_MS] between\n" +
+                "   each step.\n" +
+                "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device.\n" +
+                "am suppress-resize-config-changes: suppresses configuration changes due to\n" +
+                "  user resizing an activity/task.\n" +
                 "\n" +
                 "am set-inactive: sets the inactive state of an app.\n" +
                 "\n" +
                 "am get-inactive: returns the inactive state of an app.\n" +
                 "\n" +
-                "am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
+                "am send-trim-memory: send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
-                "<INTENT> specifications include these flags and arguments:\n" +
-                "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
-                "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
-                "    [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
-                "    [--esn <EXTRA_KEY> ...]\n" +
-                "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
-                "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
-                "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
-                "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]\n" +
-                "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
-                "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]\n" +
-                "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
-                "        (mutiple extras passed as Integer[])\n" +
-                "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Integer>)\n" +
-                "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
-                "        (mutiple extras passed as Long[])\n" +
-                "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Long>)\n" +
-                "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
-                "        (mutiple extras passed as Float[])\n" +
-                "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
-                "        (mutiple extras passed as List<Float>)\n" +
-                "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (mutiple extras passed as String[]; to embed a comma into a string,\n" +
-                "         escape it using \"\\,\")\n" +
-                "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (mutiple extras passed as List<String>; to embed a comma into a string,\n" +
-                "         escape it using \"\\,\")\n" +
-                "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
-                "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
-                "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
-                "    [--include-stopped-packages]\n" +
-                "    [--activity-brought-to-front] [--activity-clear-top]\n" +
-                "    [--activity-clear-when-task-reset] [--activity-exclude-from-recents]\n" +
-                "    [--activity-launched-from-history] [--activity-multiple-task]\n" +
-                "    [--activity-no-animation] [--activity-no-history]\n" +
-                "    [--activity-no-user-action] [--activity-previous-is-top]\n" +
-                "    [--activity-reorder-to-front] [--activity-reset-task-if-needed]\n" +
-                "    [--activity-single-top] [--activity-clear-task]\n" +
-                "    [--activity-task-on-home]\n" +
-                "    [--receiver-registered-only] [--receiver-replace-pending]\n" +
-                "    [--selector]\n" +
-                "    [<URI> | <PACKAGE> | <COMPONENT>]\n"
-                );
+                "am get-current-user: returns id of the current foreground user.\n" +
+                "\n"
+        );
+        Intent.printIntentArgsHelp(pw, "");
+        pw.flush();
     }
 
     @Override
@@ -353,6 +374,12 @@ public class Am extends BaseCommand {
         if (mAm == null) {
             System.err.println(NO_SYSTEM_ERROR_CODE);
             throw new AndroidException("Can't connect to activity manager; is the system running?");
+        }
+
+        mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (mPm == null) {
+            System.err.println(NO_SYSTEM_ERROR_CODE);
+            throw new AndroidException("Can't connect to package manager; is the system running?");
         }
 
         String op = nextArgRequired();
@@ -371,6 +398,8 @@ public class Am extends BaseCommand {
             runKillAll();
         } else if (op.equals("instrument")) {
             runInstrument();
+        } else if (op.equals("trace-ipc")) {
+            runTraceIpc();
         } else if (op.equals("broadcast")) {
             sendBroadcast();
         } else if (op.equals("profile")) {
@@ -409,6 +438,8 @@ public class Am extends BaseCommand {
             runSwitchUser();
         } else if (op.equals("start-user")) {
             runStartUserInBackground();
+        } else if (op.equals("unlock-user")) {
+            runUnlockUser();
         } else if (op.equals("stop-user")) {
             runStopUser();
         } else if (op.equals("stack")) {
@@ -417,12 +448,16 @@ public class Am extends BaseCommand {
             runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
+        } else if (op.equals("suppress-resize-config-changes")) {
+            runSuppressResizeConfigChanges();
         } else if (op.equals("set-inactive")) {
             runSetInactive();
         } else if (op.equals("get-inactive")) {
             runGetInactive();
         } else if (op.equals("send-trim-memory")) {
             runSendTrimMemory();
+        } else if (op.equals("get-current-user")) {
+            runGetCurrentUser();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -441,10 +476,6 @@ public class Am extends BaseCommand {
     }
 
     private Intent makeIntent(int defUser) throws URISyntaxException {
-        Intent intent = new Intent();
-        Intent baseIntent = intent;
-        boolean hasIntentInfo = false;
-
         mStartFlags = 0;
         mWaitOption = false;
         mStopOption = false;
@@ -453,321 +484,43 @@ public class Am extends BaseCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mUserId = defUser;
-        Uri data = null;
-        String type = null;
+        mStackId = INVALID_STACK_ID;
 
-        String opt;
-        while ((opt=nextOption()) != null) {
-            if (opt.equals("-a")) {
-                intent.setAction(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-d")) {
-                data = Uri.parse(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-t")) {
-                type = nextArgRequired();
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-c")) {
-                intent.addCategory(nextArgRequired());
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-e") || opt.equals("--es")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, value);
-            } else if (opt.equals("--esn")) {
-                String key = nextArgRequired();
-                intent.putExtra(key, (String) null);
-            } else if (opt.equals("--ei")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Integer.decode(value));
-            } else if (opt.equals("--eu")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Uri.parse(value));
-            } else if (opt.equals("--ecn")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                ComponentName cn = ComponentName.unflattenFromString(value);
-                if (cn == null) throw new IllegalArgumentException("Bad component name: " + value);
-                intent.putExtra(key, cn);
-            } else if (opt.equals("--eia")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                int[] list = new int[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Integer.decode(strings[i]);
-                }
-                intent.putExtra(key, list);
-            } else if (opt.equals("--eial")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Integer> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Integer.decode(strings[i]));
-                }
-                intent.putExtra(key, list);
-            } else if (opt.equals("--el")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Long.valueOf(value));
-            } else if (opt.equals("--ela")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                long[] list = new long[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Long.parseLong(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--elal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Long> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Long.valueOf(strings[i]));
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--ef")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Float.valueOf(value));
-                hasIntentInfo = true;
-            } else if (opt.equals("--efa")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                float[] list = new float[strings.length];
-                for (int i = 0; i < strings.length; i++) {
-                    list[i] = Float.parseFloat(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--efal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                String[] strings = value.split(",");
-                ArrayList<Float> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(Float.valueOf(strings[i]));
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--esa")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                // Split on commas unless they are preceeded by an escape.
-                // The escape character must be escaped for the string and
-                // again for the regex, thus four escape characters become one.
-                String[] strings = value.split("(?<!\\\\),");
-                intent.putExtra(key, strings);
-                hasIntentInfo = true;
-            } else if (opt.equals("--esal")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired();
-                // Split on commas unless they are preceeded by an escape.
-                // The escape character must be escaped for the string and
-                // again for the regex, thus four escape characters become one.
-                String[] strings = value.split("(?<!\\\\),");
-                ArrayList<String> list = new ArrayList<>(strings.length);
-                for (int i = 0; i < strings.length; i++) {
-                    list.add(strings[i]);
-                }
-                intent.putExtra(key, list);
-                hasIntentInfo = true;
-            } else if (opt.equals("--ez")) {
-                String key = nextArgRequired();
-                String value = nextArgRequired().toLowerCase();
-                // Boolean.valueOf() results in false for anything that is not "true", which is
-                // error-prone in shell commands
-                boolean arg;
-                if ("true".equals(value) || "t".equals(value)) {
-                    arg = true;
-                } else if ("false".equals(value) || "f".equals(value)) {
-                    arg = false;
+        return Intent.parseCommandArgs(mArgs, new Intent.CommandOptionHandler() {
+            @Override
+            public boolean handleOption(String opt, ShellCommand cmd) {
+                if (opt.equals("-D")) {
+                    mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("-N")) {
+                    mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
+                } else if (opt.equals("-W")) {
+                    mWaitOption = true;
+                } else if (opt.equals("-P")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = true;
+                } else if (opt.equals("--start-profiler")) {
+                    mProfileFile = nextArgRequired();
+                    mAutoStop = false;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-R")) {
+                    mRepeat = Integer.parseInt(nextArgRequired());
+                } else if (opt.equals("-S")) {
+                    mStopOption = true;
+                } else if (opt.equals("--track-allocation")) {
+                    mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
+                } else if (opt.equals("--user")) {
+                    mUserId = parseUserArg(nextArgRequired());
+                } else if (opt.equals("--receiver-permission")) {
+                    mReceiverPermission = nextArgRequired();
+                } else if (opt.equals("--stack")) {
+                    mStackId = Integer.parseInt(nextArgRequired());
                 } else {
-                    try {
-                        arg = Integer.decode(value) != 0;
-                    } catch (NumberFormatException ex) {
-                        throw new IllegalArgumentException("Invalid boolean value: " + value);
-                    }
+                    return false;
                 }
-
-                intent.putExtra(key, arg);
-            } else if (opt.equals("-n")) {
-                String str = nextArgRequired();
-                ComponentName cn = ComponentName.unflattenFromString(str);
-                if (cn == null) throw new IllegalArgumentException("Bad component name: " + str);
-                intent.setComponent(cn);
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-p")) {
-                String str = nextArgRequired();
-                intent.setPackage(str);
-                if (intent == baseIntent) {
-                    hasIntentInfo = true;
-                }
-            } else if (opt.equals("-f")) {
-                String str = nextArgRequired();
-                intent.setFlags(Integer.decode(str).intValue());
-            } else if (opt.equals("--grant-read-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } else if (opt.equals("--grant-write-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            } else if (opt.equals("--grant-persistable-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            } else if (opt.equals("--grant-prefix-uri-permission")) {
-                intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-            } else if (opt.equals("--exclude-stopped-packages")) {
-                intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-            } else if (opt.equals("--include-stopped-packages")) {
-                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-            } else if (opt.equals("--debug-log-resolution")) {
-                intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
-            } else if (opt.equals("--activity-brought-to-front")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            } else if (opt.equals("--activity-clear-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            } else if (opt.equals("--activity-clear-when-task-reset")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-            } else if (opt.equals("--activity-exclude-from-recents")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            } else if (opt.equals("--activity-launched-from-history")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            } else if (opt.equals("--activity-multiple-task")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-            } else if (opt.equals("--activity-no-animation")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            } else if (opt.equals("--activity-no-history")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-            } else if (opt.equals("--activity-no-user-action")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            } else if (opt.equals("--activity-previous-is-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            } else if (opt.equals("--activity-reorder-to-front")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            } else if (opt.equals("--activity-reset-task-if-needed")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-            } else if (opt.equals("--activity-single-top")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            } else if (opt.equals("--activity-clear-task")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            } else if (opt.equals("--activity-task-on-home")) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-            } else if (opt.equals("--receiver-registered-only")) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            } else if (opt.equals("--receiver-replace-pending")) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            } else if (opt.equals("--selector")) {
-                intent.setDataAndType(data, type);
-                intent = new Intent();
-            } else if (opt.equals("-D")) {
-                mStartFlags |= ActivityManager.START_FLAG_DEBUG;
-            } else if (opt.equals("-N")) {
-                mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
-            } else if (opt.equals("-W")) {
-                mWaitOption = true;
-            } else if (opt.equals("-P")) {
-                mProfileFile = nextArgRequired();
-                mAutoStop = true;
-            } else if (opt.equals("--start-profiler")) {
-                mProfileFile = nextArgRequired();
-                mAutoStop = false;
-            } else if (opt.equals("--sampling")) {
-                mSamplingInterval = Integer.parseInt(nextArgRequired());
-            } else if (opt.equals("-R")) {
-                mRepeat = Integer.parseInt(nextArgRequired());
-            } else if (opt.equals("-S")) {
-                mStopOption = true;
-            } else if (opt.equals("--opengl-trace")) {
-                mStartFlags |= ActivityManager.START_FLAG_OPENGL_TRACES;
-            } else if (opt.equals("--track-allocation")) {
-                mStartFlags |= ActivityManager.START_FLAG_TRACK_ALLOCATION;
-            } else if (opt.equals("--user")) {
-                mUserId = parseUserArg(nextArgRequired());
-            } else if (opt.equals("--receiver-permission")) {
-                mReceiverPermission = nextArgRequired();
-            } else {
-                System.err.println("Error: Unknown option: " + opt);
-                return null;
+                return true;
             }
-        }
-        intent.setDataAndType(data, type);
-
-        final boolean hasSelector = intent != baseIntent;
-        if (hasSelector) {
-            // A selector was specified; fix up.
-            baseIntent.setSelector(intent);
-            intent = baseIntent;
-        }
-
-        String arg = nextArg();
-        baseIntent = null;
-        if (arg == null) {
-            if (hasSelector) {
-                // If a selector has been specified, and no arguments
-                // have been supplied for the main Intent, then we can
-                // assume it is ACTION_MAIN CATEGORY_LAUNCHER; we don't
-                // need to have a component name specified yet, the
-                // selector will take care of that.
-                baseIntent = new Intent(Intent.ACTION_MAIN);
-                baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            }
-        } else if (arg.indexOf(':') >= 0) {
-            // The argument is a URI.  Fully parse it, and use that result
-            // to fill in any data not specified so far.
-            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME
-                    | Intent.URI_ANDROID_APP_SCHEME | Intent.URI_ALLOW_UNSAFE);
-        } else if (arg.indexOf('/') >= 0) {
-            // The argument is a component name.  Build an Intent to launch
-            // it.
-            baseIntent = new Intent(Intent.ACTION_MAIN);
-            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            baseIntent.setComponent(ComponentName.unflattenFromString(arg));
-        } else {
-            // Assume the argument is a package name.
-            baseIntent = new Intent(Intent.ACTION_MAIN);
-            baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            baseIntent.setPackage(arg);
-        }
-        if (baseIntent != null) {
-            Bundle extras = intent.getExtras();
-            intent.replaceExtras((Bundle)null);
-            Bundle uriExtras = baseIntent.getExtras();
-            baseIntent.replaceExtras((Bundle)null);
-            if (intent.getAction() != null && baseIntent.getCategories() != null) {
-                HashSet<String> cats = new HashSet<String>(baseIntent.getCategories());
-                for (String c : cats) {
-                    baseIntent.removeCategory(c);
-                }
-            }
-            intent.fillIn(baseIntent, Intent.FILL_IN_COMPONENT | Intent.FILL_IN_SELECTOR);
-            if (extras == null) {
-                extras = uriExtras;
-            } else if (uriExtras != null) {
-                uriExtras.putAll(extras);
-                extras = uriExtras;
-            }
-            intent.replaceExtras(extras);
-            hasIntentInfo = true;
-        }
-
-        if (!hasIntentInfo) throw new IllegalArgumentException("No intent supplied");
-        return intent;
+        });
     }
 
     private void runStartService() throws Exception {
@@ -819,20 +572,15 @@ public class Am extends BaseCommand {
             mimeType = mAm.getProviderMimeType(intent.getData(), mUserId);
         }
 
+
         do {
             if (mStopOption) {
                 String packageName;
                 if (intent.getComponent() != null) {
                     packageName = intent.getComponent().getPackageName();
                 } else {
-                    IPackageManager pm = IPackageManager.Stub.asInterface(
-                            ServiceManager.getService("package"));
-                    if (pm == null) {
-                        System.err.println("Error: Package manager not running; aborting");
-                        return;
-                    }
-                    List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0,
-                            mUserId);
+                    List<ResolveInfo> activities = mPm.queryIntentActivities(intent, mimeType, 0,
+                            mUserId).getList();
                     if (activities == null || activities.size() <= 0) {
                         System.err.println("Error: Intent does not match any activities: "
                                 + intent);
@@ -861,7 +609,7 @@ public class Am extends BaseCommand {
                             new File(mProfileFile),
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE |
-                            ParcelFileDescriptor.MODE_READ_WRITE);
+                            ParcelFileDescriptor.MODE_WRITE_ONLY);
                 } catch (FileNotFoundException e) {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
                     System.err.println("Consider using a file under /data/local/tmp/");
@@ -873,13 +621,20 @@ public class Am extends BaseCommand {
             IActivityManager.WaitResult result = null;
             int res;
             final long startTime = SystemClock.uptimeMillis();
+            ActivityOptions options = null;
+            if (mStackId != INVALID_STACK_ID) {
+                options = ActivityOptions.makeBasic();
+                options.setLaunchStackId(mStackId);
+            }
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, null, intent, mimeType,
-                            null, null, 0, mStartFlags, profilerInfo, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
                 res = mAm.startActivityAsUser(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
             PrintStream out = mWaitOption ? System.out : System.err;
@@ -1061,8 +816,44 @@ public class Am extends BaseCommand {
         }
 
         String cnArg = nextArgRequired();
-        ComponentName cn = ComponentName.unflattenFromString(cnArg);
-        if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
+
+        ComponentName cn;
+        if (cnArg.contains("/")) {
+            cn = ComponentName.unflattenFromString(cnArg);
+            if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
+        } else {
+            List<InstrumentationInfo> infos = mPm.queryInstrumentation(null, 0).getList();
+
+            final int numInfos = infos == null ? 0: infos.size();
+            List<ComponentName> cns = new ArrayList<>();
+            for (int i = 0; i < numInfos; i++) {
+                InstrumentationInfo info = infos.get(i);
+
+                ComponentName c = new ComponentName(info.packageName, info.name);
+                if (cnArg.equals(info.packageName)) {
+                    cns.add(c);
+                }
+            }
+
+            if (cns.size() == 0) {
+                throw new IllegalArgumentException("No instrumentation found for: " + cnArg);
+            } else if (cns.size() == 1) {
+                cn = cns.get(0);
+            } else {
+                StringBuilder cnsStr = new StringBuilder();
+                final int numCns = cns.size();
+                for (int i = 0; i < numCns; i++) {
+                    cnsStr.append(cns.get(i).flattenToString());
+                    cnsStr.append(", ");
+                }
+
+                // Remove last ", "
+                cnsStr.setLength(cnsStr.length() - 2);
+
+                throw new IllegalArgumentException("Found multiple instrumentations: "
+                        + cnsStr.toString());
+            }
+        }
 
         InstrumentationWatcher watcher = null;
         UiAutomationConnection connection = null;
@@ -1108,6 +899,62 @@ public class Am extends BaseCommand {
         if (oldAnims != null) {
             wm.setAnimationScales(oldAnims);
         }
+    }
+
+    private void runTraceIpc() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("start")) {
+            runTraceIpcStart();
+        } else if (op.equals("stop")) {
+            runTraceIpcStop();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runTraceIpcStart() throws Exception {
+        System.out.println("Starting IPC tracing.");
+        mAm.startBinderTracking();
+    }
+
+    private void runTraceIpcStop() throws Exception {
+        String opt;
+        String filename = null;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--dump-file")) {
+                filename = nextArgRequired();
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        if (filename == null) {
+            System.err.println("Error: Specify filename to dump logs to.");
+            return;
+        }
+
+        ParcelFileDescriptor fd = null;
+
+        try {
+            File file = new File(filename);
+            file.delete();
+            fd = openForSystemServer(file,
+                    ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE |
+                            ParcelFileDescriptor.MODE_WRITE_ONLY);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: Unable to open file: " + filename);
+            System.err.println("Consider using a file under /data/local/tmp/");
+            return;
+        }
+
+        ;
+        if (!mAm.stopBinderTrackingAndDump(fd)) {
+            throw new AndroidException("STOP TRACE FAILED.");
+        }
+
+        System.out.println("Stopped IPC tracing. Dumping logs to: " + filename);
     }
 
     static void removeWallOption() {
@@ -1184,7 +1031,7 @@ public class Am extends BaseCommand {
                         new File(profileFile),
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE |
-                        ParcelFileDescriptor.MODE_READ_WRITE);
+                        ParcelFileDescriptor.MODE_WRITE_ONLY);
             } catch (FileNotFoundException e) {
                 System.err.println("Error: Unable to open file: " + profileFile);
                 System.err.println("Consider using a file under /data/local/tmp/");
@@ -1244,7 +1091,7 @@ public class Am extends BaseCommand {
             fd = openForSystemServer(file,
                     ParcelFileDescriptor.MODE_CREATE |
                     ParcelFileDescriptor.MODE_TRUNCATE |
-                    ParcelFileDescriptor.MODE_READ_WRITE);
+                    ParcelFileDescriptor.MODE_WRITE_ONLY);
         } catch (FileNotFoundException e) {
             System.err.println("Error: Unable to open file: " + heapFile);
             System.err.println("Consider using a file under /data/local/tmp/");
@@ -1292,7 +1139,17 @@ public class Am extends BaseCommand {
     }
 
     private void runBugReport() throws Exception {
-        mAm.requestBugReport();
+        String opt;
+        int bugreportType = ActivityManager.BUGREPORT_OPTION_FULL;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--progress")) {
+                bugreportType = ActivityManager.BUGREPORT_OPTION_INTERACTIVE;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        mAm.requestBugReport(bugreportType);
         System.out.println("Your lovely bug report is being created; please be patient.");
     }
 
@@ -1308,6 +1165,26 @@ public class Am extends BaseCommand {
             System.out.println("Success: user started");
         } else {
             System.err.println("Error: could not start user");
+        }
+    }
+
+    private byte[] argToBytes(String arg) {
+        if (arg.equals("!")) {
+            return null;
+        } else {
+            return HexDump.hexStringToByteArray(arg);
+        }
+    }
+
+    private void runUnlockUser() throws Exception {
+        int userId = Integer.parseInt(nextArgRequired());
+        byte[] token = argToBytes(nextArgRequired());
+        byte[] secret = argToBytes(nextArgRequired());
+        boolean success = mAm.unlockUser(userId, token, secret, null);
+        if (success) {
+            System.out.println("Success: user unlocked");
+        } else {
+            System.err.println("Error: could not unlock user");
         }
     }
 
@@ -1337,10 +1214,13 @@ public class Am extends BaseCommand {
 
     private void runStopUser() throws Exception {
         boolean wait = false;
-        String opt = null;
+        boolean force = false;
+        String opt;
         while ((opt = nextOption()) != null) {
             if ("-w".equals(opt)) {
                 wait = true;
+            } else if ("-f".equals(opt)) {
+                force = true;
             } else {
                 System.err.println("Error: unknown option: " + opt);
                 return;
@@ -1349,7 +1229,7 @@ public class Am extends BaseCommand {
         int user = Integer.parseInt(nextArgRequired());
         StopUserCallback callback = wait ? new StopUserCallback() : null;
 
-        int res = mAm.stopUser(user, callback);
+        int res = mAm.stopUser(user, force, callback);
         if (res != ActivityManager.USER_OP_SUCCESS) {
             String txt = "";
             switch (res) {
@@ -1358,6 +1238,13 @@ public class Am extends BaseCommand {
                     break;
                 case ActivityManager.USER_OP_UNKNOWN_USER:
                     txt = " (Unknown user " + user + ")";
+                    break;
+                case ActivityManager.USER_OP_ERROR_IS_SYSTEM:
+                    txt = " (System user cannot be stopped)";
+                    break;
+                case ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP:
+                    txt = " (Can't stop user " + user
+                            + " - one of its related users can't be stopped)";
                     break;
             }
             System.err.println("Switch failed: " + res + txt);
@@ -1368,6 +1255,7 @@ public class Am extends BaseCommand {
 
     class MyActivityController extends IActivityController.Stub {
         final String mGdbPort;
+        final boolean mMonkey;
 
         static final int STATE_NORMAL = 0;
         static final int STATE_CRASHED = 1;
@@ -1394,8 +1282,9 @@ public class Am extends BaseCommand {
         Thread mGdbThread;
         boolean mGotGdbPrint;
 
-        MyActivityController(String gdbPort) {
+        MyActivityController(String gdbPort, boolean monkey) {
             mGdbPort = gdbPort;
+            mMonkey = monkey;
         }
 
         @Override
@@ -1595,7 +1484,7 @@ public class Am extends BaseCommand {
             try {
                 printMessageForState();
 
-                mAm.setActivityController(this);
+                mAm.setActivityController(this, mMonkey);
                 mState = STATE_NORMAL;
 
                 InputStreamReader converter = new InputStreamReader(System.in);
@@ -1650,7 +1539,7 @@ public class Am extends BaseCommand {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                mAm.setActivityController(null);
+                mAm.setActivityController(null, mMonkey);
             }
         }
     }
@@ -1658,16 +1547,19 @@ public class Am extends BaseCommand {
     private void runMonitor() throws Exception {
         String opt;
         String gdbPort = null;
+        boolean monkey = false;
         while ((opt=nextOption()) != null) {
             if (opt.equals("--gdb")) {
                 gdbPort = nextArgRequired();
+            } else if (opt.equals("-m")) {
+                monkey = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
         }
 
-        MyActivityController controller = new MyActivityController(gdbPort);
+        MyActivityController controller = new MyActivityController(gdbPort, monkey);
         controller.run();
     }
 
@@ -1706,10 +1598,10 @@ public class Am extends BaseCommand {
         }
 
         System.out.println("Performing idle maintenance...");
-        Intent intent = new Intent(
-                "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE");
-        mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
-                android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
+        try {
+            mAm.sendIdleJobTrigger();
+        } catch (RemoteException e) {
+        }
     }
 
     private void runScreenCompat() throws Exception {
@@ -1856,21 +1748,43 @@ public class Am extends BaseCommand {
 
     private void runStack() throws Exception {
         String op = nextArgRequired();
-        if (op.equals("start")) {
-            runStackStart();
-        } else if (op.equals("movetask")) {
-            runStackMoveTask();
-        } else if (op.equals("resize")) {
-            runStackResize();
-        } else if (op.equals("list")) {
-            runStackList();
-        } else if (op.equals("info")) {
-            runStackInfo();
-        } else if (op.equals("split")) {
-            runStackSplit();
-        } else {
-            showError("Error: unknown command '" + op + "'");
-            return;
+        switch (op) {
+            case "start":
+                runStackStart();
+                break;
+            case "movetask":
+                runStackMoveTask();
+                break;
+            case "resize":
+                runStackResize();
+                break;
+            case "resize-animated":
+                runStackResizeAnimated();
+                break;
+            case "resize-docked-stack":
+                runStackResizeDocked();
+                break;
+            case "positiontask":
+                runStackPositionTask();
+                break;
+            case "list":
+                runStackList();
+                break;
+            case "info":
+                runStackInfo();
+                break;
+            case "move-top-activity-to-pinned-stack":
+                runMoveTopActivityToPinnedStack();
+                break;
+            case "size-docked-stack-test":
+                runStackSizeDockedStackTest();
+                break;
+            case "remove":
+                runStackRemove();
+                break;
+            default:
+                showError("Error: unknown command '" + op + "'");
+                break;
         }
     }
 
@@ -1918,9 +1832,68 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
+        resizeStack(stackId, bounds, 0);
+    }
+
+    private void runStackResizeAnimated() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        final Rect bounds;
+        if ("null".equals(mArgs.peekNextArg())) {
+            bounds = null;
+        } else {
+            bounds = getBounds();
+            if (bounds == null) {
+                System.err.println("Error: invalid input bounds");
+                return;
+            }
+        }
+        resizeStackUnchecked(stackId, bounds, 0, true);
+    }
+
+    private void resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate) {
+        try {
+            mAm.resizeStack(stackId, bounds, false, false, animate, -1);
+            Thread.sleep(delayMs);
+        } catch (RemoteException e) {
+            showError("Error: resizing stack " + e);
+        } catch (InterruptedException e) {
+        }
+    }
+
+    private void runStackResizeDocked() throws Exception {
+        final Rect bounds = getBounds();
+        final Rect taskBounds = getBounds();
+        if (bounds == null || taskBounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
+        try {
+            mAm.resizeDockedStack(bounds, taskBounds, null, null, null);
+        } catch (RemoteException e) {
+            showError("Error: resizing docked stack " + e);
+        }
+    }
+
+    private void resizeStack(int stackId, Rect bounds, int delayMs)
+            throws Exception {
+        if (bounds == null) {
+            showError("Error: invalid input bounds");
+            return;
+        }
+        resizeStackUnchecked(stackId, bounds, delayMs, false);
+    }
+
+    private void runStackPositionTask() throws Exception {
+        String taskIdStr = nextArgRequired();
+        int taskId = Integer.parseInt(taskIdStr);
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        String positionStr = nextArgRequired();
+        int position = Integer.parseInt(positionStr);
 
         try {
-            mAm.resizeStack(stackId, bounds);
+            mAm.positionTaskInStack(taskId, stackId, position);
         } catch (RemoteException e) {
         }
     }
@@ -1945,61 +1918,121 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runStackSplit() throws Exception {
-        final int stackId = Integer.parseInt(nextArgRequired());
-        final String splitDirection = nextArgRequired();
-        Intent intent = null;
-        try {
-            intent = makeIntent(UserHandle.USER_CURRENT);
-        } catch (IllegalArgumentException e) {
-            // no intent supplied.
+    private void runStackRemove() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.parseInt(stackIdStr);
+        mAm.removeStack(stackId);
+    }
+
+    private void runMoveTopActivityToPinnedStack() throws Exception {
+        int stackId = Integer.parseInt(nextArgRequired());
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
         }
 
         try {
-            final StackInfo currentStackInfo = mAm.getStackInfo(stackId);
-            // Calculate bounds for new and current stack.
-            final Rect currentStackBounds = new Rect(currentStackInfo.bounds);
-            final Rect newStackBounds = new Rect(currentStackInfo.bounds);
-            if ("v".equals(splitDirection)) {
-                currentStackBounds.right = newStackBounds.left = currentStackInfo.bounds.centerX();
-            } else if ("h".equals(splitDirection)) {
-                currentStackBounds.bottom = newStackBounds.top = currentStackInfo.bounds.centerY();
-            } else {
-                showError("Error: unknown split direction '" + splitDirection + "'");
+            if (!mAm.moveTopActivityToPinnedStack(stackId, bounds)) {
+                showError("Didn't move top activity to pinned stack.");
+            }
+        } catch (RemoteException e) {
+            showError("Unable to move top activity: " + e);
+            return;
+        }
+    }
+
+    private void runStackSizeDockedStackTest() throws Exception {
+        final int stepSize = Integer.parseInt(nextArgRequired());
+        final String side = nextArgRequired();
+        final String delayStr = nextArg();
+        final int delayMs = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
+
+        Rect bounds;
+        try {
+            StackInfo info = mAm.getStackInfo(DOCKED_STACK_ID);
+            if (info == null) {
+                showError("Docked stack doesn't exist");
                 return;
             }
-
-            // Create new stack
-            IActivityContainer container = mAm.createStackOnDisplay(currentStackInfo.displayId);
-            if (container == null) {
-                showError("Error: Unable to create new stack...");
+            if (info.bounds == null) {
+                showError("Docked stack doesn't have a bounds");
+                return;
             }
-
-            final int newStackId = container.getStackId();
-
-            if (intent != null) {
-                container.startActivity(intent);
-            } else if (currentStackInfo.taskIds != null && currentStackInfo.taskIds.length > 1) {
-                // Move top task over to new stack
-                mAm.moveTaskToStack(currentStackInfo.taskIds[currentStackInfo.taskIds.length - 1],
-                        newStackId, true);
-            }
-
-            final StackInfo newStackInfo = mAm.getStackInfo(newStackId);
-
-            // Make all tasks in the stacks resizeable.
-            for (int taskId : currentStackInfo.taskIds) {
-                mAm.setTaskResizeable(taskId, true);
-            }
-
-            for (int taskId : newStackInfo.taskIds) {
-                mAm.setTaskResizeable(taskId, true);
-            }
-
-            // Resize stacks
-            mAm.resizeStack(currentStackInfo.stackId, currentStackBounds);
-            mAm.resizeStack(newStackInfo.stackId, newStackBounds);
+            bounds = info.bounds;
         } catch (RemoteException e) {
+            showError("Unable to get docked stack info:" + e);
+            return;
+        }
+
+        final boolean horizontalGrowth = "l".equals(side) || "r".equals(side);
+        final int changeSize = (horizontalGrowth ? bounds.width() : bounds.height()) / 2;
+        int currentPoint;
+        switch (side) {
+            case "l":
+                currentPoint = bounds.left;
+                break;
+            case "r":
+                currentPoint = bounds.right;
+                break;
+            case "t":
+                currentPoint = bounds.top;
+                break;
+            case "b":
+                currentPoint = bounds.bottom;
+                break;
+            default:
+                showError("Unknown growth side: " + side);
+                return;
+        }
+
+        final int startPoint = currentPoint;
+        final int minPoint = currentPoint - changeSize;
+        final int maxPoint = currentPoint + changeSize;
+
+        int maxChange;
+        System.out.println("Shrinking docked stack side=" + side);
+        while (currentPoint > minPoint) {
+            maxChange = Math.min(stepSize, currentPoint - minPoint);
+            currentPoint -= maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+
+        System.out.println("Growing docked stack side=" + side);
+        while (currentPoint < maxPoint) {
+            maxChange = Math.min(stepSize, maxPoint - currentPoint);
+            currentPoint += maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+
+        System.out.println("Back to Original size side=" + side);
+        while (currentPoint > startPoint) {
+            maxChange = Math.min(stepSize, currentPoint - startPoint);
+            currentPoint -= maxChange;
+            setBoundsSide(bounds, side, currentPoint);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+        }
+    }
+
+    private void setBoundsSide(Rect bounds, String side, int value) {
+        switch (side) {
+            case "l":
+                bounds.left = value;
+                break;
+            case "r":
+                bounds.right = value;
+                break;
+            case "t":
+                bounds.top = value;
+                break;
+            case "b":
+                bounds.bottom = value;
+                break;
+            default:
+                showError("Unknown set side: " + side);
+                break;
         }
     }
 
@@ -2011,6 +2044,10 @@ public class Am extends BaseCommand {
             runTaskResizeable();
         } else if (op.equals("resize")) {
             runTaskResize();
+        } else if (op.equals("drag-task-test")) {
+            runTaskDragTaskTest();
+        } else if (op.equals("size-task-test")) {
+            runTaskSizeTaskTest();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -2036,10 +2073,10 @@ public class Am extends BaseCommand {
         final String taskIdStr = nextArgRequired();
         final int taskId = Integer.parseInt(taskIdStr);
         final String resizeableStr = nextArgRequired();
-        final boolean resizeable = Boolean.parseBoolean(resizeableStr);
+        final int resizeableMode = Integer.parseInt(resizeableStr);
 
         try {
-            mAm.setTaskResizeable(taskId, resizeable);
+            mAm.setTaskResizeable(taskId, resizeableMode);
         } catch (RemoteException e) {
         }
     }
@@ -2052,10 +2089,259 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
+        taskResize(taskId, bounds, 0, false);
+    }
+
+    private void taskResize(int taskId, Rect bounds, int delay_ms, boolean pretendUserResize) {
         try {
-            mAm.resizeTask(taskId, bounds);
+            final int resizeMode = pretendUserResize ? RESIZE_MODE_USER : RESIZE_MODE_SYSTEM;
+            mAm.resizeTask(taskId, bounds, resizeMode);
+            Thread.sleep(delay_ms);
         } catch (RemoteException e) {
+            System.err.println("Error changing task bounds: " + e);
+        } catch (InterruptedException e) {
         }
+    }
+
+    private void runTaskDragTaskTest() {
+        final int taskId = Integer.parseInt(nextArgRequired());
+        final int stepSize = Integer.parseInt(nextArgRequired());
+        final String delayStr = nextArg();
+        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
+        final StackInfo stackInfo;
+        Rect taskBounds;
+        try {
+            stackInfo = mAm.getStackInfo(mAm.getFocusedStackId());
+            taskBounds = mAm.getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            System.err.println("Error getting focus stack info or task bounds: " + e);
+            return;
+        }
+        final Rect stackBounds = stackInfo.bounds;
+        int travelRight = stackBounds.width() - taskBounds.width();
+        int travelLeft = -travelRight;
+        int travelDown = stackBounds.height() - taskBounds.height();
+        int travelUp = -travelDown;
+        int passes = 0;
+
+        // We do 2 passes to get back to the original location of the task.
+        while (passes < 2) {
+            // Move right
+            System.out.println("Moving right...");
+            travelRight = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelRight, MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel right by " + travelRight);
+
+            // Move down
+            System.out.println("Moving down...");
+            travelDown = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelDown, MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel down by " + travelDown);
+
+            // Move left
+            System.out.println("Moving left...");
+            travelLeft = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelLeft, !MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel left by " + travelLeft);
+
+            // Move up
+            System.out.println("Moving up...");
+            travelUp = moveTask(taskId, taskBounds, stackBounds, stepSize,
+                    travelUp, !MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
+            System.out.println("Still need to travel up by " + travelUp);
+
+            try {
+                taskBounds = mAm.getTaskBounds(taskId);
+            } catch (RemoteException e) {
+                System.err.println("Error getting task bounds: " + e);
+                return;
+            }
+            passes++;
+        }
+    }
+
+    private int moveTask(int taskId, Rect taskRect, Rect stackRect, int stepSize,
+            int maxToTravel, boolean movingForward, boolean horizontal, int delay_ms) {
+        int maxMove;
+        if (movingForward) {
+            while (maxToTravel > 0
+                    && ((horizontal && taskRect.right < stackRect.right)
+                        ||(!horizontal && taskRect.bottom < stackRect.bottom))) {
+                if (horizontal) {
+                    maxMove = Math.min(stepSize, stackRect.right - taskRect.right);
+                    maxToTravel -= maxMove;
+                    taskRect.right += maxMove;
+                    taskRect.left += maxMove;
+                } else {
+                    maxMove = Math.min(stepSize, stackRect.bottom - taskRect.bottom);
+                    maxToTravel -= maxMove;
+                    taskRect.top += maxMove;
+                    taskRect.bottom += maxMove;
+                }
+                taskResize(taskId, taskRect, delay_ms, false);
+            }
+        } else {
+            while (maxToTravel < 0
+                    && ((horizontal && taskRect.left > stackRect.left)
+                    ||(!horizontal && taskRect.top > stackRect.top))) {
+                if (horizontal) {
+                    maxMove = Math.min(stepSize, taskRect.left - stackRect.left);
+                    maxToTravel -= maxMove;
+                    taskRect.right -= maxMove;
+                    taskRect.left -= maxMove;
+                } else {
+                    maxMove = Math.min(stepSize, taskRect.top - stackRect.top);
+                    maxToTravel -= maxMove;
+                    taskRect.top -= maxMove;
+                    taskRect.bottom -= maxMove;
+                }
+                taskResize(taskId, taskRect, delay_ms, false);
+            }
+        }
+        // Return the remaining distance we didn't travel because we reached the target location.
+        return maxToTravel;
+    }
+
+    private void runTaskSizeTaskTest() {
+        final int taskId = Integer.parseInt(nextArgRequired());
+        final int stepSize = Integer.parseInt(nextArgRequired());
+        final String delayStr = nextArg();
+        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
+        final StackInfo stackInfo;
+        final Rect initialTaskBounds;
+        try {
+            stackInfo = mAm.getStackInfo(mAm.getFocusedStackId());
+            initialTaskBounds = mAm.getTaskBounds(taskId);
+        } catch (RemoteException e) {
+            System.err.println("Error getting focus stack info or task bounds: " + e);
+            return;
+        }
+        final Rect stackBounds = stackInfo.bounds;
+        stackBounds.inset(STACK_BOUNDS_INSET, STACK_BOUNDS_INSET);
+        final Rect currentTaskBounds = new Rect(initialTaskBounds);
+
+        // Size by top-left
+        System.out.println("Growing top-left");
+        do {
+            currentTaskBounds.top -= getStepSize(
+                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.left -= getStepSize(
+                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (stackBounds.top < currentTaskBounds.top
+                || stackBounds.left < currentTaskBounds.left);
+
+        // Back to original size
+        System.out.println("Shrinking top-left");
+        do {
+            currentTaskBounds.top += getStepSize(
+                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.left += getStepSize(
+                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (initialTaskBounds.top > currentTaskBounds.top
+                || initialTaskBounds.left > currentTaskBounds.left);
+
+        // Size by top-right
+        System.out.println("Growing top-right");
+        do {
+            currentTaskBounds.top -= getStepSize(
+                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.right += getStepSize(
+                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (stackBounds.top < currentTaskBounds.top
+                || stackBounds.right > currentTaskBounds.right);
+
+        // Back to original size
+        System.out.println("Shrinking top-right");
+        do {
+            currentTaskBounds.top += getStepSize(
+                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
+                    stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (initialTaskBounds.top > currentTaskBounds.top
+                || initialTaskBounds.right < currentTaskBounds.right);
+
+        // Size by bottom-left
+        System.out.println("Growing bottom-left");
+        do {
+            currentTaskBounds.bottom += getStepSize(
+                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.left -= getStepSize(
+                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (stackBounds.bottom > currentTaskBounds.bottom
+                || stackBounds.left < currentTaskBounds.left);
+
+        // Back to original size
+        System.out.println("Shrinking bottom-left");
+        do {
+            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
+                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.left += getStepSize(
+                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
+                || initialTaskBounds.left > currentTaskBounds.left);
+
+        // Size by bottom-right
+        System.out.println("Growing bottom-right");
+        do {
+            currentTaskBounds.bottom += getStepSize(
+                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
+
+            currentTaskBounds.right += getStepSize(
+                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (stackBounds.bottom > currentTaskBounds.bottom
+                || stackBounds.right > currentTaskBounds.right);
+
+        // Back to original size
+        System.out.println("Shrinking bottom-right");
+        do {
+            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
+                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
+
+            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
+                    stepSize, GREATER_THAN_TARGET);
+
+            taskResize(taskId, currentTaskBounds, delay_ms, true);
+        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
+                || initialTaskBounds.right < currentTaskBounds.right);
+    }
+
+    private int getStepSize(int current, int target, int inStepSize, boolean greaterThanTarget) {
+        int stepSize = 0;
+        if (greaterThanTarget && target < current) {
+            current -= inStepSize;
+            stepSize = inStepSize;
+            if (target > current) {
+                stepSize -= (target - current);
+            }
+        }
+        if (!greaterThanTarget && target > current) {
+            current += inStepSize;
+            stepSize = inStepSize;
+            if (target < current) {
+                stepSize += (current - target);
+            }
+        }
+        return stepSize;
     }
 
     private List<Configuration> getRecentConfigurations(int days) {
@@ -2141,8 +2427,18 @@ public class Am extends BaseCommand {
         }
     }
 
+    private void runSuppressResizeConfigChanges() throws Exception {
+        boolean suppress = Boolean.valueOf(nextArgRequired());
+
+        try {
+            mAm.suppressResizeConfigChanges(suppress);
+        } catch (RemoteException e) {
+            System.err.println("Error suppressing resize config changes: " + e);
+        }
+    }
+
     private void runSetInactive() throws Exception {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_CURRENT;
 
         String opt;
         while ((opt=nextOption()) != null) {
@@ -2162,7 +2458,7 @@ public class Am extends BaseCommand {
     }
 
     private void runGetInactive() throws Exception {
-        int userId = UserHandle.USER_OWNER;
+        int userId = UserHandle.USER_CURRENT;
 
         String opt;
         while ((opt=nextOption()) != null) {
@@ -2230,6 +2526,12 @@ public class Am extends BaseCommand {
             System.err.println("Error: Failure to set the level - probably Unknown Process: " +
                                proc);
         }
+    }
+
+    private void runGetCurrentUser() throws Exception {
+        UserInfo currentUser = Preconditions.checkNotNull(mAm.getCurrentUser(),
+                "Current user not set");
+        System.out.println(currentUser.id);
     }
 
     /**

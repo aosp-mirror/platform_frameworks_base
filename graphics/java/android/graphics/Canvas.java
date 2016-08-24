@@ -31,6 +31,8 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.microedition.khronos.opengles.GL;
 
+import libcore.util.NativeAllocationRegistry;
+
 /**
  * The Canvas class holds the "draw" calls. To draw something, you need
  * 4 basic components: A Bitmap to hold the pixels, a Canvas to host
@@ -50,7 +52,7 @@ public class Canvas {
 
     /**
      * Should only be assigned in constructors (or setBitmap if software canvas),
-     * freed in finalizer.
+     * freed by NativeAllocation.
      * @hide
      */
     protected long mNativeCanvasWrapper;
@@ -85,32 +87,18 @@ public class Canvas {
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
 
-    // This field is used to finalize the native Canvas properly
-    private final CanvasFinalizer mFinalizer;
+    // The approximate size of the native allocation associated with
+    // a Canvas object.
+    private static final long NATIVE_ALLOCATION_SIZE = 525;
 
-    private static final class CanvasFinalizer {
-        private long mNativeCanvasWrapper;
-
-        public CanvasFinalizer(long nativeCanvas) {
-            mNativeCanvasWrapper = nativeCanvas;
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                dispose();
-            } finally {
-                super.finalize();
-            }
-        }
-
-        public void dispose() {
-            if (mNativeCanvasWrapper != 0) {
-                finalizer(mNativeCanvasWrapper);
-                mNativeCanvasWrapper = 0;
-            }
-        }
+    // Use a Holder to allow static initialization of Canvas in the boot image.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                Canvas.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
     }
+
+    // This field is used to finalize the native Canvas properly
+    private Runnable mFinalizer;
 
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
@@ -122,7 +110,8 @@ public class Canvas {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
             mNativeCanvasWrapper = initRaster(null);
-            mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+            mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                    this, mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
         }
@@ -143,7 +132,8 @@ public class Canvas {
         }
         throwIfCannotDraw(bitmap);
         mNativeCanvasWrapper = initRaster(bitmap);
-        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+        mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
@@ -154,7 +144,8 @@ public class Canvas {
             throw new IllegalStateException();
         }
         mNativeCanvasWrapper = nativeCanvas;
-        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+        mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
     }
 
@@ -214,19 +205,10 @@ public class Canvas {
         mBitmap = bitmap;
     }
 
-    /**
-     * Set the viewport dimensions if this canvas is GL based. If it is not,
-     * this method is ignored and no exception is thrown.
-     *
-     * @param width The width of the viewport
-     * @param height The height of the viewport
-     *
-     * @hide
-     */
-    public void setViewport(int width, int height) {}
-
     /** @hide */
-    public void setHighContrastText(boolean highContrastText) {}
+    public void setHighContrastText(boolean highContrastText) {
+        native_setHighContrastText(mNativeCanvasWrapper, highContrastText);
+    }
 
     /** @hide */
     public void insertReorderBarrier() {}
@@ -493,7 +475,7 @@ public class Canvas {
      *
      * @param bounds    The maximum size the offscreen bitmap needs to be
      *                  (in local coordinates)
-     * @param alpha     The alpha to apply to the offscreen when when it is
+     * @param alpha     The alpha to apply to the offscreen when it is
                         drawn during restore()
      * @param saveFlags see _SAVE_FLAG constants, generally {@link #ALL_SAVE_FLAG} is recommended
      *                  for performance reasons.
@@ -663,6 +645,12 @@ public class Canvas {
     /**
      * Return, in ctm, the current transformation matrix. This does not alter
      * the matrix in the canvas, but just returns a copy of it.
+     *
+     * @deprecated {@link #isHardwareAccelerated() Hardware accelerated} canvases may have any
+     * matrix when passed to a View or Drawable, as it is implementation defined where in the
+     * hierarchy such canvases are created. It is recommended in such cases to either draw contents
+     * irrespective of the current matrix, or to track relevant transform state outside of the
+     * canvas.
      */
     @Deprecated
     public void getMatrix(@NonNull Matrix ctm) {
@@ -672,6 +660,12 @@ public class Canvas {
     /**
      * Return a new matrix with a copy of the canvas' current transformation
      * matrix.
+     *
+     * @deprecated {@link #isHardwareAccelerated() Hardware accelerated} canvases may have any
+     * matrix when passed to a View or Drawable, as it is implementation defined where in the
+     * hierarchy such canvases are created. It is recommended in such cases to either draw contents
+     * irrespective of the current matrix, or to track relevant transform state outside of the
+     * canvas.
      */
     @Deprecated
     public final @NonNull Matrix getMatrix() {
@@ -821,6 +815,7 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
+    @Deprecated
     public boolean clipRegion(@NonNull Region region, @NonNull Region.Op op) {
         return native_clipRegion(mNativeCanvasWrapper, region.ni(), op.nativeInt);
     }
@@ -838,6 +833,7 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
+    @Deprecated
     public boolean clipRegion(@NonNull Region region) {
         return clipRegion(region, Region.Op.INTERSECT);
     }
@@ -1088,11 +1084,12 @@ public class Canvas {
      *                 (count >> 2).
      * @param paint    The paint used to draw the points
      */
-    public void drawLines(@Size(min=4,multiple=2) float[] pts, int offset, int count, Paint paint) {
+    public void drawLines(@Size(multiple=4) @NonNull float[] pts, int offset, int count,
+            @NonNull Paint paint) {
         native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
-    public void drawLines(@Size(min=4,multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
+    public void drawLines(@Size(multiple=4) @NonNull float[] pts, @NonNull Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
 
@@ -1259,13 +1256,17 @@ public class Canvas {
      * @param paint The paint used to draw the path
      */
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
-        native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
+        if (path.isSimplePath && path.rects != null) {
+            native_drawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
+        } else {
+            native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
+        }
     }
 
     /**
      * @hide
      */
-    protected static void throwIfCannotDraw(Bitmap bitmap) {
+    protected void throwIfCannotDraw(Bitmap bitmap) {
         if (bitmap.isRecycled()) {
             throw new RuntimeException("Canvas: trying to use a recycled bitmap " + bitmap);
         }
@@ -1286,7 +1287,12 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull Rect dst, @Nullable Paint paint) {
-        patch.drawSoftware(this, dst, paint);
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        native_drawNinePatch(mNativeCanvasWrapper, bitmap.getNativeInstance(), patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
+                mDensity, patch.getDensity());
     }
 
     /**
@@ -1299,7 +1305,12 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(@NonNull NinePatch patch, @NonNull RectF dst, @Nullable Paint paint) {
-        patch.drawSoftware(this, dst, paint);
+        Bitmap bitmap = patch.getBitmap();
+        throwIfCannotDraw(bitmap);
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
+        native_drawNinePatch(mNativeCanvasWrapper, bitmap.getNativeInstance(), patch.mNativeChunk,
+                dst.left, dst.top, dst.right, dst.bottom, nativePaint,
+                mDensity, patch.getDensity());
     }
 
     /**
@@ -1824,16 +1835,16 @@ public class Canvas {
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
      *
-     * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
-     *
      * @param text     The text to be drawn
      * @param index    The index of the first character to draw
      * @param count    The number of characters to draw, starting from index.
      * @param pos      Array of [x,y] positions, used to position each
      *                 character
      * @param paint    The paint used for the text (e.g. color, size, style)
+     *
+     * @deprecated This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      */
     @Deprecated
     public void drawPosText(@NonNull char[] text, int index, int count,
@@ -1851,13 +1862,13 @@ public class Canvas {
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
      *
-     * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
-     *
      * @param text  The text to be drawn
      * @param pos   Array of [x,y] positions, used to position each character
      * @param paint The paint used for the text (e.g. color, size, style)
+     *
+     * @deprecated This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      */
     @Deprecated
     public void drawPosText(@NonNull String text, @NonNull @Size(multiple=2) float[] pos,
@@ -1960,7 +1971,11 @@ public class Canvas {
      * @hide
      */
     public void release() {
-        mFinalizer.dispose();
+        mNativeCanvasWrapper = 0;
+        if (mFinalizer != null) {
+            mFinalizer.run();
+            mFinalizer = null;
+        }
     }
 
     /**
@@ -1981,6 +1996,7 @@ public class Canvas {
     private static native void native_setBitmap(long canvasHandle,
                                                 Bitmap bitmap);
     private static native boolean native_isOpaque(long canvasHandle);
+    private static native void native_setHighContrastText(long renderer, boolean highContrastText);
     private static native int native_getWidth(long canvasHandle);
     private static native int native_getHeight(long canvasHandle);
 
@@ -2064,6 +2080,11 @@ public class Canvas {
     private static native void native_drawPath(long nativeCanvas,
                                                long nativePath,
                                                long nativePaint);
+    private static native void native_drawRegion(long nativeCanvas,
+            long nativeRegion, long nativePaint);
+    private native void native_drawNinePatch(long nativeCanvas, long nativeBitmap,
+            long ninePatch, float dstLeft, float dstTop, float dstRight, float dstBottom,
+            long nativePaintOrZero, int screenDensity, int bitmapDensity);
     private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
@@ -2122,5 +2143,5 @@ public class Canvas {
                                                      float hOffset,
                                                      float vOffset,
                                                      int flags, long nativePaint, long nativeTypeface);
-    private static native void finalizer(long nativeCanvas);
+    private static native long getNativeFinalizer();
 }

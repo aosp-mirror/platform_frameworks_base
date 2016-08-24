@@ -16,16 +16,24 @@
 
 package android.app;
 
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.AppTransitionAnimationSpec;
 import android.view.View;
 import android.view.Window;
 
@@ -57,6 +65,16 @@ public class ActivityOptions {
      * @hide
      */
     public static final String KEY_PACKAGE_NAME = "android:activity.packageName";
+
+    /**
+     * The bounds (window size) that the activity should be launched in. Set to null explicitly for
+     * full screen. If the key is not found, previous bounds will be preserved.
+     * NOTE: This value is ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} or
+     * {@link android.content.pm.PackageManager#FEATURE_PICTURE_IN_PICTURE} enabled.
+     * @hide
+     */
+    public static final String KEY_LAUNCH_BOUNDS = "android:activity.launchBounds";
 
     /**
      * Type of animation that arguments specify.
@@ -119,6 +137,42 @@ public class ActivityOptions {
     public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
+     * Callback for when the last frame of the animation is played.
+     * @hide
+     */
+    private static final String KEY_ANIMATION_FINISHED_LISTENER =
+            "android:activity.animationFinishedListener";
+
+    /**
+     * Descriptions of app transition animations to be played during the activity launch.
+     */
+    private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
+
+    /**
+     * The stack id the activity should be launched into.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_STACK_ID = "android.activity.launchStackId";
+
+    /**
+     * The task id the activity should be launched into.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
+
+    /**
+     * See {@link #setTaskOverlay}.
+     * @hide
+     */
+    private static final String KEY_TASK_OVERLAY = "android.activity.taskOverlay";
+
+    /**
+     * Where the docked stack should be positioned.
+     * @hide
+     */
+    private static final String KEY_DOCK_CREATE_MODE = "android:activity.dockCreateMode";
+
+    /**
      * For Activity transitions, the calling Activity's TransitionListener used to
      * notify the called Activity when the shared element and the exit transitions
      * complete.
@@ -163,6 +217,7 @@ public class ActivityOptions {
     public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
+    private Rect mLaunchBounds;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
     private int mCustomExitResId;
@@ -173,6 +228,7 @@ public class ActivityOptions {
     private int mWidth;
     private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
+    private IRemoteCallback mAnimationFinishedListener;
     private ResultReceiver mTransitionReceiver;
     private boolean mIsReturning;
     private ArrayList<String> mSharedElementNames;
@@ -180,6 +236,11 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private int mLaunchStackId = INVALID_STACK_ID;
+    private int mLaunchTaskId = -1;
+    private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private boolean mTaskOverlay;
+    private AppTransitionAnimationSpec mAnimSpecs[];
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -253,16 +314,15 @@ public class ActivityOptions {
         return opts;
     }
 
-    private void setOnAnimationStartedListener(Handler handler,
-            OnAnimationStartedListener listener) {
+    private void setOnAnimationStartedListener(final Handler handler,
+            final OnAnimationStartedListener listener) {
         if (listener != null) {
-            final Handler h = handler;
-            final OnAnimationStartedListener finalListener = listener;
             mAnimationStartedListener = new IRemoteCallback.Stub() {
-                @Override public void sendResult(Bundle data) throws RemoteException {
-                    h.post(new Runnable() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    handler.post(new Runnable() {
                         @Override public void run() {
-                            finalListener.onAnimationStarted();
+                            listener.onAnimationStarted();
                         }
                     });
                 }
@@ -277,6 +337,32 @@ public class ActivityOptions {
      */
     public interface OnAnimationStartedListener {
         void onAnimationStarted();
+    }
+
+    private void setOnAnimationFinishedListener(final Handler handler,
+            final OnAnimationFinishedListener listener) {
+        if (listener != null) {
+            mAnimationFinishedListener = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onAnimationFinished();
+                        }
+                    });
+                }
+            };
+        }
+    }
+
+    /**
+     * Callback for use with {@link ActivityOptions#makeThumbnailAspectScaleDownAnimation}
+     * to find out when the given animation has drawn its last frame.
+     * @hide
+     */
+    public interface OnAnimationFinishedListener {
+        void onAnimationFinished();
     }
 
     /**
@@ -493,6 +579,20 @@ public class ActivityOptions {
         return opts;
     }
 
+    /** @hide */
+    public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
+            AppTransitionAnimationSpec[] specs, Handler handler,
+            OnAnimationStartedListener onAnimationStartedListener,
+            OnAnimationFinishedListener onAnimationFinishedListener) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = source.getContext().getPackageName();
+        opts.mAnimationType = ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+        opts.mAnimSpecs = specs;
+        opts.setOnAnimationStartedListener(handler, onAnimationStartedListener);
+        opts.setOnAnimationFinishedListener(handler, onAnimationFinishedListener);
+        return opts;
+    }
+
     /**
      * Create an ActivityOptions to transition between Activities using cross-Activity scene
      * animations. This method carries the position of one shared element to the started Activity.
@@ -536,6 +636,7 @@ public class ActivityOptions {
      * @see android.transition.Transition#setEpicenterCallback(
      *          android.transition.Transition.EpicenterCallback)
      */
+    @SafeVarargs
     public static ActivityOptions makeSceneTransitionAnimation(Activity activity,
             Pair<View, String>... sharedElements) {
         ActivityOptions opts = new ActivityOptions();
@@ -625,12 +726,17 @@ public class ActivityOptions {
 
     /** @hide */
     public ActivityOptions(Bundle opts) {
+        // If the remote side sent us bad parcelables, they won't get the
+        // results they want, which is their loss.
+        opts.setDefusable(true);
+
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
             mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
+        mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
@@ -674,11 +780,51 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
+        mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
+        mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
+        mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+        if (opts.containsKey(KEY_ANIM_SPECS)) {
+            Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
+            mAnimSpecs = new AppTransitionAnimationSpec[specs.length];
+            for (int i = specs.length - 1; i >= 0; i--) {
+                mAnimSpecs[i] = (AppTransitionAnimationSpec) specs[i];
+            }
+        }
+        if (opts.containsKey(KEY_ANIMATION_FINISHED_LISTENER)) {
+            mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
+                    opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
+        }
+    }
+
+    /**
+     * Sets the bounds (window size) that the activity should be launched in.
+     * Rect position should be provided in pixels and in screen coordinates.
+     * Set to null explicitly for fullscreen.
+     * <p>
+     * <strong>NOTE:<strong/> This value is ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} or
+     * {@link android.content.pm.PackageManager#FEATURE_PICTURE_IN_PICTURE} enabled.
+     * @param screenSpacePixelRect Launch bounds to use for the activity or null for fullscreen.
+     */
+    public ActivityOptions setLaunchBounds(@Nullable Rect screenSpacePixelRect) {
+        mLaunchBounds = screenSpacePixelRect != null ? new Rect(screenSpacePixelRect) : null;
+        return this;
     }
 
     /** @hide */
     public String getPackageName() {
         return mPackageName;
+    }
+
+    /**
+     * Returns the bounds that should be used to launch the activity.
+     * @see #setLaunchBounds(Rect)
+     * @return Bounds used to launch the activity.
+     */
+    @Nullable
+    public Rect getLaunchBounds() {
+        return mLaunchBounds;
     }
 
     /** @hide */
@@ -732,6 +878,11 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public IRemoteCallback getAnimationFinishedListener() {
+        return mAnimationFinishedListener;
+    }
+
+    /** @hide */
     public int getExitCoordinatorKey() { return mExitCoordinatorIndex; }
 
     /** @hide */
@@ -769,10 +920,71 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public static void abort(Bundle options) {
+    public AppTransitionAnimationSpec[] getAnimSpecs() { return mAnimSpecs; }
+
+    /** @hide */
+    public static ActivityOptions fromBundle(Bundle bOptions) {
+        return bOptions != null ? new ActivityOptions(bOptions) : null;
+    }
+
+    /** @hide */
+    public static void abort(ActivityOptions options) {
         if (options != null) {
-            (new ActivityOptions(options)).abort();
+            options.abort();
         }
+    }
+
+    /** @hide */
+    public int getLaunchStackId() {
+        return mLaunchStackId;
+    }
+
+    /** @hide */
+    @TestApi
+    public void setLaunchStackId(int launchStackId) {
+        mLaunchStackId = launchStackId;
+    }
+
+    /**
+     * Sets the task the activity will be launched in.
+     * @hide
+     */
+    public void setLaunchTaskId(int taskId) {
+        mLaunchTaskId = taskId;
+    }
+
+    /**
+     * @hide
+     */
+    public int getLaunchTaskId() {
+        return mLaunchTaskId;
+    }
+
+    /**
+     * Set's whether the activity launched with this option should be a task overlay. That is the
+     * activity will always be the top activity of the task and doesn't cause the task to be moved
+     * to the front when it is added.
+     * @hide
+     */
+    public void setTaskOverlay(boolean taskOverlay) {
+        mTaskOverlay = taskOverlay;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getTaskOverlay() {
+        return mTaskOverlay;
+    }
+
+    /** @hide */
+    public int getDockCreateMode() {
+        return mDockCreateMode;
+    }
+
+    /** @hide */
+    public void setDockCreateMode(int dockCreateMode) {
+        mDockCreateMode = dockCreateMode;
     }
 
     /**
@@ -849,6 +1061,8 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
+        mAnimSpecs = otherOptions.mAnimSpecs;
+        mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
     }
 
     /**
@@ -866,6 +1080,9 @@ public class ActivityOptions {
         Bundle b = new Bundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
+        }
+        if (mLaunchBounds != null) {
+            b.putParcelable(KEY_LAUNCH_BOUNDS, mLaunchBounds);
         }
         b.putInt(KEY_ANIM_TYPE, mAnimationType);
         if (mUsageTimeReport != null) {
@@ -910,6 +1127,16 @@ public class ActivityOptions {
                 b.putInt(KEY_RESULT_CODE, mResultCode);
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
+        }
+        b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
+        b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
+        b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
+        b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
+        if (mAnimSpecs != null) {
+            b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
+        }
+        if (mAnimationFinishedListener != null) {
+            b.putBinder(KEY_ANIMATION_FINISHED_LISTENER, mAnimationFinishedListener.asBinder());
         }
 
         return b;
@@ -957,4 +1184,11 @@ public class ActivityOptions {
         return null;
     }
 
+    /** @hide */
+    @Override
+    public String toString() {
+        return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
+                + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
+                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
+    }
 }

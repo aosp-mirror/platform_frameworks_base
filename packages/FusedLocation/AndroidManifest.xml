@@ -28,7 +28,9 @@
 
     <application
             android:label="@string/app_label"
-            android:process="system">
+            android:process="system"
+            android:defaultToDeviceProtectedStorage="true"
+            android:directBootAware="true">
 
         <uses-library android:name="com.android.location.provider" />
 
@@ -37,7 +39,7 @@
              version. -->
         <service android:name="com.android.location.fused.FusedLocationService"
                  android:exported="true"
-                 android:permission="android.permission.WRITE_SECURE_SETTINGS" >
+                 android:permission="android.permission.WRITE_SECURE_SETTINGS">
            <intent-filter>
                <action android:name="com.android.location.service.FusedLocationProvider" />
            </intent-filter>

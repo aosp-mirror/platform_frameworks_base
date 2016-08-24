@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_RECT_H
-#define ANDROID_HWUI_RECT_H
+#pragma once
 
-#include <cmath>
-#include <algorithm>
-#include <SkRect.h>
+#include "Vertex.h"
 
 #include <utils/Log.h>
 
-#include "Vertex.h"
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <ostream>
+#include <SkRect.h>
 
 namespace android {
 namespace uirenderer {
@@ -125,25 +126,32 @@ public:
     }
 
     bool intersects(float l, float t, float r, float b) const {
-        return !intersectWith(l, t, r, b).isEmpty();
+        float tempLeft = std::max(left, l);
+        float tempTop = std::max(top, t);
+        float tempRight = std::min(right, r);
+        float tempBottom = std::min(bottom, b);
+
+        return ((tempLeft < tempRight) && (tempTop < tempBottom)); // !isEmpty
     }
 
     bool intersects(const Rect& r) const {
         return intersects(r.left, r.top, r.right, r.bottom);
     }
 
-    bool intersect(float l, float t, float r, float b) {
-        Rect tmp(l, t, r, b);
-        intersectWith(tmp);
-        if (!tmp.isEmpty()) {
-            set(tmp);
-            return true;
-        }
-        return false;
+    /**
+     * This method is named 'doIntersect' instead of 'intersect' so as not to be confused with
+     * SkRect::intersect / android.graphics.Rect#intersect behavior, which do not modify the object
+     * if the intersection of the rects would be empty.
+     */
+    void doIntersect(float l, float t, float r, float b) {
+        left = std::max(left, l);
+        top = std::max(top, t);
+        right = std::min(right, r);
+        bottom = std::min(bottom, b);
     }
 
-    bool intersect(const Rect& r) {
-        return intersect(r.left, r.top, r.right, r.bottom);
+    void doIntersect(const Rect& r) {
+        doIntersect(r.left, r.top, r.right, r.bottom);
     }
 
     inline bool contains(float l, float t, float r, float b) const {
@@ -246,18 +254,22 @@ public:
         bottom = ceilf(bottom);
     }
 
-    void expandToCoverVertex(float x, float y) {
+    /*
+     * Similar to unionWith, except this makes the assumption that both rects are non-empty
+     * to avoid both emptiness checks.
+     */
+    void expandToCover(const Rect& other) {
+        left = std::min(left, other.left);
+        top = std::min(top, other.top);
+        right = std::max(right, other.right);
+        bottom = std::max(bottom, other.bottom);
+    }
+
+    void expandToCover(float x, float y) {
         left = std::min(left, x);
         top = std::min(top, y);
         right = std::max(right, x);
         bottom = std::max(bottom, y);
-    }
-
-    void expandToCoverRect(float otherLeft, float otherTop, float otherRight, float otherBottom) {
-        left = std::min(left, otherLeft);
-        top = std::min(top, otherTop);
-        right = std::max(right, otherRight);
-        bottom = std::max(bottom, otherBottom);
     }
 
     SkRect toSkRect() const {
@@ -269,29 +281,26 @@ public:
     }
 
     void dump(const char* label = nullptr) const {
-        ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
+        ALOGD("%s[l=%.2f t=%.2f r=%.2f b=%.2f]", label ? label : "Rect", left, top, right, bottom);
     }
 
-private:
-    void intersectWith(Rect& tmp) const {
-        tmp.left = std::max(left, tmp.left);
-        tmp.top = std::max(top, tmp.top);
-        tmp.right = std::min(right, tmp.right);
-        tmp.bottom = std::min(bottom, tmp.bottom);
-    }
+    friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
+        if (rect.isEmpty()) {
+            // Print empty, but continue, since empty rects may still have useful coordinate info
+            os << "(empty)";
+        }
 
-    Rect intersectWith(float l, float t, float r, float b) const {
-        Rect tmp;
-        tmp.left = std::max(left, l);
-        tmp.top = std::max(top, t);
-        tmp.right = std::min(right, r);
-        tmp.bottom = std::min(bottom, b);
-        return tmp;
-    }
+        if (rect.left == 0 && rect.top == 0) {
+            return os << "[" << rect.right << " x " << rect.bottom << "]";
+        }
 
+        return os << "[" << rect.left
+                << " " << rect.top
+                << " " << rect.right
+                << " " << rect.bottom << "]";
+    }
 }; // class Rect
 
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_RECT_H

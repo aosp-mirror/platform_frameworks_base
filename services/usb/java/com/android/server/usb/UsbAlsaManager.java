@@ -212,6 +212,10 @@ public final class UsbAlsaManager {
     }
 
     private AlsaDevice waitForAlsaDevice(int card, int device, int type) {
+        if (DEBUG) {
+            Slog.e(TAG, "waitForAlsaDevice(c:" + card + " d:" + device + ")");
+        }
+
         AlsaDevice testDevice = new AlsaDevice(type, card, device);
 
         // This value was empirically determined.
@@ -292,7 +296,8 @@ public final class UsbAlsaManager {
      */
     /* package */ UsbAudioDevice selectAudioCard(int card) {
         if (DEBUG) {
-            Slog.d(TAG, "selectAudioCard() card:" + card);
+            Slog.d(TAG, "selectAudioCard() card:" + card
+                    + " isCardUsb(): " + mCardsParser.isCardUsb(card));
         }
         if (!mCardsParser.isCardUsb(card)) {
             // Don't. AudioPolicyManager has logic for falling back to internal devices.
@@ -304,6 +309,10 @@ public final class UsbAlsaManager {
 
         boolean hasPlayback = mDevicesParser.hasPlaybackDevices(card);
         boolean hasCapture = mDevicesParser.hasCaptureDevices(card);
+        if (DEBUG) {
+            Slog.d(TAG, "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
+        }
+
         int deviceClass =
             (mCardsParser.isCardUsb(card)
                 ? UsbAudioDevice.kAudioDeviceClass_External
@@ -318,10 +327,6 @@ public final class UsbAlsaManager {
         // Capture device file needed/present?
         if (hasCapture && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null)) {
             return null;
-        }
-
-        if (DEBUG) {
-            Slog.d(TAG, "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
         }
 
         UsbAudioDevice audioDevice =
@@ -339,14 +344,13 @@ public final class UsbAlsaManager {
         if (DEBUG) {
             Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
         }
-        mCardsParser.scan();
         return selectAudioCard(mCardsParser.getDefaultCard());
     }
 
     /* package */ void usbDeviceAdded(UsbDevice usbDevice) {
        if (DEBUG) {
           Slog.d(TAG, "deviceAdded(): " + usbDevice.getManufacturerName() +
-                  "nm:" + usbDevice.getProductName());
+                  " nm:" + usbDevice.getProductName());
         }
 
         // Is there an audio interface in there?
@@ -361,31 +365,27 @@ public final class UsbAlsaManager {
                 isAudioDevice = true;
             }
         }
+
+        if (DEBUG) {
+            Slog.d(TAG, "  isAudioDevice: " + isAudioDevice);
+        }
         if (!isAudioDevice) {
             return;
         }
 
-        ArrayList<AlsaCardsParser.AlsaCardRecord> prevScanRecs = mCardsParser.getScanRecords();
-        mCardsParser.scan();
-
-        int addedCard = -1;
-        ArrayList<AlsaCardsParser.AlsaCardRecord>
-            newScanRecs = mCardsParser.getNewCardRecords(prevScanRecs);
-        if (newScanRecs.size() > 0) {
-            // This is where we select the just connected device
-            // NOTE - to switch to prefering the first-connected device, just always
-            // take the else clause below.
-            addedCard = newScanRecs.get(0).mCardNum;
-        } else {
-            addedCard = mCardsParser.getDefaultUsbCard();
-        }
+        int addedCard = mCardsParser.getDefaultUsbCard();
 
         // If the default isn't a USB device, let the existing "select internal mechanism"
         // handle the selection.
+        if (DEBUG) {
+            Slog.d(TAG, "  mCardsParser.isCardUsb(" + addedCard + ") = "
+                        + mCardsParser.isCardUsb(addedCard));
+        }
         if (mCardsParser.isCardUsb(addedCard)) {
             UsbAudioDevice audioDevice = selectAudioCard(addedCard);
             if (audioDevice != null) {
                 mAudioDevices.put(usbDevice, audioDevice);
+                Slog.i(TAG, "USB Audio Device Added: " + audioDevice);
             }
 
             // look for MIDI devices
@@ -429,6 +429,10 @@ public final class UsbAlsaManager {
                 }
             }
         }
+
+        if (DEBUG) {
+            Slog.d(TAG, "deviceAdded() - done");
+        }
     }
 
     /* package */ void usbDeviceRemoved(UsbDevice usbDevice) {
@@ -438,6 +442,7 @@ public final class UsbAlsaManager {
         }
 
         UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
+        Slog.i(TAG, "USB Audio Device Removed: " + audioDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasCapture) {
                 notifyDeviceState(audioDevice, false);

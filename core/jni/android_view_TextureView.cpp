@@ -72,29 +72,25 @@ static struct {
 
 // FIXME: consider exporting this to share (e.g. android_view_Surface.cpp)
 static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer) {
-    SkImageInfo info;
-    info.fWidth = buffer.width;
-    info.fHeight = buffer.height;
+    SkColorType colorType = kUnknown_SkColorType;
+    SkAlphaType alphaType = kOpaque_SkAlphaType;
     switch (buffer.format) {
         case WINDOW_FORMAT_RGBA_8888:
-            info.fColorType = kN32_SkColorType;
-            info.fAlphaType = kPremul_SkAlphaType;
+            colorType = kN32_SkColorType;
+            alphaType = kPremul_SkAlphaType;
             break;
         case WINDOW_FORMAT_RGBX_8888:
-            info.fColorType = kN32_SkColorType;
-            info.fAlphaType = kOpaque_SkAlphaType;
+            colorType = kN32_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
             break;
         case WINDOW_FORMAT_RGB_565:
-            info.fColorType = kRGB_565_SkColorType;
-            info.fAlphaType = kOpaque_SkAlphaType;
+            colorType = kRGB_565_SkColorType;
+            alphaType = kOpaque_SkAlphaType;
             break;
         default:
-            info.fColorType = kUnknown_SkColorType;
-            // switch to kUnknown_SkAlphaType when its in skia
-            info.fAlphaType = kOpaque_SkAlphaType;
             break;
     }
-    return info;
+    return SkImageInfo::Make(buffer.width, buffer.height, colorType, alphaType);
 }
 
 /**
@@ -142,7 +138,7 @@ static jboolean android_view_TextureView_lockCanvas(JNIEnv* env, jobject,
 
     ANativeWindow_Buffer buffer;
 
-    Rect rect;
+    Rect rect(Rect::EMPTY_RECT);
     if (dirtyRect) {
         rect.left = GET_INT(dirtyRect, gRectClassInfo.left);
         rect.top = GET_INT(dirtyRect, gRectClassInfo.top);

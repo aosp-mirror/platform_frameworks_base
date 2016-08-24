@@ -14,38 +14,90 @@
      limitations under the License.
 -->
 
-<com.android.documentsui.DirectoryView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.dirlist.AnimationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/material_grey_50">
+    android:background="@color/directory_background"
+    android:outlineProvider="bounds"
+    android:elevation="4dp"
+    android:orientation="vertical">
 
-    <TextView
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/progress_bar_height"
+        android:indeterminate="true"
+        style="@style/TrimmedHorizontalProgressBar"
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/container_message_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:background="@color/material_grey_50"
+        android:visibility="gone"/>
+
+    <!-- The empty container view -->
+    <FrameLayout
         android:id="@android:id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:gravity="center"
-        android:text="@string/empty"
-        android:visibility="gone"
-        style="@android:style/TextAppearance.Material.Subhead" />
-
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <GridView
-        android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/grid_padding_horiz"
-        android:paddingEnd="@dimen/grid_padding_horiz"
-        android:paddingTop="@dimen/grid_padding_vert"
-        android:paddingBottom="@dimen/grid_padding_vert"
-        android:horizontalSpacing="@dimen/grid_item_padding"
-        android:verticalSpacing="@dimen/grid_item_padding"
-        android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
-        android:drawSelectorOnTop="true"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:background="@color/directory_background"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:visibility="gone">
 
-</com.android.documentsui.DirectoryView>
+        <LinearLayout
+            android:id="@+id/content"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/artwork"
+                android:src="@drawable/cabinet"
+                android:adjustViewBounds="true"
+                android:layout_height="250dp"
+                android:layout_width="fill_parent"
+                android:alpha="1"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="25dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty"
+                style="@android:style/TextAppearance.Material.Subhead" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- This FrameLayout works around b/24189541 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/dir_list"
+            android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay"
+            android:drawSelectorOnTop="true" />
+
+    </FrameLayout>
+
+</com.android.documentsui.dirlist.AnimationView>

@@ -25,7 +25,6 @@
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
 
 namespace android {
 namespace uirenderer {
@@ -124,10 +123,6 @@ public:
     void clear();
 
     /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
      * Returns the maximum size of the cache in bytes.
      */
     uint32_t getMaxSize();
@@ -144,7 +139,8 @@ private:
     Texture* addLinearGradient(GradientCacheEntry& gradient,
             uint32_t* colors, float* positions, int count);
 
-    void generateTexture(uint32_t* colors, float* positions, Texture* texture);
+    void generateTexture(uint32_t* colors, float* positions,
+            const uint32_t width, const uint32_t height, Texture* texture);
 
     struct GradientInfo {
         uint32_t width;
@@ -177,13 +173,12 @@ private:
     LruCache<GradientCacheEntry, Texture*> mCache;
 
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
 
     GLint mMaxTextureSize;
     bool mUseFloatTexture;
     bool mHasNpot;
 
-    Vector<SkShader*> mGarbage;
     mutable Mutex mLock;
 }; // class GradientCache
 

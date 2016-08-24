@@ -429,8 +429,6 @@ public class Allocation extends BaseObj {
 
     protected void finalize() throws Throwable {
         RenderScript.registerNativeFree.invoke(RenderScript.sRuntime, mSize);
-        // Set mType null to avoid double-destroying it in case its finalizer races ahead
-        mType = null;
         super.finalize();
     }
 
@@ -2839,7 +2837,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Gets or creates a ByteBuffer that contains the raw data of the current Allocation.
      * <p> If the Allocation is created with USAGE_IO_INPUT, the returned ByteBuffer
      * would contain the up-to-date data as READ ONLY.
@@ -2874,7 +2871,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Creates a new Allocation Array with the given {@link
      * android.renderscript.Type}, and usage flags.
      * Note: If the input allocation is of usage: USAGE_IO_INPUT,
@@ -2976,7 +2972,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Gets the stride of the Allocation.
      * For a 2D or 3D Allocation, the raw data maybe padded so that each row of
      * the Allocation has certain alignment. The size of each row including such
@@ -2994,7 +2989,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Get the timestamp for the most recent buffer held by this Allocation.
      * The timestamp is guaranteed to be unique and monotonically increasing.
      * Default value: -1. The timestamp will be updated after each {@link
@@ -3366,7 +3360,6 @@ public class Allocation extends BaseObj {
 
         if (mType != null && mOwningType) {
             mType.destroy();
-            mType = null;
         }
 
         super.destroy();

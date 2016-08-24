@@ -1,0 +1,2224 @@
+// Copyright (C) 2016 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto2";
+
+option java_package = "com.android.internal.logging";
+option java_outer_classname = "MetricsProto";
+
+package com_android_internal_logging;
+
+// Wrapper for System UI log events
+message MetricsEvent {
+
+  // Known visual elements: views or controls.
+  enum View {
+    // Unknown view
+    VIEW_UNKNOWN = 0;
+
+    // OBSOLETE
+    MAIN_SETTINGS = 1;
+
+    // OPEN: Settings > Accessibility
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY = 2;
+
+    // OPEN: Settings > Accessibility > Captions
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY_CAPTION_PROPERTIES = 3;
+
+    // OPEN: Settings > Accessibility > [Service]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY_SERVICE = 4;
+
+    // OPEN: Settings > Accessibility > Color correction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY_TOGGLE_DALTONIZER = 5;
+
+    // OPEN: Settings > Accessibility > Accessibility shortcut
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY_TOGGLE_GLOBAL_GESTURE = 6;
+
+    // OPEN: Settings > Accessibility > Magnification gestures
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 7;
+
+    // OPEN: Settings > Accounts
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCOUNT = 8;
+
+    // OPEN: Settings > Accounts > [Single Account Sync Settings]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCOUNTS_ACCOUNT_SYNC = 9;
+
+    // OPEN: Settings > Accounts > Add an account
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCOUNTS_CHOOSE_ACCOUNT_ACTIVITY = 10;
+
+    // OPEN: Settings > Accounts > [List of accounts when more than one]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACCOUNTS_MANAGE_ACCOUNTS = 11;
+
+    // OPEN: Settings > Cellular network settings > APNs
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APN = 12;
+
+    // OPEN: Settings > More > Cellular network settings > APNs > [Edit APN]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APN_EDITOR = 13;
+
+    // OBSOLETE
+    APP_OPS_DETAILS = 14;
+
+    // OBSOLETE
+    APP_OPS_SUMMARY = 15;
+
+    // OBSOLETE
+    APPLICATION = 16;
+
+    // OPEN: Settings > Apps > Configure apps > App links > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_APP_LAUNCH = 17;
+
+    // OBSOLETE
+    APPLICATIONS_APP_PERMISSION = 18;
+
+    // OPEN: Settings > Internal storage > Apps storage > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_APP_STORAGE = 19;
+
+    // OPEN: Settings > Apps > [App info]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_INSTALLED_APP_DETAILS = 20;
+
+    // OPEN: Settings > Memory > App usage > [App Memory usage]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_PROCESS_STATS_DETAIL = 21;
+
+    // OBSOLETE
+    APPLICATIONS_PROCESS_STATS_MEM_DETAIL = 22;
+
+    // OPEN: Settings > Memory > App usage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_PROCESS_STATS_UI = 23;
+
+    // OPEN: Settings > Bluetooth
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    BLUETOOTH = 24;
+
+    // OPEN: Choose Bluetooth device (ex: when sharing)
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    BLUETOOTH_DEVICE_PICKER = 25;
+
+    // OBSOLETE
+    BLUETOOTH_DEVICE_PROFILES = 26;
+
+    // OPEN: Settings > Security > Choose screen lock
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CHOOSE_LOCK_GENERIC = 27;
+
+    // OPEN: Settings > Security > Choose screen lock > Choose your password
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CHOOSE_LOCK_PASSWORD = 28;
+
+    // OPEN: Settings > Security > Choose screen lock > Choose your pattern
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CHOOSE_LOCK_PATTERN = 29;
+
+    // OPEN: Settings > Security > Choose screen lock > Confirm your password
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CONFIRM_LOCK_PASSWORD = 30;
+
+    // OPEN: Settings > Security > Choose screen lock > Confirm your pattern
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CONFIRM_LOCK_PATTERN = 31;
+
+    // OPEN: Settings > Security > Encrypt phone
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CRYPT_KEEPER = 32;
+
+    // OPEN: Settings > Security > Encrypt phone > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    CRYPT_KEEPER_CONFIRM = 33;
+
+    // OPEN: Settings > Search results
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DASHBOARD_SEARCH_RESULTS = 34;
+
+    // OPEN: Settings (Root page)
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DASHBOARD_SUMMARY = 35;
+
+    // OBSOLETE
+    DATA_USAGE = 36;
+
+    // OPEN: Settings > Data usage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DATA_USAGE_SUMMARY = 37;
+
+    // OPEN: Settings > Date & time
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DATE_TIME = 38;
+
+    // OPEN: Settings > Developer options
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVELOPMENT = 39;
+
+    // OPEN: Settings > About phone
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVICEINFO = 40;
+
+    // OPEN: Settings > About phone > Status > IMEI information
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVICEINFO_IMEI_INFORMATION = 41;
+
+    // OPEN: Settings > Internal storage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVICEINFO_STORAGE = 42;
+
+    // OPEN: Settings > About phone > Status > SIM status
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVICEINFO_SIM_STATUS = 43;
+
+    // OPEN: Settings > About phone > Status
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DEVICEINFO_STATUS = 44;
+
+    // OBSOLETE
+    DEVICEINFO_USB = 45;
+
+    // OPEN: Settings > Display
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DISPLAY = 46;
+
+    // OPEN: Settings > Display > Daydream
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    DREAM = 47;
+
+    // OPEN: Settings > Security > Screen lock > Secure start-up
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ENCRYPTION = 48;
+
+    // OPEN: Settings > Security > Nexus Imprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FINGERPRINT = 49;
+
+    // OBSOLETE
+    FINGERPRINT_ENROLL = 50;
+
+    // OPEN: Settings > Battery > History details
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FUELGAUGE_BATTERY_HISTORY_DETAIL = 51;
+
+    // OPEN: Settings > Battery > Battery saver
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FUELGAUGE_BATTERY_SAVER = 52;
+
+    // OPEN: Settings > Battery > [App Use details]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FUELGAUGE_POWER_USAGE_DETAIL = 53;
+
+    // OPEN: Settings > Battery
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FUELGAUGE_POWER_USAGE_SUMMARY = 54;
+
+    // OPEN: Settings > Home
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    HOME = 55;
+
+    // OPEN: Settings > Security > SIM card lock settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ICC_LOCK = 56;
+
+    // OPEN: Settings > Language & input
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    INPUTMETHOD_LANGUAGE = 57;
+
+    // OPEN: Settings > Language & input > Physical keyboard
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    INPUTMETHOD_KEYBOARD = 58;
+
+    // OPEN: Settings > Language & input > Spell checker
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    INPUTMETHOD_SPELL_CHECKERS = 59;
+
+    // OBSOLETE
+    INPUTMETHOD_SUBTYPE_ENABLER = 60;
+
+    // OPEN: Settings > Language & input > Personal dictionary
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    INPUTMETHOD_USER_DICTIONARY = 61;
+
+    // OPEN: Settings > Language & input > Add word
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    INPUTMETHOD_USER_DICTIONARY_ADD_WORD = 62;
+
+    // OPEN: Settings > Location
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    LOCATION = 63;
+
+    // OPEN: Settings > Location > Location mode
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    LOCATION_MODE = 64;
+
+    // OPEN: Settings > Apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    MANAGE_APPLICATIONS = 65;
+
+    // OPEN: Settings > Backup & reset > Factory data reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    MASTER_CLEAR = 66;
+
+    // OPEN: Settings > Backup & reset > Factory data reset > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    MASTER_CLEAR_CONFIRM = 67;
+
+    // OPEN: Settings > Data usage > Network restrictions
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NET_DATA_USAGE_METERED = 68;
+
+    // OPEN: Settings > More > Android Beam
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NFC_BEAM = 69;
+
+    // OPEN: Settings > Tap & pay
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NFC_PAYMENT = 70;
+
+    // OPEN: Settings > Sound & notification
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION = 71;
+
+    // OPEN: Settings > Sound & notification > App notifications > [App]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_APP_NOTIFICATION = 72;
+
+    // OPEN: Settings > Sound & notification > Other sounds
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_OTHER_SOUND = 73;
+
+    // OBSOLETE
+    NOTIFICATION_REDACTION = 74;
+
+    // OPEN: Settings Widget > Notification log
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_STATION = 75;
+
+    // OPEN: Settings > Sound & notification > Do not disturb
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE = 76;
+
+    // OPEN: OBSOLETE
+    OWNER_INFO = 77;
+
+    // OPEN: Print job notification > Print job settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    PRINT_JOB_SETTINGS = 78;
+
+    // OPEN: Settings > Printing > [Print Service]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    PRINT_SERVICE_SETTINGS = 79;
+
+    // OPEN: Settings > Printing
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    PRINT_SETTINGS = 80;
+
+    // OPEN: Settings > Backup & reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    PRIVACY = 81;
+
+    //OBSOLETE
+    PROXY_SELECTOR = 82;
+
+    // OPEN: Settings > Backup & reset > Network settings reset
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    RESET_NETWORK = 83;
+
+    // OPEN: Settings > Backup & reset > Network settings reset > Confirm
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    RESET_NETWORK_CONFIRM = 84;
+
+    // OPEN: Settings > Developer Options > Running Services
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    RUNNING_SERVICE_DETAILS = 85;
+
+    // OPEN: Settings > Security > Screen pinning
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    SCREEN_PINNING = 86;
+
+    // OPEN: Settings > Security
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    SECURITY = 87;
+
+    // OPEN: Settings > SIM cards
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    SIM = 88;
+
+    // OBSOLETE
+    TESTING = 89;
+
+    // OPEN: Settings > More > Tethering & portable hotspot
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TETHER = 90;
+
+    // OPEN: Settings > Security > Trust agents
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TRUST_AGENT = 91;
+
+    // OPEN: Settings > Security > Trusted credentials
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TRUSTED_CREDENTIALS = 92;
+
+    // OPEN: Settings > Language & input > TTS output > [Engine] > Settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TTS_ENGINE_SETTINGS = 93;
+
+    // OPEN: Settings > Language & input > Text-to-speech output
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TTS_TEXT_TO_SPEECH = 94;
+
+    // OPEN: Settings > Security > Apps with usage access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    USAGE_ACCESS = 95;
+
+    // OPEN: Settings > Users
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    USER = 96;
+
+    // OPEN: Settings > Users > [Restricted profile app & content access]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    USERS_APP_RESTRICTIONS = 97;
+
+    // OPEN: Settings > Users > [User settings]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    USER_DETAILS = 98;
+
+    // OBSOLETE
+    VOICE_INPUT = 99;
+
+    // OPEN: Settings > More > VPN
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    VPN = 100;
+
+    // OPEN: Settings > Display > Choose wallpaper from
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WALLPAPER_TYPE = 101;
+
+    // OPEN: Settings > Display > Cast
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WFD_WIFI_DISPLAY = 102;
+
+    // OPEN: Settings > Wi-Fi
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIFI = 103;
+
+    // OPEN: Settings > Wi-Fi > Advanced Wi-Fi
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIFI_ADVANCED = 104;
+
+    // OPEN: Settings > More > Wi-Fi Calling
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIFI_CALLING = 105;
+
+    // OPEN: Settings > Wi-Fi > Saved networks
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIFI_SAVED_ACCESS_POINTS = 106;
+
+    // OBSOLETE
+    WIFI_APITEST = 107;
+
+    // OBSOLETE
+    WIFI_INFO = 108;
+
+    // OPEN: Settings > Wi-Fi > Advanced Wi-Fi > Wi-Fi Direct
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIFI_P2P = 109;
+
+    // OPEN: Settings > More
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    WIRELESS = 110;
+
+    // OPEN: Quick Settings Panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_PANEL = 111;
+
+    // OPEN: QS Airplane mode tile shown
+    // ACTION: QS Airplane mode tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_AIRPLANEMODE = 112;
+
+    // OPEN: QS Bluetooth tile shown
+    // ACTION: QS Bluetooth tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_BLUETOOTH = 113;
+
+    // OPEN: QS Cast tile shown
+    // ACTION: QS Cast tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_CAST = 114;
+
+    // OPEN: QS Cellular tile shown
+    // ACTION: QS Cellular tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_CELLULAR = 115;
+
+    // OPEN: QS Color inversion tile shown
+    // ACTION: QS Color inversion tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_COLORINVERSION = 116;
+
+    // OPEN: QS Cellular tile > Cellular detail panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_DATAUSAGEDETAIL = 117;
+
+    // OPEN: QS Do not disturb tile shown
+    // ACTION: QS Do not disturb tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_DND = 118;
+
+    // OPEN: QS Flashlight tile shown
+    // ACTION: QS Flashlight tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_FLASHLIGHT = 119;
+
+    // OPEN: QS Hotspot tile shown
+    // ACTION: QS Hotspot tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_HOTSPOT = 120;
+
+    // OPEN: QS 3P tile shown
+    // ACTION: QS 3P tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_INTENT = 121;
+
+    // OPEN: QS Location tile shown
+    // ACTION: QS Location tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_LOCATION = 122;
+
+    // OPEN: QS Rotation tile shown
+    // ACTION: QS Rotation tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_ROTATIONLOCK = 123;
+
+    // OBSOLETE
+    QS_USERDETAILITE = 124;
+
+    // OPEN: QS User list panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_USERDETAIL = 125;
+
+    // OPEN: QS WiFi tile shown
+    // ACTION: QS WiFi tile tapped
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.46
+    QS_WIFI = 126;
+
+    // OPEN: Notification Panel (including lockscreen)
+    // CATEGORY: NOTIFICATION
+    // OS: 5.1.1
+    // GMS: 7.5.26
+    NOTIFICATION_PANEL = 127;
+
+    // OPEN: Notification in panel became visible.
+    //   PACKAGE: App that posted the notification.
+    // ACTION: Notification is tapped.
+    //   PACKAGE: App that posted the notification
+    // DETAIL: Notification is expanded by user.
+    //   PACKAGE: App that posted the notification
+    // DISMISS: Notification is dismissed.
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Dismiss reason from NotificationManagerService.java
+    // CATEGORY: NOTIFICATION
+    // OS: 5.1.1
+    // GMS: 7.5.26
+    NOTIFICATION_ITEM = 128;
+
+    // ACTION: User tapped notification action
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Index of action on notification
+    // CATEGORY: NOTIFICATION
+    // OS: 5.0
+    // GMS: 7.5.26
+    NOTIFICATION_ITEM_ACTION = 129;
+
+    // OPEN: Settings > Apps > Configure apps > App permissions
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_ADVANCED = 130;
+
+    // OPEN: Settings > Location > Scanning
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    LOCATION_SCANNING = 131;
+
+    // OBSOLETE
+    MANAGE_APPLICATIONS_ALL = 132;
+
+    // OPEN: Settings > Sound & notification > App notifications
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    MANAGE_APPLICATIONS_NOTIFICATIONS = 133;
+
+    // ACTION: Settings > Wi-Fi > Overflow > Add Network
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_ADD_NETWORK = 134;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Connect to network
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_CONNECT = 135;
+
+    // ACTION: Settings > Wi-Fi > Overflow > Refresh
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_FORCE_SCAN = 136;
+
+    // ACTION: Settings > Wi-Fi > [Long press network] > Forget network
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_FORGET = 137;
+
+    // ACTION: Settings > Wi-Fi > Toggle off
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_OFF = 138;
+
+    // ACTION: Settings > Wi-Fi > Toggle on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_WIFI_ON = 139;
+
+    // OBSOLETE
+    MANAGE_PERMISSIONS = 140;
+
+    // OPEN: Settings > Sound & notification > DND > Priority only allows
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_PRIORITY = 141;
+
+    // OPEN: Settings > Sound & notification > DND > Automatic rules
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_AUTOMATION = 142;
+
+    // OPEN: Settings > Apps > Configure apps > App links
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    MANAGE_DOMAIN_URLS = 143;
+
+    // OPEN: Settings > Sound & notification > DND > [Time based rule]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_SCHEDULE_RULE = 144;
+
+    // OPEN: Settings > Sound & notification > DND > [External rule]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_EXTERNAL_RULE = 145;
+
+    // OPEN: Settings > Sound & notification > DND > [Event rule]
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_EVENT_RULE = 146;
+
+    // ACTION: App notification settings > Block Notifications
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BAN_APP_NOTES = 147;
+
+    // ACTION: Notification shade > Dismiss all button
+    // CATEGORY: NOTIFICATION
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_DISMISS_ALL_NOTES = 148;
+
+    // OPEN: QS Do Not Disturb detail panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_DND_DETAILS = 149;
+
+    // OPEN: QS Bluetooth detail panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_BLUETOOTH_DETAILS = 150;
+
+    // OPEN: QS Cast detail panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_CAST_DETAILS = 151;
+
+    // OPEN: QS Wi-Fi detail panel
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_WIFI_DETAILS = 152;
+
+    // ACTION: QS Wi-Fi detail panel > Wi-Fi toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_WIFI_TOGGLE = 153;
+
+    // ACTION: QS Bluetooth detail panel > Bluetooth toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_BLUETOOTH_TOGGLE = 154;
+
+    // ACTION: QS Cellular detail panel > Cellular toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_CELLULAR_TOGGLE = 155;
+
+    // ACTION: QS User list panel > Select different user
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_SWITCH_USER = 156;
+
+    // ACTION: QS Cast detail panel > Select cast device
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_CAST_SELECT = 157;
+
+    // ACTION: QS Cast detail panel > Disconnect cast device
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_CAST_DISCONNECT = 158;
+
+    // ACTION: Settings > Bluetooth > Toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BLUETOOTH_TOGGLE = 159;
+
+    // ACTION: Settings > Bluetooth > Overflow > Refresh
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BLUETOOTH_SCAN = 160;
+
+    // ACTION: Settings > Bluetooth > Overflow > Rename this device
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BLUETOOTH_RENAME = 161;
+
+    // ACTION: Settings > Bluetooth > Overflow > Show received files
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BLUETOOTH_FILES = 162;
+
+    // ACTION: QS DND details panel > Increase / Decrease exit time
+    //   SUBTYPE: true is increase, false is decrease
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_DND_TIME = 163;
+
+    // ACTION: QS DND details panel > [Exit condition]
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_DND_CONDITION_SELECT = 164;
+
+    // ACTION: QS DND details panel > [DND mode]
+    //  SUBTYPE: 1 is priority, 2 is silence, 3 is alarms only
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_DND_ZEN_SELECT = 165;
+
+    // ACTION: QS DND detail panel > DND toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    QS_DND_TOGGLE = 166;
+
+    // ACTION: DND Settings > Priority only allows > Reminder toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ALLOW_REMINDERS = 167;
+
+    // ACTION: DND Settings > Priority only allows > Event toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ALLOW_EVENTS = 168;
+
+    // ACTION: DND Settings > Priority only allows > Messages
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ALLOW_MESSAGES = 169;
+
+    // ACTION: DND Settings > Priority only allows > Calls
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ALLOW_CALLS = 170;
+
+    // ACTION: DND Settings > Priority only allows > Repeat callers toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ALLOW_REPEAT_CALLS = 171;
+
+    // ACTION: DND Settings > Automatic rules > Add rule
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ADD_RULE = 172;
+
+    // ACTION: DND Settings > Automatic rules > Add rule > OK
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ADD_RULE_OK = 173;
+
+    // ACTION: DND Settings > Automatic rules > [Rule] > Delete rule
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_DELETE_RULE = 174;
+
+    // ACTION: DND Settings > Automatic rules > [Rule] > Delete rule > Delete
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_DELETE_RULE_OK = 175;
+
+    // ACTION: DND Settings > Automatic rules > [Rule] > Toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ZEN_ENABLE_RULE = 176;
+
+    // ACTION: Settings > More > Airplane mode toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_AIRPLANE_TOGGLE = 177;
+
+    // ACTION: Settings > Data usage > Cellular data toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_CELL_DATA_TOGGLE = 178;
+
+    // OPEN: Settings > Sound & notification > Notification access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ACCESS = 179;
+
+    // OPEN: Settings > Sound & notification > Do Not Disturb access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    NOTIFICATION_ZEN_MODE_ACCESS = 180;
+
+    // OPEN: Settings > Apps > Configure apps > Default Apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_DEFAULT_APPS = 181;
+
+    // OPEN: Settings > Internal storage > Apps storage
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_STORAGE_APPS = 182;
+
+    // OPEN: Settings > Security > Usage access
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_USAGE_ACCESS_DETAIL = 183;
+
+    // OPEN: Settings > Battery > Battery optimization
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_HIGH_POWER_APPS = 184;
+
+    // OBSOLETE
+    FUELGAUGE_HIGH_POWER_DETAILS = 185;
+
+    // ACTION: Lockscreen > Unlock gesture
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_UNLOCK = 186;
+
+    // ACTION: Lockscreen > Pull shade open
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_SHADE = 187;
+
+    // ACTION: Lockscreen > Tap on lock, shows hint
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_HINT = 188;
+
+    // ACTION: Lockscreen > Camera
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_CAMERA = 189;
+
+    // ACTION: Lockscreen > Dialer
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_DIALER = 190;
+
+    // ACTION: Lockscreen > Tap on lock, locks phone
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_LOCK = 191;
+
+    // ACTION: Lockscreen > Tap on notification, false touch rejection
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    ACTION_LS_NOTE = 192;
+
+    // ACTION: Lockscreen > Swipe down to open quick settings
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.8.22
+    ACTION_LS_QS = 193;
+
+    // ACTION: Swipe down to open quick settings when unlocked
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.8.22
+    ACTION_SHADE_QS_PULL = 194;
+
+    // ACTION: Notification shade > Tap to open quick settings
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.8.22
+    ACTION_SHADE_QS_TAP = 195;
+
+    // OPEN: Lockscreen
+    //   SUBTYPE: 0 is unsecure, 1 is secured by password / pattern / PIN
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    LOCKSCREEN = 196;
+
+    // OPEN: Lockscreen > Screen to enter password / pattern / PIN
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    BOUNCER = 197;
+
+    // OPEN: Screen turned on
+    //   SUBTYPE: 2 is user action
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.8.22
+    SCREEN = 198;
+
+    // OPEN: Notification caused sound, vibration, and/or LED blink
+    //   SUBTYPE: 1 is buzz, 2 is beep, blink is 4, or'd together
+    // CATEGORY: NOTIFICATION
+    // OS: 5.1.1
+    // GMS: 7.8.53
+    NOTIFICATION_ALERT = 199;
+
+    // ACTION: Lockscreen > Emergency Call button
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 5.1.1
+    // GMS: 7.5.26
+    ACTION_EMERGENCY_CALL = 200;
+
+    // OPEN: Settings > Apps > Configure > Default apps > Assist & voice input
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    APPLICATIONS_MANAGE_ASSIST = 201;
+
+    // OPEN: Settings > Memory
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    PROCESS_STATS_SUMMARY = 202;
+
+    // ACTION: Settings > Display > When device is rotated
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ROTATION_LOCK = 203;
+
+    // ACTION: Long press on notification to view controls
+    // CATEGORY: NOTIFICATION
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_NOTE_CONTROLS = 204;
+
+    // ACTION: Notificatoin controls > Info button
+    // CATEGORY: NOTIFICATION
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_NOTE_INFO = 205;
+
+    // ACTION: Notification controls > Settings button
+    // CATEGORY: NOTIFICATION
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_APP_NOTE_SETTINGS = 206;
+
+    // OPEN: Volume Dialog (with hardware buttons)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    VOLUME_DIALOG = 207;
+
+    // OPEN: Volume dialog > Expanded volume dialog (multiple sliders)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    VOLUME_DIALOG_DETAILS = 208;
+
+    // ACTION: Volume dialog > Adjust volume slider
+    //   SUBTYPE: volume level (0-7)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_VOLUME_SLIDER = 209;
+
+    // ACTION: Volume dialog > Select non-active stream
+    //   SUBTYPE: stream (defined in AudioSystem.java)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_VOLUME_STREAM = 210;
+
+    // ACTION: Adjust volume with hardware key
+    //   SUBTYPE: volume level (0-7)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_VOLUME_KEY = 211;
+
+    // ACTION: Volume dialog > Mute a stream by tapping icon
+    //   SUBTYPE: mute is 1, audible is 2
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_VOLUME_ICON = 212;
+
+    // ACTION: Volume dialog > Change ringer mode by tapping icon
+    //   SUBTYPE: 2 is audible, 3 is vibrate
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_RINGER_MODE = 213;
+
+    // ACTION: Chooser shown (share target, file open, etc.)
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ACTIVITY_CHOOSER_SHOWN = 214;
+
+    // ACTION: Chooser > User taps an app target
+    //   SUBTYPE: Index of target
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET = 215;
+
+    // ACTION: Chooser > User taps a service target
+    //   SUBTYPE: Index of target
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET = 216;
+
+    // ACTION: Chooser > User taps a standard target
+    //   SUBTYPE: Index of target
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET = 217;
+
+    // ACTION: QS Brightness Slider (with auto brightness disabled)
+    //   SUBTYPE: slider value
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BRIGHTNESS = 218;
+
+    // ACTION: QS Brightness Slider (with auto brightness enabled)
+    //   SUBTYPE: slider value
+    // CATEGORY: QUICK_SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_BRIGHTNESS_AUTO = 219;
+
+    // OPEN: Settings > Display > Brightness Slider
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    BRIGHTNESS_DIALOG = 220;
+
+    // OPEN: Settings > Apps > Configure Apps > Draw over other apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    SYSTEM_ALERT_WINDOW_APPS = 221;
+
+    // OPEN: Display has entered dream mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    DREAMING = 222;
+
+    // OPEN: Display has entered ambient notification mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    DOZING = 223;
+
+    // OPEN: Overview
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    OVERVIEW_ACTIVITY = 224;
+
+    // OPEN: Settings > About phone > Legal information
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ABOUT_LEGAL_SETTINGS = 225;
+
+    // OPEN: Settings > Search > Perform search
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_SEARCH_RESULTS = 226;
+
+    // OPEN: Settings > System UI Tuner
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER = 227;
+
+    // OPEN: Settings > System UI Tuner > Quick Settings
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_QS = 228;
+
+    // OPEN: Settings > System UI Tuner > Demo mode
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_DEMO_MODE = 229;
+
+    // ACTION: Settings > System UI Tuner > Quick Settings > Move tile
+    //   PACKAGE: Tile
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_QS_REORDER = 230;
+
+    // ACTION: Settings > System UI Tuner > Quick Settings > Add tile
+    //   PACKAGE: Tile
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_QS_ADD = 231;
+
+    // ACTION: Settings > System UI Tuner > Quick Settings > Remove tile
+    //   PACKAGE: Tile
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_QS_REMOVE = 232;
+
+    // ACTION: Settings > System UI Tuner > Status bar > Enable icon
+    //   PACKAGE: Icon
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_STATUS_BAR_ENABLE = 233;
+
+    // ACTION: Settings > System UI Tuner > Status bar > Disable icon
+    //   PACKAGE: Icon
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_STATUS_BAR_DISABLE = 234;
+
+    // ACTION: Settings > System UI Tuner > Demo mode > Enable demo mode
+    //   SUBTYPE: false is disabled, true is enabled
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_DEMO_MODE_ENABLED = 235;
+
+    // ACTION: Settings > System UI Tuner > Demo mode > Show demo mode
+    //   SUBTYPE: false is disabled, true is enabled
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_DEMO_MODE_ON = 236;
+
+    // ACTION: Settings > System UI Tuner > Show embedded battery percentage
+    //   SUBTYPE: 0 is disabled, 1 is enabled
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    TUNER_BATTERY_PERCENTAGE = 237;
+
+    // OPEN: Settings > Developer options > Inactive apps
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.5.26
+    FUELGAUGE_INACTIVE_APPS = 238;
+
+    // ACTION: Long press home to bring up assistant
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.5.26
+    ACTION_ASSIST_LONG_PRESS = 239;
+
+    // OPEN: Settings > Security > Nexus Imprint > Add Fingerprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLLING = 240;
+
+    // OPEN: Fingerprint Enroll > Find Sensor
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_FIND_SENSOR = 241;
+
+    // OPEN: Fingerprint Enroll > Fingerprint Enrolled!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_FINISH = 242;
+
+    // OPEN: Fingerprint Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_INTRO = 243;
+
+    // OPEN: Fingerprint Enroll onboarding
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_ONBOARD = 244;
+
+    // OPEN: Fingerprint Enroll > Let's Start!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_SIDECAR = 245;
+
+    // OPEN: Fingerprint Enroll SUW > Let's Start!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLLING_SETUP = 246;
+
+    // OPEN: Fingerprint Enroll SUW > Find Sensor
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_FIND_SENSOR_SETUP = 247;
+
+    // OPEN: Fingerprint Enroll SUW > Fingerprint Enrolled!
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_FINISH_SETUP = 248;
+
+    // OPEN: Fingerprint Enroll SUW introduction
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_INTRO_SETUP = 249;
+
+    // OPEN: Fingerprint Enroll SUW onboarding
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    FINGERPRINT_ENROLL_ONBOARD_SETUP = 250;
+
+    // ACTION: Add fingerprint > Enroll fingerprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_FINGERPRINT_ENROLL = 251;
+
+    // ACTION: Authenticate using fingerprint
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_FINGERPRINT_AUTH = 252;
+
+    // ACTION: Settings > Security > Nexus Imprint > [Fingerprint] > Delete
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_FINGERPRINT_DELETE = 253;
+
+    // ACTION: Settings > Security > Nexus Imprint > [Fingerprint] > Rename
+    // CATEGORY: SETTINGS
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_FINGERPRINT_RENAME = 254;
+
+    // ACTION: Double tap camera shortcut
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE = 255;
+
+    // ACTION: Double twist camera shortcut
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: 6.0
+    // GMS: 7.8.99
+    ACTION_WIGGLE_CAMERA_GESTURE = 256;
+
+    // OPEN: QS Work Mode tile shown
+    // ACTION: QS Work Mode tile tapped
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_WORKMODE = 257;
+
+    // OPEN: Settings > Developer Options > Background Check
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    BACKGROUND_CHECK_SUMMARY = 258;
+
+    // OPEN: QS Lock tile shown
+    // ACTION: QS Lock tile tapped
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_LOCK_TILE = 259;
+
+    // OPEN: QS User Tile shown
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_USER_TILE = 260;
+
+    // OPEN: QS Battery tile shown
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_BATTERY_TILE = 261;
+
+    // OPEN: Settings > Sound > Do not disturb > Visual interruptions
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 262;
+
+    // ACTION: Visual interruptions > No screen interuptions toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_ZEN_ALLOW_WHEN_SCREEN_OFF = 263;
+
+    // ACTION: Visual interruptions > No notification light toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_ZEN_ALLOW_LIGHTS = 264;
+
+    // OPEN: Settings > Notifications > [App] > Topic Notifications
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    NOTIFICATION_TOPIC_NOTIFICATION = 265;
+
+    // ACTION: Settings > Apps > Default Apps > Select different SMS app
+    //   PACKAGE: Selected SMS app
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_DEFAULT_SMS_APP_CHANGED = 266;
+
+    // OPEN: QS Color modification tile shown
+    // ACTION: QS Color modification tile tapped
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_COLOR_MATRIX = 267;
+
+    // OPEN: QS Custom tile shown
+    // ACTION: QS Work Mode tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    QS_CUSTOM = 268;
+
+    // ACTION: Visual interruptions > Never turn off the screen toggle
+    //   SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_ZEN_ALLOW_WHEN_SCREEN_ON = 269;
+
+    // ACTION: Overview > Long-press task, drag to enter split-screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_WINDOW_DOCK_DRAG_DROP = 270;
+
+    // ACTION: In App > Long-press Overview button to enter split-screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_WINDOW_DOCK_LONGPRESS = 271;
+
+    // ACTION: In App > Swipe Overview button to enter split-screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_WINDOW_DOCK_SWIPE = 272;
+
+    // ACTION: Launch profile-specific app > Confirm credentials
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    PROFILE_CHALLENGE = 273;
+
+    // OPEN: QS Battery detail panel
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    QS_BATTERY_DETAIL = 274;
+
+    // OPEN: Overview > History
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    OVERVIEW_HISTORY = 275;
+
+    // ACTION: Overview > Page by tapping Overview button
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_OVERVIEW_PAGE = 276;
+
+    // ACTION: Overview > Select app
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_OVERVIEW_SELECT = 277;
+
+    // ACTION: View emergency info
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_VIEW_EMERGENCY_INFO = 278;
+
+    // ACTION: Edit emergency info activity
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_EDIT_EMERGENCY_INFO = 279;
+
+    // ACTION: Edit emergency info field
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_EDIT_EMERGENCY_INFO_FIELD = 280;
+
+    // ACTION: Add emergency contact
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_ADD_EMERGENCY_CONTACT = 281;
+
+    // ACTION: Delete emergency contact
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_DELETE_EMERGENCY_CONTACT = 282;
+
+    // ACTION: Call emergency contact
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_CALL_EMERGENCY_CONTACT = 283;
+
+    // OPEN: QS Data Saver tile shown
+    // ACTION: QS Data Saver tile tapped
+    // CATEGORY: QUICK_SETTINGS
+    QS_DATA_SAVER = 284;
+
+    // OPEN: Settings > Security > User credentials
+    // CATEGORY: Settings
+    // OS: N
+    // GMS: 7.8.99
+    USER_CREDENTIALS = 285;
+
+    // ACTION: In App (splitscreen) > Long-press Overview to exit split-screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_WINDOW_UNDOCK_LONGPRESS = 286;
+
+    // Logged when the user scrolls through overview manually
+    OVERVIEW_SCROLL = 287;
+
+    // Logged when the overview times out automatically selecting an app
+    OVERVIEW_SELECT_TIMEOUT = 288;
+
+    // Logged when a user dismisses a task in overview
+    OVERVIEW_DISMISS = 289;
+
+    // Logged when the user modifying the notification importance slider.
+    ACTION_MODIFY_IMPORTANCE_SLIDER = 290;
+
+    // Logged when the user saves a modification to notification importance. Negative numbers
+    // indicate the user lowered the importance; positive means they increased it.
+    ACTION_SAVE_IMPORTANCE = 291;
+
+    // ACTION: Long-press power button, then tap "Take bug report" option.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE = 292;
+
+    // ACTION: Long-press power button, then long-press "Take bug report" option.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_FROM_POWER_MENU_FULL = 293;
+
+    // ACTION: Settings -> Developer Options -> Take bug report -> Interactive report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    // Interactive bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_INTERACTIVE = 294;
+
+    // ACTION: Settings -> Developer Options -> Take bug report -> Full report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    // Interactive bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_FULL = 295;
+
+    // ACTION: User tapped notification action to cancel a bug report
+    // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL = 296;
+
+    // ACTION: User tapped notification action to launch bug report details screen
+    // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS = 297;
+
+    // ACTION: User tapped notification action to take adition screenshot on bug report
+    // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT = 298;
+
+    // ACTION: User tapped notification to share bug report
+    // CATEGORY: NOTIFICATION
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE = 299;
+
+    // ACTION: User changed bug report name using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_DETAILS_NAME_CHANGED = 300;
+
+    // ACTION: User changed bug report title using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_DETAILS_TITLE_CHANGED = 301;
+
+    // ACTION: User changed bug report description using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED = 302;
+
+    // ACTION: User tapped Save in the bug report details screen.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_DETAILS_SAVED = 303;
+
+    // ACTION: User tapped Cancel in the bug report details screen.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
+    ACTION_BUGREPORT_DETAILS_CANCELED = 304;
+
+    // Tuner: Open/close calibrate dialog.
+    TUNER_CALIBRATE_DISPLAY = 305;
+
+    // Tuner: Open/close color and appearance.
+    TUNER_COLOR_AND_APPEARANCE = 306;
+
+    // Tuner: Apply calibrate dialog.
+    ACTION_TUNER_CALIBRATE_DISPLAY_CHANGED = 307;
+
+    // Tuner: Open/close night mode.
+    TUNER_NIGHT_MODE = 308;
+
+    // Tuner: Change night mode.
+    ACTION_TUNER_NIGHT_MODE = 309;
+
+    // Tuner: Change night mode auto.
+    ACTION_TUNER_NIGHT_MODE_AUTO = 310;
+
+    // Tuner: Change night mode adjust dark theme.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_DARK_THEME = 311;
+
+    // Tuner: Change night mode adjust tint.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_TINT = 312;
+
+    // Tuner: Change night mode adjust brightness.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_BRIGHTNESS = 313;
+
+    // Tuner: Change do not disturb in volume panel.
+    ACTION_TUNER_DO_NOT_DISTURB_VOLUME_PANEL = 314;
+
+    // Tuner: Change do not disturb volume buttons shortcut.
+    ACTION_TUNER_DO_NOT_DISTURB_VOLUME_SHORTCUT = 315;
+
+    // Logs the action the user takes when an app crashed.
+    ACTION_APP_CRASH = 316;
+
+    // Logs the action the user takes when an app ANR'd.
+    ACTION_APP_ANR = 317;
+
+    // Logged when a user double taps the overview button to launch the previous task
+    OVERVIEW_LAUNCH_PREVIOUS_TASK = 318;
+
+    // Logged when we execute an app transition. This indicates the total delay from startActivity
+    // until the app transition is starting to animate, in milliseconds.
+    APP_TRANSITION_DELAY_MS = 319;
+
+    // Logged when we execute an app transition. This indicates the reason why the transition
+    // started. Must be one of ActivityManagerInternal.APP_TRANSITION_* reasons.
+    APP_TRANSITION_REASON = 320;
+
+    // Logged when we execute an app transition and we drew a starting window. This indicates the
+    // delay from startActivity until the starting window was drawn.
+    APP_TRANSITION_STARTING_WINDOW_DELAY_MS = 321;
+
+    // Logged when we execute an app transition and all windows of the app got drawn. This indicates
+    // the delay from startActivity until all windows have been drawn.
+    APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS = 322;
+
+    // Logged when we execute an app transition. This indicates the component name of the current
+    // transition.
+    APP_TRANSITION_COMPONENT_NAME = 323;
+
+    // Logged when we execute an app transition. This indicates whether the process was already
+    // running.
+    APP_TRANSITION_PROCESS_RUNNING = 324;
+
+    // Logged when we execute an app transition. This indicates the device uptime in seconds when
+    // the transition was executed.
+    APP_TRANSITION_DEVICE_UPTIME_SECONDS = 325;
+
+    // User granted access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    // (or -2 for root access, or -1 or unknown directory).
+    ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_FOLDER = 326;
+
+    // User denied access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    // (or -2 for root access, or -1 or unknown directory).
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_FOLDER = 327;
+
+    // User granted access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_PACKAGE = 328;
+
+    // User denied access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_PACKAGE = 329;
+
+    // App requested access to a directory it has already been granted
+    // access before; action takes an integer representing the folder's
+    // index on Environment.STANDARD_DIRECTORIES
+    // (or -2 for root access, or -1 or unknown directory).
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_FOLDER = 330;
+
+    // App requested access to a directory it has already been granted
+    // access before; action pass package name of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE = 331;
+
+    // Logged when the user slides a notification and
+    // reveals the gear beneath it.
+    ACTION_REVEAL_GEAR = 332;
+
+    // Logged when the user taps on the gear beneath
+    // a notification.
+    ACTION_TOUCH_GEAR = 333;
+
+    // Logs that the user has edited the enabled VR listeners.
+    VR_MANAGE_LISTENERS = 334;
+
+    // Settings -> Accessibility -> Click after pointer stops moving
+    ACCESSIBILITY_TOGGLE_AUTOCLICK = 335;
+    // Settings -> Sound
+    SOUND = 336;
+    // Settings -> Notifications -> Gear
+    CONFIGURE_NOTIFICATION = 337;
+    // Settings -> Wi-Fi -> Gear
+    CONFIGURE_WIFI = 338;
+    // Settings -> Display -> Display size
+    DISPLAY_SCREEN_ZOOM = 339;
+    // Settings -> Display -> Font size
+    ACCESSIBILITY_FONT_SIZE = 340;
+    // Settings -> Data usage -> Cellular/Wi-Fi data usage
+    DATA_USAGE_LIST = 341;
+    // Settings -> Data usage -> Billing cycle or DATA_USAGE_LIST -> Gear
+    BILLING_CYCLE = 342;
+    // DATA_USAGE_LIST -> Any item or App info -> Data usage
+    APP_DATA_USAGE = 343;
+    // Settings -> Language & input -> Language
+    USER_LOCALE_LIST = 344;
+    // Settings -> Language & input -> Virtual keyboard
+    VIRTUAL_KEYBOARDS = 345;
+    // Settings -> Language & input -> Physical keyboard
+    PHYSICAL_KEYBOARDS = 346;
+    // Settings -> Language & input -> Virtual keyboard -> Add a virtual keyboard
+    ENABLE_VIRTUAL_KEYBOARDS = 347;
+    // Settings -> Data usage -> Data Saver
+    DATA_SAVER_SUMMARY = 348;
+    // Settings -> Data usage -> Data Saver -> Unrestricted data access
+    DATA_USAGE_UNRESTRICTED_ACCESS = 349;
+
+    // Used for generic logging of Settings Preference Persistence, should not be used
+    // outside SharedPreferencesLogger.
+    ACTION_GENERIC_PACKAGE = 350;
+    // Settings -> Apps -> Gear -> Special access
+    SPECIAL_ACCESS = 351;
+
+    // Logs that the user docks window via shortcut key.
+    WINDOW_DOCK_SHORTCUTS = 352;
+
+    // User already denied access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    // (or -2 for root access, or -1 or unknown directory).
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_FOLDER = 353;
+
+    // User already denied access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_DENIED_BY_PACKAGE = 354;
+
+    // User denied access to the request folder and checked 'Do not ask again';
+    // action takes an integer representing the folder's index on Environment.STANDARD_DIRECTORIES
+    // (or -2 for root access, or -1 or unknown directory).
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_FOLDER = 355;
+
+    // User denied access to the request folder and checked 'Do not ask again';
+    // action pass package name of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_AND_PERSIST_BY_PACKAGE = 356;
+
+    // Logged when a user dismisses all task in overview
+    OVERVIEW_DISMISS_ALL = 357;
+
+    // Quick Settings -> Edit
+    QS_EDIT = 358;
+
+    // Quick Settings -> Edit -> Overflow -> Reset
+    ACTION_QS_EDIT_RESET = 359;
+
+    // QS -> Edit - Drag a tile out of the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_REMOVE_SPEC = 360;
+    ACTION_QS_EDIT_REMOVE = 361;
+
+    // QS -> Edit - Drag a tile into the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_ADD_SPEC = 362;
+    ACTION_QS_EDIT_ADD = 363;
+
+    // QS -> Edit - Drag a tile within the active tiles.
+    // The _SPEC contains either the spec of the tile or
+    // the package of the 3rd party app in the PKG field.
+    ACTION_QS_EDIT_MOVE_SPEC = 364;
+    ACTION_QS_EDIT_MOVE = 365;
+
+    // Long-press on a QS tile. Tile spec in package field.
+    ACTION_QS_LONG_PRESS = 366;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY = 367;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Magnification gesture
+    // ACTION: New magnification gesture configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_MAGNIFICATION = 368;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Font size
+    // ACTION: New font size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_FONT_SIZE = 369;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> Display size
+    // ACTION: New display size is chosen
+    //  SUBTYPE: 0 is small, 1 is default, 2 is large, 3 is larger, 4 is largest
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_DISPLAY_SIZE = 370;
+
+    // OPEN: SUW Welcome Screen -> Vision Settings -> TalkBack
+    // ACTION: New screen reader configuration is chosen
+    //  SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: SETTINGS
+    // OS: N
+    SUW_ACCESSIBILITY_TOGGLE_SCREEN_READER = 371;
+
+    // ------- Begin N Settings conditionals -----
+    // Conditionals are the green bars at the top of the settings dashboard
+    // All conditionals will have visible/hide events onResume/onPause
+    // but they will also be used as extra ints in the
+    // dismiss/expand/collapse/click/button events
+
+    // swipe away conditional
+    ACTION_SETTINGS_CONDITION_DISMISS = 372;
+
+    // click on collapsed conditional or clicks expand button
+    ACTION_SETTINGS_CONDITION_EXPAND = 373;
+
+    // click collapse button on expanded conditional
+    ACTION_SETTINGS_CONDITION_COLLAPSE = 374;
+
+    // click main area of expanded conditional
+    ACTION_SETTINGS_CONDITION_CLICK = 375;
+
+    // click a direct button on expanded conditional
+    ACTION_SETTINGS_CONDITION_BUTTON = 376;
+
+    // Airplane mode on
+    SETTINGS_CONDITION_AIRPLANE_MODE = 377;
+    // AKA Data saver on
+    SETTINGS_CONDITION_BACKGROUND_DATA = 378;
+    // Battery saver on
+    SETTINGS_CONDITION_BATTERY_SAVER = 379;
+    // Cellular data off
+    SETTINGS_CONDITION_CELLULAR_DATA = 380;
+    // Do not disturb on
+    SETTINGS_CONDITION_DND = 381;
+    // Hotspot on
+    SETTINGS_CONDITION_HOTSPOT = 382;
+    // Work profile off
+    SETTINGS_CONDITION_WORK_MODE = 383;
+
+    // ------- Begin N Settings suggestions -----
+    // Since suggestions come from system apps, suggestions will
+    // have generic constants and the package providing the suggestion
+    // will be put in the package field.  For suggestions in the Settings
+    // package, the class name will be filled in instead (since settings
+    // provides several suggetions).
+
+    // Settings shown/hidden on main settings dashboard.
+    // These are actually visibility events, but visible/hidden doesn't
+    // take a package, so these are being logged as actions.
+    ACTION_SHOW_SETTINGS_SUGGESTION = 384;
+    ACTION_HIDE_SETTINGS_SUGGESTION = 385;
+
+    // Click on a suggestion.
+    ACTION_SETTINGS_SUGGESTION = 386;
+
+    // Suggestion -> Overflow -> Remove.
+    ACTION_SETTINGS_DISMISS_SUGGESTION = 387;
+
+    // Settings > Apps > Gear > Special Access > Premium SMS access
+    PREMIUM_SMS_ACCESS = 388;
+
+    // Logged when the user resizes the docked stack. Arguments:
+    // 0: Split 50:50
+    // 1: Docked smaller
+    // 2: Docked larger
+    ACTION_WINDOW_DOCK_RESIZE = 389;
+
+    // User exits split-screen by dragging the divider to the side of the screen. Arguments
+    // 0: Docked gets maximized
+    // 1: Fullscreen gets maximized
+    ACTION_WINDOW_UNDOCK_MAX = 390;
+
+    // User tried to dock an unresizable app.
+    ACTION_WINDOW_DOCK_UNRESIZABLE = 391;
+
+    // System UI Tuner > Other > Power notification controls
+    TUNER_POWER_NOTIFICATION_CONTROLS = 392;
+
+    // System UI Tuner > Other > Power notification controls > Toggle on/off
+    ACTION_TUNER_POWER_NOTIFICATION_CONTROLS = 393;
+
+    // Action: user enable / disabled data saver using Settings. Arguments:
+    // 0: Data Saver mode is disabled.
+    // 1: Data Saver mode is enabled.
+    ACTION_DATA_SAVER_MODE = 394;
+
+    // User whitelisted an app for Data Saver mode; action pass package name of app.
+    ACTION_DATA_SAVER_WHITELIST = 395;
+
+    // User blacklisted an app for Data Saver mode; action pass package name of app.
+    ACTION_DATA_SAVER_BLACKLIST = 396;
+
+    // User opened a remote input view associated with a notification. Passes package name of app
+    // that posted the notification. Note that this can also happen transiently during notification
+    // reinflation.
+    ACTION_REMOTE_INPUT_OPEN = 397;
+
+    // User attempt to send data through a remote input view associated with a notification.
+    // Passes package name of app that posted the notification. May succeed or fail.
+    ACTION_REMOTE_INPUT_SEND = 398;
+
+    // Failed attempt to send data through a remote input view associated with a
+    // notification. Passes package name of app that posted the notification.
+    ACTION_REMOTE_INPUT_FAIL = 399;
+
+    // User closed a remote input view associated with a notification. Passes package name of app
+    // that posted the notification. Note that this can also happen transiently during notification
+    // reinflation.
+    ACTION_REMOTE_INPUT_CLOSE = 400;
+
+    // OPEN: Settings > Accounts > Work profile settings
+    // CATEGORY: SETTINGS
+    ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
+
+    // Settings -> Dev options -> Convert to file encryption
+    CONVERT_FBE = 402;
+
+    // Settings -> Dev options -> Convert to file encryption -> WIPE AND CONVERT...
+    CONVERT_FBE_CONFIRM = 403;
+
+    // Settings -> Dev options -> Running services
+    RUNNING_SERVICES = 404;
+
+    // The dialog shown by 3P intent to change current webview implementation.
+    WEBVIEW_IMPLEMENTATION = 405;
+
+    // Settings launched from expanded quick settings.
+    ACTION_QS_EXPANDED_SETTINGS_LAUNCH = 406;
+
+    // Notification expansion state toggled by the expand affordance.
+    ACTION_NOTIFICATION_EXPANDER = 407;
+
+    // Notification group expansion state toggled by the expand affordance.
+    ACTION_NOTIFICATION_GROUP_EXPANDER = 408;
+
+    // Notification expansion state toggled by the expand gesture.
+    ACTION_NOTIFICATION_GESTURE_EXPANDER = 409;
+
+    // Notification group expansion state toggled by the expand gesture.
+    ACTION_NOTIFICATION_GROUP_GESTURE_EXPANDER = 410;
+
+    // Add new aosp constants above this line.
+    // END OF AOSP CONSTANTS
+  }
+}

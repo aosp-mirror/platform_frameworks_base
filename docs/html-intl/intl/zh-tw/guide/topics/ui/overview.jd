@@ -1,0 +1,71 @@
+page.title=UI 總覽
+@jd:body
+
+
+<p>Android 應用程式中的所有使用者介面元素都是使用 {@link android.view.View} 與
+{@link android.view.ViewGroup} 物件。{@link android.view.View} 物件可在畫面上繪製使用者能與之互動的項目。
+{@link android.view.ViewGroup} 物件可保留其他
+{@link android.view.View} (與 {@link android.view.ViewGroup}) 物件，以定義介面的版面配置。
+</p>
+
+<p>Android 提供 {@link android.view.View} 與{@link
+android.view.ViewGroup} 子類別集合，提供一般輸入控制項 (例如按鈕與文字欄位) 及各種版面配置模型 (例如線性或相對)。
+</p>
+
+
+<h2 id="Layout">使用者介面版面配置</h2>
+
+<p>應用程式每個元件的使用者介面是使用 {@link
+android.view.View} 與 {@link android.view.ViewGroup} 物件的階層來定義，如圖 1 所示。每個檢視群組都是不可見容器，用以組織子檢視，而子檢視可能是輸入控制項或其他繪製部分 UI 的小工具。這個階層樹狀結構可依您的需求簡單或複雜化 (但簡化才會有最佳效能)。
+
+
+
+</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>圖 1.</strong>定義 UI 版面配置的檢視階層圖例
+</p>
+
+<p>如要宣告版面配置，您可以在程式碼中將 {@link android.view.View} 物件具現化，然後開始建置樹狀結構，但最簡單也最有效的方法是使用 XML 檔案來定義您的版面配置。
+
+XML 提供類似於 HTML 且人類看得懂的版面配置結構。</p>
+
+<p>檢視的 XML 元素名稱相當於它個別代表的 Android 類別。因此，
+<code>&lt;TextView&gt;</code> 元素可在您的 UI 中建立 {@link android.widget.TextView} 小工具，而
+<code>&lt;LinearLayout&gt;</code> 元素可以建立 {@link android.widget.LinearLayout} 檢視群組。
+ </p>
+
+<p>例如，上面有一個文字檢視與按鈕的簡單垂直版面配置，看起來像這樣：</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>當您載入應用程式中的版面配置資源時，Android 會將每個版面配置節點初始化成執行階段物件，您再用來定義其他行為、查詢物件狀態或修改版面配置。
+
+</p>
+
+<p>如需建立 UI 版面配置的完整指南，請參閱 <a href="declaring-layout.html">XML 版面配置</a>。
+
+
+  
+<h2 id="UIComponents">使用者介面元件</h2>
+
+<p>您不必使用 {@link android.view.View} 與 {@link
+android.view.ViewGroup} 物件來建置您的所有 UI。Android 提供的數個應用程式元件會提供標準 UI 版面配置，您只需要定義內容即可。
+這些 UI 元件各自有一組獨特的 API，如其各自的文件中所述，例如<a href="{@docRoot}guide/topics/ui/actionbar.html">動作列</a>、<a href="{@docRoot}guide/topics/ui/dialogs.html">對話方塊</a>及<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">狀態通知</a>。
+</p>
+
+

@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -66,11 +67,16 @@ import java.util.Collection;
 public class NinePatchDrawable extends Drawable {
     // dithering helps a lot, and is pretty cheap, so default is true
     private static final boolean DEFAULT_DITHER = false;
+
+    /** Temporary rect used for density scaling. */
+    private Rect mTempRect;
+
     private NinePatchState mNinePatchState;
-    private NinePatch mNinePatch;
     private PorterDuffColorFilter mTintFilter;
     private Rect mPadding;
     private Insets mOpticalInsets = Insets.NONE;
+    private Rect mOutlineInsets;
+    private float mOutlineRadius;
     private Paint mPaint;
     private boolean mMutated;
 
@@ -86,8 +92,9 @@ public class NinePatchDrawable extends Drawable {
 
     /**
      * Create drawable from raw nine-patch data, not dealing with density.
+     *
      * @deprecated Use {@link #NinePatchDrawable(Resources, Bitmap, byte[], Rect, String)}
-     * to ensure that the drawable has correctly set its target density.
+     *             to ensure that the drawable has correctly set its target density.
      */
     @Deprecated
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
@@ -101,7 +108,6 @@ public class NinePatchDrawable extends Drawable {
     public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
             Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), res);
-        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
     /**
@@ -114,16 +120,17 @@ public class NinePatchDrawable extends Drawable {
             Rect padding, Rect opticalInsets, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding, opticalInsets),
                 res);
-        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
     /**
      * Create drawable from existing nine-patch, not dealing with density.
+     *
      * @deprecated Use {@link #NinePatchDrawable(Resources, NinePatch)}
-     * to ensure that the drawable has correctly set its target density.
+     *             to ensure that the drawable has correctly set its target
+     *             density.
      */
     @Deprecated
-    public NinePatchDrawable(NinePatch patch) {
+    public NinePatchDrawable(@NonNull NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), null);
     }
 
@@ -131,9 +138,8 @@ public class NinePatchDrawable extends Drawable {
      * Create drawable from existing nine-patch, setting initial target density
      * based on the display metrics of the resources.
      */
-    public NinePatchDrawable(Resources res, NinePatch patch) {
+    public NinePatchDrawable(@Nullable Resources res, @NonNull NinePatch patch) {
         this(new NinePatchState(patch, new Rect()), res);
-        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
     /**
@@ -146,7 +152,7 @@ public class NinePatchDrawable extends Drawable {
      * @see android.graphics.Bitmap#setDensity(int)
      * @see android.graphics.Bitmap#getDensity()
      */
-    public void setTargetDensity(Canvas canvas) {
+    public void setTargetDensity(@NonNull Canvas canvas) {
         setTargetDensity(canvas.getDensity());
     }
 
@@ -158,7 +164,7 @@ public class NinePatchDrawable extends Drawable {
      * @see android.graphics.Bitmap#setDensity(int)
      * @see android.graphics.Bitmap#getDensity()
      */
-    public void setTargetDensity(DisplayMetrics metrics) {
+    public void setTargetDensity(@NonNull DisplayMetrics metrics) {
         setTargetDensity(metrics.densityDpi);
     }
 
@@ -171,64 +177,24 @@ public class NinePatchDrawable extends Drawable {
      * @see android.graphics.Bitmap#getDensity()
      */
     public void setTargetDensity(int density) {
-        if (density != mTargetDensity) {
-            mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
-            if (mNinePatch != null) {
-                computeBitmapSize();
-            }
-            invalidateSelf();
+        if (density == 0) {
+            density = DisplayMetrics.DENSITY_DEFAULT;
         }
-    }
 
-    private static Insets scaleFromDensity(Insets insets, int sdensity, int tdensity) {
-        int left = Bitmap.scaleFromDensity(insets.left, sdensity, tdensity);
-        int top = Bitmap.scaleFromDensity(insets.top, sdensity, tdensity);
-        int right = Bitmap.scaleFromDensity(insets.right, sdensity, tdensity);
-        int bottom = Bitmap.scaleFromDensity(insets.bottom, sdensity, tdensity);
-        return Insets.of(left, top, right, bottom);
-    }
+        if (mTargetDensity != density) {
+            mTargetDensity = density;
 
-    private void computeBitmapSize() {
-        final int sdensity = mNinePatch.getDensity();
-        final int tdensity = mTargetDensity;
-        if (sdensity == tdensity) {
-            mBitmapWidth = mNinePatch.getWidth();
-            mBitmapHeight = mNinePatch.getHeight();
-            mOpticalInsets = mNinePatchState.mOpticalInsets;
-        } else {
-            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(), sdensity, tdensity);
-            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(), sdensity, tdensity);
-            if (mNinePatchState.mPadding != null && mPadding != null) {
-                Rect dest = mPadding;
-                Rect src = mNinePatchState.mPadding;
-                if (dest == src) {
-                    mPadding = dest = new Rect(src);
-                }
-                dest.left = Bitmap.scaleFromDensity(src.left, sdensity, tdensity);
-                dest.top = Bitmap.scaleFromDensity(src.top, sdensity, tdensity);
-                dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
-                dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
-            }
-            mOpticalInsets = scaleFromDensity(mNinePatchState.mOpticalInsets, sdensity, tdensity);
-        }
-    }
-
-    private void setNinePatch(NinePatch ninePatch) {
-        if (mNinePatch != ninePatch) {
-            mNinePatch = ninePatch;
-            if (ninePatch != null) {
-                computeBitmapSize();
-            } else {
-                mBitmapWidth = mBitmapHeight = -1;
-                mOpticalInsets = Insets.NONE;
-            }
+            computeBitmapSize();
             invalidateSelf();
         }
     }
 
     @Override
     public void draw(Canvas canvas) {
-        final Rect bounds = getBounds();
+        final NinePatchState state = mNinePatchState;
+
+        Rect bounds = getBounds();
+        int restoreToCount = -1;
 
         final boolean clearColorFilter;
         if (mTintFilter != null && getPaint().getColorFilter() == null) {
@@ -238,22 +204,52 @@ public class NinePatchDrawable extends Drawable {
             clearColorFilter = false;
         }
 
-        final boolean needsMirroring = needsMirroring();
-        if (needsMirroring) {
-            // Mirror the 9patch
-            canvas.translate(bounds.right - bounds.left, 0);
-            canvas.scale(-1.0f, 1.0f);
-        }
-
         final int restoreAlpha;
-        if (mNinePatchState.mBaseAlpha != 1.0f) {
-            restoreAlpha = mPaint.getAlpha();
-            mPaint.setAlpha((int) (restoreAlpha * mNinePatchState.mBaseAlpha + 0.5f));
+        if (state.mBaseAlpha != 1.0f) {
+            restoreAlpha = getPaint().getAlpha();
+            mPaint.setAlpha((int) (restoreAlpha * state.mBaseAlpha + 0.5f));
         } else {
             restoreAlpha = -1;
         }
 
-        mNinePatch.draw(canvas, bounds, mPaint);
+        final boolean needsDensityScaling = canvas.getDensity() == 0;
+        if (needsDensityScaling) {
+            restoreToCount = restoreToCount >= 0 ? restoreToCount : canvas.save();
+
+            // Apply density scaling.
+            final float scale = mTargetDensity / (float) state.mNinePatch.getDensity();
+            final float px = bounds.left;
+            final float py = bounds.top;
+            canvas.scale(scale, scale, px, py);
+
+            if (mTempRect == null) {
+                mTempRect = new Rect();
+            }
+
+            // Scale the bounds to match.
+            final Rect scaledBounds = mTempRect;
+            scaledBounds.left = bounds.left;
+            scaledBounds.top = bounds.top;
+            scaledBounds.right = bounds.left + Math.round(bounds.width() / scale);
+            scaledBounds.bottom = bounds.top + Math.round(bounds.height() / scale);
+            bounds = scaledBounds;
+        }
+
+        final boolean needsMirroring = needsMirroring();
+        if (needsMirroring) {
+            restoreToCount = restoreToCount >= 0 ? restoreToCount : canvas.save();
+
+            // Mirror the 9patch.
+            final float cx = (bounds.left + bounds.right) / 2.0f;
+            final float cy = (bounds.top + bounds.bottom) / 2.0f;
+            canvas.scale(-1.0f, 1.0f, cx, cy);
+        }
+
+        state.mNinePatch.draw(canvas, bounds, mPaint);
+
+        if (restoreToCount >= 0) {
+            canvas.restoreToCount(restoreToCount);
+        }
 
         if (clearColorFilter) {
             mPaint.setColorFilter(null);
@@ -265,43 +261,41 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mNinePatchState.getChangingConfigurations();
     }
 
     @Override
-    public boolean getPadding(Rect padding) {
-        final Rect scaledPadding = mPadding;
-        if (scaledPadding != null) {
-            if (needsMirroring()) {
-                padding.set(scaledPadding.right, scaledPadding.top,
-                        scaledPadding.left, scaledPadding.bottom);
-            } else {
-                padding.set(scaledPadding);
-            }
+    public boolean getPadding(@NonNull Rect padding) {
+        if (mPadding != null) {
+            padding.set(mPadding);
             return (padding.left | padding.top | padding.right | padding.bottom) != 0;
+        } else {
+            return super.getPadding(padding);
         }
-        return false;
     }
 
     @Override
     public void getOutline(@NonNull Outline outline) {
         final Rect bounds = getBounds();
-        if (bounds.isEmpty()) return;
+        if (bounds.isEmpty()) {
+            return;
+        }
 
-        if (mNinePatchState != null) {
-            NinePatch.InsetStruct insets = mNinePatchState.mNinePatch.getBitmap().getNinePatchInsets();
+        if (mNinePatchState != null && mOutlineInsets != null) {
+            final NinePatch.InsetStruct insets =
+                    mNinePatchState.mNinePatch.getBitmap().getNinePatchInsets();
             if (insets != null) {
-                final Rect outlineInsets = insets.outlineRect;
-                outline.setRoundRect(bounds.left + outlineInsets.left,
-                        bounds.top + outlineInsets.top,
-                        bounds.right - outlineInsets.right,
-                        bounds.bottom - outlineInsets.bottom,
-                        insets.outlineRadius);
+                outline.setRoundRect(bounds.left + mOutlineInsets.left,
+                        bounds.top + mOutlineInsets.top,
+                        bounds.right - mOutlineInsets.right,
+                        bounds.bottom - mOutlineInsets.bottom,
+                        mOutlineRadius);
                 outline.setAlpha(insets.outlineAlpha * (getAlpha() / 255.0f));
                 return;
             }
         }
+
         super.getOutline(outline);
     }
 
@@ -310,11 +304,12 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public Insets getOpticalInsets() {
+        final Insets opticalInsets = mOpticalInsets;
         if (needsMirroring()) {
-            return Insets.of(mOpticalInsets.right, mOpticalInsets.top,
-                    mOpticalInsets.left, mOpticalInsets.bottom);
+            return Insets.of(opticalInsets.right, opticalInsets.top,
+                    opticalInsets.left, opticalInsets.bottom);
         } else {
-            return mOpticalInsets;
+            return opticalInsets;
         }
     }
 
@@ -338,7 +333,7 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter colorFilter) {
+    public void setColorFilter(@Nullable ColorFilter colorFilter) {
         if (mPaint == null && colorFilter == null) {
             // Fast common case -- leave at no color filter.
             return;
@@ -348,14 +343,14 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setTintList(ColorStateList tint) {
+    public void setTintList(@Nullable ColorStateList tint) {
         mNinePatchState.mTint = tint;
         mTintFilter = updateTintFilter(mTintFilter, tint, mNinePatchState.mTintMode);
         invalidateSelf();
     }
 
     @Override
-    public void setTintMode(PorterDuff.Mode tintMode) {
+    public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
         mNinePatchState.mTintMode = tintMode;
         mTintFilter = updateTintFilter(mTintFilter, mNinePatchState.mTint, tintMode);
         invalidateSelf();
@@ -395,10 +390,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public boolean isFilterBitmap() {
-        if (mPaint == null) {
-            return false;
-        }
-        return getPaint().isFilterBitmap();
+        return mPaint != null && getPaint().isFilterBitmap();
     }
 
     @Override
@@ -416,7 +408,7 @@ public class NinePatchDrawable extends Drawable {
     /**
      * Updates the constant state from the values in the typed array.
      */
-    private void updateStateFromTypedArray(TypedArray a) throws XmlPullParserException {
+    private void updateStateFromTypedArray(@NonNull TypedArray a) throws XmlPullParserException {
         final Resources r = a.getResources();
         final NinePatchState state = mNinePatchState;
 
@@ -477,13 +469,10 @@ public class NinePatchDrawable extends Drawable {
         if (tint != null) {
             state.mTint = tint;
         }
-
-        final int densityDpi = r.getDisplayMetrics().densityDpi;
-        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
     @Override
-    public void applyTheme(Theme t) {
+    public void applyTheme(@NonNull Theme t) {
         super.applyTheme(t);
 
         final NinePatchState state = mNinePatchState;
@@ -497,7 +486,7 @@ public class NinePatchDrawable extends Drawable {
             try {
                 updateStateFromTypedArray(a);
             } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
+                rethrowAsRuntimeException(e);
             } finally {
                 a.recycle();
             }
@@ -515,6 +504,7 @@ public class NinePatchDrawable extends Drawable {
         return mNinePatchState != null && mNinePatchState.canApplyTheme();
     }
 
+    @NonNull
     public Paint getPaint() {
         if (mPaint == null) {
             mPaint = new Paint();
@@ -523,45 +513,26 @@ public class NinePatchDrawable extends Drawable {
         return mPaint;
     }
 
-    /**
-     * Retrieves the width of the source .png file (before resizing).
-     */
     @Override
     public int getIntrinsicWidth() {
         return mBitmapWidth;
     }
 
-    /**
-     * Retrieves the height of the source .png file (before resizing).
-     */
     @Override
     public int getIntrinsicHeight() {
         return mBitmapHeight;
     }
 
     @Override
-    public int getMinimumWidth() {
-        return mBitmapWidth;
-    }
-
-    @Override
-    public int getMinimumHeight() {
-        return mBitmapHeight;
-    }
-
-    /**
-     * Returns a {@link android.graphics.PixelFormat graphics.PixelFormat}
-     * value of OPAQUE or TRANSLUCENT.
-     */
-    @Override
     public int getOpacity() {
-        return mNinePatch.hasAlpha() || (mPaint != null && mPaint.getAlpha() < 255) ?
-                PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+        return mNinePatchState.mNinePatch.hasAlpha()
+                || (mPaint != null && mPaint.getAlpha() < 255) ?
+                        PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
     }
 
     @Override
     public Region getTransparentRegion() {
-        return mNinePatch.getTransparentRegion(getBounds());
+        return mNinePatchState.mNinePatch.getTransparentRegion(getBounds());
     }
 
     @Override
@@ -574,7 +545,6 @@ public class NinePatchDrawable extends Drawable {
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
             mNinePatchState = new NinePatchState(mNinePatchState);
-            mNinePatch = mNinePatchState.mNinePatch;
             mMutated = true;
         }
         return this;
@@ -606,8 +576,9 @@ public class NinePatchDrawable extends Drawable {
     }
 
     final static class NinePatchState extends ConstantState {
+        @Config int mChangingConfigurations;
+
         // Values loaded during inflation.
-        int[] mThemeAttrs = null;
         NinePatch mNinePatch = null;
         ColorStateList mTint = null;
         Mode mTintMode = DEFAULT_TINT_MODE;
@@ -615,10 +586,9 @@ public class NinePatchDrawable extends Drawable {
         Insets mOpticalInsets = Insets.NONE;
         float mBaseAlpha = 1.0f;
         boolean mDither = DEFAULT_DITHER;
-        int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
         boolean mAutoMirrored = false;
 
-        int mChangingConfigurations;
+        int[] mThemeAttrs;
 
         NinePatchState() {
             // Empty constructor.
@@ -642,27 +612,24 @@ public class NinePatchDrawable extends Drawable {
             mAutoMirrored = autoMirror;
         }
 
-        // Copy constructor
-
-        NinePatchState(@NonNull NinePatchState state) {
-            // We don't deep-copy any fields because they are all immutable.
-            mNinePatch = state.mNinePatch;
-            mTint = state.mTint;
-            mTintMode = state.mTintMode;
-            mThemeAttrs = state.mThemeAttrs;
-            mPadding = state.mPadding;
-            mOpticalInsets = state.mOpticalInsets;
-            mBaseAlpha = state.mBaseAlpha;
-            mDither = state.mDither;
-            mChangingConfigurations = state.mChangingConfigurations;
-            mTargetDensity = state.mTargetDensity;
-            mAutoMirrored = state.mAutoMirrored;
+        NinePatchState(@NonNull NinePatchState orig) {
+            mChangingConfigurations = orig.mChangingConfigurations;
+            mNinePatch = orig.mNinePatch;
+            mTint = orig.mTint;
+            mTintMode = orig.mTintMode;
+            mPadding = orig.mPadding;
+            mOpticalInsets = orig.mOpticalInsets;
+            mBaseAlpha = orig.mBaseAlpha;
+            mDither = orig.mDither;
+            mAutoMirrored = orig.mAutoMirrored;
+            mThemeAttrs = orig.mThemeAttrs;
         }
 
         @Override
         public boolean canApplyTheme() {
             return mThemeAttrs != null
-                    || (mTint != null && mTint.canApplyTheme());
+                    || (mTint != null && mTint.canApplyTheme())
+                    || super.canApplyTheme();
         }
 
         @Override
@@ -685,50 +652,102 @@ public class NinePatchDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
+        }
+    }
+
+    private void computeBitmapSize() {
+        final NinePatch ninePatch = mNinePatchState.mNinePatch;
+        if (ninePatch == null) {
+            return;
+        }
+
+        final int sourceDensity = ninePatch.getDensity();
+        final int targetDensity = mTargetDensity;
+
+        final Insets sourceOpticalInsets = mNinePatchState.mOpticalInsets;
+        if (sourceOpticalInsets != Insets.NONE) {
+            final int left = Drawable.scaleFromDensity(
+                    sourceOpticalInsets.left, sourceDensity, targetDensity, true);
+            final int top = Drawable.scaleFromDensity(
+                    sourceOpticalInsets.top, sourceDensity, targetDensity, true);
+            final int right = Drawable.scaleFromDensity(
+                    sourceOpticalInsets.right, sourceDensity, targetDensity, true);
+            final int bottom = Drawable.scaleFromDensity(
+                    sourceOpticalInsets.bottom, sourceDensity, targetDensity, true);
+            mOpticalInsets = Insets.of(left, top, right, bottom);
+        } else {
+            mOpticalInsets = Insets.NONE;
+        }
+
+        final Rect sourcePadding = mNinePatchState.mPadding;
+        if (sourcePadding != null) {
+            if (mPadding == null) {
+                mPadding = new Rect();
+            }
+            mPadding.left = Drawable.scaleFromDensity(
+                    sourcePadding.left, sourceDensity, targetDensity, false);
+            mPadding.top = Drawable.scaleFromDensity(
+                    sourcePadding.top, sourceDensity, targetDensity, false);
+            mPadding.right = Drawable.scaleFromDensity(
+                    sourcePadding.right, sourceDensity, targetDensity, false);
+            mPadding.bottom = Drawable.scaleFromDensity(
+                    sourcePadding.bottom, sourceDensity, targetDensity, false);
+        } else {
+            mPadding = null;
+        }
+
+        mBitmapHeight = Drawable.scaleFromDensity(
+                ninePatch.getHeight(), sourceDensity, targetDensity, true);
+        mBitmapWidth = Drawable.scaleFromDensity(
+                ninePatch.getWidth(), sourceDensity, targetDensity, true);
+
+        final NinePatch.InsetStruct insets = ninePatch.getBitmap().getNinePatchInsets();
+        if (insets != null) {
+            Rect outlineRect = insets.outlineRect;
+            mOutlineInsets = NinePatch.InsetStruct.scaleInsets(outlineRect.left, outlineRect.top,
+                    outlineRect.right, outlineRect.bottom, targetDensity / (float) sourceDensity);
+            mOutlineRadius = Drawable.scaleFromDensity(
+                    insets.outlineRadius, sourceDensity, targetDensity);
+        } else {
+            mOutlineInsets = null;
         }
     }
 
     /**
      * The one constructor to rule them all. This is called by all public
      * constructors to set the state and initialize local properties.
+     *
+     * @param state constant state to assign to the new drawable
      */
-    private NinePatchDrawable(NinePatchState state, Resources res) {
+    private NinePatchDrawable(@NonNull NinePatchState state, @Nullable Resources res) {
         mNinePatchState = state;
 
         updateLocalState(res);
-
-        // Push density applied by setNinePatchState into state.
-        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
     /**
      * Initializes local dynamic properties from state.
      */
-    private void updateLocalState(Resources res) {
+    private void updateLocalState(@Nullable Resources res) {
         final NinePatchState state = mNinePatchState;
-
-        if (res != null) {
-            final int densityDpi = res.getDisplayMetrics().densityDpi;
-            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
-        } else {
-            mTargetDensity = state.mTargetDensity;
-        }
-
 
         // If we can, avoid calling any methods that initialize Paint.
         if (state.mDither != DEFAULT_DITHER) {
             setDither(state.mDither);
         }
 
-        // Make a local copy of the padding.
-        if (state.mPadding != null) {
-            mPadding = new Rect(state.mPadding);
+        // The nine-patch may have been created without a Resources object, in
+        // which case we should try to match the density of the nine patch (if
+        // available).
+        if (res == null && state.mNinePatch != null) {
+            mTargetDensity = state.mNinePatch.getDensity();
+        } else {
+            mTargetDensity = Drawable.resolveDensity(res, mTargetDensity);
         }
-
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
-        setNinePatch(state.mNinePatch);
+        computeBitmapSize();
     }
 }

@@ -23,6 +23,8 @@
     <dimen name="action_bar_default_height_material">64dp</dimen>
     <!-- Default content inset of an action bar. -->
     <dimen name="action_bar_content_inset_material">24dp</dimen>
+    <!-- Default content inset of an action bar with navigation present. -->
+    <dimen name="action_bar_content_inset_with_nav">80dp</dimen>
 
     <!-- Default start padding of an action bar. -->
     <dimen name="action_bar_default_padding_start_material">8dp</dimen>

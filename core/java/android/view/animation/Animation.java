@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.annotation.AnimRes;
 import android.annotation.ColorInt;
 import android.annotation.InterpolatorRes;
 import android.content.Context;
@@ -92,8 +93,12 @@ public abstract class Animation implements Cloneable {
      */
     public static final int ZORDER_BOTTOM = -1;
 
-    private static final boolean USE_CLOSEGUARD
-            = SystemProperties.getBoolean("log.closeguard.Animation", false);
+    // Use a preload holder to isolate static initialization into inner class, which allows
+    // Animation and its subclasses to be compile-time initialized.
+    private static class NoImagePreloadHolder {
+        public static final boolean USE_CLOSEGUARD
+                = SystemProperties.getBoolean("log.closeguard.Animation", false);
+    }
 
     /**
      * Set by {@link #getTransformation(long, Transformation)} when the animation ends.
@@ -389,7 +394,7 @@ public abstract class Animation implements Cloneable {
      * @param resID The resource identifier of the interpolator to load
      * @attr ref android.R.styleable#Animation_interpolator
      */
-    public void setInterpolator(Context context, @InterpolatorRes int resID) {
+    public void setInterpolator(Context context, @AnimRes @InterpolatorRes int resID) {
         setInterpolator(AnimationUtils.loadInterpolator(context, resID));
     }
 
@@ -849,7 +854,7 @@ public abstract class Animation implements Cloneable {
             normalizedTime = currentTime < mStartTime ? 0.0f : 1.0f;
         }
 
-        final boolean expired = normalizedTime >= 1.0f;
+        final boolean expired = normalizedTime >= 1.0f || isCanceled();
         mMore = !expired;
 
         if (!mFillEnabled) normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
@@ -858,7 +863,7 @@ public abstract class Animation implements Cloneable {
             if (!mStarted) {
                 fireAnimationStart();
                 mStarted = true;
-                if (USE_CLOSEGUARD) {
+                if (NoImagePreloadHolder.USE_CLOSEGUARD) {
                     guard.open("cancel or detach or getTransformation");
                 }
             }
@@ -874,7 +879,7 @@ public abstract class Animation implements Cloneable {
         }
 
         if (expired) {
-            if (mRepeatCount == mRepeated) {
+            if (mRepeatCount == mRepeated || isCanceled()) {
                 if (!mEnded) {
                     mEnded = true;
                     guard.close();
@@ -902,6 +907,10 @@ public abstract class Animation implements Cloneable {
         }
 
         return mMore;
+    }
+
+    private boolean isCanceled() {
+        return mStartTime == Long.MIN_VALUE;
     }
 
     private void fireAnimationStart() {

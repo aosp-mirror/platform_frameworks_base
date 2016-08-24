@@ -22,13 +22,14 @@
     <dimen name="thumbnail_width">192dp</dimen>
     <!-- The height that is used when creating thumbnails of applications. -->
     <dimen name="thumbnail_height">192dp</dimen>
+    <!-- The amount to scale a fullscreen screenshot thumbnail. -->
+    <item name="thumbnail_fullscreen_scale" type="fraction">60%</item>
+    <!-- The width used to calculate scale for full screen thumbnail on TV -->
+    <integer name="thumbnail_width_tv">240</integer>
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
-    <!-- The maximum number of action buttons that should be permitted within
-         an action bar/action mode. This will be used to determine how many
-         showAsAction="ifRoom" items can fit. "always" items can override this. -->
-    <integer name="max_action_buttons">2</integer>
+
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">24dp</dimen>
@@ -38,12 +39,30 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+    <!-- Height of the bottom navigation / system bar in car mode. -->
+    <dimen name="navigation_bar_height_car_mode">96dp</dimen>
+    <!-- Height of the bottom navigation bar in portrait; often the same as
+         @dimen/navigation_bar_height_car_mode -->
+    <dimen name="navigation_bar_height_landscape_car_mode">96dp</dimen>
+    <!-- Width of the navigation bar when it is placed vertically on the screen in car mode -->
+    <dimen name="navigation_bar_width_car_mode">96dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
+
+    <!-- Width of the window of the divider bar used to resize docked stacks. -->
+    <dimen name="docked_stack_divider_thickness">48dp</dimen>
+
+    <!-- How much the content in the divider is inset from the window bounds when resting. Used to
+         calculate the bounds of the stacks-->
+    <dimen name="docked_stack_divider_insets">19dp</dimen>
+
+    <!-- To how much the docked stack gets reduced when we decide to minimize the docked stack, i.e.
+         when the user opens homescreen. -->
+    <dimen name="docked_stack_minimize_thickness">8dp</dimen>
 
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
@@ -95,10 +114,10 @@
 
     <!-- The platform's desired fixed width for a dialog along the major axis
          (the screen is in landscape). This may be either a fraction or a dimension.-->
-    <item type="dimen" name="dialog_fixed_width_major">320dp</item>
+    <item type="dimen" name="dialog_fixed_width_major">100%</item>
     <!-- The platform's desired fixed width for a dialog along the minor axis
          (the screen is in portrait). This may be either a fraction or a dimension.-->
-    <item type="dimen" name="dialog_fixed_width_minor">320dp</item>
+    <item type="dimen" name="dialog_fixed_width_minor">100%</item>
     <!-- The platform's desired fixed height for a dialog along the major axis
          (the screen is in portrait). This may be either a fraction or a dimension.-->
     <item type="dimen" name="dialog_fixed_height_major">80%</item>
@@ -126,16 +145,64 @@
     <!-- Default padding for dialogs. -->
     <dimen name="dialog_padding">16dp</dimen>
 
+    <!-- The margin on the start of the content view -->
+    <dimen name="notification_content_margin_start">16dp</dimen>
+
+    <!-- The margin on the end of the content view
+        Keep in sync with notification_content_plus_picture_margin! -->
+    <dimen name="notification_content_margin_end">16dp</dimen>
+
+    <!-- The margin on the end of the content view with a picture.
+        Keep in sync with notification_content_plus_picture_margin! -->
+    <dimen name="notification_content_picture_margin">56dp</dimen>
+
+    <!-- The margin on the end of the content view with a picture, plus the standard
+        content end margin.
+        Keep equal to (notification_content_picture_margin + notification_content_margin_end)!
+    -->
+    <dimen name="notification_content_plus_picture_margin_end">72dp</dimen>
+
+    <!-- The height of the notification action list -->
+    <dimen name="notification_action_list_height">56dp</dimen>
+
+    <!-- height of the content margin to accomodate for the header -->
+    <dimen name="notification_content_margin_top">37.5dp</dimen>
+
+    <!-- height of the content margin on the bottom -->
+    <dimen name="notification_content_margin_bottom">16dp</dimen>
+
+	<!-- The height of the background for a notification header on a group -->
+    <dimen name="notification_header_background_height">45.5dp</dimen>
+
+    <!-- Height of a small notification in the status bar -->
+    <dimen name="notification_min_height">92dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_height">64dp</dimen>
 
-    <!-- Minimum width of the search view text entry area. -->
-    <dimen name="search_view_text_min_width">160dip</dimen>
+    <!-- The minimum width of the app name in the header if it shrinks -->
+    <dimen name="notification_header_shrink_min_width">72dp</dimen>
 
-    <!-- Preferred width of the search view. -->
+    <!-- The minimum height of the content if there are at least two lines or a picture-->
+    <dimen name="notification_min_content_height">41dp</dimen>
+
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_max_size">94dp</dimen>
+
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
+
+    <!-- The margin of the content to an image-->
+    <dimen name="notification_content_image_margin_end">8dp</dimen>
+
+    <!-- The spacing between messages in Notification.MessagingStyle -->
+    <dimen name="notification_messaging_spacing">6dp</dimen>
+
+    <!-- Preferred width and height of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
+    <dimen name="search_view_preferred_height">48dip</dimen>
 
     <!-- Dialog padding for round display -->
     <dimen name="alert_dialog_round_padding">27dip</dimen>
@@ -220,7 +287,7 @@
     <!-- Size of notification text (see TextAppearance.StatusBar.EventContent) -->
     <dimen name="notification_text_size">14sp</dimen>
     <!-- Size of notification text titles (see TextAppearance.StatusBar.EventContent.Title) -->
-    <dimen name="notification_title_text_size">16sp</dimen>
+    <dimen name="notification_title_text_size">14sp</dimen>
     <!-- Size of smaller notification text (see TextAppearance.StatusBar.EventContent.Line2, Info, Time) -->
     <dimen name="notification_subtext_size">12sp</dimen>
 
@@ -239,8 +306,14 @@
     <!-- Padding for notification icon when drawn with circle around it -->
     <dimen name="notification_large_icon_circle_padding">11dp</dimen>
 
+    <!-- The margin on top of the text of the notification -->
+    <dimen name="notification_text_margin_top">0.5dp</dimen>
+
+    <!-- The padding on top of inbox style elements -->
+    <dimen name="notification_inbox_item_top_padding">5dp</dimen>
+
     <!-- Size of the profile badge for notifications -->
-    <dimen name="notification_badge_size">16dp</dimen>
+    <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
@@ -401,4 +474,17 @@
 
     <item type="dimen" format="integer" name="time_picker_column_start_material">0</item>
     <item type="dimen" format="integer" name="time_picker_column_end_material">1</item>
+
+    <item type="dimen" name="aerr_padding_list_top">15dp</item>
+    <item type="dimen" name="aerr_padding_list_bottom">8dp</item>
+
+    <item type="fraction" name="docked_stack_divider_fixed_ratio">34.15%</item>
+
+    <dimen name="resize_shadow_size">5dp</dimen>
+
+    <!-- The default minimal size of a resizable task, in both dimensions. -->
+    <dimen name="default_minimal_size_resizable_task">220dp</dimen>
+
+    <!-- Minimum "smallest width" of the display for cascading menus to be enabled. -->
+    <dimen name="cascading_menus_min_smallest_width">720dp</dimen>
 </resources>

@@ -5,7 +5,9 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_PACKAGE_NAME := FrameworkCoreTests_install_complete_package_info
+LOCAL_PACKAGE_NAME := install_complete_package_info
+#LOCAL_MANIFEST_FILE := api_test/AndroidManifest.xml
 
-include $(BUILD_PACKAGE)
+include $(FrameworkCoreTests_BUILD_PACKAGE)
+#include $(BUILD_PACKAGE)
 

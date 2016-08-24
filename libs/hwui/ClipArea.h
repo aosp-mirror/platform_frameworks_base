@@ -16,14 +16,16 @@
 #ifndef CLIPAREA_H
 #define CLIPAREA_H
 
-#include <SkRegion.h>
-
 #include "Matrix.h"
 #include "Rect.h"
 #include "utils/Pair.h"
 
+#include <SkRegion.h>
+
 namespace android {
 namespace uirenderer {
+
+class LinearAllocator;
 
 Rect transformAndCalculateBounds(const Rect& r, const Matrix4& transform);
 
@@ -33,7 +35,7 @@ public:
     TransformedRectangle(const Rect& bounds, const Matrix4& transform);
 
     bool canSimplyIntersectWith(const TransformedRectangle& other) const;
-    bool intersectWith(const TransformedRectangle& other);
+    void intersectWith(const TransformedRectangle& other);
 
     bool isEmpty() const;
 
@@ -48,6 +50,12 @@ public:
 
     const Matrix4& getTransform() const {
         return mTransform;
+    }
+
+    void transform(const Matrix4& transform) {
+        Matrix4 t;
+        t.loadMultiply(transform, mTransform);
+        mTransform = t;
     }
 
 private:
@@ -66,17 +74,62 @@ public:
     void setEmpty();
     void set(const Rect& bounds, const Matrix4& transform);
     bool intersectWith(const Rect& bounds, const Matrix4& transform);
+    void transform(const Matrix4& transform);
 
     SkRegion convertToRegion(const SkRegion& clip) const;
     Rect calculateBounds() const;
 
-private:
     enum {
         kMaxTransformedRectangles = 5
     };
 
+private:
     int mTransformedRectanglesCount;
     TransformedRectangle mTransformedRectangles[kMaxTransformedRectangles];
+};
+
+enum class ClipMode {
+    Rectangle,
+    RectangleList,
+
+    // region and path - intersected. if either is empty, don't use
+    Region
+};
+
+struct ClipBase {
+    ClipBase(ClipMode mode)
+            : mode(mode) {}
+    ClipBase(const Rect& rect)
+            : mode(ClipMode::Rectangle)
+            , rect(rect) {}
+    const ClipMode mode;
+    bool intersectWithRoot = false;
+    // Bounds of the clipping area, used to define the scissor, and define which
+    // portion of the stencil is updated/used
+    Rect rect;
+
+    void dump() const;
+};
+
+struct ClipRect : ClipBase {
+    ClipRect(const Rect& rect)
+            : ClipBase(rect) {}
+};
+
+struct ClipRectList : ClipBase {
+    ClipRectList(const RectangleList& rectList)
+            : ClipBase(ClipMode::RectangleList)
+            , rectList(rectList) {}
+    RectangleList rectList;
+};
+
+struct ClipRegion : ClipBase {
+    ClipRegion(const SkRegion& region)
+            : ClipBase(ClipMode::Region)
+            , region(region) {}
+    ClipRegion()
+            : ClipBase(ClipMode::Region) {}
+    SkRegion region;
 };
 
 class ClipArea {
@@ -91,12 +144,10 @@ public:
 
     void setEmpty();
     void setClip(float left, float top, float right, float bottom);
-    bool clipRectWithTransform(float left, float top, float right, float bottom,
-            const mat4* transform, SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipRectWithTransform(const Rect& r, const mat4* transform,
-            SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipRegion(const SkRegion& region, SkRegion::Op op = SkRegion::kIntersect_Op);
-    bool clipPathWithTransform(const SkPath& path, const mat4* transform,
+    void clipRectWithTransform(const Rect& r, const mat4* transform,
+            SkRegion::Op op);
+    void clipRegion(const SkRegion& region, SkRegion::Op op);
+    void clipPathWithTransform(const SkPath& path, const mat4* transform,
             SkRegion::Op op);
 
     const Rect& getClipRect() const {
@@ -112,41 +163,45 @@ public:
     }
 
     bool isRegion() const {
-        return kModeRegion == mMode;
+        return ClipMode::Region == mMode;
     }
 
     bool isSimple() const {
-        return mMode == kModeRectangle;
+        return mMode == ClipMode::Rectangle;
     }
 
     bool isRectangleList() const {
-        return mMode == kModeRectangleList;
+        return mMode == ClipMode::RectangleList;
     }
+
+    WARN_UNUSED_RESULT const ClipBase* serializeClip(LinearAllocator& allocator);
+    WARN_UNUSED_RESULT const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
+            const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
+    void applyClip(const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
 
 private:
     void enterRectangleMode();
-    bool rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);
-    bool rectangleModeClipRectWithTransform(float left, float top, float right,
-            float bottom, const mat4* transform, SkRegion::Op op);
+    void rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);
 
     void enterRectangleListMode();
-    bool rectangleListModeClipRectWithTransform(float left, float top,
-            float right, float bottom, const mat4* transform, SkRegion::Op op);
-    bool rectangleListModeClipRectWithTransform(const Rect& r,
+    void rectangleListModeClipRectWithTransform(const Rect& r,
             const mat4* transform, SkRegion::Op op);
 
     void enterRegionModeFromRectangleMode();
     void enterRegionModeFromRectangleListMode();
     void enterRegionMode();
-    bool regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
+    void regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
-    bool regionModeClipRectWithTransform(float left, float top, float right,
-            float bottom, const mat4* transform, SkRegion::Op op);
 
     void ensureClipRegion();
     void onClipRegionUpdated();
-    bool clipRegionOp(float left, float top, float right, float bottom,
-            SkRegion::Op op);
+
+    // Called by every state modifying public method.
+    void onClipUpdated() {
+        mPostViewportClipObserved = true;
+        mLastSerialization = nullptr;
+        mLastResolutionResult = nullptr;
+    }
 
     SkRegion createViewportRegion() {
         return SkRegion(mViewportBounds.toSkIRect());
@@ -158,13 +213,23 @@ private:
         pathAsRegion.setPath(path, createViewportRegion());
     }
 
-    enum Mode {
-        kModeRectangle,
-        kModeRegion,
-        kModeRectangleList
-    };
+    ClipMode mMode;
+    bool mPostViewportClipObserved = false;
+    bool mReplaceOpObserved = false;
 
-    Mode mMode;
+    /**
+     * If mLastSerialization is non-null, it represents an already serialized copy
+     * of the current clip state. If null, it has not been computed.
+     */
+    const ClipBase* mLastSerialization = nullptr;
+
+    /**
+     * This pair of pointers is a single entry cache of most recently seen
+     */
+    const ClipBase* mLastResolutionResult = nullptr;
+    const ClipBase* mLastResolutionClip = nullptr;
+    Matrix4 mLastResolutionTransform;
+
     Rect mViewportBounds;
     Rect mClipRect;
     SkRegion mClipRegion;

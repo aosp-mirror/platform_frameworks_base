@@ -23,12 +23,14 @@
   <item type="id" name="empty" />
   <item type="id" name="hint" />
   <item type="id" name="icon" />
+  <item type="id" name="icon_frame" />
   <item type="id" name="icon_badge" />
   <item type="id" name="icon1" />
   <item type="id" name="icon2" />
   <item type="id" name="input" />
   <item type="id" name="left_icon" />
   <item type="id" name="list" />
+  <item type="id" name="list_container" />
   <item type="id" name="menu" />
   <item type="id" name="message" />
   <item type="id" name="primary" />
@@ -48,6 +50,7 @@
   <item type="id" name="lock_screen" />
   <item type="id" name="edit" />
   <item type="id" name="widget_frame" />
+  <item type="id" name="switch_widget" />
   <item type="id" name="button1" />
   <item type="id" name="button2" />
   <item type="id" name="button3" />
@@ -94,6 +97,9 @@
   <item type="id" name="redo" />
   <item type="id" name="replaceText" />
   <item type="id" name="shareText" />
+  <item type="id" name="selection_start_handle" />
+  <item type="id" name="selection_end_handle" />
+  <item type="id" name="insertion_handle" />
   <item type="id" name="floating_toolbar_menu_item_image_button" />
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
@@ -113,7 +119,12 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_RIGHT}. -->
   <item type="id" name="accessibilityActionScrollRight" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SET_PROGRESS}. -->
+  <item type="id" name="accessibilityActionSetProgress" />
   
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_CONTEXT_CLICK}. -->
   <item type="id" name="accessibilityActionContextClick" />
+
+  <item type="id" name="remote_input_tag" />
 </resources>

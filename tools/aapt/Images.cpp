@@ -873,14 +873,15 @@ static void dump_image(int w, int h, png_bytepp rows, int color_type)
 
 static void analyze_image(const char *imageName, image_info &imageInfo, int grayscaleTolerance,
                           png_colorp rgbPalette, png_bytep alphaPalette,
-                          int *paletteEntries, bool *hasTransparency, int *colorType,
-                          png_bytepp outRows)
+                          int *paletteEntries, int *alphaPaletteEntries, bool *hasTransparency,
+                          int *colorType, png_bytepp outRows)
 {
     int w = imageInfo.width;
     int h = imageInfo.height;
-    int i, j, rr, gg, bb, aa, idx;
-    uint32_t colors[256], col;
-    int num_colors = 0;
+    int i, j, rr, gg, bb, aa, idx;;
+    uint32_t opaqueColors[256], alphaColors[256];
+    uint32_t col;
+    int numOpaqueColors = 0, numAlphaColors = 0;
     int maxGrayDeviation = 0;
 
     bool isOpaque = true;
@@ -891,6 +892,10 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     // 1. Every pixel has R == G == B (grayscale)
     // 2. Every pixel has A == 255 (opaque)
     // 3. There are no more than 256 distinct RGBA colors
+    //        We will track opaque colors separately from colors with
+    //        alpha.  This allows us to reencode the color table more
+    //        efficiently (color tables entries without a corresponding
+    //        alpha value are assumed to be opaque).
 
     if (kIsDebug) {
         printf("Initial image data:\n");
@@ -901,10 +906,34 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
         png_bytep row = imageInfo.rows[j];
         png_bytep out = outRows[j];
         for (i = 0; i < w; i++) {
-            rr = *row++;
-            gg = *row++;
-            bb = *row++;
-            aa = *row++;
+
+            // Make sure any zero alpha pixels are fully zeroed.  On average,
+            // each of our PNG assets seem to have about four distinct pixels
+            // with zero alpha.
+            // There are several advantages to setting these to zero:
+            // (1) Images are more likely able to be encodable with a palette.
+            // (2) Image palettes will be smaller.
+            // (3) Premultiplied and unpremultiplied PNG decodes can skip
+            //     writing zeros to memory, often saving significant numbers
+            //     of memory pages.
+            aa = *(row + 3);
+            if (aa == 0) {
+                rr = 0;
+                gg = 0;
+                bb = 0;
+
+                // Also set red, green, and blue to zero in "row".  If we later
+                // decide to encode the PNG as RGB or RGBA, we will use the
+                // values stored there.
+                *(row) = 0;
+                *(row + 1) = 0;
+                *(row + 2) = 0;
+            } else {
+                rr = *(row);
+                gg = *(row + 1);
+                bb = *(row + 2);
+            }
+            row += 4;
 
             int odev = maxGrayDeviation;
             maxGrayDeviation = MAX(ABS(rr - gg), maxGrayDeviation);
@@ -943,36 +972,68 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
             if (isPalette) {
                 col = (uint32_t) ((rr << 24) | (gg << 16) | (bb << 8) | aa);
                 bool match = false;
-                for (idx = 0; idx < num_colors; idx++) {
-                    if (colors[idx] == col) {
-                        match = true;
-                        break;
+
+                if (aa == 0xff) {
+                    for (idx = 0; idx < numOpaqueColors; idx++) {
+                        if (opaqueColors[idx] == col) {
+                            match = true;
+                            break;
+                        }
                     }
+
+                    if (!match) {
+                        if (numOpaqueColors < 256) {
+                            opaqueColors[numOpaqueColors] = col;
+                        }
+                        numOpaqueColors++;
+                    }
+
+                    // Write the palette index for the pixel to outRows optimistically.
+                    // We might overwrite it later if we decide to encode as gray or
+                    // gray + alpha.  We may also need to overwrite it when we combine
+                    // into a single palette.
+                    *out++ = idx;
+                } else {
+                    for (idx = 0; idx < numAlphaColors; idx++) {
+                        if (alphaColors[idx] == col) {
+                            match = true;
+                            break;
+                        }
+                    }
+
+                    if (!match) {
+                        if (numAlphaColors < 256) {
+                            alphaColors[numAlphaColors] = col;
+                        }
+                        numAlphaColors++;
+                    }
+
+                    // Write the palette index for the pixel to outRows optimistically.
+                    // We might overwrite it later if we decide to encode as gray or
+                    // gray + alpha.
+                    *out++ = idx;
                 }
 
-                // Write the palette index for the pixel to outRows optimistically
-                // We might overwrite it later if we decide to encode as gray or
-                // gray + alpha
-                *out++ = idx;
-                if (!match) {
-                    if (num_colors == 256) {
-                        if (kIsDebug) {
-                            printf("Found 257th color at %d, %d\n", i, j);
-                        }
-                        isPalette = false;
-                    } else {
-                        colors[num_colors++] = col;
+                if (numOpaqueColors + numAlphaColors > 256) {
+                    if (kIsDebug) {
+                        printf("Found 257th color at %d, %d\n", i, j);
                     }
+                    isPalette = false;
                 }
             }
         }
     }
 
+    // If we decide to encode the image using a palette, we will reset these counts
+    // to the appropriate values later.  Initializing them here avoids compiler
+    // complaints about uses of possibly uninitialized variables.
     *paletteEntries = 0;
-    *hasTransparency = !isOpaque;
-    int bpp = isOpaque ? 3 : 4;
-    int paletteSize = w * h + bpp * num_colors;
+    *alphaPaletteEntries = 0;
 
+    *hasTransparency = !isOpaque;
+    int paletteSize = w * h + 3 * numOpaqueColors + 4 * numAlphaColors;
+
+    int bpp = isOpaque ? 3 : 4;
     if (kIsDebug) {
         printf("isGrayscale = %s\n", isGrayscale ? "true" : "false");
         printf("isOpaque = %s\n", isOpaque ? "true" : "false");
@@ -1017,16 +1078,37 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     // color type chosen
 
     if (*colorType == PNG_COLOR_TYPE_PALETTE) {
+        // Combine the alphaColors and the opaqueColors into a single palette.
+        // The alphaColors must be at the start of the palette.
+        uint32_t* colors = alphaColors;
+        memcpy(colors + numAlphaColors, opaqueColors, 4 * numOpaqueColors);
+
+        // Fix the indices of the opaque colors in the image.
+        for (j = 0; j < h; j++) {
+            png_bytep row = imageInfo.rows[j];
+            png_bytep out = outRows[j];
+            for (i = 0; i < w; i++) {
+                uint32_t pixel = ((uint32_t*) row)[i];
+                if (pixel >> 24 == 0xFF) {
+                    out[i] += numAlphaColors;
+                }
+            }
+        }
+
         // Create separate RGB and Alpha palettes and set the number of colors
-        *paletteEntries = num_colors;
+        int numColors = numOpaqueColors + numAlphaColors;
+        *paletteEntries = numColors;
+        *alphaPaletteEntries = numAlphaColors;
 
         // Create the RGB and alpha palettes
-        for (int idx = 0; idx < num_colors; idx++) {
+        for (int idx = 0; idx < numColors; idx++) {
             col = colors[idx];
             rgbPalette[idx].red   = (png_byte) ((col >> 24) & 0xff);
             rgbPalette[idx].green = (png_byte) ((col >> 16) & 0xff);
             rgbPalette[idx].blue  = (png_byte) ((col >>  8) & 0xff);
-            alphaPalette[idx]     = (png_byte)  (col        & 0xff);
+            if (idx < numAlphaColors) {
+                alphaPalette[idx] = (png_byte)  (col        & 0xff);
+            }
         }
     } else if (*colorType == PNG_COLOR_TYPE_GRAY || *colorType == PNG_COLOR_TYPE_GRAY_ALPHA) {
         // If the image is gray or gray + alpha, compact the pixels into outRows
@@ -1052,10 +1134,9 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     }
 }
 
-
 static void write_png(const char* imageName,
                       png_structp write_ptr, png_infop write_info,
-                      image_info& imageInfo, int grayscaleTolerance)
+                      image_info& imageInfo, const Bundle* bundle)
 {
     png_uint_32 width, height;
     int color_type;
@@ -1090,16 +1171,26 @@ static void write_png(const char* imageName,
     png_color rgbPalette[256];
     png_byte alphaPalette[256];
     bool hasTransparency;
-    int paletteEntries;
+    int paletteEntries, alphaPaletteEntries;
 
+    int grayscaleTolerance = bundle->getGrayscaleTolerance();
     analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
-                  &paletteEntries, &hasTransparency, &color_type, outRows);
+                  &paletteEntries, &alphaPaletteEntries, &hasTransparency, &color_type, outRows);
 
-    // If the image is a 9-patch, we need to preserve it as a ARGB file to make
-    // sure the pixels will not be pre-dithered/clamped until we decide they are
-    if (imageInfo.is9Patch && (color_type == PNG_COLOR_TYPE_RGB ||
-            color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)) {
-        color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+    // Legacy versions of aapt would always encode 9patch PNGs as RGBA.  This had the unintended
+    // benefit of working around a bug decoding paletted images in Android 4.1.
+    // https://code.google.com/p/android/issues/detail?id=34619
+    //
+    // If SDK_JELLY_BEAN is supported, we need to avoid a paletted encoding in order to not expose
+    // this bug.
+    if (!bundle->isMinSdkAtLeast(SDK_JELLY_BEAN_MR1)) {
+        if (imageInfo.is9Patch && PNG_COLOR_TYPE_PALETTE == color_type) {
+            if (hasTransparency) {
+                color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+            } else {
+                color_type = PNG_COLOR_TYPE_RGB;
+            }
+        }
     }
 
     if (kIsDebug) {
@@ -1131,7 +1222,8 @@ static void write_png(const char* imageName,
     if (color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_PLTE(write_ptr, write_info, rgbPalette, paletteEntries);
         if (hasTransparency) {
-            png_set_tRNS(write_ptr, write_info, alphaPalette, paletteEntries, (png_color_16p) 0);
+            png_set_tRNS(write_ptr, write_info, alphaPalette, alphaPaletteEntries,
+                    (png_color_16p) 0);
         }
        png_set_filter(write_ptr, 0, PNG_NO_FILTERS);
     } else {
@@ -1180,18 +1272,11 @@ static void write_png(const char* imageName,
         }
 
         for (int i = 0; i < chunk_count; i++) {
-            unknowns[i].location = PNG_HAVE_PLTE;
+            unknowns[i].location = PNG_HAVE_IHDR;
         }
         png_set_keep_unknown_chunks(write_ptr, PNG_HANDLE_CHUNK_ALWAYS,
                                     chunk_names, chunk_count);
         png_set_unknown_chunks(write_ptr, write_info, unknowns, chunk_count);
-#if PNG_LIBPNG_VER < 10600
-        /* Deal with unknown chunk location bug in 1.5.x and earlier */
-        png_set_unknown_chunk_location(write_ptr, write_info, 0, PNG_HAVE_PLTE);
-        if (imageInfo.haveLayoutBounds) {
-            png_set_unknown_chunk_location(write_ptr, write_info, 1, PNG_HAVE_PLTE);
-        }
-#endif
     }
 
 
@@ -1263,8 +1348,7 @@ static bool write_png_protected(png_structp write_ptr, String8& printableName, p
         return false;
     }
 
-    write_png(printableName.string(), write_ptr, write_info, *imageInfo,
-              bundle->getGrayscaleTolerance());
+    write_png(printableName.string(), write_ptr, write_info, *imageInfo, bundle);
 
     return true;
 }
@@ -1474,8 +1558,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     }
 
     // Actually write out to the new png
-    write_png(dest.string(), write_ptr, write_info, imageInfo,
-              bundle->getGrayscaleTolerance());
+    write_png(dest.string(), write_ptr, write_info, imageInfo, bundle);
 
     if (bundle->getVerbose()) {
         // Find the size of our new file

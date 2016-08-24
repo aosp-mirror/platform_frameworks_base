@@ -1,0 +1,71 @@
+page.title=Android Instant Apps: Frequently Asked Questions
+page.tags=Material,design
+footer.hide=true
+forcelocalnav=true
+@jd:body
+
+<p>
+  <strong>What devices are compatible with Android Instant Apps?</strong>
+  <br/>
+  Android Instant Apps is compatible with devices that are running Android 4.1
+  (API level 16) or higher and have Google Play services installed.
+</p>
+
+<p>
+  <strong>Do developers need to build two different Android apps now?</strong>
+  <br/>
+  Developers only need to maintain one project with one source tree.
+  Developers simply configure the project to create two build artifacts: the
+  installable APK and the instant version.
+  Some developers can take less than a day to get up and running,
+  though the effort involved varies depending on how the
+  app is structured.
+</p>
+
+<p>
+  <strong>What Android APIs and functionality can Instant Apps use?</strong>
+  <br/>
+  Android Instant Apps functionality complements an existing Android app,
+  but does not replace it. Android Instant Apps uses the same Android APIs, the
+  same project, the same source code. Android Instant Apps restricts some
+  features that might not match users' expectations of an app
+  that is not installed.
+  For example, an Instant App can't use background services, do background
+  notifications, or access unique device identifiers.
+</p>
+
+<p>
+  <strong>Can users choose to install the app permanently?</strong>
+  <br/>
+  Developers can allow users to download the app from the Google Play
+  Store. After download, the app remains on the phone after the user has left
+  the experience.
+</p>
+
+<p>
+  <strong>How do permissions work in Android Instant Apps?</strong>
+  <br/>
+  Android Instant Apps uses the runtime permissions model introduced in
+  Android 6.0.
+  If an app supports the permission model introduced in Android 6.0
+  (API level 23), it does not require any additional work to become an Instant
+  App that runs on older devices.
+</p>
+
+<p>
+  <strong>How do developers publish these apps?</strong>
+  <br/>
+  Developers publish their Instant Apps through the Google Play Developer
+  Console, similar to their existing Android apps.
+</p>
+
+<p>
+  <strong>How can developers get involved?</strong>
+  <br/>
+  Developers interested in upgrading their Android apps can visit
+  <a class="external-link"
+  href="http://g.co/InstantApps">
+  g.co/InstantApps</a> to
+  sign up. We will be reaching out to interested
+  developers in the coming months.
+</p>

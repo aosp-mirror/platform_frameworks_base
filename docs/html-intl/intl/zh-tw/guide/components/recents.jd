@@ -1,0 +1,256 @@
+page.title=總覽畫面
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>本文件內容</h2>
+  <ol>
+    <li><a href="#adding">新增工作到總覽畫面</a>
+      <ol>
+        <li><a href="#flag-new-doc">使用意圖旗標來新增工作</a></li>
+        <li><a href="#attr-doclaunch">使用 Activity 屬性來新增工作</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">移除工作</a>
+      <ol>
+        <li><a href="#apptask-remove">使用 AppTask 類別來移除工作</a></li>
+        <li><a href="#retain-finished">保留結束的工作</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>重要類別</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>程式碼範例</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">以文件為中心的應用程式</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>總覽畫面 (也被稱為最近畫面、最近工作清單，或最近的應用程式) 是系統層級的 UI，可以列出最近存取的 <a href="{@docRoot}guide/components/activities.html">Activity</a> 與<a href="{@docRoot}guide/components/tasks-and-back-stack.html">工作</a>。
+
+使用者可以透過清單導覽並選擇要繼續的工作，或是使用者可以滑動的方式從清單移除工作。
+
+使用 Android 5.0 版本 (API 級別 21)，相同 Activity (包含不同文件) 的多個執行個體可以在總覽畫面中顯示為工作。
+例如：對多份 Google 文件，Google 雲端硬碟能讓每份文件都對應一個工作。
+每份文件在總覽畫面中都會顯示為工作。
+</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>圖 1.</strong>總覽畫面會顯示三份 Google 雲端硬碟文件，每份都分別顯示為一項工作。
+</p>
+
+<p>一般而言，您應該允許系統定義如何在總覽畫面中呈現工作與 Activity，而且不需要修改此行為。
+然而，您的應用程式可以決定要如何與在何時於總覽畫面中顯示 Activity。
+
+{@link android.app.ActivityManager.AppTask} 類別讓您可以管理工作，而 {@link android.content.Intent} 類別的 Activity 旗標可以讓您指定何時從總覽畫面新增或移除 Activity。
+
+此外，<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 屬性可以讓您設定宣示說明中的行為。</p>
+
+<h2 id="adding">新增工作到總覽畫面</h2>
+
+<p>使用 {@link android.content.Intent} 類別的旗標可以新增工作，該工作針對何時與如何在總覽畫面中開啟或重新開啟文件，可給予更多控制權。
+當您使用
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>屬性時，您可以選擇永遠在新工作開啟文件或對文件重複使用現有工作。
+
+</p>
+
+<h3 id="flag-new-doc">使用意圖旗標來新增工作</h3>
+
+<p>當您建立 Activity 的新文件時，您可以呼叫
+ {@link android.app.ActivityManager.AppTask} 類別的 {@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}方法，傳送啟動 Activity 的意圖至新文件。
+
+如要插入邏輯中斷，讓系統可以將您的 Activity 當作總覽視窗中的新工作，傳送啟動 Activity 的 {@link android.content.Intent}其 {@link android.content.Intent#addFlags(int) addFlags()} 方法中的 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 旗標。
+
+
+</p>
+
+<p class="note"><strong>注意：</strong>{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 旗標會取代 {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET} 旗標，後者已從 Android 5.0 (API 級別 21) 起失效。
+
+</p>
+
+<p>如果您在建立新文件時設定 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 旗標，則系統永遠會在建立新工作時也在根目錄建立目標 Activity。此設定允許可以在一個以上的工作中開啟相同的文件。
+
+下列程式碼示範主要 Activity 如何處理：
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>與 {@code FLAG_ACTIVITY_NEW_DOCUMENT} 旗標一起啟動的 Activity 務必要在宣示說明中設定 {@code android:launchMode="standard"} 屬性值 (預設)。
+
+</p>
+
+<p>當主要 Activity 啟動新的 Activity 時，系統會透過現有工作搜尋其意圖和 Activity 意圖元件名稱及意圖資料相同的 Activity。
+如果找不到工作，或意圖已包含 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 旗標，則會建立新的工作並使用 Activity 做為其根目錄。
+
+如果找到工作，則會將該工作帶到前面並傳送新的意圖到 {@link android.app.Activity#onNewIntent onNewIntent()}。
+新的 Activity 會取得意圖並在總覽視窗中建立新的文件，如下列範例所示：
+
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">NewDocumentActivity.java
+</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">使用 Activity 屬性來新增工作</h3>
+
+<p>Activity 也可以在宣示說明中指定為永遠啟動新工作，這可透過使用<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 屬性的 <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a> 達成。
+
+此屬性有四個值，在使用者使用應用程式開啟文件時，會產生下列效果：
+</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>Activity 會對文件重複使用現有的工作。設定
+{@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 旗標，但「不」<em></em>設定
+{@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 旗標，會與上述<a href="#flag-new-doc">使用意圖旗標來新增工作</a>達到相同效果。
+</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>Activity 會為文件建立新的工作，就算文件已開始也會建立新的工作。使用此值與設定 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 與 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 旗標會達到相同效果。
+
+</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>Activity 不會為文件建立新的工作。總覽視窗會將 Activity 當作預設：會顯示應用程式的單一工作，該工作會從使用者最後呼叫的 Activity 繼續。
+
+</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>Activity 不會為文件建立新的工作。設定此值會覆寫 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} 與 {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} 旗標的行為，如果任一個已於意圖中設定，總覽視窗會顯示應用程式的單一工作，該工作會從使用者最後呼叫的 Activity 繼續。
+
+
+
+</dd>
+</dl>
+
+<p class="note"><strong>注意：</strong>如果值不是 {@code none} 與 {@code never}，則 Activity 必須使用 {@code launchMode="standard"} 定義。
+如果沒有指定此屬性，則會使用 
+{@code documentLaunchMode="none"}。</p>
+
+<h2 id="removing">移除工作</h2>
+
+<p>依照預設，當 Activity 結束時，會自動將文件工作從總覽畫面移除。
+您可以使用 {@link android.app.ActivityManager.AppTask} 類別，搭配 {@link android.content.Intent} 旗標或 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> 屬性，來覆寫此行為。
+</p>
+
+<p>您可以完全從總覽畫面排除工作，設定方式為將
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 屬性的<a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> 設為 {@code true}。
+</p>
+
+<p>您可以設定應用程式可以納入總覽視窗的最大工作數目，方法是對 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 屬性 <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}</a> 設定整數值。
+
+
+預設值為 16。當達到工作的最大值時，會從總覽視窗移除最近最少使用的工作。
+{@code android:maxRecents} 的最大值是 50 (在低記憶體裝置上是 25)；數值不可以小於 1。
+</p>
+
+<h3 id="#apptask-remove">使用 AppTask 類別來移除工作</h3>
+
+<p>在總覽畫面建立新工作的 Activity 中，您可以指定何時移除工作與結束所有相關 Activity，方法為呼叫{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} 方法。
+
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">NewDocumentActivity.java
+</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>注意：</strong>使用
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()} 方法覆寫 {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} 標籤的使用，會在下面討論。
+
+</p>
+
+<h3 id="#retain-finished">保留結束的工作</h3>
+
+<p>如果您要保留總覽畫面中的工作 (就算其 Activity 已結束)， 方法為傳送啟動 Activity 的意圖其 {@link android.content.Intent#addFlags(int) addFlags()} 方法中的
+{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} 旗標。
+</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">DocumentCentricActivity.java
+</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>如要達到相同效果，可以設定
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 屬性的 <a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> 為 {@code false}。
+對文件 Activity 的預設值為 {@code true}，對定期 Activity 的預設值則為 {@code false}。
+如同之前的討論，使用此屬性可以覆寫 {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} 旗標。
+</p>
+
+
+
+
+
+
+

@@ -248,16 +248,14 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_material</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.TextSelectHandle</item>
         <item name="textEditPasteWindowLayout">@layout/text_edit_paste_window</item>
         <item name="textEditNoPasteWindowLayout">@layout/text_edit_no_paste_window</item>
         <item name="textEditSidePasteWindowLayout">@layout/text_edit_side_paste_window</item>
         <item name="textEditSideNoPasteWindowLayout">@layout/text_edit_side_no_paste_window</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.TextSuggestionsPopupWindow</item>
-        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
         <item name="textCursorDrawable">@null</item>
 
         <!-- Widget styles -->
@@ -429,9 +427,6 @@ please see themes_device_defaults.xml.
         <item name="fastScrollPreviewBackgroundLeft">@drawable/menu_submenu_background</item>
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@color/primary_text_dark</item>
-
-        <!-- Pointer style -->
-        <item name="pointerStyle">@style/Pointer</item>
 
         <!-- Accessibility focused drawable -->
         <item name="accessibilityFocusedDrawable">@drawable/view_accessibility_focused</item>

@@ -1,0 +1,72 @@
+page.title=Best Practices for Testing
+page.article=true
+page.image=images/testing/hwtest_junit_success.png
+
+meta.tags="testing"
+page.tags="testing"
+
+page.metaDescription=Starting point for testing Android apps, with guidelines, information, and examples.
+
+@jd:body
+
+<img src="/images/testing/testing-icon.png"
+style="float:right; margin:0 0 20px 30px" width="245" height="229" />
+
+<p>
+  Testing your app is an integral part of the app development process. Testing allows you to verify
+  the correctness, functional behavior, and usability of your app before it is released publicly.
+</p>
+<br>
+<br>
+
+<h2 id="start">Get Started</h2>
+
+<p>
+  Learn the basics of testing your app, with information about building and running your tests with
+  Android Studio:
+</p>
+
+<div class="resource-widget resource-flow-layout col-12"
+  data-query="collection:training/testing/overview"
+  data-cardSizes="6x3"
+  data-maxresults="3">
+</div>
+
+
+<h2 id="tools">Testing Tools and APIs</h2>
+
+<p>
+  Learn about the tools provided by the Android platform that help you test every aspect of your app
+  at every level:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/testing/tools"
+  data-cardSizes="15x3, 9x2, 9x2, 9x2, 9x2"
+  data-maxResults="5">
+</div>
+
+
+<h2 id="techniques">App Testing Techniques</h2>
+
+<p>
+  Learn techniques for testing your apps:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/testing/techniques"
+  data-cardSizes="6x3
+  data-maxResults="3">
+</div>
+
+<h2 id="resources">Other Resources</h2>
+
+<p>
+  More resources for app testing:
+</p>
+
+<div class="resource-widget resource-flow-layout landing col-12"
+  data-query="collection:training/testing/resources"
+  data-cardSizes="9x3"
+  data-maxResults="6">
+</div>

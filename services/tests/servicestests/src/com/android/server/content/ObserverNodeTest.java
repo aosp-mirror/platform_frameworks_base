@@ -62,7 +62,7 @@ public class ObserverNodeTest extends AndroidTestCase {
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
 
         for (int i = nums.length - 1; i >=0; --i) {
-            root.collectObserversLocked(uris[i], 0, null, false, myUserHandle, calls);
+            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, calls);
             assertEquals(nums[i], calls.size());
             calls.clear();
         }
@@ -92,7 +92,7 @@ public class ObserverNodeTest extends AndroidTestCase {
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
 
         for (int i = uris.length - 1; i >=0; --i) {
-            root.collectObserversLocked(uris[i], 0, null, false, myUserHandle, calls);
+            root.collectObserversLocked(uris[i], 0, null, false, 0, myUserHandle, calls);
             assertEquals(nums[i], calls.size());
             calls.clear();
         }

@@ -98,7 +98,8 @@ public final class Formatter {
 
     /** {@hide} */
     public static BytesResult formatBytes(Resources res, long sizeBytes, int flags) {
-        float result = sizeBytes;
+        final boolean isNegative = (sizeBytes < 0);
+        float result = isNegative ? -sizeBytes : sizeBytes;
         int suffix = com.android.internal.R.string.byteShort;
         long mult = 1;
         if (result > 900) {
@@ -131,7 +132,10 @@ public final class Formatter {
         // floating point errors.
         final int roundFactor;
         final String roundFormat;
-        if (result < 1) {
+        if (mult == 1 || result >= 100) {
+            roundFactor = 1;
+            roundFormat = "%.0f";
+        } else if (result < 1) {
             roundFactor = 100;
             roundFormat = "%.2f";
         } else if (result < 10) {
@@ -142,7 +146,7 @@ public final class Formatter {
                 roundFactor = 100;
                 roundFormat = "%.2f";
             }
-        } else if (result < 100) {
+        } else { // 10 <= result < 100
             if ((flags & FLAG_SHORTER) != 0) {
                 roundFactor = 1;
                 roundFormat = "%.0f";
@@ -150,13 +154,14 @@ public final class Formatter {
                 roundFactor = 100;
                 roundFormat = "%.2f";
             }
-        } else {
-            roundFactor = 1;
-            roundFormat = "%.0f";
+        }
+
+        if (isNegative) {
+            result = -result;
         }
         final String roundedString = String.format(roundFormat, result);
 
-        // Note this might overflow if result >= Long.MAX_VALUE / 100, but that's like 80PB so
+        // Note this might overflow if abs(result) >= Long.MAX_VALUE / 100, but that's like 80PB so
         // it's okay (for now)...
         final long roundedBytes =
                 (flags & FLAG_CALCULATE_ROUNDED) == 0 ? 0

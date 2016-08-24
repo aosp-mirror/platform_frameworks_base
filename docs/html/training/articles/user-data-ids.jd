@@ -1,0 +1,742 @@
+page.title=Best Practices for Unique Identifiers
+page.metaDescription=How to manage unique identifiers the right way for users.
+page.tags=ids, user data
+meta.tags="ids", "user data"
+page.image=images/cards/card-user-ids_2x.png
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#tenets_of_working_with_android_identifiers">Tenets of Working with
+      Android Identifiers</a></li>
+      <li><a href="#version_specific_details_identifiers_in_m">Identifiers in Android 6.0+</a></li>
+      <li><a href="#working_with_advertising_ids">Working with Advertising IDs</a></li>
+      <li><a href="#working_with_instance_ids_&_guids">Working with Instance IDs and GUIDs</a></li>
+      <li><a href="#understand_identifier_characteristics">Understanding Identifier
+      Characteristics</a>
+      <ol>
+        <li><a href="#scope">Scope</a></li>
+        <li><a href="#resettability_&_persistence">Resettability &amp; persistence</a></li>
+        <li><a href="#uniqueness">Uniqueness</h3>
+        <li><a href="#integrity_protection_and_non-repudiability">Integrity protection and
+        non-repudiability</a></li>
+      </ol>
+      </li>
+      <li><a href="#use_appropriate_identifiers">Common Use Cases and the Identifier to Use</a>
+      <ol>
+        <li><a href="#a_track_signed-out_user_preferences">Tracking signed-out user
+        preferences</a></li>
+        <li><a href="#b_track_signed-out_user_behavior">Tracking signed-out user behavior</a></li>
+        <li><a href="#c_generate_signed-out_anonymous_user_analytics">Generating
+        signed-out/anonymous user analytics</a></li>
+        <li><a href="#d_track_signed-out_user_conversion">Tracking signed-out user
+        conversion</a></li>
+        <li><a href="#e_handle_multiple_installations">Handling multiple installations</a></li>
+        <li><a href="#f_anti-fraud_enforcing_free_content_limits_detecting_sybil_attacks">Anti-fraud:
+        Enforcing free content limits / detecting Sybil attacks</a></li>
+        <li><a href="#g_manage_telephony_&_carrier_functionality">Managing telephony and carrier
+        functionality</a></li>
+        <li><a href="#h_abuse_detection_identifying_bots_and_ddos_attacks">Abuse detection:
+        Identifying bots and DDoS attacks</a></li>
+        <li><a href="#i_abuse_detection_detecting_high_value_stolen_credentials">Abuse detection:
+        Detecting high value stolen credentials</a></li>
+      </ol>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  While there are valid reasons why your application may need to identify a
+  device rather than an instance of the application or an authenticated user on
+  the device, for the vast majority of applications, the ultimate goal is to
+  identify a particular <em>installation</em> of your app (not the actual
+  physical device).
+</p>
+
+<p>
+  Fortunately, identifying an installation on Android is straightforward using
+  an Instance ID or by creating your own GUID at install time. This document
+  provides guidance for selecting appropriate identifiers for your application,
+  based on your use-case.
+</p>
+
+<p>
+  For a general look at Android permissions, please see <a href=
+  "{@docRoot}training/articles/user-data-overview.html">Permissions
+  and User Data</a>. For specific best practices for
+  working with Android permissions, please see <a href=
+  "{@docRoot}training/articles/user-data-permissions.html">Best Practices for
+  App Permissions</a>.
+</p>
+
+
+<h2 id="tenets_of_working_with_android_identifiers">Tenets of Working with Android Identifiers</h2>
+
+<p>
+  We recommend that you follow these tenets when working with Android
+  identifiers:
+</p>
+
+<p>
+  <em><strong>#1: Avoid using hardware identifiers.</strong></em> Hardware
+  identifiers such as SSAID (Android ID) and IMEI can be avoided in most
+  use-cases without limiting required functionality.
+</p>
+
+<p>
+  <em><strong>#2: Only use Advertising ID for user profiling or ads
+  use-cases.</strong></em> When using an <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6048248?hl=en">
+  Advertising ID</a>, always respect the <a href=
+  "https://play.google.com/about/developer-content-policy.html#ADID">Limit Ad
+  Tracking</a> flag, ensure the identifier cannot be connected to personally
+  identifiable information (PII) and avoid bridging Advertising ID resets.
+</p>
+
+<p>
+  <em><strong>#3: Use an Instance ID or a privately stored GUID whenever
+  possible for all other use-cases except payment fraud prevention and
+  telephony.</strong></em> For the vast majority of non-ads use-cases, an
+  instance ID or GUID should be sufficient.
+</p>
+
+<p>
+  <em><strong>#4: Use APIs that are appropriate to your use-case to minimize
+  privacy risk.</strong></em> Use the
+  <a href="http://source.android.com/devices/drm.html">DRM
+  API</a> API for high value content
+  protection and the <a href="{@docRoot}training/safetynet/index.html">SafetyNet
+  API</a> for abuse prevention. The Safetynet API is
+  the easiest way to determine whether a device is genuine without incurring
+  privacy risk.
+</p>
+
+<p>
+  The remaining sections of this guide elaborate on these rules in the context
+  of developing Android applications.
+</p>
+
+<h2 id="version_specific_details_identifiers_in_m">Identifiers in Android 6.0+</h2>
+
+<p>
+  MAC addresses are globally unique, not user-resettable and survive factory
+  reset. It is generally not recommended to use MAC address for any form of
+  user identification. As a result, as of Android M, local device MAC addresses
+  (for example, Wifi and Bluetooth) <em><strong>are not available via third party
+  APIs</strong></em>. The {@link android.net.wifi.WifiInfo#getMacAddress WifiInfo.getMacAddress()}
+  method and the {@link android.bluetooth.BluetoothAdapter#getAddress
+  BluetoothAdapter.getDefaultAdapter().getAddress()} method will
+  both return <code>02:00:00:00:00:00</code>..
+</p>
+
+<p>
+  Additionally, you must hold the following permissions to access MAC addresses
+  of nearby external devices available via Bluetooth and Wifi scans:
+</p>
+
+<table>
+ <tr>
+    <th><strong>Method/Property</strong></td>
+    <th><strong>Permissions Required</strong></td>
+ </tr>
+ <tr>
+    <td>
+      <code><a href="{@docRoot}reference/android/net/wifi/WifiManager.html#getScanResults()">WifiManager.getScanResults()</a></code>
+    </td>
+    <td>
+      <code>ACCESS_FINE_LOCATION</code> or <code>ACCESS_COARSE_LOCATION</code>
+    </td>
+ </tr>
+ <tr>
+    <td>
+      <code><a href="{@docRoot}reference/android/bluetooth/BluetoothDevice.html#ACTION_FOUND">BluetoothDevice.ACTION_FOUND</a></code>
+    </td>
+    <td>
+      <code>ACCESS_FINE_LOCATION</code> or <code>ACCESS_COARSE_LOCATION</code>
+    </td>
+ </tr>
+ <tr>
+    <td>
+      <code><a href="{@docRoot}reference/android/bluetooth/le/BluetoothLeScanner.html#startScan(android.bluetooth.le.ScanCallback)">BluetoothLeScanner.startScan(ScanCallback)</a></code>
+    </td>
+    <td>
+      <code>ACCESS_FINE_LOCATION</code> or <code>ACCESS_COARSE_LOCATION</code>
+    </td>
+ </tr>
+</table>
+
+
+<h2 id="working_with_advertising_ids">Working with Advertising IDs</h2>
+
+<p>
+  Advertising ID is a user-resettable identifier and is appropriate for Ads
+  use-cases, but there are some key points to bear in mind when using it:
+</p>
+
+<p>
+  <em><strong>Always respect the user’s intention in resetting the advertising
+  ID</strong></em>. Do not bridge user resets by using a more persistent device
+  identifier or fingerprint to link subsequent Advertising IDs together without
+  the user’s consent. The <a href=
+  "https://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Content Policy</a> states:
+</p>
+
+<div style="padding:.5em 2em;">
+<div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
+<p>...if reset, a new advertising
+  identifier must not be connected to a previous advertising identifier or data
+  derived from a previous advertising identifier without the explicit consent
+  of the user.</span></p>
+</div>
+</div>
+
+<p>
+  <em><strong>Always respect the associated Personalized Ads
+  flag</strong></em>. Advertising IDs are configurable in that users can limit
+  the amount of tracking associated with the ID. Always use the <code><a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html#isLimitAdTrackingEnabled()">
+  AdvertisingIdClient.Info.isLimitAdTrackingEnabled()</a></code> method to
+  ensure you are not circumventing your users' wishes. The <a href=
+  "https://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Content Policy</a> states:
+</p>
+
+
+<div style="padding:.5em 2em;">
+<div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
+<p>...you must abide by a user’s ‘Opt out of interest-based advertising’ or 'Opt
+  out of Ads Personalization' setting. If a user has enabled this setting, you
+  may not use the advertising identifier for creating user profiles for
+  advertising purposes or for targeting users with personalized advertising.
+  Allowed activities include contextual advertising, frequency capping,
+  conversion tracking, reporting and security and fraud detection.</span></p>
+</div>
+</div>
+
+<p>
+  <em><strong>Be aware of any privacy or security policies associated with SDKs
+  you use that are related to Advertising ID use.</strong></em> For example, if
+  you are using the Google Analytics SDK
+  <code><a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/analytics/Tracker.html#enableAdvertisingIdCollection(boolean)">mTracker.enableAdvertisingIdCollection(true)</a></code>
+  method, make sure to review and adhere to all applicable <a href=
+  "https://developers.google.com/analytics/devguides/collection/android/v4/policy">
+  Analytics SDK policies</a>.
+</p>
+
+<p>
+  Also, be aware that the <a href=
+  "https://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Content Policy</a> requires that the Advertising ID “must not be
+  connected to personally-identifiable information or associated with any
+  persistent device identifier (for example: SSAID, MAC address, IMEI, etc.,)
+  without the explicit consent of the user.”
+</p>
+
+<p>
+  As an example, suppose you want to collect information to populate database
+  tables with the following columns:
+</p>
+
+<table>
+ <tr>
+    <td>
+      <table>
+       <tr>
+          <td class="tab2">
+      <code>timestamp</code></td>
+          <td class="tab2">
+      <code>ad_id</code></td>
+          <td>
+      <code><strong>account_id</strong></code></td>
+          <td class="tab2">
+      <code>clickid</code></td>
+       </tr>
+      </table>
+
+      <p>TABLE-01</p>
+    </td>
+    <td>
+      <table>
+       <tr>
+          <td>
+      <code><strong>account_id</strong></code></td>
+          <td class="tab2">
+      <code>name</code></td>
+          <td class="tab2">
+      <code>dob</code></td>
+          <td class="tab2">
+      <code>country</code></td>
+       </tr>
+      </table>
+      <p>TABLE-02</p>
+    </td>
+ </tr>
+</table>
+
+
+<p>
+  In this example, the <code>ad_id</code> column could be joined to PII via the
+  <code>account_id</code> column in both tables, which would be a violation of
+  the <a href=
+  "https://play.google.com/about/developer-content-policy.html">Google Play
+  Developer Content Policy</a>, if you did not get explicit permission from
+  your users.
+</p>
+
+<p>
+  Keep in mind that links between Advertiser ID and PII aren't always this
+  explicit. It's possible to have “quasi-identifiers” that appear in both PII
+  and Ad ID keyed tables, which also cause problems. For example, assume we
+  change TABLE-01 and TABLE-02 as follows:
+</p>
+
+<table>
+ <tr>
+    <td><table>
+ <tr>
+    <td>
+      <code><strong>timestamp</strong></code></td>
+          <td class="tab2">
+      <code>ad_id</code></td>
+          <td>
+      <code>clickid</code></td>
+          <td>
+      <code><strong>dev_model</strong></code></td>
+       </tr>
+      </table>
+
+      </pre>
+      <p>TABLE-01</p>
+    </td>
+    <td>
+      <table>
+       <tr>
+          <td>
+      <code><strong>timestamp</strong></code></td>
+          <td class="tab2">
+      <code>demo</code></td>
+          <td class="tab2">
+      <code>account_id</code></td>
+          <td>
+      <code><strong>dev_model</strong></code></td>
+          <td class="tab2">
+      <code>name</code></td>
+       </tr>
+      </table>
+      <p>TABLE-02</p>
+    </td>
+ </tr>
+</table>
+
+
+<p>
+  In this case, with sufficiently rare click events, it's still possible to
+  join between the Advertiser ID TABLE-01 and the PII contained in TABLE-2
+  using the timestamp of the event and the device model.
+</p>
+
+<p>
+  While it is often difficult to guarantee that no such quasi-identifiers exist
+  in a dataset, the most obvious join risks can be prevented by generalizing
+  unique data where possible. In the example, this would mean reducing the
+  accuracy of the timestamp so that multiple devices with the same model appear
+  for every timestamp.
+</p>
+
+<p>
+  Other solutions include:
+</p>
+
+<ul>
+<li><em><strong>Not designing tables that explicitly link PII with Advertising
+IDs</strong></em>. In the first example above this would mean not including the
+account_id column in TABLE-01.</li>
+
+<li><em><strong>Segregating and monitoring access control lists for users or roles
+that have access to both the Advertising ID keyed data and PII</strong></em>. If the
+ability to access both sources simultaneously (for example, to perform
+a join between two tables) is tightly controlled and audited, it reduces the
+risk of association between the Advertising ID and PII. Generally speaking,
+controlling access means:
+
+<ol>
+  <li> Keeping access control lists (ACLs) for Advertiser ID keyed data and PII disjoint to
+  minimize the number of individuals or roles that are in both ACLs, and</li>
+  <li> Implementing access logging and auditing to detect and manage any exceptions to
+  this rule.</li>
+</ol>
+</li>
+</ul>
+
+<p>
+  For more information on working responsibly with Advertising IDs, please see
+  the <a href=
+  "https://support.google.com/googleplay/android-developer/answer/6048248?hl=en">
+  Advertising ID</a> help center article.
+</p>
+
+<h2 id="working_with_instance_ids_&_guids">Working with Instance IDs and GUIDs</h2>
+
+<p>
+  The most straightforward solution to identifying an application instance
+  running on a device is to use an Instance ID, and this is the recommended
+  solution in the majority of non-ads use-cases. Only the app instance for
+  which it was provisioned can access this identifier, and it's (relatively)
+  easily resettable because it only persists as long as the app is installed.
+</p>
+
+<p>
+  As a result, Instance IDs provide better privacy properties compared to
+  non-resettable, device-scoped hardware IDs. They also come with a key-pair
+  for message signing (and similar actions) and are available on Android, iOS
+  and Chrome. Please see the <a href=
+  "https://developers.google.com/instance-id/">What is Instance ID?</a> help
+  center document for more information.
+</p>
+
+<p>
+  In cases where an Instance ID isn't practical, custom globally unique IDs
+  (GUIDs) can also be used to uniquely identify an app instance. The simplest
+  way to do so is by generating your own GUID using the following code.
+</p>
+
+<pre>String uniqueID = UUID.randomUUID().toString();</pre>
+
+<p>
+  Because the identifier is globally unique, it can be used to identify a
+  specific app instance. To avoid concerns related to linking the identifier
+  across applications, GUIDs should be stored in internal storage rather than
+  external (shared) storage. Please see <a href=
+  "{@docRoot}guide/topics/data/data-storage.html">Storage Options</a> guide for
+  more information.
+</p>
+
+
+<h2 id="understand_identifier_characteristics">Understanding Identifier Characteristics</h2>
+
+<p>
+  The Android Operating system offers a number of IDs with different behavior
+  characteristics and which ID you should use depends on how those following
+  characteristics work with your use-case. But these characteristics also come
+  with privacy implications so it's important to understand how these
+  characteristics play together.
+</p>
+
+<h3 id="scope">Scope</h3>
+
+<p>
+  Identifier scope explains which systems can access the identifier. Android
+  identifier scope generally comes in three flavors:
+</p>
+
+<ul>
+  <li> <em>Single app</em>.  the ID is internal to the app and not accessible to other apps.
+  <li> <em>Group of apps</em> - the ID is accessible to a pre-defined group of related apps.
+  <li> <em>Device</em> - the ID is accessible to all apps installed on the device.
+</ul>
+
+<p>
+  The wider the scope granted to an identifier, the greater the risk of it
+  being used for tracking purposes. Conversely, if an identifier can only be
+  accessed by a single app instance, it can’t be used to track a device across
+  transactions in different apps.
+</p>
+<h3 id="resettability_&_persistence">Resettability and persistence</h3>
+
+<p>
+  Resettability and persistence define the lifespan of the identifier and
+  explain how it can be reset. Common reset triggers are: in-app resets, resets
+  via System Settings, resets on launch, and resets on installation. Android
+  Identifiers can have varying lifespans, but the lifespan is usually related
+  to how the ID is reset:
+</p>
+<ul>
+  <li> <em>Session-only</em> - a new ID is used every time the user restarts the app.
+  <li> <em>Install-reset</em> - a new ID is used every time user uninstalls and reinstalls the app.
+  <li> <em>FDR-reset</em> - a new ID is used every time the user factory-resets the device.
+  <li> <em>FDR-persistent</em> - the ID survives factory reset.
+</ul>
+
+<p>
+  Resettability gives users the ability to create a new ID that is
+  disassociated from any existing profile information. This is important
+  because the longer, and more reliably, an identifier persists (e.g. across
+  factory resets etc.), the greater the risk that the user may be subjected to
+  long-term tracking. If the identifier is reset upon app reinstall, this
+  reduces the persistence and provides a means for the ID to be reset, even if
+  there is no explicit user control to reset it from within the app or the
+  System Settings.
+</p>
+<h3 id="uniqueness">Uniqueness</h3>
+
+<p>
+  Uniqueness establishes the likelihood that identical identifiers exist within
+  the associated scope. At the highest level, a globally unique identifier will
+  never have a collision - even on other devices/apps. Otherwise, the level of
+  uniqueness depends on the size of the identifier and the source of randomness
+  used to create it. For example, the chance of a collision is much higher for
+  random identifiers seeded with the calendar date of installation (e.g.,
+  2015-01-05) than for identifiers seeded with the Unix timestamp of
+  installation (e.g., 1445530977).
+</p>
+
+<p>
+  In general, user account identifiers can be considered unique (i.e., each
+  device/account combo has a unique ID). On the other hand, the less unique
+  an identifier is within a population (e.g. of devices), the greater the
+  privacy protection because it's less useful for tracking an individual user.
+</p>
+
+<h3 id="integrity_protection_and_non-repudiability">Integrity protection and
+non-repudiability</h3>
+
+<p>
+  An identifier that is difficult to spoof or replay can be used to prove that
+  the associated device or account has certain properties (e.g. it’s not a
+  virtual device used by a spammer). Difficult to spoof identifiers also
+  provide <em>non-repudiability</em>. If the device signs a message with a
+  secret key, it is difficult to claim someone else’s device sent the message.
+  Non-repudiability could be something a user wants (e.g. authenticating a
+  payment) or it could be an undesirable property (e.g. sending a message they
+  regret).
+</p>
+
+
+<h2 id="use_appropriate_identifiers">Common Use Cases and the Identifier to Use</h2>
+
+<p>
+  This section provides alternatives to using hardware IDs such as IMEI or
+  SSAID for the majority of use-cases. Relying on hardware IDs is discouraged
+  because the user cannot reset them and generally has limited control over
+  their collection.
+</p>
+
+<h3 id="a_track_signed-out_user_preferences">Tracking signed-out user preferences</h3>
+
+<p>
+  <em>In this case, you are saving per-device state on the server side.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Instance ID or a GUID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  Persisting information through reinstalls is not recommended because users
+  may want to reset their preferences by reinstalling the app.
+</p>
+
+<h3 id="b_track_signed-out_user_behavior">Tracking signed-out user behavior</h3>
+
+<p>
+  <em>In this case, you have created a profile of a user based on their
+  behavior across different apps/sessions on the same device.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Advertising ID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  Use of the Advertising ID is mandatory for Advertising use-cases per the
+  <a href="https://play.google.com/about/developer-content-policy.html">Google
+  Play Developer Content Policy</a> because the user can reset it.
+</p>
+
+<h3 id="c_generate_signed-out_anonymous_user_analytics">Generating signed-out/anonymous user analytics</h3>
+
+<p>
+  <em>In this case, you are measuring usage statistics and analytics for
+  signed-out or anonymous users.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Instance ID; if an Instance ID is
+  insufficient, you can also use a GUID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  An Instance ID or a GUID is scoped to the app that creates it, which prevents
+  it from being used to track users across apps. It is also easily reset by
+  clearing app data or reinstalling the app. Creating Instance IDs and GUIDs is
+  straightforward:
+</p>
+
+<ul>
+  <li> Creating an Instance ID: <code>String iid = InstanceID.getInstance(context).getId()</code>
+  <li> Creating a GUID: <code>String uniqueID = UUID.randomUUID().toString</code>
+</ul>
+
+<p>
+  Be aware that if you have told the user that the data you are collecting is
+  anonymous, you should <em><strong>ensure you are not connecting the
+  identifier to PII</strong></em> or other identifiers that may be linked to
+  PII.
+</p>
+
+<p>
+  You can also use Google Analytics for Mobile Apps, which offers a solution
+  for per-app analytics.
+</p>
+
+<h3 id="d_track_signed-out_user_conversion">Tracking signed-out user conversion</h3>
+
+<p>
+  <em>In this case, you are tracking conversions to detect if your marketing
+  strategy was successful.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Advertising ID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  This is an ads-related use-case which may require an ID that is available
+  across different apps so using an Advertising ID is the most appropriate
+  solution.
+</p>
+
+<h3 id="e_handle_multiple_installations">Handling multiple installations</h3>
+
+<p>
+  <em>In this case, you need to identify the correct instance of the app when
+  it's installed on multiple devices for the same user.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Instance ID or GUID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  Instance ID is designed explicitly for this purpose; its scope is limited to
+  the app so that it cannot be used to track users across different apps and it
+  is reset upon app reinstall. In the rare cases where an Instance ID is
+  insufficient, you can also use a GUID.
+</p>
+
+<h3 id="f_anti-fraud_enforcing_free_content_limits_detecting_sybil_attacks">Anti-fraud: Enforcing free content limits / detecting Sybil attacks</h3>
+
+<p>
+  <em>In this case, you want to limit the number of free content (e.g.
+  articles) a user can see on a device.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: Instance ID or GUID.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  Using a GUID or Instance ID forces the user to reinstall the app in order to
+  overcome the content limits, which is a sufficient burden to deter most
+  people. If this is not sufficient protection, Android provides a
+  <a href="http://source.android.com/devices/drm.html">DRM API</a>
+  which can be used to limit access to content.
+</p>
+
+<h3 id="g_manage_telephony_&_carrier_functionality">Managing telephony and carrier functionality</h3>
+
+<p>
+  <em>In this case, your app is interacting with the device's phone and texting
+  functionality.</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: IMEI, IMSI, and Line1 (requires <code>PHONE</code>
+  permission group in Android 6.0 (API level 23) and higher).
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  Leveraging hardware identifiers is acceptable if it is required for
+  telephony/carrier related functionality; for example, switching between
+  cellular carriers/SIM slots or delivering SMS messages over IP (for Line1) -
+  SIM-based user accounts. But it's important to note that in Android 6.0+
+  these identifiers can only be used via a runtime permission and that users
+  may toggle off this permission so your app should handle these exceptions
+  gracefully.
+</p>
+
+<h3 id="h_abuse_detection_identifying_bots_and_ddos_attacks">Abuse detection:
+Identifying bots and DDoS attacks</h3>
+
+<p>
+  <em>In this case, you are trying to detect multiple fake devices attacking
+  your backend services.</em>
+</p>
+
+<p>
+  <strong>We Recommend:</strong> The Safetynet API.
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  An identifier in isolation does little to indicate that a device is genuine.
+  You can verify that a request comes from a genuine Android device (as opposed
+  to an emulator or other code spoofing another device) using the Safetynet
+  API's <code>SafetyNet.SafetyNetApi.attest(mGoogleApiClient, nonce)</code>
+  method to verify the integrity of a device making a request. For more
+  detailed information, please see <a href=
+  "{@docRoot}training/safetynet/index.html">Safetynet's API documentation</a>.
+</p>
+
+<h3 id="i_abuse_detection_detecting_high_value_stolen_credentials">Abuse detection:
+Detecting high value stolen credentials</h3>
+
+<p>
+  <em>In this case, you are trying to detect if a single device is being used
+  multiple times with high-value, stolen credentials (e.g. to make fraudulent
+  payments).</em>
+</p>
+
+<p>
+  <strong>We Recommend</strong>: IMEI/IMSI (requires <code>PHONE</code>
+  permission group in Android 6.0 (API level 23) and higher.)
+</p>
+
+<p>
+  <strong>Why this Recommendation?</strong>
+</p>
+
+<p>
+  With stolen credentials, devices can be used to monetize multiple high value
+  stolen credentials (such as tokenized credit cards). In these scenarios,
+  software IDs can be reset to avoid detection, so hardware identifiers may be
+  used.
+</p>

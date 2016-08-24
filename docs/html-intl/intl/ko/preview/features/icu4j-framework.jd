@@ -1,0 +1,159 @@
+page.title=ICU4J Android 프레임워크 API
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>이 문서의 내용</h2>
+<ol>
+    <li><a href="#relation">ICU4J와의 관계</a></li>
+    <li><a href="#migration">android.icu API에서 ICU4J로 마이그레이션</a></li>
+    <li><a href="#licence">라이선스</a></li>
+</ol>
+
+<h2>참고 항목</h2>
+<ol>
+  <li>
+    <a class="external-link" href="http://userguide.icu-project.org">ICU4J 문서</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="http://site.icu-project.org/#TOC-What-is-ICU-">
+ICU4J가 지원하는 최신 표준</a>
+  </li>
+</ol>
+</div>
+</div>
+
+<p>
+  ICU4J는 오픈 소스이며 널리 사용되는 Java 라이브러리 세트로, 소프트웨어 애플리케이션에 유니코드와
+세계화 지원을 제공합니다. Android N은
+Android 프레임워크에서 앱 개발자가
+{@code android.icu} 패키지에서 사용할 수 있는 ICU4J API의 하위 세트를 노출합니다. 이 API는
+기기의 현지화 데이터를 사용합니다. 따라서 ICU4J 라이브러리를 APK로 컴파일하지 않고
+프레임워크에서 호출하여APK
+풋프린트를 줄일 수 있습니다. (이 경우, Android N 이하 버전의 Android를
+실행하는 사용자가 ICU4J 라이브러리를 포함한 앱 버전을 다운로드할 수 있도록
+<a href="{@docRoot}google/play/publishing/multiple-apks.html">여러 버전의
+APK</a>를 제공해야 할 수도 있습니다.)
+</p>
+
+<p>
+  이 문서에서는 먼저 이 라이브러리 지원에 필요한 최소
+Android API 레벨과 관련된 몇 가지 기본 정보를 제공합니다. 그 후,
+각 Android에서 ICU4J를 구현하는 데 무엇이 필요한지 설명합니다. 마지막으로,
+Android 프레임워크에서 ICU4J API를 사용하는 방법을 설명합니다.
+</p>
+
+<h2 id="relation">ICU4J와의 관계</h2>
+
+<p>
+  Android N은
+<code>com.ibm.icu</code>가 아니라 <code>android.icu</code> 패키지를 통해 ICU4J API의 하위 세트를 노출합니다. 
+Android 프레임워크는 여러 가지 이유로
+ICU4J API를 노출하지 않을 수 있습니다. 예컨대 Android N은
+일부 사용 중단된 API나 ICU 팀에서 안정적이라고 선언하지 않은 API를
+노출하지 않습니다. ICU 팀이 이후 API의 사용을 중단하면, Android도
+이를 사용 중단됨으로 표시하지만 계속 포함합니다.
+</p>
+
+<p class="table-caption"><strong>표 1.</strong>
+Android N에서 사용된 ICU 및 CLDR 버전.</p>
+<table>
+<tr>
+<th>Android API 레벨</th>
+<th>ICU 버전</th>
+<th>CLDR 버전</th>
+</tr>
+<tr>
+<td>Android N</td>
+<td>56</td>
+<td>28</td>
+</tr>
+</table>
+
+<p>중요한 참고 사항:</p>
+
+<ul>
+<li>ICU4J Android 프레임워크 API에는 모든 ICU4J API가 포함되지 않습니다.</li>
+<li>NDK 개발자는 Android ICU4C가 지원되지 않는다는 것을 알아야 합니다.</li>
+<li>Android 프레임워크의 API는 Android의
+<a href="{@docRoot}guide/topics/resources/localization.html">리소스로
+현지화</a> 지원을 대체하지 못합니다.</li>
+</ul>
+
+<h2 id="migration">com.ibm.icu에서 android.icu 패키지로 마이그레이션</h2>
+
+<p>
+  앱에서 이미 ICU4J API를 사용하고 있고
+<code>android.icu</code> API가 요구사항을 충족한다면
+프레임워크 API로 마이그레이션할 때 Java 가져오기를
+<code>com.ibm.icu</code>에서 <code>android.icu</code>로 변경해야 합니다. 그러면 APK에서
+ICU4J 파일 사본을 삭제할 수 있습니다.
+</p>
+
+<p class="note">
+  <b>참고</b>: ICU4J 프레임워크 API는 {@code com.ibm.icu} 대신 {@code android.icu}
+네임스페이스를 사용합니다. 이는 자체 {@code com.ibm.icu} 라이브러리가 포함된 APK에서
+네임스페이스 충돌을 피하기 위해서입니다.
+</p>
+
+<h3 id="migrate-from-android">
+  다른 Android SDK API에서 android.icu API로 마이그레이션
+</h3>
+
+<p>
+  <code>java</code>와 <code>android</code> 패키지의 일부 클래스는
+ICU4J의 클래스와 같습니다. 그러나 ICU4J는 종종 더욱 폭넓은
+표준과 언어를 지원합니다.
+</p>
+<p>시작하기 위한 몇 가지 예시는 다음과 같습니다.</p>
+<table>
+<tr>
+<th>클래스</th>
+<th>대체</th>
+</tr>
+<tr>
+<td><code>java.lang.Character</code> </td>
+<td><code>android.icu.lang.UCharacter</code> </td>
+</tr>
+<tr>
+<td><code>java.text.BreakIterator</code> </td>
+<td><code>android.icu.text.BreakIterator</code> </td>
+</tr>
+<tr>
+<td><code>java.text.DecimalFormat</code> </td>
+<td><code>android.icu.text.DecimalFormat</code> </td>
+</tr>
+<tr>
+<td><code>java.util.Calendar</code></td>
+<td>
+<code>android.icu.util.Calendar</code></td>
+</tr>
+<tr>
+<td><code>android.text.BidiFormatter</code>
+ </td>
+<td><code>android.icu.text.Bidi</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateFormat</code>
+ </td>
+<td><code>android.icu.text.DateFormat</code>
+ </td>
+</tr>
+<tr>
+<td><code>android.text.format.DateUtils</code> </td>
+<td><code>android.icu.text.DateFormat</code>
+<code>android.icu.text.RelativeDateTimeFormatter</code>
+</td>
+</tr>
+</table>
+
+<h2 id="licence">라이선스</h2>
+
+<p>
+  ICU4J는 ICU 라이선스에 따라 배포됩니다. 자세한 내용은 <a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU
+ 사용자 가이드</a>를 참조하세요.
+</p>

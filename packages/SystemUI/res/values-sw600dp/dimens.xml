@@ -32,22 +32,12 @@
     <!-- The width of the view containing the menu/ime navigation bar icons -->
     <dimen name="navigation_extra_key_width">48dip</dimen>
 
-    <!-- Size of application thumbnail -->
-    <dimen name="status_bar_recents_thumbnail_width">200dp</dimen>
-    <dimen name="status_bar_recents_thumbnail_height">177dp</dimen>
-
     <!-- Minimum fraction of the screen that should be taken up by the notification panel. -->
     <item type="dimen" name="notification_panel_min_height_frac">40%</item>
 
     <!-- How far to slide the panel out when you touch it -->
     <!-- On tablets this is just the close_handle_height -->
     <dimen name="peek_height">@dimen/close_handle_height</dimen>
-
-    <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.075</item>
-
-    <!-- The height of the search bar space. -->
-    <dimen name="recents_search_bar_space_height">72dp</dimen>
 
     <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
          max value is used when no notifications are displaying, and the min value is when the
@@ -98,4 +88,17 @@
          In sw600dp we want the buttons centered so this fills the space,
          (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
     <dimen name="screen_pinning_request_side_width">8dp</dimen>
+
+    <dimen name="fab_margin">24dp</dimen>
+
+    <dimen name="navigation_key_width">128dp</dimen>
+    <dimen name="navigation_key_padding">25dp</dimen>
+
+    <dimen name="qs_expand_margin">0dp</dimen>
+
+    <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_layout_width">488dp</dimen>
+
+    <!-- The offsets the tasks animate from when recents is launched while docking -->
+    <dimen name="recents_task_stack_animation_launched_while_docking_offset">192dp</dimen>
 </resources>

@@ -1,0 +1,555 @@
+page.title=Android for Work Updates
+page.metaDescription=New Android for Work APIs and features in Android N.
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#qr">QR Code Provisioning
+                </a></li>
+
+        <li><a href="#sec-challenge">Work Profile Security Challenge
+                </a></li>
+
+        <li><a href="#suspend">Disable Access to Apps
+                </a></li>
+
+        <li><a href="#toggle-work">Toggle Work Mode
+                </a></li>
+
+        <li><a href="#always-on-vpn">Always-On VPN
+                </a></li>
+
+        <li><a href="#contacts">Contacts Integration with Work Profile
+                </a></li>
+
+        <li><a href="#remote-reboot">Remote Reboot
+                </a></li>
+
+        <li><a href="#disable-roaming">Disable Data Roaming
+                </a></li>
+
+        <li><a href="#process-logging">Enterprise Process Logging
+                </a></li>
+
+        <li><a href="#bug-reports">Remote Bug Reports
+                </a></li>
+
+        <li><a href="#remove-cert">Remove a Client Certificate
+                </a></li>
+
+        <li><a href="#grant-cert-on-install">Grant Access to Client Certificate
+                on Installation</a></li>
+
+        <li><a href="#ui-policy">System UI Policy Transparency
+                </a></li>
+
+        <li><a href="#managed-configurations">Managed Configurations Enhancements
+                </a></li>
+
+        <li><a href="#location-off">Location Off Switch
+                </a></li>
+
+        <li><a href="#custom-provisioning">Customized Provisioning
+                </a></li>
+
+        <li><a href="#multi-wifi-ca">Multiple Wi-Fi CA Certificates
+                </a></li>
+
+        <li><a href="#custom-lock">Customized Lockscreen Message
+                </a></li>
+
+        <li><a href="#work-connectionservice">Work Profile ConnectionService
+                </a></li>
+
+        <li><a href="#lock-wp">Lock Down Wallpaper
+                </a></li>
+
+        <li><a href="#lock-user-icon">Lock Down User Icon
+                </a></li>
+
+        <li><a href="#health-monitoring">Device Health Monitoring
+                </a></li>
+
+      </ol>
+
+    <h2>See Also</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+            Reference</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>This document describes the new Android for Work features provided in
+Android N.</p>
+
+<h2 id="qr">QR Code Provisioning</h2>
+
+<p>
+  Android for Work now supports using QR codes to provision corporate-liable
+  devices. The setup wizard now allows you to scan a QR code to provision
+  the device.
+</p>
+
+<h2 id="sec-challenge">Work Profile Security Challenge</h2>
+
+<p>
+  Profile owners can require users to specify a security challenge for apps
+  running in the work profile. The system shows the security challenge when the
+  user attempts to open any work apps. If the user successfully completes the
+  security challenge, the system unlocks the work profile and decrypts it if
+  necessary.
+</p>
+
+<p>
+  If a profile owner sends an {@link
+  android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD} intent, the
+  system prompts a user to set up a security challenge. The profile owner can
+  also send an <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> intent to
+  prompt the user to set a device lock.
+</p>
+
+<p>
+  Profile owners can choose to set the password policies for the work challenge
+  differently from the policies for other device passwords. For example, the
+  minimum length for the device challenge response can be different from the
+  length required for other passwords. Profile owners set the challenge
+  policies using the usual {@link android.app.admin.DevicePolicyManager}
+  methods, such as {@link
+  android.app.admin.DevicePolicyManager#setPasswordQuality
+  setPasswordQuality()} and {@link
+  android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+  setPasswordMinimumLength()}. The profile owner can also set the device lock,
+  by using the {@link android.app.admin.DevicePolicyManager} instance returned
+  by the new <code>DevicePolicyManager.getParentProfileInstance()</code>
+  method. Additionally, profile owners can customize the credentials screen for
+  the work challenge by using the {@link android.app.admin.DevicePolicyManager}
+  class's new <code>setOrganizationColor()</code> and
+  <code>setOrganizationName()</code> methods.
+</p>
+
+<p>
+  For details on the new methods and constants, see the
+  <code>DevicePolicyManager</code> reference page in the <a
+  href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK Reference</a>.
+</p>
+
+<h2 id="suspend">Disable Access to Apps</h2>
+
+<p>
+  Device owners and profile owners can temporarily suspend access to packages
+  by calling the new <code>DevicePolicyManager.setPackagesSuspended()</code>
+  method. Owners can use the same method to re-enable those packages.
+</p>
+
+<p>
+  While a package is suspended, it cannot start activities, notifications to
+  the package are suppressed, and the app's entry in the <a
+  href="{@docRoot}guide/components/recents.html">overview screen</a> is hidden.
+  Suspended packages do not show in the <a href=
+  "{@docRoot}guide/components/recents.html">overview screen</a>, and they
+  cannot show dialogs (including toasts and snackbars). They also cannot play
+  audio or vibrate the device.
+</p>
+
+<p>
+  Launchers should apply a distinctive UI to suspended apps to show that the
+  apps aren't currently available; for example, they might render the app icon
+  in gray. Launchers can find out if an app is suspended by calling the new
+  <code>DevicePolicyManager.getPackageSuspended()</code> method.
+</p>
+
+<h2 id="toggle-work">Toggle Work Mode</h2>
+
+<p>
+  On dual-profile devices, users can toggle work mode on and off. While work
+  mode is turned off, the managed profile is temporarily shut down. Work
+  profile apps, background sync, and notifications are all disabled, including
+  the profile owner app. While the work profile is disabled, the system
+  displays a persistent status icon to remind users that they can't launch work
+  apps. The system launcher indicates that work apps and widgets are not
+  accessible.
+</p>
+
+<h2 id="always-on-vpn">Always-On VPN</h2>
+
+<p>
+  Device owners and profile owners can require that work apps always connect to
+  the network through a specified VPN. If owners set this requirement, the
+  device automatically starts that VPN at boot time.
+</p>
+
+<p>
+  Owners can require use of a VPN by calling the new
+  <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code> method. To find out
+  if the owner has set a VPN requirement, call the new
+  <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code> method.
+</p>
+
+<p>
+  Because the system can directly bind VPN services without app interaction,
+  VPN clients need to handle new entry points for always-on VPN. As before, you
+  can find active services by using an intent filter that matches the action
+  {@link android.net.VpnService android.net.VpnService}.
+</p>
+
+<p>
+  Users can manually set an always-on VPN client that implement {@link
+  android.net.VpnService} by using the <strong>Settings &gt; More &gt;
+  VPN</strong> screen.
+</p>
+
+<h2 id="contacts">Contacts Integration with Work Profile</h2>
+
+<p>
+  Profile owners can allow local search and directory lookup of work contacts
+  from the primary user. For example, a user can access both personal and work
+  directory contacts from their personal dialer or contacts application (if
+  permitted by their profile administrator).
+</p>
+
+<p>
+  Developers that leverage the Contact Provider can use the Enterprise Contacts
+  API to access work profile directory entries from the primary user if allowed
+  by policy:
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  Profile owners can control the visibility of work contacts in the primary
+  user using the following new methods:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">Remote Reboot</h2>
+
+<p>
+  Device owners can remotely reboot devices. In some cases, devices deployed in
+  public places inside enclosures can prevent access to the power button. If a
+  device needs to be rebooted, administrators can do so using the new
+  <code>DevicePolicyManager.reboot()</code> method.
+</p>
+
+<h2 id="disable-roaming">Disable Data Roaming</h2>
+
+<p>
+  Device owners can disable data roaming using the new {@link
+  android.os.UserManager} user restriction <code>DISALLOW_DATA_ROAMING</code>.
+</p>
+
+<h2 id="process-logging">Enterprise Process Logging</h2>
+
+<p>
+  Device owners can identify suspicious activity by remotely tracking device
+  activity, including app launches, adb activity, and screen unlocks. Process
+  logs don’t require user consent. To retrieve logs, device owners enable
+  device logging using <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>.
+</p>
+
+<p>
+  API changes include:
+</p>
+
+<ul>
+
+  <li>
+    The new class <code>android.app.admin.SecurityLog</code> and its
+    methods
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">Remote Bug Reports</h2>
+
+<p>
+  Device owners can remotely trigger and retrieve a bug report that contains a
+  device state dump file, which allows forensic investigation of a known
+  incident or compromised device. Due to the detailed nature of the bug report,
+  user consent is required.
+</p>
+
+<p>
+  Android N includes the following API additions to support this feature. For
+  details, see the <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+  Reference</a>.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">Remove a Client Certificate</h2>
+
+<p>
+  Profile owners and device owners can now remove client certificates that were
+  installed through {@link android.app.admin.DevicePolicyManager#installKeyPair
+  installKeyPair()} by calling the new method
+  <code>DevicePolicyManager.removeKeyPair()</code>.
+</p>
+
+<h2 id="grant-cert-on-install">Grant Access to Client Certificate on
+  Installation</h2>
+
+<p>
+  If a profile owner or device owner grants a third-party app the ability to
+  manage certificates, the app can grant itself access to certificates it
+  installs without any intervention by the owner.
+</p>
+
+<p>
+  The existing API for managing certificates is extended to include:
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">System UI Policy Transparency</h2>
+
+<p>
+  Policies that affect the user experience or restrict user Settings are fully
+  disclosed to the user, and profile owners and device owners can attribute the
+  policy to their company’s IT department. In addition to a consistent “Action
+  not allowed” message in Settings, IT administrators can set an
+  organization-specific support message in device settings with the following
+  new {@link android.app.admin.DevicePolicyManager} methods:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="managed-configurations">Managed Configurations Enhancements</h2>
+
+<p>
+  The device or profile owner can enable another application to manage
+  configurations via the new
+  <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
+  method. The nominated application can check whether this permission has been
+  granted by calling
+  <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>.
+</p>
+
+<p>
+  An application nominated to manage configurations can call {@link
+  android.app.admin.DevicePolicyManager#setApplicationRestrictions
+  setApplicationRestrictions()} and {@link
+  android.app.admin.DevicePolicyManager#getApplicationRestrictions
+  getApplicationRestrictions()} for any packages within that user or profile.
+</p>
+
+<h2 id="location-off">Location Off Switch</h2>
+
+<p>
+  Users can disable location permissions for work apps while continuing to
+  access location information in their personal apps. A separate location
+  access switch in Location Settings allows users to deny location updates or
+  last-location queries for apps running in the work profile.
+</p>
+
+<p>
+  The top level location off switch disables location access for both the
+  primary profile and the managed profile.
+</p>
+
+<h2 id="custom-provisioning">Customized Provisioning</h2>
+
+<p>
+  An application can customize the profile owner and device owner provisioning
+  flows with corporate colors and logos.
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    Customizes flow color.
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    Customizes the flow with a corporate logo.
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">Multiple Wi-Fi CA Certificates</h2>
+
+<p>
+  Profile owners and device owners can set multiple CA certificates for a given
+  Wi-Fi configuration. When corporate Wi-Fi networks have separate CAs for
+  separate access points with the same SSID, IT administrators can include all
+  relevant CAs in the Wi-Fi configuration using the new method
+  <code>setCaCertificates()</code>.
+</p>
+
+<p>
+  APIs added are:
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">Customized Lockscreen Message</h2>
+
+<p>
+  Device owners can provide owner information to be shownon the lockscreen.
+  This information takes precedence over the user lock screen message (if one is
+  set). New {@link android.app.admin.DevicePolicyManager} methods are:
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">Work Profile ConnectionService</h2>
+
+<p>
+  Profile owners can specify a work dialer application that uses a
+  work-specific {@link android.telecom.ConnectionService} for the calling
+  backend (calling accounts). The work dialer maintains a work-only call log
+  and relies on work contacts only. Users have a consistent in-call UI
+  experience regardless of dialing application. Incoming work calls to the work
+  calling accounts are distinguished from personal incoming calls to the
+  personal calling accounts.
+</p>
+
+<p>
+  The dialer should check for the new flag
+  <code>android.telecom.Call.PROPERTY_ENTERPRISE_CALL</code> to determine if a call
+  is a work call. If a call is a work call, the dialer should indicate this,
+  such as by adding a work badge.
+</p>
+
+<h2 id="lock-wp">Lock Down Wallpaper</h2>
+
+<p>
+  A new user restriction (<code>DISALLOW_SET_WALLPAPER</code>) prevents the
+  user from changing their wallpaper. The device owner or profile owner can
+  still change the wallpaper, but they can only change the wallpaper for the
+  user or profile they control. For example, a profile owner can’t change the
+  wallpaper of the parent user, but a profile owner in the primary profile or
+  device owner can. A profile owner or device owner that wants to change the
+  wallpaper should check whether the the user or profile they manage has a
+  wallpaper ({@link android.app.WallpaperManager#isWallpaperSupported
+  isWallpaperSupported()}) and whether they are allowed to change it (with the
+  new method <code>WallpaperManager.isWallpaperSettingAllowed()</code>)
+</p>
+
+<h2 id="lock-user-icon">Lock Down User Icon</h2>
+
+<p>
+  A new user restriction (<code>DISALLOW_SET_USER_ICON</code>) prevents the
+  user from changing their user icon. The user’s device owner or profile owner
+  can still change the icon. However, a profile owner can only change the user
+  icon for the profile it controls.
+</p>
+
+<h2 id="health-monitoring">Device Health Monitoring</h2>
+
+<p>
+  A device owner or profile owner can use the new
+  <code>HardwarePropertiesManager</code> interface to retrieve information
+  about device health, such as CPU or GPU temperatures and CPU usage. The new
+  monitoring interface is especially useful for monitoring unattended devices
+  running in a remote location.
+</p>

@@ -20,8 +20,11 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -52,6 +55,7 @@ public class KeyButtonView extends ImageView {
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
+    private boolean mLongClicked;
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -60,9 +64,11 @@ public class KeyButtonView extends ImageView {
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
                     performLongClick();
+                    mLongClicked = true;
                 } else if (mSupportsLongpress) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                    mLongClicked = true;
                 }
             }
         }
@@ -94,6 +100,24 @@ public class KeyButtonView extends ImageView {
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setBackground(new KeyButtonRipple(context, this));
+    }
+
+    public void setCode(int code) {
+        mCode = code;
+    }
+
+    public void loadAsync(String uri) {
+        new AsyncTask<String, Void, Drawable>() {
+            @Override
+            protected Drawable doInBackground(String... params) {
+                return Icon.createWithContentUri(params[0]).loadDrawable(mContext);
+            }
+
+            @Override
+            protected void onPostExecute(Drawable drawable) {
+                setImageDrawable(drawable);
+            }
+        }.execute(uri);
     }
 
     @Override
@@ -155,6 +179,7 @@ public class KeyButtonView extends ImageView {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
+                mLongClicked = false;
                 setPressed(true);
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
@@ -181,7 +206,7 @@ public class KeyButtonView extends ImageView {
                 removeCallbacks(mCheckLongPress);
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed();
+                final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
                 if (mCode != 0) {
                     if (doIt) {

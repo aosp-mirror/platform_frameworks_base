@@ -65,6 +65,10 @@ class ApplicationLoaders {
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupVulkanLayerPath");
+                setupVulkanLayerPath(pathClassloader, librarySearchPath);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
             }
@@ -74,6 +78,20 @@ class ApplicationLoaders {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return pathClassloader;
         }
+    }
+
+    private static native void setupVulkanLayerPath(ClassLoader classLoader, String librarySearchPath);
+
+    /**
+     * Adds a new path the classpath of the given loader.
+     * @throws IllegalStateException if the provided class loader is not a {@link PathClassLoader}.
+     */
+    void addPath(ClassLoader classLoader, String dexPath) {
+        if (!(classLoader instanceof PathClassLoader)) {
+            throw new IllegalStateException("class loader is not a PathClassLoader");
+        }
+        final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
+        baseDexClassLoader.addDexPath(dexPath);
     }
 
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();

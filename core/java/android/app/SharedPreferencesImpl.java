@@ -87,20 +87,20 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
         new Thread("SharedPreferencesImpl-load") {
             public void run() {
-                synchronized (SharedPreferencesImpl.this) {
-                    loadFromDiskLocked();
-                }
+                loadFromDisk();
             }
         }.start();
     }
 
-    private void loadFromDiskLocked() {
-        if (mLoaded) {
-            return;
-        }
-        if (mBackupFile.exists()) {
-            mFile.delete();
-            mBackupFile.renameTo(mFile);
+    private void loadFromDisk() {
+        synchronized (SharedPreferencesImpl.this) {
+            if (mLoaded) {
+                return;
+            }
+            if (mBackupFile.exists()) {
+                mFile.delete();
+                mBackupFile.renameTo(mFile);
+            }
         }
 
         // Debugging
@@ -118,30 +118,30 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     str = new BufferedInputStream(
                             new FileInputStream(mFile), 16*1024);
                     map = XmlUtils.readMapXml(str);
-                } catch (XmlPullParserException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
-                } catch (FileNotFoundException e) {
-                    Log.w(TAG, "getSharedPreferences", e);
-                } catch (IOException e) {
+                } catch (XmlPullParserException | IOException e) {
                     Log.w(TAG, "getSharedPreferences", e);
                 } finally {
                     IoUtils.closeQuietly(str);
                 }
             }
         } catch (ErrnoException e) {
+            /* ignore */
         }
-        mLoaded = true;
-        if (map != null) {
-            mMap = map;
-            mStatTimestamp = stat.st_mtime;
-            mStatSize = stat.st_size;
-        } else {
-            mMap = new HashMap<String, Object>();
+
+        synchronized (SharedPreferencesImpl.this) {
+            mLoaded = true;
+            if (map != null) {
+                mMap = map;
+                mStatTimestamp = stat.st_mtime;
+                mStatSize = stat.st_size;
+            } else {
+                mMap = new HashMap<>();
+            }
+            notifyAll();
         }
-        notifyAll();
     }
 
-    private static File makeBackupFile(File prefsFile) {
+    static File makeBackupFile(File prefsFile) {
         return new File(prefsFile.getPath() + ".bak");
     }
 

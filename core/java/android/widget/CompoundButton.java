@@ -456,14 +456,11 @@ public abstract class CompoundButton extends Button implements Checkable {
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        
-        if (mButtonDrawable != null) {
-            int[] myDrawableState = getDrawableState();
-            
-            // Set the state of the Drawable
-            mButtonDrawable.setState(myDrawableState);
-            
-            invalidate();
+
+        final Drawable buttonDrawable = mButtonDrawable;
+        if (buttonDrawable != null && buttonDrawable.isStateful()
+                && buttonDrawable.setState(getDrawableState())) {
+            invalidateDrawable(buttonDrawable);
         }
     }
 
@@ -477,7 +474,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
+    protected boolean verifyDrawable(@NonNull Drawable who) {
         return super.verifyDrawable(who) || who == mButtonDrawable;
     }
 

@@ -17,6 +17,14 @@
 #ifndef ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 #define ANDROID_HWUI_DISPLAY_LIST_RENDERER_H
 
+#include "CanvasState.h"
+#include "DisplayList.h"
+#include "RenderNode.h"
+#include "ResourceCache.h"
+#include "SkiaCanvasProxy.h"
+#include "hwui/Canvas.h"
+#include "utils/Macros.h"
+
 #include <SkDrawFilter.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
@@ -24,13 +32,6 @@
 #include <SkRegion.h>
 #include <SkTLazy.h>
 #include <cutils/compiler.h>
-
-#include "Canvas.h"
-#include "CanvasState.h"
-#include "DisplayList.h"
-#include "SkiaCanvasProxy.h"
-#include "RenderNode.h"
-#include "ResourceCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -54,6 +55,7 @@ class DeferredDisplayList;
 class DeferredLayerUpdater;
 class DisplayListOp;
 class DrawOp;
+class DrawRenderNodeOp;
 class RenderNode;
 class StateOp;
 
@@ -62,67 +64,37 @@ class StateOp;
  */
 class ANDROID_API DisplayListCanvas: public Canvas, public CanvasStateClient {
 public:
-    DisplayListCanvas();
+    DisplayListCanvas(int width, int height);
     virtual ~DisplayListCanvas();
 
-    void insertReorderBarrier(bool enableReorder);
-
-    DisplayListData* finishRecording();
-
-// ----------------------------------------------------------------------------
-// HWUI Frame state operations
-// ----------------------------------------------------------------------------
-
-    void prepareDirty(float left, float top, float right, float bottom);
-    void prepare() { prepareDirty(0.0f, 0.0f, width(), height()); }
-    bool finish();
-    void interrupt();
-    void resume();
+    virtual void resetRecording(int width, int height) override;
+    virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas state operations
 // ----------------------------------------------------------------------------
 
-    void setViewport(int width, int height) { mState.setViewport(width, height); }
-
-    const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
-
-    bool isCurrentTransformSimple() {
-        return mState.currentTransform()->isSimple();
-    }
+    virtual void insertReorderBarrier(bool enableReorder) override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations
 // ----------------------------------------------------------------------------
 
-    // Bitmap-based
-    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
-    // TODO: move drawPatch() to Canvas.h
-    void drawPatch(const SkBitmap& bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint);
-
     // Shapes
-    void drawRects(const float* rects, int count, const SkPaint* paint);
-    void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
+    virtual void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
                 CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
                 CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
-                CanvasPropertyPaint* paint);
-    void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
-                CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
-
+                CanvasPropertyPaint* paint) override;
+    virtual void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
+                CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) override;
 
 // ----------------------------------------------------------------------------
 // HWUI Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    void drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
-    void drawRenderNode(RenderNode* renderNode);
-
-    // TODO: rename for consistency
-    void callDrawGLFunction(Functor* functor);
-
-    void setHighContrastText(bool highContrastText) {
-        mHighContrastText = highContrastText;
-    }
+    virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
+    virtual void drawRenderNode(RenderNode* renderNode) override;
+    virtual void callDrawGLFunction(Functor* functor,
+            GlFunctorLifecycleListener* listener) override;
 
 // ----------------------------------------------------------------------------
 // CanvasStateClient interface
@@ -144,19 +116,24 @@ public:
     virtual int width() override { return mState.getWidth(); }
     virtual int height() override { return mState.getHeight(); }
 
+    virtual void setHighContrastText(bool highContrastText) override {
+        mHighContrastText = highContrastText;
+    }
+    virtual bool isHighContrastText() override { return mHighContrastText; }
+
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas state operations
 // ----------------------------------------------------------------------------
     // Save (layer)
     virtual int getSaveCount() const override { return mState.getSaveCount(); }
-    virtual int save(SkCanvas::SaveFlags flags) override;
+    virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-        SkCanvas::SaveFlags flags) override;
+        SaveFlags::Flags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SkCanvas::SaveFlags flags) override {
+            int alpha, SaveFlags::Flags flags) override {
         SkPaint paint;
         paint.setAlpha(alpha);
         return saveLayer(left, top, right, bottom, &paint, flags);
@@ -165,7 +142,6 @@ public:
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
     virtual void setMatrix(const SkMatrix& matrix) override;
-    virtual void setLocalMatrix(const SkMatrix& matrix) override;
 
     virtual void concat(const SkMatrix& matrix) override;
     virtual void rotate(float degrees) override;
@@ -205,6 +181,7 @@ public:
     }
     virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
     virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
+    virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) override;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
@@ -226,17 +203,19 @@ public:
             float dstRight, float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
+    virtual void drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
+            float dstLeft, float dstTop, float dstRight, float dstBottom,
+            const SkPaint* paint) override;
+
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
 
     // Text
-    virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
+    virtual void drawGlyphs(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
             float boundsRight, float boundsBottom, float totalAdvance) override;
-    virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint) override;
-    virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
+    virtual void drawGlyphsOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
-
 
 private:
 
@@ -249,11 +228,14 @@ private:
         kBarrier_OutOfOrder,
     };
 
+    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    void drawRects(const float* rects, int count, const SkPaint* paint);
+
     void flushRestoreToCount();
     void flushTranslate();
     void flushReorderBarrier();
 
-    LinearAllocator& alloc() { return mDisplayListData->allocator; }
+    LinearAllocator& alloc() { return mDisplayList->allocator; }
 
     // Each method returns final index of op
     size_t addOpAndUpdateChunk(DisplayListOp* op);
@@ -270,13 +252,9 @@ private:
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
         if (!srcBuffer) return nullptr;
 
-        T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
+        T* dstBuffer = (T*) mDisplayList->allocator.alloc<T>(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
-    }
-
-    inline char* refText(const char* text, size_t byteLength) {
-        return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
     }
 
     inline const SkPath* refPath(const SkPath* path) {
@@ -285,7 +263,7 @@ private:
         // The points/verbs within the path are refcounted so this copy operation
         // is inexpensive and maintains the generationID of the original path.
         const SkPath* cachedPath = new SkPath(*path);
-        mDisplayListData->pathResources.add(cachedPath);
+        mDisplayList->pathResources.push_back(cachedPath);
         return cachedPath;
     }
 
@@ -309,7 +287,7 @@ private:
         if (cachedPaint == nullptr || *cachedPaint != *paint) {
             cachedPaint = new SkPaint(*paint);
             std::unique_ptr<const SkPaint> copy(cachedPaint);
-            mDisplayListData->paints.push_back(std::move(copy));
+            mDisplayList->paints.push_back(std::move(copy));
 
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
@@ -317,16 +295,6 @@ private:
         }
 
         return cachedPaint;
-    }
-
-    inline SkPaint* copyPaint(const SkPaint* paint) {
-        if (!paint) return nullptr;
-
-        SkPaint* returnPaint = new SkPaint(*paint);
-        std::unique_ptr<const SkPaint> copy(returnPaint);
-        mDisplayListData->paints.push_back(std::move(copy));
-
-        return returnPaint;
     }
 
     inline const SkRegion* refRegion(const SkRegion* region) {
@@ -339,7 +307,7 @@ private:
         if (cachedRegion == nullptr) {
             std::unique_ptr<const SkRegion> copy(new SkRegion(*region));
             cachedRegion = copy.get();
-            mDisplayListData->regions.push_back(std::move(copy));
+            mDisplayList->regions.push_back(std::move(copy));
 
             // replaceValueFor() performs an add if the entry doesn't exist
             mRegionMap.replaceValueFor(region, cachedRegion);
@@ -353,14 +321,13 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        SkBitmap* localBitmap = new (alloc()) SkBitmap(bitmap);
-        alloc().autoDestroy(localBitmap);
-        mDisplayListData->bitmapResources.push_back(localBitmap);
+        SkBitmap* localBitmap = alloc().create<SkBitmap>(bitmap);
+        mDisplayList->bitmapResources.push_back(localBitmap);
         return localBitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
-        mDisplayListData->patchResources.add(patch);
+        mDisplayList->patchResources.push_back(patch);
         mResourceCache.incrementRefcount(patch);
         return patch;
     }
@@ -370,7 +337,7 @@ private:
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
     ResourceCache& mResourceCache;
-    DisplayListData* mDisplayListData;
+    DisplayList* mDisplayList;
 
     float mTranslateX;
     float mTranslateY;

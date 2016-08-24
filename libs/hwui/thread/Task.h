@@ -38,7 +38,6 @@ public:
     virtual ~Task() { }
 
     T getResult() const {
-        ScopedTrace tracer(ATRACE_TAG_VIEW, "waitForTask");
         return mFuture->get();
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.internal.statusbar;
 
+import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -24,13 +26,29 @@ import com.android.internal.statusbar.StatusBarIcon;
 /** @hide */
 oneway interface IStatusBar
 {
-    void setIcon(int index, in StatusBarIcon icon);
-    void removeIcon(int index);
+    void setIcon(String slot, in StatusBarIcon icon);
+    void removeIcon(String slot);
     void disable(int state1, int state2);
     void animateExpandNotificationsPanel();
-    void animateExpandSettingsPanel();
+    void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
-    void setSystemUiVisibility(int vis, int mask);
+
+    /**
+     * Notifies the status bar of a System UI visibility flag change.
+     *
+     * @param vis the visibility flags except SYSTEM_UI_FLAG_LIGHT_STATUS_BAR which will be reported
+     *            separately in fullscreenStackVis and dockedStackVis
+     * @param fullscreenStackVis the flags which only apply in the region of the fullscreen stack,
+     *                           which is currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+     * @param dockedStackVis the flags that only apply in the region of the docked stack, which is
+     *                       currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+     * @param mask which flags to change
+     * @param fullscreenBounds the current bounds of the fullscreen stack, in screen coordinates
+     * @param dockedBounds the current bounds of the docked stack, in screen coordinates
+     */
+    void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
+            in Rect fullscreenBounds, in Rect dockedBounds);
+
     void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
@@ -39,12 +57,16 @@ oneway interface IStatusBar
     void notificationLightOff();
     void notificationLightPulse(int argb, int millisOn, int millisOff);
 
-    void showRecentApps(boolean triggeredFromAltTab);
+    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
+    void toggleSplitScreen();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
-    void showScreenPinningRequest();
+    void showScreenPinningRequest(int taskId);
+
+    void dismissKeyboardShortcutsMenu();
+    void toggleKeyboardShortcutsMenu(int deviceId);
 
     /**
      * Notifies the status bar that an app transition is pending to delay applying some flags with
@@ -67,6 +89,11 @@ oneway interface IStatusBar
      */
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
 
+    /**
+     * Notifies the status bar that an app transition is done.
+     */
+    void appTransitionFinished();
+
     void showAssistDisclosure();
     void startAssist(in Bundle args);
 
@@ -76,5 +103,13 @@ oneway interface IStatusBar
      * @param source the identifier for the gesture, see {@link StatusBarManager}
      */
     void onCameraLaunchGestureDetected(int source);
-}
 
+    /**
+     * Shows the TV's picture-in-picture menu if an activity is in picture-in-picture mode.
+     */
+    void showTvPictureInPictureMenu();
+
+    void addQsTile(in ComponentName tile);
+    void remQsTile(in ComponentName tile);
+    void clickQsTile(in ComponentName tile);
+}

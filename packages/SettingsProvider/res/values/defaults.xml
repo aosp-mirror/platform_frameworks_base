@@ -155,6 +155,9 @@
     <!-- Default for Settings.Secure.LONG_PRESS_TIMEOUT_MILLIS -->
     <integer name="def_long_press_timeout_millis">500</integer>
 
+    <!-- Default for Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD -->
+    <bool name="def_show_ime_with_hard_keyboard">false</bool>
+
     <!-- Default for Settings.System.POINTER_SPEED -->
     <integer name="def_pointer_speed">0</integer>
 
@@ -205,12 +208,12 @@
     <!-- Default for Settings.Secure.WAKE_GESTURE_ENABLED -->
     <bool name="def_wake_gesture_enabled">true</bool>
 
-    <!-- Default for Settings.Global.GUEST_USER_ENABLED -->
-    <bool name="def_guest_user_enabled">true</bool>
-
     <!-- Default state of tap to wake -->
     <bool name="def_double_tap_to_wake">true</bool>
 
     <!-- Default for Settings.Secure.NFC_PAYMENT_COMPONENT -->
     <string name="def_nfc_payment_component"></string>
+
+    <!-- Default setting for ability to add users from the lock screen -->
+    <bool name="def_add_users_from_lockscreen">false</bool>
 </resources>

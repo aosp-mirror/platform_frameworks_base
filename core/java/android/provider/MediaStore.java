@@ -283,7 +283,7 @@ public final class MediaStore {
      *
      * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M} and above
      * and declares as using the {@link android.Manifest.permission#CAMERA} permission which
-     * is not granted, then atempting to use this action will result in a {@link
+     * is not granted, then attempting to use this action will result in a {@link
      * java.lang.SecurityException}.
      *
      *  @see #EXTRA_OUTPUT
@@ -384,8 +384,14 @@ public final class MediaStore {
 
     public interface MediaColumns extends BaseColumns {
         /**
-         * The data stream for the file
-         * <P>Type: DATA STREAM</P>
+         * Path to the file on disk.
+         * <p>
+         * Note that apps may not have filesystem permissions to directly access
+         * this path. Instead of trying to open this path directly, apps should
+         * use {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
+         * access.
+         * <p>
+         * Type: TEXT
          */
         public static final String DATA = "_data";
 
@@ -1149,8 +1155,15 @@ public final class MediaStore {
             public static final String DEFAULT_SORT_ORDER = "image_id ASC";
 
             /**
-             * The data stream for the thumbnail
-             * <P>Type: DATA STREAM</P>
+             * Path to the thumbnail file on disk.
+             * <p>
+             * Note that apps may not have filesystem permissions to directly
+             * access this path. Instead of trying to open this path directly,
+             * apps should use
+             * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
+             * access.
+             * <p>
+             * Type: TEXT
              */
             public static final String DATA = "_data";
 
@@ -1596,8 +1609,15 @@ public final class MediaStore {
             public static final String NAME = "name";
 
             /**
-             * The data stream for the playlist file
-             * <P>Type: DATA STREAM</P>
+             * Path to the playlist file on disk.
+             * <p>
+             * Note that apps may not have filesystem permissions to directly
+             * access this path. Instead of trying to open this path directly,
+             * apps should use
+             * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
+             * access.
+             * <p>
+             * Type: TEXT
              */
             public static final String DATA = "_data";
 
@@ -2192,8 +2212,15 @@ public final class MediaStore {
             public static final String DEFAULT_SORT_ORDER = "video_id ASC";
 
             /**
-             * The data stream for the thumbnail
-             * <P>Type: DATA STREAM</P>
+             * Path to the thumbnail file on disk.
+             * <p>
+             * Note that apps may not have filesystem permissions to directly
+             * access this path. Instead of trying to open this path directly,
+             * apps should use
+             * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
+             * access.
+             * <p>
+             * Type: TEXT
              */
             public static final String DATA = "_data";
 

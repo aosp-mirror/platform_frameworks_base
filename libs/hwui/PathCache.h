@@ -25,10 +25,12 @@
 #include "utils/Pair.h"
 
 #include <GLES2/gl2.h>
+#include <SkPaint.h>
 #include <SkPath.h>
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
-#include <utils/Vector.h>
+
+#include <vector>
 
 class SkBitmap;
 class SkCanvas;
@@ -60,13 +62,11 @@ class Caches;
  */
 struct PathTexture: public Texture {
     PathTexture(Caches& caches, float left, float top,
-            float offset, int width, int height, int generation)
+            float offset, int generation)
             : Texture(caches)
             , left(left)
             , top(top)
             , offset(offset) {
-        this->width = width;
-        this->height = height;
         this->generation = generation;
     }
     PathTexture(Caches& caches, int generation)
@@ -109,18 +109,18 @@ private:
     sp<Task<SkBitmap*> > mTask;
 }; // struct PathTexture
 
-enum ShapeType {
-    kShapeNone,
-    kShapeRect,
-    kShapeRoundRect,
-    kShapeCircle,
-    kShapeOval,
-    kShapeArc,
-    kShapePath
+enum class ShapeType {
+    None,
+    Rect,
+    RoundRect,
+    Circle,
+    Oval,
+    Arc,
+    Path
 };
 
 struct PathDescription {
-    DESCRIPTION_TYPE(PathDescription);
+    HASHABLE_TYPE(PathDescription);
     ShapeType type;
     SkPaint::Join join;
     SkPaint::Cap cap;
@@ -160,8 +160,6 @@ struct PathDescription {
 
     PathDescription();
     PathDescription(ShapeType shapeType, const SkPaint* paint);
-
-    hash_t hash() const;
 };
 
 /**
@@ -301,7 +299,7 @@ private:
 
     LruCache<PathDescription, PathTexture*> mCache;
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
     GLuint mMaxTextureSize;
 
     bool mDebugEnabled;
@@ -314,7 +312,7 @@ private:
 
     sp<PathProcessor> mProcessor;
 
-    Vector<uint32_t> mGarbage;
+    std::vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 

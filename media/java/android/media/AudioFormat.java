@@ -18,10 +18,13 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The {@link AudioFormat} class is used to access a number of audio format and
@@ -209,7 +212,7 @@ import java.util.Arrays;
  * AudioTrack.getPlaybackHeadPosition()}),
  * depending on the context where audio frame is used.
  */
-public class AudioFormat {
+public final class AudioFormat implements Parcelable {
 
     //---------------------------------------------------------
     // Constants
@@ -251,6 +254,15 @@ public class AudioFormat {
      * @hide
      * */
     public static final int ENCODING_AAC_HE_V2 = 12;
+    /** Audio data format: compressed audio wrapped in PCM for HDMI
+     * or S/PDIF passthrough.
+     * IEC61937 uses a stereo stream of 16-bit samples as the wrapper.
+     * So the channel mask for the track must be {@link #CHANNEL_OUT_STEREO}.
+     * Data should be written to the stream in a short[] array.
+     * If the data is written in a byte[] array then there may be endian problems
+     * on some platforms when converting to short internally.
+     */
+    public static final int ENCODING_IEC61937 = 13;
 
     /** Invalid audio channel configuration */
     /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */
@@ -327,6 +339,24 @@ public class AudioFormat {
             CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_LOW_FREQUENCY);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
+
+    /** Minimum value for sample rate,
+     *  assuming AudioTrack and AudioRecord share the same limitations.
+     * @hide
+     */
+    // never unhide
+    public static final int SAMPLE_RATE_HZ_MIN = 4000;
+    /** Maximum value for sample rate,
+     *  assuming AudioTrack and AudioRecord share the same limitations.
+     * @hide
+     */
+    // never unhide
+    public static final int SAMPLE_RATE_HZ_MAX = 192000;
+    /** Sample rate will be a route-dependent value.
+     * For AudioTrack, it is usually the sink sample rate,
+     * and for AudioRecord it is usually the source sample rate.
+     */
+    public static final int SAMPLE_RATE_UNSPECIFIED = 0;
 
     /**
      * @hide
@@ -418,6 +448,7 @@ public class AudioFormat {
         case ENCODING_PCM_8BIT:
             return 1;
         case ENCODING_PCM_16BIT:
+        case ENCODING_IEC61937:
         case ENCODING_DEFAULT:
             return 2;
         case ENCODING_PCM_FLOAT:
@@ -443,6 +474,7 @@ public class AudioFormat {
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_IEC61937:
             return true;
         default:
             return false;
@@ -460,6 +492,7 @@ public class AudioFormat {
         case ENCODING_E_AC3:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
+        case ENCODING_IEC61937:
             return true;
         default:
             return false;
@@ -483,6 +516,7 @@ public class AudioFormat {
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_IEC61937: // wrapped in PCM but compressed
             return false;
         case ENCODING_INVALID:
         default:
@@ -490,6 +524,30 @@ public class AudioFormat {
         }
     }
 
+    /** @hide */
+    public static boolean isEncodingLinearFrames(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+        case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_FLOAT:
+        case ENCODING_IEC61937: // same size as stereo PCM
+        case ENCODING_DEFAULT:
+            return true;
+        case ENCODING_AC3:
+        case ENCODING_E_AC3:
+        case ENCODING_DTS:
+        case ENCODING_DTS_HD:
+        case ENCODING_MP3:
+        case ENCODING_AAC_LC:
+        case ENCODING_AAC_HE_V1:
+        case ENCODING_AAC_HE_V2:
+            return false;
+        case ENCODING_INVALID:
+        default:
+            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+        }
+    }
     /**
      * Returns an array of public encoding values extracted from an array of
      * encoding values.
@@ -526,7 +584,7 @@ public class AudioFormat {
     }
 
     /**
-     * Constructor used by the JNI
+     * Constructor used by the JNI.  Parameters are not checked for validity.
      */
     // Update sound trigger JNI in core/jni/android_hardware_SoundTrigger.cpp when modifying this
     // constructor
@@ -575,12 +633,9 @@ public class AudioFormat {
     /**
      * Return the sample rate.
      * @return one of the values that can be set in {@link Builder#setSampleRate(int)} or
-     * 0 if not set.
+     * {@link #SAMPLE_RATE_UNSPECIFIED} if not set.
      */
     public int getSampleRate() {
-        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) == 0) {
-            return 0;
-        }
         return mSampleRate;
     }
 
@@ -652,7 +707,7 @@ public class AudioFormat {
      */
     public static class Builder {
         private int mEncoding = ENCODING_INVALID;
-        private int mSampleRate = 0;
+        private int mSampleRate = SAMPLE_RATE_UNSPECIFIED;
         private int mChannelMask = CHANNEL_INVALID;
         private int mChannelIndexMask = 0;
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
@@ -683,6 +738,8 @@ public class AudioFormat {
         public AudioFormat build() {
             AudioFormat af = new AudioFormat(1980/*ignored*/);
             af.mEncoding = mEncoding;
+            // not calling setSampleRate is equivalent to calling
+            // setSampleRate(SAMPLE_RATE_UNSPECIFIED)
             af.mSampleRate = mSampleRate;
             af.mChannelMask = mChannelMask;
             af.mChannelIndexMask = mChannelIndexMask;
@@ -715,6 +772,7 @@ public class AudioFormat {
                 case ENCODING_E_AC3:
                 case ENCODING_DTS:
                 case ENCODING_DTS_HD:
+                case ENCODING_IEC61937:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -759,7 +817,7 @@ public class AudioFormat {
          *    are specified but do not have the same channel count.
          */
         public @NonNull Builder setChannelMask(int channelMask) {
-            if (channelMask == 0) {
+            if (channelMask == CHANNEL_INVALID) {
                 throw new IllegalArgumentException("Invalid zero channel mask");
             } else if (/* channelMask != 0 && */ mChannelIndexMask != 0 &&
                     Integer.bitCount(channelMask) != Integer.bitCount(mChannelIndexMask)) {
@@ -831,7 +889,11 @@ public class AudioFormat {
          * @throws java.lang.IllegalArgumentException
          */
         public Builder setSampleRate(int sampleRate) throws IllegalArgumentException {
-            if ((sampleRate <= 0) || (sampleRate > 192000)) {
+            // TODO Consider whether to keep the MIN and MAX range checks here.
+            // It is not necessary and poses the problem of defining the limits independently from
+            // native implementation or platform capabilities.
+            if (((sampleRate < SAMPLE_RATE_HZ_MIN) || (sampleRate > SAMPLE_RATE_HZ_MAX)) &&
+                    sampleRate != SAMPLE_RATE_UNSPECIFIED) {
                 throw new IllegalArgumentException("Invalid sample rate " + sampleRate);
             }
             mSampleRate = sampleRate;
@@ -839,6 +901,64 @@ public class AudioFormat {
             return this;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AudioFormat that = (AudioFormat) o;
+
+        if (mPropertySetMask != that.mPropertySetMask) return false;
+
+        // return false if any of the properties is set and the values differ
+        return !((((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_ENCODING) != 0)
+                            && (mEncoding != that.mEncoding))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) != 0)
+                            && (mSampleRate != that.mSampleRate))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
+                            && (mChannelMask != that.mChannelMask))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0)
+                            && (mChannelIndexMask != that.mChannelIndexMask)));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPropertySetMask, mSampleRate, mEncoding, mChannelMask,
+                mChannelIndexMask);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mPropertySetMask);
+        dest.writeInt(mEncoding);
+        dest.writeInt(mSampleRate);
+        dest.writeInt(mChannelMask);
+        dest.writeInt(mChannelIndexMask);
+    }
+
+    private AudioFormat(Parcel in) {
+        mPropertySetMask = in.readInt();
+        mEncoding = in.readInt();
+        mSampleRate = in.readInt();
+        mChannelMask = in.readInt();
+        mChannelIndexMask = in.readInt();
+    }
+
+    public static final Parcelable.Creator<AudioFormat> CREATOR =
+            new Parcelable.Creator<AudioFormat>() {
+        public AudioFormat createFromParcel(Parcel p) {
+            return new AudioFormat(p);
+        }
+        public AudioFormat[] newArray(int size) {
+            return new AudioFormat[size];
+        }
+    };
 
     @Override
     public String toString () {
@@ -859,7 +979,8 @@ public class AudioFormat {
         ENCODING_AC3,
         ENCODING_E_AC3,
         ENCODING_DTS,
-        ENCODING_DTS_HD
+        ENCODING_DTS_HD,
+        ENCODING_IEC61937
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}

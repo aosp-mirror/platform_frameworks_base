@@ -139,4 +139,7 @@
     <!-- RestrictionsManagerTest -->
     <string name="restrictionManager_title">Title</string>
     <string name="restrictionManager_desc">Description</string>
+
+    <!-- ResourcesLocaleResolutionTest -->
+    <string name="dummy_string">dummy string</string>
 </resources>

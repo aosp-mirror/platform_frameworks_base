@@ -3,8 +3,8 @@ page.title=Contrato de licença
 @jd:body
 
 <p>
-Para começar a usar o Android SDK Preview, você deve concordar com os seguintes termos e condições. 
-Como descrito abaixo, observe que isto é uma versão de prévia do Android SDK, sujeita a alterações, que deve ser usada a seu risco.  O Android SDK Preview não é uma versão estável e pode conter erros e defeitos que podem resultar em danos sérios aos sistemas de computador, aos dispositivos e aos dados.
+Para começar a usar o Android SDK Preview, você deve concordar com os seguintes termos e condições.
+Como descrito abaixo, observe que esta é uma versão de prévia do Android SDK, sujeita a alterações, que deve ser usada por seu risco.  O Android SDK Preview não é uma versão estável e pode conter erros e defeitos que podem resultar em danos sérios aos sistemas de computador, aos dispositivos e aos dados.
 </p>
 
 <p>
@@ -17,7 +17,9 @@ Este é o contrato de licença do Android SDK Preview (o “Contrato de Licença
 
 1.2 "Android" refere-se à pilha de software do Android para dispositivos, conforme disponibilizado no Projeto de código aberto do Android, localizado no URL a seguir: http://source.android.com/, atualizado periodicamente.
 
-1.3 "Google" refere-se à Google Inc, uma corporação de Delaware, com sede em 1600 Amphitheatre Parkway, Mountain View, CA 94043, Estados Unidos.
+1.3 “Compatível com Android” significa qualquer implementação do Android que (i) obedece ao documento Definição de Compatibilidade com Android, que pode ser encontrado no site de compatibilidade do Android (http://source.android.com/compatibility) que pode ser atualizado de tempos em tempos; e (ii) seja aprovado no Android Compatibility Test Suite (CTS).
+
+1.4 “Google” se refere à Google Inc, uma corporação de Delaware, com sede em 1600 Amphitheatre Parkway, Mountain View, CA 94043, Estados Unidos.
 
 2. Aceitação do Contrato de Licença
 
@@ -31,27 +33,27 @@ Este é o contrato de licença do Android SDK Preview (o “Contrato de Licença
 
 3. Licença do Preview da Google
 
-3.1 Sujeito aos termos do Contrato de licença, a Google confere uma licença limitada, revogável, livre de taxas, intransmissível, não sub-licenciável e não exclusiva para o uso apenas do Preview, pessoal ou internamente dentro da sua empresa ou organização, para fins de desenvolvimento de aplicativos executados na plataforma do Android.
+3.1 Sujeito aos termos deste Contrato de licença, a Google confere uma licença limitada, mundial, sem royalties, intransmissível, não exclusiva e não sublicenciável unicamente para o uso do Preview exclusivamente para o desenvolvimento de aplicativos executados para implementações compatíveis do Android.
 
-3.2 Você concorda que a Google ou terceiros detêm todos os direitos legais, títulos e interesses relativos ao Preview, incluindo quaisquer direitos de propriedade intelectual que subsistam no Preview. "Direitos de propriedade intelectual" se referem a todo e qualquer direito sob as leis de patentes, de direitos autorais, de segredo comercial, de marca registrada e todos os outros direitos de propriedade. A Google reserva todos os direitos não conferidos expressamente a você.
+3.2 Você não poderá usar este Preview para desenvolver aplicativos para outras plataformas (incluindo implementações não compatíveis do Android) nem para desenvolver outro SDK. Você tem a liberdade para desenvolver aplicativos para outras plataformas, incluindo implementações não compatíveis do Android, desde que este Preview não seja usado para essa finalidade.
 
-3.3 O uso do Preview não é autorizado para qualquer finalidade não expressamente permitida por este Contrato de licença. Salvo na extensão exigida por licenças aplicáveis de terceiros, é proibido: (a) copiar (exceto para fins de cópia de segurança), modificar, adaptar, redistribuir, descompilar, fazer engenharia reversa, desmontar ou criar trabalhos derivados do Preview ou qualquer parte dele; ou (b) carregar qualquer parte do Preview em um aparelho celular ou outro dispositivo de hardware, exceto em computador pessoal, combinar qualquer parte do Preview com outros softwares ou distribuir qualquer software ou dispositivo que contenha uma parte do Preview.
+3.3 Você concorda que a Google ou terceiros detêm todos os direitos legais, títulos e interesses relativos ao Preview, incluindo quaisquer direitos de propriedade intelectual que subsistam no Preview. "Direitos de propriedade intelectual" se referem a todo e qualquer direito sob as leis de patentes, de direitos autorais, de segredo comercial, de marca registrada e todos os outros direitos de propriedade. A Google reserva todos os direitos não conferidos expressamente a você.
 
-3.4 Você concorda que não tomará quaisquer medidas que possam causar ou resultar em fragmentação do Android, incluindo, sem limitar-se, a distribuição e a participação na criação ou na promoção, sob quaisquer formas, de um conjunto de desenvolvimento de software derivado do Preview.
+3.4 O uso do Preview não é autorizado para qualquer finalidade não expressamente permitida por este Contrato de licença. Salvo na extensão exigida por licenças aplicáveis de terceiros, é proibido: (a) copiar (exceto para fins de cópia de segurança), modificar, adaptar, redistribuir, descompilar, fazer engenharia reversa, desmontar ou criar trabalhos derivados do Preview ou qualquer parte dele; ou (b) carregar qualquer parte do Preview em um aparelho celular ou outro dispositivo de hardware, exceto em computador pessoal, combinar qualquer parte do Preview com outros softwares ou distribuir qualquer software ou dispositivo que contenha uma parte do Preview.
 
-3.5 O uso, a reprodução e a distribuição de componentes do Preview licenciado sob licença de software de código aberto são regidos exclusivamente pelos termos daquela licença de software de código aberto, e não por este Contrato de licença. Você concorda em manter uma licença em bom estado para as licenças de software de código aberto sob todos os direitos concedidos e deter quaisquer ações que possam limitar, suspender ou romper tais direitos.
+3.5 O uso, a reprodução e a distribuição de componentes do Preview licenciado sob uma licença de software de código aberto são regidos exclusivamente pelos termos daquela licença de software de código aberto, e não por este Contrato de licença. Você concorda em manter uma licença em situação regular para as licenças de software de código aberto sob todos os direitos concedidos e deter quaisquer ações que possam limitar, suspender ou romper tais direitos.
 
-3.6 Você concorda que a forma e a natureza do SDK que a Google fornece podem mudar sem aviso prévio e que as versões futuras do SDK podem ser incompatíveis com aplicativos desenvolvidos em versões anteriores do SDK. Você concorda que a Google pode cessar (permanente ou temporariamente) o fornecimento do Preview (ou quaisquer recursos dentro dele) a você ou a usuários em geral sob critério exclusivo da Google, sem aviso prévio.
+3.6 Você concorda que a forma e a natureza do Preview que a Google fornece podem mudar sem aviso prévio e que as versões futuras do Preview podem ser incompatíveis com aplicativos desenvolvidos em versões anteriores do Preview. Você concorda que a Google pode cessar (permanente ou temporariamente) o fornecimento do Preview (ou quaisquer recursos dentro dele) a você ou a usuários em geral sob critério exclusivo da Google, sem aviso prévio.
 
 3.7 Nada neste Contrato de licença confere o direito de uso de quaisquer nomes comerciais, marcas comerciais, marcas de serviço, logomarcas, nomes de domínios e outros recursos de marcas especiais da Google.
 
 3.8 Você concorda que não removerá, ocultará nem alterará quaisquer observações de direitos de propriedade (incluindo observações de direitos autorais e de marcas registradas) que possam estar afixadas ou contidas no Preview.
 
-4. Uso do Preview por você
+4. O uso do Preview
 
-4.1 A Google compreende que nada no Contrato de licença da a ela direito, título nem interesse no usuário (ou em seus licenciadores), sob o presente Contrato de licença, no que tange ao desenvolvimento de aplicativos de software através do uso do Preview, incluindo quaisquer direitos de propriedade intelectual que subsistam nos referidos aplicativos.
+4.1 A Google entende que nada no Contrato de Licença dá a ela direitos, título nem interesse sobre o usuário (ou sobre os seus licenciadores) sob o presente Contrato de licença nem sobre quaisquer aplicativos de software que o usuário desenvolver usando o Preview, incluindo quaisquer direitos de propriedade intelectual que subsistem nos referidos aplicativos.
 
-4.2 Você concorda em usar o Preview e desenvolver aplicativos somente para as finalidades permitidas por (a) este Contrato de licença e (b) quaisquer leis, normas, diretrizes geralmente aceitas ou orientações aplicáveis nas jurisdições relevantes (incluindo quaisquer leis acerca da exportação e da importação de dados ou softwares nos Estados Unidos ou em outros países relevantes). 
+4.2 Você concorda em usar o Preview e desenvolver aplicativos somente para as finalidades permitidas por (a) este Contrato de licença e (b) quaisquer leis, normas, diretrizes geralmente aceitas ou orientações aplicáveis nas jurisdições relevantes (incluindo quaisquer leis acerca da exportação de dados ou softwares dos e para os Estados Unidos ou outros países relevantes.
 
 4.3 Você concorda que, se usar o Preview para o desenvolvimento de aplicativos, deverá proteger a privacidade e os direitos legais dos usuários. Se nomes de usuário, senhas ou outras informações de acesso ou informações pessoais forem fornecidos ao aplicativo, deve-se informá-los de que tais dados estarão disponíveis para o aplicativo, além de fornecer observações de privacidade e proteção legalmente adequadas a esses usuários. Se o aplicativo armazenar informações pessoais ou confidenciais fornecidas pelos usuários, deve fazê-lo com segurança. Se o usuário fornecer informações da conta do Google, o aplicativo poderá usar essas informações exclusivamente para acessar a conta da Google do usuário quando houver autorização para fazê-lo e para os fins limitados pela autorização.
 
@@ -75,9 +77,9 @@ Este é o contrato de licença do Android SDK Preview (o “Contrato de Licença
 
 7. Aplicativos de terceiros
 
-7.1 Ao usar o Preview para executar aplicativos desenvolvidos por terceiros ou que acessam dados, conteúdo ou recursos fornecidos por terceiros, você concorda que a Google não é responsável por tais aplicativos, dados, conteúdo ou recursos. Você compreende que quaisquer dados, conteúdo ou recursos passíveis de aceitação por meio de tais aplicativos de terceiros imputam responsabilidade exclusiva ao indivíduo que os originou. A Google não é responsável por qualquer perda ou dano que possa ocorrer como resultado do uso ou acesso de quaisquer aplicativos, dados, conteúdo ou recursos de terceiros.
+7.1 Ao usar o Preview para executar aplicativos desenvolvidos por terceiros ou que acessam dados, conteúdo ou recursos fornecidos por terceiros, você concorda que a Google não é responsável por tais aplicativos, dados, conteúdo ou recursos. Você compreende que quaisquer dados, conteúdo ou recursos que possa acessar por meio de tais aplicativos de terceiros imputam responsabilidade exclusiva ao indivíduo que os originou. A Google não é responsável por qualquer perda ou dano que possa ocorrer como resultado do uso ou acesso de quaisquer aplicativos, dados, conteúdo ou recursos de terceiros.
 
-7.2 Você deve estar ciente de que os dados, conteúdo e recursos apresentados a você por aplicativos de terceiros podem ser protegidos pelos direitos de propriedade intelectual de posse dos fornecedores (ou de outras pessoas ou empresas em seus nomes). Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados com base nestes dados, conteúdo ou recursos (na totalidade ou em parte), salvo se houver permissão explícita especificada pelos respectivos detentores de direitos.
+7.2 Você deve estar ciente de que os dados, conteúdo e recursos apresentados a você por aplicativos de terceiros podem ser protegidos pelos direitos de propriedade intelectual de posse dos fornecedores (ou de outras pessoas ou empresas em seus nomes). Não é permitido modificar, alugar, arrendar, emprestar, vender, distribuir nem criar trabalhos derivados com base nestes dados, conteúdo ou recursos (na totalidade ou em parte), salvo se houver permissão explícita especificada pelos respectivos proprietários.
 
 7.3 Você reconhece que o uso de tais aplicativos, dados, conteúdo ou recursos de terceiros pode estar sujeito a termos adicionais entre você e o terceiro em questão.
 

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2016 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Toolbar
+        android:id="@*android:id/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:navigationContentDescription="@*android:string/action_bar_up_description"
+        style="?android:attr/toolbarStyle" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@android:id/list"
+        android:layout_width="@dimen/notification_panel_width"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollIndicators="top"
+        android:scrollbars="vertical"
+        android:importantForAccessibility="no" />
+
+    <View
+        android:id="@+id/nav_bar_background"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/navigation_bar_size"
+        android:layout_gravity="bottom"
+        android:background="#ff000000" />
+</merge>

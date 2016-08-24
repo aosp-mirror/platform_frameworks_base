@@ -84,9 +84,8 @@ public class EditableInputConnection extends BaseInputConnection {
     }
 
     @Override
-    protected void reportFinish() {
-        super.reportFinish();
-
+    public void closeConnection() {
+        super.closeConnection();
         synchronized(this) {
             while (mBatchEditNesting > 0) {
                 endBatchEdit();

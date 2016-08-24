@@ -21,6 +21,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/ogg/KeypressInvalid_120.ogg:system/media/audio/ui/KeypressInvalid.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressReturn_120.ogg:system/media/audio/ui/KeypressReturn.ogg \
 	$(LOCAL_PATH)/effects/ogg/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
+	$(LOCAL_PATH)/effects/ogg/VideoStop.ogg:system/media/audio/ui/VideoStop.ogg \
 	$(LOCAL_PATH)/effects/material/ogg/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
 	$(LOCAL_PATH)/effects/ogg/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
 	$(LOCAL_PATH)/effects/ogg/Dock.ogg:system/media/audio/ui/Dock.ogg \

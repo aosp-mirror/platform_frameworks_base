@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 import junit.framework.TestCase;
 import libcore.util.HexEncoding;
+import java.util.Arrays;
 
 import static android.net.dhcp.DhcpPacket.*;
 
@@ -45,6 +46,11 @@ public class DhcpPacketTest extends TestCase {
 
     private static final Inet4Address v4Address(String addrString) throws IllegalArgumentException {
         return (Inet4Address) NetworkUtils.numericToInetAddress(addrString);
+    }
+
+    public void setUp() {
+        DhcpPacket.testOverrideVendorId = "android-dhcp-???";
+        DhcpPacket.testOverrideHostname = "android-01234567890abcde";
     }
 
     class TestDhcpPacket extends DhcpPacket {
@@ -255,7 +261,7 @@ public class DhcpPacketTest extends TestCase {
 
     private void assertDhcpResults(String ipAddress, String gateway, String dnsServersString,
             String domains, String serverAddress, String vendorInfo, int leaseDuration,
-            boolean hasMeteredHint, DhcpResults dhcpResults) throws Exception {
+            boolean hasMeteredHint, int mtu, DhcpResults dhcpResults) throws Exception {
         assertEquals(new LinkAddress(ipAddress), dhcpResults.ipAddress);
         assertEquals(v4Address(gateway), dhcpResults.gateway);
 
@@ -271,6 +277,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals(vendorInfo, dhcpResults.vendorInfo);
         assertEquals(leaseDuration, dhcpResults.leaseDuration);
         assertEquals(hasMeteredHint, dhcpResults.hasMeteredHint());
+        assertEquals(mtu, dhcpResults.mtu);
     }
 
     @SmallTest
@@ -304,7 +311,7 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
-                null, "192.168.144.3", null, 7200, false, dhcpResults);
+                null, "192.168.144.3", null, 7200, false, 0, dhcpResults);
     }
 
     @SmallTest
@@ -336,8 +343,68 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.43.247/24", "192.168.43.1", "192.168.43.1",
-                null, "192.168.43.1", "ANDROID_METERED", 3600, true, dhcpResults);
+                null, "192.168.43.1", "ANDROID_METERED", 3600, true, 0, dhcpResults);
         assertTrue(dhcpResults.hasMeteredHint());
+    }
+
+    private byte[] mtuBytes(int mtu) {
+        // 0x1a02: option 26, length 2. 0xff: no more options.
+        if (mtu > Short.MAX_VALUE - Short.MIN_VALUE) {
+            throw new IllegalArgumentException(
+                String.format("Invalid MTU %d, must be 16-bit unsigned", mtu));
+        }
+        String hexString = String.format("1a02%04xff", mtu);
+        return HexEncoding.decode(hexString.toCharArray(), false);
+    }
+
+    private void checkMtu(ByteBuffer packet, int expectedMtu, byte[] mtuBytes) throws Exception {
+        if (mtuBytes != null) {
+            packet.position(packet.capacity() - mtuBytes.length);
+            packet.put(mtuBytes);
+            packet.clear();
+        }
+        DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
+        assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
+        DhcpResults dhcpResults = offerPacket.toDhcpResults();
+        assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
+                null, "192.168.144.3", null, 7200, false, expectedMtu, dhcpResults);
+    }
+
+    @SmallTest
+    public void testMtu() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // IP header.
+            "451001480000000080118849c0a89003c0a89ff7" +
+            // UDP header.
+            "004300440134dcfa" +
+            // BOOTP header.
+            "02010600c997a63b0000000000000000c0a89ff70000000000000000" +
+            // MAC address.
+            "30766ff2a90c00000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options
+            "638253633501023604c0a89003330400001c200104fffff0000304c0a89ffe06080808080808080404" +
+            "3a0400000e103b040000189cff00000000"
+        ).toCharArray(), false));
+
+        checkMtu(packet, 0, null);
+        checkMtu(packet, 0, mtuBytes(1501));
+        checkMtu(packet, 1500, mtuBytes(1500));
+        checkMtu(packet, 1499, mtuBytes(1499));
+        checkMtu(packet, 1280, mtuBytes(1280));
+        checkMtu(packet, 0, mtuBytes(1279));
+        checkMtu(packet, 0, mtuBytes(576));
+        checkMtu(packet, 0, mtuBytes(68));
+        checkMtu(packet, 0, mtuBytes(Short.MIN_VALUE));
+        checkMtu(packet, 0, mtuBytes(Short.MAX_VALUE + 3));
+        checkMtu(packet, 0, mtuBytes(-1));
     }
 
     @SmallTest
@@ -447,7 +514,7 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("172.17.152.118/16", "172.17.1.1", "172.17.1.1",
-                null, "1.1.1.1", null, 43200, false, dhcpResults);
+                null, "1.1.1.1", null, 43200, false, 0, dhcpResults);
     }
 
     @SmallTest
@@ -478,7 +545,7 @@ public class DhcpPacketTest extends TestCase {
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.63.93.4/20", "10.63.80.1", "192.0.2.1,192.0.2.2",
-                "domain123.co.uk", "192.0.2.254", null, 49094, false, dhcpResults);
+                "domain123.co.uk", "192.0.2.254", null, 49094, false, 0, dhcpResults);
     }
 
     @SmallTest
@@ -512,7 +579,7 @@ public class DhcpPacketTest extends TestCase {
         assertEquals("BCF5AC000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
-                "lancs.ac.uk", "10.32.255.128", null, 7200, false, dhcpResults);
+                "lancs.ac.uk", "10.32.255.128", null, 7200, false, 0, dhcpResults);
     }
 
     @SmallTest
@@ -548,7 +615,7 @@ public class DhcpPacketTest extends TestCase {
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.15.122.242/16", "10.15.200.23",
                 "209.129.128.3,209.129.148.3,209.129.128.6",
-                "wvm.edu", "10.1.105.252", null, 86400, false, dhcpResults);
+                "wvm.edu", "10.1.105.252", null, 86400, false, 0, dhcpResults);
     }
 
     @SmallTest
@@ -615,6 +682,91 @@ public class DhcpPacketTest extends TestCase {
         assertEquals("FC3D93000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.189.49/24", "192.168.189.1", "8.8.8.8,8.8.4.4",
-                null, "192.171.189.2", null, 28800, false, dhcpResults);
+                null, "192.171.189.2", null, 28800, false, 0, dhcpResults);
+    }
+
+    @SmallTest
+    public void testDiscoverPacket() throws Exception {
+        short secs = 7;
+        int transactionId = 0xdeadbeef;
+        byte[] hwaddr = {
+                (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b, (byte) 0xb1, (byte) 0x7a
+        };
+
+        ByteBuffer packet = DhcpPacket.buildDiscoverPacket(
+                DhcpPacket.ENCAP_L2, transactionId, secs, hwaddr,
+                false /* do unicast */, DhcpClient.REQUESTED_PARAMS);
+
+        byte[] headers = new byte[] {
+            // Ethernet header.
+            (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b, (byte) 0xb1, (byte) 0x7a,
+            (byte) 0x08, (byte) 0x00,
+            // IP header.
+            (byte) 0x45, (byte) 0x10, (byte) 0x01, (byte) 0x56,
+            (byte) 0x00, (byte) 0x00, (byte) 0x40, (byte) 0x00,
+            (byte) 0x40, (byte) 0x11, (byte) 0x39, (byte) 0x88,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
+            // UDP header.
+            (byte) 0x00, (byte) 0x44, (byte) 0x00, (byte) 0x43,
+            (byte) 0x01, (byte) 0x42, (byte) 0x6a, (byte) 0x4a,
+            // BOOTP.
+            (byte) 0x01, (byte) 0x01, (byte) 0x06, (byte) 0x00,
+            (byte) 0xde, (byte) 0xad, (byte) 0xbe, (byte) 0xef,
+            (byte) 0x00, (byte) 0x07, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b,
+            (byte) 0xb1, (byte) 0x7a
+        };
+        byte[] options = new byte[] {
+            // Magic cookie 0x63825363.
+            (byte) 0x63, (byte) 0x82, (byte) 0x53, (byte) 0x63,
+            // Message type DISCOVER.
+            (byte) 0x35, (byte) 0x01, (byte) 0x01,
+            // Client identifier Ethernet, da:01:19:5b:b1:7a.
+            (byte) 0x3d, (byte) 0x07,
+                    (byte) 0x01,
+                    (byte) 0xda, (byte) 0x01, (byte) 0x19, (byte) 0x5b, (byte) 0xb1, (byte) 0x7a,
+            // Max message size 1500.
+            (byte) 0x39, (byte) 0x02, (byte) 0x05, (byte) 0xdc,
+            // Version "android-dhcp-???".
+            (byte) 0x3c, (byte) 0x10,
+                    'a', 'n', 'd', 'r', 'o', 'i', 'd', '-', 'd', 'h', 'c', 'p', '-', '?', '?', '?',
+            // Hostname "android-01234567890abcde"
+            (byte) 0x0c, (byte) 0x18,
+                    'a', 'n', 'd', 'r', 'o', 'i', 'd', '-',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e',
+            // Requested parameter list.
+            (byte) 0x37, (byte) 0x0a,
+                DHCP_SUBNET_MASK,
+                DHCP_ROUTER,
+                DHCP_DNS_SERVER,
+                DHCP_DOMAIN_NAME,
+                DHCP_MTU,
+                DHCP_BROADCAST_ADDRESS,
+                DHCP_LEASE_TIME,
+                DHCP_RENEWAL_TIME,
+                DHCP_REBINDING_TIME,
+                DHCP_VENDOR_INFO,
+            // End options.
+            (byte) 0xff,
+            // Our packets are always of even length. TODO: find out why and possibly fix it.
+            (byte) 0x00
+        };
+        byte[] expected = new byte[DhcpPacket.MIN_PACKET_LENGTH_L2 + options.length];
+        assertTrue((expected.length & 1) == 0);
+        System.arraycopy(headers, 0, expected, 0, headers.length);
+        System.arraycopy(options, 0, expected, DhcpPacket.MIN_PACKET_LENGTH_L2, options.length);
+
+        byte[] actual = new byte[packet.limit()];
+        packet.get(actual);
+        String msg =
+                "Expected:\n  " + Arrays.toString(expected) +
+                "\nActual:\n  " + Arrays.toString(actual);
+        assertTrue(msg, Arrays.equals(expected, actual));
     }
 }

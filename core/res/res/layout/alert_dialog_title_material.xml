@@ -21,6 +21,8 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
+    <!-- If the client uses a customTitle, it will be added here. -->
+
     <LinearLayout
         android:id="@+id/title_template"
         android:layout_width="match_parent"
@@ -41,13 +43,17 @@
 
         <com.android.internal.widget.DialogTitle
             android:id="@+id/alertTitle"
-            style="?attr/windowTitleStyle"
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="viewStart" />
+            android:textAlignment="viewStart"
+            style="?attr/windowTitleStyle" />
     </LinearLayout>
 
-    <!-- If the client uses a customTitle, it will be added here. -->
+    <Space
+        android:id="@+id/titleDividerNoCustom"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_title_divider_material" />
 </LinearLayout>

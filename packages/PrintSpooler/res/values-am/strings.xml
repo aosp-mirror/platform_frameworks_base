@@ -27,6 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"ባለ ሁለት-ጎን"</string>
     <string name="label_orientation" msgid="2853142581990496477">"አቀማመጠ ገፅ"</string>
     <string name="label_pages" msgid="7768589729282182230">"ገፆች"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"አንድ አታሚ ይምረጡ"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"ሁሉም <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"የ<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ክልል"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ለምሳሌ፦ 1–5,8,11–13"</string>
@@ -58,22 +59,34 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> አታሚዎች ተገኝተዋል</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> አታሚዎች ተገኝተዋል</item>
     </plurals>
-    <string name="choose_print_service" msgid="3740309762324459694">"የህትመት አገልግሎት ይምረጡ"</string>
+    <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"ተጨማሪ የዚህ አታሚ መረጃ"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"ፋይል መፍጠር አልተቻለም"</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"አንዳንድ የህትመት አገልግሎቶች ተሰናክለዋል"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"አታሚዎችን በመፈለግ ላይ"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"ምንም የህትመት አገልግሎቶች አልነቁም"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"ምንም አታሚዎች አልተገኙም"</string>
+    <string name="cannot_add_printer" msgid="7840348733668023106">"አታሚዎችን ማከል አልተቻለም"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"አታሚን ለማከል ይምረጡ"</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"ለማንቃት ይምረጡ"</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"የነቁ አገልግሎቶች"</string>
+    <string name="recommended_services_title" msgid="3799434882937956924">"የሚመከሩ አገልግሎቶች"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"የተሰናከሉ አገልግሎቶች"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"ሁሉም አገልግሎቶች"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> አታሚዎች ለማግኘት ይጫኑ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> አታሚዎች ለማግኘት ይጫኑ</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ን በማተም ላይ"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ን በመተው ላይ"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"የአታሚ ስህተት <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"አታሚ <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ን አግዷል"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> የህትመት ስራ</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> የህትመት ስራ</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"ይቅር"</string>
     <string name="restart" msgid="2472034227037808749">"እንደገና ጀምር"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ከአታሚ ጋር ምንም ግንኙነት የለም"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"አይታወቅም"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – አይገኝም"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ይጠቀሙ?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"ሰነድዎ ወደ አታሚው በሚሄድበት ወቅት በአንድ ወይም ከዚያ በላይ አገልጋዮች ውስጥ ሊያልፍ ይችላል።"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"ጥቁር እና ነጭ"</item>
     <item msgid="2762241247228983754">"ቀለም"</item>
@@ -91,5 +104,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"ይቅርታ፣ ያ አልሰራም። እንደገና ይሞክሩ።"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"እንደገና ይሞክሩ"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"አታሚው አሁን አይገኝም።"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"ቅድመ ዕይታን ማሳየት አይቻልም"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"ቅድመ እይታን በማዘጋጀት ላይ…"</string>
 </resources>

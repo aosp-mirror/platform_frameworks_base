@@ -15,6 +15,14 @@
  */
 package android.speech.tts;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.media.AudioFormat;
+import android.speech.tts.TextToSpeech;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A callback to return speech data synthesized by a text to speech engine.
  *
@@ -31,6 +39,13 @@ package android.speech.tts;
  * All methods can be only called on the synthesis thread.
  */
 public interface SynthesisCallback {
+
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef({AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT,
+              AudioFormat.ENCODING_PCM_FLOAT})
+     public @interface SupportedAudioFormat {};
+
     /**
      * @return the maximum number of bytes that the TTS engine can pass in a single call of
      *         {@link #audioAvailable}. Calls to {@link #audioAvailable} with data lengths
@@ -38,6 +53,7 @@ public interface SynthesisCallback {
      */
     public int getMaxBufferSize();
 
+    // TODO: Replace reference to Android N to an API level when the API level for N is decided.
     /**
      * The service should call this when it starts to synthesize audio for this
      * request.
@@ -47,12 +63,16 @@ public interface SynthesisCallback {
      *
      * @param sampleRateInHz Sample rate in HZ of the generated audio.
      * @param audioFormat Audio format of the generated audio. Must be one of
-     *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
+     *         {@link AudioFormat#ENCODING_PCM_8BIT} or
+     *         {@link AudioFormat#ENCODING_PCM_16BIT}. Can also be
+     *         {@link AudioFormat#ENCODING_PCM_FLOAT} when targetting Android N and
+     *         above.
      * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
      * @return {@link TextToSpeech#SUCCESS}, {@link TextToSpeech#ERROR} or
      *          {@link TextToSpeech#STOPPED}.
      */
-    public int start(int sampleRateInHz, int audioFormat, int channelCount);
+    public int start(int sampleRateInHz, @SupportedAudioFormat int audioFormat,
+                     @IntRange(from=1,to=2) int channelCount);
 
     /**
      * The service should call this method when synthesized audio is ready for consumption.
@@ -102,7 +122,7 @@ public interface SynthesisCallback {
      * @param errorCode Error code to pass to the client. One of the ERROR_ values from
      *      {@link TextToSpeech}
      */
-    public void error(int errorCode);
+    public void error(@TextToSpeech.Error int errorCode);
 
     /**
      * Check if {@link #start} was called or not.

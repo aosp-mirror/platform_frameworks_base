@@ -237,8 +237,8 @@ public final class BluetoothLeAdvertiser {
         private final IBluetoothGatt mBluetoothGatt;
 
         // mClientIf 0: not registered
-        // -1: scan stopped
-        // >0: registered and scan started
+        // -1: advertise stopped or registration timeout
+        // >0: registered and advertising started
         private int mClientIf;
         private boolean mIsAdvertising = false;
 
@@ -268,6 +268,10 @@ public final class BluetoothLeAdvertiser {
                 if (mClientIf > 0 && mIsAdvertising) {
                     mLeAdvertisers.put(mAdvertiseCallback, this);
                 } else if (mClientIf <= 0) {
+
+                    // Registration timeout, reset mClientIf to -1 so no subsequent operations can
+                    // proceed.
+                    if (mClientIf == 0) mClientIf = -1;
                     // Post internal error if registration failed.
                     postStartFailure(mAdvertiseCallback,
                             AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR);
@@ -308,10 +312,15 @@ public final class BluetoothLeAdvertiser {
             Log.d(TAG, "onClientRegistered() - status=" + status + " clientIf=" + clientIf);
             synchronized (this) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startMultiAdvertising(mClientIf, mAdvertisement,
-                                mScanResponse, mSettings);
+                        if (mClientIf == -1) {
+                            // Registration succeeds after timeout, unregister client.
+                            mBluetoothGatt.unregisterClient(clientIf);
+                        } else {
+                            mClientIf = clientIf;
+                            mBluetoothGatt.startMultiAdvertising(mClientIf, mAdvertisement,
+                                    mScanResponse, mSettings);
+                        }
                         return;
                     } catch (RemoteException e) {
                         Log.e(TAG, "failed to start advertising", e);

@@ -1,0 +1,207 @@
+page.title=Get Started with the Preview
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+
+    <div id="qv-wrapper">
+      <div id="qv">
+        <ol>
+          <li>
+            <a href="#install_android_studio_and_the_latest_packages">Install
+            Android Studio and the Latest Packages</a>
+          </li>
+
+          <li>
+            <a href="#get_the_preview_reference_documentation">Get the Preview
+            Reference Documentation</a>
+          </li>
+
+          <li>
+            <a href="#update_or_create_a_project">Update or Create a
+            Project</a>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <p>
+      If you want an environment for basic compatibility
+      testing of your app, you can use your current APK and a
+      supported watch or an emulator. You don't necessarily need to update your
+      full development environment to do basic testing. To simply test your
+      app's compatibility with a preview system image, see <a href=
+      "{@docRoot}wear/preview/downloads.html">Download and Test with a
+      Device</a>.
+    </p>
+
+    <p>
+      However, to develop apps for the Android Wear 2.0 Developer Preview, you
+      need to make some updates to your development environment, as described
+      below.
+    </p>
+
+    <h2 id="install_android_studio_and_the_latest_packages">
+      Install Android Studio and the Latest Packages
+    </h2>
+
+    <p>
+      1. For compatibility with the <a href="{@docRoot}preview/overview.html">N
+      Developer Preview</a>, follow the <a href=
+      "{@docRoot}preview/setup-sdk.html">setup instructions</a> for installing
+      the latest version of Android Studio.
+    </p>
+
+    <p>
+      2. Use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK
+      manager</a> to install or confirm that you have the latest installations
+      of the following packages:
+    </p>
+
+    <ul>
+      <li>Under the <strong>SDK Platforms tab</strong>:
+        <ul>
+          <li>Android N Preview
+          </li>
+        </ul>
+      </li>
+
+      <li>Under the <strong>SDK Tools tab</strong>:
+        <ul>
+          <li>Android Support Library
+          </li>
+
+          <li>Google Play services
+          </li>
+
+          <li>Google Repository
+          </li>
+
+          <li>Android Support Repository
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2 id="get_the_preview_reference_documentation">
+      Get the Preview Reference Documentation
+    </h2>
+
+    <p>
+      Detailed information about the preview is available in the preview
+      reference documentation, which you can download from the following table.
+      The zip file includes an updated API reference for the preview.
+    </p>
+
+    <table>
+      <tr>
+        <th style="width:300px">
+          Reference documentation
+        </th>
+        <th>
+          Checksums
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-1-docs.zip">wearable-support-preview-1-docs.zip</a>
+        </td>
+        <td>MD5: 02f9dc7714c00076b323c9081655c3b2<br>
+            SHA-1: 075f3821ee9b66a919a0e8086f79c12bc9576fb2
+        </td>
+      </tr>
+    </table>
+
+    <h2 id="update_or_create_a_project">
+      Update or Create a Project
+    </h2>
+
+    <p>
+      To use the APIs, your project must be configured appropriately in Android
+      Studio.
+    </p>
+
+    <h3 id="update_an_existing_project">
+      Update an existing project
+    </h3>
+
+    <p>
+      To update an existing project for development:
+    </p>
+
+    <ol>
+      <li>Start Android Studio, click <strong>Open an existing Android Studio
+      Project</strong>, and select a project.
+      </li>
+
+      <li>If prompted by the Android SDK Manager for the SDK version to use for
+      the project, select <strong>Use Android Studio's
+      SDK</strong>.
+      </li>
+
+      <li>If prompted to update the Gradle plugin, update the version of the
+      plugin.
+      </li>
+
+      <li>In the <code>build.gradle</code> file for the Wear module, in the
+      <code>dependencies</code> section, update the existing reference to the
+      Wearable Support Library (for example, <code>compile
+      'com.google.android.support:wearable:1.4.0'</code>) by changing it to the
+      following, which requires that your the Google Repository <a href=
+      "#install_android_studio_and_the_latest_packages">is the latest
+      version</a>:
+      <pre>
+compile 'com.google.android.support:wearable:2.0.0-alpha1'
+      </pre>
+      </li>
+
+      <li>See the following page for setting up a watch or emulator with a
+      preview system image, in order to begin testing your app: <a href=
+      "{@docRoot}wear/preview/downloads.html">Download and Test with a
+      Device</a>
+      </li>
+    </ol>
+
+    <h3 id="create_a_new_project">
+      Create a new project
+    </h3>
+
+    <p>
+      To create a new project for development:
+    </p>
+
+    <ol>
+      <li>Click <strong>File &gt; New Project</strong> and follow the steps in
+      the Create New Project wizard until you reach the Target Android Devices
+      page.
+      </li>
+
+      <li>Optionally, select the <strong>Phone and Tablet</strong> option. If
+      you plan to use N Preview APIs in a phone app, then the Minimum SDK
+      option list, select <strong>API N: Android 6.x (N Preview)</strong>.
+      </li>
+
+      <li>Select the <strong>Wear</strong> option, and in the Minimum SDK
+      option list, select the latest available (<strong>N Preview</strong>)
+      option. Click <strong>Next</strong> until you exit the Create New Project
+      wizard.
+      </li>
+
+      <li>In the <code>build.gradle</code> file for the Wear module, in the
+      <code>dependencies</code> section, update the existing reference to the
+      Wearable Support Library (perhaps <code>compile
+      'com.google.android.support:wearable:1.4.0'</code>) to:
+      <pre>
+compile 'com.google.android.support:wearable:2.0.0-alpha1'
+      </pre>
+      </li>
+
+      <li>See the following page for setting up a watch or emulator with a
+      preview system image, in order to begin testing your app: <a href=
+      "{@docRoot}wear/preview/downloads.html">Download and Test with a
+      Device</a>
+      </li>
+    </ol>

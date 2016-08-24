@@ -83,4 +83,31 @@ oneway interface IAccountAuthenticator {
      */
     void addAccountFromCredentials(in IAccountAuthenticatorResponse response, in Account account,
             in Bundle accountCredentials);
+
+    /**
+     * Starts the add account session by prompting the user for account information
+     * and return a Bundle containing data to finish the session later.
+     */
+    void startAddAccountSession(in IAccountAuthenticatorResponse response, String accountType,
+        String authTokenType, in String[] requiredFeatures, in Bundle options);
+
+    /**
+     * Prompts the user for a new password but does not write it to the IAccountManager.
+     */
+    void startUpdateCredentialsSession(in IAccountAuthenticatorResponse response, in Account account,
+        String authTokenType, in Bundle options);
+
+    /**
+     * Finishes the session started by startAddAccountSession(...) or
+     * startUpdateCredentialsSession(...) by adding account to or updating local credentials
+     * in the IAccountManager.
+     */
+    void finishSession(in IAccountAuthenticatorResponse response, String accountType,
+        in Bundle sessionBundle);
+
+    /**
+     * Checks if the credentials of the provided account should be updated.
+     */
+    void isCredentialsUpdateSuggested(in IAccountAuthenticatorResponse response, in Account account,
+        String statusToken);
 }

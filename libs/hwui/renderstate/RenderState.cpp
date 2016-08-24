@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <GpuMemoryTracker.h>
 #include "renderstate/RenderState.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
+#include <algorithm>
 
 namespace android {
 namespace uirenderer {
@@ -38,6 +40,8 @@ RenderState::~RenderState() {
 void RenderState::onGLContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
+    GpuMemoryTracker::onGLContextCreated();
+
     mBlend = new Blend();
     mMeshState = new MeshState();
     mScissor = new Scissor();
@@ -88,6 +92,8 @@ void RenderState::onGLContextDestroyed() {
     }
 */
 
+    mLayerPool.clear();
+
     // TODO: reset all cached state in state objects
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
     mAssetAtlas.terminate();
@@ -102,6 +108,21 @@ void RenderState::onGLContextDestroyed() {
     mScissor = nullptr;
     delete mStencil;
     mStencil = nullptr;
+
+    GpuMemoryTracker::onGLContextDestroyed();
+}
+
+void RenderState::flush(Caches::FlushMode mode) {
+    switch (mode) {
+        case Caches::FlushMode::Full:
+            // fall through
+        case Caches::FlushMode::Moderate:
+            // fall through
+        case Caches::FlushMode::Layers:
+            mLayerPool.clear();
+            break;
+    }
+    mCaches->flush(mode);
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
@@ -121,6 +142,21 @@ void RenderState::bindFramebuffer(GLuint fbo) {
         mFramebuffer = fbo;
         glBindFramebuffer(GL_FRAMEBUFFER, mFramebuffer);
     }
+}
+
+GLuint RenderState::createFramebuffer() {
+    GLuint ret;
+    glGenFramebuffers(1, &ret);
+    return ret;
+}
+
+void RenderState::deleteFramebuffer(GLuint fbo) {
+    if (mFramebuffer == fbo) {
+        // GL defines that deleting the currently bound FBO rebinds FBO 0.
+        // Reflect this in our cached value.
+        mFramebuffer = 0;
+    }
+    glDeleteFramebuffers(1, &fbo);
 }
 
 void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info) {
@@ -173,17 +209,6 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
     }
 }
 
-void RenderState::requireGLContext() {
-    assertOnGLThread();
-    LOG_ALWAYS_FATAL_IF(!mRenderThread.eglManager().hasEglContext(),
-            "No GL context!");
-}
-
-void RenderState::assertOnGLThread() {
-    pthread_t curr = pthread_self();
-    LOG_ALWAYS_FATAL_IF(!pthread_equal(mThreadId, curr), "Wrong thread!");
-}
-
 class DecStrongTask : public renderthread::RenderTask {
 public:
     explicit DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
@@ -199,18 +224,24 @@ private:
 };
 
 void RenderState::postDecStrong(VirtualLightRefBase* object) {
-    mRenderThread.queue(new DecStrongTask(object));
+    if (pthread_equal(mThreadId, pthread_self())) {
+        object->decStrong(nullptr);
+    } else {
+        mRenderThread.queue(new DecStrongTask(object));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Render
 ///////////////////////////////////////////////////////////////////////////////
 
-void RenderState::render(const Glop& glop) {
+void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     const Glop::Mesh& mesh = glop.mesh;
     const Glop::Mesh::Vertices& vertices = mesh.vertices;
     const Glop::Mesh::Indices& indices = mesh.indices;
     const Glop::Fill& fill = glop.fill;
+
+    GL_CHECKPOINT(MODERATE);
 
     // ---------------------------------------------
     // ---------- Program + uniform setup ----------
@@ -221,17 +252,17 @@ void RenderState::render(const Glop& glop) {
         fill.program->setColor(fill.color);
     }
 
-    fill.program->set(glop.transform.ortho,
+    fill.program->set(orthoMatrix,
             glop.transform.modelView,
             glop.transform.meshTransform(),
             glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
 
     // Color filter uniforms
-    if (fill.filterMode == ProgramDescription::kColorBlend) {
+    if (fill.filterMode == ProgramDescription::ColorFilterMode::Blend) {
         const FloatColor& color = fill.filter.color;
         glUniform4f(mCaches->program().getUniform("colorBlend"),
                 color.r, color.g, color.b, color.a);
-    } else if (fill.filterMode == ProgramDescription::kColorMatrix) {
+    } else if (fill.filterMode == ProgramDescription::ColorFilterMode::Matrix) {
         glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
                 fill.filter.matrix.matrix);
         glUniform4fv(mCaches->program().getUniform("colorMatrixVector"), 1,
@@ -255,37 +286,42 @@ void RenderState::render(const Glop& glop) {
                 roundedOutRadius);
     }
 
+    GL_CHECKPOINT(MODERATE);
+
     // --------------------------------
     // ---------- Mesh setup ----------
     // --------------------------------
     // vertices
-    const bool force = meshState().bindMeshBufferInternal(vertices.bufferObject)
-            || (vertices.position != nullptr);
-    meshState().bindPositionVertexPointer(force, vertices.position, vertices.stride);
+    meshState().bindMeshBuffer(vertices.bufferObject);
+    meshState().bindPositionVertexPointer(vertices.position, vertices.stride);
 
     // indices
-    meshState().bindIndicesBufferInternal(indices.bufferObject);
+    meshState().bindIndicesBuffer(indices.bufferObject);
 
-    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
+    // texture
+    if (fill.texture.texture != nullptr) {
         const Glop::Fill::TextureData& texture = fill.texture;
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
+        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
         if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, true, false, texture.target);
+            texture.texture->setWrap(texture.clamp, false, false, texture.target);
         }
         if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, true, false, texture.target);
+            texture.texture->setFilter(texture.filter, false, false, texture.target);
         }
-
-        mCaches->textureState().bindTexture(texture.target, texture.texture->id);
-        meshState().enableTexCoordsVertexArray();
-        meshState().bindTexCoordsVertexPointer(force, vertices.texCoord, vertices.stride);
 
         if (texture.textureTransform) {
             glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1,
                     GL_FALSE, &texture.textureTransform->data[0]);
         }
+    }
+
+    // vertex attributes (tex coord, color, alpha)
+    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
+        meshState().enableTexCoordsVertexArray();
+        meshState().bindTexCoordsVertexPointer(vertices.texCoord, vertices.stride);
     } else {
         meshState().disableTexCoordsVertexArray();
     }
@@ -306,6 +342,7 @@ void RenderState::render(const Glop& glop) {
     // Shader uniforms
     SkiaShader::apply(*mCaches, fill.skiaShaderData);
 
+    GL_CHECKPOINT(MODERATE);
     Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?
             fill.skiaShaderData.bitmapData.bitmapTexture : nullptr;
     const AutoTexture autoCleanup(texture);
@@ -314,6 +351,8 @@ void RenderState::render(const Glop& glop) {
     // ---------- GL state setup ----------
     // ------------------------------------
     blend().setFactors(glop.blend.src, glop.blend.dst);
+
+    GL_CHECKPOINT(MODERATE);
 
     // ------------------------------------
     // ---------- Actual drawing ----------
@@ -324,12 +363,10 @@ void RenderState::render(const Glop& glop) {
         GLsizei elementsCount = mesh.elementCount;
         const GLbyte* vertexData = static_cast<const GLbyte*>(vertices.position);
         while (elementsCount > 0) {
-            GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
-
-            // rebind pointers without forcing, since initial bind handled above
-            meshState().bindPositionVertexPointer(false, vertexData, vertices.stride);
+            GLsizei drawCount = std::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+            meshState().bindPositionVertexPointer(vertexData, vertices.stride);
             if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-                meshState().bindTexCoordsVertexPointer(false,
+                meshState().bindTexCoordsVertexPointer(
                         vertexData + kMeshTextureOffset, vertices.stride);
             }
 
@@ -343,6 +380,8 @@ void RenderState::render(const Glop& glop) {
         glDrawArrays(mesh.primitiveMode, 0, mesh.elementCount);
     }
 
+    GL_CHECKPOINT(MODERATE);
+
     // -----------------------------------
     // ---------- Mesh teardown ----------
     // -----------------------------------
@@ -352,6 +391,8 @@ void RenderState::render(const Glop& glop) {
     if (vertices.attribFlags & VertexAttribFlags::Color) {
         glDisableVertexAttribArray(colorLocation);
     }
+
+    GL_CHECKPOINT(MODERATE);
 }
 
 void RenderState::dump() {

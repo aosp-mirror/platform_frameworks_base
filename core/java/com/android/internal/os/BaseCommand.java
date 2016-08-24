@@ -17,13 +17,19 @@
 
 package com.android.internal.os;
 
+import android.os.ShellCommand;
+
 import java.io.PrintStream;
 
 public abstract class BaseCommand {
 
-    protected String[] mArgs;
-    private int mNextArg;
-    private String mCurArgData;
+    final protected ShellCommand mArgs = new ShellCommand() {
+        @Override public int onCommand(String cmd) {
+            return 0;
+        }
+        @Override public void onHelp() {
+        }
+    };
 
     // These are magic strings understood by the Eclipse plugin.
     public static final String FATAL_ERROR_CODE = "Error type 1";
@@ -39,9 +45,7 @@ public abstract class BaseCommand {
             return;
         }
 
-        mArgs = args;
-        mNextArg = 0;
-        mCurArgData = null;
+        mArgs.init(null, null, null, null, args, 0);
 
         try {
             onRun();
@@ -87,32 +91,7 @@ public abstract class BaseCommand {
      * starts with '-'.  If the next argument is not an option, null is returned.
      */
     public String nextOption() {
-        if (mCurArgData != null) {
-            String prev = mArgs[mNextArg - 1];
-            throw new IllegalArgumentException("No argument expected after \"" + prev + "\"");
-        }
-        if (mNextArg >= mArgs.length) {
-            return null;
-        }
-        String arg = mArgs[mNextArg];
-        if (!arg.startsWith("-")) {
-            return null;
-        }
-        mNextArg++;
-        if (arg.equals("--")) {
-            return null;
-        }
-        if (arg.length() > 1 && arg.charAt(1) != '-') {
-            if (arg.length() > 2) {
-                mCurArgData = arg.substring(2);
-                return arg.substring(0, 2);
-            } else {
-                mCurArgData = null;
-                return arg;
-            }
-        }
-        mCurArgData = null;
-        return arg;
+        return mArgs.getNextOption();
     }
 
     /**
@@ -120,15 +99,7 @@ public abstract class BaseCommand {
      * no arguments left, return null.
      */
     public String nextArg() {
-        if (mCurArgData != null) {
-            String arg = mCurArgData;
-            mCurArgData = null;
-            return arg;
-        } else if (mNextArg < mArgs.length) {
-            return mArgs[mNextArg++];
-        } else {
-            return null;
-        }
+        return mArgs.getNextArg();
     }
 
     /**
@@ -136,11 +107,6 @@ public abstract class BaseCommand {
      * no arguments left, throws an IllegalArgumentException to report this to the user.
      */
     public String nextArgRequired() {
-        String arg = nextArg();
-        if (arg == null) {
-            String prev = mArgs[mNextArg - 1];
-            throw new IllegalArgumentException("Argument expected after \"" + prev + "\"");
-        }
-        return arg;
+        return mArgs.getNextArgRequired();
     }
 }

@@ -51,7 +51,7 @@ abstract class KeyStoreCryptoOperationUtils {
         // An error occured. However, some errors should not lead to init throwing an exception.
         // See below.
         InvalidKeyException e =
-                keyStore.getInvalidKeyException(key.getAlias(), beginOpResultCode);
+                keyStore.getInvalidKeyException(key.getAlias(), key.getUid(), beginOpResultCode);
         switch (beginOpResultCode) {
             case KeyStore.OP_AUTH_NEEDED:
                 // Operation needs to be authorized by authenticating the user. Don't throw an

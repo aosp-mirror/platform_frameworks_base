@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.qs.QSTile;
 
 import java.util.Arrays;
@@ -74,7 +75,7 @@ public class IntentTile extends QSTile<QSTile.State> {
     }
 
     @Override
-    protected State newTileState() {
+    public State newTileState() {
         return new State();
     }
 
@@ -88,6 +89,11 @@ public class IntentTile extends QSTile<QSTile.State> {
     protected void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory(), mIntentPackage);
         sendIntent("click", mOnClick, mOnClickUri);
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return null;
     }
 
     @Override
@@ -113,6 +119,11 @@ public class IntentTile extends QSTile<QSTile.State> {
     }
 
     @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
+    }
+
+    @Override
     protected void handleUpdateState(State state, Object arg) {
         Intent intent = (Intent) arg;
         if (intent == null) {
@@ -124,7 +135,6 @@ public class IntentTile extends QSTile<QSTile.State> {
         }
         // Save the last one in case we need it later.
         mLastIntent = intent;
-        state.visible = intent.getBooleanExtra("visible", true);
         state.contentDescription = intent.getStringExtra("contentDescription");
         state.label = intent.getStringExtra("label");
         state.icon = null;
@@ -156,7 +166,7 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_INTENT;
+        return MetricsEvent.QS_INTENT;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

@@ -25,13 +25,8 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
-import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
@@ -42,7 +37,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater_Delegate;
 import android.view.ViewGroup.LayoutParams;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -71,7 +65,7 @@ import static com.android.ide.common.rendering.api.RenderResources.REFERENCE_UND
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    private final BridgeResources mBridgeResources;
+    private final Resources mBridgeResources;
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
 
@@ -84,7 +78,7 @@ public final class BridgeTypedArray extends TypedArray {
     @Nullable
     private int[] mEmptyIds;
 
-    public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
+    public BridgeTypedArray(Resources resources, BridgeContext context, int len,
             boolean platformFile) {
         super(resources, null, null, 0);
         mBridgeResources = resources;
@@ -305,64 +299,22 @@ public final class BridgeTypedArray extends TypedArray {
         return defValue;
     }
 
-    /**
-     * Retrieve the ColorStateList for the attribute at <var>index</var>.
-     * The value may be either a single solid color or a reference to
-     * a color or complex {@link android.content.res.ColorStateList} description.
-     *
-     * @param index Index of attribute to retrieve.
-     *
-     * @return ColorStateList for the attribute, or null if not defined.
-     */
     @Override
     public ColorStateList getColorStateList(int index) {
         if (!hasValue(index)) {
             return null;
         }
 
-        ResourceValue resValue = mResourceData[index];
-        String value = resValue.getValue();
+        return ResourceHelper.getColorStateList(mResourceData[index], mContext);
+    }
 
-        if (value == null) {
+    @Override
+    public ComplexColor getComplexColor(int index) {
+        if (!hasValue(index)) {
             return null;
         }
 
-        // let the framework inflate the ColorStateList from the XML file.
-        File f = new File(value);
-        if (f.isFile()) {
-            try {
-                XmlPullParser parser = ParserFactory.create(f);
-
-                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
-                        parser, mContext, resValue.isFramework());
-                try {
-                    return ColorStateList.createFromXml(mContext.getResources(), blockParser,
-                            mContext.getTheme());
-                } finally {
-                    blockParser.ensurePopped();
-                }
-            } catch (XmlPullParserException e) {
-                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        "Failed to configure parser for " + value, e, null);
-                return null;
-            } catch (Exception e) {
-                // this is an error and not warning since the file existence is checked before
-                // attempting to parse it.
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                        "Failed to parse file " + value, e, null);
-
-                return null;
-            }
-        }
-
-        try {
-            int color = ResourceHelper.getColor(value);
-            return ColorStateList.valueOf(color);
-        } catch (NumberFormatException e) {
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null);
-        }
-
-        return null;
+        return ResourceHelper.getComplexColor(mResourceData[index], mContext);
     }
 
     /**
@@ -749,7 +701,8 @@ public final class BridgeTypedArray extends TypedArray {
         if (resVal instanceof ArrayResourceValue) {
             ArrayResourceValue array = (ArrayResourceValue) resVal;
             int count = array.getElementCount();
-            return count >= 0 ? mBridgeResources.fillValues(array, new CharSequence[count]) : null;
+            return count >= 0 ? Resources_Delegate.fillValues(mBridgeResources, array, new CharSequence[count]) :
+                    null;
         }
         int id = getResourceId(index, 0);
         String resIdMessage = id > 0 ? " (resource id 0x" + Integer.toHexString(id) + ')' : "";
@@ -997,7 +950,6 @@ public final class BridgeTypedArray extends TypedArray {
     }
 
     static TypedArray obtain(Resources res, int len) {
-        return res instanceof BridgeResources ?
-                new BridgeTypedArray(((BridgeResources) res), null, len, true) : null;
+        return new BridgeTypedArray(res, null, len, true);
     }
 }

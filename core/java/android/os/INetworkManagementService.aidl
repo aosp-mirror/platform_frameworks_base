@@ -97,12 +97,6 @@ interface INetworkManagementService
     void setInterfaceIpv6NdOffload(String iface, boolean enable);
 
     /**
-     * Retrieves the network routes currently configured on the specified
-     * interface
-     */
-    RouteInfo[] getRoutes(String iface);
-
-    /**
      * Add the specified route to the interface.
      */
     void addRoute(int netId, in RouteInfo route);
@@ -299,7 +293,9 @@ interface INetworkManagementService
     /**
      * Control network activity of a UID over interfaces with a quota limit.
      */
-    void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces);
+    void setUidMeteredNetworkBlacklist(int uid, boolean enable);
+    void setUidMeteredNetworkWhitelist(int uid, boolean enable);
+    boolean setDataSaverModeEnabled(boolean enable);
 
     void setUidCleartextNetworkPolicy(int uid, int policy);
 
@@ -328,14 +324,14 @@ interface INetworkManagementService
     void removeIdleTimer(String iface);
 
     /**
+     * Configure name servers, search paths, and resolver parameters for the given network.
+     */
+    void setDnsConfigurationForNetwork(int netId, in String[] servers, String domains);
+
+    /**
      * Bind name servers to a network in the DNS resolver.
      */
     void setDnsServersForNetwork(int netId, in String[] servers, String domains);
-
-    /**
-     * Flush the DNS cache associated with the specified network.
-     */
-    void flushNetworkDnsCache(int netId);
 
     void setFirewallEnabled(boolean enabled);
     boolean isFirewallEnabled();
@@ -440,4 +436,6 @@ interface INetworkManagementService
 
     void addInterfaceToLocalNetwork(String iface, in List<RouteInfo> routes);
     void removeInterfaceFromLocalNetwork(String iface);
+
+    void setAllowOnlyVpnForUids(boolean enable, in UidRange[] uidRanges);
 }

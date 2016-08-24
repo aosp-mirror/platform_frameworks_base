@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.tv;
 
+import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -25,24 +28,30 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.tv.pip.PipManager;
 
-/*
+/**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav
  */
 
 public class TvStatusBar extends BaseStatusBar {
 
+    /**
+     * Tracking calls to View.setSystemUiVisibility().
+     */
+    int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+
+    /**
+     * Last value sent to window manager.
+     */
+    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
+
     @Override
-    public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
+    public void setIcon(String slot, StatusBarIcon icon) {
     }
 
     @Override
-    public void updateIcon(String slot, int index, int viewIndex, StatusBarIcon old,
-            StatusBarIcon icon) {
-    }
-
-    @Override
-    public void removeIcon(String slot, int index, int viewIndex) {
+    public void removeIcon(String slot) {
     }
 
     @Override
@@ -71,7 +80,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setSystemUiVisibility(int vis, int mask) {
+    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
     }
 
     @Override
@@ -81,10 +91,6 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher) {
-    }
-
-    @Override
-    public void toggleRecentApps() {
     }
 
     @Override // CommandQueue
@@ -121,21 +127,25 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
+    }
+
+    @Override
     public void maybeEscalateHeadsUp() {
     }
 
     @Override
-    protected boolean isPanelFullyCollapsed() {
+    public boolean isPanelFullyCollapsed() {
         return false;
     }
 
     @Override
-    protected int getMaxKeyguardNotifications() {
+    protected int getMaxKeyguardNotifications(boolean recompute) {
         return 0;
     }
 
     @Override
-    public void animateExpandSettingsPanel() {
+    public void animateExpandSettingsPanel(String subPanel) {
     }
 
     @Override
@@ -155,7 +165,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void showScreenPinningRequest() {
+    public void showScreenPinningRequest(int taskId) {
     }
 
     @Override
@@ -171,11 +181,20 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void appTransitionFinished() {
+    }
+
+    @Override
     public void onCameraLaunchGestureDetected(int source) {
     }
 
     @Override
-    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldInterrupt,
+    public void showTvPictureInPictureMenu() {
+        PipManager.getInstance().showTvPictureInPictureMenu();
+    }
+
+    @Override
+    protected void updateHeadsUp(String key, NotificationData.Entry entry, boolean shouldPeek,
             boolean alertAgain) {
     }
 
@@ -185,5 +204,57 @@ public class TvStatusBar extends BaseStatusBar {
 
     protected boolean isSnoozedPackage(StatusBarNotification sbn) {
         return false;
+    }
+
+    @Override
+    public void addQsTile(ComponentName tile) {
+    }
+
+    @Override
+    public void remQsTile(ComponentName tile) {
+    }
+
+    @Override
+    public void clickTile(ComponentName tile) {
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        putComponent(TvStatusBar.class, this);
+    }
+
+    /**
+     * Updates the visibility of the picture-in-picture.
+     */
+    public void updatePipVisibility(boolean visible) {
+        if (visible) {
+            mSystemUiVisibility |= View.TV_PICTURE_IN_PICTURE_VISIBLE;
+        } else {
+            mSystemUiVisibility &= ~View.TV_PICTURE_IN_PICTURE_VISIBLE;
+        }
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    /**
+     * Updates the visibility of the Recents
+     */
+    public void updateRecentsVisibility(boolean visible) {
+        if (visible) {
+            mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
+        } else {
+            mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
+        }
+        notifyUiVisibilityChanged(mSystemUiVisibility);
+    }
+
+    private void notifyUiVisibilityChanged(int vis) {
+        try {
+            if (mLastDispatchedSystemUiVisibility != vis) {
+                mWindowManagerService.statusBarVisibilityChanged(vis);
+                mLastDispatchedSystemUiVisibility = vis;
+            }
+        } catch (RemoteException ex) {
+        }
     }
 }

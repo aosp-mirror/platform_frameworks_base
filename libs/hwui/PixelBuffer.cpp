@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "PixelBuffer.h"
 
 #include "Debug.h"
 #include "Extensions.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
+#include "utils/GLUtils.h"
 
 #include <utils/Log.h>
 
@@ -37,11 +36,13 @@ public:
     CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
-    void unmap() override;
 
     uint8_t* getMappedPointer() const override;
 
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
+
+protected:
+    void unmap() override;
 
 private:
     std::unique_ptr<uint8_t[]> mBuffer;
@@ -82,11 +83,13 @@ public:
     ~GpuPixelBuffer();
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
-    void unmap() override;
 
     uint8_t* getMappedPointer() const override;
 
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
+
+protected:
+    void unmap() override;
 
 private:
     GLuint mBuffer;
@@ -114,15 +117,12 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mCaches.pixelBufferState().bind(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
-#if DEBUG_OPENGL
-        if (!mMappedPointer) {
-            GLenum status = GL_NO_ERROR;
-            while ((status = glGetError()) != GL_NO_ERROR) {
-                ALOGE("Could not map GPU pixel buffer: 0x%x", status);
-            }
+        if (CC_UNLIKELY(!mMappedPointer)) {
+            GLUtils::dumpGLErrors();
+            LOG_ALWAYS_FATAL("Failed to map PBO");
         }
-#endif
         mAccessMode = mode;
+        mCaches.pixelBufferState().unbind();
     }
 
     return mMappedPointer;
@@ -152,6 +152,7 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
     unmap();
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
             GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));
+    mCaches.pixelBufferState().unbind();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@ package com.android.internal.view;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -38,10 +39,29 @@ public class ActionBarPolicy {
         mContext = context;
     }
 
+    /**
+     * Returns the maximum number of action buttons that should be permitted within an action
+     * bar/action mode. This will be used to determine how many showAsAction="ifRoom" items can fit.
+     * "always" items can override this.
+     */
     public int getMaxActionButtons() {
-        return mContext.getResources().getInteger(R.integer.max_action_buttons);
+        final Configuration config = mContext.getResources().getConfiguration();
+        final int width = config.screenWidthDp;
+        final int height = config.screenHeightDp;
+        final int smallest = config.smallestScreenWidthDp;
+        if (smallest > 600 || (width > 960 && height > 720) || (width > 720 && height > 960)) {
+            // For values-w600dp, values-sw600dp and values-xlarge.
+            return 5;
+        } else if (width >= 500 || (width > 640 && height > 480) || (width > 480 && height > 640)) {
+            // For values-w500dp and values-large.
+            return 4;
+        } else if (width >= 360) {
+            // For values-w360dp.
+            return 3;
+        } else {
+            return 2;
+        }
     }
-
     public boolean showsOverflowMenuButton() {
         return true;
     }
@@ -58,7 +78,11 @@ public class ActionBarPolicy {
 
         // The embedded tabs policy changed in Jellybean; give older apps the old policy
         // so they get what they expect.
-        return mContext.getResources().getBoolean(R.bool.action_bar_embed_tabs_pre_jb);
+        final Configuration configuration = mContext.getResources().getConfiguration();
+        final int width = configuration.screenWidthDp;
+        final int height = configuration.screenHeightDp;
+        return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE ||
+                width >= 480 || (width >= 640 && height >= 480);
     }
 
     public int getTabContainerHeight() {

@@ -1,0 +1,201 @@
+page.title=Vulkan Setup
+@jd:body
+
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#downloading">Downloading</a></li>
+        <li><a href="#testing">Testing Installation</a></li>
+        <li><a href="#compiling">Compiling Your Project</a></li>
+        <li><a href="#running">Running Your Project</a></li>
+        <li><a href="#using">Using the Dynamic Loader</a></li>
+      </ol>
+
+    </div>
+  </div>
+
+<p>
+This document explains how to get started with the Vulkan graphics library by downloading,
+compiling, and running several sample apps.
+</p>
+
+<p>
+Before beginning, make sure you have the right hardware and platform version prepared. You should
+be using one of the following devices, running at least Android N, Developer Preview 2:
+</p>
+
+<ul>
+   <li>Nexus 6P.</li>
+   <li>Nexus 5X.</li>
+   <li>Nexus Player.</li>
+</ul>
+
+<p>
+You can confirm your Android version by going to the <strong>Settings</strong> menu, and
+selecting <strong>About &lt;device&gt;</strong> > <strong>Android Version</strong>.
+Once you’ve confirmed that you have the right hardware and platform version set up, you can
+download the necessary software.
+</p>
+
+<h2 id="downloading">Downloading</h2>
+
+<p>
+Before getting started, you must download several tools and other software.
+</p>
+
+<ol style="1">
+   <li>If you don’t already have Android Studio,
+   <a href="{@docRoot}studio/index.html">download it.</a></li>
+
+<li><a href="https://github.com/android-ndk/ndk/wiki">Download</a> NDK r12-beta.</li>
+
+<li><a href="{@docRoot}preview/setup-sdk.html">Download and install
+the Android N-Preview SDK.</a></li>
+
+<li>(Optional) Build shaderc in NDK r12-beta by navigating to
+{@code &lt;ndk-root&gt;/sources/third_party/shaderc/},
+and running the following command:
+
+<pre class="no-pretty-print">
+../../../ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk \
+ APP_STL:=c++_shared APP_ABI=all libshaderc_combined
+</pre>
+
+You can specify {@code APP_STL} as {@code gnustl_static},
+{@code gnustl_shared}, {@code c++_static},
+or {@code c++_shared}.</li>
+
+<li>Open a terminal window, and use git to clone the Android Vulkan samples from the
+repository in which they reside.
+
+<pre class="no-pretty-print">
+$ git clone https://github.com/googlesamples/vulkan-basic-samples.git
+</pre>
+</li>
+
+<li>
+Navigate to the {@code LunarGSamples/} directory, which is in the local repository
+that you checked out in the previous step.
+</li>
+
+<li>Update the gslang source by entering the following command:
+
+<pre class="no-pretty-print">
+$ ./update_external_sources.sh -s -g
+</pre>
+</li>
+
+</ol>
+
+
+<h2 id="testing">Testing Installation</h2>
+
+<p>
+To confirm that Vulkan is set up properly, you can test it with
+the set of Vulkan API samples provided partly for that purpose. Follow these steps to
+build and execute these samples:
+</p>
+
+<ol style="1">
+
+
+<li>(Optional) Build the source by entering the following commands:
+
+<pre class="no-pretty-print">
+$ cd API-samples
+$ cmake -DANDROID=ON -DANDROID_ABI=[armeabi-v7a|arm64-v8a| x86|x86_64|all(default)]
+</pre>
+</li>
+
+<li>
+Import the samples into Android Studio. To do so, choose <strong>File</strong> >
+<strong>Import
+project (Eclipse, ADT, Gradle)</strong> and
+select the {@code LunarGSamples/API-Samples/android} directory.
+
+<p>You may see an error about missing components or missing SDK version.
+Ignore this error message, and follow the installation prompts.</p>
+
+<p>After several minutes, the <em>Project</em> pane should
+resemble the window shown in Figure 1.</p>
+
+<img src="../images/project-pane.png"
+alt="Project pane after importing samples into Android Studio" id="figure1" />
+
+<p class="img-caption">
+<strong>Figure 1.</strong> Project pane displaying samples after they've been imported.
+
+</li>
+</ol>
+
+<h2 id="compiling">Compiling Your Project</h2>
+
+<p>To compile your project, follow these steps:</p>
+
+<ol style="1">
+<li>Select your project in the Android Studio <em>Project</em> panel.</li>
+<li>From the <strong>Build</strong> menu, choose <strong>Make Module &lt;module-name&gt; </strong>; or select <strong> Build APK </strong> to generate APK.</li>
+<li>Resolve any dependency issues, and then compile. As Figure 2 shows, you can select individual projects to compile by choosing them from the configuration pulldown.</li>
+
+<img src="../images/config-pulldown.png"
+alt="Selecting the "drawcube" project from the config pulldown id="figure2" />
+
+<p class="img-caption">
+<strong>Figure 2.</strong> Selecting an individual project to compile.
+
+</ol>
+
+<p class="note"><strong>Note: </strong>
+<a href="https://github.com/googlesamples/android-vulkan-tutorials">Additional
+tutorial samples</a> illustrate the use of shaders compiled with off-line
+compilation integrated into Android Studio. For simplicity, each tutorial
+is self-contained, and builds according to standard Android Studio
+<a href="{@docRoot}tools/studio/index.html">build procedures.</a>
+</p>
+
+<h2 id="running">Running Your Project</h2>
+
+<p>To run your project, choose an APK to run by choosing <strong>Run</strong> > <strong>Run &lt;project-name&gt;</strong>.</p>
+
+<p>To debug an APK, choose <strong>Run</strong> >
+<strong>Debug &lt;project-name&gt;</strong>.  For each project,
+there’s a Java version and a native (C or C++) version.  Run the
+native version of the app. For example, for drawcube,
+run drawcube-native.</p>
+
+<p>Most of the samples have simple functionality, and most stop
+automatically after running.  The drawcube example is one of
+the more visually interesting examples. When you run it, it
+should display the image in Figure 3</p>.
+
+<img src="../images/drawcube-output.png"
+alt="Successfully running shows a multicolored cube" id="figure3" />
+
+<p class="img-caption">
+<strong>Figure 3.</strong> The successfully compiled program runs and produces a display.
+</p>
+
+<h2 id="using">Using the Dynamic Loader</h2>
+<p>
+The samples use a dynamic loader helper function defined in {@code vulkan_wrapper.h/cpp} to
+retrieve Vulkan API pointers using {@code dlopen()} and {@code dlsym()}. It does this rather
+than statically linking them with {@code vulkan.so}.
+</p>
+
+<p>
+Using this loader allows the code to link against API level 23 and earlier versions of the platform, which don’t include the {@code vulkan.so} shared library, but can run on devices that support Vulkan API.
+</p>
+
+<p>
+The following snippet shows how to use the dynamic loader.
+</p>
+
+<pre>
+#include "vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
+...
+// Before any Vulkan API usage,
+InitVulkan();
+</pre>

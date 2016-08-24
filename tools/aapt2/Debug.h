@@ -20,14 +20,20 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 
-#include <memory>
+// Include for printf-like debugging.
+#include <iostream>
 
 namespace aapt {
 
+struct DebugPrintTableOptions {
+    bool showSources = false;
+};
+
 struct Debug {
-    static void printTable(const std::shared_ptr<ResourceTable>& table);
-    static void printStyleGraph(const std::shared_ptr<ResourceTable>& table,
+    static void printTable(ResourceTable* table, const DebugPrintTableOptions& options = {});
+    static void printStyleGraph(ResourceTable* table,
                                 const ResourceName& targetStyle);
+    static void dumpHex(const void* data, size_t len);
 };
 
 } // namespace aapt

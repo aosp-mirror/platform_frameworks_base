@@ -20,21 +20,21 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -78,6 +78,8 @@ public class WifiScanner {
     public static final int REASON_INVALID_REQUEST = -3;
     /** Invalid request */
     public static final int REASON_NOT_AUTHORIZED = -4;
+    /** An outstanding request with the same listener hasn't finished yet. */
+    public static final int REASON_DUPLICATE_REQEUST = -5;
 
     /** @hide */
     public static final String GET_AVAILABLE_CHANNELS_EXTRA = "Channels";
@@ -136,18 +138,31 @@ public class WifiScanner {
         }
     }
 
-    /** reports {@link ScanListener#onResults} when underlying buffers are full
-     * @deprecated
+    /**
+     * reports {@link ScanListener#onResults} when underlying buffers are full
+     * this is simply the lack of the {@link #REPORT_EVENT_AFTER_EACH_SCAN} flag
+     * @deprecated It is not supported anymore.
      */
     @Deprecated
     public static final int REPORT_EVENT_AFTER_BUFFER_FULL = 0;
-    /** reports {@link ScanListener#onResults} after each scan */
-    public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1;
-    /** reports {@link ScanListener#onFullResult} whenever each beacon is discovered */
-    public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2;
-    /** do not batch */
-    public static final int REPORT_EVENT_NO_BATCH = 4;
+    /**
+     * reports {@link ScanListener#onResults} after each scan
+     */
+    public static final int REPORT_EVENT_AFTER_EACH_SCAN = (1 << 0);
+    /**
+     * reports {@link ScanListener#onFullResult} whenever each beacon is discovered
+     */
+    public static final int REPORT_EVENT_FULL_SCAN_RESULT = (1 << 1);
+    /**
+     * Do not place scans in the chip's scan history buffer
+     */
+    public static final int REPORT_EVENT_NO_BATCH = (1 << 2);
 
+
+    /** {@hide} */
+    public static final String SCAN_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
+    /** {@hide} */
+    public static final String SCAN_PARAMS_WORK_SOURCE_KEY = "WorkSource";
     /**
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
      */
@@ -157,6 +172,13 @@ public class WifiScanner {
         public int band;
         /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
         public ChannelSpec[] channels;
+        /**
+         * list of networkId's of hidden networks to scan for.
+         * These Id's should correspond to the wpa_supplicant's networkId's and will be used
+         * in connectivity scans using wpa_supplicant.
+         * {@hide}
+         * */
+        public int[] hiddenNetworkIds;
         /** period of background scan; in millisecond, 0 => single shot scan */
         public int periodInMs;
         /** must have a valid REPORT_EVENT value */
@@ -168,6 +190,23 @@ public class WifiScanner {
          * to wake up at fixed interval
          */
         public int maxScansToCache;
+        /**
+         * if maxPeriodInMs is non zero or different than period, then this bucket is
+         * a truncated binary exponential backoff bucket and the scan period will grow
+         * exponentially as per formula: actual_period(N) = period * (2 ^ (N/stepCount))
+         * to maxPeriodInMs
+         */
+        public int maxPeriodInMs;
+        /**
+         * for truncated binary exponential back off bucket, number of scans to perform
+         * for a given period
+         */
+        public int stepCount;
+        /**
+         * Flag to indicate if the scan settings are targeted for PNO scan.
+         * {@hide}
+         */
+        public boolean isPnoScan;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -181,10 +220,11 @@ public class WifiScanner {
             dest.writeInt(reportEvents);
             dest.writeInt(numBssidsPerScan);
             dest.writeInt(maxScansToCache);
-
+            dest.writeInt(maxPeriodInMs);
+            dest.writeInt(stepCount);
+            dest.writeInt(isPnoScan ? 1 : 0);
             if (channels != null) {
                 dest.writeInt(channels.length);
-
                 for (int i = 0; i < channels.length; i++) {
                     dest.writeInt(channels[i].frequency);
                     dest.writeInt(channels[i].dwellTimeMS);
@@ -193,30 +233,32 @@ public class WifiScanner {
             } else {
                 dest.writeInt(0);
             }
+            dest.writeIntArray(hiddenNetworkIds);
         }
 
         /** Implement the Parcelable interface {@hide} */
         public static final Creator<ScanSettings> CREATOR =
                 new Creator<ScanSettings>() {
                     public ScanSettings createFromParcel(Parcel in) {
-
                         ScanSettings settings = new ScanSettings();
                         settings.band = in.readInt();
                         settings.periodInMs = in.readInt();
                         settings.reportEvents = in.readInt();
                         settings.numBssidsPerScan = in.readInt();
                         settings.maxScansToCache = in.readInt();
+                        settings.maxPeriodInMs = in.readInt();
+                        settings.stepCount = in.readInt();
+                        settings.isPnoScan = in.readInt() == 1;
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
                             int frequency = in.readInt();
-
                             ChannelSpec spec = new ChannelSpec(frequency);
                             spec.dwellTimeMS = in.readInt();
                             spec.passive = in.readInt() == 1;
                             settings.channels[i] = spec;
                         }
-
+                        settings.hiddenNetworkIds = in.createIntArray();
                         return settings;
                     }
 
@@ -238,6 +280,12 @@ public class WifiScanner {
          * non-zero => scan was truncated, so results may not be complete
          */
         private int mFlags;
+        /**
+         * Indicates the buckets that were scanned to generate these results.
+         * This is not relevant to WifiScanner API users and is used internally.
+         * {@hide}
+         */
+        private int mBucketsScanned;
         /** all scan results discovered in this scan, sorted by timestamp in ascending order */
         private ScanResult mResults[];
 
@@ -249,9 +297,18 @@ public class WifiScanner {
             mResults = results;
         }
 
+        /** {@hide} */
+        public ScanData(int id, int flags, int bucketsScanned, ScanResult[] results) {
+            mId = id;
+            mFlags = flags;
+            mBucketsScanned = bucketsScanned;
+            mResults = results;
+        }
+
         public ScanData(ScanData s) {
             mId = s.mId;
             mFlags = s.mFlags;
+            mBucketsScanned = s.mBucketsScanned;
             mResults = new ScanResult[s.mResults.length];
             for (int i = 0; i < s.mResults.length; i++) {
                 ScanResult result = s.mResults[i];
@@ -268,6 +325,11 @@ public class WifiScanner {
             return mFlags;
         }
 
+        /** {@hide} */
+        public int getBucketsScanned() {
+            return mBucketsScanned;
+        }
+
         public ScanResult[] getResults() {
             return mResults;
         }
@@ -282,6 +344,7 @@ public class WifiScanner {
             if (mResults != null) {
                 dest.writeInt(mId);
                 dest.writeInt(mFlags);
+                dest.writeInt(mBucketsScanned);
                 dest.writeInt(mResults.length);
                 for (int i = 0; i < mResults.length; i++) {
                     ScanResult result = mResults[i];
@@ -298,12 +361,13 @@ public class WifiScanner {
                     public ScanData createFromParcel(Parcel in) {
                         int id = in.readInt();
                         int flags = in.readInt();
+                        int bucketsScanned = in.readInt();
                         int n = in.readInt();
                         ScanResult results[] = new ScanResult[n];
                         for (int i = 0; i < n; i++) {
                             results[i] = ScanResult.CREATOR.createFromParcel(in);
                         }
-                        return new ScanData(id, flags, results);
+                        return new ScanData(id, flags, bucketsScanned, results);
                     }
 
                     public ScanData[] newArray(int size) {
@@ -408,6 +472,158 @@ public class WifiScanner {
                 };
     }
 
+    /** {@hide} */
+    public static final String PNO_PARAMS_PNO_SETTINGS_KEY = "PnoSettings";
+    /** {@hide} */
+    public static final String PNO_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
+    /**
+     * PNO scan configuration parameters to be sent to {@link #startPnoScan}.
+     * Note: This structure needs to be in sync with |wifi_epno_params| struct in gscan HAL API.
+     * {@hide}
+     */
+    public static class PnoSettings implements Parcelable {
+        /**
+         * Pno network to be added to the PNO scan filtering.
+         * {@hide}
+         */
+        public static class PnoNetwork {
+            /*
+             * Pno flags bitmask to be set in {@link #PnoNetwork.flags}
+             */
+            /** Whether directed scan needs to be performed (for hidden SSIDs) */
+            public static final byte FLAG_DIRECTED_SCAN = (1 << 0);
+            /** Whether PNO event shall be triggered if the network is found on A band */
+            public static final byte FLAG_A_BAND = (1 << 1);
+            /** Whether PNO event shall be triggered if the network is found on G band */
+            public static final byte FLAG_G_BAND = (1 << 2);
+            /**
+             * Whether strict matching is required
+             * If required then the firmware must store the network's SSID and not just a hash
+             */
+            public static final byte FLAG_STRICT_MATCH = (1 << 3);
+            /**
+             * If this SSID should be considered the same network as the currently connected
+             * one for scoring.
+             */
+            public static final byte FLAG_SAME_NETWORK = (1 << 4);
+
+            /*
+             * Code for matching the beacon AUTH IE - additional codes. Bitmask to be set in
+             * {@link #PnoNetwork.authBitField}
+             */
+            /** Open Network */
+            public static final byte AUTH_CODE_OPEN = (1 << 0);
+            /** WPA_PSK or WPA2PSK */
+            public static final byte AUTH_CODE_PSK = (1 << 1);
+            /** any EAPOL */
+            public static final byte AUTH_CODE_EAPOL = (1 << 2);
+
+            /** SSID of the network */
+            public String ssid;
+            /** Network ID in wpa_supplicant */
+            public int networkId;
+            /** Assigned priority for the network */
+            public int priority;
+            /** Bitmask of the FLAG_XXX */
+            public byte flags;
+            /** Bitmask of the ATUH_XXX */
+            public byte authBitField;
+
+            /**
+             * default constructor for PnoNetwork
+             */
+            public PnoNetwork(String ssid) {
+                this.ssid = ssid;
+                flags = 0;
+                authBitField = 0;
+            }
+        }
+
+        /** Connected vs Disconnected PNO flag {@hide} */
+        public boolean isConnected;
+        /** Minimum 5GHz RSSI for a BSSID to be considered */
+        public int min5GHzRssi;
+        /** Minimum 2.4GHz RSSI for a BSSID to be considered */
+        public int min24GHzRssi;
+        /** Maximum score that a network can have before bonuses */
+        public int initialScoreMax;
+        /**
+         *  Only report when there is a network's score this much higher
+         *  than the current connection.
+         */
+        public int currentConnectionBonus;
+        /** score bonus for all networks with the same network flag */
+        public int sameNetworkBonus;
+        /** score bonus for networks that are not open */
+        public int secureBonus;
+        /** 5GHz RSSI score bonus (applied to all 5GHz networks) */
+        public int band5GHzBonus;
+        /** Pno Network filter list */
+        public PnoNetwork[] networkList;
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(isConnected ? 1 : 0);
+            dest.writeInt(min5GHzRssi);
+            dest.writeInt(min24GHzRssi);
+            dest.writeInt(initialScoreMax);
+            dest.writeInt(currentConnectionBonus);
+            dest.writeInt(sameNetworkBonus);
+            dest.writeInt(secureBonus);
+            dest.writeInt(band5GHzBonus);
+            if (networkList != null) {
+                dest.writeInt(networkList.length);
+                for (int i = 0; i < networkList.length; i++) {
+                    dest.writeString(networkList[i].ssid);
+                    dest.writeInt(networkList[i].networkId);
+                    dest.writeInt(networkList[i].priority);
+                    dest.writeByte(networkList[i].flags);
+                    dest.writeByte(networkList[i].authBitField);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<PnoSettings> CREATOR =
+                new Creator<PnoSettings>() {
+                    public PnoSettings createFromParcel(Parcel in) {
+                        PnoSettings settings = new PnoSettings();
+                        settings.isConnected = in.readInt() == 1;
+                        settings.min5GHzRssi = in.readInt();
+                        settings.min24GHzRssi = in.readInt();
+                        settings.initialScoreMax = in.readInt();
+                        settings.currentConnectionBonus = in.readInt();
+                        settings.sameNetworkBonus = in.readInt();
+                        settings.secureBonus = in.readInt();
+                        settings.band5GHzBonus = in.readInt();
+                        int numNetworks = in.readInt();
+                        settings.networkList = new PnoNetwork[numNetworks];
+                        for (int i = 0; i < numNetworks; i++) {
+                            String ssid = in.readString();
+                            PnoNetwork network = new PnoNetwork(ssid);
+                            network.networkId = in.readInt();
+                            network.priority = in.readInt();
+                            network.flags = in.readByte();
+                            network.authBitField = in.readByte();
+                            settings.networkList[i] = network;
+                        }
+                        return settings;
+                    }
+
+                    public PnoSettings[] newArray(int size) {
+                        return new PnoSettings[size];
+                    }
+                };
+
+    }
+
     /**
      * interface to get scan events on; specify this on {@link #startBackgroundScan} or
      * {@link #startScan}
@@ -428,6 +644,18 @@ public class WifiScanner {
         public void onFullResult(ScanResult fullScanResult);
     }
 
+    /**
+     * interface to get PNO scan events on; specify this on {@link #startDisconnectedPnoScan} and
+     * {@link #startConnectedPnoScan}.
+     * {@hide}
+     */
+    public interface PnoScanListener extends ScanListener {
+        /**
+         * Invoked when one of the PNO networks are found in scan results.
+         */
+        void onPnoNetworkFound(ScanResult[] results);
+    }
+
     /** start wifi scan in background
      * @param settings specifies various parameters for the scan; for more information look at
      * {@link ScanSettings}
@@ -436,17 +664,40 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
-        validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, putListener(listener), settings);
+        startBackgroundScan(settings, listener, null);
     }
+
+    /** start wifi scan in background
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param workSource WorkSource to blame for power usage
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
+    public void startBackgroundScan(ScanSettings settings, ScanListener listener,
+            WorkSource workSource) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        Bundle scanParams = new Bundle();
+        scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
+        scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        mAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, scanParams);
+    }
+
     /**
      * stop an ongoing wifi scan
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
      *  #startBackgroundScan}
      */
     public void stopBackgroundScan(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, key);
     }
     /**
      * reports currently available scan results on appropriate listeners
@@ -454,7 +705,7 @@ public class WifiScanner {
      */
     public boolean getScanResults() {
         validateChannel();
-        Message reply = sAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
+        Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
         return reply.what == CMD_OP_SUCCEEDED;
     }
 
@@ -467,8 +718,27 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startScan(ScanSettings settings, ScanListener listener) {
+        startScan(settings, listener, null);
+    }
+
+    /**
+     * starts a single scan and reports results asynchronously
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param workSource WorkSource to blame for power usage
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
+    public void startScan(ScanSettings settings, ScanListener listener, WorkSource workSource) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, putListener(listener), settings);
+        Bundle scanParams = new Bundle();
+        scanParams.putParcelable(SCAN_PARAMS_SCAN_SETTINGS_KEY, settings);
+        scanParams.putParcelable(SCAN_PARAMS_WORK_SOURCE_KEY, workSource);
+        mAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, key, scanParams);
     }
 
     /**
@@ -477,8 +747,77 @@ public class WifiScanner {
      * @param listener
      */
     public void stopScan(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key);
+    }
+
+    private void startPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings, int key) {
+        // Bundle up both the settings and send it across.
+        Bundle pnoParams = new Bundle();
+        // Set the PNO scan flag.
+        scanSettings.isPnoScan = true;
+        pnoParams.putParcelable(PNO_PARAMS_SCAN_SETTINGS_KEY, scanSettings);
+        pnoParams.putParcelable(PNO_PARAMS_PNO_SETTINGS_KEY, pnoSettings);
+        mAsyncChannel.sendMessage(CMD_START_PNO_SCAN, 0, key, pnoParams);
+    }
+    /**
+     * Start wifi connected PNO scan
+     * @param scanSettings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param pnoSettings specifies various parameters for PNO; for more information look at
+     * {@link PnoSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     * {@hide}
+     */
+    public void startConnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
+            PnoScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        pnoSettings.isConnected = true;
+        startPnoScan(scanSettings, pnoSettings, key);
+    }
+    /**
+     * Start wifi disconnected PNO scan
+     * @param scanSettings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param pnoSettings specifies various parameters for PNO; for more information look at
+     * {@link PnoSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     * {@hide}
+     */
+    public void startDisconnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
+            PnoScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(pnoSettings, "pnoSettings cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        pnoSettings.isConnected = false;
+        startPnoScan(scanSettings, pnoSettings, key);
+    }
+    /**
+     * Stop an ongoing wifi PNO scan
+     * @param listener specifies which scan to cancel; must be same object as passed in {@link
+     *  #startPnoScan}
+     * TODO(rpius): Check if we can remove pnoSettings param in stop.
+     * {@hide}
+     */
+    public void stopPnoScan(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        mAsyncChannel.sendMessage(CMD_STOP_PNO_SCAN, 0, key);
     }
 
     /** specifies information about an access point of interest */
@@ -610,8 +949,11 @@ public class WifiScanner {
      *                 provided on {@link #stopTrackingWifiChange}
      */
     public void startTrackingWifiChange(WifiChangeListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, putListener(listener));
+        mAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, key);
     }
 
     /**
@@ -620,15 +962,17 @@ public class WifiScanner {
      * #stopTrackingWifiChange}
      */
     public void stopTrackingWifiChange(WifiChangeListener listener) {
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, key);
     }
 
     /** @hide */
     @SystemApi
     public void configureWifiChange(WifiChangeSettings settings) {
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
+        mAsyncChannel.sendMessage(CMD_CONFIGURE_WIFI_CHANGE, 0, 0, settings);
     }
 
     /** interface to receive hotlist events on; use this on {@link #setHotlist} */
@@ -706,10 +1050,14 @@ public class WifiScanner {
      */
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
         HotlistSettings settings = new HotlistSettings();
         settings.bssidInfos = bssidInfos;
-        sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, putListener(listener), settings);
+        settings.apLostThreshold = apLostThreshold;
+        mAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, key, settings);
     }
 
     /**
@@ -717,8 +1065,11 @@ public class WifiScanner {
      * @param listener same object provided in {@link #startTrackingBssids}
      */
     public void stopTrackingBssids(BssidListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, removeListener(listener));
+        mAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, key);
     }
 
 
@@ -772,22 +1123,24 @@ public class WifiScanner {
     public static final int CMD_STOP_SINGLE_SCAN            = BASE + 22;
     /** @hide */
     public static final int CMD_SINGLE_SCAN_COMPLETED       = BASE + 23;
+    /** @hide */
+    public static final int CMD_START_PNO_SCAN              = BASE + 24;
+    /** @hide */
+    public static final int CMD_STOP_PNO_SCAN               = BASE + 25;
+    /** @hide */
+    public static final int CMD_PNO_NETWORK_FOUND           = BASE + 26;
 
     private Context mContext;
     private IWifiScanner mService;
 
     private static final int INVALID_KEY = 0;
-    private static int sListenerKey = 1;
+    private int mListenerKey = 1;
 
-    private static final SparseArray sListenerMap = new SparseArray();
-    private static final Object sListenerMapLock = new Object();
+    private final SparseArray mListenerMap = new SparseArray();
+    private final Object mListenerMapLock = new Object();
 
-    private static AsyncChannel sAsyncChannel;
-    private static CountDownLatch sConnected;
-
-    private static final Object sThreadRefLock = new Object();
-    private static int sThreadRefCount;
-    private static HandlerThread sHandlerThread;
+    private AsyncChannel mAsyncChannel;
+    private final Handler mInternalHandler;
 
     /**
      * Create a new WifiScanner instance.
@@ -796,98 +1149,111 @@ public class WifiScanner {
      * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
      * @param context the application context
      * @param service the Binder interface
+     * @param looper the Looper used to deliver callbacks
      * @hide
      */
-    public WifiScanner(Context context, IWifiScanner service) {
+    public WifiScanner(Context context, IWifiScanner service, Looper looper) {
         mContext = context;
         mService = service;
-        init();
+
+        Messenger messenger = null;
+        try {
+            messenger = mService.getMessenger();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        if (messenger == null) {
+            throw new IllegalStateException("getMessenger() returned null!  This is invalid.");
+        }
+
+        mAsyncChannel = new AsyncChannel();
+
+        mInternalHandler = new ServiceHandler(looper);
+        mAsyncChannel.connectSync(mContext, mInternalHandler, messenger);
+        // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
+        // synchronously, which causes WifiScanningService to receive the wrong replyTo value.
+        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
     }
 
-    private void init() {
-        synchronized (sThreadRefLock) {
-            if (++sThreadRefCount == 1) {
-                Messenger messenger = null;
-                try {
-                    messenger = mService.getMessenger();
-                } catch (RemoteException e) {
-                    /* do nothing */
-                } catch (SecurityException e) {
-                    /* do nothing */
-                }
+    private void validateChannel() {
+        if (mAsyncChannel == null) throw new IllegalStateException(
+                "No permission to access and change wifi or a bad initialization");
+    }
 
-                if (messenger == null) {
-                    sAsyncChannel = null;
-                    return;
-                }
-
-                sHandlerThread = new HandlerThread("WifiScanner");
-                sAsyncChannel = new AsyncChannel();
-                sConnected = new CountDownLatch(1);
-
-                sHandlerThread.start();
-                Handler handler = new ServiceHandler(sHandlerThread.getLooper());
-                sAsyncChannel.connect(mContext, handler, messenger);
-                try {
-                    sConnected.await();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "interrupted wait at init");
-                }
+    // Add a listener into listener map. If the listener already exists, return INVALID_KEY and
+    // send an error message to internal handler; Otherwise add the listener to the listener map and
+    // return the key of the listener.
+    private int addListener(ActionListener listener) {
+        synchronized (mListenerMapLock) {
+            boolean keyExists = (getListenerKey(listener) != INVALID_KEY);
+            // Note we need to put the listener into listener map even if it's a duplicate as the
+            // internal handler will need the key to find the listener. In case of duplicates,
+            // removing duplicate key logic will be handled in internal handler.
+            int key = putListener(listener);
+            if (keyExists) {
+                if (DBG) Log.d(TAG, "listener key already exists");
+                OperationResult operationResult = new OperationResult(REASON_DUPLICATE_REQEUST,
+                        "Outstanding request with same key not stopped yet");
+                Message message = Message.obtain(mInternalHandler, CMD_OP_FAILED, 0, key,
+                        operationResult);
+                message.sendToTarget();
+                return INVALID_KEY;
+            } else {
+                return key;
             }
         }
     }
 
-    private void validateChannel() {
-        if (sAsyncChannel == null) throw new IllegalStateException(
-                "No permission to access and change wifi or a bad initialization");
-    }
-
-    private static int putListener(Object listener) {
+    private int putListener(Object listener) {
         if (listener == null) return INVALID_KEY;
         int key;
-        synchronized (sListenerMapLock) {
+        synchronized (mListenerMapLock) {
             do {
-                key = sListenerKey++;
+                key = mListenerKey++;
             } while (key == INVALID_KEY);
-            sListenerMap.put(key, listener);
+            mListenerMap.put(key, listener);
         }
         return key;
     }
 
-    private static Object getListener(int key) {
+    private Object getListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
             return listener;
         }
     }
 
-    private static int getListenerKey(Object listener) {
+    private int getListenerKey(Object listener) {
         if (listener == null) return INVALID_KEY;
-        synchronized (sListenerMapLock) {
-            int index = sListenerMap.indexOfValue(listener);
+        synchronized (mListenerMapLock) {
+            int index = mListenerMap.indexOfValue(listener);
             if (index == -1) {
                 return INVALID_KEY;
             } else {
-                return sListenerMap.keyAt(index);
+                return mListenerMap.keyAt(index);
             }
         }
     }
 
-    private static Object removeListener(int key) {
+    private Object removeListener(int key) {
         if (key == INVALID_KEY) return null;
-        synchronized (sListenerMapLock) {
-            Object listener = sListenerMap.get(key);
-            sListenerMap.remove(key);
+        synchronized (mListenerMapLock) {
+            Object listener = mListenerMap.get(key);
+            mListenerMap.remove(key);
             return listener;
         }
     }
 
-    private static int removeListener(Object listener) {
+    private int removeListener(Object listener) {
         int key = getListenerKey(listener);
-        if (key == INVALID_KEY) return key;
-        synchronized (sListenerMapLock) {
-            sListenerMap.remove(key);
+        if (key == INVALID_KEY) {
+            Log.e(TAG, "listener cannot be found");
+            return key;
+        }
+        synchronized (mListenerMapLock) {
+            mListenerMap.remove(key);
             return key;
         }
     }
@@ -928,31 +1294,20 @@ public class WifiScanner {
                 };
     }
 
-    private static class ServiceHandler extends Handler {
+    private class ServiceHandler extends Handler {
         ServiceHandler(Looper looper) {
             super(looper);
         }
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        sAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
-                    } else {
-                        Log.e(TAG, "Failed to set up channel connection");
-                        // This will cause all further async API calls on the WifiManager
-                        // to fail and throw an exception
-                        sAsyncChannel = null;
-                    }
-                    sConnected.countDown();
-                    return;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
                     return;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                     Log.e(TAG, "Channel connection lost");
                     // This will cause all further async API calls on the WifiManager
                     // to fail and throw an exception
-                    sAsyncChannel = null;
+                    mAsyncChannel = null;
                     getLooper().quit();
                     return;
             }
@@ -1008,6 +1363,10 @@ public class WifiScanner {
                     if (DBG) Log.d(TAG, "removing listener for single scan");
                     removeListener(msg.arg2);
                     break;
+                case CMD_PNO_NETWORK_FOUND:
+                    ((PnoScanListener) listener).onPnoNetworkFound(
+                            ((ParcelableScanResults) msg.obj).getResults());
+                    return;
                 default:
                     if (DBG) Log.d(TAG, "Ignoring message " + msg.what);
                     return;

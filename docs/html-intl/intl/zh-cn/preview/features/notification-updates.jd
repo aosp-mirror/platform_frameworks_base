@@ -1,0 +1,393 @@
+page.title=通知
+page.tags=通知
+helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!-- table of contents -->
+<h2>本文内容包括</h2>
+<ol>
+  <li><a href="#direct">直接回复</a></li>
+  <li><a href="#bundle">捆绑通知</a></li>
+  <li><a href="#custom">自定义视图</a></li>
+  <li><a href="#style">消息样式</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N 引入了一些新 API，允许应用发布具有高度可见性和交互性的通知。
+</p>
+
+<p>Android N 扩展了现有 {@link android.support.v4.app.RemoteInput} 通知 API，以支持手持式设备上的内联回复。
+此功能允许用户从通知栏快速进行回复，无需访问应用。
+</p>
+
+<p>
+  此外，Android N 还允许捆绑类似的通知并将它们显示为一则通知。
+为了实现此功能，Android N 使用现有的 {@link
+  android.support.v4.app.NotificationCompat.Builder#setGroup
+  NotificationCompat.Builder.setGroup()} 方法。用户可以从通知栏展开各通知，并分别对每则通知进行回复和清除等操作。
+
+
+</p>
+
+<p>最后，Android N 还添加了一些新 API，允许您在应用的自定义通知视图中使用系统装饰元素。
+这些 API 可帮助确保通知视图与标准模板的展示效果相一致。
+
+</p>
+
+<p>本文重点介绍您在应用中使用新通知功能时应加以考虑的一些重要变更。
+</p>
+
+<h2 id="direct">直接回复</h2>
+
+<p>利用 Android N 中的直接回复功能，用户可以直接在通知界面内快速回复短信或更新任务列表。
+
+在手持式设备上，可通过通知中另外附加的按钮进行内联回复操作。
+当用户通过键盘回复时，系统会将文本回复附加到您为通知操作指定的 Intent，并将 Intent 发送到手持式设备应用。
+
+
+
+
+
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
+<p class="img-caption">
+  <strong>图 1.</strong>Android N 添加了 <strong>Reply</strong> 操作按钮。
+
+</p>
+
+<h3>添加内联回复操作</h3>
+
+<p>要创建支持直接回复的通知操作：
+</p>
+
+<ol>
+<li>创建一个可添加到通知操作的 {@link android.support.v4.app.RemoteInput.Builder} 实例。
+
+该类的构造函数接受系统用作文本输入密钥的字符串。
+之后，手持式设备应用使用该密钥检索输入的文本。
+
+
+<pre>
+// Key for the string that's delivered in the action's intent.
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li>使用 <code>addRemoteInput()</code> 向操作附加 {@link android.support.v4.app.RemoteInput} 对象。
+
+
+<pre>
+// Create the reply action and add the remote input.
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>对通知应用操作并发出通知。
+
+<pre>
+// Build the notification and add the action.
+Notification newMessageNotification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification.
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, newMessageNotification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> 在触发通知操作时系统提示用户输入回复。
+ </p>
+
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png" srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>图 2.</strong>用户从通知栏输入文本。
+</p>
+
+<h3>
+  从内联回复检索用户输入
+</h3>
+
+<p>
+  要从通知界面接收用户输入并发送到在回复操作的 Intent 中声明的 Activity：
+
+</p>
+
+<ol>
+  <li>通过传递通知操作的 Intent 作为输入参数来调用 {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+ getResultsFromIntent()}。
+该方法返回含有文本回复的 {@link android.os.Bundle}。
+
+
+    <pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+  </li>
+
+  <li>使用产生的密钥查询捆绑包（提供给 {@link
+ android.support.v4.app.RemoteInput.Builder} 构造函数）。以下代码段说明了方法如何从捆绑包检索输入文本：
+
+
+
+    <pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
+    return null;
+ }
+</pre>
+  </li>
+
+  <li>使用您为上一项通知提供的相同的通知 ID 来建立和发布另一项通知。
+进度指示器从通知界面消失，以告知用户已回复成功。
+
+在处理这项新通知时，使用被传递到接收器 {@code onReceive()} 方法的上下文。
+
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  对于交互式应用（例如聊天），这可以用来在处理检索到的文本时添加其他上下文。
+例如，这些应用可以显示多行聊天记录。
+当用户通过 {@link
+  android.support.v4.app.RemoteInput} 回复时，您可以使用 {@code setRemoteInputHistory()} 方法更新回复历史。
+
+</p>
+
+<p>
+  在应用收到远程输入后，必须更新或取消通知。
+如果用户使用直接回复来对远程更新进行回复，则不可取消通知。
+
+否则，更新通知以显示用户的回复。对于使用 {@code MessagingStyle} 的通知，您应该添加回复来作为最新消息。
+
+当使用其它模板时，您可以将用户的回复追加到远程输入历史。
+
+</p>
+
+<h2 id="bundle">捆绑通知</h2>
+
+<p>Android N 为开发者提供了表示通知队列的新方法：
+ <i>捆绑通知</i>。这类似于 Android Wear 中的<a href="{@docRoot}training/wearables/notifications/stacks.html">通知堆栈</a>功能。
+
+例如，如果应用为接收的消息创建通知，那么在接收到多个消息时，应用会将通知捆绑在一起成为一个群组。
+
+您可以使用现有的 {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()} 方法捆绑类似的通知。
+</p>
+
+<p>
+  通知组对组内的通知施加层次结构。
+  层次结构的顶层是父级通知，其显示该群组的摘要信息。
+用户可以逐步展开通知组，随着用户深入展开，系统将显示更多信息。
+
+当用户展开捆绑包时，系统将显示其所有子通知的更多信息；当用户展开其中一则通知时，系统显示该通知的所有内容。
+
+
+</p>
+
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png" srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>图 3.</strong>用户可以逐步展开通知组。
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>如果同一应用发送了四条或以上通知，并且未指定分组，系统会自动将它们分到一组。
+
+
+</p>
+
+<p>如需了解如何将通知添加到组，请参阅<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">将各通知添加到组</a>。
+
+</p>
+
+
+<h3 id="best-practices">捆绑通知最佳做法</h3>
+<p>本节提供了有关何时使用通知组而非早期版本 Android 平台中的 {@link android.app.Notification.InboxStyle InboxStyle} 通知的指南。
+
+
+</p>
+
+<h3>何时使用捆绑通知</h3>
+
+<p>只有在您的用例满足以下所有条件时才应使用通知组：
+</p>
+
+<ul>
+  <li>子通知为完整通知，且可以单独显示，无需群组摘要。
+</li>
+  <li>单独显示子通知更合理。例如：
+
+  </li>
+  <ul>
+    <li>子通知可操作，且每个子通知均有特定的操作。</li>
+    <li>子通知中包含用户想要查看的更多信息。</li>
+  </ul>
+</ul>
+
+<p>好的通知组用例示例包括：显示传入消息列表的短信应用，或显示收到的电子邮件列表的电子邮件应用。
+
+</p>
+
+<p>
+适合显示单一通知的用例示例包括：从某一个人收到的单独消息，或以列表表示的单行文本项目。
+
+您可以使用 {@link android.app.Notification.InboxStyle InboxStyle} 或
+{@link android.app.Notification.BigTextStyle BigTextStyle} 实现此功能。
+
+
+</p>
+
+<h3 id ="post">显示捆绑通知</h3>
+
+<p>
+  即使组内仅含有一则子通知，应用也应发布组摘要。
+如果只含有一则通知，系统将取消摘要并直接显示子通知。
+这样可确保用户在滑动切换组内的子通知时，系统仍可以提供一致的用户体验。
+
+
+</p>
+
+<p class="note">
+  <strong>注：</strong>本版本 Android N 目前还无法在仅含一则子通知时取消通知组的摘要。
+我们将在之后版本的 Android N 中添加此功能。
+
+</p>
+
+<h3>扫视通知</h3>
+
+<p>虽然系统通常以群组的方式显示子通知，但您可以进行设置，使其暂时作为<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">浮动通知</a>显示。
+
+
+该功能非常实用，因为其允许用户立即访问最近的子通知以及与其相关的操作。
+
+</p>
+
+
+<h3>后向兼容性</h3>
+
+<p>
+  自 Android 5.0（API 级别 21）起，{@link
+  android.app.Notification} API 中就添加了通知组和远程输入，以支持 Android Wear 设备。
+如果您已经使用这些 API 构建通知，则只需验证应用行为是否符合上述指南，并考虑实现 {@code
+  setRemoteInputHistory()}。
+
+
+</p>
+
+<p>
+  为了支持后向兼容性，支持库的 {@link android.support.v4.app.NotificationCompat} 类中提供了相同的 API，以便您构建可在早期 Android 版本中运行的通知。
+
+
+在手持式设备和平板电脑上，用户只能看到摘要通知，因此应用应仍提供收件箱式或类似形式的通知显示模式，以显示群组的全部信息内容。
+
+鉴于 Android Wear 设备允许用户查看所有子通知，包括更早级别平台上的通知，您应在不依赖 API 级别的基础上构建子通知。
+
+
+
+</p>
+
+<h2 id="custom"> 自定义视图</h2>
+<p>从 Android N 开始，您将可以自定义通知视图，同时仍可以使用系统装饰元素，例如通知标头、操作和可展开的布局。
+
+</p>
+
+<p>为启用该功能，Android N 添加了以下 API，以便您样式化自己的自定义视图：
+</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> 样式化除媒体通知外的其他通知。
+</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> 样式化媒体通知。</dd>
+</dl>
+
+<p>如需使用这些新 API，可调用 {@code setStyle()} 方法，并向其传递所需的自定义视图样式。
+</p>
+
+<p>此代码段显示了如何使用 {@code DecoratedCustomViewStyle()} 方法构建自定义通知对象。
+</p>
+
+<pre>
+Notification notification = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>
+
+<h2 id="style">消息传递样式</h2>
+<p>
+  Android N 引入了一项新的 API 来自定义通知样式。
+  使用 <code>MessageStyle</code> 类，您可以更改在通知中显示的多个标签，包括会话标题、其他消息和通知的内容视图。
+
+
+</p>
+
+<p>
+  以下代码段演示了如何使用 <code>MessageStyle</code> 类来自定义通知样式。
+
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
+</pre>

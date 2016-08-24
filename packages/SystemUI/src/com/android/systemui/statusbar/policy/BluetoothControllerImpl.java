@@ -16,11 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import com.android.settingslib.bluetooth.BluetoothCallback;
@@ -37,8 +40,9 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private static final String TAG = "BluetoothController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final LocalBluetoothManager mLocalBluetoothManager;
+    private final UserManager mUserManager;
+    private final int mCurrentUser;
 
     private boolean mEnabled;
     private int mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
@@ -54,6 +58,14 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             onBluetoothStateChanged(
                     mLocalBluetoothManager.getBluetoothAdapter().getBluetoothState());
         }
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mCurrentUser = ActivityManager.getCurrentUser();
+    }
+
+    @Override
+    public boolean canConfigBluetooth() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                UserHandle.of(mCurrentUser));
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -65,7 +77,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         pw.print("  mEnabled="); pw.println(mEnabled);
         pw.print("  mConnectionState="); pw.println(stateToString(mConnectionState));
         pw.print("  mLastDevice="); pw.println(mLastDevice);
-        pw.print("  mCallbacks.size="); pw.println(mCallbacks.size());
+        pw.print("  mCallbacks.size="); pw.println(mHandler.mCallbacks.size());
         pw.println("  Bluetooth Devices:");
         for (CachedBluetoothDevice device :
                 mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy()) {
@@ -93,13 +105,13 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     @Override
     public void addStateChangedCallback(Callback cb) {
-        mCallbacks.add(cb);
+        mHandler.obtainMessage(H.MSG_ADD_CALLBACK, cb).sendToTarget();
         mHandler.sendEmptyMessage(H.MSG_STATE_CHANGED);
     }
 
     @Override
     public void removeStateChangedCallback(Callback cb) {
-        mCallbacks.remove(cb);
+        mHandler.obtainMessage(H.MSG_REMOVE_CALLBACK, cb).sendToTarget();
     }
 
     @Override
@@ -223,8 +235,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private final class H extends Handler {
+        private final ArrayList<BluetoothController.Callback> mCallbacks = new ArrayList<>();
+
         private static final int MSG_PAIRED_DEVICES_CHANGED = 1;
         private static final int MSG_STATE_CHANGED = 2;
+        private static final int MSG_ADD_CALLBACK = 3;
+        private static final int MSG_REMOVE_CALLBACK = 4;
 
         @Override
         public void handleMessage(Message msg) {
@@ -234,6 +250,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
                     break;
                 case MSG_STATE_CHANGED:
                     fireStateChange();
+                    break;
+                case MSG_ADD_CALLBACK:
+                    mCallbacks.add((BluetoothController.Callback) msg.obj);
+                    break;
+                case MSG_REMOVE_CALLBACK:
+                    mCallbacks.remove((BluetoothController.Callback) msg.obj);
                     break;
             }
         }

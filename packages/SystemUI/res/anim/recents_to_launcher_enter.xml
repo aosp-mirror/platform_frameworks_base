@@ -23,6 +23,6 @@
   <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
          android:fillEnabled="true"
          android:fillBefore="true" android:fillAfter="true"
-         android:interpolator="@android:interpolator/linear"
-         android:duration="150"/>
+         android:interpolator="@interpolator/recents_to_launcher_enter_interpolator"
+         android:duration="133"/>
 </set>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* apps/common/assets/default/default/skins/StatusBar.xml
 **
 ** Copyright 2006, The Android Open Source Project
 **
@@ -40,47 +39,21 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <com.android.systemui.statusbar.phone.ObservableScrollView
-            android:id="@+id/scroll_view"
+        <com.android.systemui.AutoReinflateContainer
+            android:id="@+id/qs_auto_reinflate_container"
+            android:layout="@layout/qs_panel"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:scrollbars="none"
-            android:overScrollMode="never"
-            android:fillViewport="true">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <include
-                    layout="@layout/qs_panel"
-                    android:layout_marginTop="@dimen/status_bar_header_height_expanded"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/notification_side_padding"
-                    android:layout_marginRight="@dimen/notification_side_padding"/>
-
-                <!-- A view to reserve space for the collapsed stack -->
-                <!-- Layout height: notification_min_height + bottom_stack_peek_amount -->
-                <View
-                    android:id="@+id/reserve_notification_space"
-                    android:layout_height="@dimen/min_stack_height"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="@dimen/notifications_top_padding" />
-
-                <View
-                    android:layout_height="@dimen/notification_side_padding"
-                    android:layout_width="match_parent" />
-            </LinearLayout>
-        </com.android.systemui.statusbar.phone.ObservableScrollView>
+            android:clipToPadding="false"
+            android:clipChildren="false" />
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:layout_marginBottom="@dimen/close_handle_underlap"
-            android:importantForAccessibility="no" />
+            android:layout_marginBottom="@dimen/close_handle_underlap" />
 
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
@@ -97,8 +70,6 @@
     <include
             layout="@layout/keyguard_bottom_area"
             android:visibility="gone" />
-
-    <include layout="@layout/status_bar_expanded_header" />
 
     <com.android.systemui.statusbar.AlphaOptimizedView
         android:id="@+id/qs_navbar_scrim"

@@ -28,6 +28,9 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Settings base class for pending and resolved classes.
@@ -48,6 +51,9 @@ abstract class PackageSettingBase extends SettingBase {
 
     final String name;
     final String realName;
+
+    String parentPackageName;
+    List<String> childPackageNames;
 
     /**
      * Path where this package was found on disk. For monolithic packages
@@ -108,16 +114,19 @@ abstract class PackageSettingBase extends SettingBase {
     int installStatus = PKG_INSTALL_COMPLETE;
 
     /**
-     * Non-persisted value indicating this package has been temporarily frozen,
-     * usually during a critical section of the package update pipeline. The
-     * platform will refuse to launch packages in a frozen state.
+     * Non-persisted value. During an "upgrade without restart", we need the set
+     * of all previous code paths so we can surgically add the new APKs to the
+     * active classloader. If at any point an application is upgraded with a
+     * restart, this field will be cleared since the classloader would be created
+     * using the full set of code paths when the package's process is started.
      */
-    boolean frozen = false;
-
+    Set<String> oldCodePaths;
     PackageSettingBase origPackage;
 
     /** Package name of the app that installed this package */
     String installerPackageName;
+    /** Indicates if the package that installed this app has been uninstalled */
+    boolean isOrphaned;
     /** UUID of {@link VolumeInfo} hosting this app */
     String volumeUuid;
 
@@ -126,10 +135,14 @@ abstract class PackageSettingBase extends SettingBase {
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int pkgPrivateFlags) {
+            int pVersionCode, int pkgFlags, int pkgPrivateFlags,
+            String parentPackageName, List<String> childPackageNames) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
+        this.parentPackageName = parentPackageName;
+        this.childPackageNames = (childPackageNames != null)
+                ? new ArrayList<>(childPackageNames) : null;
         init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
                 secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
     }
@@ -171,9 +184,14 @@ abstract class PackageSettingBase extends SettingBase {
         origPackage = base.origPackage;
 
         installerPackageName = base.installerPackageName;
+        isOrphaned = base.isOrphaned;
         volumeUuid = base.volumeUuid;
 
         keySetData = new PackageKeySetData(base.keySetData);
+
+        parentPackageName = base.parentPackageName;
+        childPackageNames = (base.childPackageNames != null)
+                ? new ArrayList<>(base.childPackageNames) : null;
     }
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
@@ -308,6 +326,14 @@ abstract class PackageSettingBase extends SettingBase {
         return res;
     }
 
+    long getCeDataInode(int userId) {
+        return readUserState(userId).ceDataInode;
+    }
+
+    void setCeDataInode(long ceDataInode, int userId) {
+        modifyUserState(userId).ceDataInode = ceDataInode;
+    }
+
     boolean getStopped(int userId) {
         return readUserState(userId).stopped;
     }
@@ -332,6 +358,14 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).hidden = hidden;
     }
 
+    boolean getSuspended(int userId) {
+        return readUserState(userId).suspended;
+    }
+
+    void setSuspended(boolean suspended, int userId) {
+        modifyUserState(userId).suspended = suspended;
+    }
+
     boolean getBlockUninstall(int userId) {
         return readUserState(userId).blockUninstall;
     }
@@ -340,17 +374,19 @@ abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).blockUninstall = blockUninstall;
     }
 
-    void setUserState(int userId, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden,
+    void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
+            boolean notLaunched, boolean hidden, boolean suspended,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
             ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState,
             int linkGeneration) {
         PackageUserState state = modifyUserState(userId);
+        state.ceDataInode = ceDataInode;
         state.enabled = enabled;
         state.installed = installed;
         state.stopped = stopped;
         state.notLaunched = notLaunched;
         state.hidden = hidden;
+        state.suspended = suspended;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;

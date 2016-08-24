@@ -41,6 +41,8 @@
     <dimen name="action_bar_default_padding_end_material">0dp</dimen>
     <!-- Default content inset of an action bar. -->
     <dimen name="action_bar_content_inset_material">16dp</dimen>
+    <!-- Default content inset of an action bar when a navigation button is present. -->
+    <dimen name="action_bar_content_inset_with_nav">72dp</dimen>
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding_material">16dp</dimen>
     <!-- Top margin for action bar subtitles -->
@@ -72,6 +74,7 @@
     <dimen name="text_size_title_material_toolbar">20dp</dimen>
     <dimen name="text_size_subtitle_material_toolbar">16dp</dimen>
     <dimen name="text_size_menu_material">16sp</dimen>
+    <dimen name="text_size_menu_header_material">14sp</dimen>
     <dimen name="text_size_body_2_material">14sp</dimen>
     <dimen name="text_size_body_1_material">14sp</dimen>
     <dimen name="text_size_caption_material">12sp</dimen>
@@ -80,6 +83,9 @@
     <dimen name="text_size_large_material">22sp</dimen>
     <dimen name="text_size_medium_material">18sp</dimen>
     <dimen name="text_size_small_material">14sp</dimen>
+
+    <dimen name="text_edit_floating_toolbar_elevation">2dp</dimen>
+    <dimen name="text_edit_floating_toolbar_margin">20dp</dimen>
 
     <dimen name="floating_window_z">16dp</dimen>
     <dimen name="floating_window_margin_left">16dp</dimen>
@@ -111,12 +117,12 @@
 
     <dimen name="dialog_padding_material">24dp</dimen>
     <dimen name="dialog_padding_top_material">18dp</dimen>
+    <dimen name="dialog_title_divider_material">8dp</dimen>
+    <dimen name="dialog_list_padding_top_no_title">8dp</dimen>
+    <dimen name="dialog_list_padding_bottom_no_buttons">8dp</dimen>
 
     <!-- Dialog padding minus control padding, used to fix alignment. -->
     <dimen name="select_dialog_padding_start_material">20dp</dimen>
-
-    <!-- Padding above and below selection dialog lists. -->
-    <dimen name="dialog_list_padding_vertical_material">8dp</dimen>
 
     <dimen name="seekbar_track_background_height_material">2dp</dimen>
     <dimen name="seekbar_track_progress_height_material">2dp</dimen>

@@ -77,17 +77,17 @@ supported by Android TV.</p>
 <p>Before you begin building apps for TV, you must:</p>
 
 <ul>
-  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">
+  <li><strong><a href="{@docRoot}studio/intro/update.html#GetTools">
     Update your SDK tools to version 24.0.0 or higher</a></strong>
     <br>
     The updated SDK tools enable you to build and test apps for TV.
   </li>
-  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">
+  <li><strong><a href="{@docRoot}studio/intro/update.html#GetTools">
     Update your SDK with Android 5.0 (API 21) or higher</a></strong>
     <br>
     The updated platform version provides new APIs for TV apps.
   </li>
-  <li><strong><a href="{@docRoot}sdk/installing/create-project.html">
+  <li><strong><a href="{@docRoot}studio/projects/create-project.html">
     Create or update your app project</a></strong>
     <br>
     In order to access new APIs for TV devices, you must create a project or modify an existing
@@ -201,9 +201,12 @@ supported by Android TV.</p>
 <h3 id="banner">Provide a home screen banner</h3>
 
 <p>
-  An application must provide a home screen banner for each localization if it includes a Leanback
-  launcher intent filter. The banner is the app launch point that appears on the home screen in the
-  apps and games rows. Desribe the banner in the manifest as follows:
+  An application must provide a home screen banner image for each localization
+  if it includes a Leanback launcher intent filter. The banner is the app launch
+  point that appears on the home screen in the apps and games rows. When designing your banner,
+  follow the design requirements described in
+  <a href="{@docRoot}design/tv/patterns.html#banner">Banners</a>.
+  To add the banner to your app, describe the banner in the manifest as follows:
 </p>
 
 <pre>
@@ -223,10 +226,26 @@ supported by Android TV.</p>
   tag to supply a banner for a specific activity.
 </p>
 
-<p>
-  See <a href="{@docRoot}design/tv/patterns.html#banner">Banners</a> in the UI Patterns for TV
-  design guide.
-</p>
+<h3 id="transition-color">Change the launcher color</h3>
+
+<p>When a TV app launches, the system displays an animation that resembles an expanding, filled
+  circle. To customize the color of this animation, set the <code>android:colorPrimary</code>
+  attribute of your TV app or activity to a specific color. You should also set two additional
+  transition overlap attributes to <code>true</code>, as shown in the following snippet from a
+  theme resource XML file:</p>
+
+<pre>
+&lt;resources&gt;
+    &lt;style ... &gt;
+      &lt;item name="android:colorPrimary"&gt;&#64;color/primary&lt;/item&gt;
+      &lt;item name="android:windowAllowReturnTransitionOverlap"&gt;true&lt;/item&gt;
+      &lt;item name="android:windowAllowEnterTransitionOverlap"&gt;true&lt;/item&gt;
+    &lt;/style&gt;
+&lt;/resources&gt;
+</pre>
+
+<p>For more information about working with themes and styles, see
+<a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.</p>
 
 <h2 id="tv-libraries">Add TV Support Libraries</h3>
 
@@ -345,8 +364,6 @@ supported by Android TV.</p>
 <p>
   For more information about using emulators see, <a href="{@docRoot}tools/devices/emulator.html">
   Using the Emulator</a>. For more information on deploying apps from Android Studio to virtual
-  devices, see <a href="{@docRoot}sdk/installing/studio-debug.html">Debugging with Android
-  Studio</a>. For more information about deploying apps to emulators from Eclipse with ADT, see
-  <a href="{@docRoot}tools/building/building-eclipse.html">Building and Running from Eclipse with
-  ADT</a>.
+  devices, see <a href="{@docRoot}studio/debug/index.html">Debugging with Android
+  Studio</a>.
 </p>

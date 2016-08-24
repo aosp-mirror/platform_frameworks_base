@@ -26,13 +26,10 @@ import android.view.Window;
 import android.view.WindowManager;
 
 /**
- * Helper for menus that appear as Dialogs (context and submenus).
- * 
- * @hide
+ * Presents a menu as a modal dialog.
  */
-public class MenuDialogHelper implements DialogInterface.OnKeyListener,
-        DialogInterface.OnClickListener,
-        DialogInterface.OnDismissListener,
+public class MenuDialogHelper implements MenuHelper, DialogInterface.OnKeyListener,
+        DialogInterface.OnClickListener, DialogInterface.OnDismissListener,
         MenuPresenter.Callback {
     private MenuBuilder mMenu;
     private AlertDialog mDialog;
@@ -111,7 +108,7 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
                     if (decor != null) {
                         KeyEvent.DispatcherState ds = decor.getKeyDispatcherState();
                         if (ds != null && ds.isTracking(event)) {
-                            mMenu.close(true);
+                            mMenu.close(true /* closeAllMenus */);
                             dialog.dismiss();
                             return true;
                         }
@@ -125,6 +122,7 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
 
     }
 
+    @Override
     public void setPresenterCallback(MenuPresenter.Callback cb) {
         mPresenterCallback = cb;
     }
@@ -134,6 +132,7 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
      * 
      * @see Dialog#dismiss()
      */
+    @Override
     public void dismiss() {
         if (mDialog != null) {
             mDialog.dismiss();

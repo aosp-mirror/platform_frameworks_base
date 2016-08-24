@@ -1,0 +1,391 @@
+page.title=バックグラウンド処理の最適化
+page.metaDescription=暗黙的なブロードキャストに対する新しい制限。
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      このドキュメントの内容
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">CONNECTIVITY_ACTION に対する制限</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">従量制ではない接続でネットワーク ジョブをスケジュールする</a>
+
+      </li>
+
+      <li>
+        <a href="#monitor-conn">アプリを実行しているときにネットワーク接続を監視する</a>
+
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">NEW_PICTURE と NEW_VIDEO に対する制限</a>
+
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">新しい JobInfo メソッド</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">新しい JobParameter メソッド</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">アプリをさらに最適化する</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  バックグラウンド処理が多くのメモリと電池を消費する場合があります。たとえば、多くのバックグラウンド処理が暗黙的なブロードキャストをリッスンするように登録されていますが、バックグラウンド処理が有用でない場合でも、暗黙的なブロードキャストによりこれらの処理が開始されることがあります。
+
+バックグラウンド処理が端末のパフォーマンスとユーザー エクスペリエンスの両方に多大な影響を及ぼす可能性があります。
+
+</p>
+
+<p>
+  Android N では、こういった問題を緩和するために、以下の制限が適用されます。
+
+</p>
+
+<ul>
+  <li>プレビュー向けのアプリは、マニフェストで {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} ブロードキャストの受信登録をしていても、このブロードキャストを受信しません。
+実行中のアプリは、{@link
+  android.content.Context#registerReceiver Context.registerReceiver()} で {@link android.content.BroadcastReceiver} を登録することにより、メインスレッドで {@code CONNECTIVITY_CHANGE} を引き続きリッスンできます。
+
+
+  </li>
+
+  <li>アプリは、{@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} ブロードキャストまたは {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} ブロードキャストを送受信できません。この最適化は、プレビューをターゲットにしたアプリだけでなく、すべてのアプリに影響を及ぼします。
+
+  </li>
+</ul>
+
+<p>
+  アプリでこれらのインテントのいずれかを使用する場合は、Android N 端末を適切にターゲットにできるように、可能な限りインテントとの依存性を削除する必要があります。
+
+  Android フレームワークは、これらの暗黙的なブロードキャストの必要性を軽減するいくつかのソリューションを提供します。
+たとえば、{@link android.app.job.JobScheduler} と <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> は、従量制ではないネットワークへの接続など、指定条件が満たされたときに、ネットワーク操作をスケジュールするための堅牢なメカニズムを提供します。
+
+
+また、コンテンツ プロバイダの変更に対応するために、{@link android.app.job.JobScheduler} を使用することもできます。{@link android.app.job.JobInfo} オブジェクトは、{@link android.app.job.JobScheduler} がジョブをスケジュールするために使用するパラメータをカプセル化します。
+
+
+ジョブの条件が満たされると、システムはこのジョブをアプリの {@link android.app.job.JobService} で実行します。
+
+</p>
+
+<p>
+  このドキュメントでは、アプリをこれらの新しい制限に対応させるために、
+{@link android.app.job.JobScheduler} などの代替メソッドの使用法について説明します。
+
+</p>
+
+<h2 id="connectivity-action">
+  CONNECTIVITY_ACTION に対する制限
+</h2>
+
+<p>
+  Android N 向けのアプリは、マニフェストで {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} ブロードキャストの受信登録をしていても、このブロードキャストを受信しません。また、このブロードキャストに依存している処理は開始されません。
+
+これにより、ネットワークの変更をリッスンするアプリ、または端末が従量制ではないネットワークに接続したときにネットワーク アクティビティをまとめて実行するアプリに問題が発生する可能性があります。
+
+Android フレームワークは、この制限を回避するためのいくつかのソリューションを備えていますが、アプリで実行するタスクに応じて、適切なソリューションを選択してください。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong>
+{@link android.content.Context#registerReceiver Context.registerReceiver()} で登録された {@link android.content.BroadcastReceiver} は、アプリが実行中のときにこれらのブロードキャストを継続して受信します。
+
+</p>
+
+<h3 id="sched-jobs">
+  従量制ではない接続でネットワーク ジョブをスケジュールする
+</h3>
+
+<p>
+  {@link android.app.job.JobInfo} オブジェクトをビルドするために {@link android.app.job.JobInfo.Builder JobInfo.Builder} を使用するときは、{@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} メソッドを適用し、{@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} をジョブ パラメータとして渡します。
+次のコードサンプルは、端末が従量制ではないネットワークに接続し、充電しているときに実行するサービスをスケジュールします。
+
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  ジョブの条件が満たされたとき、アプリはコールバックを受け取り、指定された {@code JobService.class} で {@link android.app.job.JobService#onStartJob onStartJob()} メソッドを実行します。
+
+{@link
+  android.app.job.JobScheduler} 実装の例については、<a href="{@docRoot}samples/JobScheduler/index.html">JobScheduler サンプルアプリ</a>をご覧ください。
+</p>
+
+<p>
+  GMSCore サービスを使用し、Android 5.0（API レベル 21）以前をターゲットにしているアプリは、<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+{@code GcmNetworkManager}</a> を使用して {@code Task.NETWORK_STATE_UNMETERED} を指定できます。
+
+</p>
+
+<h3 id="monitor-conn">
+  アプリを実行しているときにネットワーク接続を監視する
+</h3>
+
+<p>
+  実行されているアプリは、登録された {@link android.content.BroadcastReceiver} を使用して {@code CONNECTIVITY_CHANGE} を引き続きリッスンできます。
+ただし、{@link
+  android.net.ConnectivityManager} API は、特定のネットワーク条件が満たされたときだけコールバックをリクエストするより堅牢なメソッドを提供します。
+
+</p>
+
+<p>
+  {@link android.net.NetworkRequest} オブジェクトは、{@link android.net.NetworkCapabilities} に応じてネットワーク コールバックのパラメータを定義します。
+{@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder} クラスを使って {@link android.net.NetworkRequest} オブジェクトを作成します。次に、{@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()} は、{@link android.net.NetworkRequest} オブジェクトをシステムに渡します。
+
+ネットワーク条件が満たされると、アプリはコールバックを受け取り、{@link
+  android.net.ConnectivityManager.NetworkCallback} クラスで定義された {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} メソッドを実行します。
+
+
+</p>
+
+<p>
+  アプリは終了するか、{@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()} を呼び出すまで、コールバックを受信し続けます。
+
+</p>
+
+<h2 id="media-broadcasts">
+  NEW_PICTURE と NEW_VIDEO に対する制限
+</h2>
+
+<p>
+  Android N では、アプリは、{@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} ブロードキャストまたは {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} ブロードキャストを送受信できません。この制限は、新しいイメージや動画を処理するためにいくつかのアプリを起動する必要があるときに、パフォーマンスとユーザー エクスペリエンスへの影響を軽減するのに役立ちます。
+
+Android N では、{@link android.app.job.JobInfo} と {@link
+  android.app.job.JobParameters} を拡張することにより、代わりのソリューションを提供しています。
+
+</p>
+
+<h3 id="new-jobinfo">
+  新しい JobInfo メソッド
+</h3>
+
+<p>
+  Android N では、コンテンツ URI の変更でジョブをトリガーするために、{@link android.app.job.JobInfo} API に次のメソッドが追加されています。
+
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    コンテンツ URI の変更でジョブをトリガーするために必要なパラメータをカプセル化します。
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    {@code TriggerContentUri} オブジェクトを {@link
+    android.app.job.JobInfo} に渡します。{@link android.database.ContentObserver} は、カプセル化されたコンテンツ URI を監視します。
+ジョブに関連する複数の {@code
+    TriggerContentUri} オブジェクトがある場合、システムは、1 つのコンテンツ URI のみの変更を通知する場合でも、コールバックを提供します。
+
+  </dd>
+
+  <dd>
+    指定した URI の子孫のいずれかが変更された場合、ジョブをトリガーするために、{@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} フラグを追加します。
+このフラグは、{@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()} に渡される {@code notifyForDescendants} パラメータに相当します。
+
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>注:</strong> {@code TriggerContentUri()} は、{@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} または {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()} と組み合わせて使うことはできません。
+コンテンツの変更を継続的に監視するには、アプリの {@link
+  android.app.job.JobService} が最新のコールバックの処理を完了する前に、新しい 
+{@link android.app.job.JobInfo} をスケジュールします。
+</p>
+
+<p>
+  次のサンプルコードは、システムが変更をコンテンツ URI {@code MEDIA_URI} に通知するときにトリガーされるジョブをスケジュールします。
+
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  システムが特定のコンテンツ URI の変更を通知すると、アプリはコールバックを受け取り、{@link android.app.job.JobParameters} オブジェクトが {@code MediaContentJob.class} の {@link android.app.job.JobService#onStartJob onStartJob()} メソッドに渡されます。
+
+
+
+</p>
+
+<h3 id="new-jobparam">
+  新しい JobParameter メソッド
+</h3>
+
+<p>
+  また、Android N では、{@link android.app.job.JobParameters} が拡張され、ジョブをトリガーしたコンテンツ権限や URI についての有用な情報をアプリが受け取れるようになっています。
+
+
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    ジョブをトリガーした URI の配列を返します。この配列は、ジョブをトリガーした URI がない場合（たとえば、期限切れ、またはその他の理由でジョブがトリガーされた場合）、または変更された URI の数が 50 を超える場合は、{@code
+    null} になります。
+
+
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    ジョブをトリガーしたコンテンツ権限の文字列配列を返します。
+    返された配列が {@code null} ではない場合、どの URI が変更されたかについて、詳細を取得するために {@code getTriggeredContentUris()} を使用します。
+
+  </dd>
+</dl>
+
+<p>
+  次のサンプルコードは、{@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} メソッドをオーバーライドし、ジョブを起動したコンテンツ権限と URI を記録します。
+
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  アプリをさらに最適化する
+</h2>
+
+<p>
+  アプリをメモリ不足の端末またはメモリ不足の状況で実行するために最適化すると、パフォーマンスとユーザー エクスペリエンスが向上します。
+バックグラウンド サービスと静的に登録された暗黙的なブロードキャスト レシーバーへの依存関係を削除すると、そのような端末上のアプリの動作が向上します。
+
+Android N では、これらの問題を削減するための措置が講じられていますが、これらのバックグラウンド処理をまったく使用せずに、アプリが実行されるように最適化することをお勧めします。
+
+
+
+</p>
+
+<p>
+  Android N には、それらのバックグラウンド処理を無効にした状態でアプリの動作をテストするために使用できるいくつかの <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge（ADB）</a>コマンドが追加されています。
+
+</p>
+
+<ul>
+  <li>暗黙的なブロードキャストとバックグラウンド サービスが利用できない状態をシミュレートするには、次のコマンドを入力します。
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>暗黙的なブロードキャストとバックグラウンド サービスを再度有効にするには、次のコマンドを入力します。
+
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

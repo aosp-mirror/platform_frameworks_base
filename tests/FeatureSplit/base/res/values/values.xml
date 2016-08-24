@@ -16,6 +16,7 @@
 
 <resources>
     <string name="app_title">FeatureSplit APK</string>
+    <string name="base">Base</string>
 
     <item type="id" name="test_id"/>
     <integer name="test_integer">100</integer>

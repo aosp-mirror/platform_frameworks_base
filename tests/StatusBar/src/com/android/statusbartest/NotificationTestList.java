@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioAttributes;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import android.os.PowerManager;
 
 // private NM API
 import android.app.INotificationManager;
+import android.widget.Toast;
 
 public class NotificationTestList extends TestActivity
 {
@@ -84,6 +87,338 @@ public class NotificationTestList extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+            new Test("Phone call") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("phone call")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"),
+                                    new AudioAttributes.Builder().setUsage(
+                                            AudioAttributes.USAGE_NOTIFICATION_RINGTONE).build())
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setVibrate(new long[] {
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400,
+                                    300, 400, 300, 400, 300, 400, 300, 400, 300, 400, 300, 400 })
+                            .setFullScreenIntent(makeIntent2(), true)
+                            .build();
+                    mNM.notify(7001, n);
+                }
+            },
+            new Test("Post a group") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority group 1")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setGroup("group1")
+                            .build();
+                    mNM.notify(6000, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("low priority group 1")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .setGroup("group1")
+                            .build();
+                    mNM.notify(6001, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("default priority group 1")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setGroup("group1")
+                            .build();
+                    mNM.notify(6002, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("summary group 1")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setGroup("group1")
+                            .setGroupSummary(true)
+                            .build();
+                    mNM.notify(6003, n);
+                }
+            },
+            new Test("Post a group (2) w/o summary") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority group 2")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setGroup("group2")
+                            .build();
+                    mNM.notify(6100, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("low priority group 2")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .setGroup("group2")
+                            .build();
+                    mNM.notify(6101, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("default priority group 2")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setGroup("group2")
+                            .build();
+                    mNM.notify(6102, n);
+                }
+            },
+            new Test("Summary for group 2") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("summary group 2")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setGroup("group2")
+                            .setGroupSummary(true)
+                            .build();
+                    mNM.notify(6103, n);
+                }
+            },
+            new Test("Group up public-secret") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("public notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .setGroup("public-secret")
+                            .build();
+                    mNM.notify("public", 7009, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private only notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .setGroup("public-secret")
+                            .build();
+                    mNM.notify("no public", 7010, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private version of notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .setGroup("public-secret")
+                            .setPublicVersion(new Notification.Builder(NotificationTestList.this)
+                                    .setSmallIcon(R.drawable.icon2)
+                                    .setContentTitle("public notification of private notification")
+                                    .setPriority(Notification.PRIORITY_DEFAULT)
+                                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                                    .build())
+                            .build();
+                    mNM.notify("priv with pub", 7011, n);
+                    n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("secret notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_SECRET)
+                            .setGroup("public-secret")
+                            .build();
+                    mNM.notify("secret", 7012, n);
+
+                    Notification s = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("summary group public-secret")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setGroup("public-secret")
+                            .setGroupSummary(true)
+                            .build();
+                    mNM.notify(7113, s);
+                }
+            },
+            new Test("Cancel priority autogroup") {
+                public void run()
+                {
+                    try {
+                        mNM.cancel(Integer.MAX_VALUE);
+                    } catch (Exception e) {
+                        Toast.makeText(NotificationTestList.this, "cancel failed (yay)",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+            },
+            new Test("Min priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .build();
+                    mNM.notify("min", 7000, n);
+                }
+            },
+            new Test("Min priority, high pri flag") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority, high pri flag")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setFullScreenIntent(makeIntent2(), true)
+                            .build();
+                    mNM.notify(7001, n);
+                }
+            },
+            new Test("Low priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Low priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .build();
+                    mNM.notify("low", 7002, n);
+                }
+            },
+            new Test("Default priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Default priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .build();
+                    mNM.notify("default", 7004, n);
+                }
+            },
+            new Test("High priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("High priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_HIGH)
+                            .build();
+                    mNM.notify("high", 7006, n);
+                }
+            },
+            new Test("Max priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Max priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify("max", 7007, n);
+                }
+            },
+            new Test("Max priority with delay") {
+                public void run()
+                {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                    }
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Max priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7008, n);
+                }
+            },
+            new Test("public notification") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("public notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
+                    mNM.notify("public", 7009, n);
+                }
+            },
+            new Test("private notification, no public") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private only notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .build();
+                    mNM.notify("no public", 7010, n);
+                }
+            },
+            new Test("private notification, has public") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("private version of notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_PRIVATE)
+                            .setPublicVersion(new Notification.Builder(NotificationTestList.this)
+                                    .setSmallIcon(R.drawable.icon2)
+                                    .setContentTitle("public notification of private notification")
+                                    .setPriority(Notification.PRIORITY_DEFAULT)
+                                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                                    .build())
+                            .build();
+                    mNM.notify("priv with pub", 7011, n);
+                }
+            },
+            new Test("secret notification") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("secret notification")
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setVisibility(Notification.VISIBILITY_SECRET)
+                            .build();
+                    mNM.notify("secret", 7012, n);
+                }
+            },
         new Test("Off") {
             public void run() {
                 PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE);
@@ -159,6 +494,22 @@ public class NotificationTestList extends TestActivity
                 mNM.notify(1, n);
             }
         },
+
+            new Test("Is blocked?") {
+                public void run() {
+                    Toast.makeText(NotificationTestList.this,
+                            "package enabled? " + mNM.areNotificationsEnabled(),
+                            Toast.LENGTH_LONG).show();
+                }
+            },
+
+            new Test("importance?") {
+                public void run() {
+                    Toast.makeText(NotificationTestList.this,
+                            "importance? " + mNM.getImportance(),
+                            Toast.LENGTH_LONG).show();
+                }
+            },
 
         new Test("Whens") {
             public void run()

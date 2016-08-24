@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <utils/JenkinsHash.h>
 
 #include "Caches.h"
 #include "Debug.h"
 #include "GradientCache.h"
 #include "Properties.h"
+
+#include <cutils/properties.h>
 
 namespace android {
 namespace uirenderer {
@@ -65,17 +65,9 @@ int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCac
 GradientCache::GradientCache(Extensions& extensions)
         : mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE))
+        , mMaxSize(Properties::gradientCacheSize)
         , mUseFloatTexture(extensions.hasFloatTextures())
         , mHasNpot(extensions.hasNPot()){
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting gradient cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
-    }
-
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
@@ -97,22 +89,13 @@ uint32_t GradientCache::getMaxSize() {
     return mMaxSize;
 }
 
-void GradientCache::setMaxSize(uint32_t maxSize) {
-    mMaxSize = maxSize;
-    while (mSize > mMaxSize) {
-        mCache.removeOldest();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
 void GradientCache::operator()(GradientCacheEntry&, Texture*& texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height * bytesPerPixel();
-        mSize -= size;
-
+        mSize -= texture->objectSize();
         texture->deleteTexture();
         delete texture;
     }
@@ -167,20 +150,25 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     getGradientInfo(colors, count, info);
 
     Texture* texture = new Texture(Caches::getInstance());
-    texture->width = info.width;
-    texture->height = 2;
     texture->blend = info.hasAlpha;
     texture->generation = 1;
 
-    // Asume the cache is always big enough
-    const uint32_t size = texture->width * texture->height * bytesPerPixel();
+    // Assume the cache is always big enough
+    const uint32_t size = info.width * 2 * bytesPerPixel();
     while (getSize() + size > mMaxSize) {
-        mCache.removeOldest();
+        LOG_ALWAYS_FATAL_IF(!mCache.removeOldest(),
+                "Ran out of things to remove from the cache? getSize() = %" PRIu32
+                ", size = %" PRIu32 ", mMaxSize = %" PRIu32 ", width = %" PRIu32,
+                getSize(), size, mMaxSize, info.width);
     }
 
-    generateTexture(colors, positions, texture);
+    generateTexture(colors, positions, info.width, 2, texture);
 
     mSize += size;
+    LOG_ALWAYS_FATAL_IF((int)size != texture->objectSize(),
+            "size != texture->objectSize(), size %" PRIu32 ", objectSize %d"
+            " width = %" PRIu32 " bytesPerPixel() = %zu",
+            size, texture->objectSize(), info.width, bytesPerPixel());
     mCache.put(gradient, texture);
 
     return texture;
@@ -231,10 +219,10 @@ void GradientCache::mixFloats(GradientColor& start, GradientColor& end, float am
     dst += 4 * sizeof(float);
 }
 
-void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture* texture) {
-    const uint32_t width = texture->width;
+void GradientCache::generateTexture(uint32_t* colors, float* positions,
+        const uint32_t width, const uint32_t height, Texture* texture) {
     const GLsizei rowBytes = width * bytesPerPixel();
-    uint8_t pixels[rowBytes * texture->height];
+    uint8_t pixels[rowBytes * height];
 
     static ChannelSplitter gSplitters[] = {
             &android::uirenderer::GradientCache::splitToBytes,
@@ -277,17 +265,11 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture*
 
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
-    glGenTextures(1, &texture->id);
-    Caches::getInstance().textureState().bindTexture(texture->id);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
     if (mUseFloatTexture) {
         // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, texture->height, 0,
-                GL_RGBA, GL_FLOAT, pixels);
+        texture->upload(GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, pixels);
     } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, texture->height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        texture->upload(GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     }
 
     texture->setFilter(GL_LINEAR);

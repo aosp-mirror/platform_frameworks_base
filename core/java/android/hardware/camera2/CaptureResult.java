@@ -2097,6 +2097,41 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.videoStabilizationMode", int.class);
 
     /**
+     * <p>The amount of additional sensitivity boost applied to output images
+     * after RAW sensor data is captured.</p>
+     * <p>Some camera devices support additional digital sensitivity boosting in the
+     * camera processing pipeline after sensor RAW image is captured.
+     * Such a boost will be applied to YUV/JPEG format output images but will not
+     * have effect on RAW output formats like RAW_SENSOR, RAW10, RAW12 or RAW_OPAQUE.</p>
+     * <p>This key will be <code>null</code> for devices that do not support any RAW format
+     * outputs. For devices that do support RAW format outputs, this key will always
+     * present, and if a device does not support post RAW sensitivity boost, it will
+     * list <code>100</code> in this key.</p>
+     * <p>If the camera device cannot apply the exact boost requested, it will reduce the
+     * boost to the nearest supported value.
+     * The final boost value used will be available in the output capture result.</p>
+     * <p>For devices that support post RAW sensitivity boost, the YUV/JPEG output images
+     * of such device will have the total sensitivity of
+     * <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} / 100</code>
+     * The sensitivity of RAW format images will always be <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</code></p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
+     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * <p><b>Units</b>: ISO arithmetic units, the same as {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</p>
+     * <p><b>Range of valid values:</b><br>
+     * {@link CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE android.control.postRawSensitivityBoostRange}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
+     * @see CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST =
+            new Key<Integer>("android.control.postRawSensitivityBoost", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -3086,6 +3121,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * requested, it will reduce the gain to the nearest supported
      * value. The final sensitivity used will be available in the
      * output capture result.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
+     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
      * <p><b>Units</b>: ISO arithmetic units</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}</p>
@@ -3094,6 +3131,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
      * @see CameraCharacteristics#SENSOR_MAX_ANALOG_SENSITIVITY
@@ -3292,6 +3331,70 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Long>("android.sensor.rollingShutterSkew", long.class);
 
     /**
+     * <p>A per-frame dynamic black level offset for each of the color filter
+     * arrangement (CFA) mosaic channels.</p>
+     * <p>Camera sensor black levels may vary dramatically for different
+     * capture settings (e.g. {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). The fixed black
+     * level reported by {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may be too
+     * inaccurate to represent the actual value on a per-frame basis. The
+     * camera device internal pipeline relies on reliable black level values
+     * to process the raw images appropriately. To get the best image
+     * quality, the camera device may choose to estimate the per frame black
+     * level values either based on optically shielded black regions
+     * ({@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions}) or its internal model.</p>
+     * <p>This key reports the camera device estimated per-frame zero light
+     * value for each of the CFA mosaic channels in the camera sensor. The
+     * {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may only represent a coarse
+     * approximation of the actual black level values. This value is the
+     * black level used in camera device internal image processing pipeline
+     * and generally more accurate than the fixed black level values.
+     * However, since they are estimated values by the camera device, they
+     * may not be as accurate as the black level values calculated from the
+     * optical black pixels reported by {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions}.</p>
+     * <p>The values are given in the same order as channels listed for the CFA
+     * layout key (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
+     * nth value given corresponds to the black level offset for the nth
+     * color channel listed in the CFA.</p>
+     * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is
+     * available or the camera device advertises this key via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &gt;= 0 for each.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<float[]> SENSOR_DYNAMIC_BLACK_LEVEL =
+            new Key<float[]>("android.sensor.dynamicBlackLevel", float[].class);
+
+    /**
+     * <p>Maximum raw value output by sensor for this frame.</p>
+     * <p>Since the {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern} may change for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}), the white
+     * level will change accordingly. This key is similar to
+     * {@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}, but specifies the camera device
+     * estimated white level for each frame.</p>
+     * <p>This key will be available if {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} is
+     * available or the camera device advertises this key via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureRequestKeys }.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &gt;= 0</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<Integer> SENSOR_DYNAMIC_WHITE_LEVEL =
+            new Key<Integer>("android.sensor.dynamicWhiteLevel", int.class);
+
+    /**
      * <p>Quality of lens shading correction applied
      * to the image data.</p>
      * <p>When set to OFF mode, no lens shading correction will be applied by the
@@ -3444,10 +3547,21 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>The shading map is a low-resolution floating-point map
      * that lists the coefficients used to correct for vignetting, for each
      * Bayer color channel.</p>
-     * <p>The least shaded section of the image should have a gain factor
-     * of 1; all other sections should have gains above 1.</p>
+     * <p>The map provided here is the same map that is used by the camera device to
+     * correct both color shading and vignetting for output non-RAW images.</p>
+     * <p>When there is no lens shading correction applied to RAW
+     * output images ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} <code>==</code>
+     * false), this map is the complete lens shading correction
+     * map; when there is some lens shading correction applied to
+     * the RAW output image ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied}<code>==</code> true), this map reports the remaining lens shading
+     * correction map that needs to be applied to get shading
+     * corrected images that match the camera device's output for
+     * non-RAW formats.</p>
+     * <p>For a complete shading correction map, the least shaded
+     * section of the image will have a gain factor of 1; all
+     * other sections will have gains above 1.</p>
      * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
-     * must take into account the colorCorrection settings.</p>
+     * will take into account the colorCorrection settings.</p>
      * <p>The shading map is for the entire active pixel array, and is not
      * affected by the crop region specified in the request. Each shading map
      * entry is the value of the shading compensation map over a specific
@@ -3459,8 +3573,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>The channel order is [R, Geven, Godd, B], where Geven is the green
      * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
      * The shading map is stored in a fully interleaved format.</p>
-     * <p>The shading map should have on the order of 30-40 rows and columns,
-     * and must be smaller than 64x64.</p>
+     * <p>The shading map will generally have on the order of 30-40 rows and columns,
+     * and will be smaller than 64x64.</p>
      * <p>As an example, given a very small map defined as:</p>
      * <pre><code>width,height = [ 4, 3 ]
      * values =
@@ -3489,6 +3603,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED
      */
     @PublicKey
     public static final Key<android.hardware.camera2.params.LensShadingMap> STATISTICS_LENS_SHADING_CORRECTION_MAP =
@@ -3496,12 +3611,23 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
 
     /**
      * <p>The shading map is a low-resolution floating-point map
-     * that lists the coefficients used to correct for vignetting, for each
-     * Bayer color channel of RAW image data.</p>
-     * <p>The least shaded section of the image should have a gain factor
-     * of 1; all other sections should have gains above 1.</p>
+     * that lists the coefficients used to correct for vignetting and color shading,
+     * for each Bayer color channel of RAW image data.</p>
+     * <p>The map provided here is the same map that is used by the camera device to
+     * correct both color shading and vignetting for output non-RAW images.</p>
+     * <p>When there is no lens shading correction applied to RAW
+     * output images ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} <code>==</code>
+     * false), this map is the complete lens shading correction
+     * map; when there is some lens shading correction applied to
+     * the RAW output image ({@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied}<code>==</code> true), this map reports the remaining lens shading
+     * correction map that needs to be applied to get shading
+     * corrected images that match the camera device's output for
+     * non-RAW formats.</p>
+     * <p>For a complete shading correction map, the least shaded
+     * section of the image will have a gain factor of 1; all
+     * other sections will have gains above 1.</p>
      * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
-     * must take into account the colorCorrection settings.</p>
+     * will take into account the colorCorrection settings.</p>
      * <p>The shading map is for the entire active pixel array, and is not
      * affected by the crop region specified in the request. Each shading map
      * entry is the value of the shading compensation map over a specific
@@ -3514,8 +3640,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * channel for the even rows of a Bayer pattern, and Godd is the odd rows.
      * The shading map is stored in a fully interleaved format, and its size
      * is provided in the camera static metadata by android.lens.info.shadingMapSize.</p>
-     * <p>The shading map should have on the order of 30-40 rows and columns,
-     * and must be smaller than 64x64.</p>
+     * <p>The shading map will generally have on the order of 30-40 rows and columns,
+     * and will be smaller than 64x64.</p>
      * <p>As an example, given a very small map defined as:</p>
      * <pre><code>android.lens.info.shadingMapSize = [ 4, 3 ]
      * android.statistics.lensShadingMap =

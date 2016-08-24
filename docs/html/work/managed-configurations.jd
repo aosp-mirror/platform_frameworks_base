@@ -1,0 +1,355 @@
+page.title=Set up Managed Configurations
+page.metaDescription=Learn how to implement managed configurations that can be changed by other apps on the same device.
+page.image=images/work/cards/briefcase_600px.png
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#define-configuration">Define Managed Configurations</a></li>
+      <li><a href="#check-configuration">Check Managed Configurations</a></li>
+      <li><a href="#listen-configuration">Listen for Managed Configuration Changes</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  If you are developing apps for the enterprise market, you may need
+  to satisfy particular requirements set by a company's policies.
+  Managed configurations, previously known as <em>application restrictions</em>,
+  allow the enterprise administrator to remotely specify settings for
+  apps. This capability is particularly useful for enterprise-approved
+  apps deployed to a managed profile.
+</p>
+
+<p>For example, an enterprise might require that approved apps allow the
+enterprise administrator to:</p>
+
+<ul>
+  <li>Whitelist or blacklist URLs for a web browser</li>
+  <li>Configure whether an app is allowed to sync content via cellular, or just
+    by Wi-Fi</li>
+  <li>Configure the app's email settings</li>
+</ul>
+
+<p>
+  This guide shows how to implement these configuration settings in your app.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> For historical reasons, these configuration settings are known as
+  <em>restrictions,</em> and are implemented with files and classes that use this
+  term (such as {@link android.content.RestrictionsManager}). However, these
+  restrictions can actually implement a wide range of configuration options,
+  not just restrictions on app functionality.
+</p>
+
+<h2 id="overview">
+  Remote Configuration Overview
+</h2>
+
+<p>
+  Apps define the managed configuration options that can be remotely
+  set by an administrator. These are arbitrary settings that can be
+  changed by a managed configuration provider. If your app is running on an
+  enterprise device's managed profile, the enterprise administrator
+  can change your app's managed configuration.
+</p>
+
+<p>
+  The managed configurations provider is another app running on the same device.
+  This app is typically controlled by the enterprise administrator. The
+  enterprise administrator communicates configuration changes to the managed
+  configuration provider app. That app, in turn, changes the configurations on your app.
+</p>
+
+<p>
+  To provide externally managed configurations:
+</p>
+
+<ul>
+  <li>Declare the managed configurations in your app manifest. Doing
+  so allows the enterprise administrator to read the app's
+  configurations through Google Play APIs.
+  </li>
+
+  <li>Whenever the app resumes, use the {@link
+    android.content.RestrictionsManager} object to check the current
+    managed configurations, and change your app's UI and behavior to
+    conform with those configurations.
+  </li>
+
+  <li>Listen for the
+  {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
+  ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent. When you receive this
+  broadcast, check the {@link android.content.RestrictionsManager} to see what
+  the current managed configurations are, and make any necessary changes to your
+  app's behavior.
+  </li>
+</ul>
+
+<h2 id="define-configuration">
+  Define Managed Configurations
+</h2>
+
+<p>
+  Your app can support any managed configuration you want to define. You declare the
+  app's managed configurations in a <em>managed configurations file</em>, and declare the
+  configurations file in the manifest. Creating a configurations file allows other
+  apps to examine the managed configurations your app provides. Enterprise Mobility
+  Management (EMM) partners can read your app's configurations by using Google
+  Play APIs.
+</p>
+
+<p>
+  To define your app's remote configuration options, put the following element
+  in your manifest's
+  <a href="{@docRoot}guide/topics/manifest/application-element.html">
+  <code>&lt;application&gt;</code></a> element:
+</p>
+
+<pre>&lt;meta-data android:name="android.content.APP_RESTRICTIONS"
+    android:resource="@xml/app_restrictions" /&gt;
+</pre>
+
+<p>
+  Create a file named <code>app_restrictions.xml</code> in your app's
+  <code>res/xml</code> directory. The structure of that file is described in
+  the reference for {@link android.content.RestrictionsManager}. The file has a
+  single top-level <code>&lt;restrictions&gt;</code> element, which contains
+  one <code>&lt;restriction&gt;</code> child element for every configuration
+  option the app has.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Do not create localized versions of the
+  managed configuration file. Your app is only allowed to have a
+  single managed configurations file, so configurations will be
+  consistent for your app in all locales.
+</p>
+
+<p>
+  In an enterprise environment, an EMM will typically use the managed
+  configuration schema to generate a remote console for IT
+  administrators, so the administrators can remotely configure your
+  application.
+</p>
+
+<p>
+  For example, suppose your app can be remotely configured to allow or forbid
+  it to download data over a cellular connection. Your app could have a
+  <code>&lt;restriction&gt;</code> element like this:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android" &gt;
+
+  &lt;restriction
+    android:key="downloadOnCellular"
+    android:title="App is allowed to download data via cellular"
+    android:restrictionType="bool"
+    android:description="If 'false', app can only download data via Wi-Fi"
+    android:defaultValue="true" /&gt;
+
+&lt;/restrictions&gt;
+</pre>
+
+<p>
+  The supported types for the <code>android:restrictionType</code> element are
+  documented in the reference for {@link android.content.RestrictionsManager}.
+</p>
+
+<p>
+  You use each configuration's <code>android:key</code> attribute to
+  read its value from a managed configuration bundle. For this reason,
+  each configuration must have a unique key string, and the string
+  <em>cannot</em> be localized. It must be specified with a string literal.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> In a production app, <code>android:title</code> and
+  <code>android:description</code> should be drawn from a localized resource
+  file, as described in <a href=
+  "{@docRoot}guide/topics/resources/localization.html">Localizing with
+  Resources</a>.
+</p>
+
+<p>
+  The managed configuration provider can query the app to find details
+  on the app's available configurations, including their description
+  text. Configurations providers and enterprise administrators can
+  change your app's managed configurations at any time, even when the
+  app is not running.
+</p>
+
+<h2 id="check-configuration">
+  Check Managed Configurations
+</h2>
+
+<p>
+  Your app is not automatically notified when other apps change its
+  configuration settings. Instead, you need to check what the managed
+  configurations are when your app starts or resumes, and listen for a
+  system intent to find out if the configurations change while your
+  app is running.
+</p>
+
+<p>
+  To find out the current configuration settings, your app uses a
+  {@link android.content.RestrictionsManager} object. Your app should
+  check for the current managed configurations at the following times:
+</p>
+
+<ul>
+  <li>When the app starts or resumes, in its
+  {@link android.app.Activity#onResume onResume()} method
+  </li>
+
+  <li>When the app is notified of a configuration change, as described in
+    <a href="#listen-configuration">Listen for Managed Configuration
+    Changes</a>
+  </li>
+</ul>
+
+<p>
+  To get a {@link android.content.RestrictionsManager} object, get the current
+  activity with {@link android.app.Fragment#getActivity getActivity()}, then
+  call that activity's {@link android.app.Activity#getSystemService
+  Activity.getSystemService()} method:
+</p>
+
+<pre>RestrictionsManager myRestrictionsMgr =
+    (RestrictionsManager) getActivity()
+        .getSystemService(Context.RESTRICTIONS_SERVICE);</pre>
+
+<p>
+  Once you have a {@link android.content.RestrictionsManager}, you can get the
+  current configuration settings by calling its
+  {@link android.content.RestrictionsManager#getApplicationRestrictions
+  getApplicationRestrictions()} method:
+</p>
+
+<pre>Bundle appRestrictions = myRestrictionsMgr.getApplicationRestrictions();</pre>
+
+<p class="note">
+  <strong>Note:</strong> For convenience, you can also fetch the current
+  configurations with a {@link android.os.UserManager}, by calling
+  {@link android.os.UserManager#getApplicationRestrictions
+  UserManager.getApplicationRestrictions()}. This method behaves exactly the
+  same as {@link android.content.RestrictionsManager#getApplicationRestrictions
+  RestrictionsManager.getApplicationRestrictions()}.
+</p>
+
+<p>
+  The {@link android.content.RestrictionsManager#getApplicationRestrictions
+  getApplicationRestrictions()} method requires reading from data storage, so
+  it should be done sparingly. Do not call this method every time you need to
+  know the current configuration. Instead, you should call it once when your app
+  starts or resumes, and cache the fetched managed configurations bundle. Then listen
+  for the {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
+  ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent to find out if the configuration
+  change while your app is active, as described in
+  <a href="#listen-configuration">Listen for Managed Configuration Changes</a>.
+</p>
+
+<h3 id="read-configurations">
+  Reading and applying managed configurations
+</h3>
+
+<p>
+  The {@link android.content.RestrictionsManager#getApplicationRestrictions
+  getApplicationRestrictions()} method returns a {@link android.os.Bundle}
+  containing a key-value pair for each configuration that has been set. The
+  values are all of type <code>Boolean</code>, <code>int</code>,
+  <code>String</code>, and <code>String[]</code>. Once you have the
+  managed configurations {@link android.os.Bundle}, you can check the current
+  configuration settings with the standard {@link android.os.Bundle} methods for
+  those data types, such as {@link android.os.Bundle#getBoolean getBoolean()}
+  or
+  {@link android.os.Bundle#getString getString()}.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The managed configurations {@link android.os.Bundle}
+  contains one item for every configuration that has been explicitly set by a
+  managed configurations provider. However, you <em>cannot</em> assume that a
+  configuration will be present in the bundle just because you defined a default
+  value in the managed configurations XML file.
+</p>
+
+<p>
+  It is up to your app to take appropriate action based on the current
+  managed configuration settings. For example, if your app has a
+  configuration specifying whether it can download data over a
+  cellular connection, and you find that the configuration is set to
+  <code>false</code>, you would have to disable data download except when
+  the device has a Wi-Fi connection, as shown in the following example code:
+</p>
+
+<pre>
+boolean appCanUseCellular;
+
+if appRestrictions.containsKey("downloadOnCellular") {
+    appCanUseCellular = appRestrictions.getBoolean("downloadOnCellular");
+} else {
+    // here, cellularDefault is a boolean set with the restriction's
+    // default value
+    appCanUseCellular = cellularDefault;
+}
+
+if (!appCanUseCellular) {
+    // ...turn off app's cellular-download functionality
+    // ...show appropriate notices to user
+}</pre>
+
+<h2 id="listen-configuration">
+  Listen for Managed Configuration Changes
+</h2>
+
+<p>
+  Whenever an app's managed configurations are changed, the system fires the
+  {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
+  ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent. Your app has to listen for
+  this intent so you can change the app's behavior when the configuration settings
+  change.</p>
+
+<p class="note">
+  <strong>Note:</strong> The {@link
+  android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
+  ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent is sent only to listeners
+  that are dynamically registered, <em>not</em> to listeners that are declared
+  in the app manifest.
+</p>
+<p>
+  The following code shows how to dynamically register a broadcast receiver for
+  this intent:
+</p>
+
+<pre>IntentFilter restrictionsFilter =
+    new IntentFilter(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+
+BroadcastReceiver restrictionsReceiver = new BroadcastReceiver() {
+  &#64;Override public void onReceive(Context context, Intent intent) {
+
+    // Get the current configuration bundle
+    Bundle appRestrictions = myRestrictionsMgr.getApplicationRestrictions();
+
+    // Check current configuration settings, change your app's UI and
+    // functionality as necessary.
+  }
+};
+
+registerReceiver(restrictionsReceiver, restrictionsFilter);
+</pre>
+<p class="note">
+  <strong>Note:</strong> Ordinarily, your app does not need to be notified
+  about configuration changes when it is paused. Instead, you should unregister
+  your broadcast receiver when the app is paused. When the app resumes, you
+  first check for the current managed configurations (as discussed in
+  <a href="#check-configuration">Check Managed Configurations</a>), then register
+  your broadcast receiver to make sure you're notified about configuration changes
+  that happen while the app is active.
+</p>

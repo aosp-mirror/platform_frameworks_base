@@ -72,28 +72,28 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"‏إدخال رمز رمز PIN المراد"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"‏تأكيد رمز رمز PIN المراد"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"‏جارٍ إلغاء تأمين شريحة SIM…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"‏اكتب رمز PIN المكون من 4 إلى 8 أرقام."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"‏يجب أن يتضمن رمز PUK‏ 8 أرقام أو أكثر."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"‏يجب أن يتضمن رمز PUK‏ ۸ أرقام أو أكثر."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"‏أعد إدخال رمز PUK الصحيح. وستؤدي المحاولات المتكررة إلى تعطيل شريحة SIM نهائيًا."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"‏لا يتطابق رمزا رمز PIN"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"محاولات النقش كثيرة جدًا"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين هذا الجهاز والتي بدورها تحذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين هذا الهاتف والتي بدورها تحذف جميع بياناته."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين هذا الجهاز والتي بدورها تحذف جميع بياناته."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين هذا الهاتف والتي بدورها تحذف جميع بياناته."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إعادة تعيين هذا الجهاز والتي بدورها تحذف جميع بياناته."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إعادة تعيين هذا الهاتف والتي بدورها تحذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة هذا المستخدم والتي بدورها تحذف جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة هذا المستخدم والتي بدورها تحذف جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة هذا المستخدم والتي بدورها تحذف جميع بيانات المستخدم."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة هذا المستخدم والتي بدورها تحذف جميع بيانات المستخدم."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إزالة المستخدم والتي بدورها تحذف جميع بياناته."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إزالة المستخدم والتي بدورها تحذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بيانات الملف الشخصي."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بيانات الملف الشخصي."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بيانات الملف الشخصي."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER_0">%1$d</xliff:g> من المرات. بعد <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بيانات الملف الشخصي."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"أخطأت في محاولة إلغاء قفل الجهاز اللوحي <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بياناته."</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"أخطأت في محاولة إلغاء قفل الهاتف <xliff:g id="NUMBER">%d</xliff:g> من المرات. ستتم إزالة الملف الشخصي للعمل والتي بدورها تحذف جميع بياناته."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"‏رمز \"رقم التعريف الشخصي\" لبطاقة SIM غير صحيح، ويلزمك الاتصال الآن بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="zero">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ولم تتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
@@ -116,17 +116,19 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"‏أخفقت عملية PUK لبطاقة SIM!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"تم قبول الرمز!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"لا تتوفر خدمة"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"زر تبديل طريقة الإدخال."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"تبديل أسلوب الإدخال"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"وضع الطائرة"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"يجب رسم النقش عند إعادة تشغيل الجهاز."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"يجب إدخال رقم التعريف الشخصي عند إعادة تشغيل الجهاز."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"يجب إدخال كلمة المرور عند إعادة تشغيل الجهاز."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"يلزم إدخال النمط لمزيد من الأمان."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"يلزم إدخال رقم التعريف الشخصي لمزيد من الأمان."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"يلزم إدخال كلمة المرور لمزيد من الأمان."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"يجب رسم النقش عند تبديل الملفات الشخصية."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"يجب إدخال رقم التعريف الشخصي عند تبديل الملفات الشخصية."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"يجب إدخال كلمة المرور عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"يجب رسم النقش بعد إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"يجب إدخال رقم التعريف الشخصي بعد إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"يجب إدخال كلمة المرور بعد إعادة تشغيل الجهاز."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"يجب رسم النقش لمزيد من الأمان."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"يجب إدخال رقم التعريف الشخصي لمزيد من الأمان."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"يجب إدخال كلمة المرور لمزيد من الأمان."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"يجب رسم النقش عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"يجب إدخال رقم التعريف الشخصي عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"يجب إدخال كلمة المرور عند تبديل الملفات الشخصية."</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"تم حظر الجهاز بواسطة المسؤول"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"تم حظر الجهاز يدويًا"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="zero">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> من الساعات. تأكيد النقش.</item>
       <item quantity="two">لم يتم إلغاء تأمين الجهاز لمدة ساعتين (<xliff:g id="NUMBER_1">%d</xliff:g>). تأكيد النقش.</item>

@@ -40,6 +40,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -77,6 +78,8 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_REMINDERS = true;
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
+    private static final boolean DEFAULT_ALLOW_SCREEN_OFF = true;
+    private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
     private static final int XML_VERSION = 2;
     private static final String ZEN_TAG = "zen";
@@ -91,6 +94,8 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_MESSAGES_FROM = "messagesFrom";
     private static final String ALLOW_ATT_REMINDERS = "reminders";
     private static final String ALLOW_ATT_EVENTS = "events";
+    private static final String ALLOW_ATT_SCREEN_OFF = "visualScreenOff";
+    private static final String ALLOW_ATT_SCREEN_ON = "visualScreenOn";
 
     private static final String CONDITION_TAG = "condition";
     private static final String CONDITION_ATT_COMPONENT = "component";
@@ -112,6 +117,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_COMPONENT = "component";
     private static final String RULE_ATT_ZEN = "zen";
     private static final String RULE_ATT_CONDITION_ID = "conditionId";
+    private static final String RULE_ATT_CREATION_TIME = "creationTime";
 
     public boolean allowCalls = DEFAULT_ALLOW_CALLS;
     public boolean allowRepeatCallers = DEFAULT_ALLOW_REPEAT_CALLERS;
@@ -120,7 +126,9 @@ public class ZenModeConfig implements Parcelable {
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
     public int allowCallsFrom = DEFAULT_SOURCE;
     public int allowMessagesFrom = DEFAULT_SOURCE;
-    public int user = UserHandle.USER_OWNER;
+    public int user = UserHandle.USER_SYSTEM;
+    public boolean allowWhenScreenOff = DEFAULT_ALLOW_SCREEN_OFF;
+    public boolean allowWhenScreenOn = DEFAULT_ALLOW_SCREEN_ON;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -147,6 +155,8 @@ public class ZenModeConfig implements Parcelable {
                 automaticRules.put(ids[i], rules[i]);
             }
         }
+        allowWhenScreenOff = source.readInt() == 1;
+        allowWhenScreenOn = source.readInt() == 1;
     }
 
     @Override
@@ -174,22 +184,26 @@ public class ZenModeConfig implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(allowWhenScreenOff ? 1 : 0);
+        dest.writeInt(allowWhenScreenOn ? 1 : 0);
     }
 
     @Override
     public String toString() {
         return new StringBuilder(ZenModeConfig.class.getSimpleName()).append('[')
-            .append("user=").append(user)
-            .append(",allowCalls=").append(allowCalls)
-            .append(",allowRepeatCallers=").append(allowRepeatCallers)
-            .append(",allowMessages=").append(allowMessages)
-            .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
-            .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
-            .append(",allowReminders=").append(allowReminders)
-            .append(",allowEvents=").append(allowEvents)
-            .append(",automaticRules=").append(automaticRules)
-            .append(",manualRule=").append(manualRule)
-            .append(']').toString();
+                .append("user=").append(user)
+                .append(",allowCalls=").append(allowCalls)
+                .append(",allowRepeatCallers=").append(allowRepeatCallers)
+                .append(",allowMessages=").append(allowMessages)
+                .append(",allowCallsFrom=").append(sourceToString(allowCallsFrom))
+                .append(",allowMessagesFrom=").append(sourceToString(allowMessagesFrom))
+                .append(",allowReminders=").append(allowReminders)
+                .append(",allowEvents=").append(allowEvents)
+                .append(",allowWhenScreenOff=").append(allowWhenScreenOff)
+                .append(",allowWhenScreenOn=").append(allowWhenScreenOn)
+                .append(",automaticRules=").append(automaticRules)
+                .append(",manualRule=").append(manualRule)
+                .append(']').toString();
     }
 
     private Diff diff(ZenModeConfig to) {
@@ -220,6 +234,12 @@ public class ZenModeConfig implements Parcelable {
         }
         if (allowEvents != to.allowEvents) {
             d.addLine("allowEvents", allowEvents, to.allowEvents);
+        }
+        if (allowWhenScreenOff != to.allowWhenScreenOff) {
+            d.addLine("allowWhenScreenOff", allowWhenScreenOff, to.allowWhenScreenOff);
+        }
+        if (allowWhenScreenOn != to.allowWhenScreenOn) {
+            d.addLine("allowWhenScreenOn", allowWhenScreenOn, to.allowWhenScreenOn);
         }
         final ArraySet<String> allRules = new ArraySet<>();
         addKeys(allRules, automaticRules);
@@ -318,6 +338,8 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowMessagesFrom == allowMessagesFrom
                 && other.allowReminders == allowReminders
                 && other.allowEvents == allowEvents
+                && other.allowWhenScreenOff == allowWhenScreenOff
+                && other.allowWhenScreenOn == allowWhenScreenOn
                 && other.user == user
                 && Objects.equals(other.automaticRules, automaticRules)
                 && Objects.equals(other.manualRule, manualRule);
@@ -326,7 +348,9 @@ public class ZenModeConfig implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowCallsFrom,
-                allowMessagesFrom, allowReminders, allowEvents, user, automaticRules, manualRule);
+                allowMessagesFrom, allowReminders, allowEvents, allowWhenScreenOff,
+                allowWhenScreenOn,
+                user, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -355,7 +379,7 @@ public class ZenModeConfig implements Parcelable {
     private static int tryParseInt(String value, int defValue) {
         if (TextUtils.isEmpty(value)) return defValue;
         try {
-            return Integer.valueOf(value);
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             return defValue;
         }
@@ -411,12 +435,17 @@ public class ZenModeConfig implements Parcelable {
                         rt.allowCallsFrom = DEFAULT_SOURCE;
                         rt.allowMessagesFrom = DEFAULT_SOURCE;
                     }
+                    rt.allowWhenScreenOff =
+                            safeBoolean(parser, ALLOW_ATT_SCREEN_OFF, DEFAULT_ALLOW_SCREEN_OFF);
+                    rt.allowWhenScreenOn =
+                            safeBoolean(parser, ALLOW_ATT_SCREEN_ON, DEFAULT_ALLOW_SCREEN_ON);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
                     final ZenRule automaticRule = readRuleXml(parser);
                     if (id != null && automaticRule != null) {
+                        automaticRule.id = id;
                         rt.automaticRules.put(id, automaticRule);
                     }
                 }
@@ -438,6 +467,8 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_CALLS_FROM, Integer.toString(allowCallsFrom));
         out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
+        out.attribute(null, ALLOW_ATT_SCREEN_OFF, Boolean.toString(allowWhenScreenOff));
+        out.attribute(null, ALLOW_ATT_SCREEN_ON, Boolean.toString(allowWhenScreenOn));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
@@ -470,6 +501,7 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
+        rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
         rt.condition = readConditionXml(parser);
         return rt;
     }
@@ -487,6 +519,7 @@ public class ZenModeConfig implements Parcelable {
         if (rule.conditionId != null) {
             out.attribute(null, RULE_ATT_CONDITION_ID, rule.conditionId.toString());
         }
+        out.attribute(null, RULE_ATT_CREATION_TIME, Long.toString(rule.creationTime));
         if (rule.condition != null) {
             writeConditionXml(rule.condition, out);
         }
@@ -533,6 +566,10 @@ public class ZenModeConfig implements Parcelable {
 
     private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {
         final String val = parser.getAttributeValue(null, att);
+        return safeBoolean(val, defValue);
+    }
+
+    private static boolean safeBoolean(String val, boolean defValue) {
         if (TextUtils.isEmpty(val)) return defValue;
         return Boolean.parseBoolean(val);
     }
@@ -554,12 +591,9 @@ public class ZenModeConfig implements Parcelable {
         return Uri.parse(val);
     }
 
-    public ArraySet<String> getAutomaticRuleNames() {
-        final ArraySet<String> rt = new ArraySet<String>();
-        for (int i = 0; i < automaticRules.size(); i++) {
-            rt.add(automaticRules.valueAt(i).name);
-        }
-        return rt;
+    private static long safeLong(XmlPullParser parser, String att, long defValue) {
+        final String val = parser.getAttributeValue(null, att);
+        return tryParseLong(val, defValue);
     }
 
     @Override
@@ -610,9 +644,17 @@ public class ZenModeConfig implements Parcelable {
         if (allowRepeatCallers) {
             priorityCategories |= Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
         }
+        int suppressedVisualEffects = 0;
+        if (!allowWhenScreenOff) {
+            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+        }
+        if (!allowWhenScreenOn) {
+            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+        }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
-        return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders);
+        return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
+                suppressedVisualEffects);
     }
 
     private static int sourceToPrioritySenders(int source, int def) {
@@ -644,6 +686,12 @@ public class ZenModeConfig implements Parcelable {
         allowCallsFrom = prioritySendersToSource(policy.priorityCallSenders, allowCallsFrom);
         allowMessagesFrom = prioritySendersToSource(policy.priorityMessageSenders,
                 allowMessagesFrom);
+        if (policy.suppressedVisualEffects != Policy.SUPPRESSED_EFFECTS_UNSET) {
+            allowWhenScreenOff =
+                    (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_SCREEN_OFF) == 0;
+            allowWhenScreenOn =
+                    (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_SCREEN_ON) == 0;
+        }
     }
 
     public static Condition toTimeCondition(Context context, int minutesFromNow, int userHandle) {
@@ -759,6 +807,7 @@ public class ZenModeConfig implements Parcelable {
                 .appendQueryParameter("days", toDayList(schedule.days))
                 .appendQueryParameter("start", schedule.startHour + "." + schedule.startMinute)
                 .appendQueryParameter("end", schedule.endHour + "." + schedule.endMinute)
+                .appendQueryParameter("exitAtAlarm", String.valueOf(schedule.exitAtAlarm))
                 .build();
     }
 
@@ -782,7 +831,12 @@ public class ZenModeConfig implements Parcelable {
         rt.startMinute = start[1];
         rt.endHour = end[0];
         rt.endMinute = end[1];
+        rt.exitAtAlarm = safeBoolean(conditionId.getQueryParameter("exitAtAlarm"), false);
         return rt;
+    }
+
+    public static ComponentName getScheduleConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "ScheduleConditionProvider");
     }
 
     public static class ScheduleInfo {
@@ -791,6 +845,8 @@ public class ZenModeConfig implements Parcelable {
         public int startMinute;
         public int endHour;
         public int endMinute;
+        public boolean exitAtAlarm;
+        public long nextAlarm;
 
         @Override
         public int hashCode() {
@@ -805,7 +861,8 @@ public class ZenModeConfig implements Parcelable {
                     && startHour == other.startHour
                     && startMinute == other.startMinute
                     && endHour == other.endHour
-                    && endMinute == other.endMinute;
+                    && endMinute == other.endMinute
+                    && exitAtAlarm == other.exitAtAlarm;
         }
 
         public ScheduleInfo copy() {
@@ -818,7 +875,22 @@ public class ZenModeConfig implements Parcelable {
             rt.startMinute = startMinute;
             rt.endHour = endHour;
             rt.endMinute = endMinute;
+            rt.exitAtAlarm = exitAtAlarm;
+            rt.nextAlarm = nextAlarm;
             return rt;
+        }
+
+        @Override
+        public String toString() {
+            return "ScheduleInfo{" +
+                    "days=" + Arrays.toString(days) +
+                    ", startHour=" + startHour +
+                    ", startMinute=" + startMinute +
+                    ", endHour=" + endHour +
+                    ", endMinute=" + endMinute +
+                    ", exitAtAlarm=" + exitAtAlarm +
+                    ", nextAlarm=" + nextAlarm +
+                    '}';
         }
     }
 
@@ -855,6 +927,10 @@ public class ZenModeConfig implements Parcelable {
         }
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
+    }
+
+    public static ComponentName getEventConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "EventConditionProvider");
     }
 
     public static class EventInfo {
@@ -909,7 +985,7 @@ public class ZenModeConfig implements Parcelable {
         return Global.isValidZenMode(rt) ? rt : defValue;
     }
 
-    public String newRuleId() {
+    public static String newRuleId() {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
@@ -955,11 +1031,13 @@ public class ZenModeConfig implements Parcelable {
     public static class ZenRule implements Parcelable {
         public boolean enabled;
         public boolean snoozing;         // user manually disabled this instance
-        public String name;              // required for automatic (unique)
+        public String name;              // required for automatic
         public int zenMode;
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional
         public ComponentName component;  // optional
+        public String id;                // required for automatic (unique)
+        public long creationTime;        // required for automatic
 
         public ZenRule() { }
 
@@ -973,6 +1051,10 @@ public class ZenModeConfig implements Parcelable {
             conditionId = source.readParcelable(null);
             condition = source.readParcelable(null);
             component = source.readParcelable(null);
+            if (source.readInt() == 1) {
+                id = source.readString();
+            }
+            creationTime = source.readLong();
         }
 
         @Override
@@ -994,6 +1076,13 @@ public class ZenModeConfig implements Parcelable {
             dest.writeParcelable(conditionId, 0);
             dest.writeParcelable(condition, 0);
             dest.writeParcelable(component, 0);
+            if (id != null) {
+                dest.writeInt(1);
+                dest.writeString(id);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeLong(creationTime);
         }
 
         @Override
@@ -1006,6 +1095,8 @@ public class ZenModeConfig implements Parcelable {
                     .append(",conditionId=").append(conditionId)
                     .append(",condition=").append(condition)
                     .append(",component=").append(component)
+                    .append(",id=").append(id)
+                    .append(",creationTime=").append(creationTime)
                     .append(']').toString();
         }
 
@@ -1046,6 +1137,12 @@ public class ZenModeConfig implements Parcelable {
             if (!Objects.equals(component, to.component)) {
                 d.addLine(item, "component", component, to.component);
             }
+            if (!Objects.equals(id, to.id)) {
+                d.addLine(item, "id", id, to.id);
+            }
+            if (creationTime != to.creationTime) {
+                d.addLine(item, "creationTime", creationTime, to.creationTime);
+            }
         }
 
         @Override
@@ -1059,13 +1156,15 @@ public class ZenModeConfig implements Parcelable {
                     && other.zenMode == zenMode
                     && Objects.equals(other.conditionId, conditionId)
                     && Objects.equals(other.condition, condition)
-                    && Objects.equals(other.component, component);
+                    && Objects.equals(other.component, component)
+                    && Objects.equals(other.id, id)
+                    && other.creationTime == creationTime;
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                    component);
+                    component, id, creationTime);
         }
 
         public boolean isAutomaticActive() {

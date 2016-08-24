@@ -743,6 +743,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.control.availableModes", int[].class);
 
     /**
+     * <p>Range of boosts for {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} supported
+     * by this camera device.</p>
+     * <p>Devices support post RAW sensitivity boost  will advertise
+     * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} key for controling
+     * post RAW sensitivity boost.</p>
+     * <p>This key will be <code>null</code> for devices that do not support any RAW format
+     * outputs. For devices that do support RAW format outputs, this key will always
+     * present, and if a device does not support post RAW sensitivity boost, it will
+     * list <code>(100, 100)</code> in this key.</p>
+     * <p><b>Units</b>: ISO arithmetic units, the same as {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<android.util.Range<Integer>> CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support
@@ -2185,11 +2205,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (8-14 bits is expected), or by the point where the sensor response
      * becomes too non-linear to be useful.  The default value for this is
      * maximum representable value for a 16-bit raw sample (2^16 - 1).</p>
+     * <p>The white level values of captured images may vary for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). This key
+     * represents a coarse approximation for such case. It is recommended
+     * to use {@link CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL android.sensor.dynamicWhiteLevel} for captures when supported
+     * by the camera device, which provides more accurate white level values.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt; 255 (8-bit output)</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
     public static final Key<Integer> SENSOR_INFO_WHITE_LEVEL =
@@ -2527,12 +2554,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * layout key (see {@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}), i.e. the
      * nth value given corresponds to the black level offset for the nth
      * color channel listed in the CFA.</p>
+     * <p>The black level values of captured images may vary for different
+     * capture settings (e.g., {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}). This key
+     * represents a coarse approximation for such case. It is recommended to
+     * use {@link CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL android.sensor.dynamicBlackLevel} or use pixels from
+     * {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} directly for captures when
+     * supported by the camera device, which provides more accurate black
+     * level values. For raw capture in particular, it is recommended to use
+     * pixels from {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} to calculate black
+     * level values for each frame.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 for each.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
      * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS
+     * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
     public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN =
@@ -2585,6 +2624,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
+
+    /**
+     * <p>List of disjoint rectangles indicating the sensor
+     * optically shielded black pixel regions.</p>
+     * <p>In most camera sensors, the active array is surrounded by some
+     * optically shielded pixel areas. By blocking light, these pixels
+     * provides a reliable black reference for black level compensation
+     * in active array region.</p>
+     * <p>This key provides a list of disjoint rectangles specifying the
+     * regions of optically shielded (with metal shield) black pixel
+     * regions if the camera device is capable of reading out these black
+     * pixels in the output raw images. In comparison to the fixed black
+     * level values reported by {@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern}, this key
+     * may provide a more accurate way for the application to calculate
+     * black level of each captured raw images.</p>
+     * <p>When this key is reported, the {@link CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL android.sensor.dynamicBlackLevel} and
+     * {@link CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL android.sensor.dynamicWhiteLevel} will also be reported.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
+     * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
+     */
+    @PublicKey
+    public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
+            new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
 
     /**
      * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>
@@ -2722,22 +2787,39 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Generally classifies the overall set of the camera device functionality.</p>
-     * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
-     * <p>A FULL device will support below capabilities:</p>
+     * <p>The supported hardware level is a high-level description of the camera device's
+     * capabilities, summarizing several capabilities into one field.  Each level adds additional
+     * features to the previous one, and is always a strict superset of the previous level.
+     * The ordering is <code>LEGACY &lt; LIMITED &lt; FULL &lt; LEVEL_3</code>.</p>
+     * <p>Starting from <code>LEVEL_3</code>, the level enumerations are guaranteed to be in increasing
+     * numerical value as well. To check if a given device is at least at a given hardware level,
+     * the following code snippet can be used:</p>
+     * <pre><code>// Returns true if the device supports the required hardware level, or better.
+     * boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
+     *     int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+     *     if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+     *         return requiredLevel == deviceLevel;
+     *     }
+     *     // deviceLevel is not LEGACY, can use numerical sort
+     *     return requiredLevel &lt;= deviceLevel;
+     * }
+     * </code></pre>
+     * <p>At a high level, the levels are:</p>
      * <ul>
-     * <li>BURST_CAPTURE capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
-     * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
-     * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
-     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     *   MANUAL_POST_PROCESSING)</li>
-     * <li>At least 3 processed (but not stalling) format output streams
-     *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
-     * <li>The required stream configurations defined in android.scaler.availableStreamConfigurations</li>
-     * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
-     * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
+     * <li><code>LEGACY</code> devices operate in a backwards-compatibility mode for older
+     *   Android devices, and have very limited capabilities.</li>
+     * <li><code>LIMITED</code> devices represent the
+     *   baseline feature set, and may also include additional capabilities that are
+     *   subsets of <code>FULL</code>.</li>
+     * <li><code>FULL</code> devices additionally support per-frame manual control of sensor, flash, lens and
+     *   post-processing settings, and image capture at a high rate.</li>
+     * <li><code>LEVEL_3</code> devices additionally support YUV reprocessing and RAW image capture, along
+     *   with additional output stream configurations.</li>
      * </ul>
-     * <p>A LIMITED device may have some or none of the above characteristics.
-     * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>See the individual level enums for full descriptions of the supported capabilities.  The
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} entry describes the device's capabilities at a
+     * finer-grain level, if needed. In addition, many controls have their available settings or
+     * ranges defined in individual {@link android.hardware.camera2.CameraCharacteristics } entries.</p>
      * <p>Some features are not part of any particular hardware level or capability and must be
      * queried separately. These include:</p>
      * <ul>
@@ -2748,19 +2830,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization},
      *    {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes})</li>
      * </ul>
-     * <p>A LEGACY device does not support per-frame control, manual sensor control, manual
-     * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
-     * <p>Each higher level supports everything the lower level supports
-     * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
-     * <p>Note:
-     * Pre-API level 23, FULL devices also supported arbitrary cropping region
-     * ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM); this requirement was relaxed in API level 23,
-     * and FULL devices may only support CENTERED cropping.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
+     *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_3 3}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -2768,16 +2843,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC
-     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
-     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
-     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
      * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
      * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES
-     * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_3
      */
     @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =

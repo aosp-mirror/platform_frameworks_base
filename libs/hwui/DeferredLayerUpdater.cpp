@@ -24,14 +24,13 @@
 namespace android {
 namespace uirenderer {
 
-DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer)
+DeferredLayerUpdater::DeferredLayerUpdater(Layer* layer)
         : mSurfaceTexture(nullptr)
         , mTransform(nullptr)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
-        , mCaches(Caches::getInstance())
-        , mRenderThread(thread) {
+        , mCaches(Caches::getInstance()) {
     mWidth = mLayer->layer.getWidth();
     mHeight = mLayer->layer.getHeight();
     mBlend = mLayer->isBlend();
@@ -48,13 +47,13 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
+    mAlpha = PaintUtils::getAlphaDirect(paint);
+    mMode = PaintUtils::getXfermodeDirect(paint);
     SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
-bool DeferredLayerUpdater::apply() {
-    bool success = true;
+void DeferredLayerUpdater::apply() {
     // These properties are applied the same to both layer types
     mLayer->setColorFilter(mColorFilter);
     mLayer->setAlpha(mAlpha, mMode);
@@ -73,7 +72,6 @@ bool DeferredLayerUpdater::apply() {
             setTransform(nullptr);
         }
     }
-    return success;
 }
 
 void DeferredLayerUpdater::doUpdateTexImage() {

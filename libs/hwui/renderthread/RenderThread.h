@@ -25,8 +25,6 @@
 #include <cutils/compiler.h>
 #include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
-#include <utils/Mutex.h>
-#include <utils/Singleton.h>
 #include <utils/Thread.h>
 
 #include <memory>
@@ -39,6 +37,7 @@ class DisplayEventReceiver;
 namespace uirenderer {
 
 class RenderState;
+class TestUtils;
 
 namespace renderthread {
 
@@ -71,11 +70,12 @@ protected:
     ~IFrameCallback() {}
 };
 
-class ANDROID_API RenderThread : public Thread, protected Singleton<RenderThread> {
+class ANDROID_API RenderThread : public Thread {
 public:
     // RenderThread takes complete ownership of tasks that are queued
     // and will delete them after they are run
     ANDROID_API void queue(RenderTask* task);
+    ANDROID_API void queueAndWait(RenderTask* task);
     ANDROID_API void queueAtFront(RenderTask* task);
     void queueAt(RenderTask* task, nsecs_t runAtNs);
     void remove(RenderTask* task);
@@ -98,12 +98,15 @@ protected:
     virtual bool threadLoop() override;
 
 private:
-    friend class Singleton<RenderThread>;
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
+    friend class android::uirenderer::TestUtils;
 
     RenderThread();
     virtual ~RenderThread();
+
+    static bool hasInstance();
+    static RenderThread& getInstance();
 
     void initThreadLocals();
     void initializeDisplayEventReceiver();

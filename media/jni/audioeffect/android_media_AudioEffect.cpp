@@ -351,7 +351,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
                                     priority,
                                     effectCallback,
                                     &lpJniStorage->mCallbackData,
-                                    sessionId,
+                                    (audio_session_t) sessionId,
                                     0);
     if (lpAudioEffect == 0) {
         ALOGE("Error creating AudioEffect");
@@ -819,7 +819,7 @@ android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz _
     effect_descriptor_t *descriptors = new effect_descriptor_t[AudioEffect::kMaxPreProcessing];
     uint32_t numEffects = AudioEffect::kMaxPreProcessing;
 
-    status_t status = AudioEffect::queryDefaultPreProcessing(audioSession,
+    status_t status = AudioEffect::queryDefaultPreProcessing((audio_session_t) audioSession,
                                            descriptors,
                                            &numEffects);
     if (status != NO_ERROR || numEffects == 0) {

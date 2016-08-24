@@ -19,6 +19,9 @@
 
 #include "SpriteController.h"
 
+#include <map>
+#include <vector>
+
 #include <ui/DisplayInfo.h>
 #include <input/Input.h>
 #include <inputflinger/PointerControllerInterface.h>
@@ -26,8 +29,7 @@
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 #include <utils/String8.h>
-
-#include <SkBitmap.h>
+#include <gui/DisplayEventReceiver.h>
 
 namespace android {
 
@@ -40,6 +42,10 @@ struct PointerResources {
     SpriteIcon spotAnchor;
 };
 
+struct PointerAnimation {
+    std::vector<SpriteIcon> animationFrames;
+    nsecs_t durationPerFrame;
+};
 
 /*
  * Pointer controller policy interface.
@@ -56,7 +62,12 @@ protected:
     virtual ~PointerControllerPolicyInterface() { }
 
 public:
+    virtual void loadPointerIcon(SpriteIcon* icon) = 0;
     virtual void loadPointerResources(PointerResources* outResources) = 0;
+    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
+            std::map<int32_t, PointerAnimation>* outAnimationResources) = 0;
+    virtual int32_t getDefaultPointerIconId() = 0;
+    virtual int32_t getCustomPointerIconId() = 0;
 };
 
 
@@ -65,7 +76,8 @@ public:
  *
  * Handles pointer acceleration and animation.
  */
-class PointerController : public PointerControllerInterface, public MessageHandler {
+class PointerController : public PointerControllerInterface, public MessageHandler,
+                          public LooperCallback {
 protected:
     virtual ~PointerController();
 
@@ -93,16 +105,17 @@ public:
             const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
     virtual void clearSpots();
 
+    void updatePointerIcon(int32_t iconId);
+    void setCustomPointerIcon(const SpriteIcon& icon);
     void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
-    void setPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
+    void reloadPointerResources();
 
 private:
     static const size_t MAX_RECYCLED_SPRITES = 12;
     static const size_t MAX_SPOTS = 12;
 
     enum {
-        MSG_ANIMATE,
         MSG_INACTIVITY_TIMEOUT,
     };
 
@@ -132,11 +145,16 @@ private:
     sp<SpriteController> mSpriteController;
     sp<WeakMessageHandler> mHandler;
 
+    DisplayEventReceiver mDisplayEventReceiver;
+
     PointerResources mResources;
 
     struct Locked {
         bool animationPending;
         nsecs_t animationTime;
+
+        size_t animationFrameIndex;
+        nsecs_t lastFrameUpdatedTime;
 
         int32_t displayWidth;
         int32_t displayHeight;
@@ -155,6 +173,11 @@ private:
         SpriteIcon pointerIcon;
         bool pointerIconChanged;
 
+        std::map<int32_t, SpriteIcon> additionalMouseResources;
+        std::map<int32_t, PointerAnimation> animationResources;
+
+        int32_t requestedPointerType;
+
         int32_t buttonState;
 
         Vector<Spot*> spots;
@@ -165,7 +188,10 @@ private:
     void setPositionLocked(float x, float y);
 
     void handleMessage(const Message& message);
-    void doAnimate();
+    int handleEvent(int fd, int events, void* data);
+    void doAnimate(nsecs_t timestamp);
+    bool doFadingAnimationLocked(nsecs_t timestamp);
+    bool doBitmapAnimationLocked(nsecs_t timestamp);
     void doInactivityTimeout();
 
     void startAnimationLocked();

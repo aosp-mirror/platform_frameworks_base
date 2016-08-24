@@ -24,8 +24,8 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 #include <gui/GLConsumer.h>
+#include <hwui/Paint.h>
 
-#include <Paint.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
@@ -79,12 +79,6 @@ static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject
     layer->updateTexImage();
 }
 
-static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    return layer->backingLayer()->getTextureId();
-}
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -98,8 +92,6 @@ static const JNINativeMethod gMethods[] = {
     { "nSetSurfaceTexture",      "(JLandroid/graphics/SurfaceTexture;Z)V",
             (void*) android_view_HardwareLayer_setSurfaceTexture },
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
-
-    { "nGetTexName",             "(J)I",       (void*) android_view_HardwareLayer_getTexName },
 };
 
 int register_android_view_HardwareLayer(JNIEnv* env) {

@@ -1,0 +1,391 @@
+page.title=Optimalisasi Latar Belakang
+page.metaDescription=Pembatasan baru pada siaran implisit.
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      Dalam dokumen ini
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">Pembatasan pada CONNECTIVITY_ACTION</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">Menjadwalkan Pekerjaan Jaringan pada Koneksi
+        Berbiaya Tetap</a>
+      </li>
+
+      <li>
+        <a href="#monitor-conn">Memantau Konektivitas Jaringan Saat Aplikasi
+        Dijalankan</a>
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">Pembatasan pada NEW_PICTURE dan
+        NEW_VIDEO</a>
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">Metode JobInfo Baru</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">Metode JobParameter Baru</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">Mengoptimalkan Aplikasi Anda Lebih Jauh</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Proses latar belakang bisa menguras memori dan baterai. Misalnya, sebuah
+  siaran implisit dapat memulai banyak proses latar belakang yang telah didaftarkan
+  untuk mendengarkannya, sekalipun proses-proses itu mungkin tidak melakukan banyak pekerjaan. Hal ini bisa
+  berdampak besar pada kinerja perangkat dan pengalaman pengguna.
+</p>
+
+<p>
+  Untuk meringankan masalah ini, Android N menerapkan pembatasan
+  berikut:
+</p>
+
+<ul>
+  <li>Aplikasi yang menargetkan Pratinjau tidak menerima siaran {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} jika mereka
+  mendaftar untuk menerimanya dalam manifes mereka. Aplikasi yang berjalan tetap
+  bisa mendengarkan {@code CONNECTIVITY_CHANGE} pada thread utama mereka dengan mendaftarkan
+  {@link android.content.BroadcastReceiver} pada {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}.
+  </li>
+
+  <li>Aplikasi tidak bisa mengirim atau menerima siaran {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} atau {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Optimalisasi ini
+  memengaruhi semua aplikasi, tidak hanya aplikasi yang menargetkan Pratinjau.
+  </li>
+</ul>
+
+<p>
+  Jika aplikasi Anda menggunakan intent ini, Anda harus membuang dependensi padanya
+  secepat mungkin agar Anda bisa menargetkan perangkat Android N dengan benar.
+  Kerangka kerja Android menyediakan beberapa solusi untuk mengurangi kebutuhan akan
+  siaran implisit ini. Misalnya, {@link android.app.job.JobScheduler}
+  dan<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> menyediakan mekanisme yang tangguh untuk menjadwalkan operasi
+  jaringan bila kondisi yang ditetapkan, seperti koneksi ke jaringan
+  berbiaya tetap, terpenuhi. Anda sekarang juga bisa menggunakan {@link android.app.job.JobScheduler}
+  untuk bereaksi terhadap perubahan penyedia materi. Objek {@link android.app.job.JobInfo}
+  membungkus parameter yang digunakan {@link android.app.job.JobScheduler}
+  untuk menjadwalkan pekerjaan Anda. Bila syarat-syarat pekerjaan sudah terpenuhi, sistem
+  akan mengeksekusi pekerjaan ini pada {@link android.app.job.JobService} aplikasi Anda.
+</p>
+
+<p>
+  Dalam dokumen ini, kita akan mempelajari cara menggunakan metode alternatif, seperti
+  {@link android.app.job.JobScheduler}, untuk menyesuaikan aplikasi Anda dengan pembatasan
+  yang baru.
+</p>
+
+<h2 id="connectivity-action">
+  Pembatasan pada CONNECTIVITY_ACTION
+</h2>
+
+<p>
+  Aplikasi yang menargetkan Android N tidak menerima siaran {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} jika mereka
+  mendaftar untuk menerimanya dalam manifes mereka, dan proses yang bergantung pada siaran
+  ini tidak akan dimulai. Hal ini bisa menimbulkan masalah bagi aplikasi yang ingin
+  memantau perubahan jaringan atau melakukan aktivitas jaringan dalam jumlah besar bila perangkat
+  menghubungkan ke jaringan berbiaya tetap. Beberapa solusi untuk menyiasati pembatasan
+  ini sudah ada dalam kerangka kerja Android, namun pemilihan solusi
+  yang tepat bergantung pada apa yang ingin dicapai oleh aplikasi Anda.
+</p>
+
+<p class="note">
+  <strong>Catatan:</strong> Sebuah {@link android.content.BroadcastReceiver} yang mendaftar pada
+  {@link android.content.Context#registerReceiver Context.registerReceiver()}
+  akan terus menerima siaran ini saat aplikasi berjalan.
+</p>
+
+<h3 id="sched-jobs">
+  Menjadwalkan Pekerjaan Jaringan pada Koneksi Berbiaya Tetap
+</h3>
+
+<p>
+  Saat menggunakan kelas {@link android.app.job.JobInfo.Builder JobInfo.Builder}
+  untuk membangun objek {@link android.app.job.JobInfo} Anda, terapkan metode {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} dan teruskan {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} sebagai parameter pekerjaan. Contoh kode berikut
+  menjadwalkan layanan yang akan dijalankan ketika perangkat terhubung ke jaringan
+  berbiaya tetap dan dikenai biaya:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  Bila syarat untuk pekerjaan Anda terpenuhi, aplikasi Anda akan menerima callback untuk menjalankan
+  metode {@link android.app.job.JobService#onStartJob onStartJob()} dalam
+  {@code JobService.class} yang ditetapkan. Untuk melihat contoh selengkapnya mengenai implementasi {@link
+  android.app.job.JobScheduler}, lihat <a href="{@docRoot}samples/JobScheduler/index.html">aplikasi contoh JobScheduler</a>.
+</p>
+
+<p>
+  Aplikasi yang menggunakan layanan GMSCore, dan menargetkan Android 5.0 (API level 21)
+  atau yang lebih rendah, bisa menggunakan <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> dan menetapkan {@code Task.NETWORK_STATE_UNMETERED}.
+</p>
+
+<h3 id="monitor-conn">
+  Memantau Konektivitas Jaringan Saat Aplikasi Dijalankan
+</h3>
+
+<p>
+  Aplikasi yang berjalan tetap bisa memantau {@code CONNECTIVITY_CHANGE} dengan
+  {@link android.content.BroadcastReceiver} yang telah didaftarkan. Akan tetapi, {@link
+  android.net.ConnectivityManager} API menyediakan metode yang lebih tangguh untuk meminta
+  callback hanya bila persyaratan jaringan yang ditetapkan terpenuhi.
+</p>
+
+<p>
+  Objek {@link android.net.NetworkRequest} mendefinisikan parameter
+  callback jaringan dari segi {@link android.net.NetworkCapabilities}. Anda
+  membuat objek {@link android.net.NetworkRequest} dengan kelas {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder}. {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+  kemudian meneruskan objek {@link android.net.NetworkRequest} ke sistem. Bila
+  syarat jaringan terpenuhi, aplikasi akan menerima callback untuk mengeksekusi
+  metode {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} yang didefinisikan dalam kelas {@link
+  android.net.ConnectivityManager.NetworkCallback}.
+</p>
+
+<p>
+  Aplikasi akan terus menerima callback hingga aplikasi keluar atau memanggil
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()}.
+</p>
+
+<h2 id="media-broadcasts">
+  Pembatasan pada NEW_PICTURE dan NEW_VIDEO
+</h2>
+
+<p>
+  Di Android N, aplikasi tidak bisa mengirim atau menerima siaran {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} atau {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO}. Pembatasan ini membantu
+  meringankan dampak terhadap kinerja dan pengalaman pengguna bila beberapa aplikasi harus
+  aktif untuk memproses gambar atau video baru. Android N
+  memperluas {@link android.app.job.JobInfo} dan {@link
+  android.app.job.JobParameters} untuk menyediakan solusi alternatif.
+</p>
+
+<h3 id="new-jobinfo">
+  Metode JobInfo baru
+</h3>
+
+<p>
+  Untuk memicu pekerjaan saat perubahan URI materi, Android N memperluas
+  {@link android.app.job.JobInfo} API dengan metode berikut:
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    Membungkus parameter yang diperlukan untuk memicu pekerjaan saat perubahan URI materi.
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    Meneruskan objek {@code TriggerContentUri} ke {@link
+    android.app.job.JobInfo}. Sebuah {@link android.database.ContentObserver}
+    akan memantau URI materi yang dibungkus. Jika terdapat beberapa objek {@code
+    TriggerContentUri} yang berhubungan dengan pekerjaan, sistem memberikan sebuah
+    callback bahkan jika itu hanya melaporkan perubahan pada salah satu URI materi.
+  </dd>
+
+  <dd>
+    Tambahkan flag {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} untuk
+    memicu pekerjaan jika ada turunan dari perubahan URI yang diberikan. Flag ini
+    berkaitan dengan parameter {@code notifyForDescendants} yang diteruskan ke {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()}.
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>Catatan:</strong> {@code TriggerContentUri()} tidak bisa digunakan
+  bersama-sama dengan {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} atau {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()}. Untuk terus memantau perubahan materi, jadwalkan
+  {@link android.app.job.JobInfo} baru sebelum {@link
+  android.app.job.JobService} aplikasi selesai menangani callback terbaru.
+</p>
+
+<p>
+  Kode contoh berikut menjadwalkan pekerjaan yang akan dipicu bila sistem melaporkan
+  perubahan ke URI materi, {@code MEDIA_URI}:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  Bila sistem melaporkan perubahan dalam URI materi yang ditetapkan, aplikasi Anda
+  akan menerima callback dan objek {@link android.app.job.JobParameters}
+  akan diteruskan ke metode {@link android.app.job.JobService#onStartJob onStartJob()}
+  dalam {@code MediaContentJob.class}.
+</p>
+
+<h3 id="new-jobparam">
+  Metode JobParameter Baru
+</h3>
+
+<p>
+  Android N juga memperluas {@link android.app.job.JobParameters} untuk
+  memungkinkan aplikasi Anda menerima informasi yang berguna tentang otoritas materi
+  dan URI yang memicu pekerjaan:
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    Mengembalikan larik URL yang telah memicu pekerjaan. Ini akan berupa {@code
+    null} jika tidak ada URI yang memicu pekerjaan (misalnya, pekerjaan
+    dipicu karena batas waktu atau alasan lainnya), atau jumlah 
+    URI yang berubah lebih dari 50.
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    Mengembalikan larik string otoritas materi yang telah memicu pekerjaan.
+    Jika larik yang dikembalikan bukan {@code null}, gunakan {@code getTriggeredContentUris()}
+    untuk mengambil detail URI yang telah berubah.
+  </dd>
+</dl>
+
+<p>
+  Kode contoh berikut mengganti metode {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} dan
+  mencatat otoritas materi serta URI yang telah memicu pekerjaan:
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  Mengoptimalkan Aplikasi Anda Lebih Jauh
+</h2>
+
+<p>
+  Mengoptimalkan aplikasi Anda untuk berjalan pada perangkat yang mempunyai memori rendah, atau dalam kondisi
+  memori rendah, dapat meningkatkan kinerja dan pengalaman pengguna. Membuang
+  dependensi pada layanan latar belakang dan penerima siaran
+  implisit yang terdaftar secara statis bisa membantu aplikasi Anda berjalan lebih baik pada perangkat demikian. Meskipun
+  Android N telah mengambil langkah-langkah untuk mengurangi sebagian masalah ini, Anda disarankan
+  agar mengoptimalkan aplikasi untuk berjalan tanpa menggunakan
+  proses latar belakang ini sama sekali.
+</p>
+
+<p>
+  Android N memperkenalkan beberapa tambahan perintah <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> yang
+  bisa Anda gunakan untuk menguji perilaku aplikasi dengan proses latar belakang dinonaktifkan:
+</p>
+
+<ul>
+  <li>Untuk mensimulasikan kondisi saat siaran implisit dan layanan latar belakang
+  tidak tersedia, masukkan perintah berikut:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>Untuk mengaktifkan kembali siaran implisit dan layanan latar belakang, masukkan
+  perintah berikut:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

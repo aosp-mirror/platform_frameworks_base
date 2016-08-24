@@ -1,0 +1,168 @@
+page.title=Обеспечение совместимости
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Содержание этого урока</h2>
+<ol>
+  <li><a href="#Theme">Определение альтернативных стилей</a></li>
+  <li><a href="#Layouts">Предоставление альтернативных макетов</a></li>
+  <li><a href="#SupportLib">Использование вспомогательной библиотеки</a></li>
+  <li><a href="#CheckVersion">Проверка версии системы</a></li>
+</ol>
+<h2>См. также</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Спецификация Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design в Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Некоторые возможности Material Design, такие как "материальные" темы и настраиваемые переходы между операциями,
+ доступны только в Android 5.0 (уровень API 21) и более поздних версиях. Однако приложения можно разработать таким образом,
+чтобы эти функции были доступны при запуске на устройствах, поддерживающих Material Design, сохранив при этом
+совместимость приложений с устройствами под управлением более ранних выпусков Android.</p>
+
+
+<h2 id="Theme">Определение альтернативных стилей</h2>
+
+<p>Приложение можно настроить так, чтобы тема Material Design использовалась при работе на поддерживающих эту технологию устройствах,
+а при запуске приложения на устройствах с более ранними версиями Android происходило переключение на старые варианты тем. Ниже описан порядок такой настройки.</p>
+
+<ol>
+<li>В файле
+<code>res/values/styles.xml</code> определите тему, наследующую более старой теме (например, Holo).</li>
+<li>В файле
+<code>res/values-v21/styles.xml</code> определите тему с таким же именем, наследующую теме Material Design.</li>
+<li>В файле манифеста укажите эту тему как тему приложения.</li>
+</ol>
+
+<p class="note"><strong>Примечание.</strong>
+Если в приложении используется тема Material Design, но отсутствует определенная описанным способом альтернативная тема,
+это приложение не будет запускаться на устройствах под управлением версий Android, предшествующих 5.0.
+</p>
+
+
+<h2 id="Layouts">Предоставление альтернативных макетов</h2>
+
+<p>Если в создаваемых согласно рекомендациям Material Design макетах отсутствуют новые
+атрибуты XML, представленные в Android 5.0 (уровень API 21),
+такие макеты поддерживаются в предыдущих версиях ОС Android. В противном случае необходимо предоставить альтернативные макеты. Можно также предоставить
+альтернативные макеты для настройки внешнего вида приложения в более ранних версиях Android.</p>
+
+<p>Создайте файлы макета для Android 5.0 (уровень API 21) в <code>res/layout-v21/</code>,
+а также файлы альтернативного макета для более ранних версий Android (в <code>res/layout/</code>).
+Например, <code>res/layout/my_activity.xml</code> — это альтернативный макет для
+<code>res/layout-v21/my_activity.xml</code>.</p>
+
+<p>Чтобы сделать код более компактным, определите стили в <code>res/values/</code>, измените
+ стили в <code>res/values-v21/</code> для новых API, а также используйте наследование стилей,
+ определив основные стили в <code>res/values/</code> и задав наследование из них в <code>res/values-v21/</code>.</p>
+
+
+<h2 id="SupportLib">Использование вспомогательной библиотеки</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">Вспомогательные библиотеки v7</a>
+r21 и более поздних версий включают следующие функции Material Design:</p>
+
+<ul>
+<li><a href="{@docRoot}training/material/theme.html">стили Material Design</a> для некоторых
+системных виджетов в случае применения одной из тем <code>Theme.AppCompat</code>;</li>
+<li><a href="{@docRoot}training/material/theme.html#ColorPalette">атрибуты цветовой палитры темы</a>
+в темах <code>Theme.AppCompat</code>;</li>
+<li>виджет {@link android.support.v7.widget.RecyclerView} для <a href="{@docRoot}training/material/lists-cards.html#RecyclerView">отображения коллекций
+данных</a>;</li>
+<li>виджет {@link android.support.v7.widget.CardView} для <a href="{@docRoot}training/material/lists-cards.html#CardView">создания карточек</a>;</li>
+<li>класс {@link android.support.v7.graphics.Palette} для <a href="{@docRoot}training/material/drawables.html#ColorExtract">извлечения главных цветов
+на изображениях</a>.</li>
+</ul>
+
+<h3>Системные виджеты</h3>
+
+<p>В темах <code>Theme.AppCompat</code> имеются стили Material Design для следующих виджетов:</p>
+
+<ul>
+  <li>{@link android.widget.EditText};</li>
+  <li>{@link android.widget.Spinner};</li>
+  <li>{@link android.widget.CheckBox};</li>
+  <li>{@link android.widget.RadioButton};</li>
+  <li>{@link android.support.v7.widget.SwitchCompat};</li>
+  <li>{@link android.widget.CheckedTextView}.</li>
+</ul>
+
+<h3>Цветовая палитра</h3>
+
+<p>Чтобы получить стили Material Design и настроить цветовую палитру с помощью вспомогательной библиотеки
+Android v7, примените одну из следующих тем <code>Theme.AppCompat</code>:</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>Списки и карточки</h3>
+
+<p>Виджеты {@link android.support.v7.widget.RecyclerView} и {@link
+android.support.v7.widget.CardView} имеются в более ранних версиях Android. Они находятся во
+вспомогательной библиотеке Android v7, и для них существуют следующие ограничения.</p>
+<ul>
+<li>В виджете {@link android.support.v7.widget.CardView} применяется программная реализация тени
+с помощью дополнительного отступа.</li>
+<li>Виджет {@link android.support.v7.widget.CardView} не выполняет обрезку своих дочерних представлений,
+пересекающихся со скругленными углами.</li>
+</ul>
+
+
+<h3>Зависимости</h3>
+
+<p>Чтобы воспользоваться этими возможностями в версиях Android, предшествующих 5.0 (уровень API 21), включите в свой проект вспомогательную библиотеку
+Android v7 как <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">зависимость Gradle</a>:</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">Проверка версии системы</h2>
+
+<p>Следующие функции доступны только в Android 5.0 (уровень API 21) и более поздних версиях:</p>
+
+<ul>
+<li>переходы;</li>
+<li>реакция на касание;</li>
+<li>анимации появления;</li>
+<li>анимации по траектории;</li>
+<li>векторные элементы;</li>
+<li>тонирование элементов дизайна.</li>
+</ul>
+
+<p>Чтобы обеспечить совместимость приложения с более ранними версиями Android, проверьте системный параметр {@link
+android.os.Build.VERSION#SDK_INT version} во время запуска, прежде чем вызвать API любой из этих
+функций:</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>Примечание.</strong> Чтобы указать версии Android, поддерживаемые вашим приложением,
+установите атрибуты <code>android:minSdkVersion</code> и <code>android:targetSdkVersion</code>
+в файле манифеста. Чтобы использовать функции Material Design, которые имеются в Android 5.0, задайте
+для атрибута <code>android:targetSdkVersion</code> значение <code>21</code>. Дополнительные сведения см.
+ в <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">руководстве по API
+&lt;uses-sdk&gt;</a>.</p>

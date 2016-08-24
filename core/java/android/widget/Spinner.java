@@ -17,6 +17,7 @@
 package android.widget;
 
 import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
 
 import android.annotation.DrawableRes;
 import android.annotation.Nullable;
@@ -44,7 +45,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.ListPopupWindow.ForwardingListener;
 import android.widget.PopupWindow.OnDismissListener;
 
 /**
@@ -85,8 +85,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     private static final int MODE_THEME = -1;
 
+    private final Rect mTempRect = new Rect();
+
     /** Context used to inflate the popup window or dialog. */
-    private Context mPopupContext;
+    private final Context mPopupContext;
 
     /** Forwarding listener used to implement drag-to-open. */
     private ForwardingListener mForwardingListener;
@@ -100,26 +102,25 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     private int mGravity;
     private boolean mDisableChildrenWhenDisabled;
 
-    private Rect mTempRect = new Rect();
-
     /**
-     * Construct a new spinner with the given context's theme.
+     * Constructs a new spinner with the given context's theme.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
+     *                access the current theme, resources, etc.
      */
     public Spinner(Context context) {
         this(context, null);
     }
 
     /**
-     * Construct a new spinner with the given context's theme and the supplied
+     * Constructs a new spinner with the given context's theme and the supplied
      * mode of displaying choices. <code>mode</code> may be one of
      * {@link #MODE_DIALOG} or {@link #MODE_DROPDOWN}.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
-     * @param mode Constant describing how the user will select choices from the spinner.
+     *                access the current theme, resources, etc.
+     * @param mode Constant describing how the user will select choices from
+     *             the spinner.
      * 
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
@@ -129,10 +130,11 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     /**
-     * Construct a new spinner with the given context's theme and the supplied attribute set.
+     * Constructs a new spinner with the given context's theme and the supplied
+     * attribute set.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
+     *                access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
     public Spinner(Context context, AttributeSet attrs) {
@@ -140,32 +142,35 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     /**
-     * Construct a new spinner with the given context's theme, the supplied attribute set,
-     * and default style attribute.
+     * Constructs a new spinner with the given context's theme, the supplied
+     * attribute set, and default style attribute.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
+     *                access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
      * @param defStyleAttr An attribute in the current theme that contains a
-     *        reference to a style resource that supplies default values for
-     *        the view. Can be 0 to not look for defaults.
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for
+     *                     defaults.
      */
     public Spinner(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0, MODE_THEME);
     }
 
     /**
-     * Construct a new spinner with the given context's theme, the supplied attribute set,
-     * and default style. <code>mode</code> may be one of {@link #MODE_DIALOG} or
-     * {@link #MODE_DROPDOWN} and determines how the user will select choices from the spinner.
+     * Constructs a new spinner with the given context's theme, the supplied
+     * attribute set, and default style attribute. <code>mode</code> may be one
+     * of {@link #MODE_DIALOG} or {@link #MODE_DROPDOWN} and determines how the
+     * user will select choices from the spinner.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
+     *                access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
      * @param defStyleAttr An attribute in the current theme that contains a
-     *        reference to a style resource that supplies default values for
-     *        the view. Can be 0 to not look for defaults.
-     * @param mode Constant describing how the user will select choices from the spinner.
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for defaults.
+     * @param mode Constant describing how the user will select choices from the
+     *             spinner.
      *
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
@@ -175,21 +180,24 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     /**
-     * Construct a new spinner with the given context's theme, the supplied attribute set,
-     * and default style. <code>mode</code> may be one of {@link #MODE_DIALOG} or
-     * {@link #MODE_DROPDOWN} and determines how the user will select choices from the spinner.
+     * Constructs a new spinner with the given context's theme, the supplied
+     * attribute set, and default styles. <code>mode</code> may be one of
+     * {@link #MODE_DIALOG} or {@link #MODE_DROPDOWN} and determines how the
+     * user will select choices from the spinner.
      *
      * @param context The Context the view is running in, through which it can
-     *        access the current theme, resources, etc.
+     *                access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
      * @param defStyleAttr An attribute in the current theme that contains a
-     *        reference to a style resource that supplies default values for
-     *        the view. Can be 0 to not look for defaults.
+     *                     reference to a style resource that supplies default
+     *                     values for the view. Can be 0 to not look for
+     *                     defaults.
      * @param defStyleRes A resource identifier of a style resource that
-     *        supplies default values for the view, used only if
-     *        defStyleAttr is 0 or can not be found in the theme. Can be 0
-     *        to not look for defaults.
-     * @param mode Constant describing how the user will select choices from the spinner.
+     *                    supplies default values for the view, used only if
+     *                    defStyleAttr is 0 or can not be found in the theme.
+     *                    Can be 0 to not look for defaults.
+     * @param mode Constant describing how the user will select choices from
+     *             the spinner.
      *
      * @see #MODE_DIALOG
      * @see #MODE_DROPDOWN
@@ -200,10 +208,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     }
 
     /**
-     * Constructs a new spinner with the given context's theme, the supplied
-     * attribute set, default styles, popup mode (one of {@link #MODE_DIALOG}
-     * or {@link #MODE_DROPDOWN}), and the context against which the popup
-     * should be inflated.
+     * Constructs a new spinner with the given context, the supplied attribute
+     * set, default styles, popup mode (one of {@link #MODE_DIALOG} or
+     * {@link #MODE_DROPDOWN}), and the theme against which the popup should be
+     * inflated.
      *
      * @param context The context against which the view is inflated, which
      *                provides access to the current theme, resources, etc.
@@ -263,6 +271,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                         attrs, R.styleable.Spinner, defStyleAttr, defStyleRes);
                 mDropDownWidth = pa.getLayoutDimension(R.styleable.Spinner_dropDownWidth,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
+                if (pa.hasValueOrEmpty(R.styleable.Spinner_dropDownSelector)) {
+                    popup.setListSelector(pa.getDrawable(
+                            R.styleable.Spinner_dropDownSelector));
+                }
                 popup.setBackgroundDrawable(pa.getDrawable(R.styleable.Spinner_popupBackground));
                 popup.setPromptText(a.getString(R.styleable.Spinner_prompt));
                 pa.recycle();
@@ -270,7 +282,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 mPopup = popup;
                 mForwardingListener = new ForwardingListener(this) {
                     @Override
-                    public ListPopupWindow getPopup() {
+                    public ShowableListMenu getPopup() {
                         return popup;
                     }
 

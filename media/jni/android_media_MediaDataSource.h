@@ -45,6 +45,8 @@ public:
     virtual ssize_t readAt(off64_t offset, size_t size);
     virtual status_t getSize(off64_t* size);
     virtual void close();
+    virtual uint32_t getFlags();
+    virtual String8 toString();
 
 private:
     // Protect all member variables with mLock because this object will be

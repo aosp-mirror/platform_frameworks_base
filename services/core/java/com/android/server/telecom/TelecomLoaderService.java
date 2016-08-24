@@ -188,7 +188,7 @@ public class TelecomLoaderService extends SystemService {
                     | Context.BIND_AUTO_CREATE;
 
             // Bind to Telecom and register the service
-            if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.OWNER)) {
+            if (mContext.bindServiceAsUser(intent, serviceConnection, flags, UserHandle.SYSTEM)) {
                 mServiceConnection = serviceConnection;
             }
         }

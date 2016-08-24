@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -45,9 +46,8 @@ public class KeyguardUserSwitcherScrim extends Drawable
     private Paint mRadialGradientPaint = new Paint();
     private int mLayoutWidth;
 
-    public KeyguardUserSwitcherScrim(View host) {
-        host.addOnLayoutChangeListener(this);
-        mDarkColor = host.getContext().getColor(
+    public KeyguardUserSwitcherScrim(Context context) {
+        mDarkColor = context.getColor(
                 R.color.keyguard_user_switcher_background_gradient_color);
     }
 

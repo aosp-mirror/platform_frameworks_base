@@ -17,7 +17,6 @@
 package android.text;
 
 import android.annotation.IntDef;
-import android.emoji.EmojiFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -102,19 +101,6 @@ public abstract class Layout {
 
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
-
-    /* package */ static final EmojiFactory EMOJI_FACTORY = EmojiFactory.newAvailableInstance();
-    /* package */ static final int MIN_EMOJI, MAX_EMOJI;
-
-    static {
-        if (EMOJI_FACTORY != null) {
-            MIN_EMOJI = EMOJI_FACTORY.getMinimumAndroidPua();
-            MAX_EMOJI = EMOJI_FACTORY.getMaximumAndroidPua();
-        } else {
-            MIN_EMOJI = -1;
-            MAX_EMOJI = -1;
-        }
-    }
 
     /**
      * Return how wide a layout must be in order to display the
@@ -360,9 +346,9 @@ public abstract class Layout {
                 }
             }
 
-            boolean hasTabOrEmoji = getLineContainsTab(lineNum);
+            boolean hasTab = getLineContainsTab(lineNum);
             // Can't tell if we have tabs for sure, currently
-            if (hasTabOrEmoji && !tabStopsIsInitialized) {
+            if (hasTab && !tabStopsIsInitialized) {
                 if (tabStops == null) {
                     tabStops = new TabStops(TAB_INCREMENT, spans);
                 } else {
@@ -405,11 +391,11 @@ public abstract class Layout {
 
             paint.setHyphenEdit(getHyphen(lineNum));
             Directions directions = getLineDirections(lineNum);
-            if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTabOrEmoji) {
+            if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTab) {
                 // XXX: assumes there's nothing additional to be done
                 canvas.drawText(buf, start, end, x, lbaseline, paint);
             } else {
-                tl.set(paint, buf, start, end, dir, directions, hasTabOrEmoji, tabStops);
+                tl.set(paint, buf, start, end, dir, directions, hasTab, tabStops);
                 tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
             paint.setHyphenEdit(0);
@@ -710,8 +696,7 @@ public abstract class Layout {
 
     /**
      * Returns whether the specified line contains one or more
-     * characters that need to be handled specially, like tabs
-     * or emoji.
+     * characters that need to be handled specially, like tabs.
      */
     public abstract boolean getLineContainsTab(int line);
 
@@ -814,6 +799,31 @@ public abstract class Layout {
         return false;
     }
 
+    /**
+     * Returns the range of the run that the character at offset belongs to.
+     * @param offset the offset
+     * @return The range of the run
+     * @hide
+     */
+    public long getRunRange(int offset) {
+        int line = getLineForOffset(offset);
+        Directions dirs = getLineDirections(line);
+        if (dirs == DIRS_ALL_LEFT_TO_RIGHT || dirs == DIRS_ALL_RIGHT_TO_LEFT) {
+            return TextUtils.packRangeInLong(0, getLineEnd(line));
+        }
+        int[] runs = dirs.mDirections;
+        int lineStart = getLineStart(line);
+        for (int i = 0; i < runs.length; i += 2) {
+            int start = lineStart + runs[i];
+            int limit = start + (runs[i+1] & RUN_LENGTH_MASK);
+            if (offset >= start && offset < limit) {
+                return TextUtils.packRangeInLong(start, limit);
+            }
+        }
+        // Should happen only if the offset is "out of bounds"
+        return TextUtils.packRangeInLong(0, getLineEnd(line));
+    }
+
     private boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
@@ -901,6 +911,10 @@ public abstract class Layout {
         return getHorizontal(offset, !trailing, clamped);
     }
 
+    private float getHorizontal(int offset, boolean primary) {
+        return primary ? getPrimaryHorizontal(offset) : getSecondaryHorizontal(offset);
+    }
+
     private float getHorizontal(int offset, boolean trailing, boolean clamped) {
         int line = getLineForOffset(offset);
 
@@ -911,11 +925,11 @@ public abstract class Layout {
         int start = getLineStart(line);
         int end = getLineEnd(line);
         int dir = getParagraphDirection(line);
-        boolean hasTabOrEmoji = getLineContainsTab(line);
+        boolean hasTab = getLineContainsTab(line);
         Directions directions = getLineDirections(line);
 
         TabStops tabStops = null;
-        if (hasTabOrEmoji && mText instanceof Spanned) {
+        if (hasTab && mText instanceof Spanned) {
             // Just checking this line should be good enough, tabs should be
             // consistent across all lines in a paragraph.
             TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, start, end, TabStopSpan.class);
@@ -925,7 +939,7 @@ public abstract class Layout {
         }
 
         TextLine tl = TextLine.obtain();
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabOrEmoji, tabStops);
+        tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops);
         float wid = tl.measure(offset - start, trailing, null);
         TextLine.recycle(tl);
 
@@ -1031,9 +1045,9 @@ public abstract class Layout {
         int start = getLineStart(line);
         int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
 
-        boolean hasTabsOrEmoji = getLineContainsTab(line);
+        boolean hasTabs = getLineContainsTab(line);
         TabStops tabStops = null;
-        if (hasTabsOrEmoji && mText instanceof Spanned) {
+        if (hasTabs && mText instanceof Spanned) {
             // Just checking this line should be good enough, tabs should be
             // consistent across all lines in a paragraph.
             TabStopSpan[] tabs = getParagraphSpans((Spanned) mText, start, end, TabStopSpan.class);
@@ -1049,7 +1063,7 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
 
         TextLine tl = TextLine.obtain();
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabsOrEmoji, tabStops);
+        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         float width = tl.metrics(null);
         TextLine.recycle(tl);
         return width;
@@ -1066,12 +1080,12 @@ public abstract class Layout {
     private float getLineExtent(int line, TabStops tabStops, boolean full) {
         int start = getLineStart(line);
         int end = full ? getLineEnd(line) : getLineVisibleEnd(line);
-        boolean hasTabsOrEmoji = getLineContainsTab(line);
+        boolean hasTabs = getLineContainsTab(line);
         Directions directions = getLineDirections(line);
         int dir = getParagraphDirection(line);
 
         TextLine tl = TextLine.obtain();
-        tl.set(mPaint, mText, start, end, dir, directions, hasTabsOrEmoji, tabStops);
+        tl.set(mPaint, mText, start, end, dir, directions, hasTabs, tabStops);
         float width = tl.metrics(null);
         TextLine.recycle(tl);
         return width;
@@ -1129,6 +1143,20 @@ public abstract class Layout {
      * closest to the specified horizontal position.
      */
     public int getOffsetForHorizontal(int line, float horiz) {
+        return getOffsetForHorizontal(line, horiz, true);
+    }
+
+    /**
+     * Get the character offset on the specified line whose position is
+     * closest to the specified horizontal position.
+     *
+     * @param line the line used to find the closest offset
+     * @param horiz the horizontal position used to find the closest offset
+     * @param primary whether to use the primary position or secondary position to find the offset
+     *
+     * @hide
+     */
+    public int getOffsetForHorizontal(int line, float horiz, boolean primary) {
         // TODO: use Paint.getOffsetForAdvance to avoid binary search
         final int lineEndOffset = getLineEnd(line);
         final int lineStartOffset = getLineStart(line);
@@ -1148,7 +1176,7 @@ public abstract class Layout {
                     !isRtlCharAt(lineEndOffset - 1)) + lineStartOffset;
         }
         int best = lineStartOffset;
-        float bestdist = Math.abs(getPrimaryHorizontal(best) - horiz);
+        float bestdist = Math.abs(getHorizontal(best, primary) - horiz);
 
         for (int i = 0; i < dirs.mDirections.length; i += 2) {
             int here = lineStartOffset + dirs.mDirections[i];
@@ -1164,7 +1192,7 @@ public abstract class Layout {
                 guess = (high + low) / 2;
                 int adguess = getOffsetAtStartOf(guess);
 
-                if (getPrimaryHorizontal(adguess) * swap >= horiz * swap)
+                if (getHorizontal(adguess, primary) * swap >= horiz * swap)
                     high = guess;
                 else
                     low = guess;
@@ -1177,9 +1205,9 @@ public abstract class Layout {
                 int aft = tl.getOffsetToLeftRightOf(low - lineStartOffset, isRtl) + lineStartOffset;
                 low = tl.getOffsetToLeftRightOf(aft - lineStartOffset, !isRtl) + lineStartOffset;
                 if (low >= here && low < there) {
-                    float dist = Math.abs(getPrimaryHorizontal(low) - horiz);
+                    float dist = Math.abs(getHorizontal(low, primary) - horiz);
                     if (aft < there) {
-                        float other = Math.abs(getPrimaryHorizontal(aft) - horiz);
+                        float other = Math.abs(getHorizontal(aft, primary) - horiz);
 
                         if (other < dist) {
                             dist = other;
@@ -1194,7 +1222,7 @@ public abstract class Layout {
                 }
             }
 
-            float dist = Math.abs(getPrimaryHorizontal(here) - horiz);
+            float dist = Math.abs(getHorizontal(here, primary) - horiz);
 
             if (dist < bestdist) {
                 bestdist = dist;
@@ -1202,7 +1230,7 @@ public abstract class Layout {
             }
         }
 
-        float dist = Math.abs(getPrimaryHorizontal(max) - horiz);
+        float dist = Math.abs(getHorizontal(max, primary) - horiz);
 
         if (dist <= bestdist) {
             bestdist = dist;
@@ -1841,7 +1869,11 @@ public abstract class Layout {
             return ArrayUtils.emptyArray(type);
         }
 
-        return text.getSpans(start, end, type);
+        if(text instanceof SpannableStringBuilder) {
+            return ((SpannableStringBuilder) text).getSpans(start, end, type, false);
+        } else {
+            return text.getSpans(start, end, type);
+        }
     }
 
     private char getEllipsisChar(TextUtils.TruncateAt method) {

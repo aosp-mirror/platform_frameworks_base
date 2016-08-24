@@ -16,7 +16,7 @@
 package android.hardware.camera2.legacy;
 
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SubmitInfo;
 import android.util.Log;
 import android.util.Pair;
 
@@ -111,31 +111,29 @@ public class RequestQueue {
      *
      * @param requests the burst of requests to add to the queue.
      * @param repeating true if the burst is repeating.
-     * @param frameNumber an output argument that contains either the frame number of the last frame
-     *                    that will be returned for this request, or the frame number of the last
-     *                    frame that will be returned for the current repeating request if this
-     *                    burst is set to be repeating.
-     * @return the request id.
+     * @return the submission info, including the new request id, and the last frame number, which
+     *   contains either the frame number of the last frame that will be returned for this request,
+     *   or the frame number of the last frame that will be returned for the current repeating
+     *   request if this burst is set to be repeating.
      */
-    public synchronized int submit(List<CaptureRequest> requests, boolean repeating,
-            /*out*/LongParcelable frameNumber) {
+    public synchronized SubmitInfo submit(CaptureRequest[] requests, boolean repeating) {
         int requestId = mCurrentRequestId++;
         BurstHolder burst = new BurstHolder(requestId, repeating, requests, mJpegSurfaceIds);
-        long ret = INVALID_FRAME;
+        long lastFrame = INVALID_FRAME;
         if (burst.isRepeating()) {
             Log.i(TAG, "Repeating capture request set.");
             if (mRepeatingRequest != null) {
-                ret = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
+                lastFrame = (mCurrentRepeatingFrameNumber == INVALID_FRAME) ? INVALID_FRAME :
                         mCurrentRepeatingFrameNumber - 1;
             }
             mCurrentRepeatingFrameNumber = INVALID_FRAME;
             mRepeatingRequest = burst;
         } else {
             mRequestQueue.offer(burst);
-            ret = calculateLastFrame(burst.getRequestId());
+            lastFrame = calculateLastFrame(burst.getRequestId());
         }
-        frameNumber.setNumber(ret);
-        return requestId;
+        SubmitInfo info = new SubmitInfo(requestId, lastFrame);
+        return info;
     }
 
     private long calculateLastFrame(int requestId) {

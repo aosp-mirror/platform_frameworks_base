@@ -231,6 +231,18 @@ public class Handler {
         mAsynchronous = async;
     }
 
+    /** {@hide} */
+    public String getTraceName(Message message) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getName()).append(": ");
+        if (message.callback != null) {
+            sb.append(message.callback.getClass().getName());
+        } else {
+            sb.append("#").append(message.what);
+        }
+        return sb.toString();
+    }
+
     /**
      * Returns a string representing the name of the specified message.
      * The default implementation will either return the class name of the
@@ -739,8 +751,8 @@ public class Handler {
         message.callback.run();
     }
 
-    final MessageQueue mQueue;
     final Looper mLooper;
+    final MessageQueue mQueue;
     final Callback mCallback;
     final boolean mAsynchronous;
     IMessenger mMessenger;

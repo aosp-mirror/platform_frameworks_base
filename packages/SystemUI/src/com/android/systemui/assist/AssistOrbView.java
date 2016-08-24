@@ -27,12 +27,12 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 public class AssistOrbView extends FrameLayout {
@@ -43,8 +43,6 @@ public class AssistOrbView extends FrameLayout {
     private final Paint mBackgroundPaint = new Paint();
     private final Rect mCircleRect = new Rect();
     private final Rect mStaticRect = new Rect();
-    private final Interpolator mAppearInterpolator;
-    private final Interpolator mDisappearInterpolator;
     private final Interpolator mOvershootInterpolator = new OvershootInterpolator();
 
     private boolean mClipToOutline;
@@ -117,10 +115,6 @@ public class AssistOrbView extends FrameLayout {
                 R.dimen.assist_orb_travel_distance);
         mMaxElevation = context.getResources().getDimensionPixelSize(
                 R.dimen.assist_orb_elevation);
-        mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear_out_slow_in);
-        mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_linear_in);
         mBackgroundPaint.setAntiAlias(true);
         mBackgroundPaint.setColor(getResources().getColor(R.color.assist_orb_color));
     }
@@ -256,8 +250,8 @@ public class AssistOrbView extends FrameLayout {
     }
 
     public void startExitAnimation(long delay) {
-        animateCircleSize(0, 200, delay, mDisappearInterpolator);
-        animateOffset(0, 200, delay, mDisappearInterpolator);
+        animateCircleSize(0, 200, delay, Interpolators.FAST_OUT_LINEAR_IN);
+        animateOffset(0, 200, delay, Interpolators.FAST_OUT_LINEAR_IN);
     }
 
     public void startEnterAnimation() {
@@ -266,7 +260,7 @@ public class AssistOrbView extends FrameLayout {
             @Override
             public void run() {
                 animateCircleSize(mCircleMinSize, 300, 0 /* delay */, mOvershootInterpolator);
-                animateOffset(mStaticOffset, 400, 0 /* delay */, mAppearInterpolator);
+                animateOffset(mStaticOffset, 400, 0 /* delay */, Interpolators.LINEAR_OUT_SLOW_IN);
             }
         });
     }

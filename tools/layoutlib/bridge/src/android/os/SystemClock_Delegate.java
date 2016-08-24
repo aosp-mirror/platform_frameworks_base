@@ -18,6 +18,7 @@ package android.os;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+import com.android.tools.layoutlib.java.System_Delegate;
 
 /**
  * Delegate implementing the native methods of android.os.SystemClock
@@ -30,9 +31,6 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
  *
  */
 public class SystemClock_Delegate {
-    private static long sBootTime = System.currentTimeMillis();
-    private static long sBootTimeNano = System.nanoTime();
-
     /**
      * Returns milliseconds since boot, not counting time spent in deep sleep.
      * <b>Note:</b> This value may get reset occasionally (before it would
@@ -42,7 +40,7 @@ public class SystemClock_Delegate {
      */
     @LayoutlibDelegate
     /*package*/ static long uptimeMillis() {
-        return System.currentTimeMillis() - sBootTime;
+        return System_Delegate.currentTimeMillis() - System_Delegate.bootTimeMillis();
     }
 
     /**
@@ -52,7 +50,7 @@ public class SystemClock_Delegate {
      */
     @LayoutlibDelegate
     /*package*/ static long elapsedRealtime() {
-        return System.currentTimeMillis() - sBootTime;
+        return System_Delegate.currentTimeMillis() - System_Delegate.bootTimeMillis();
     }
 
     /**
@@ -62,7 +60,7 @@ public class SystemClock_Delegate {
      */
     @LayoutlibDelegate
     /*package*/ static long elapsedRealtimeNanos() {
-        return System.nanoTime() - sBootTimeNano;
+        return System_Delegate.nanoTime() - System_Delegate.bootTime();
     }
 
     /**
@@ -72,7 +70,7 @@ public class SystemClock_Delegate {
      */
     @LayoutlibDelegate
     /*package*/ static long currentThreadTimeMillis() {
-        return System.currentTimeMillis();
+        return System_Delegate.currentTimeMillis();
     }
 
     /**
@@ -84,7 +82,7 @@ public class SystemClock_Delegate {
      */
     @LayoutlibDelegate
     /*package*/ static long currentThreadTimeMicro() {
-        return System.currentTimeMillis() * 1000;
+        return System_Delegate.currentTimeMillis() * 1000;
     }
 
     /**

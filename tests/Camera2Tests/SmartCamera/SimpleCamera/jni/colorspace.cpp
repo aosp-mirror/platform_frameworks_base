@@ -65,9 +65,6 @@ void JNI_COLORSPACE_METHOD(nativeYuv420pToRgba8888)(
   uint8* pInV = pInput + size + size / 4;
   Rgba* pOutColor = pOutput;
 
-  const int u_offset = size;
-  const int v_offset = u_offset + size / 4;
-
   for (int y = 0; y < height; y += 2) {
     for (int x = 0; x < width; x += 2) {
       int u, v, y1, y2, y3, y4;

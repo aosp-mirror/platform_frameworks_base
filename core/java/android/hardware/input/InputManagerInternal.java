@@ -16,8 +16,11 @@
 
 package android.hardware.input;
 
+import android.annotation.Nullable;
 import android.hardware.display.DisplayViewport;
 import android.view.InputEvent;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 /**
  * Input manager local system service interface.
@@ -39,4 +42,21 @@ public abstract class InputManagerInternal {
      * watching for wake events.
      */
     public abstract void setInteractive(boolean interactive);
+
+    /**
+     * Notifies that InputMethodManagerService switched the current input method subtype.
+     *
+     * @param userId user id that indicates who is using the specified input method and subtype.
+     * @param inputMethodInfo {@code null} when no input method is selected.
+     * @param subtype {@code null} when {@code inputMethodInfo} does has no subtype.
+     */
+    public abstract void onInputMethodSubtypeChanged(int userId,
+            @Nullable InputMethodInfo inputMethodInfo, @Nullable InputMethodSubtype subtype);
+
+    /**
+     * Toggles Caps Lock state for input device with specific id.
+     *
+     * @param deviceId The id of input device.
+     */
+    public abstract void toggleCapsLock(int deviceId);
 }

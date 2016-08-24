@@ -44,7 +44,11 @@ public class PageContentView extends View
 
     private Drawable mEmptyState;
 
+    private Drawable mErrorState;
+
     private boolean mContentRequested;
+
+    private boolean mIsFailed;
 
     public PageContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -53,19 +57,26 @@ public class PageContentView extends View
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         mContentRequested = false;
+
         requestPageContentIfNeeded();
     }
 
     @Override
-    public void onPageContentAvailable(BitmapDrawable content) {
-        setBackground(content);
+    public void onPageContentAvailable(BitmapDrawable renderedPage) {
+        mIsFailed = (renderedPage == null);
+
+        if (mIsFailed) {
+            setBackground(mErrorState);
+        } else {
+            setBackground(renderedPage);
+        }
     }
 
     public PageContentProvider getPageContentProvider() {
         return mProvider;
     }
 
-    public void init(PageContentProvider provider, Drawable emptyState,
+    public void init(PageContentProvider provider, Drawable emptyState, Drawable errorState,
             MediaSize mediaSize, Margins minMargins) {
         final boolean providerChanged = (mProvider == null)
                 ? provider != null : !mProvider.equals(provider);
@@ -81,17 +92,21 @@ public class PageContentView extends View
             return;
         }
 
+        mIsFailed = false;
         mProvider = provider;
         mMediaSize = mediaSize;
         mMinMargins = minMargins;
 
         mEmptyState = emptyState;
+        mErrorState = errorState;
         mContentRequested = false;
 
         // If there is no provider we want immediately to switch to
         // the empty state, so pages with no content appear blank.
-        if (mProvider == null && getBackground() != mEmptyState) {
+        if (mProvider == null) {
             setBackground(mEmptyState);
+        } else if (mIsFailed) {
+            setBackground(mErrorState);
         }
 
         requestPageContentIfNeeded();

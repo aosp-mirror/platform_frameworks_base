@@ -116,12 +116,20 @@ page.tags="users, growth, global"
   Localization</a> section of the Localization Checklist.
 </p>
 
+<h3>
+  Purchase professional translations through Google Play
+</h3>
+
 <p>
-  <strong>Google Play App Translation Service</strong> can help you quickly
-  find and purchase translations of your apps. In the <a href=
-  "https://play.google.com/apps/publish/">Developer Console</a>, you can browse
-  a list of third-party vendors who are pre-qualified by Google to offer
-  high-quality professional translations at competitive prices.
+  The <a href="https://support.google.com/l10n/answer/6359997">App Translation
+  Service</a> can help you quickly purchase translations of your app. In the
+  <a href="https://support.google.com/l10n/answer/6341304">Developer
+  Console</a> and <a href=
+  "https://support.google.com/l10n/answer/6341928">Android Studio</a>, you can
+  browse a list of third-party vendors who are prequalified by Google to offer
+  high-quality translations at competitive prices. Beyond the app UI strings,
+  you can request translations for Play Store text, in-app purchase products,
+  and universal app campaign ads, all in one go.
 </p>
 
 <img src="{@docRoot}images/gp-listing-3.jpg" style="padding:8px 0">

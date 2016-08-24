@@ -27,6 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"양면"</string>
     <string name="label_orientation" msgid="2853142581990496477">"방향"</string>
     <string name="label_pages" msgid="7768589729282182230">"페이지"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"프린터 선택"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>페이지 모두"</string>
     <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>페이지 범위"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"예: 1-5, 8, 11-13"</string>
@@ -58,22 +59,34 @@
       <item quantity="other">프린터 <xliff:g id="COUNT_1">%1$s</xliff:g>대 검색됨</item>
       <item quantity="one">프린터 <xliff:g id="COUNT_0">%1$s</xliff:g>대 검색됨</item>
     </plurals>
-    <string name="choose_print_service" msgid="3740309762324459694">"인쇄 서비스 선택"</string>
+    <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"이 프린터에 대한 정보 더보기"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"파일을 만들 수 없습니다."</string>
+    <string name="print_services_disabled_toast" msgid="9089060734685174685">"프린트 서비스 일부가 사용 중지되었습니다."</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"프린터 검색 중"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"사용 가능한 프린트 서비스 없음"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"프린터 없음"</string>
+    <string name="cannot_add_printer" msgid="7840348733668023106">"프린터를 추가할 수 없음"</string>
+    <string name="select_to_add_printers" msgid="3800709038689830974">"프린터를 추가하려면 선택하세요."</string>
+    <string name="enable_print_service" msgid="3482815747043533842">"사용 설정하려면 선택하세요."</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"사용 설정된 서비스"</string>
+    <string name="recommended_services_title" msgid="3799434882937956924">"권장 서비스"</string>
+    <string name="disabled_services_title" msgid="7313253167968363211">"사용 중지된 서비스"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"모든 서비스"</string>
+    <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g>개 프린터를 표시하려면 설치하세요.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g>개 프린터를 표시하려면 설치하세요.</item>
+    </plurals>
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> 인쇄 중"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> 취소 중"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"프린터 오류: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"차단된 프린터: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> 인쇄 작업</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> 인쇄 작업</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"취소"</string>
     <string name="restart" msgid="2472034227037808749">"다시 시작"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"프린터와 연결되지 않음"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"알 수 없음"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – 사용할 수 없음"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용할까요?"</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"문서가 프린터로 전송되는 중에 하나 이상의 서버를 통과할 수 있습니다."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"흑백"</item>
     <item msgid="2762241247228983754">"컬러"</item>
@@ -91,5 +104,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"죄송합니다. 오류가 발생했습니다. 다시 시도해 보세요."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"다시 시도"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"현재 이 프린터를 사용할 수 없습니다."</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"미리보기를 표시할 수 없음"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"미리보기 준비 중…"</string>
 </resources>

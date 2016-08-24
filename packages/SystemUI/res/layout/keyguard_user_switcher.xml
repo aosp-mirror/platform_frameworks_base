@@ -19,14 +19,5 @@
         android:visibility="gone"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
-    <com.android.keyguard.AlphaOptimizedLinearLayout
-            android:id="@+id/keyguard_user_switcher_inner"
-            android:orientation="vertical"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
-            android:layout_gravity="end"
-            android:gravity="end"
-            android:paddingTop="4dp">
-    </com.android.keyguard.AlphaOptimizedLinearLayout>
+    <!-- KeyguardUserSwitcher loads keyguard_user_switcher_inner.xml here -->
 </view>

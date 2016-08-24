@@ -1,0 +1,393 @@
+page.title=通知
+page.tags=notifications
+helpoutsWidget=true
+page.image=/preview/images/notifications-card.png
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<!-- table of contents -->
+<h2>このドキュメントの内容</h2>
+<ol>
+  <li><a href="#direct">ダイレクト リプライ</a></li>
+  <li><a href="#bundle">バンドル通知</a></li>
+  <li><a href="#custom">カスタムビュー</a></li>
+  <li><a href="#style">メッセージ スタイル</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Android N には、アプリが視認性の高いインタラクティブな通知を投稿できるようにする新しい API がいくつか導入されています。
+</p>
+
+<p>Android N では、ハンドセットでインライン リプライをサポートするために、既存の {@link android.support.v4.app.RemoteInput} 通知 API が拡張されています。
+これらの機能を使用すると、ユーザーは、アプリにアクセスすることなく、通知シェードからすばやく応答できます。
+</p>
+
+<p>
+  Android N では、類似した通知をバンドルして、単一の通知として表示することもできます。
+このバンドルを可能にするために、Android N では、既存の {@link
+  android.support.v4.app.NotificationCompat.Builder#setGroup
+  NotificationCompat.Builder.setGroup()} メソッドが使用されます。ユーザーは、各通知を展開して、通知シェードから個別に返信や消去などのアクションを各通知に対して行うことができます。
+
+
+</p>
+
+<p>最後に、Android N には、アプリのカスタマイズした通知ビューでシステム デコレーションを活用できるようにする新しい API が追加されています。
+これらの API は、通知ビューで、標準のテンプレートを使った一貫した表示を共有できるようにします。
+
+</p>
+
+<p>このドキュメントでは、アプリでこれらの新しい通知機能を使用するときに考慮する必要のある主な変更点について説明します。
+</p>
+
+<h2 id="direct">ダイレクト リプライ</h2>
+
+<p>Android N のダイレクト リプライ機能を使用すると、ユーザーは、テキスト メッセージにすばやく応答したり、通知インターフェース内でタスクリストを直接アップデートしたりできます。
+
+ハンドヘルド デバイスでは、インライン リプライ アクションが、通知にアタッチされた追加ボタンとして表示されます。
+ユーザーがキーボード経由で返信する場合、通知アクション向けに指定したインテントにテキストによる応答がアタッチされ、そのインテントがハンドヘルド デバイス用アプリに送信されます。
+
+
+
+
+
+<img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
+  {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
+<p class="img-caption">
+  <strong>図 1.</strong> Android N に追加された [<strong>Reply</strong>] アクション ボタン。
+
+</p>
+
+<h3>インライン リプライ アクションを追加する</h3>
+
+<p>ダイレクト リプライをサポートする通知アクションを作成する方法は次のとおりです。
+</p>
+
+<ol>
+<li>通知アクションに追加できる {@link android.support.v4.app.RemoteInput.Builder} のインスタンスを作成します。
+
+このクラスのコンストラクタは、システムがテキスト入力のキーとして使用する文字列を受け取ります。
+その後、ハンドヘルド デバイス用アプリはそのキーを使用して、入力テキストを取得します。
+
+
+<pre>
+// Key for the string that's delivered in the action's intent.
+private static final String KEY_TEXT_REPLY = "key_text_reply";
+String replyLabel = getResources().getString(R.string.reply_label);
+RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+        .setLabel(replyLabel)
+        .build();
+</pre>
+</li>
+<li> <code>addRemoteInput()</code> を使用して、{@link android.support.v4.app.RemoteInput} オブジェクトをアクションにアタッチします。
+
+
+<pre>
+// Create the reply action and add the remote input.
+Notification.Action action =
+        new Notification.Action.Builder(R.drawable.ic_reply_icon,
+                getString(R.string.label), replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build();
+</pre>
+</li>
+
+<li>アクションを通知に適用し、通知を発行します。
+
+<pre>
+// Build the notification and add the action.
+Notification newMessageNotification =
+        new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentTitle(getString(R.string.title))
+                .setContentText(getString(R.string.content))
+                .addAction(action))
+                .build();
+
+// Issue the notification.
+NotificationManager notificationManager =
+        NotificationManager.from(mContext);
+notificationManager.notify(notificationId, newMessageNotification);
+
+</pre>
+</li>
+
+</ol>
+
+
+<p> ユーザーが通知アクションをトリガーすると、ユーザーは応答を入力するよう求められます。
+ </p>
+
+<img id="fig-user-input" src="{@docRoot}preview/images/inline-type-reply.png" srcset="{@docRoot}preview/images/inline-type-reply.png 1x,
+    {@docRoot}preview/images/inline-type-reply_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>図 2.</strong> ユーザーは通知シェードでテキスト メッセージを入力できます。
+</p>
+
+<h3>
+  インライン リプライからユーザー入力を取得する
+</h3>
+
+<p>
+  リプライ アクションのインテントで宣言したアクティビティで、通知インターフェースからのユーザー入力を取得する方法は次のとおりです。
+
+</p>
+
+<ol>
+  <li>通知アクションのインテントを入力パラメータとして渡すことにより、{@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  getResultsFromIntent()} を呼び出します。
+このメソッドは、テキストによる応答が含まれた {@link android.os.Bundle} を返します。
+
+
+    <pre>
+Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+</pre>
+  </li>
+
+  <li>result キー（{@link
+  android.support.v4.app.RemoteInput.Builder} コンストラクタに提供されている）を使用して、バンドルへのクエリを実行します。次のコード スニペットに示すようにメソッドを作成することにより、このプロセスを完了して入力テキストを取得できます。
+
+
+
+    <pre>
+// Obtain the intent that started this activity by calling
+// Activity.getIntent() and pass it into this method to
+// get the associated string.
+
+private CharSequence getMessageText(Intent intent) {
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
+    return null;
+ }
+</pre>
+  </li>
+
+  <li>以前の通知に指定したのと同じ通知 ID を使用して、別の通知をビルドして発行します。
+進捗インジケーターが通知インターフェースに表示されなくなり、リプライが正常に行われたことがわかります。
+
+この新しい通知で作業するときは、レシーバーの {@code onReceive()} メソッドに渡されるコンテキストを使用します。
+
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  チャットなどのインタラクティブなアプリでは、取得されたテキストを処理するときに、追加のコンテキストを含めると役立つ場合があります。
+たとえば、このようなアプリでは複数行のチャット履歴が表示されることがあります。
+{@link
+  android.support.v4.app.RemoteInput} を介してユーザーが応答した場合、{@code setRemoteInputHistory()} メソッドを使用してリプライ履歴を更新できます。
+
+</p>
+
+<p>
+  アプリがリモート入力を受け取った後、通知は更新またはキャンセルされる必要があります。
+ユーザーがダイレクト リプライを使用してリモート更新にリプライする場合は、通知をキャンセルしないでください。
+
+代わりに、通知を更新してユーザーのリプライを表示します。{@code MessagingStyle} を使用した通知の場合は、リプライを最新のメッセージとして追加する必要があります。
+
+他のテンプレートを使用する場合は、ユーザーのリプライをリモート入力履歴に追加できます。
+
+</p>
+
+<h2 id="bundle">バンドル通知</h2>
+
+<p>Android N は、通知のキューを表す新しい方法である
+ <i>バンドル通知</i>をデベロッパーに提供します。この機能は、Android Wear の<a href="{@docRoot}training/wearables/notifications/stacks.html">通知スタック</a>機能に似ています。
+
+たとえば、受信したメッセージの通知をアプリで作成する場合、複数のメッセージが受信されると、通知が単一のグループにバンドルされます。
+
+既存の {@link android.support.v4.app.NotificationCompat.Builder#setGroup
+Builder.setGroup()} メソッドを使用して、同様の通知をバンドルできます。
+</p>
+
+<p>
+  通知グループでは、通知グループを構成する通知が階層化されます。
+  この階層の最上位には、そのグループの概要情報を表示する親通知があります。
+ユーザーは通知グループを順次展開できます。ユーザーが階層を深くたどると、より多くの情報が表示されます。
+
+ユーザーがバンドルを展開すると、すべての子通知の詳細情報が表示されます。ユーザーがいずれかの通知を展開すると、そのコンテンツがすべて表示されます。
+
+
+</p>
+
+<img id="fig-bundles" src="{@docRoot}preview/images/bundles.png" srcset="{@docRoot}preview/images/bundles.png 1x,
+          {@docRoot}preview/images/bundles_2x.png 2x" width="300">
+<p class="img-caption">
+  <strong>図 3.</strong> ユーザーは通知グループを順次展開できます。
+
+</p>
+
+<p class="note">
+  <strong>注:</strong>同じアプリが 4 つ以上の通知を送信するときにグループ化が指定されていない場合、システムにより自動的に通知がグループ化されます。
+
+
+</p>
+
+<p>通知をグループに追加する方法については、<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">各通知をグループに追加する</a>をご覧ください。
+
+</p>
+
+
+<h3 id="best-practices">バンドル通知のベストプラクティス</h3>
+<p>このセクションでは、前のバージョンの Android プラットフォームで利用可能な {@link android.app.Notification.InboxStyle InboxStyle} 通知の代わりに、通知グループを使用する必要がある状況についてのガイドラインを提供します。
+
+
+</p>
+
+<h3>バンドル通知を使用するとき</h3>
+
+<p>ユースケースで次のすべての条件が満たされた場合にのみ通知グループを使用する必要があります。
+</p>
+
+<ul>
+  <li>子通知が完全な通知であり、グループの概要なしに、子通知を個別に表示できる。
+</li>
+  <li>子通知を個別に表示するメリットがある。次に例を示します。
+
+  </li>
+  <ul>
+    <li>子通知がアクション可能であり、各子通知に固有のアクションがある。</li>
+    <li>ユーザーが読みたい多くの情報が子通知にある。</li>
+  </ul>
+</ul>
+
+<p>通知グループの適切なユースケースの例には、着信メッセージのリストを表示するメッセージング アプリや受信したメールのリストを表示するメールアプリなどが含まれます。
+
+</p>
+
+<p>
+単一の通知が望ましいユースケースの例には、1 人のユーザーからの個別メッセージや、1 行のテキスト メッセージ アイテムのリスト表示が含まれます。
+
+このリスト表示を行うには、
+{@link android.app.Notification.InboxStyle InboxStyle} または {@link android.app.Notification.BigTextStyle BigTextStyle} を使用します。
+
+
+</p>
+
+<h3 id ="post">バンドル通知を表示する</h3>
+
+<p>
+  アプリは、グループに単一の子通知が含まれている場合でも、グループの概要を常に送信する必要があります。
+グループに単一の通知のみが含まれている場合、システムによって、概要の表示が非表示になり、子通知が直接表示されます。
+これにより、ユーザーがグループの子通知をスワイプして消すときに一貫した使用感が出ます。
+
+
+</p>
+
+<p class="note">
+  <strong>注:</strong>このバージョンの Android N では、単一の子通知が含まれる通知グループの概要を非表示にできません。
+この機能は、将来のバージョンの Android N に追加されます。
+
+</p>
+
+<h3>通知をピークする</h3>
+
+<p>通常、子通知はグループとして表示されますが、子通知を<a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">ヘッドアップ通知</a>として一時的に表示するように設定できます。
+
+
+この機能は、特に最新の子通知とその関連するアクションへの即時アクセスを可能にするので便利です。
+
+</p>
+
+
+<h3>下位互換性</h3>
+
+<p>
+  Android 5.0（API レベル 21）以降では、Android Wear 端末をサポートするために、通知グループとリモート入力が {@link
+  android.app.Notification} API の一部になっています。
+これらの API を使用して通知を既に作成している場合は、アプリの動作が上記のガイドラインに適合していることの確認と、{@code
+  setRemoteInputHistory()} の実装検討のみを行ってください。
+
+
+</p>
+
+<p>
+  下位互換性をサポートするために、サポート ライブラリの {@link android.support.v4.app.NotificationCompat} クラスで同じ API が利用できるようになっているため、前の Android バージョンで機能する通知を作成できます。
+
+
+携帯端末とタブレットでは、概要通知のみがユーザーに表示されるため、アプリは、受信トレイスタイルやグループの全情報を表す同等の通知を引き続きサポートする必要があります。
+
+Android Wear 端末では、古いプラットフォーム レベル上にもすべての子通知が表示されるため、API レベルに関係なく、子通知を作成する必要があります。
+
+
+
+</p>
+
+<h2 id="custom"> カスタムビュー</h2>
+<p>Android N 以降では通知ビューをカスタマイズでき、通知ヘッダー、アクション、展開レイアウトなどのシステム デコレーションを引き続き取得できます。
+
+</p>
+
+<p>この機能を有効にするために、Android N には、カスタムビューにスタイルを適用する次の API が追加されています。
+</p>
+
+<dl>
+<dt>
+{@code DecoratedCustomViewStyle()}</dt>
+<dd> メディア通知以外の通知にスタイルを適用します。
+</dd>
+<dt>
+{@code DecoratedMediaCustomViewStyle()}</dt>
+<dd> メディア通知にスタイルを適用します。</dd>
+</dl>
+
+<p>この新しい API を使用するには、{@code setStyle()} メソッドを呼び出し、目的のカスタムビュー スタイルに渡します。
+</p>
+
+<p>次のコード スニペットは、
+{@code DecoratedCustomViewStyle()} メソッドでカスタム通知オブジェクトを作成する方法を示しています。</p>
+
+<pre>
+Notification notification = new Notification.Builder()
+           .setSmallIcon(R.drawable.ic_stat_player)
+           .setLargeIcon(albumArtBitmap))
+           .setCustomContentView(contentView);
+           .setStyle(new Notification.DecoratedCustomViewStyle())
+           .build();
+
+</pre>
+
+<h2 id="style">メッセージング スタイル</h2>
+<p>
+  Android N では、通知スタイルをカスタマイズするための新しい API が提供されます。
+  <code>MessageStyle</code> クラスを使用して、会話タイトル、追加メッセージ、通知のコンテンツ ビューなど、通知に表示される複数のラベルを変更できます。
+
+
+</p>
+
+<p>
+  次のコード スニペットは、<code>MessageStyle</code> クラスを使用して通知のスタイルをカスタマイズする方法を示しています。
+
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
+</pre>

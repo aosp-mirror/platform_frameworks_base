@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
@@ -31,6 +32,8 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_TRANSFORM;
@@ -715,6 +718,16 @@ public final class Display {
     }
 
     /**
+     * Returns the display's HDR capabilities.
+     */
+    public HdrCapabilities getHdrCapabilities() {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.hdrCapabilities;
+        }
+    }
+
+    /**
      * Gets the supported color transforms of this device.
      * @hide
      */
@@ -762,14 +775,23 @@ public final class Display {
 
     /**
      * Gets display metrics that describe the size and density of this display.
-     * <p>
-     * The size is adjusted based on the current rotation of the display.
-     * </p><p>
      * The size returned by this method does not necessarily represent the
-     * actual raw size (native resolution) of the display.  The returned size may
-     * be adjusted to exclude certain system decor elements that are always visible.
-     * It may also be scaled to provide compatibility with older applications that
+     * actual raw size (native resolution) of the display.
+     * <p>
+     * 1. The returned size may be adjusted to exclude certain system decor elements
+     * that are always visible.
+     * </p><p>
+     * 2. It may be scaled to provide compatibility with older applications that
      * were originally designed for smaller displays.
+     * </p><p>
+     * 3. It can be different depending on the WindowManager to which the display belongs.
+     * <pre>
+     * - If requested from non-Activity context (e.g. Application context via
+     * {@code (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE)})
+     * metrics will report real size of the display based on current rotation.
+     * - If requested from activity resulting metrics will correspond to current window metrics.
+     * In this case the size can be smaller than physical size in multi-window mode.
+     * </pre>
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
@@ -807,7 +829,7 @@ public final class Display {
      * The size is adjusted based on the current rotation of the display.
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
-     * window manager is emulating a smaller display (using adb shell am display-size).
+     * window manager is emulating a smaller display (using adb shell wm size).
      * </p>
      *
      * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
@@ -816,8 +838,7 @@ public final class Display {
         synchronized (this) {
             updateDisplayInfoLocked();
             mDisplayInfo.getLogicalMetrics(outMetrics,
-                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
-                    mDisplayAdjustments.getConfiguration());
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
     }
 
@@ -1101,6 +1122,134 @@ public final class Display {
                 return new Mode[size];
             }
         };
+    }
+
+    /**
+     * Encapsulates the HDR capabilities of a given display.
+     * For example, what HDR types it supports and details about the desired luminance data.
+     * <p>You can get an instance for a given {@link Display} object with
+     * {@link Display#getHdrCapabilities getHdrCapabilities()}.
+     */
+    public static final class HdrCapabilities implements Parcelable {
+        /**
+         * Invalid luminance value.
+         */
+        public static final float INVALID_LUMINANCE = -1;
+        /**
+         * Dolby Vision high dynamic range (HDR) display.
+         */
+        public static final int HDR_TYPE_DOLBY_VISION = 1;
+        /**
+         * HDR10 display.
+         */
+        public static final int HDR_TYPE_HDR10 = 2;
+        /**
+         * Hybrid Log-Gamma HDR display.
+         */
+        public static final int HDR_TYPE_HLG = 3;
+
+        /** @hide */
+        @IntDef({
+            HDR_TYPE_DOLBY_VISION,
+            HDR_TYPE_HDR10,
+            HDR_TYPE_HLG,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HdrType {}
+
+        private @HdrType int[] mSupportedHdrTypes = new int[0];
+        private float mMaxLuminance = INVALID_LUMINANCE;
+        private float mMaxAverageLuminance = INVALID_LUMINANCE;
+        private float mMinLuminance = INVALID_LUMINANCE;
+
+        /**
+         * @hide
+         */
+        public HdrCapabilities() {
+        }
+
+        /**
+         * @hide
+         */
+        public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
+                float maxAverageLuminance, float minLuminance) {
+            mSupportedHdrTypes = supportedHdrTypes;
+            mMaxLuminance = maxLuminance;
+            mMaxAverageLuminance = maxAverageLuminance;
+            mMinLuminance = minLuminance;
+        }
+
+        /**
+         * Gets the supported HDR types of this display.
+         * Returns empty array if HDR is not supported by the display.
+         */
+        public @HdrType int[] getSupportedHdrTypes() {
+            return mSupportedHdrTypes;
+        }
+        /**
+         * Returns the desired content max luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMaxLuminance() {
+            return mMaxLuminance;
+        }
+        /**
+         * Returns the desired content max frame-average luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMaxAverageLuminance() {
+            return mMaxAverageLuminance;
+        }
+        /**
+         * Returns the desired content min luminance data in cd/m2 for this display.
+         */
+        public float getDesiredMinLuminance() {
+            return mMinLuminance;
+        }
+
+        public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
+            @Override
+            public HdrCapabilities createFromParcel(Parcel source) {
+                return new HdrCapabilities(source);
+            }
+
+            @Override
+            public HdrCapabilities[] newArray(int size) {
+                return new HdrCapabilities[size];
+            }
+        };
+
+        private HdrCapabilities(Parcel source) {
+            readFromParcel(source);
+        }
+
+        /**
+         * @hide
+         */
+        public void readFromParcel(Parcel source) {
+            int types = source.readInt();
+            mSupportedHdrTypes = new int[types];
+            for (int i = 0; i < types; ++i) {
+                mSupportedHdrTypes[i] = source.readInt();
+            }
+            mMaxLuminance = source.readFloat();
+            mMaxAverageLuminance = source.readFloat();
+            mMinLuminance = source.readFloat();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mSupportedHdrTypes.length);
+            for (int i = 0; i < mSupportedHdrTypes.length; ++i) {
+                dest.writeInt(mSupportedHdrTypes[i]);
+            }
+            dest.writeFloat(mMaxLuminance);
+            dest.writeFloat(mMaxAverageLuminance);
+            dest.writeFloat(mMinLuminance);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
     }
 
     /**

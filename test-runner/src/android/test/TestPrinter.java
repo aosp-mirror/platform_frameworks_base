@@ -30,9 +30,10 @@ import java.util.Set;
  * probably will not need to create or extend this class or call its methods manually.
  * See the full {@link android.test} package description for information about
  * getting test results.
- * 
+ *
  * {@hide} Not needed for 1.0 SDK.
  */
+@Deprecated
 public class TestPrinter implements TestRunner.Listener, TestListener {
 
     private String mTag;
@@ -89,7 +90,7 @@ public class TestPrinter implements TestRunner.Listener, TestListener {
         mFailedTests.add(test.toString());
         failed(test.toString(), t);
     }
-    
+
     public void addError(Test test, Throwable t) {
         failed(test, t);
     }

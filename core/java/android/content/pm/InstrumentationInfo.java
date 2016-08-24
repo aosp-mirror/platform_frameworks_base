@@ -57,17 +57,20 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
     public String[] splitPublicSourceDirs;
 
     /**
-     * Full path to a directory assigned to the package for its persistent
-     * data.
+     * Full path to a directory assigned to the package for its persistent data.
      */
     public String dataDir;
 
-    /**
-     * Full path to the directory where the native JNI libraries are stored.
-     * 
-     * {@hide}
-     */
+    /** {@hide} */
+    public String deviceProtectedDataDir;
+    /** {@hide} */
+    public String credentialProtectedDataDir;
+
+    /** {@hide} Full path to the directory containing primary ABI native libraries. */
     public String nativeLibraryDir;
+
+    /** {@hide} Full path to the directory containing secondary ABI native libraries. */
+    public String secondaryNativeLibraryDir;
 
     /**
      * Specifies whether or not this instrumentation will handle profiling.
@@ -85,8 +88,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         targetPackage = orig.targetPackage;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
+        splitSourceDirs = orig.splitSourceDirs;
+        splitPublicSourceDirs = orig.splitPublicSourceDirs;
         dataDir = orig.dataDir;
+        deviceProtectedDataDir = orig.deviceProtectedDataDir;
+        credentialProtectedDataDir = orig.credentialProtectedDataDir;
         nativeLibraryDir = orig.nativeLibraryDir;
+        secondaryNativeLibraryDir = orig.secondaryNativeLibraryDir;
         handleProfiling = orig.handleProfiling;
         functionalTest = orig.functionalTest;
     }
@@ -106,8 +114,13 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(targetPackage);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
+        dest.writeStringArray(splitSourceDirs);
+        dest.writeStringArray(splitPublicSourceDirs);
         dest.writeString(dataDir);
+        dest.writeString(deviceProtectedDataDir);
+        dest.writeString(credentialProtectedDataDir);
         dest.writeString(nativeLibraryDir);
+        dest.writeString(secondaryNativeLibraryDir);
         dest.writeInt((handleProfiling == false) ? 0 : 1);
         dest.writeInt((functionalTest == false) ? 0 : 1);
     }
@@ -127,9 +140,28 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         targetPackage = source.readString();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
+        splitSourceDirs = source.readStringArray();
+        splitPublicSourceDirs = source.readStringArray();
         dataDir = source.readString();
+        deviceProtectedDataDir = source.readString();
+        credentialProtectedDataDir = source.readString();
         nativeLibraryDir = source.readString();
+        secondaryNativeLibraryDir = source.readString();
         handleProfiling = source.readInt() != 0;
         functionalTest = source.readInt() != 0;
+    }
+
+    /** {@hide} */
+    public void copyTo(ApplicationInfo ai) {
+        ai.packageName = packageName;
+        ai.sourceDir = sourceDir;
+        ai.publicSourceDir = publicSourceDir;
+        ai.splitSourceDirs = splitSourceDirs;
+        ai.splitPublicSourceDirs = splitPublicSourceDirs;
+        ai.dataDir = dataDir;
+        ai.deviceProtectedDataDir = deviceProtectedDataDir;
+        ai.credentialProtectedDataDir = credentialProtectedDataDir;
+        ai.nativeLibraryDir = nativeLibraryDir;
+        ai.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
     }
 }

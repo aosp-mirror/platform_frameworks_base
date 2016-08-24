@@ -16,9 +16,15 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 
+import android.provider.Settings;
+import android.widget.Switch;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -27,14 +33,18 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mPortraitToAuto
-            = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation,
+            R.drawable.ic_portrait_from_auto_rotate);
     private final AnimationIcon mAutoToPortrait
-            = new AnimationIcon(R.drawable.ic_portrait_from_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_portrait_from_auto_rotate_animation,
+            R.drawable.ic_portrait_to_auto_rotate);
 
     private final AnimationIcon mLandscapeToAuto
-            = new AnimationIcon(R.drawable.ic_landscape_to_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_landscape_to_auto_rotate_animation,
+            R.drawable.ic_landscape_from_auto_rotate);
     private final AnimationIcon mAutoToLandscape
-            = new AnimationIcon(R.drawable.ic_landscape_from_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_landscape_from_auto_rotate_animation,
+            R.drawable.ic_landscape_to_auto_rotate);
 
     private final RotationLockController mController;
 
@@ -44,7 +54,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected BooleanState newTileState() {
+    public BooleanState newTileState() {
         return new BooleanState();
     }
 
@@ -58,50 +68,52 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
+    }
+
+    @Override
     protected void handleClick() {
         if (mController == null) return;
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         final boolean newState = !mState.value;
-        mController.setRotationLocked(newState);
-        refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
+        mController.setRotationLocked(!newState);
+        refreshState(newState);
+    }
+
+    @Override
+    public CharSequence getTileLabel() {
+        return getState().label;
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (mController == null) return;
-        final boolean rotationLocked = arg != null ? ((UserBoolean) arg).value
-                : mController.isRotationLocked();
-        final boolean userInitiated = arg != null ? ((UserBoolean) arg).userInitiated : false;
-        state.visible = mController.isRotationLockAffordanceVisible();
-        if (state.value == rotationLocked && state.contentDescription != null) {
-            // No change and initialized, no need to update all the values.
-            return;
-        }
-        state.value = rotationLocked;
-        final boolean portrait = isCurrentOrientationLockPortrait();
-        final AnimationIcon icon;
+        final boolean rotationLocked = mController.isRotationLocked();
+        // TODO: Handle accessibility rotation lock and whatnot.
+
+        state.value = !rotationLocked;
+        final boolean portrait = isCurrentOrientationLockPortrait(mController, mContext);
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
                     : R.string.quick_settings_rotation_locked_landscape_label;
             state.label = mContext.getString(label);
-            icon = portrait ? mAutoToPortrait : mAutoToLandscape;
+            state.icon = portrait ? mAutoToPortrait : mAutoToLandscape;
         } else {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-            icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
+            state.icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
         }
-        icon.setAllowAnimation(userInitiated);
-        state.icon = icon;
-        state.contentDescription = getAccessibilityString(rotationLocked,
-                R.string.accessibility_rotation_lock_on_portrait,
-                R.string.accessibility_rotation_lock_on_landscape,
-                R.string.accessibility_rotation_lock_off);
+        state.contentDescription = getAccessibilityString(rotationLocked);
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
-    private boolean isCurrentOrientationLockPortrait() {
-        int lockOrientation = mController.getRotationLockOrientation();
+    public static boolean isCurrentOrientationLockPortrait(RotationLockController controller,
+            Context context) {
+        int lockOrientation = controller.getRotationLockOrientation();
         if (lockOrientation == Configuration.ORIENTATION_UNDEFINED) {
             // Freely rotating device; use current rotation
-            return mContext.getResources().getConfiguration().orientation
+            return context.getResources().getConfiguration().orientation
                     != Configuration.ORIENTATION_LANDSCAPE;
         } else {
             return lockOrientation != Configuration.ORIENTATION_LANDSCAPE;
@@ -110,42 +122,38 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_ROTATIONLOCK;
+        return MetricsEvent.QS_ROTATIONLOCK;
     }
 
     /**
      * Get the correct accessibility string based on the state
      *
      * @param locked Whether or not rotation is locked.
-     * @param idWhenPortrait The id which should be used when locked in portrait.
-     * @param idWhenLandscape The id which should be used when locked in landscape.
-     * @param idWhenOff The id which should be used when the rotation lock is off.
-     * @return
      */
-    private String getAccessibilityString(boolean locked, int idWhenPortrait, int idWhenLandscape,
-            int idWhenOff) {
-        int stringID;
+    private String getAccessibilityString(boolean locked) {
         if (locked) {
-            stringID = isCurrentOrientationLockPortrait() ? idWhenPortrait: idWhenLandscape;
+            return mContext.getString(R.string.accessibility_quick_settings_rotation) + ","
+                    + mContext.getString(R.string.accessibility_quick_settings_rotation_value,
+                    isCurrentOrientationLockPortrait(mController, mContext)
+                            ? mContext.getString(
+                                    R.string.quick_settings_rotation_locked_portrait_label)
+                            : mContext.getString(
+                                    R.string.quick_settings_rotation_locked_landscape_label));
+
         } else {
-            stringID = idWhenOff;
+            return mContext.getString(R.string.accessibility_quick_settings_rotation);
         }
-        return mContext.getString(stringID);
     }
 
     @Override
     protected String composeChangeAnnouncement() {
-        return getAccessibilityString(mState.value,
-                R.string.accessibility_rotation_lock_on_portrait_changed,
-                R.string.accessibility_rotation_lock_on_landscape_changed,
-                R.string.accessibility_rotation_lock_off_changed);
+        return getAccessibilityString(mState.value);
     }
 
     private final RotationLockControllerCallback mCallback = new RotationLockControllerCallback() {
         @Override
         public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
-            refreshState(rotationLocked ? UserBoolean.BACKGROUND_TRUE
-                    : UserBoolean.BACKGROUND_FALSE);
+            refreshState(rotationLocked);
         }
     };
 }

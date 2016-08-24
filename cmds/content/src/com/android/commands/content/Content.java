@@ -184,7 +184,7 @@ public class Content {
 
         private InsertCommand parseInsertCommand() {
             Uri uri = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             ContentValues values = new ContentValues();
             for (String argument; (argument = mTokenizer.nextArg()) != null;) {
                 if (ARGUMENT_URI.equals(argument)) {
@@ -210,7 +210,7 @@ public class Content {
 
         private DeleteCommand parseDeleteCommand() {
             Uri uri = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             String where = null;
             for (String argument; (argument = mTokenizer.nextArg())!= null;) {
                 if (ARGUMENT_URI.equals(argument)) {
@@ -232,7 +232,7 @@ public class Content {
 
         private UpdateCommand parseUpdateCommand() {
             Uri uri = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             String where = null;
             ContentValues values = new ContentValues();
             for (String argument; (argument = mTokenizer.nextArg())!= null;) {
@@ -261,7 +261,7 @@ public class Content {
 
         public CallCommand parseCallCommand() {
             String method = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             String arg = null;
             Uri uri = null;
             ContentValues values = new ContentValues();
@@ -293,7 +293,7 @@ public class Content {
 
         private ReadCommand parseReadCommand() {
             Uri uri = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             for (String argument; (argument = mTokenizer.nextArg())!= null;) {
                 if (ARGUMENT_URI.equals(argument)) {
                     uri = Uri.parse(argumentValueRequired(argument));
@@ -312,7 +312,7 @@ public class Content {
 
         public QueryCommand parseQueryCommand() {
             Uri uri = null;
-            int userId = UserHandle.USER_OWNER;
+            int userId = UserHandle.USER_SYSTEM;
             String[] projection = null;
             String sort = null;
             String where = null;

@@ -41,6 +41,22 @@ public final class ViewAnimationUtils {
      * As a result {@link AnimatorListener#onAnimationEnd(Animator)}
      * will occur after the animation has ended, but it may be delayed depending
      * on thread responsiveness.
+     * <p>
+     * Note that if any start delay is set on the reveal animator, the start radius
+     * will not be applied to the reveal circle until the start delay has passed.
+     * If it's desired to set a start radius on the reveal circle during the start
+     * delay, one workaround could be adding an animator with the same start and
+     * end radius. For example:
+     * <pre><code>
+     * public static Animator createRevealWithDelay(View view, int centerX, int centerY, float startRadius, float endRadius) {
+     *     Animator delayAnimator = ViewAnimationUtils.createCircularReveal(view, centerX, centerY, startRadius, startRadius);
+     *     delayAnimator.setDuration(delayTimeMS);
+     *     Animator revealAnimator = ViewAnimationUtils.createCircularReveal(view, centerX, centerY, startRadius, endRadius);
+     *     AnimatorSet set = new AnimatorSet();
+     *     set.playSequentially(delayAnimator, revealAnimator);
+     *     return set;
+     * }
+     * </code></pre>
      *
      * @param view The View will be clipped to the animating circle.
      * @param centerX The x coordinate of the center of the animating circle, relative to

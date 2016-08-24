@@ -19,6 +19,9 @@ package android.content.res;
 import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
+import android.annotation.StyleableRes;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.Config;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
@@ -144,7 +147,7 @@ public class TypedArray {
      *         coerced to a string.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public CharSequence getText(int index) {
+    public CharSequence getText(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -181,7 +184,7 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
     @Nullable
-    public String getString(int index) {
+    public String getString(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -220,7 +223,7 @@ public class TypedArray {
      *         an immediate string value.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public String getNonResourceString(int index) {
+    public String getNonResourceString(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -251,7 +254,8 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
-    public String getNonConfigurationString(int index, int allowedChangingConfigs) {
+    public String getNonConfigurationString(@StyleableRes int index,
+            @Config int allowedChangingConfigs) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -259,7 +263,9 @@ public class TypedArray {
         index *= AssetManager.STYLE_NUM_ENTRIES;
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
-        if ((data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS]&~allowedChangingConfigs) != 0) {
+        final @Config int changingConfigs = ActivityInfo.activityInfoConfigNativeToJava(
+                data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
+        if ((changingConfigs & ~allowedChangingConfigs) != 0) {
             return null;
         }
         if (type == TypedValue.TYPE_NULL) {
@@ -295,7 +301,7 @@ public class TypedArray {
      *         not defined or could not be coerced to an integer.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public boolean getBoolean(int index, boolean defValue) {
+    public boolean getBoolean(@StyleableRes int index, boolean defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -334,7 +340,7 @@ public class TypedArray {
      *         not defined or could not be coerced to an integer.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public int getInt(int index, int defValue) {
+    public int getInt(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -371,7 +377,7 @@ public class TypedArray {
      *         not defined or could not be coerced to a float.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public float getFloat(int index, float defValue) {
+    public float getFloat(@StyleableRes int index, float defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -420,12 +426,14 @@ public class TypedArray {
      *         not an integer color or color state list.
      */
     @ColorInt
-    public int getColor(int index, @ColorInt int defValue) {
+    public int getColor(@StyleableRes int index, @ColorInt int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -443,13 +451,47 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to color: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to color: type=0x" + Integer.toHexString(type));
+    }
+
+    /**
+     * Retrieve the ComplexColor for the attribute at <var>index</var>.
+     * The value may be either a {@link android.content.res.ColorStateList} which can wrap a simple
+     * color value or a {@link android.content.res.GradientColor}
+     * <p>
+     * This method will return {@code null} if the attribute is not defined or
+     * is not an integer color, color state list or GradientColor.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return ComplexColor for the attribute, or {@code null} if not defined.
+     * @throws RuntimeException if the attribute if the TypedArray has already
+     *         been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer color, color state list or GradientColor.
+     * @hide
+     */
+    @Nullable
+    public ComplexColor getComplexColor(@StyleableRes int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        final TypedValue value = mValue;
+        if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
+            }
+            return mResources.loadComplexColor(value, value.resourceId, mTheme);
+        }
+        return null;
     }
 
     /**
@@ -471,7 +513,7 @@ public class TypedArray {
      *         not an integer color or color state list.
      */
     @Nullable
-    public ColorStateList getColorStateList(int index) {
+    public ColorStateList getColorStateList(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -502,12 +544,14 @@ public class TypedArray {
      * @throws UnsupportedOperationException if the attribute is defined but is
      *         not an integer.
      */
-    public int getInteger(int index, int defValue) {
+    public int getInteger(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -517,13 +561,13 @@ public class TypedArray {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to integer: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to integer: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -548,12 +592,14 @@ public class TypedArray {
      * @see #getDimensionPixelOffset
      * @see #getDimensionPixelSize
      */
-    public float getDimension(int index, float defValue) {
+    public float getDimension(@StyleableRes int index, float defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -563,13 +609,13 @@ public class TypedArray {
                     data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -595,12 +641,14 @@ public class TypedArray {
      * @see #getDimension
      * @see #getDimensionPixelSize
      */
-    public int getDimensionPixelOffset(int index, int defValue) {
+    public int getDimensionPixelOffset(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -610,13 +658,13 @@ public class TypedArray {
                     data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -643,12 +691,14 @@ public class TypedArray {
      * @see #getDimension
      * @see #getDimensionPixelOffset
      */
-    public int getDimensionPixelSize(int index, int defValue) {
+    public int getDimensionPixelSize(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -658,13 +708,13 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -685,12 +735,14 @@ public class TypedArray {
      * @throws UnsupportedOperationException if the attribute is defined but is
      *         not a dimension or integer (enum).
      */
-    public int getLayoutDimension(int index, String name) {
+    public int getLayoutDimension(@StyleableRes int index, String name) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type >= TypedValue.TYPE_FIRST_INT
@@ -701,9 +753,9 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
         throw new UnsupportedOperationException(getPositionDescription()
@@ -724,7 +776,7 @@ public class TypedArray {
      *         metric and truncated to integer pixels.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public int getLayoutDimension(int index, int defValue) {
+    public int getLayoutDimension(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -761,12 +813,14 @@ public class TypedArray {
      * @throws UnsupportedOperationException if the attribute is defined but is
      *         not a fraction.
      */
-    public float getFraction(int index, int base, int pbase, float defValue) {
+    public float getFraction(@StyleableRes int index, int base, int pbase, float defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -776,13 +830,13 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], base, pbase);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to fraction: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to fraction: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -801,7 +855,7 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
     @AnyRes
-    public int getResourceId(int index, int defValue) {
+    public int getResourceId(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -829,7 +883,7 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
-    public int getThemeAttributeId(int index, int defValue) {
+    public int getThemeAttributeId(@StyleableRes int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -856,7 +910,7 @@ public class TypedArray {
      *         not a color or drawable resource.
      */
     @Nullable
-    public Drawable getDrawable(int index) {
+    public Drawable getDrawable(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -887,7 +941,7 @@ public class TypedArray {
      *         defined.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public CharSequence[] getTextArray(int index) {
+    public CharSequence[] getTextArray(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -909,7 +963,7 @@ public class TypedArray {
      * @return {@code true} if the value was retrieved, false otherwise.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public boolean getValue(int index, TypedValue outValue) {
+    public boolean getValue(@StyleableRes int index, TypedValue outValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -925,7 +979,7 @@ public class TypedArray {
      * @return Attribute type.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public int getType(int index) {
+    public int getType(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -945,7 +999,7 @@ public class TypedArray {
      * @return True if the attribute has a value, false otherwise.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public boolean hasValue(int index) {
+    public boolean hasValue(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -966,7 +1020,7 @@ public class TypedArray {
      * @return True if the attribute has a value or is empty, false otherwise.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public boolean hasValueOrEmpty(int index) {
+    public boolean hasValueOrEmpty(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -990,7 +1044,7 @@ public class TypedArray {
      *         receive a TypedValue whose type is TYPE_NULL.)
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    public TypedValue peekValue(int index) {
+    public TypedValue peekValue(@StyleableRes int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -1107,12 +1161,12 @@ public class TypedArray {
      * @throws RuntimeException if the TypedArray has already been recycled.
      * @see android.content.pm.ActivityInfo
      */
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
-        int changingConfig = 0;
+        @Config int changingConfig = 0;
 
         final int[] data = mData;
         final int N = length();
@@ -1122,7 +1176,8 @@ public class TypedArray {
             if (type == TypedValue.TYPE_NULL) {
                 continue;
             }
-            changingConfig |= data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS];
+            changingConfig |= ActivityInfo.activityInfoConfigNativeToJava(
+                    data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
         }
         return changingConfig;
     }
@@ -1137,7 +1192,8 @@ public class TypedArray {
         outValue.data = data[index+AssetManager.STYLE_DATA];
         outValue.assetCookie = data[index+AssetManager.STYLE_ASSET_COOKIE];
         outValue.resourceId = data[index+AssetManager.STYLE_RESOURCE_ID];
-        outValue.changingConfigurations = data[index+AssetManager.STYLE_CHANGING_CONFIGURATIONS];
+        outValue.changingConfigurations = ActivityInfo.activityInfoConfigNativeToJava(
+                data[index + AssetManager.STYLE_CHANGING_CONFIGURATIONS]);
         outValue.density = data[index+AssetManager.STYLE_DENSITY];
         outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
         return true;
@@ -1158,8 +1214,8 @@ public class TypedArray {
 
     /*package*/ TypedArray(Resources resources, int[] data, int[] indices, int len) {
         mResources = resources;
-        mMetrics = mResources.mMetrics;
-        mAssets = mResources.mAssets;
+        mMetrics = mResources.getDisplayMetrics();
+        mAssets = mResources.getAssets();
         mData = data;
         mIndices = indices;
         mLength = len;

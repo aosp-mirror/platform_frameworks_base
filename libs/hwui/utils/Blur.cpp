@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <math.h>
 
 #include "Blur.h"
@@ -60,7 +58,9 @@ static float legacyConvertRadiusToSigma(float radius) {
     return radius > 0 ? 0.3f * radius + 0.6f : 0.0f;
 }
 
-void Blur::generateGaussianWeights(float* weights, int32_t radius) {
+void Blur::generateGaussianWeights(float* weights, float radius) {
+    int32_t intRadius = convertRadiusToInt(radius);
+
     // Compute gaussian weights for the blur
     // e is the euler's number
     static float e = 2.718281828459045f;
@@ -68,7 +68,7 @@ void Blur::generateGaussianWeights(float* weights, int32_t radius) {
     // g(x) = ( 1 / sqrt( 2 * pi ) * sigma) * e ^ ( -x^2 / 2 * sigma^2 )
     // x is of the form [-radius .. 0 .. radius]
     // and sigma varies with radius.
-    float sigma = legacyConvertRadiusToSigma((float) radius);
+    float sigma = legacyConvertRadiusToSigma(radius);
 
     // Now compute the coefficints
     // We will store some redundant values to save some math during
@@ -78,16 +78,16 @@ void Blur::generateGaussianWeights(float* weights, int32_t radius) {
     float coeff2 = - 1.0f / (2.0f * sigma * sigma);
 
     float normalizeFactor = 0.0f;
-    for (int32_t r = -radius; r <= radius; r ++) {
+    for (int32_t r = -intRadius; r <= intRadius; r ++) {
         float floatR = (float) r;
-        weights[r + radius] = coeff1 * pow(e, floatR * floatR * coeff2);
-        normalizeFactor += weights[r + radius];
+        weights[r + intRadius] = coeff1 * pow(e, floatR * floatR * coeff2);
+        normalizeFactor += weights[r + intRadius];
     }
 
     //Now we need to normalize the weights because all our coefficients need to add up to one
     normalizeFactor = 1.0f / normalizeFactor;
-    for (int32_t r = -radius; r <= radius; r ++) {
-        weights[r + radius] *= normalizeFactor;
+    for (int32_t r = -intRadius; r <= intRadius; r ++) {
+        weights[r + intRadius] *= normalizeFactor;
     }
 }
 

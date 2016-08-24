@@ -27,16 +27,16 @@ import android.os.OperationCanceledException;
  * changes while started, manages {@link CancellationSignal}, and caches
  * returned results.
  */
-public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
+public abstract class UriDerivativeLoader<Param, Res> extends AsyncTaskLoader<Res> {
     final ForceLoadContentObserver mObserver;
 
-    private final P mParam;
+    private final Param mParam;
 
-    private R mResult;
+    private Res mResult;
     private CancellationSignal mCancellationSignal;
 
     @Override
-    public final R loadInBackground() {
+    public final Res loadInBackground() {
         synchronized (this) {
             if (isLoadInBackgroundCanceled()) {
                 throw new OperationCanceledException();
@@ -52,7 +52,7 @@ public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
         }
     }
 
-    public abstract R loadInBackground(P param, CancellationSignal signal);
+    public abstract Res loadInBackground(Param param, CancellationSignal signal);
 
     @Override
     public void cancelLoadInBackground() {
@@ -66,12 +66,12 @@ public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
     }
 
     @Override
-    public void deliverResult(R result) {
+    public void deliverResult(Res result) {
         if (isReset()) {
             closeQuietly(result);
             return;
         }
-        R oldResult = mResult;
+        Res oldResult = mResult;
         mResult = result;
 
         if (isStarted()) {
@@ -83,7 +83,7 @@ public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
         }
     }
 
-    public UriDerivativeLoader(Context context, P param) {
+    public UriDerivativeLoader(Context context, Param param) {
         super(context);
         mObserver = new ForceLoadContentObserver();
         mParam = param;
@@ -105,7 +105,7 @@ public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
     }
 
     @Override
-    public void onCanceled(R result) {
+    public void onCanceled(Res result) {
         closeQuietly(result);
     }
 
@@ -122,7 +122,7 @@ public abstract class UriDerivativeLoader<P, R> extends AsyncTaskLoader<R> {
         getContext().getContentResolver().unregisterContentObserver(mObserver);
     }
 
-    private void closeQuietly(R result) {
+    private void closeQuietly(Res result) {
         if (result instanceof AutoCloseable) {
             try {
                 ((AutoCloseable) result).close();

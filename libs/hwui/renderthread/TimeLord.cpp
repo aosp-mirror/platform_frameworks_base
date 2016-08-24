@@ -43,10 +43,6 @@ nsecs_t TimeLord::computeFrameTimeNanos() {
     return mFrameTimeNanos;
 }
 
-nsecs_t TimeLord::computeFrameTimeMs() {
-    return nanoseconds_to_milliseconds(computeFrameTimeNanos());
-}
-
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

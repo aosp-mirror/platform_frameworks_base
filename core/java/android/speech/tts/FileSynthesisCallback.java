@@ -15,6 +15,7 @@
  */
 package android.speech.tts;
 
+import android.annotation.NonNull;
 import android.media.AudioFormat;
 import android.speech.tts.TextToSpeechService.UtteranceProgressDispatcher;
 import android.util.Log;
@@ -46,7 +47,6 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
     private FileChannel mFileChannel;
 
     private final UtteranceProgressDispatcher mDispatcher;
-    private final Object mCallerIdentity;
 
     private boolean mStarted = false;
     private boolean mDone = false;
@@ -54,12 +54,11 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
     /** Status code of synthesis */
     protected int mStatusCode;
 
-    FileSynthesisCallback(FileChannel fileChannel, UtteranceProgressDispatcher dispatcher,
-            Object callerIdentity, boolean clientIsUsingV2) {
+    FileSynthesisCallback(@NonNull FileChannel fileChannel,
+            @NonNull UtteranceProgressDispatcher dispatcher, boolean clientIsUsingV2) {
         super(clientIsUsingV2);
         mFileChannel = fileChannel;
         mDispatcher = dispatcher;
-        mCallerIdentity = callerIdentity;
         mStatusCode = TextToSpeech.SUCCESS;
     }
 
@@ -75,9 +74,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
 
             mStatusCode = TextToSpeech.STOPPED;
             cleanUp();
-            if (mDispatcher != null) {
-                mDispatcher.dispatchOnStop();
-            }
+            mDispatcher.dispatchOnStop();
         }
     }
 
@@ -107,6 +104,15 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             Log.d(TAG, "FileSynthesisRequest.start(" + sampleRateInHz + "," + audioFormat
                     + "," + channelCount + ")");
         }
+        if (audioFormat != AudioFormat.ENCODING_PCM_8BIT &&
+            audioFormat != AudioFormat.ENCODING_PCM_16BIT &&
+            audioFormat != AudioFormat.ENCODING_PCM_FLOAT) {
+            Log.e(TAG, "Audio format encoding " + audioFormat + " not supported. Please use one " +
+                       "of AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT or " +
+                       "AudioFormat.ENCODING_PCM_FLOAT");
+        }
+        mDispatcher.dispatchOnBeginSynthesis(sampleRateInHz, audioFormat, channelCount);
+
         FileChannel fileChannel = null;
         synchronized (mStateLock) {
             if (mStatusCode == TextToSpeech.STOPPED) {
@@ -126,9 +132,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             mAudioFormat = audioFormat;
             mChannelCount = channelCount;
 
-            if (mDispatcher != null) {
-                mDispatcher.dispatchOnStart();
-            }
+            mDispatcher.dispatchOnStart();
             fileChannel = mFileChannel;
         }
 
@@ -173,6 +177,10 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             fileChannel = mFileChannel;
         }
 
+        final byte[] bufferCopy = new byte[length];
+        System.arraycopy(buffer, offset, bufferCopy, 0, length);
+        mDispatcher.dispatchOnAudioAvailable(bufferCopy);
+
         try {
             fileChannel.write(ByteBuffer.wrap(buffer,  offset,  length));
             return TextToSpeech.SUCCESS;
@@ -206,8 +214,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return errorCodeOnStop();
             }
-            if (mDispatcher != null && mStatusCode != TextToSpeech.SUCCESS &&
-                    mStatusCode != TextToSpeech.STOPPED) {
+            if (mStatusCode != TextToSpeech.SUCCESS && mStatusCode != TextToSpeech.STOPPED) {
                 mDispatcher.dispatchOnError(mStatusCode);
                 return TextToSpeech.ERROR;
             }
@@ -231,9 +238,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
 
             synchronized (mStateLock) {
                 closeFile();
-                if (mDispatcher != null) {
-                    mDispatcher.dispatchOnSuccess();
-                }
+                mDispatcher.dispatchOnSuccess();
                 return TextToSpeech.SUCCESS;
             }
         } catch (IOException ex) {

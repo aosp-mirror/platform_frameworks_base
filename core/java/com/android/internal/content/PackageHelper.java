@@ -34,6 +34,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageResultCode;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -44,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -56,6 +58,7 @@ import java.util.zip.ZipOutputStream;
 public class PackageHelper {
     public static final int RECOMMEND_INSTALL_INTERNAL = 1;
     public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
+    public static final int RECOMMEND_INSTALL_EPHEMERAL = 3;
     public static final int RECOMMEND_FAILED_INSUFFICIENT_STORAGE = -1;
     public static final int RECOMMEND_FAILED_INVALID_APK = -2;
     public static final int RECOMMEND_FAILED_INVALID_LOCATION = -3;
@@ -345,6 +348,8 @@ public class PackageHelper {
      */
     public static String resolveInstallVolume(Context context, String packageName,
             int installLocation, long sizeBytes) throws IOException {
+        final boolean forceAllowOnExternal = Settings.Global.getInt(
+                context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
         // TODO: handle existing apps installed in ASEC; currently assumes
         // they'll end up back on internal storage
         ApplicationInfo existingInfo = null;
@@ -378,22 +383,31 @@ public class PackageHelper {
             installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         }
 
-        // If app expresses strong desire for internal space, honor it
-        if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+        // If app expresses strong desire for internal storage, honor it
+        if (!forceAllowOnExternal
+                && installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            if (existingInfo != null && !Objects.equals(existingInfo.volumeUuid,
+                    StorageManager.UUID_PRIVATE_INTERNAL)) {
+                throw new IOException("Cannot automatically move " + packageName + " from "
+                        + existingInfo.volumeUuid + " to internal storage");
+            }
             if (fitsOnInternal) {
-                return null;
+                return StorageManager.UUID_PRIVATE_INTERNAL;
             } else {
                 throw new IOException("Requested internal only, but not enough space");
             }
         }
 
-        // If app already exists somewhere, prefer to stay on that volume
+        // If app already exists somewhere, we must stay on that volume
         if (existingInfo != null) {
-            if (existingInfo.volumeUuid == null && fitsOnInternal) {
-                return null;
-            }
-            if (allCandidates.contains(existingInfo.volumeUuid)) {
+            if (Objects.equals(existingInfo.volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)
+                    && fitsOnInternal) {
+                return StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (allCandidates.contains(existingInfo.volumeUuid)) {
                 return existingInfo.volumeUuid;
+            } else {
+                throw new IOException("Not enough space on existing volume "
+                        + existingInfo.volumeUuid + " for " + packageName + " upgrade");
             }
         }
 
@@ -402,7 +416,7 @@ public class PackageHelper {
         if (bestCandidate != null) {
             return bestCandidate.fsUuid;
         } else if (fitsOnInternal) {
-            return null;
+            return StorageManager.UUID_PRIVATE_INTERNAL;
         } else {
             throw new IOException("No special requests, but no room anywhere");
         }
@@ -437,7 +451,12 @@ public class PackageHelper {
 
         final int prefer;
         final boolean checkBoth;
-        if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+        boolean ephemeral = false;
+        if ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            ephemeral = true;
+            checkBoth = false;
+        } else if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
             prefer = RECOMMEND_INSTALL_INTERNAL;
             checkBoth = false;
         } else if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
@@ -478,8 +497,12 @@ public class PackageHelper {
         }
 
         if (prefer == RECOMMEND_INSTALL_INTERNAL) {
+            // The ephemeral case will either fit and return EPHEMERAL, or will not fit
+            // and will fall through to return INSUFFICIENT_STORAGE
             if (fitsOnInternal) {
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                return (ephemeral)
+                        ? PackageHelper.RECOMMEND_INSTALL_EPHEMERAL
+                        : PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
         } else if (prefer == RECOMMEND_INSTALL_EXTERNAL) {
             if (fitsOnExternal) {

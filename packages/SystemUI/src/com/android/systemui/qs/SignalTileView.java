@@ -27,7 +27,7 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.SignalState;
 
 /** View that represents a custom quick settings tile for displaying signal info (wifi/cell). **/
-public final class SignalTileView extends QSTileView {
+public final class SignalTileView extends QSIconView {
     private static final long DEFAULT_DURATION = new ValueAnimator().getDuration();
     private static final long SHORT_DURATION = DEFAULT_DURATION / 3;
 
@@ -83,6 +83,11 @@ public final class SignalTileView extends QSTileView {
         layoutIndicator(mOut);
     }
 
+    @Override
+    protected int getIconMeasureMode() {
+        return MeasureSpec.AT_MOST;
+    }
+
     private void layoutIndicator(View indicator) {
         boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
         int left, right;
@@ -101,8 +106,7 @@ public final class SignalTileView extends QSTileView {
     }
 
     @Override
-    protected void handleStateChanged(QSTile.State state) {
-        super.handleStateChanged(state);
+    public void setIcon(QSTile.State state) {
         final SignalState s = (SignalState) state;
         setIcon(mSignal, s);
         if (s.overlayIconId > 0) {

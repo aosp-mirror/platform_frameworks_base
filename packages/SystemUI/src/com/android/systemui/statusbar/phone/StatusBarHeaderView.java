@@ -39,15 +39,16 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
+import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tuner.TunerService;
@@ -57,7 +58,7 @@ import java.text.NumberFormat;
 /**
  * The view to manage the header area in the expanded status bar.
  */
-public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
+public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnClickListener,
         BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
         EmergencyListener {
 
@@ -127,6 +128,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private float mCurrentT;
     private boolean mShowingDetail;
     private boolean mDetailTransitioning;
+
+    private boolean mAllowExpand = true;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -290,7 +293,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public int getExpandedHeight() {
-        return mExpandedHeight;
+        return mAllowExpand ? mExpandedHeight : mCollapsedHeight;
     }
 
     public void setListening(boolean listening) {
@@ -302,6 +305,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setExpanded(boolean expanded) {
+        if (!mAllowExpand) {
+            expanded = false;
+        }
         boolean changed = expanded != mExpanded;
         mExpanded = expanded;
         if (changed) {
@@ -414,7 +420,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     @Override
-    public void onPowerSaveChanged() {
+    public void onPowerSaveChanged(boolean isPowerSave) {
         // could not care less
     }
 
@@ -503,6 +509,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 mMultiUserAvatar.setImageDrawable(picture);
             }
         });
+    }
+
+    @Override
+    public void setCallback(Callback qsPanelCallback) {
     }
 
     @Override
@@ -737,7 +747,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
 
         @Override
-        public void onShowingDetail(final QSTile.DetailAdapter detail) {
+        public void onShowingDetail(final DetailAdapter detail, int x, int y) {
             mDetailTransitioning = true;
             post(new Runnable() {
                 @Override

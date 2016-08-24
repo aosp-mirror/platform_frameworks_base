@@ -16,30 +16,56 @@
 
 package android.text.style;
 
+import com.android.internal.util.Preconditions;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Paint;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
+
 import java.util.Locale;
 
 /**
  * Changes the {@link Locale} of the text to which the span is attached.
  */
 public class LocaleSpan extends MetricAffectingSpan implements ParcelableSpan {
-    private final Locale mLocale;
+    @NonNull
+    private final LocaleList mLocales;
 
     /**
-     * Creates a LocaleSpan.
-     * @param locale The {@link Locale} of the text to which the span is
-     * attached.
+     * Creates a {@link LocaleSpan} from a well-formed {@link Locale}.  Note that only
+     * {@link Locale} objects that can be created by {@link Locale#forLanguageTag(String)} are
+     * supported.
+     *
+     * <p><b>Caveat:</b> Do not specify any {@link Locale} object that cannot be created by
+     * {@link Locale#forLanguageTag(String)}.  {@code new Locale(" a ", " b c", " d")} is an
+     * example of such a malformed {@link Locale} object.</p>
+     *
+     * @param locale The {@link Locale} of the text to which the span is attached.
+     *
+     * @see #LocaleSpan(LocaleList)
      */
-    public LocaleSpan(Locale locale) {
-        mLocale = locale;
+    public LocaleSpan(@Nullable Locale locale) {
+        mLocales = locale == null ? LocaleList.getEmptyLocaleList() : new LocaleList(locale);
     }
 
-    public LocaleSpan(Parcel src) {
-        mLocale = new Locale(src.readString(), src.readString(), src.readString());
+    /**
+     * Creates a {@link LocaleSpan} from {@link LocaleList}.
+     *
+     * @param locales The {@link LocaleList} of the text to which the span is attached.
+     * @throws NullPointerException if {@code locales} is null
+     */
+    public LocaleSpan(@NonNull LocaleList locales) {
+        Preconditions.checkNotNull(locales, "locales cannot be null");
+        mLocales = locales;
+    }
+
+    public LocaleSpan(Parcel source) {
+        mLocales = LocaleList.CREATOR.createFromParcel(source);
     }
 
     @Override
@@ -64,31 +90,40 @@ public class LocaleSpan extends MetricAffectingSpan implements ParcelableSpan {
 
     /** @hide */
     public void writeToParcelInternal(Parcel dest, int flags) {
-        dest.writeString(mLocale.getLanguage());
-        dest.writeString(mLocale.getCountry());
-        dest.writeString(mLocale.getVariant());
+        mLocales.writeToParcel(dest, flags);
     }
 
     /**
-     * Returns the {@link Locale}.
+     * @return The {@link Locale} for this span.  If multiple locales are associated with this
+     * span, only the first locale is returned.  {@code null} if no {@link Locale} is specified.
      *
-     * @return The {@link Locale} for this span.
+     * @see LocaleList#get()
+     * @see #getLocales()
      */
+    @Nullable
     public Locale getLocale() {
-        return mLocale;
+        return mLocales.get(0);
+    }
+
+    /**
+     * @return The entire list of locales that are associated with this span.
+     */
+    @NonNull
+    public LocaleList getLocales() {
+        return mLocales;
     }
 
     @Override
     public void updateDrawState(TextPaint ds) {
-        apply(ds, mLocale);
+        apply(ds, mLocales);
     }
 
     @Override
     public void updateMeasureState(TextPaint paint) {
-        apply(paint, mLocale);
+        apply(paint, mLocales);
     }
 
-    private static void apply(Paint paint, Locale locale) {
-        paint.setTextLocale(locale);
+    private static void apply(@NonNull Paint paint, @NonNull LocaleList locales) {
+        paint.setTextLocales(locales);
     }
 }

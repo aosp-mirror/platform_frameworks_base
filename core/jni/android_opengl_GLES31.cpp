@@ -714,22 +714,18 @@ android_glGetProgramResourceiv__IIII_3III_3II_3II
         _env->GetIntArrayElements(props_ref, (jboolean *)0);
     props = props_base + propsOffset;
 
-    if (!length_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "length == null";
-        goto exit;
+    if (length_ref) {
+        if (lengthOffset < 0) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "lengthOffset < 0";
+            goto exit;
+        }
+        _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
+        length_base = (GLsizei *)
+            _env->GetIntArrayElements(length_ref, (jboolean *)0);
+        length = length_base + lengthOffset;
     }
-    if (lengthOffset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "lengthOffset < 0";
-        goto exit;
-    }
-    _lengthRemaining = _env->GetArrayLength(length_ref) - lengthOffset;
-    length_base = (GLsizei *)
-        _env->GetIntArrayElements(length_ref, (jboolean *)0);
-    length = length_base + lengthOffset;
 
     if (!params_ref) {
         _exception = 1;
@@ -795,13 +791,15 @@ android_glGetProgramResourceiv__IIIILjava_nio_IntBuffer_2ILjava_nio_IntBuffer_2L
     GLint *params = (GLint *) 0;
 
     props = (GLenum *)getPointer(_env, props_buf, (jarray*)&_propsArray, &_propsRemaining, &_propsBufferOffset);
-    length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    if (length_buf) {
+        length = (GLsizei *)getPointer(_env, length_buf, (jarray*)&_lengthArray, &_lengthRemaining, &_lengthBufferOffset);
+    }
     params = (GLint *)getPointer(_env, params_buf, (jarray*)&_paramsArray, &_paramsRemaining, &_paramsBufferOffset);
     if (props == NULL) {
         char * _propsBase = (char *)_env->GetIntArrayElements(_propsArray, (jboolean *) 0);
         props = (GLenum *) (_propsBase + _propsBufferOffset);
     }
-    if (length == NULL) {
+    if (length_buf && length == NULL) {
         char * _lengthBase = (char *)_env->GetIntArrayElements(_lengthArray, (jboolean *) 0);
         length = (GLsizei *) (_lengthBase + _lengthBufferOffset);
     }
@@ -890,9 +888,69 @@ android_glActiveShaderProgram__II
 static jint
 android_glCreateShaderProgramv
   (JNIEnv *_env, jobject _this, jint type, jobjectArray strings) {
+    jint _exception = 0;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
+    GLsizei _count;
+    const GLchar** _strings = NULL;
+    jstring* _jstrings = NULL;
+    GLuint _returnValue = 0;
 
-    jniThrowException(_env, "java/lang/UnsupportedOperationException", "not yet implemented");
-    return 0;
+    if (!strings) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "strings == null";
+        goto exit;
+    }
+
+    _count = _env->GetArrayLength(strings);
+
+    _strings = (const GLchar**) calloc(_count, sizeof(const GLchar*));
+    if (!_strings) {
+        _exception = 1;
+        _exceptionType = "java/lang/OutOfMemoryError";
+        _exceptionMessage = "out of memory";
+        goto exit;
+    }
+
+    _jstrings = (jstring*) calloc(_count, sizeof(jstring));
+    if (!_jstrings) {
+        _exception = 1;
+        _exceptionType = "java/lang/OutOfMemoryError";
+        _exceptionMessage = "out of memory";
+        goto exit;
+    }
+
+    for(int i = 0; i < _count; i++) {
+        _jstrings[i] = (jstring) _env->GetObjectArrayElement(strings, i);
+        if (!_jstrings[i]) {
+            _exception = 1;
+            _exceptionType = "java/lang/IllegalArgumentException";
+            _exceptionMessage = "strings == null";
+            goto exit;
+        }
+        _strings[i] = _env->GetStringUTFChars(_jstrings[i], 0);
+    }
+
+    _returnValue = glCreateShaderProgramv((GLenum)type, _count, _strings);
+exit:
+    if (_strings && _jstrings) {
+        for(int i = 0; i < _count; i++) {
+            if (_strings[i] && _jstrings[i]) {
+                _env->ReleaseStringUTFChars(_jstrings[i], _strings[i]);
+            }
+        }
+    }
+    if (_strings) {
+        free(_strings);
+    }
+    if (_jstrings) {
+        free(_jstrings);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
+    return (jint)_returnValue;
 }
 /* void glBindProgramPipeline ( GLuint pipeline ) */
 static void

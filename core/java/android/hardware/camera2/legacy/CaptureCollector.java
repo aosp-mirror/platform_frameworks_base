@@ -19,7 +19,7 @@ import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.util.Log;
 import android.util.MutableLong;
 import android.util.Pair;
-
+import android.view.Surface;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.TreeSet;
@@ -95,22 +95,28 @@ public class CaptureCollector {
                     } else {
                         // Send buffer dropped errors for each pending buffer if the request has
                         // started.
-                        if (mFailedPreview) {
-                            Log.w(TAG, "Preview buffers dropped for request: " +
-                                    mRequest.getRequestId());
-                            for (int i = 0; i < mRequest.numPreviewTargets(); i++) {
-                                CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
-                                    /*result*/null,
-                                        CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_BUFFER);
-                            }
-                        }
-                        if (mFailedJpeg) {
-                            Log.w(TAG, "Jpeg buffers dropped for request: " +
-                                    mRequest.getRequestId());
-                            for (int i = 0; i < mRequest.numJpegTargets(); i++) {
-                                CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
-                                    /*result*/null,
-                                        CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_BUFFER);
+                        for (Surface targetSurface : mRequest.getRequest().getTargets() ) {
+                            try {
+                                if (mRequest.jpegType(targetSurface)) {
+                                    if (mFailedJpeg) {
+                                        CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
+                                                /*result*/null,
+                                                CameraDeviceImpl.CameraDeviceCallbacks.
+                                                        ERROR_CAMERA_BUFFER,
+                                                targetSurface);
+                                    }
+                                } else {
+                                    // preview buffer
+                                    if (mFailedPreview) {
+                                        CaptureCollector.this.mDeviceState.setCaptureResult(mRequest,
+                                                /*result*/null,
+                                                CameraDeviceImpl.CameraDeviceCallbacks.
+                                                        ERROR_CAMERA_BUFFER,
+                                                targetSurface);
+                                    }
+                                }
+                            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                                Log.e(TAG, "Unexpected exception when querying Surface: " + e);
                             }
                         }
                     }

@@ -178,7 +178,7 @@ public class ImsCallProfile implements Parcelable {
      *  Codec: Codec info.
      *  DisplayText: Display text for the call.
      *  AdditionalCallInfo: Additional call info.
-     *  CallRadioTech: The radio tech on which the call is placed.
+     *  CallPull: Boolean value specifying if the call is a pulled call.
      */
     public static final String EXTRA_OI = "oi";
     public static final String EXTRA_CNA = "cna";
@@ -188,6 +188,7 @@ public class ImsCallProfile implements Parcelable {
     public static final String EXTRA_CODEC = "Codec";
     public static final String EXTRA_DISPLAY_TEXT = "DisplayText";
     public static final String EXTRA_ADDITIONAL_CALL_INFO = "AdditionalCallInfo";
+    public static final String EXTRA_IS_CALL_PULL = "CallPull";
 
     /**
      * Extra key which the RIL can use to indicate the radio technology used for a call.
@@ -200,7 +201,7 @@ public class ImsCallProfile implements Parcelable {
      * "14" vs (int) 14).
      * Note: This is used by {@link com.android.internal.telephony.imsphone.ImsPhoneConnection#
      *      updateWifiStateFromExtras(Bundle)} to determine whether to set the
-     * {@link android.telecom.Connection#CAPABILITY_WIFI} capability on a connection.
+     * {@link android.telecom.Connection#PROPERTY_WIFI} property on a connection.
      */
     public static final String EXTRA_CALL_RAT_TYPE = "CallRadioTech";
 
@@ -335,12 +336,27 @@ public class ImsCallProfile implements Parcelable {
      * Converts from the call types defined in {@link com.android.ims.ImsCallProfile} to the
      * video state values defined in {@link VideoProfile}.
      *
-     * @param callType The call type.
+     * @param callProfile The call profile.
      * @return The video state.
      */
     public static int getVideoStateFromImsCallProfile(ImsCallProfile callProfile) {
+        int videostate = getVideoStateFromCallType(callProfile.mCallType);
+        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
+            videostate |= VideoProfile.STATE_PAUSED;
+        } else {
+            videostate &= ~VideoProfile.STATE_PAUSED;
+        }
+        return videostate;
+    }
+
+    /**
+     * Translates a {@link ImsCallProfile} {@code CALL_TYPE_*} constant into a video state.
+     * @param callType The call type.
+     * @return The video state.
+     */
+    public static int getVideoStateFromCallType(int callType) {
         int videostate = VideoProfile.STATE_AUDIO_ONLY;
-        switch (callProfile.mCallType) {
+        switch (callType) {
             case CALL_TYPE_VT_TX:
                 videostate = VideoProfile.STATE_TX_ENABLED;
                 break;
@@ -356,11 +372,6 @@ public class ImsCallProfile implements Parcelable {
             default:
                 videostate = VideoProfile.STATE_AUDIO_ONLY;
                 break;
-        }
-        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
-            videostate |= VideoProfile.STATE_PAUSED;
-        } else {
-            videostate &= ~VideoProfile.STATE_PAUSED;
         }
         return videostate;
     }

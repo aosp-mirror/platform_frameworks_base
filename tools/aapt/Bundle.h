@@ -66,6 +66,7 @@ public:
           mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
           mBuildSharedLibrary(false),
+          mBuildAppAsSharedLibrary(false),
           mArgc(0), mArgv(NULL)
         {}
     ~Bundle(void) {}
@@ -125,6 +126,12 @@ public:
     void setPlatformBuildVersionCode(const android::String8& code) { mPlatformVersionCode = code; }
     const android::String8& getPlatformBuildVersionName() { return mPlatformVersionName; }
     void setPlatformBuildVersionName(const android::String8& name) { mPlatformVersionName = name; }
+
+    const android::String8& getPrivateSymbolsPackage() const { return mPrivateSymbolsPackage; }
+
+    void setPrivateSymbolsPackage(const android::String8& package) {
+        mPrivateSymbolsPackage = package;
+    }
 
     bool getUTF16StringsOption() {
         return mWantUTF16 || !isMinSdkAtLeast(SDK_FROYO);
@@ -208,6 +215,8 @@ public:
     void setSingleCrunchOutputFile(const char* val) { mSingleCrunchOutputFile = val; }
     bool getBuildSharedLibrary() const { return mBuildSharedLibrary; }
     void setBuildSharedLibrary(bool val) { mBuildSharedLibrary = val; }
+    bool getBuildAppAsSharedLibrary() const { return mBuildAppAsSharedLibrary; }
+    void setBuildAppAsSharedLibrary(bool val) { mBuildAppAsSharedLibrary = val; }
     void setNoVersionVectors(bool val) { mNoVersionVectors = val; }
     bool getNoVersionVectors() const { return mNoVersionVectors; }
 
@@ -242,7 +251,7 @@ public:
      * above. SDK levels that have a non-numeric identifier are assumed
      * to be newer than any SDK level that has a number designated.
      */
-    bool isMinSdkAtLeast(int desired) {
+    bool isMinSdkAtLeast(int desired) const {
         /* If the application specifies a minSdkVersion in the manifest
          * then use that. Otherwise, check what the user specified on
          * the command line. If neither, it's not available since
@@ -330,8 +339,10 @@ private:
     const char* mSingleCrunchInputFile;
     const char* mSingleCrunchOutputFile;
     bool        mBuildSharedLibrary;
+    bool        mBuildAppAsSharedLibrary;
     android::String8 mPlatformVersionCode;
     android::String8 mPlatformVersionName;
+    android::String8 mPrivateSymbolsPackage;
 
     /* file specification */
     int         mArgc;

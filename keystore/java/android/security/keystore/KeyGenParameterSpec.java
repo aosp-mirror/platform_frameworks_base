@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.KeyStore;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
@@ -40,9 +41,9 @@ import javax.security.auth.x500.X500Principal;
  * {@link KeyGenerator} of the <a href="{@docRoot}training/articles/keystore.html">Android Keystore
  * system</a>. The spec determines authorized uses of the key, such as whether user authentication
  * is required for using the key, what operations are authorized (e.g., signing, but not
- * decryption) and with what parameters (e.g., only with a particular padding scheme or digest), the
- * key's validity start and end dates. Key use authorizations expressed in the spec apply only to
- * secret keys and private keys -- public keys can be used for any supported operations.
+ * decryption), with what parameters (e.g., only with a particular padding scheme or digest), and
+ * the key's validity start and end dates. Key use authorizations expressed in the spec apply
+ * only to secret keys and private keys -- public keys can be used for any supported operations.
  *
  * <p>To generate an asymmetric key pair or a symmetric key, create an instance of this class using
  * the {@link Builder}, initialize a {@code KeyPairGenerator} or a {@code KeyGenerator} of the
@@ -90,13 +91,22 @@ import javax.security.auth.x500.X500Principal;
  *
  * <p>Instances of this class are immutable.
  *
+ * <p><h3>Known issues</h3>
+ * A known bug in Android 6.0 (API Level 23) causes user authentication-related authorizations to be
+ * enforced even for public keys. To work around this issue extract the public key material to use
+ * outside of Android Keystore. For example:
+ * <pre> {@code
+ * PublicKey unrestrictedPublicKey =
+ *         KeyFactory.getInstance(publicKey.getAlgorithm()).generatePublic(
+ *                 new X509EncodedKeySpec(publicKey.getEncoded()));
+ * }</pre>
+ *
  * <p><h3>Example: NIST P-256 EC key pair for signing/verification using ECDSA</h3>
  * This example illustrates how to generate a NIST P-256 (aka secp256r1 aka prime256v1) EC key pair
  * in the Android KeyStore system under alias {@code key1} where the private key is authorized to be
  * used only for signing using SHA-256, SHA-384, or SHA-512 digest and only if the user has been
- * authenticated within the last five minutes. The use of public key is unrestricted, thus
- * permitting signature verification using any padding schemes and digests, and without user
- * authentication.
+ * authenticated within the last five minutes. The use of the public key is unrestricted (See Known
+ * Issues).
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
@@ -128,8 +138,7 @@ import javax.security.auth.x500.X500Principal;
  * <p><h3>Example: RSA key pair for signing/verification using RSA-PSS</h3>
  * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
  * alias {@code key1} authorized to be used only for signing using the RSA-PSS signature padding
- * scheme with SHA-256 or SHA-512 digests. The use of public key is unrestricted, thus permitting
- * signature verification using any padding schemes and digests.
+ * scheme with SHA-256 or SHA-512 digests. The use of the public key is unrestricted.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
@@ -155,8 +164,8 @@ import javax.security.auth.x500.X500Principal;
  * <p><h3>Example: RSA key pair for encryption/decryption using RSA OAEP</h3>
  * This example illustrates how to generate an RSA key pair in the Android KeyStore system under
  * alias {@code key1} where the private key is authorized to be used only for decryption using RSA
- * OAEP encryption padding scheme with SHA-256 or SHA-512 digests. The use of public key is
- * unrestricted, thus permitting encryption using any padding schemes and digests.
+ * OAEP encryption padding scheme with SHA-256 or SHA-512 digests. The use of the public key is
+ * unrestricted.
  * <pre> {@code
  * KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
@@ -231,6 +240,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
 
     private final String mKeystoreAlias;
+    private final int mUid;
     private final int mKeySize;
     private final AlgorithmParameterSpec mSpec;
     private final X500Principal mCertificateSubject;
@@ -248,12 +258,17 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final byte[] mAttestationChallenge;
+    private final boolean mUniqueIdIncluded;
+    private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mInvalidatedByBiometricEnrollment;
 
     /**
      * @hide should be built with Builder
      */
     public KeyGenParameterSpec(
             String keyStoreAlias,
+            int uid,
             int keySize,
             AlgorithmParameterSpec spec,
             X500Principal certificateSubject,
@@ -270,7 +285,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
-            int userAuthenticationValidityDurationSeconds) {
+            int userAuthenticationValidityDurationSeconds,
+            byte[] attestationChallenge,
+            boolean uniqueIdIncluded,
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -293,6 +312,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         mKeystoreAlias = keyStoreAlias;
+        mUid = uid;
         mKeySize = keySize;
         mSpec = spec;
         mCertificateSubject = certificateSubject;
@@ -311,6 +331,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
+        mUniqueIdIncluded = uniqueIdIncluded;
+        mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
     /**
@@ -320,6 +344,16 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     @NonNull
     public String getKeystoreAlias() {
         return mKeystoreAlias;
+    }
+
+    /**
+     * Returns the UID which will own the key. {@code -1} is an alias for the UID of the current
+     * process.
+     *
+     * @hide
+     */
+    public int getUid() {
+        return mUid;
     }
 
     /**
@@ -525,12 +559,80 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns the attestation challenge value that will be placed in attestation certificate for
+     * this key pair.
+     *
+     * <p>If this method returns non-{@code null}, the public key certificate for this key pair will
+     * contain an extension that describes the details of the key's configuration and
+     * authorizations, including the content of the attestation challenge value. If the key is in
+     * secure hardware, and if the secure hardware supports attestation, the certificate will be
+     * signed by a chain of certificates rooted at a trustworthy CA key. Otherwise the chain will
+     * be rooted at an untrusted certificate.
+     *
+     * <p>If this method returns {@code null}, and the spec is used to generate an asymmetric (RSA
+     * or EC) key pair, the public key will have a self-signed certificate if it has purpose {@link
+     * KeyProperties#PURPOSE_SIGN} (see {@link #KeyGenParameterSpec(String, int)). If does not have
+     * purpose {@link KeyProperties#PURPOSE_SIGN}, it will have a fake certificate.
+     *
+     * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
+     * {@link KeyGenParameterSpec} with {@link #hasAttestationCertificate()} returning
+     * non-{@code null} is used to generate a symmetric (AES or HMAC) key,
+     * {@link KeyGenerator#generateKey())} will throw
+     * {@link java.security.InvalidAlgorithmParameterException}.
+     *
+     * @see Builder#setAttestationChallenge(byte[])
+     */
+    public byte[] getAttestationChallenge() {
+        return Utils.cloneIfNotNull(mAttestationChallenge);
+    }
+
+    /**
+     * @hide This is a system-only API
+     *
+     * Returns {@code true} if the attestation certificate will contain a unique ID field.
+     */
+    public boolean isUniqueIdIncluded() {
+        return mUniqueIdIncluded;
+    }
+
+    /**
+     * Returns {@code true} if the key will remain authorized only until the device is removed from
+     * the user's body, up to the validity duration.  This option has no effect on keys that don't
+     * have an authentication validity duration, and has no effect if the device lacks an on-body
+     * sensor.
+     *
+     * <p>Authorization applies only to secret key and private key operations. Public key operations
+     * are not restricted.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setUserAuthenticationValidWhileOnBody(boolean)
+     */
+    public boolean isUserAuthenticationValidWhileOnBody() {
+        return mUserAuthenticationValidWhileOnBody;
+    }
+
+    /**
+     * Returns {@code true} if the key is irreversibly invalidated when a new fingerprint is
+     * enrolled or all enrolled fingerprints are removed. This has effect only for keys that
+     * require fingerprint user authentication for every use.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setInvalidatedByBiometricEnrollment(boolean)
+     */
+    public boolean isInvalidatedByBiometricEnrollment() {
+        return mInvalidatedByBiometricEnrollment;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
         private final String mKeystoreAlias;
         private @KeyProperties.PurposeEnum int mPurposes;
 
+        private int mUid = KeyStore.UID_SELF;
         private int mKeySize = -1;
         private AlgorithmParameterSpec mSpec;
         private X500Principal mCertificateSubject;
@@ -547,6 +649,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
+        private byte[] mAttestationChallenge = null;
+        private boolean mUniqueIdIncluded = false;
+        private boolean mUserAuthenticationValidWhileOnBody;
+        private boolean mInvalidatedByBiometricEnrollment = true;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -572,6 +678,19 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             }
             mKeystoreAlias = keystoreAlias;
             mPurposes = purposes;
+        }
+
+        /**
+         * Sets the UID which will own the key.
+         *
+         * @param uid UID or {@code -1} for the UID of the current process.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setUid(int uid) {
+            mUid = uid;
+            return this;
         }
 
         /**
@@ -867,8 +986,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * or when the secure lock screen is forcibly reset (e.g., by a Device Administrator).
          * Additionally, if the key requires that user authentication takes place for every use of
          * the key, it is also irreversibly invalidated once a new fingerprint is enrolled or once\
-         * no more fingerprints are enrolled. Attempts to initialize cryptographic operations using
-         * such keys will throw {@link KeyPermanentlyInvalidatedException}.</li>
+         * no more fingerprints are enrolled, unless {@link
+         * #setInvalidatedByBiometricEnrollment(boolean)} is used to allow validity after
+         * enrollment. Attempts to initialize cryptographic operations using such keys will throw
+         * {@link KeyPermanentlyInvalidatedException}.</li>
          * </ul>
          *
          * <p>This authorization applies only to secret key and private key operations. Public key
@@ -929,6 +1050,106 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             return this;
         }
 
+        /*
+         * TODO(swillden): Update this documentation to describe the hardware and software root
+         * keys, including information about CRL/OCSP services for discovering revocations, and to
+         * link to documentation of the extension format and content.
+         */
+        /**
+         * Sets whether an attestation certificate will be generated for this key pair, and what
+         * challenge value will be placed in the certificate.  The attestation certificate chain
+         * can be retrieved with with {@link java.security.KeyStore#getCertificateChain(String)}.
+         *
+         * <p>If {@code attestationChallenge} is not {@code null}, the public key certificate for
+         * this key pair will contain an extension that describes the details of the key's
+         * configuration and authorizations, including the {@code attestationChallenge} value. If
+         * the key is in secure hardware, and if the secure hardware supports attestation, the
+         * certificate will be signed by a chain of certificates rooted at a trustworthy CA key.
+         * Otherwise the chain will be rooted at an untrusted certificate.
+         *
+         * <p>The purpose of the challenge value is to enable relying parties to verify that the key
+         * was created in response to a specific request. If attestation is desired but no
+         * challenged is needed, any non-{@code null} value may be used, including an empty byte
+         * array.
+         *
+         * <p>If {@code attestationChallenge} is {@code null}, and this spec is used to generate an
+         * asymmetric (RSA or EC) key pair, the public key certificate will be self-signed if the
+         * key has purpose {@link KeyProperties#PURPOSE_SIGN} (see
+         * {@link #KeyGenParameterSpec(String, int)). If the key does not have purpose
+         * {@link KeyProperties#PURPOSE_SIGN}, it is not possible to use the key to sign a
+         * certificate, so the public key certificate will contain a dummy signature.
+         *
+         * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
+         * {@code getAttestationChallenge} returns non-{@code null} and the spec is used to
+         * generate a symmetric (AES or HMAC) key, {@link KeyGenerator#generateKey()} will throw
+         * {@link java.security.InvalidAlgorithmParameterException}.
+         *
+         * @see Builder#setAttestationChallenge(String attestationChallenge)
+         */
+        @NonNull
+        public Builder setAttestationChallenge(byte[] attestationChallenge) {
+            mAttestationChallenge = attestationChallenge;
+            return this;
+        }
+
+        /**
+         * @hide Only system apps can use this method.
+         *
+         * Sets whether to include a temporary unique ID field in the attestation certificate.
+         */
+        @NonNull
+        public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {
+            mUniqueIdIncluded = uniqueIdIncluded;
+            return this;
+        }
+
+        /**
+         * Sets whether the key will remain authorized only until the device is removed from the
+         * user's body up to the limit of the authentication validity period (see
+         * {@link #setUserAuthenticationValidityDurationSeconds} and
+         * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
+         * user's body, the key will be considered unauthorized and the user will need to
+         * re-authenticate to use it. For keys without an authentication validity period this
+         * parameter has no effect.
+         *
+         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
+         * effect; the device will always be considered to be "on-body" and the key will therefore
+         * remain authorized until the validity period ends.
+         *
+         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
+         * will be invalidated when the device is removed from the user's body or when the
+         * authentication validity expires, whichever occurs first.
+         */
+        @NonNull
+        public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
+            mUserAuthenticationValidWhileOnBody = remainsValid;
+            return this;
+        }
+
+        /**
+         * Sets whether this key should be invalidated on fingerprint enrollment.  This
+         * applies only to keys which require user authentication (see {@link
+         * #setUserAuthenticationRequired(boolean)}) and if no positive validity duration has been
+         * set (see {@link #setUserAuthenticationValidityDurationSeconds(int)}, meaning the key is
+         * valid for fingerprint authentication only.
+         *
+         * <p>By default, {@code invalidateKey} is {@code true}, so keys that are valid for
+         * fingerprint authentication only are <em>irreversibly invalidated</em> when a new
+         * fingerprint is enrolled, or when all existing fingerprints are deleted.  That may be
+         * changed by calling this method with {@code invalidateKey} set to {@code false}.
+         *
+         * <p>Invalidating keys on enrollment of a new finger or unenrollment of all fingers
+         * improves security by ensuring that an unauthorized person who obtains the password can't
+         * gain the use of fingerprint-authenticated keys by enrolling their own finger.  However,
+         * invalidating keys makes key-dependent operations impossible, requiring some fallback
+         * procedure to authenticate the user and set up a new key.
+         */
+        @NonNull
+        public Builder setInvalidatedByBiometricEnrollment(boolean invalidateKey) {
+            mInvalidatedByBiometricEnrollment = invalidateKey;
+            return this;
+        }
+
         /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
@@ -936,6 +1157,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         public KeyGenParameterSpec build() {
             return new KeyGenParameterSpec(
                     mKeystoreAlias,
+                    mUid,
                     mKeySize,
                     mSpec,
                     mCertificateSubject,
@@ -952,7 +1174,11 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mBlockModes,
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
-                    mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticationValidityDurationSeconds,
+                    mAttestationChallenge,
+                    mUniqueIdIncluded,
+                    mUserAuthenticationValidWhileOnBody,
+                    mInvalidatedByBiometricEnrollment);
         }
     }
 }

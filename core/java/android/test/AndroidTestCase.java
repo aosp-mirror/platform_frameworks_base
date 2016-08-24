@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.test.suitebuilder.annotation.Suppress;
 
 import junit.framework.TestCase;
 
@@ -28,7 +29,13 @@ import java.lang.reflect.Modifier;
 
 /**
  * Extend this if you need to access Resources or other things that depend on Activity Context.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+ * InstrumentationRegistry</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class AndroidTestCase extends TestCase {
 
     protected Context mContext;
@@ -44,6 +51,7 @@ public class AndroidTestCase extends TestCase {
         super.tearDown();
     }
 
+    @Suppress
     public void testAndroidTestCaseSetupProperly() {
         assertNotNull("Context is null. setContext should be called before tests are run",
                 mContext);

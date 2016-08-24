@@ -16,20 +16,37 @@
 
 package com.android.systemui;
 
+import android.graphics.Rect;
 import android.view.Display;
 import android.view.View;
 
 public interface RecentsComponent {
-    public interface Callbacks {
-        public void onVisibilityChanged(boolean visible);
-    }
-
-    void showRecents(boolean triggeredFromAltTab, View statusBarView);
+    void showRecents(boolean triggeredFromAltTab, boolean fromHome);
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
-    void toggleRecents(Display display, int layoutDirection, View statusBarView);
+    void toggleRecents(Display display);
     void preloadRecents();
     void cancelPreloadingRecents();
     void showNextAffiliatedTask();
     void showPrevAffiliatedTask();
-    void setCallback(Callbacks cb);
+
+    /**
+     * Docks the top-most task and opens recents.
+     */
+    boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds,
+            int metricsDockAction);
+
+    /**
+     * Called during a drag-from-navbar-in gesture.
+     *
+     * @param distanceFromTop the distance of the current drag in gesture from the top of the
+     *                        screen
+     */
+    void onDraggingInRecents(float distanceFromTop);
+
+    /**
+     * Called when the gesture to drag in recents ended.
+     *
+     * @param velocity the velocity of the finger when releasing it in pixels per second
+     */
+    void onDraggingInRecentsEnded(float velocity);
 }

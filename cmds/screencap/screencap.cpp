@@ -67,30 +67,6 @@ static SkColorType flinger2skia(PixelFormat f)
     }
 }
 
-static status_t vinfoToPixelFormat(const fb_var_screeninfo& vinfo,
-        uint32_t* bytespp, uint32_t* f)
-{
-
-    switch (vinfo.bits_per_pixel) {
-        case 16:
-            *f = PIXEL_FORMAT_RGB_565;
-            *bytespp = 2;
-            break;
-        case 24:
-            *f = PIXEL_FORMAT_RGB_888;
-            *bytespp = 3;
-            break;
-        case 32:
-            // TODO: do better decoding of vinfo here
-            *f = PIXEL_FORMAT_RGBX_8888;
-            *bytespp = 4;
-            break;
-        default:
-            return BAD_VALUE;
-    }
-    return NO_ERROR;
-}
-
 static status_t notifyMediaScanner(const char* fileName) {
     String8 cmd("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://");
     String8 fileUrl("\"");
@@ -147,7 +123,7 @@ int main(int argc, char** argv)
             png = true;
         }
     }
-    
+
     if (fd == -1) {
         usage(pname);
         return 1;
@@ -195,28 +171,6 @@ int main(int argc, char** argv)
         s = screenshot.getStride();
         f = screenshot.getFormat();
         size = screenshot.getSize();
-    } else {
-        const char* fbpath = "/dev/graphics/fb0";
-        int fb = open(fbpath, O_RDONLY);
-        if (fb >= 0) {
-            struct fb_var_screeninfo vinfo;
-            if (ioctl(fb, FBIOGET_VSCREENINFO, &vinfo) == 0) {
-                uint32_t bytespp;
-                if (vinfoToPixelFormat(vinfo, &bytespp, &f) == NO_ERROR) {
-                    size_t offset = (vinfo.xoffset + vinfo.yoffset*vinfo.xres) * bytespp;
-                    w = vinfo.xres;
-                    h = vinfo.yres;
-                    s = vinfo.xres;
-                    size = w*h*bytespp;
-                    mapsize = offset + size;
-                    mapbase = mmap(0, mapsize, PROT_READ, MAP_PRIVATE, fb, 0);
-                    if (mapbase != MAP_FAILED) {
-                        base = (void const *)((char const *)mapbase + offset);
-                    }
-                }
-            }
-            close(fb);
-        }
     }
 
     if (base != NULL) {

@@ -24,6 +24,7 @@
 #include <memory>
 
 #include <GLES2/gl2.h>
+#include <GpuMemoryTracker.h>
 
 #include <ui/Region.h>
 
@@ -54,21 +55,21 @@ struct DeferStateStruct;
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
-class Layer : public VirtualLightRefBase {
+class Layer : public VirtualLightRefBase, GpuMemoryTracker {
 public:
-    enum Type {
-        kType_Texture,
-        kType_DisplayList,
+    enum class Type {
+        Texture,
+        DisplayList,
     };
 
     // layer lifecycle, controlled from outside
-    enum State {
-        kState_Uncached = 0,
-        kState_InCache = 1,
-        kState_FailedToCache = 2,
-        kState_RemovedFromCache = 3,
-        kState_DeletedFromCache = 4,
-        kState_InGarbageList = 5,
+    enum class State {
+        Uncached = 0,
+        InCache = 1,
+        FailedToCache = 2,
+        RemovedFromCache = 3,
+        DeletedFromCache = 4,
+        InGarbageList = 5,
     };
     State state; // public for logging/debugging purposes
 
@@ -94,8 +95,8 @@ public:
         regionRect.set(bounds.leftTop().x, bounds.leftTop().y,
                bounds.rightBottom().x, bounds.rightBottom().y);
 
-        const float texX = 1.0f / float(texture.width);
-        const float texY = 1.0f / float(texture.height);
+        const float texX = 1.0f / float(texture.mWidth);
+        const float texY = 1.0f / float(texture.mHeight);
         const float height = layer.getHeight();
         texCoords.set(
                regionRect.left * texX, (height - regionRect.top) * texY,
@@ -112,11 +113,11 @@ public:
     void updateDeferred(RenderNode* renderNode, int left, int top, int right, int bottom);
 
     inline uint32_t getWidth() const {
-        return texture.width;
+        return texture.mWidth;
     }
 
     inline uint32_t getHeight() const {
-        return texture.height;
+        return texture.mHeight;
     }
 
     /**
@@ -131,8 +132,7 @@ public:
     bool resize(const uint32_t width, const uint32_t height);
 
     void setSize(uint32_t width, uint32_t height) {
-        texture.width = width;
-        texture.height = height;
+        texture.updateSize(width, height, texture.format());
     }
 
     ANDROID_API void setPaint(const SkPaint* paint);
@@ -201,7 +201,7 @@ public:
     }
 
     inline GLuint getTextureId() const {
-        return texture.id;
+        return texture.id();
     }
 
     inline Texture& getTexture() {
@@ -214,6 +214,10 @@ public:
 
     inline void setRenderTarget(GLenum renderTarget) {
         this->renderTarget = renderTarget;
+    }
+
+    inline bool isRenderable() const {
+        return renderTarget != GL_NONE;
     }
 
     void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
@@ -241,7 +245,7 @@ public:
     }
 
     inline bool isTextureLayer() const {
-        return type == kType_Texture;
+        return type == Type::Texture;
     }
 
     inline SkColorFilter* getColorFilter() const {
@@ -263,7 +267,6 @@ public:
     void bindTexture() const;
     void generateTexture();
     void allocateTexture();
-    void deleteTexture();
 
     /**
      * When the caller frees the texture itself, the caller

@@ -1,14 +1,15 @@
-page.title=Notifications in Android 4.4 and Lower
+page.title=Notifications, Android 4.4 and Lower
+footer.hide=1
 @jd:body
 
-<a class="notice-developers" href="{@docRoot}training/notify-user/index.html">
+<a class="notice-developers right" href="{@docRoot}training/notify-user/index.html">
   <div>
     <h3>Developer Docs</h3>
     <p>Notifying the User</p>
   </div>
 </a>
 
-<a class="notice-designers" href="notifications.html">
+<a class="notice-designers right" href="notifications.html">
   <div>
     <h3>Notifications in Android 5.0</h3>
   </div>

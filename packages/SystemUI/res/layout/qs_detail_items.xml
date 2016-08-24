@@ -16,17 +16,19 @@
 -->
 <!-- extends FrameLayout -->
 <com.android.systemui.qs.QSDetailItems xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="16dp"
+    android:paddingTop="@dimen/qs_detail_items_padding_top"
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <LinearLayout
+    <com.android.systemui.qs.AutoSizingList
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        sysui:itemHeight="@dimen/qs_detail_item_height" />
 
     <LinearLayout
         android:id="@android:id/empty"
@@ -48,9 +50,4 @@
             android:layout_marginTop="20dp"
             android:textAppearance="@style/TextAppearance.QS.DetailEmpty" />
     </LinearLayout>
-
-    <View
-        android:id="@+id/min_height_spacer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"/>
 </com.android.systemui.qs.QSDetailItems>

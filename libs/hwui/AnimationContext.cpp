@@ -63,7 +63,7 @@ void AnimationContext::startFrame(TreeInfo::TraversalMode mode) {
         mCurrentFrameAnimations.mNextHandle = head;
         head->mPreviousHandle = &mCurrentFrameAnimations;
     }
-    mFrameTimeMs = mClock.computeFrameTimeMs();
+    mFrameTimeMs = ns2ms(mClock.latestVsync());
 }
 
 void AnimationContext::runRemainingAnimations(TreeInfo& info) {

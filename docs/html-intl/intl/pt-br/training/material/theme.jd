@@ -1,0 +1,131 @@
+page.title=Como usar o tema do Material
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Esta lição ensina a</h2>
+<ol>
+  <li><a href="#ColorPalette">Personalizar a paleta de cores</a></li>
+  <li><a href="#StatusBar">Personalizar a barra de status</a></li>
+  <li><a href="#Inheritance">Atribuir tema a visualizações individuais</a></li>
+</ol>
+<h2>Você também deve ler</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Especificações do Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design no Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>O novo tema do Material fornece:</p>
+
+<ul>
+  <li>Widgets do sistema que permitem a configuração da paleta de cores</li>
+  <li>Animações de feedback de toque para os widgets do sistema</li>
+  <li>Animações de transição de atividades</li>
+</ul>
+
+<p>É possível personalizar a aparência do tema do Material com
+uma paleta de cores que você controla, de acordo com a identidade da sua marca. Você pode atribuir cor à barra de ações e
+à barra de status usando atributos de tema, conforme exibido na <a href="#fig3">Figura 3</a>.</p>
+
+<p>Os widgets de sistema têm um novo design e animações de feedback de toque. Você pode personalizar a
+paleta de cores, as animações de feedback de toque e as transições de atividades do aplicativo.</p>
+
+<p>O tema do Material é definido como:</p>
+
+<ul>
+  <li><code>@android:style/Theme.Material</code> (versão escura)</li>
+  <li><code>@android:style/Theme.Material.Light</code> (versão clara)</li>
+  <li><code>@android:style/Theme.Material.Light.DarkActionBar</code></li>
+</ul>
+
+<p>Para obter uma lista de estilos do Material que podem ser usados, consulte a referência de API para
+{@link android.R.style R.style}.</p>
+
+<!-- two columns, dark/light material theme example -->
+<div style="width:700px;margin-top:25px;margin-bottom:10px">
+<div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
+  <img src="{@docRoot}design/material/images/MaterialDark.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figura 1</strong>. Tema escuro do Material</p>
+  </div>
+</div>
+<div style="float:left;width:250px;margin-right:0px;">
+  <img src="{@docRoot}design/material/images/MaterialLight.png" width="500" height="238">
+  <div style="width:170px;margin:0 auto">
+  <p style="margin-top:8px;font-size:12px"><strong>Figura 2</strong>. Tema claro do Material</p>
+  </div>
+</div>
+<br style="clear:left">
+</div>
+
+<p class="note">
+<strong>Observação:</strong> o tema do Material só está disponível no Android 5.0 (API de nível 21) e
+posteriores. A <a href="{@docRoot}tools/support-library/features.html#v7">Biblioteca de Suporte v7</a>
+fornece temas com estilos do Material Design para alguns widgets e compatibilidade com a personalização da
+paleta de cores. Para obter mais informações, consulte
+<a href="{@docRoot}training/material/compatibility.html">Como manter a compatibilidade</a>.
+</p>
+
+
+<h2 id="ColorPalette">Personalizar a paleta de cores</h2>
+
+<p style="margin-bottom:30px">Para personalizar as cores de base do tema para adequá-lo à sua marca, defina
+as cores personalizadas usando os atributos de tema ao herdar do tema do Material:</p>
+
+<pre>
+&lt;resources>
+  &lt;!-- inherit from the material theme -->
+  &lt;style name="AppTheme" parent="android:Theme.Material">
+    &lt;!-- Main theme colors -->
+    &lt;!--   your app branding color for the app bar -->
+    &lt;item name="android:colorPrimary">@color/primary&lt;/item>
+    &lt;!--   darker variant for the status bar and contextual app bars -->
+    &lt;item name="android:colorPrimaryDark">@color/primary_dark&lt;/item>
+    &lt;!--   theme UI controls like checkboxes and text fields -->
+    &lt;item name="android:colorAccent">@color/accent&lt;/item>
+  &lt;/style>
+&lt;/resources>
+</pre>
+
+<div style="float:right;margin-left:25px;margin-top:20px;margin-bottom:10px" id="fig3">
+<img src="{@docRoot}training/material/images/ThemeColors.png" width="250" height="445" />
+<p class="img-caption" style="margin-bottom:0px">
+<strong>Figura 3.</strong> Como personalizar o tema do Material</p>
+</div>
+
+
+<h2 id="StatusBar">Personalizar a barra de status</h2>
+
+<p>O tema do Material permite a fácil personalização da barra de status, para você poder
+especificar uma cor adequada à sua marca, e fornece contraste suficiente para exibir os ícones de status brancos. Para
+definir uma cor personalizada para a barra de status, use o atributo <code>android:statusBarColor</code> ao
+ampliar o tema do Material. Por padrão, <code>android:statusBarColor</code> herda o
+valor de <code>android:colorPrimaryDark</code>.</p>
+
+<p>Você também pode personalizar a parte de trás da barra de status. Por exemplo, se você quiser mostrar
+uma barra de status transparente sobre uma foto, com um degradê escuro sutil, para garantir que os ícones de status
+brancos sejam visíveis, defina o atributo <code>android:statusBarColor</code> como
+<code>&#64;android:color/transparent</code> e ajuste os marcadores de janela conforme necessário. Você também
+pode usar o método {@link android.view.Window#setStatusBarColor Window.setStatusBarColor()} para
+animações ou esmaecimento.</p>
+
+<p class="note">
+<strong>Observação:</strong> a barra de status deve ter, quase sempre, um traçado distante da barra de ferramentas
+principal, exceto em casos em que haja imagens ricas de ponta a ponta, conteúdo de mídia por trás
+dessas barras e quando se usa degradê, para garantir que os ícones continuem visíveis.
+</p>
+
+<p>Ao personalizar as barras de navegação e de status, deixe-as transparentes ou modifique
+somente a barra de status. A barra de navegação deve permanecer preta em todos os outros casos.</p>
+
+
+<h2 id="Inheritance">Atribuir tema a visualizações individuais</h3>
+
+<p>Elementos nas definições do layout XML podem especificar o atributo <code>android:theme</code>,
+que referencia um recurso do tema. Esse atributo modifica o tema do elemento e quaisquer
+elementos-filho, o que é útil para alterar as paletas de cores do tema em uma parte específica
+de uma interface.</p>

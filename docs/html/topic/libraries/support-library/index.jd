@@ -1,0 +1,184 @@
+page.title=Support Library
+page.metaDescription=The Android Support Library offers backward-compatible versions of a number of features that are not built into the framework.
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#backward">Backward Compatibility</a></li>
+      <li><a href="#layout-patterns">Support for General Layout Patterns</a></li>
+      <li><a href="#form-factors">Support for Different Form Factors</a></li>
+      <li><a href="#utils">General Utilities</a></li>
+    </ol>
+
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}topic/libraries/support-library/features.html">
+        Support Library Features</a></li>
+      <li><a href="{@docRoot}topic/libraries/support-library/setup.html">
+        Support Library Setup</a></li>
+      <li><a href="{@docRoot}topic/libraries/support-library/revisions.html">
+        Support Library Revision History</a></li>
+
+    </ol>
+
+  </div>
+</div>
+
+<p>
+  The Android Support Library offers a number of features that are not built
+  into the framework. These libraries offer backward-compatible versions of
+  new features, provide useful UI elements that are not included in the
+  framework, and provide a range of utilities that apps can draw on.
+</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>
+  In many cases, a feature may be valuable to many app developers, but not
+  appropriate to include in the Android framework itself. For example, an app
+  might only need a feature for specialized use cases, such as to smooth the
+  transition between different versions of the Android system.
+</p>
+
+<p>
+  To address these situations, the Android SDK includes several libraries
+  collectively called the <em>Android Support Library</em>. App developers
+  can include any of these libraries if they want to incorporate the
+  library functionality into their apps.
+</p>
+
+<p>
+  Support libraries provide a range of different features:
+</p>
+
+<ul>
+  <li>
+    <a href="#backward">Backward-compatible</a> versions of framework
+    components.
+  </li>
+
+  <li>UI elements to implement the recommended Android <a href=
+  "#layout-patterns">layout patterns</a>.
+  </li>
+
+  <li>Support for different <a href="#form-factors">form factors</a>.
+  </li>
+
+  <li>Miscellaneous <a href="#utils">utility</a> functions.
+  </li>
+</ul>
+
+<h2 id="backward">Backward Compatibility</h2>
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/tools/support-library/appbar-kitkat.png"
+    srcset="{@docRoot}images/tools/support-library/appbar-kitkat.png 1x,
+        {@docRoot}images/tools/support-library/appbar-kitkat_2x.png 2x"
+    alt="" width="300">
+  <p class="img-caption">
+    <strong>Figure 1.</strong> Because this app uses support library UI
+    elements its interface incorporates material design principles, even though
+    it is running on Android 4.4, which does not include native support for
+    material design.
+  </p>
+</div>
+
+<p>
+  Support libraries allow apps running on older versions of the Android
+  platform to support features made available on newer versions of the
+  platform. For example, an app running on a version of Android lower than 5.0
+  (API level 21) that relies on framework classes cannot display
+  material-design elements, as that version of the Android framework doesn't
+  support material design. However, if the app incorporates the Support
+  Library's <a href="{@docRoot}tools/support-library/features.html">appcompat
+  library</a>, the app has access to many of the features available in API
+  level 21, including support for material design. As a result, your app can
+  deliver a more consistent experience across a broader range of platform
+  versions.
+</p>
+
+
+<p>
+  In some cases, the support library version of a class depends as much as
+  possible on the functionality that the framework provides. In these cases,
+  if an app calls one of the support class's methods, the support library's
+  behavior depends on what version of Android the app is running on. If the
+  framework provides the necessary functionality, the support library calls on
+  the framework to perform the task. If the app is running on an earlier
+  version of Android, and the framework doesn't expose the needed
+  functionality, the support library may try to provide the functionality
+  itself, or may act as a no-op. In either case, the app generally doesn't
+  need to check what version of Android it's running on; instead, the app
+  can rely on the support library to do those checks and choose appropriate
+  behavior. Generally, classes whose names end in
+  <code>…Compat</code> (like {@link android.support.v4.app.ActivityCompat})
+  behave this way.
+</p>
+
+<p>
+  In other cases, the support library class provides a complete, standalone
+  version of a framework class that does not rely on the availability of
+  any framework APIs. These
+  methods provide consistent behavior across all supported platforms.
+</p>
+
+<p>
+  In either case, the app does not need to check the system version at run
+  time. The app can rely on the support library class to do the appropriate
+  system checks, and modify its behavior as necessary.
+</p>
+
+<h2 id="layout-patterns">Support for General Layout Patterns</h2>
+
+<p>
+  Support libraries provide user interface elements not offered by
+  the Android framework. For example, the Android Support Library offers additional
+  layout classes, like {@link android.support.v4.widget.DrawerLayout}. These
+  classes follow recommended Android design practices; for example, the Design
+  Library follows the principles of material design in a way that works across
+  many versions of Android.
+</p>
+
+<p>
+  By using these support library classes, you can avoid having to reinvent the
+  wheel; if your app has a particular user interface requirement, you can draw
+  on existing code, which provides a user interface that users will already be
+  familiar with. These elements also help you build an app that looks and feels
+  like a part of the Android ecosystem. For example, many apps need to display
+  arbitrarily long lists of elements, and need to be able to quickly and
+  efficiently reuse those elements as the list changes; this might be a list of
+  emails, contacts, music albums, and so on. Those apps can use the support
+  library {@link android.support.v7.widget.RecyclerView} widget to display the
+  list. This saves the app developer from having to develop the list from
+  scratch, and also ensures that the user will see a list that looks and
+  behaves like lists in other apps.
+</p>
+
+<h2 id="form-factors">Support for Different Form Factors</h2>
+
+<p>
+  The Android SDK provides libraries for a number of different form factors,
+  such as TV and wearables. An app can depend on the appropriate support
+  library to provide functionality across a wide range of platform versions,
+  and can provide content on external screens, speakers, and other destination
+  devices.
+</p>
+
+<h2 id="utils">General Utilities</h2>
+
+<p>
+  The Android Support Library provides backward-compatible utility functions.
+  Apps can use these utility functions to provide an appropriate user
+  experience across a wide range of Android system versions. For example,
+  support library permission methods behave appropriately depending on what
+  platform version your app is running on. If the platform supports the
+  runtime permissions model, these methods request the appropriate permission
+  from the user; on platform versions that do not support the runtime
+  permissions model, the methods check whether the appropriate permission was
+  granted at install time.
+</p>

@@ -17,7 +17,15 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+
+import com.android.internal.os.IResultReceiver;
+import com.android.internal.R;
+
+import java.util.List;
 
 /**
  * Provides low-level communication with the system window manager for
@@ -47,26 +55,26 @@ import android.os.IBinder;
  */
 public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    private final Display mDisplay;
+    private final Context mContext;
     private final Window mParentWindow;
 
     private IBinder mDefaultToken;
 
-    public WindowManagerImpl(Display display) {
-        this(display, null);
+    public WindowManagerImpl(Context context) {
+        this(context, null);
     }
 
-    private WindowManagerImpl(Display display, Window parentWindow) {
-        mDisplay = display;
+    private WindowManagerImpl(Context context, Window parentWindow) {
+        mContext = context;
         mParentWindow = parentWindow;
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
-        return new WindowManagerImpl(mDisplay, parentWindow);
+        return new WindowManagerImpl(mContext, parentWindow);
     }
 
-    public WindowManagerImpl createPresentationWindowManager(Display display) {
-        return new WindowManagerImpl(display, mParentWindow);
+    public WindowManagerImpl createPresentationWindowManager(Context displayContext) {
+        return new WindowManagerImpl(displayContext, mParentWindow);
     }
 
     /**
@@ -82,7 +90,7 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
-        mGlobal.addView(view, params, mDisplay, mParentWindow);
+        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
     }
 
     @Override
@@ -117,7 +125,25 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
+    public void requestAppKeyboardShortcuts(
+            final KeyboardShortcutsReceiver receiver, int deviceId) {
+        IResultReceiver resultReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                List<KeyboardShortcutGroup> result =
+                        resultData.getParcelableArrayList(PARCEL_KEY_SHORTCUTS_ARRAY);
+                receiver.onKeyboardShortcutsReceived(result);
+            }
+        };
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                .requestAppKeyboardShortcuts(resultReceiver, deviceId);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
     public Display getDefaultDisplay() {
-        return mDisplay;
+        return mContext.getDisplay();
     }
 }

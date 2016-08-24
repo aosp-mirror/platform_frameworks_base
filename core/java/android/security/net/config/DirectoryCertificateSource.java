@@ -126,6 +126,13 @@ abstract class DirectoryCertificateSource implements CertificateSource {
         });
     }
 
+    @Override
+    public void handleTrustStorageUpdate() {
+        synchronized (mLock) {
+            mCertificates = null;
+        }
+    }
+
     private static interface CertSelector {
         boolean match(X509Certificate cert);
     }

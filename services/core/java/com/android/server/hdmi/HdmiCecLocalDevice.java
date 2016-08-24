@@ -650,7 +650,7 @@ abstract class HdmiCecLocalDevice {
     void addAndStartAction(final HdmiCecFeatureAction action) {
         assertRunOnServiceThread();
         mActions.add(action);
-        if (mService.isPowerStandby()) {
+        if (mService.isPowerStandby() || !mService.isAddressAllocated()) {
             Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }

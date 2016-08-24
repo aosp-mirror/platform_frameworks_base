@@ -17,6 +17,9 @@
 package com.android.server.wm;
 
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -26,15 +29,15 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.util.Slog;
 
 class CircularDisplayMask {
-    private static final String TAG = "CircularDisplayMask";
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "CircularDisplayMask" : TAG_WM;
 
     // size of the chin
     private int mScreenOffset = 0;
@@ -64,8 +67,8 @@ class CircularDisplayMask {
 
         SurfaceControl ctrl = null;
         try {
-            if (WindowManagerService.DEBUG_SURFACE_TRACE) {
-                ctrl = new WindowStateAnimator.SurfaceTrace(session, "CircularDisplayMask",
+            if (DEBUG_SURFACE_TRACE) {
+                ctrl = new WindowSurfaceController.SurfaceTrace(session, "CircularDisplayMask",
                         mScreenSize.x, mScreenSize.y, PixelFormat.TRANSLUCENT,
                         SurfaceControl.HIDDEN);
             } else {

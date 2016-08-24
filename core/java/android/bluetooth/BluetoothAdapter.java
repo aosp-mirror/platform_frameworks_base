@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2015 The Android Open Source Project
+ * Copyright (C) 2009-2016 The Android Open Source Project
  * Copyright (C) 2015 Samsung LSI
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,11 +31,14 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.SynchronousResultReceiver;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
@@ -67,9 +70,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
  * adapter, when running on JELLY_BEAN_MR1 and below, call the
  * static {@link #getDefaultAdapter} method; when running on JELLY_BEAN_MR2 and
- * higher, retrieve it through
- * {@link android.content.Context#getSystemService} with
- * {@link android.content.Context#BLUETOOTH_SERVICE}.
+ * higher, call {@link BluetoothManager#getAdapter}.
  * Fundamentally, this is your starting point for all
  * Bluetooth actions. Once you have the local adapter, you can get a set of
  * {@link BluetoothDevice} objects representing all paired devices with
@@ -471,12 +472,6 @@ public final class BluetoothAdapter {
 
 
     private static final int ADDRESS_LENGTH = 17;
-
-    private static final int CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS = 30;
-    /** @hide */
-    public static final int ACTIVITY_ENERGY_INFO_CACHED = 0;
-    /** @hide */
-    public static final int ACTIVITY_ENERGY_INFO_REFRESHED = 1;
 
     /**
      * Lazily initialized singleton. Guaranteed final after first object
@@ -902,27 +897,9 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean enable() {
-        int state = BluetoothAdapter.STATE_OFF;
         if (isEnabled() == true) {
             if (DBG) Log.d(TAG, "enable(): BT is already enabled..!");
             return true;
-        }
-        // Use service interface to get the exact state
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                state = mService.getState();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-
-        if (state == BluetoothAdapter.STATE_BLE_ON) {
-                Log.e(TAG, "BT is in BLE_ON State");
-                notifyUserAction(true);
-                return true;
         }
         try {
             return mManagerService.enable();
@@ -1441,38 +1418,52 @@ public final class BluetoothAdapter {
      *
      * @return a record with {@link BluetoothActivityEnergyInfo} or null if
      * report is unavailable or unsupported
+     * @deprecated use the asynchronous
+     * {@link #requestControllerActivityEnergyInfo(ResultReceiver)} instead.
      * @hide
      */
+    @Deprecated
     public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
-        if (getState() != STATE_ON) return null;
+        SynchronousResultReceiver receiver = new SynchronousResultReceiver();
+        requestControllerActivityEnergyInfo(receiver);
+        try {
+            SynchronousResultReceiver.Result result = receiver.awaitResult(1000);
+            if (result.bundle != null) {
+                return result.bundle.getParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY);
+            }
+        } catch (TimeoutException e) {
+            Log.e(TAG, "getControllerActivityEnergyInfo timed out");
+        }
+        return null;
+    }
+
+    /**
+     * Request the record of {@link BluetoothActivityEnergyInfo} object that
+     * has the activity and energy info. This can be used to ascertain what
+     * the controller has been up to, since the last sample.
+     *
+     * A null value for the activity info object may be sent if the bluetooth service is
+     * unreachable or the device does not support reporting such information.
+     *
+     * @param result The callback to which to send the activity info.
+     * @hide
+     */
+    public void requestControllerActivityEnergyInfo(ResultReceiver result) {
         try {
             mServiceLock.readLock().lock();
-            BluetoothActivityEnergyInfo record;
             if (mService != null) {
-                if (!mService.isActivityAndEnergyReportingSupported()) {
-                    return null;
-                }
+                mService.requestActivityInfo(result);
+                result = null;
             }
-            synchronized(this) {
-                if (updateType == ACTIVITY_ENERGY_INFO_REFRESHED) {
-                    mService.getActivityEnergyInfoFromController();
-                    wait(CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS);
-                }
-                record = mService.reportActivityInfo();
-                if (record.isValid()) {
-                    return record;
-                } else {
-                    return null;
-                }
-            }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "getControllerActivityEnergyInfoCallback wait interrupted: " + e);
         } catch (RemoteException e) {
             Log.e(TAG, "getControllerActivityEnergyInfoCallback: " + e);
         } finally {
             mServiceLock.readLock().unlock();
+            if (result != null) {
+                // Only send an immediate result if we failed.
+                result.send(0, null);
+            }
         }
-        return null;
     }
 
     /**
@@ -1931,6 +1922,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.SAP) {
             BluetoothSap sap = new BluetoothSap(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.PBAP_CLIENT) {
+            BluetoothPbapClient pbapClient = new BluetoothPbapClient(context, listener);
+            return true;
         } else {
             return false;
         }
@@ -1998,6 +1992,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.SAP:
                 BluetoothSap sap = (BluetoothSap)proxy;
                 sap.close();
+                break;
+            case BluetoothProfile.PBAP_CLIENT:
+                BluetoothPbapClient pbapClient = (BluetoothPbapClient)proxy;
+                pbapClient.close();
                 break;
         }
     }
@@ -2276,7 +2274,7 @@ public final class BluetoothAdapter {
     @Deprecated
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean startLeScan(final UUID[] serviceUuids, final LeScanCallback callback) {
-        if (DBG) Log.d(TAG, "startLeScan(): " + serviceUuids);
+        if (DBG) Log.d(TAG, "startLeScan(): " + Arrays.toString(serviceUuids));
         if (callback == null) {
             if (DBG) Log.e(TAG, "startLeScan: null callback");
             return false;

@@ -21,9 +21,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
@@ -31,9 +34,11 @@ import com.android.systemui.qs.QSTile;
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_enable_animation);
+            new AnimationIcon(R.drawable.ic_signal_airplane_enable_animation,
+                    R.drawable.ic_signal_airplane_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_disable_animation);
+            new AnimationIcon(R.drawable.ic_signal_airplane_disable_animation,
+                    R.drawable.ic_signal_airplane_enable);
     private final GlobalSetting mSetting;
 
     private boolean mListening;
@@ -50,7 +55,7 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected BooleanState newTileState() {
+    public BooleanState newTileState() {
         return new BooleanState();
     }
 
@@ -58,8 +63,6 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     public void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         setEnabled(!mState.value);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     private void setEnabled(boolean enabled) {
@@ -69,26 +72,34 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
+    }
+
+    @Override
+    public CharSequence getTileLabel() {
+        return mContext.getString(R.string.airplane_mode);
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer)arg : mSetting.getValue();
         final boolean airplaneMode = value != 0;
         state.value = airplaneMode;
-        state.visible = true;
         state.label = mContext.getString(R.string.airplane_mode);
         if (airplaneMode) {
             state.icon = mEnable;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane_on);
         } else {
             state.icon = mDisable;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane_off);
         }
+        state.contentDescription = state.label;
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_AIRPLANEMODE;
+        return MetricsEvent.QS_AIRPLANEMODE;
     }
 
     @Override

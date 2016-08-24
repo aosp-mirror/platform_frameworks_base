@@ -35,4 +35,6 @@ interface IPersistentDataBlockService {
 
     void setOemUnlockEnabled(boolean enabled);
     boolean getOemUnlockEnabled();
+    int getFlashLockState();
 }
+

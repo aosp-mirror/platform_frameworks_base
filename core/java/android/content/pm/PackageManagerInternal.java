@@ -16,7 +16,11 @@
 
 package android.content.pm;
 
-import android.annotation.NonNull;
+import android.content.ComponentName;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.SparseArray;
+
+import java.util.List;
 
 /**
  * Package manager local system service interface.
@@ -57,12 +61,6 @@ public abstract class PackageManagerInternal {
      * @param provider The packages provider.
      */
     public abstract void setLocationPackagesProvider(PackagesProvider provider);
-
-    /**
-     * Sets the input method packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setImePackagesProvider(PackagesProvider provider);
 
     /**
      * Sets the voice interaction packages provider.
@@ -115,4 +113,51 @@ public abstract class PackageManagerInternal {
      */
     public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
             int userId);
+
+    /**
+     * Sets a list of apps to keep in PM's internal data structures and as APKs even if no user has
+     * currently installed it. The apps are not preloaded.
+     * @param packageList List of package names to keep cached.
+     */
+    public abstract void setKeepUninstalledPackages(List<String> packageList);
+
+    /**
+     * Gets whether some of the permissions used by this package require a user
+     * review before any of the app components can run.
+     * @param packageName The package name for which to check.
+     * @param userId The user under which to check.
+     * @return True a permissions review is required.
+     */
+    public abstract boolean isPermissionsReviewRequired(String packageName, int userId);
+
+    /**
+     * Gets all of the information we know about a particular package.
+     *
+     * @param packageName The package name to find.
+     * @param userId The user under which to check.
+     *
+     * @return An {@link ApplicationInfo} containing information about the
+     *         package.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
+     */
+    public abstract ApplicationInfo getApplicationInfo(String packageName, int userId);
+
+    /**
+     * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.
+     */
+    public abstract ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
+            int userId);
+
+    /**
+     * Called by DeviceOwnerManagerService to set the package names of device owner and profile
+     * owners.
+     */
+    public abstract void setDeviceAndProfileOwnerPackages(
+            int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
+
+    /**
+     * Whether a package's data be cleared.
+     */
+    public abstract boolean canPackageBeWiped(int userId, String packageName);
 }

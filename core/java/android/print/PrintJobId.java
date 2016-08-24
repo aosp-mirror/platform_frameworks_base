@@ -16,9 +16,11 @@
 
 package android.print;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ import java.util.UUID;
  * This class represents the id of a print job.
  */
 public final class PrintJobId implements Parcelable {
-    private final String mValue;
+    private final @NonNull String mValue;
 
     /**
      * Creates a new instance.
@@ -44,7 +46,7 @@ public final class PrintJobId implements Parcelable {
      *
      * @hide
      */
-    public PrintJobId(String value) {
+    public PrintJobId(@NonNull String value) {
         mValue = value;
     }
 
@@ -52,7 +54,7 @@ public final class PrintJobId implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((mValue != null) ? mValue.hashCode() : 0);
+        result = prime * result + mValue.hashCode();
         return result;
     }
 
@@ -68,7 +70,7 @@ public final class PrintJobId implements Parcelable {
             return false;
         }
         PrintJobId other = (PrintJobId) obj;
-        if (!TextUtils.equals(mValue, other.mValue)) {
+        if (!mValue.equals(other.mValue)) {
             return false;
         }
         return true;
@@ -91,19 +93,19 @@ public final class PrintJobId implements Parcelable {
      *
      * @hide
      */
-    public String flattenToString() {
+    public @NonNull String flattenToString() {
         return mValue;
     }
 
     /**
      * Unflattens a print job id from a string.
      *
-     * @string The string.
+     * @param string The string.
      * @return The unflattened id, or null if the string is malformed.
      *
      * @hide
      */
-    public static PrintJobId unflattenFromString(String string) {
+    public static @NonNull PrintJobId unflattenFromString(@NonNull String string) {
         return new PrintJobId(string);
     }
 
@@ -111,7 +113,7 @@ public final class PrintJobId implements Parcelable {
             new Parcelable.Creator<PrintJobId>() {
         @Override
         public PrintJobId createFromParcel(Parcel parcel) {
-            return new PrintJobId(parcel.readString());
+            return new PrintJobId(Preconditions.checkNotNull(parcel.readString()));
         }
 
         @Override

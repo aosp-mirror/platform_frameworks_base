@@ -16,21 +16,21 @@
 
 package com.android.server.policy;
 
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
+import static android.view.WindowManagerInternal.AppTransitionListener;
+
 import android.app.StatusBarManager;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.Slog;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.Interpolator;
 import android.view.animation.TranslateAnimation;
 
-import com.android.internal.statusbar.IStatusBarService;
-
-import static android.view.WindowManagerInternal.*;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 /**
  * Implements status bar specific behavior.
@@ -47,15 +47,9 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.appTransitionPending();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is pending", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.appTransitionPending();
                     }
                 }
             });
@@ -67,19 +61,13 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            long startTime = calculateStatusBarTransitionStartTime(openAnimation,
-                                    closeAnimation);
-                            long duration = closeAnimation != null || openAnimation != null
-                                    ? TRANSITION_DURATION : 0;
-                            statusbar.appTransitionStarting(startTime, duration);
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is starting", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        long startTime = calculateStatusBarTransitionStartTime(openAnimation,
+                                closeAnimation);
+                        long duration = closeAnimation != null || openAnimation != null
+                                ? TRANSITION_DURATION : 0;
+                        statusbar.appTransitionStarting(startTime, duration);
                     }
                 }
             });
@@ -90,15 +78,23 @@ public class StatusBarController extends BarController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.appTransitionCancelled();
-                        }
-                    } catch (RemoteException e) {
-                        Slog.e(mTag, "RemoteException when app transition is cancelled", e);
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarInternal();
+                    if (statusbar != null) {
+                        statusbar.appTransitionCancelled();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onAppTransitionFinishedLocked(IBinder token) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    StatusBarManagerInternal statusbar = LocalServices.getService(
+                            StatusBarManagerInternal.class);
+                    if (statusbar != null) {
+                        statusbar.appTransitionFinished();
                     }
                 }
             });
@@ -111,7 +107,13 @@ public class StatusBarController extends BarController {
                 View.STATUS_BAR_UNHIDE,
                 View.STATUS_BAR_TRANSLUCENT,
                 StatusBarManager.WINDOW_STATUS_BAR,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                FLAG_TRANSLUCENT_STATUS,
+                View.STATUS_BAR_TRANSPARENT);
+    }
+
+    @Override
+    protected boolean skipAnimation() {
+        return mWin.getAttrs().height == MATCH_PARENT;
     }
 
     public AppTransitionListener getAppTransitionListener() {
@@ -124,7 +126,7 @@ public class StatusBarController extends BarController {
      *
      * @return the desired start time of the status bar transition, in uptime millis
      */
-    private long calculateStatusBarTransitionStartTime(Animation openAnimation,
+    private static long calculateStatusBarTransitionStartTime(Animation openAnimation,
             Animation closeAnimation) {
         if (openAnimation != null && closeAnimation != null) {
             TranslateAnimation openTranslateAnimation = findTranslateAnimation(openAnimation);
@@ -153,7 +155,7 @@ public class StatusBarController extends BarController {
      *
      * @return the found animation, {@code null} otherwise
      */
-    private TranslateAnimation findTranslateAnimation(Animation animation) {
+    private static TranslateAnimation findTranslateAnimation(Animation animation) {
         if (animation instanceof TranslateAnimation) {
             return (TranslateAnimation) animation;
         } else if (animation instanceof AnimationSet) {
@@ -172,7 +174,7 @@ public class StatusBarController extends BarController {
      * Binary searches for a {@code t} such that there exists a {@code -0.01 < eps < 0.01} for which
      * {@code interpolator(t + eps) > 0.99}.
      */
-    private float findAlmostThereFraction(Interpolator interpolator) {
+    private static float findAlmostThereFraction(Interpolator interpolator) {
         float val = 0.5f;
         float adj = 0.25f;
         while (adj >= 0.01f) {

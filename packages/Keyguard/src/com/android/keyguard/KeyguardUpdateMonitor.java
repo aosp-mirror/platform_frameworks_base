@@ -188,7 +188,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /** Tracks whether strong authentication hasn't been used since quite some time per user. */
     private ArraySet<Integer> mStrongAuthNotTimedOut = new ArraySet<>();
-    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker();
+    private final StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -606,6 +606,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
+        @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (DEBUG) Log.d(TAG, "received broadcast " + action);
@@ -674,6 +675,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private final BroadcastReceiver mBroadcastAllReceiver = new BroadcastReceiver() {
 
+        @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(action)) {
@@ -806,6 +808,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return new SimData(state, slotId, subId);
         }
 
+        @Override
         public String toString() {
             return "SimData{state=" + simState + ",slotId=" + slotId + ",subId=" + subId + "}";
         }
@@ -868,6 +871,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        public StrongAuthTracker(Context context) {
+            super(context);
+        }
 
         public boolean isUnlockingWithFingerprintAllowed() {
             int userId = getCurrentUser();
@@ -978,6 +984,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager = SubscriptionManager.from(context);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
+        mStrongAuthTracker = new StrongAuthTracker(context);
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -1549,12 +1556,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mFailedAttempts.delete(sCurrentUser);
     }
 
-    public int getFailedUnlockAttempts() {
-        return mFailedAttempts.get(sCurrentUser, 0);
+    public int getFailedUnlockAttempts(int userId) {
+        return mFailedAttempts.get(userId, 0);
     }
 
-    public void reportFailedStrongAuthUnlockAttempt() {
-        mFailedAttempts.put(sCurrentUser, getFailedUnlockAttempts() + 1);
+    public void reportFailedStrongAuthUnlockAttempt(int userId) {
+        mFailedAttempts.put(userId, getFailedUnlockAttempts(userId) + 1);
     }
 
     public void clearFingerprintRecognized() {
@@ -1711,6 +1718,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         pw.println("  Service states:");
         for (int subId : mServiceStates.keySet()) {
             pw.println("    " + subId + "=" + mServiceStates.get(subId));
+        }
+        if (mFpm != null && mFpm.isHardwareDetected()) {
+            final int userId = ActivityManager.getCurrentUser();
+            final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
+            pw.println("  Fingerprint state (user=" + userId + ")");
+            pw.println("    allowed=" + isUnlockingWithFingerprintAllowed());
+            pw.println("    auth'd=" + mUserFingerprintAuthenticated.get(userId));
+            pw.println("    authSinceBoot="
+                    + getStrongAuthTracker().hasUserAuthenticatedSinceBoot());
+            pw.println("    disabled(DPM)=" + isFingerprintDisabled(userId));
+            pw.println("    possible=" + isUnlockWithFingerprintPossible(userId));
+            pw.println("    strongAuthFlags=" + Integer.toHexString(strongAuthFlags));
+            pw.println("    timedout=" + hasFingerprintUnlockTimedOut(userId));
+            pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
         }
     }
 }

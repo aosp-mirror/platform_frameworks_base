@@ -16,6 +16,7 @@
 
 package com.android.systemui.usb;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
@@ -96,6 +97,11 @@ public class StorageNotification extends SystemUI {
         @Override
         public void onDiskScanned(DiskInfo disk, int volumeCount) {
             onDiskScannedInternal(disk, volumeCount);
+        }
+
+        @Override
+        public void onDiskDestroyed(DiskInfo disk) {
+            onDiskDestroyedInternal(disk);
         }
     };
 
@@ -192,7 +198,7 @@ public class StorageNotification extends SystemUI {
                         rec.getNickname());
                 final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
 
-                final Notification notif = new Notification.Builder(mContext)
+                Notification.Builder builder = new Notification.Builder(mContext)
                         .setSmallIcon(R.drawable.ic_sd_card_48dp)
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setContentTitle(title)
@@ -202,10 +208,11 @@ public class StorageNotification extends SystemUI {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setLocalOnly(true)
                         .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setDeleteIntent(buildSnoozeIntent(fsUuid))
-                        .build();
+                        .setDeleteIntent(buildSnoozeIntent(fsUuid));
+                SystemUI.overrideNotificationAppName(mContext, builder);
 
-                mNotificationManager.notifyAsUser(fsUuid, PRIVATE_ID, notif, UserHandle.ALL);
+                mNotificationManager.notifyAsUser(fsUuid, PRIVATE_ID, builder
+                        .build(), UserHandle.ALL);
             }
         }
     }
@@ -218,7 +225,7 @@ public class StorageNotification extends SystemUI {
             final CharSequence text = mContext.getString(
                     R.string.ext_media_unsupported_notification_message, disk.getDescription());
 
-            final Notification notif = new Notification.Builder(mContext)
+            Notification.Builder builder = new Notification.Builder(mContext)
                     .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
                     .setColor(mContext.getColor(R.color.system_notification_accent_color))
                     .setContentTitle(title)
@@ -227,15 +234,25 @@ public class StorageNotification extends SystemUI {
                     .setStyle(new Notification.BigTextStyle().bigText(text))
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setLocalOnly(true)
-                    .setCategory(Notification.CATEGORY_ERROR)
-                    .build();
+                    .setCategory(Notification.CATEGORY_ERROR);
+            SystemUI.overrideNotificationAppName(mContext, builder);
 
-            mNotificationManager.notifyAsUser(disk.getId(), DISK_ID, notif, UserHandle.ALL);
+            mNotificationManager.notifyAsUser(disk.getId(), DISK_ID, builder.build(),
+                    UserHandle.ALL);
 
         } else {
             // Yay, we have volumes!
             mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
         }
+    }
+
+    /**
+     * Remove all notifications for a disk when it goes away.
+     *
+     * @param disk The disk that went away.
+     */
+    private void onDiskDestroyedInternal(@NonNull DiskInfo disk) {
+        mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
     }
 
     private void onVolumeStateChangedInternal(VolumeInfo vol) {
@@ -456,7 +473,7 @@ public class StorageNotification extends SystemUI {
             intent = buildWizardMigratePendingIntent(move);
         }
 
-        final Notification notif = new Notification.Builder(mContext)
+        Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_sd_card_48dp)
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
@@ -468,10 +485,11 @@ public class StorageNotification extends SystemUI {
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setPriority(Notification.PRIORITY_LOW)
                 .setProgress(100, status, false)
-                .setOngoing(true)
-                .build();
+                .setOngoing(true);
+        SystemUI.overrideNotificationAppName(mContext, builder);
 
-        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID,
+                builder.build(), UserHandle.ALL);
     }
 
     private void onMoveFinished(MoveInfo move, int status) {
@@ -505,7 +523,7 @@ public class StorageNotification extends SystemUI {
             intent = null;
         }
 
-        final Notification notif = new Notification.Builder(mContext)
+        Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_sd_card_48dp)
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
@@ -516,10 +534,11 @@ public class StorageNotification extends SystemUI {
                 .setLocalOnly(true)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setPriority(Notification.PRIORITY_LOW)
-                .setAutoCancel(true)
-                .build();
+                .setAutoCancel(true);
+        SystemUI.overrideNotificationAppName(mContext, builder);
 
-        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID, notif, UserHandle.ALL);
+        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID, builder.build(),
+                UserHandle.ALL);
     }
 
     private int getSmallIcon(DiskInfo disk, int state) {
@@ -540,7 +559,7 @@ public class StorageNotification extends SystemUI {
 
     private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
             CharSequence text) {
-        return new Notification.Builder(mContext)
+        Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
                 .setColor(mContext.getColor(R.color.system_notification_accent_color))
                 .setContentTitle(title)
@@ -548,6 +567,8 @@ public class StorageNotification extends SystemUI {
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setLocalOnly(true);
+        overrideNotificationAppName(mContext, builder);
+        return builder;
     }
 
     private PendingIntent buildInitPendingIntent(DiskInfo disk) {
@@ -639,8 +660,9 @@ public class StorageNotification extends SystemUI {
         intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
 
         final VolumeInfo vol = mStorageManager.findVolumeByQualifiedUuid(move.volumeUuid);
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
-
+        if (vol != null) {
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+        }
         return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }

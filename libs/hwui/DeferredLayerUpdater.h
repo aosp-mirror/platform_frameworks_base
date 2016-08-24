@@ -35,7 +35,7 @@ class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer);
+    ANDROID_API DeferredLayerUpdater(Layer* layer);
     ANDROID_API ~DeferredLayerUpdater();
 
     ANDROID_API bool setSize(int width, int height) {
@@ -46,6 +46,9 @@ public:
         }
         return false;
     }
+
+    int getWidth() { return mWidth; }
+    int getHeight() { return mHeight; }
 
     ANDROID_API bool setBlend(bool blend) {
         if (blend != mBlend) {
@@ -75,15 +78,19 @@ public:
         mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
     }
 
+    SkMatrix* getTransform() {
+        return mTransform;
+    }
+
     ANDROID_API void setPaint(const SkPaint* paint);
 
-    ANDROID_API bool apply();
+    void apply();
 
     Layer* backingLayer() {
         return mLayer;
     }
 
-    ANDROID_API void detachSurfaceTexture();
+    void detachSurfaceTexture();
 
 private:
     // Generic properties
@@ -101,7 +108,6 @@ private:
 
     Layer* mLayer;
     Caches& mCaches;
-    renderthread::RenderThread& mRenderThread;
 
     void doUpdateTexImage();
 };

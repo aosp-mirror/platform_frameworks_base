@@ -931,9 +931,7 @@ public final class TvContentRating {
      *
      * @param rating The {@link TvContentRating} to check.
      * @return {@code true} if this object contains {@code rating}, {@code false} otherwise.
-     * @hide
      */
-    @SystemApi
     public final boolean contains(@NonNull TvContentRating rating) {
         Preconditions.checkNotNull(rating);
         if (!rating.getMainRating().equals(mRating)) {

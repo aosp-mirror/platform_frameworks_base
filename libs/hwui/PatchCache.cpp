@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <utils/JenkinsHash.h>
 #include <utils/Log.h>
 
@@ -34,20 +32,12 @@ namespace uirenderer {
 
 PatchCache::PatchCache(RenderState& renderState)
         : mRenderState(renderState)
+        , mMaxSize(Properties::patchCacheSize)
         , mSize(0)
         , mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity)
         , mMeshBuffer(0)
         , mFreeBlocks(nullptr)
-        , mGenerationId(0) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting patch cache size to %skB", property);
-        mMaxSize = KB(atoi(property));
-    } else {
-        INIT_LOGD("  Using default patch cache size of %.2fkB", DEFAULT_PATCH_CACHE_SIZE);
-        mMaxSize = KB(DEFAULT_PATCH_CACHE_SIZE);
-    }
-}
+        , mGenerationId(0) {}
 
 PatchCache::~PatchCache() {
     clear();

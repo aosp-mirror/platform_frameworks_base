@@ -16,9 +16,11 @@
 
 package android.view.inputmethod;
 
+import android.annotation.CallSuper;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.NoCopySpan;
@@ -153,12 +155,11 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * Called when this InputConnection is no longer used by the InputMethodManager.
-     *
-     * @hide
+     * Default implementation calls {@link #finishComposingText()}.
      */
-    protected void reportFinish() {
-        // Intentionaly empty
+    @CallSuper
+    public void closeConnection() {
+        finishComposingText();
     }
 
     /**
@@ -195,16 +196,22 @@ public class BaseInputConnection implements InputConnection {
     public boolean commitText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "commitText " + text);
         replaceText(text, newCursorPosition, false);
-        mIMM.notifyUserAction();
         sendCurrentText();
         return true;
     }
 
     /**
-     * The default implementation performs the deletion around the current
-     * selection position of the editable text.
-     * @param beforeLength
-     * @param afterLength
+     * The default implementation performs the deletion around the current selection position of the
+     * editable text.
+     *
+     * @param beforeLength The number of characters before the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
@@ -213,7 +220,7 @@ public class BaseInputConnection implements InputConnection {
         if (content == null) return false;
 
         beginBatchEdit();
-        
+
         int a = Selection.getSelectionStart(content);
         int b = Selection.getSelectionEnd(content);
 
@@ -223,7 +230,7 @@ public class BaseInputConnection implements InputConnection {
             b = tmp;
         }
 
-        // ignore the composing text.
+        // Ignore the composing text.
         int ca = getComposingSpanStart(content);
         int cb = getComposingSpanEnd(content);
         if (cb < ca) {
@@ -253,9 +260,170 @@ public class BaseInputConnection implements InputConnection {
 
             content.delete(b, end);
         }
-        
+
         endBatchEdit();
-        
+
+        return true;
+    }
+
+    private static int INVALID_INDEX = -1;
+    private static int findIndexBackward(final CharSequence cs, final int from,
+            final int numCodePoints) {
+        int currentIndex = from;
+        boolean waitingHighSurrogate = false;
+        final int N = cs.length();
+        if (currentIndex < 0 || N < currentIndex) {
+            return INVALID_INDEX;  // The starting point is out of range.
+        }
+        if (numCodePoints < 0) {
+            return INVALID_INDEX;  // Basically this should not happen.
+        }
+        int remainingCodePoints = numCodePoints;
+        while (true) {
+            if (remainingCodePoints == 0) {
+                return currentIndex;  // Reached to the requested length in code points.
+            }
+
+            --currentIndex;
+            if (currentIndex < 0) {
+                if (waitingHighSurrogate) {
+                    return INVALID_INDEX;  // An invalid surrogate pair is found.
+                }
+                return 0;  // Reached to the beginning of the text w/o any invalid surrogate pair.
+            }
+            final char c = cs.charAt(currentIndex);
+            if (waitingHighSurrogate) {
+                if (!java.lang.Character.isHighSurrogate(c)) {
+                    return INVALID_INDEX;  // An invalid surrogate pair is found.
+                }
+                waitingHighSurrogate = false;
+                --remainingCodePoints;
+                continue;
+            }
+            if (!java.lang.Character.isSurrogate(c)) {
+                --remainingCodePoints;
+                continue;
+            }
+            if (java.lang.Character.isHighSurrogate(c)) {
+                return INVALID_INDEX;  // A invalid surrogate pair is found.
+            }
+            waitingHighSurrogate = true;
+        }
+    }
+
+    private static int findIndexForward(final CharSequence cs, final int from,
+            final int numCodePoints) {
+        int currentIndex = from;
+        boolean waitingLowSurrogate = false;
+        final int N = cs.length();
+        if (currentIndex < 0 || N < currentIndex) {
+            return INVALID_INDEX;  // The starting point is out of range.
+        }
+        if (numCodePoints < 0) {
+            return INVALID_INDEX;  // Basically this should not happen.
+        }
+        int remainingCodePoints = numCodePoints;
+
+        while (true) {
+            if (remainingCodePoints == 0) {
+                return currentIndex;  // Reached to the requested length in code points.
+            }
+
+            if (currentIndex >= N) {
+                if (waitingLowSurrogate) {
+                    return INVALID_INDEX;  // An invalid surrogate pair is found.
+                }
+                return N;  // Reached to the end of the text w/o any invalid surrogate pair.
+            }
+            final char c = cs.charAt(currentIndex);
+            if (waitingLowSurrogate) {
+                if (!java.lang.Character.isLowSurrogate(c)) {
+                    return INVALID_INDEX;  // An invalid surrogate pair is found.
+                }
+                --remainingCodePoints;
+                waitingLowSurrogate = false;
+                ++currentIndex;
+                continue;
+            }
+            if (!java.lang.Character.isSurrogate(c)) {
+                --remainingCodePoints;
+                ++currentIndex;
+                continue;
+            }
+            if (java.lang.Character.isLowSurrogate(c)) {
+                return INVALID_INDEX;  // A invalid surrogate pair is found.
+            }
+            waitingLowSurrogate = true;
+            ++currentIndex;
+        }
+    }
+
+    /**
+     * The default implementation performs the deletion around the current selection position of the
+     * editable text.
+     * @param beforeLength The number of characters before the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
+     */
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+        if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
+                + " / " + afterLength);
+        final Editable content = getEditable();
+        if (content == null) return false;
+
+        beginBatchEdit();
+
+        int a = Selection.getSelectionStart(content);
+        int b = Selection.getSelectionEnd(content);
+
+        if (a > b) {
+            int tmp = a;
+            a = b;
+            b = tmp;
+        }
+
+        // Ignore the composing text.
+        int ca = getComposingSpanStart(content);
+        int cb = getComposingSpanEnd(content);
+        if (cb < ca) {
+            int tmp = ca;
+            ca = cb;
+            cb = tmp;
+        }
+        if (ca != -1 && cb != -1) {
+            if (ca < a) a = ca;
+            if (cb > b) b = cb;
+        }
+
+        if (a >= 0 && b >= 0) {
+            final int start = findIndexBackward(content, a, Math.max(beforeLength, 0));
+            if (start != INVALID_INDEX) {
+                final int end = findIndexForward(content, b, Math.max(afterLength, 0));
+                if (end != INVALID_INDEX) {
+                    final int numDeleteBefore = a - start;
+                    if (numDeleteBefore > 0) {
+                        content.delete(start, a);
+                    }
+                    final int numDeleteAfter = end - b;
+                    if (numDeleteAfter > 0) {
+                        content.delete(b - numDeleteBefore, end - numDeleteBefore);
+                    }
+                }
+            }
+            // NOTE: You may think we should return false here if start and/or end is INVALID_INDEX,
+            // but the truth is that IInputConnectionWrapper running in the middle of IPC calls
+            // always returns true to the IME without waiting for the completion of this method as
+            // IInputConnectionWrapper#isAtive() returns true.  This is actually why some methods
+            // including this method look like asynchronous calls from the IME.
+        }
+
+        endBatchEdit();
+
         return true;
     }
 
@@ -435,6 +603,10 @@ public class BaseInputConnection implements InputConnection {
         return false;
     }
 
+    public Handler getHandler() {
+        return null;
+    }
+
     /**
      * The default implementation places the given text into the editable,
      * replacing any existing composing text.  The new text is marked as
@@ -443,7 +615,6 @@ public class BaseInputConnection implements InputConnection {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "setComposingText " + text);
         replaceText(text, newCursorPosition, true);
-        mIMM.notifyUserAction();
         return true;
     }
 
@@ -516,29 +687,17 @@ public class BaseInputConnection implements InputConnection {
      * attached to the input connection's view.
      */
     public boolean sendKeyEvent(KeyEvent event) {
-        synchronized (mIMM.mH) {
-            ViewRootImpl viewRootImpl = mTargetView != null ? mTargetView.getViewRootImpl() : null;
-            if (viewRootImpl == null) {
-                if (mIMM.mServedView != null) {
-                    viewRootImpl = mIMM.mServedView.getViewRootImpl();
-                }
-            }
-            if (viewRootImpl != null) {
-                viewRootImpl.dispatchKeyFromIme(event);
-            }
-        }
-        mIMM.notifyUserAction();
+        mIMM.dispatchKeyEventFromInputMethod(mTargetView, event);
         return false;
     }
-    
+
     /**
      * Updates InputMethodManager with the current fullscreen mode.
      */
     public boolean reportFullscreenMode(boolean enabled) {
-        mIMM.setFullscreenMode(enabled);
         return true;
     }
-    
+
     private void sendCurrentText() {
         if (!mDummyMode) {
             return;

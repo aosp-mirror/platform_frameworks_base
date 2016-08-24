@@ -17,10 +17,6 @@
 #ifndef ANDROID_HWUI_STENCIL_H
 #define ANDROID_HWUI_STENCIL_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <GLES2/gl2.h>
 
 #include <cutils/compiler.h>
@@ -34,8 +30,6 @@ namespace uirenderer {
 
 class ANDROID_API Stencil {
 public:
-    Stencil();
-
     /**
      * Returns the desired size for the stencil buffer. If the returned value
      * is 0, then no stencil buffer is required.
@@ -85,32 +79,31 @@ public:
      * Indicates whether either test or write is enabled.
      */
     bool isEnabled() {
-        return mState != kDisabled;
+        return mState != StencilState::Disabled;
     }
 
     /**
      * Indicates whether testing only is enabled.
      */
     bool isTestEnabled() {
-        return mState == kTest;
+        return mState == StencilState::Test;
     }
 
     bool isWriteEnabled() {
-        return mState == kWrite;
+        return mState == StencilState::Write;
     }
 
     void dump();
 
 private:
-    void enable();
-
-    enum StencilState {
-        kDisabled,
-        kTest,
-        kWrite
+    enum class StencilState {
+        Disabled,
+        Test,
+        Write
     };
 
-    StencilState mState;
+    void enable();
+    StencilState mState = StencilState::Disabled;
 
 }; // class Stencil
 

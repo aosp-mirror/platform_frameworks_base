@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.documentsui.appperftests">
+
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+
+        <activity
+            android:name="com.android.documentsui.LauncherActivity" />
+    </application>
+
+    <!-- This package instrumentates itself, so the DocumentsUI process can be killed without
+         killing the testing package. -->
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.android.documentsui.appperftests"
+        android:label="App performance tests for DocumentsUI" />
+
+</manifest>

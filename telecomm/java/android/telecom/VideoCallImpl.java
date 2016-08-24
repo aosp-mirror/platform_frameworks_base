@@ -42,7 +42,7 @@ public class VideoCallImpl extends VideoCall {
     private final VideoCallListenerBinder mBinder;
     private VideoCall.Callback mCallback;
     private int mVideoQuality = VideoProfile.QUALITY_UNKNOWN;
-    private Call mCall;
+    private int mVideoState = VideoProfile.STATE_AUDIO_ONLY;
 
     private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
         @Override
@@ -57,13 +57,20 @@ public class VideoCallImpl extends VideoCall {
     private final class VideoCallListenerBinder extends IVideoCallback.Stub {
         @Override
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_RECEIVE_SESSION_MODIFY_REQUEST,
                     videoProfile).sendToTarget();
+
         }
 
         @Override
         public void receiveSessionModifyResponse(int status, VideoProfile requestProfile,
                 VideoProfile responseProfile) {
+            if (mHandler == null) {
+                return;
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = status;
             args.arg2 = requestProfile;
@@ -74,12 +81,18 @@ public class VideoCallImpl extends VideoCall {
 
         @Override
         public void handleCallSessionEvent(int event) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_HANDLE_CALL_SESSION_EVENT, event)
                     .sendToTarget();
         }
 
         @Override
         public void changePeerDimensions(int width, int height) {
+            if (mHandler == null) {
+                return;
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = width;
             args.arg2 = height;
@@ -88,18 +101,27 @@ public class VideoCallImpl extends VideoCall {
 
         @Override
         public void changeVideoQuality(int videoQuality) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_VIDEO_QUALITY, videoQuality, 0)
                     .sendToTarget();
         }
 
         @Override
         public void changeCallDataUsage(long dataUsage) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CALL_DATA_USAGE, dataUsage)
                     .sendToTarget();
         }
 
         @Override
         public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
+            if (mHandler == null) {
+                return;
+            }
             mHandler.obtainMessage(MessageHandler.MSG_CHANGE_CAMERA_CAPABILITIES,
                     cameraCapabilities).sendToTarget();
         }
@@ -175,13 +197,12 @@ public class VideoCallImpl extends VideoCall {
 
     private Handler mHandler;
 
-    VideoCallImpl(IVideoProvider videoProvider, Call call) throws RemoteException {
+    VideoCallImpl(IVideoProvider videoProvider) throws RemoteException {
         mVideoProvider = videoProvider;
         mVideoProvider.asBinder().linkToDeath(mDeathRecipient, 0);
 
         mBinder = new VideoCallListenerBinder();
         mVideoProvider.addVideoCallback(mBinder);
-        mCall = call;
     }
 
     public void destroy() {
@@ -270,8 +291,7 @@ public class VideoCallImpl extends VideoCall {
      */
     public void sendSessionModifyRequest(VideoProfile requestProfile) {
         try {
-            VideoProfile originalProfile = new VideoProfile(mCall.getDetails().getVideoState(),
-                    mVideoQuality);
+            VideoProfile originalProfile = new VideoProfile(mVideoState, mVideoQuality);
 
             mVideoProvider.sendSessionModifyRequest(originalProfile, requestProfile);
         } catch (RemoteException e) {
@@ -308,5 +328,13 @@ public class VideoCallImpl extends VideoCall {
             mVideoProvider.setPauseImage(uri);
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Sets the video state for the current video call.
+     * @param videoState the new video state.
+     */
+    public void setVideoState(int videoState) {
+        mVideoState = videoState;
     }
 }

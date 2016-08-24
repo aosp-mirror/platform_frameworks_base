@@ -1,0 +1,1845 @@
+page.title=Data Binding Library
+page.metaDescription=The Data Binding Library enables you to write declarative layouts.
+page.tags="databinding", "layouts"
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      In this document:
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#build_environment">Build Environment</a>
+      </li>
+
+      <li>
+        <a href="#data_binding_layout_files">Data Binding Layout Files</a>
+        <ol>
+          <li>
+            <a href="#writing_expressions">Writing your first set of data binding
+            expressions</a>
+          </li>
+
+          <li>
+            <a href="#data_object">Data Object</a>
+          </li>
+
+          <li>
+            <a href="#binding_data">Binding Data</a>
+          </li>
+          <li>
+            <a href="#event_handling">Event Handling</a>
+            <ol>
+              <li>
+                <a href="#method_references">Method References</a>
+              </li>
+              <li>
+                <a href="#listener_bindings">Listener Bindings</a>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#layout_details">Layout Details</a>
+        <ol>
+          <li>
+            <a href="#imports">Imports</a>
+          </li>
+
+          <li>
+            <a href="#variables">Variables</a>
+          </li>
+
+          <li>
+            <a href="#custom_binding_class_names">Custom Binding Class Names</a>
+          </li>
+
+          <li>
+            <a href="#includes">Includes</a>
+          </li>
+
+          <li>
+            <a href="#expression_language">Expression Language</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#data_objects">Data Objects</a>
+        <ol>
+          <li>
+            <a href="#observable_objects">Observable Objects</a>
+          </li>
+
+          <li>
+            <a href="#observablefields">ObservableFields</a>
+          </li>
+
+          <li>
+            <a href="#observable_collections">Observable Collections</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#generated_binding">Generated Binding</a>
+        <ol>
+          <li>
+            <a href="#creating">Creating</a>
+          </li>
+
+          <li>
+            <a href="#views_with_ids">Views With IDs</a>
+          </li>
+
+          <li>
+            <a href="#variables">Variables</a>
+          </li>
+
+          <li>
+            <a href="#viewstubs">ViewStubs</a>
+          </li>
+
+          <li>
+            <a href="#advanced_binding">Advanced Binding</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#attribute_setters">Attribute Setters</a>
+        <ol>
+          <li>
+            <a href="#automatic_setters">Automatic Setters</a>
+          </li>
+
+          <li>
+            <a href="#renamed_setters">Renamed Setters</a>
+          </li>
+
+          <li>
+            <a href="#custom_setters">Custom Setters</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#converters">Converters</a>
+        <ol>
+          <li>
+            <a href="#object_conversions">Object Conversions</a>
+          </li>
+
+          <li>
+            <a href="#custom_conversions">Custom Conversions</a>
+          </li>
+        </ol>
+      </li>
+
+      <li>
+        <a href="#studio_support">Android Studio Support for Data Binding</a>
+      </li>
+
+    </ol>
+  </div><!-- qv -->
+</div><!-- qv-wrapper -->
+
+<p>
+  This document explains how to use the Data Binding Library to write
+  declarative layouts and minimize the glue code necessary to bind your
+  application logic and layouts.
+</p>
+
+<p>
+  The Data Binding Library offers both flexibility and broad compatibility —
+  it's a support library, so you can use it with all Android platform versions
+  back to <strong>Android 2.1</strong> (API level 7+).
+</p>
+
+<p>
+  To use data binding, Android Plugin for Gradle <strong>1.5.0-alpha1</strong>
+  or higher is required.
+</p>
+
+<h2 id="build_environment">
+  Build Environment
+</h2>
+
+<p>
+  To get started with Data Binding, download the library from the Support
+  repository in the Android SDK manager.
+</p>
+
+<p>
+  To configure your app to use data binding, add the <code>dataBinding</code>
+  element to your <code>build.gradle</code> file in the app module.
+</p>
+
+<p>
+  Use the following code snippet to configure data binding:
+</p>
+<pre>
+android {
+    ....
+    dataBinding {
+        enabled = true
+    }
+}
+</pre>
+<p>
+  If you have an app module that depends on a library which uses data binding,
+  your app module must configure data binding in its <code>build.gradle</code>
+  file as well.
+</p>
+
+<p>
+  Also, make sure you are using a compatible version of Android Studio.
+  <strong>Android Studio 1.3</strong> and later provides support for data
+  binding as described in <a href="#studio_support">Android Studio Support for
+  Data Binding</a>.
+</p>
+
+<h2 id="data_binding_layout_files">
+  Data Binding Layout Files
+</h2>
+
+<h3 id="writing_expressions">
+  Writing your first set of data binding expressions
+</h3>
+
+<p>
+  Data-binding layout files are slightly different and start with a root tag of
+  <strong>layout</strong> followed by a <strong>data</strong> element and a
+  <strong>view</strong> root element. This view element is what your root would
+  be in a non-binding layout file. A sample file looks like this:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;layout xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+   &lt;data&gt;
+       &lt;variable name="user" type="com.example.User"/&gt;
+   &lt;/data&gt;
+   &lt;LinearLayout
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"&gt;
+       &lt;TextView android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="&commat;{user.firstName}"/&gt;
+       &lt;TextView android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="&commat;{user.lastName}"/&gt;
+   &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</pre>
+<p>
+  The user <strong>variable</strong> within <strong>data</strong> describes a
+  property that may be used within this layout.
+</p>
+<pre>
+&lt;<strong>variable name="user" type="com.example.User"</strong>/&gt;
+</pre>
+<p>
+  Expressions within the layout are written in the attribute properties using
+  the “<code>&amp;commat;{}</code>” syntax. Here, the TextView’s text is set to
+  the firstName property of user:
+</p>
+
+<pre>
+&lt;TextView android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="&amp;commat;{user.firstName}"/&gt;
+</pre>
+<h3 id="data_object">
+  Data Object
+</h3>
+
+<p>
+  Let’s assume for now that you have a plain-old Java object (POJO) for User:
+</p>
+
+<pre>
+public class User {
+   public final String firstName;
+   public final String lastName;
+   public User(String firstName, String lastName) {
+       this.firstName = firstName;
+       this.lastName = lastName;
+   }
+}
+</pre>
+<p>
+  This type of object has data that never changes. It is common in applications
+  to have data that is read once and never changes thereafter. It is also
+  possible to use a JavaBeans objects:
+</p>
+<pre>
+public class User {
+   private final String firstName;
+   private final String lastName;
+   public User(String firstName, String lastName) {
+       this.firstName = firstName;
+       this.lastName = lastName;
+   }
+   public String getFirstName() {
+       return this.firstName;
+   }
+   public String getLastName() {
+       return this.lastName;
+   }
+}
+</pre>
+<p>
+  From the perspective of data binding, these two classes are equivalent. The
+  expression <strong><code>&amp;commat;{user.firstName}</code></strong> used
+  for the TextView’s <strong><code>android:text</code></strong> attribute will
+  access the <strong><code>firstName</code></strong> field in the former class
+  and the <code>getFirstName()</code> method in the latter class.
+  Alternatively, it will also be resolved to <code>firstName()</code> if that
+  method exists.
+</p>
+
+<h3 id="binding_data">
+  Binding Data
+</h3>
+
+<p>
+  By default, a Binding class will be generated based on the name of the layout
+  file, converting it to Pascal case and suffixing “Binding” to it. The above
+  layout file was <code>main_activity.xml</code> so the generate class was
+  <code>MainActivityBinding</code>. This class holds all the bindings from the
+  layout properties (e.g. the <code>user</code> variable) to the layout’s Views
+  and knows how to assign values for the binding expressions.The easiest means
+  for creating the bindings is to do it while inflating:
+</p>
+
+<pre>
+&commat;Override
+protected void onCreate(Bundle savedInstanceState) {
+   super.onCreate(savedInstanceState);
+   MainActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.main_activity);
+   User user = new User("Test", "User");
+   binding.setUser(user);
+}
+</pre>
+<p>
+  You’re done! Run the application and you’ll see Test User in the UI.
+  Alternatively, you can get the view via:
+</p>
+
+<pre>
+MainActivityBinding binding = MainActivityBinding.<em>inflate</em>(getLayoutInflater());
+</pre>
+<p>
+  If you are using data binding items inside a ListView or RecyclerView
+  adapter, you may prefer to use:
+</p>
+
+<pre>
+ListItemBinding binding = ListItemBinding.inflate(layoutInflater, viewGroup, false);
+//or
+ListItemBinding binding = DataBindingUtil.<em>inflate</em>(layoutInflater, R.layout.<em><strong>list_item</strong></em>, viewGroup, <strong>false</strong>);
+</pre>
+<h3 id="event_handling">Event Handling</h3>
+<p>
+Data Binding allows you to write expressions handling events that are dispatched from the views (e.g. onClick).
+Event attribute names are governed by the name of the listener method with a few exceptions.
+For example, {@link android.view.View.OnLongClickListener} has a method {@link android.view.View.OnLongClickListener#onLongClick onLongClick()},
+so the attribute for this event is <code>android:onLongClick</code>.
+There are two ways to handle an event.
+</p>
+<ul>
+  <li>
+    <a href="#method_references">Method References</a>: In your expressions, you can reference methods that conform to the signature of the listener method. When an expression evaluates to a method reference, Data Binding wraps the method reference and owner object in a listener, and sets that listener on the target view. If the expression evaluates to null, Data Binding does not create a listener and sets a null listener instead.
+  </li>
+  <li>
+    <a href="#listener_bindings">Listener Bindings</a>: These are lambda expressions that are evaluated when the event happens.
+Data Binding always creates a listener, which it sets on the view. When the event is dispatched, the listener evaluates the lambda expression.
+  </li>
+</ul>
+<h4 id="method_references">
+  Method References
+</h4>
+<p>
+  Events can be bound to handler methods directly, similar to the way
+  <strong><code>android:onClick</code></strong> can be assigned to a method in an Activity.
+  One major advantage compared to the {@code View#onClick} attribute is that the expression
+  is processed at compile time, so if the method does not exist or its signature is not
+  correct, you receive a compile time error.</p>
+<p>
+  The major difference between Method References and Listener Bindings is that
+  the actual listener implementation is created when the data is bound, not
+  when the event is triggered. If you prefer to evaluate the expression when
+  the event happens, you should use <a href="#listener_bindings">listener
+  binding</a>.
+</p>
+<p>
+  To assign an event to its handler, use a normal binding expression, with the value
+  being the method name to call. For example, if your data object has two methods:
+</p>
+<pre>public class MyHandlers {
+    public void onClickFriend(View view) { ... }
+}
+</pre>
+<p>
+  The binding expression can assign the click listener for a View:
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;layout xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+   &lt;data&gt;
+       &lt;variable name="handlers" type="com.example.Handlers"/&gt;
+       &lt;variable name="user" type="com.example.User"/&gt;
+   &lt;/data&gt;
+   &lt;LinearLayout
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"&gt;
+       &lt;TextView android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="&commat;{user.firstName}"
+           android:onClick="&commat;{handlers::onClickFriend}"/&gt;
+   &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</pre>
+<p>
+Note that the signature of the method in the expression must exactly match the signature of the method in the
+Listener object.
+</p>
+<h4 id="listener_bindings">
+  Listener Bindings
+</h4>
+<p>
+  Listener Bindings are binding expressions that run when an event happens.
+  They are similar to method references, but they let you run arbitrary data
+  binding expressions. This feature is available with Android Gradle Plugin for Gradle
+  version 2.0 and later.
+</p>
+<p>
+  In method references, the parameters of the method must
+  match the parameters of the event listener. In Listener Bindings, only your
+  return value must match the expected return value of the listener (unless it
+  is expecting void).
+  For example, you can have a presenter class that has the following method:
+</p>
+<pre>
+public class Presenter {
+    public void onSaveClick(Task task){}
+}
+</pre>
+  Then you can bind the click event to your class as follows:
+<pre>
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+  &lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+      &lt;data&gt;
+          &lt;variable name=&quot;task&quot; type=&quot;com.android.example.Task&quot; /&gt;
+          &lt;variable name=&quot;presenter&quot; type=&quot;com.android.example.Presenter&quot; /&gt;
+      &lt;/data&gt;
+      &lt;LinearLayout android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+          &lt;Button android:layout_width=&quot;wrap_content&quot; android:layout_height=&quot;wrap_content&quot;
+          android:onClick=&quot;@{() -&gt; presenter.onSaveClick(task)}&quot; /&gt;
+      &lt;/LinearLayout&gt;
+  &lt;/layout&gt;
+</pre>
+<p>
+  Listeners are represented by lambda expressions that are allowed only as root
+  elements of your expressions. When a callback is used in an expression, Data
+  Binding automatically creates the necessary listener and registers for the
+  event. When the view fires the event, Data Binding evaluates the given
+  expression. As in regular binding expressions, you still get the null and
+  thread safety of Data Binding while these listener expressions are being
+  evaluated.
+</p>
+<p>
+  Note that in the example above, we haven't defined the {@code view} parameter
+  that is passed into {@link
+  android.view.View.OnClickListener#onClick(android.view.View view)}. Listener
+  bindings provide two choices for listener parameters: you can either ignore
+  all parameters to the method or name all of them. If you prefer to name the
+  parameters, you can use them in your expression. For example, the expression
+  above could be written as:
+</p>
+<pre>
+  android:onClick=&quot;@{(view) -&gt; presenter.onSaveClick(task)}&quot;
+</pre>
+Or if you wanted to use the parameter in the expression, it could work as follows:
+<pre>
+public class Presenter {
+    public void onSaveClick(View view, Task task){}
+}
+</pre>
+<pre>
+  android:onClick=&quot;@{(theView) -&gt; presenter.onSaveClick(theView, task)}&quot;
+</pre>
+You can use a lambda expression with more than one parameter:
+<pre>
+public class Presenter {
+    public void onCompletedChanged(Task task, boolean completed){}
+}
+</pre>
+<pre>
+  &lt;CheckBox android:layout_width=&quot;wrap_content&quot; android:layout_height=&quot;wrap_content&quot;
+        android:onCheckedChanged=&quot;@{(cb, isChecked) -&gt; presenter.completeChanged(task, isChecked)}&quot; /&gt;
+</pre>
+<p>
+  If the event you are listening to returns a value whose type is not {@code
+  void}, your expressions must return the same type of value as well. For
+  example, if you want to listen for the long click event, your expression
+  should return {@code boolean}.
+</p>
+<pre>
+public class Presenter {
+    public boolean onLongClick(View view, Task task){}
+}
+</pre>
+<pre>
+  android:onLongClick=&quot;@{(theView) -&gt; presenter.onLongClick(theView, task)}&quot;
+</pre>
+<p>
+If the expression cannot be evaluated due to {@code null} objects, Data Binding returns
+the default Java value for that type. For example, {@code null} for reference types, {@code 0} for {@code int},
+{@code false} for {@code boolean}, etc.
+</p>
+<p>
+If you need to use an expression with a predicate (e.g. ternary), you can use
+{@code void} as a symbol.
+</p>
+<pre>
+  android:onClick=&quot;@{(v) -&gt; v.isVisible() ? doSomething() : void}&quot;
+</pre>
+
+<h5>Avoid Complex Listeners</h5>
+Listener expressions are very powerful and can make your code very easy to read.
+On the other hand, listeners containing complex expressions make your layouts hard to read and unmaintainable. 
+These expressions should be as simple as passing available data from your UI to your callback method. You should implement 
+any business logic inside the callback method that you invoked from the listener expression.
+
+<p>
+  Some specialized click event handlers exist and they need an attribute other than
+  <code>android:onClick</code> to avoid a conflict. The following attributes have been created
+  to avoid such conflicts:
+</p>
+
+<table>
+  <tr>
+    <th>Class</th>
+    <th>Listener Setter</th>
+    <th>Attribute</th>
+  </tr>
+  <tr>
+    <td>{@link android.widget.SearchView}</td>
+    <td>{@link android.widget.SearchView#setOnSearchClickListener}</td>
+    <td><code>android:onSearchClick</code></td>
+  </tr>
+  <tr>
+    <td>{@link android.widget.ZoomControls}</td>
+    <td>{@link android.widget.ZoomControls#setOnZoomInClickListener}</td>
+    <td><code>android:onZoomIn</code></td>
+  </tr>
+  <tr>
+    <td>{@link android.widget.ZoomControls}</td>
+    <td>{@link android.widget.ZoomControls#setOnZoomOutClickListener}</td>
+    <td><code>android:onZoomOut</code></td>
+  </tr>
+</table>
+
+<h2 id="layout_details">
+  Layout Details
+</h2>
+
+<h3 id="imports">
+  Imports
+</h3>
+
+<p>
+  Zero or more <strong><code>import</code></strong> elements may be used inside
+  the <strong><code>data</code></strong> element. These allow easy reference to
+  classes inside your layout file, just like in Java.
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.view.View"/&gt;
+&lt;/data&gt;
+</pre>
+<p>
+  Now, View may be used within your binding expression:
+</p>
+
+<pre>
+&lt;TextView
+   android:text="&commat;{user.lastName}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:visibility="&commat;{user.isAdult ? View.VISIBLE : View.GONE}"/&gt;
+</pre>
+<p>
+  When there are class name conflicts, one of the classes may be renamed to an
+  “alias:”
+</p>
+
+<pre>
+&lt;import type="android.view.View"/&gt;
+&lt;import type="com.example.real.estate.View"
+        alias="Vista"/&gt;
+</pre>
+<p>
+  Now, <strong><code>Vista</code></strong> may be used to reference the
+  <code>com.example.real.estate.View</code> and
+  <strong><code>View</code></strong> may be used to reference
+  <code>android.view.View</code> within the layout file. Imported types may be
+  used as type references in variables and expressions:
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="com.example.User"/&gt;
+    &lt;import type="java.util.List"/&gt;
+    &lt;variable name="user" type="User"/&gt;
+    &lt;variable name="userList" type="List&amp;lt;User&gt;"/&gt;
+&lt;/data&gt;
+</pre>
+<p class="caution">
+  <strong>Note</strong>: Android Studio does not yet handle imports so the
+  autocomplete for imported variables may not work in your IDE. Your
+  application will still compile fine and you can work around the IDE issue by
+  using fully qualified names in your variable definitions.
+</p>
+
+<pre>
+&lt;TextView
+   android:text="&commat;{((User)(user.connection)).lastName}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+<p>
+  Imported types may also be used when referencing static fields and methods in
+  expressions:
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="com.example.MyStringUtils"/&gt;
+    &lt;variable name="user" type="com.example.User"/&gt;
+&lt;/data&gt;
+…
+&lt;TextView
+   android:text="&commat;{MyStringUtils.capitalize(user.lastName)}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+<p>
+  Just as in Java, <code>java.lang.*</code> is imported automatically.
+</p>
+
+<h3 id="variables">
+  Variables
+</h3>
+
+<p>
+  Any number of <strong><code>variable</code></strong> elements may be used
+  inside the <strong><code>data</code></strong> element. Each
+  <strong><code>variable</code></strong> element describes a property that may
+  be set on the layout to be used in binding expressions within the layout
+  file.
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.graphics.drawable.Drawable"/&gt;
+    &lt;variable name="user"  type="com.example.User"/&gt;
+    &lt;variable name="image" type="Drawable"/&gt;
+    &lt;variable name="note"  type="String"/&gt;
+&lt;/data&gt;
+</pre>
+<p>
+  The variable types are inspected at compile time, so if a variable implements
+  {@link android.databinding.Observable} or is an <a href=
+  "#observable_collections">observable collection</a>, that should be reflected
+  in the type. If the variable is a base class or interface that does not
+  implement the Observable* interface, the variables will <strong>not
+  be</strong> observed!
+</p>
+
+<p>
+  When there are different layout files for various configurations (e.g.
+  landscape or portrait), the variables will be combined. There must not be
+  conflicting variable definitions between these layout files.
+</p>
+
+<p>
+  The generated binding class will have a setter and getter for each of the
+  described variables. The variables will take the default Java values until
+  the setter is called &mdash; <code>null</code> for reference types,
+  <code>0</code> for <code>int</code>, <code>false</code> for
+  <code>boolean</code>, etc.
+</p>
+
+<p>
+  A special variable named <code>context</code> is generated for use in binding
+  expressions as needed. The value for <code>context</code> is the
+  <code>Context</code> from the root View's {@link android.view.View#getContext}.
+  The <code>context</code> variable will be overridden by an explicit variable
+  declaration with that name.
+</p>
+
+<h3 id="custom_binding_class_names">
+  Custom Binding Class Names
+</h3>
+
+<p>
+  By default, a Binding class is generated based on the name of the layout
+  file, starting it with upper-case, removing underscores ( _ ) and
+  capitalizing the following letter and then suffixing “Binding”. This class
+  will be placed in a databinding package under the module package. For
+  example, the layout file <code>contact_item.xml</code> will generate
+  <code>ContactItemBinding</code>. If the module package is
+  <code>com.example.my.app</code>, then it will be placed in
+  <code>com.example.my.app.databinding</code>.
+</p>
+
+<p>
+  Binding classes may be renamed or placed in different packages by adjusting
+  the <strong><code>class</code></strong> attribute of the
+  <strong><code>data</code></strong> element. For example:
+</p>
+
+<pre>
+&lt;data class="ContactItem"&gt;
+    ...
+&lt;/data&gt;
+</pre>
+<p>
+  This generates the binding class as <code>ContactItem</code> in the
+  databinding package in the module package. If the class should be generated
+  in a different package within the module package, it may be prefixed with
+  “.”:
+</p>
+
+<pre>
+&lt;data class=".ContactItem"&gt;
+    ...
+&lt;/data&gt;
+</pre>
+<p>
+  In this case, <code>ContactItem</code> is generated in the module package
+  directly. Any package may be used if the full package is provided:
+</p>
+
+<pre>
+&lt;data class="com.example.ContactItem"&gt;
+    ...
+&lt;/data&gt;
+</pre>
+<h3 id="includes">
+  Includes
+</h3>
+
+<p>
+  Variables may be passed into an included layout&apos;s binding from the
+  containing layout by using the application namespace and the variable name in
+  an attribute:
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:bind="http://schemas.android.com/apk/res-auto"&gt;
+   &lt;data&gt;
+       &lt;variable name="user" type="com.example.User"/&gt;
+   &lt;/data&gt;
+   &lt;LinearLayout
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"&gt;
+       &lt;include layout="&commat;layout/name"
+           bind:user="&commat;{user}"/&gt;
+       &lt;include layout="&commat;layout/contact"
+           bind:user="&commat;{user}"/&gt;
+   &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</pre>
+<p>
+  Here, there must be a <code>user</code> variable in both the
+  <code>name.xml</code> and <code>contact.xml</code> layout files.
+</p>
+<p>
+  Data binding does not support include as a direct child of a merge element. For example,
+  <strong>the following layout is not supported:</strong>
+</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:bind="http://schemas.android.com/apk/res-auto"&gt;
+   &lt;data&gt;
+       &lt;variable name="user" type="com.example.User"/&gt;
+   &lt;/data&gt;
+   &lt;merge&gt;
+       &lt;include layout="&commat;layout/name"
+           bind:user="&commat;{user}"/&gt;
+       &lt;include layout="&commat;layout/contact"
+           bind:user="&commat;{user}"/&gt;
+   &lt;/merge&gt;
+&lt;/layout&gt;
+</pre>
+<h3 id="expression_language">
+  Expression Language
+</h3>
+
+<h4 id="common_features">
+  Common Features
+</h4>
+
+<p>
+  The expression language looks a lot like a Java expression. These are the
+  same:
+</p>
+
+<ul>
+  <li>Mathematical <strong><code>+ - / * %</code></strong>
+  </li>
+
+  <li>String concatenation <strong><code>+</code></strong>
+  </li>
+
+  <li>
+    Logical <strong><code>&& ||</code></strong>
+  </li>
+
+  <li>Binary <strong><code>& | ^</code></strong>
+  </li>
+
+  <li>Unary <strong><code>+ - ! ~</code></strong>
+  </li>
+
+  <li>Shift <strong><code>&gt;&gt; &gt;&gt;&gt; &lt;&lt;</code></strong>
+  </li>
+
+  <li>Comparison <strong><code>== &gt; &lt; &gt;= &lt;=</code></strong>
+  </li>
+
+  <li>
+    <strong><code>instanceof</code></strong>
+  </li>
+
+  <li>Grouping <strong><code>()</code></strong>
+  </li>
+
+  <li>Literals - character, String, numeric, <strong><code>null</code></strong>
+  </li>
+
+  <li>Cast
+  </li>
+
+  <li>Method calls
+  </li>
+
+  <li>Field access
+  </li>
+
+  <li>Array access <strong><code>[]</code></strong>
+  </li>
+
+  <li>Ternary operator <strong><code>?:</code></strong>
+  </li>
+</ul>
+
+<p>
+  Examples:
+</p>
+
+<pre>
+android:text="&commat;{String.valueOf(index + 1)}"
+android:visibility="&commat;{age &amp;lt; 13 ? View.GONE : View.VISIBLE}"
+android:transitionName=&apos;&commat;{"image_" + id}&apos;
+</pre>
+<h4 id="missing_operations">
+  Missing Operations
+</h4>
+
+<p>
+  A few operations are missing from the expression syntax that you can use in
+  Java.
+</p>
+
+<ul>
+  <li>
+    <strong><code>this</code></strong>
+  </li>
+
+  <li>
+    <strong><code>super</code></strong>
+  </li>
+
+  <li>
+    <strong><code>new</code></strong>
+  </li>
+
+  <li>Explicit generic invocation
+  </li>
+</ul>
+
+<h4 id="null_coalescing_operator">
+  Null Coalescing Operator
+</h4>
+
+<p>
+  The null coalescing operator (<strong><code>??</code></strong>) chooses the
+  left operand if it is not null or the right if it is null.
+</p>
+
+<pre>
+<strong>android:text="&commat;{user.displayName ?? user.lastName}"</strong>
+</pre>
+<p>
+  This is functionally equivalent to:
+</p>
+
+<pre>
+<strong>android:text="&commat;{user.displayName != null ? user.displayName : user.lastName}"</strong>
+</pre>
+<h4 id="property_reference">
+  Property Reference
+</h4>
+
+<p>
+  The first was already discussed in the <a href=
+  "#writing_your_first_data_binding_expressions">Writing your first data
+  binding expressions</a> above: short form JavaBean references. When an
+  expression references a property on a class, it uses the same format for
+  fields, getters, and ObservableFields.
+</p>
+
+<pre>
+<strong>android:text="&commat;{user.lastName}"</strong>
+</pre>
+<h4>
+  Avoiding NullPointerException
+</h4>
+
+<p>
+  Generated data binding code automatically checks for nulls and avoid null
+  pointer exceptions. For example, in the expression
+  <code>&commat;{user.name}</code>, if <code>user</code> is null,
+  <code>user.name</code> will be assigned its default value (null). If you were
+  referencing <code>user.age</code>, where age is an <code>int</code>, then it
+  would default to 0.
+</p>
+
+<h4 id="collections">
+  Collections
+</h4>
+
+<p>
+  Common collections: arrays, lists, sparse lists, and maps, may be accessed
+  using the <code>[]</code> operator for convenience.
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.util.SparseArray"/&gt;
+    &lt;import type="java.util.Map"/&gt;
+    &lt;import type="java.util.List"/&gt;
+    &lt;variable name="list" type="List&amp;lt;String&gt;"/&gt;
+    &lt;variable name="sparse" type="SparseArray&amp;lt;String&gt;"/&gt;
+    &lt;variable name="map" type="Map&amp;lt;String, String&gt;"/&gt;
+    &lt;variable name="index" type="int"/&gt;
+    &lt;variable name="key" type="String"/&gt;
+&lt;/data&gt;
+…
+android:text="&commat;{list[index]}"
+…
+android:text="&commat;{sparse[index]}"
+…
+android:text="&commat;{map[key]}"
+
+</pre>
+<h4 id="string_literals">
+  String Literals
+</h4>
+
+<p>
+  When using single quotes around the attribute value, it is easy to use double
+  quotes in the expression:
+</p>
+
+<pre>
+android:text=&apos;&commat;{map["firstName"]}&apos;
+</pre>
+<p>
+  It is also possible to use double quotes to surround the attribute value.
+  When doing so, String literals should either use the &amp;quot; or back quote
+  (`).
+</p>
+
+<pre>
+android:text="&commat;{map[`firstName`}"
+android:text="&commat;{map[&amp;quot;firstName&amp;quot;]}"
+</pre>
+<h4 id="resources">
+  Resources
+</h4>
+
+<p>
+  It is possible to access resources as part of expressions using the normal
+  syntax:
+</p>
+
+<pre>
+android:padding="&commat;{large? &commat;dimen/largePadding : &commat;dimen/smallPadding}"
+</pre>
+<p>
+  Format strings and plurals may be evaluated by providing parameters:
+</p>
+
+<pre>
+android:text="&commat;{&commat;string/nameFormat(firstName, lastName)}"
+android:text="&commat;{&commat;plurals/banana(bananaCount)}"
+</pre>
+<p>
+  When a plural takes multiple parameters, all parameters should be passed:
+</p>
+
+<pre>
+
+  Have an orange
+  Have %d oranges
+
+android:text="&commat;{&commat;plurals/orange(orangeCount, orangeCount)}"
+</pre>
+<p>
+  Some resources require explicit type evaluation.
+</p>
+
+<table>
+  <tr>
+    <th>
+      Type
+    </th>
+    <th>
+      Normal Reference
+    </th>
+    <th>
+      Expression Reference
+    </th>
+  </tr>
+
+  <tr>
+    <td>
+      String[]
+    </td>
+    <td>
+      &commat;array
+    </td>
+    <td>
+      &commat;stringArray
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      int[]
+    </td>
+    <td>
+      &commat;array
+    </td>
+    <td>
+      &commat;intArray
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      TypedArray
+    </td>
+    <td>
+      &commat;array
+    </td>
+    <td>
+      &commat;typedArray
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Animator
+    </td>
+    <td>
+      &commat;animator
+    </td>
+    <td>
+      &commat;animator
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      StateListAnimator
+    </td>
+    <td>
+      &commat;animator
+    </td>
+    <td>
+      &commat;stateListAnimator
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      color <code>int</code>
+    </td>
+    <td>
+      &commat;color
+    </td>
+    <td>
+      &commat;color
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      ColorStateList
+    </td>
+    <td>
+      &commat;color
+    </td>
+    <td>
+      &commat;colorStateList
+    </td>
+  </tr>
+</table>
+
+<h2 id="data_objects">
+  Data Objects
+</h2>
+
+<p>
+  Any plain old Java object (POJO) may be used for data binding, but modifying
+  a POJO will not cause the UI to update. The real power of data binding can be
+  used by giving your data objects the ability to notify when data changes.
+  There are three different data change notification mechanisms,
+  <a href="#observable_objects">Observable objects</a>,
+  <a href="#observablefields">observable fields</a>, and
+  <a href="#observable_collections">observable collection</a>s.
+</p>
+
+<p>
+  When one of these observable data object is bound to the UI and a property of
+  the data object changes, the UI will be updated automatically.
+</p>
+
+<h3 id="observable_objects">
+  Observable Objects
+</h3>
+
+<p>
+  A class implementing the {@link android.databinding.Observable} interface
+  will allow the binding to attach a single listener to a bound object to
+  listen for changes of all properties on that object.
+</p>
+
+<p>
+  The {@link android.databinding.Observable} interface has a mechanism to add and remove
+  listeners, but notifying is up to the developer. To make development easier,
+  a base class, {@link android.databinding.BaseObservable}, was created to implement the
+  listener registration mechanism. The data class implementer is still
+  responsible for notifying when the properties change. This is done by
+  assigning a {@link android.databinding.Bindable} annotation to the getter and notifying in
+  the setter.
+</p>
+
+<pre>
+private static class User extends BaseObservable {
+   private String firstName;
+   private String lastName;
+   &commat;Bindable
+   public String getFirstName() {
+       return this.firstName;
+   }
+   &commat;Bindable
+   public String getLastName() {
+       return this.lastName;
+   }
+   public void setFirstName(String firstName) {
+       this.firstName = firstName;
+       notifyPropertyChanged(BR.firstName);
+   }
+   public void setLastName(String lastName) {
+       this.lastName = lastName;
+       notifyPropertyChanged(BR.lastName);
+   }
+}
+</pre>
+<p>
+  The {@link android.databinding.Bindable} annotation generates an entry in the BR class file
+  during compilation. The BR class file will be generated in the module
+  package. If the base class for data classes cannot be changed, the
+  {@link android.databinding.Observable} interface may be implemented using the convenient
+  {@link android.databinding.PropertyChangeRegistry} to store and notify listeners
+  efficiently.
+</p>
+
+<h3 id="observablefields">
+  ObservableFields
+</h3>
+
+<p>
+  A little work is involved in creating {@link android.databinding.Observable} classes, so
+  developers who want to save time or have few properties may use
+  {@link android.databinding.ObservableField} and its siblings
+  {@link android.databinding.ObservableBoolean},
+  {@link android.databinding.ObservableByte},
+  {@link android.databinding.ObservableChar},
+  {@link android.databinding.ObservableShort},
+  {@link android.databinding.ObservableInt},
+  {@link android.databinding.ObservableLong},
+  {@link android.databinding.ObservableFloat},
+  {@link android.databinding.ObservableDouble}, and
+  {@link android.databinding.ObservableParcelable}.
+  <code>ObservableFields</code> are self-contained observable objects that have a single
+  field. The primitive versions avoid boxing and unboxing during access operations.
+  To use, create a public final field in the data class:
+</p>
+
+<pre>
+private static class User {
+   public final ObservableField&lt;String&gt; firstName =
+       new ObservableField&lt;&gt;();
+   public final ObservableField&lt;String&gt; lastName =
+       new ObservableField&lt;&gt;();
+   public final ObservableInt age = new ObservableInt();
+}
+</pre>
+<p>
+  That&apos;s it! To access the value, use the set and get accessor methods:
+</p>
+
+<pre>
+user.firstName.set("Google");
+int age = user.age.get();
+</pre>
+<h3 id="observable_collections">
+  Observable Collections
+</h3>
+
+<p>
+  Some applications use more dynamic structures to hold data. Observable
+  collections allow keyed access to these data objects.
+  {@link android.databinding.ObservableArrayMap} is
+  useful when the key is a reference type, such as String.
+</p>
+
+<pre>
+ObservableArrayMap&lt;String, Object&gt; user = new ObservableArrayMap&lt;&gt;();
+user.put("firstName", "Google");
+user.put("lastName", "Inc.");
+user.put("age", 17);
+</pre>
+<p>
+  In the layout, the map may be accessed through the String keys:
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.databinding.ObservableMap"/&gt;
+    &lt;variable name="user" type="ObservableMap&amp;lt;String, Object&gt;"/&gt;
+&lt;/data&gt;
+…
+&lt;TextView
+   android:text=&apos;&commat;{user["lastName"]}&apos;
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+&lt;TextView
+   android:text=&apos;&commat;{String.valueOf(1 + (Integer)user["age"])}&apos;
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+<p>
+  {@link android.databinding.ObservableArrayList} is useful when the key is an integer:
+</p>
+
+<pre>
+ObservableArrayList&lt;Object&gt; user = new ObservableArrayList&lt;&gt;();
+user.add("Google");
+user.add("Inc.");
+user.add(17);
+</pre>
+<p>
+  In the layout, the list may be accessed through the indices:
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.databinding.ObservableList"/&gt;
+    &lt;import type="com.example.my.app.Fields"/&gt;
+    &lt;variable name="user" type="ObservableList&amp;lt;Object&gt;"/&gt;
+&lt;/data&gt;
+…
+&lt;TextView
+   android:text=&apos;&commat;{user[Fields.LAST_NAME]}&apos;
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+&lt;TextView
+   android:text=&apos;&commat;{String.valueOf(1 + (Integer)user[Fields.AGE])}&apos;
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+<h2 id="generated_binding">
+  Generated Binding
+</h2>
+
+<p>
+  The generated binding class links the layout variables with the Views within
+  the layout. As discussed earlier, the name and package of the Binding may be
+  <a href="#custom_binding_class_names">customized</a>. The Generated binding
+  classes all extend {@link android.databinding.ViewDataBinding}.
+</p>
+
+<h3 id="creating">
+  Creating
+</h3>
+
+<p>
+  The binding should be created soon after inflation to ensure that the View
+  hierarchy is not disturbed prior to binding to the Views with expressions
+  within the layout. There are a few ways to bind to a layout. The most common
+  is to use the static methods on the Binding class.The inflate method inflates
+  the View hierarchy and binds to it all it one step. There is a simpler
+  version that only takes a {@link android.view.LayoutInflater} and one that takes a
+  {@link android.view.ViewGroup} as well:
+</p>
+
+<pre>
+MyLayoutBinding binding = MyLayoutBinding.inflate(layoutInflater);
+MyLayoutBinding binding = MyLayoutBinding.inflate(layoutInflater, viewGroup, false);
+</pre>
+<p>
+  If the layout was inflated using a different mechanism, it may be bound
+  separately:
+</p>
+
+<pre>
+MyLayoutBinding binding = MyLayoutBinding.bind(viewRoot);
+</pre>
+<p>
+  Sometimes the binding cannot be known in advance. In such cases, the binding
+  can be created using the {@link android.databinding.DataBindingUtil} class:
+</p>
+
+<pre>
+ViewDataBinding binding = DataBindingUtil.inflate(LayoutInflater, layoutId,
+    parent, attachToParent);
+ViewDataBinding binding = DataBindingUtil.bindTo(viewRoot, layoutId);
+</pre>
+<h3 id="views_with_ids">
+  Views With IDs
+</h3>
+
+<p>
+  A public final field will be generated for each View with an ID in the
+  layout. The binding does a single pass on the View hierarchy, extracting the
+  Views with IDs. This mechanism can be faster than calling findViewById for
+  several Views. For example:
+</p>
+
+<pre>
+&lt;layout xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+   &lt;data&gt;
+       &lt;variable name="user" type="com.example.User"/&gt;
+   &lt;/data&gt;
+   &lt;LinearLayout
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"&gt;
+       &lt;TextView android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="&commat;{user.firstName}"
+   android:id="&commat;+id/firstName"/&gt;
+       &lt;TextView android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="&commat;{user.lastName}"
+  android:id="&commat;+id/lastName"/&gt;
+   &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</pre>
+<p>
+  Will generate a binding class with:
+</p>
+
+<pre>
+public final TextView firstName;
+public final TextView lastName;
+</pre>
+<p>
+  IDs are not nearly as necessary as without data binding, but there are still
+  some instances where access to Views are still necessary from code.
+</p>
+
+<h3 id="variables2">
+  Variables
+</h3>
+
+<p>
+  Each variable will be given accessor methods.
+</p>
+
+<pre>
+&lt;data&gt;
+    &lt;import type="android.graphics.drawable.Drawable"/&gt;
+    &lt;variable name="user"  type="com.example.User"/&gt;
+    &lt;variable name="image" type="Drawable"/&gt;
+    &lt;variable name="note"  type="String"/&gt;
+&lt;/data&gt;
+</pre>
+<p>
+  will generate setters and getters in the binding:
+</p>
+
+<pre>
+public abstract com.example.User getUser();
+public abstract void setUser(com.example.User user);
+public abstract Drawable getImage();
+public abstract void setImage(Drawable image);
+public abstract String getNote();
+public abstract void setNote(String note);
+</pre>
+<h3 id="viewstubs">
+  ViewStubs
+</h3>
+
+<p>
+  {@link android.view.ViewStub}s are a little different from normal Views. They start off invisible
+  and when they either are made visible or are explicitly told to inflate, they
+  replace themselves in the layout by inflating another layout.
+</p>
+
+<p>
+  Because the <code>ViewStub</code> essentially disappears from the View hierarchy, the View
+  in the binding object must also disappear to allow collection. Because the
+  Views are final, a {@link android.databinding.ViewStubProxy} object takes the place of the
+  <code>ViewStub</code>, giving the developer access to the ViewStub when it exists and also
+  access to the inflated View hierarchy when the <code>ViewStub</code> has been inflated.
+</p>
+
+<p>
+  When inflating another layout, a binding must be established for the new
+  layout. Therefore, the <code>ViewStubProxy</code> must listen to the <code>ViewStub</code>&apos;s
+  {@link android.view.ViewStub.OnInflateListener} and establish the binding at that time. Since
+  only one can exist, the <code>ViewStubProxy</code> allows the developer to set an
+  <code>OnInflateListener</code> on it that it will call after establishing the binding.
+</p>
+
+<h3 id="advanced_binding">
+  Advanced Binding
+</h3>
+
+<h4 id="dynamic_variables">
+  Dynamic Variables
+</h4>
+
+<p>
+  At times, the specific binding class won&apos;t be known. For example, a
+  {@link android.support.v7.widget.RecyclerView.Adapter} operating against arbitrary layouts
+  won&apos;t know the specific binding class. It still must assign the binding value during the
+  {@link android.support.v7.widget.RecyclerView.Adapter#onBindViewHolder}.
+</p>
+
+<p>
+  In this example, all layouts that the RecyclerView binds to have an "item"
+  variable. The <code>BindingHolder</code> has a <code>getBinding</code> method returning the
+  {@link android.databinding.ViewDataBinding} base.
+</p>
+
+<pre>
+public void onBindViewHolder(BindingHolder holder, int position) {
+   final T item = mItems.get(position);
+   holder.getBinding().setVariable(BR.item, item);
+   holder.getBinding().executePendingBindings();
+}
+</pre>
+<h4 id="immediate_binding">
+  Immediate Binding
+</h4>
+
+<p>
+  When a variable or observable changes, the binding will be scheduled to
+  change before the next frame. There are times, however, when binding must be
+  executed immediately. To force execution, use the
+  {@link android.databinding.ViewDataBinding#executePendingBindings()} method.
+</p>
+
+<h4>
+  Background Thread
+</h4>
+
+<p>
+  You can change your data model in a background thread as long as it is not a
+  collection. Data binding will localize each variable / field while evaluating
+  to avoid any concurrency issues.
+</p>
+
+<h2 id="attribute_setters">
+  Attribute Setters
+</h2>
+
+<p>
+  Whenever a bound value changes, the generated binding class must call a
+  setter method on the View with the binding expression. The data binding
+  framework has ways to customize which method to call to set the value.
+</p>
+
+<h3 id="automatic_setters">
+  Automatic Setters
+</h3>
+For an attribute, data binding tries to find the method setAttribute. The
+namespace for the attribute does not matter, only the attribute name itself.
+<p>
+  For example, an expression associated with TextView&apos;s attribute
+  <strong><code>android:text</code></strong> will look for a setText(String).
+  If the expression returns an int, data binding will search for a setText(int)
+  method. Be careful to have the expression return the correct type, casting if
+  necessary. Note that data binding will work even if no attribute exists with
+  the given name. You can then easily "create" attributes for any setter by
+  using data binding. For example, support DrawerLayout doesn&apos;t have any
+  attributes, but plenty of setters. You can use the automatic setters to use
+  one of these.
+</p>
+
+<pre>
+&lt;android.support.v4.widget.<strong>DrawerLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:scrimColor="&commat;{&commat;color/scrim}"
+    app:drawerListener="&commat;{fragment.drawerListener}"/&gt;</strong>
+</pre>
+<h3 id="renamed_setters">
+  Renamed Setters
+</h3>
+
+<p>
+  Some attributes have setters that don&apos;t match by name. For these
+  methods, an attribute may be associated with the setter through
+  {@link android.databinding.BindingMethods} annotation. This must be associated with
+  a class and contains {@link android.databinding.BindingMethod} annotations, one for
+  each renamed method. For example, the <strong><code>android:tint</code></strong> attribute
+  is really associated with {@link android.widget.ImageView#setImageTintList}, not
+  <code>setTint</code>.
+</p>
+
+<pre>
+&commat;BindingMethods({
+       &commat;BindingMethod(type = "android.widget.ImageView",
+                      attribute = "android:tint",
+                      method = "setImageTintList"),
+})
+</pre>
+<p>
+  It is unlikely that developers will need to rename setters; the android
+  framework attributes have already been implemented.
+</p>
+
+<h3 id="custom_setters">
+  Custom Setters
+</h3>
+
+<p>
+  Some attributes need custom binding logic. For example, there is no
+  associated setter for the <strong><code>android:paddingLeft</code></strong>
+  attribute. Instead, <code>setPadding(left, top, right, bottom)</code> exists.
+  A static binding adapter method with the {@link android.databinding.BindingAdapter}
+  annotation allows the developer to customize how a setter for an attribute is
+  called.
+</p>
+
+<p>
+  The android attributes have already had <code>BindingAdapter</code>s created.
+  For example, here is the one for <code>paddingLeft</code>:
+</p>
+
+<pre>
+&commat;BindingAdapter("android:paddingLeft")
+public static void setPaddingLeft(View view, int padding) {
+   view.setPadding(padding,
+                   view.getPaddingTop(),
+                   view.getPaddingRight(),
+                   view.getPaddingBottom());
+}
+</pre>
+<p>
+  Binding adapters are useful for other types of customization. For example, a
+  custom loader can be called off-thread to load an image.
+</p>
+
+<p>
+  Developer-created binding adapters will override the data binding default
+  adapters when there is a conflict.
+</p>
+
+<p>
+  You can also have adapters that receive multiple parameters.
+</p>
+
+<pre>
+&commat;BindingAdapter({"bind:imageUrl", "bind:error"})
+public static void loadImage(ImageView view, String url, Drawable error) {
+   Picasso.with(view.getContext()).load(url).error(error).into(view);
+}
+</pre>
+<pre>
+&lt;ImageView app:imageUrl=“&commat;{venue.imageUrl}”
+app:error=“&commat;{&commat;drawable/venueError}”/&gt;
+</pre>
+
+<p>
+  This adapter will be called if both <strong>imageUrl</strong> and
+  <strong>error</strong> are used for an ImageView and <em>imageUrl</em> is a
+  string and <em>error</em> is a drawable.
+</p>
+
+<ul>
+  <li>Custom namespaces are ignored during matching.
+  </li>
+
+  <li>You can also write adapters for android namespace.
+  </li>
+</ul>
+
+<p>
+  Binding adapter methods may optionally take the old values in their handlers. A method
+  taking old and new values should have all old values for the attributes come first, followed
+  by the new values:
+</p>
+<pre>
+&commat;BindingAdapter("android:paddingLeft")
+public static void setPaddingLeft(View view, int oldPadding, int newPadding) {
+   if (oldPadding != newPadding) {
+       view.setPadding(newPadding,
+                       view.getPaddingTop(),
+                       view.getPaddingRight(),
+                       view.getPaddingBottom());
+   }
+}
+</pre>
+<p>
+  Event handlers may only be used with interfaces or abstract classes with one abstract method.
+  For example:
+</p>
+<pre>
+&commat;BindingAdapter("android:onLayoutChange")
+public static void setOnLayoutChangeListener(View view, View.OnLayoutChangeListener oldValue,
+       View.OnLayoutChangeListener newValue) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (oldValue != null) {
+            view.removeOnLayoutChangeListener(oldValue);
+        }
+        if (newValue != null) {
+            view.addOnLayoutChangeListener(newValue);
+        }
+    }
+}
+</pre>
+<p>
+  When a listener has multiple methods, it must be split into multiple listeners. For example,
+  {@link android.view.View.OnAttachStateChangeListener} has two methods:
+  {@link android.view.View.OnAttachStateChangeListener#onViewAttachedToWindow onViewAttachedToWindow()} and
+  {@link android.view.View.OnAttachStateChangeListener#onViewDetachedFromWindow onViewDetachedFromWindow()}.
+  We must then create two interfaces to differentiate the attributes and handlers for them.
+</p>
+
+<pre>
+&commat;TargetApi(VERSION_CODES.HONEYCOMB_MR1)
+public interface OnViewDetachedFromWindow {
+    void onViewDetachedFromWindow(View v);
+}
+
+&commat;TargetApi(VERSION_CODES.HONEYCOMB_MR1)
+public interface OnViewAttachedToWindow {
+    void onViewAttachedToWindow(View v);
+}
+</pre>
+<p>
+  Because changing one listener will also affect the other, we must have three different
+  binding adapters, one for each attribute and one for both, should they both be set.
+</p>
+<pre>
+&commat;BindingAdapter("android:onViewAttachedToWindow")
+public static void setListener(View view, OnViewAttachedToWindow attached) {
+    setListener(view, null, attached);
+}
+
+&commat;BindingAdapter("android:onViewDetachedFromWindow")
+public static void setListener(View view, OnViewDetachedFromWindow detached) {
+    setListener(view, detached, null);
+}
+
+&commat;BindingAdapter({"android:onViewDetachedFromWindow", "android:onViewAttachedToWindow"})
+public static void setListener(View view, final OnViewDetachedFromWindow detach,
+        final OnViewAttachedToWindow attach) {
+    if (VERSION.SDK_INT >= VERSION_CODES.HONEYCOMB_MR1) {
+        final OnAttachStateChangeListener newListener;
+        if (detach == null && attach == null) {
+            newListener = null;
+        } else {
+            newListener = new OnAttachStateChangeListener() {
+                &commat;Override
+                public void onViewAttachedToWindow(View v) {
+                    if (attach != null) {
+                        attach.onViewAttachedToWindow(v);
+                    }
+                }
+
+                &commat;Override
+                public void onViewDetachedFromWindow(View v) {
+                    if (detach != null) {
+                        detach.onViewDetachedFromWindow(v);
+                    }
+                }
+            };
+        }
+        final OnAttachStateChangeListener oldListener = ListenerUtil.trackListener(view,
+                newListener, R.id.onAttachStateChangeListener);
+        if (oldListener != null) {
+            view.removeOnAttachStateChangeListener(oldListener);
+        }
+        if (newListener != null) {
+            view.addOnAttachStateChangeListener(newListener);
+        }
+    }
+}
+</pre>
+<p>
+  The above example is slightly more complicated than normal because View uses add and remove
+  for the listener instead of a set method for {@link android.view.View.OnAttachStateChangeListener}.
+  The <code>android.databinding.adapters.ListenerUtil</code> class helps keep track of the previous
+  listeners so that they may be removed in the Binding Adaper.
+</p>
+<p>
+  By annotating the interfaces <code>OnViewDetachedFromWindow</code> and
+  <code>OnViewAttachedToWindow</code> with
+  <code>&commat;TargetApi(VERSION_CODES.HONEYCOMB_MR1)</code>, the data binding code
+  generator knows that the listener should only be generated when running on Honeycomb MR1
+  and new devices, the same version supported by
+  {@link android.view.View#addOnAttachStateChangeListener}.
+</p>
+<h2 id="converters">
+  Converters
+</h2>
+
+<h3 id="object_conversions">
+  Object Conversions
+</h3>
+
+<p>
+  When an Object is returned from a binding expression, a setter will be chosen
+  from the automatic, renamed, and custom setters. The Object will be cast to a
+  parameter type of the chosen setter.
+</p>
+
+<p>
+  This is a convenience for those using ObservableMaps to hold data. for
+  example:
+</p>
+
+<pre>
+&lt;TextView
+   android:text=&apos;&commat;{userMap["lastName"]}&apos;
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+
+<p>
+The <code>userMap</code> returns an Object and that Object will be automatically cast to
+  parameter type found in the setter <code>setText(CharSequence)</code>. When there
+  may be confusion about the parameter type, the developer will need
+  to cast in the expression.
+</p>
+
+<h3 id="custom_conversions">Custom Conversions</h3>
+
+<p>
+  Sometimes conversions should be automatic between specific types. For
+  example, when setting the background:
+</p>
+
+<pre>
+&lt;View
+   android:background="&commat;{isError ? &commat;color/red : &commat;color/white}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+<p>
+  Here, the background takes a <code>Drawable</code>, but the color is an
+  integer. Whenever a <code>Drawable</code> is expected and an integer is
+  returned, the <code>int</code> should be converted to a
+  <code>ColorDrawable</code>. This conversion is done using a static method
+  with a BindingConversion annotation:
+</p>
+
+<pre>
+&commat;BindingConversion
+public static ColorDrawable convertColorToDrawable(int color) {
+   return new ColorDrawable(color);
+}
+</pre>
+<p>
+  Note that conversions only happen at the setter level, so it is <strong>not
+  allowed</strong> to mix types like this:
+</p>
+
+<pre>
+&lt;View
+   android:background="&commat;{isError ? &commat;drawable/error : &commat;color/white}"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"/&gt;
+</pre>
+
+<h3 id="studio_support">Android Studio Support for Data Binding</h3>
+
+<p>
+Android Studio supports many of the code editing features for data binding code.
+For example, it supports the following features for data binding expressions:</p>
+<ul>
+<li>Syntax highlighting</li>
+<li>Flagging of expression language syntax errors</li>
+<li>XML code completion</li>
+<li>References, including <a class="external-link"
+href="https://www.jetbrains.com/help/idea/2016.1/navigation-in-source-code.html?origin=old_help">
+navigation</a> (such as navigate to a declaration) and
+<a class="external-link"
+href="https://www.jetbrains.com/help/idea/2016.1/viewing-inline-documentation.html?origin=old_help">
+quick documentation</a></li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Arrays and a
+<a href="https://docs.oracle.com/javase/tutorial/java/generics/types.html"
+class="external-link">generic type</a>, such as the {@link
+android.databinding.Observable} class, might display
+errors when there are no errors.</p>
+
+<p>
+The Preview pane displays default values for data binding expressions if
+provided. In the following
+example excerpt of an element from a layout XML file, the Preview pane displays
+the {@code PLACEHOLDER} default text value in the <code>TextView</code>.
+</p>
+
+<pre>
+&lt;TextView android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:text="&commat;{user.firstName, default=PLACEHOLDER}"/&gt;
+</pre>
+
+<p>
+If you need to display a default value during the design phase of your project,
+you can also use tools attributes instead of default expression values, as
+described in
+<a class="external-link"
+href="http://tools.android.com/tips/layout-designtime-attributes">
+Designtime Layout Attributes</a>.
+</p>
+

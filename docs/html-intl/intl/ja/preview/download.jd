@@ -1,5 +1,7 @@
-page.title=ダウンロード
-page.image=images/cards/card-download_16-9_2x.png
+page.title=端末上でのテスト
+meta.tags="preview", "nexus","system image"
+page.tags="preview", "androidn"
+page.image=images/cards/card-n-downloads_2x.png
 
 @jd:body
 
@@ -8,6 +10,7 @@ page.image=images/cards/card-download_16-9_2x.png
   <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
 
     <p class="sdk-terms-intro">Android Preview SDK のコンポーネントをダウンロード、インストールする前に、次の利用規約に同意する必要があります。
+
 </p>
 
     <h2 class="norule">利用規約</h2>
@@ -15,17 +18,19 @@ page.image=images/cards/card-download_16-9_2x.png
     <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
 以下は、Android SDK Preview の使用許諾契約です（以下「本契約」）。
 
-1.はじめに
+1. はじめに
 
 1.1 Android SDK Preview（以下、本契約で「Preview」という。具体的には利用可能な場合には Android システム ファイル、パッケージ型 API、Preview ライブラリ ファイルを含む）は、本契約の規定に従ってライセンス許可されます。本契約では、デベロッパーの Preview の使用に関して、デベロッパーと Google の間で法的拘束力のある契約を結びます。
 
-1.2 「Android」とは、Android オープン ソース プロジェクト（http://source.android.com/ にて随時更新）にて利用可能な、端末向けの Android ソフトウェア スタックを意味します。
+1.2 「Android」とは、Android オープンソース プロジェクト（http://source.android.com/ にて随時更新）にて利用可能な、端末向けの Android ソフトウェア スタックを意味します。
 
-1.3 「Google」とは、1600 Amphitheatre Parkway, Mountain View, CA 94043, United States に主たる事業所を有するデラウェア州法人である Google Inc. を意味します。
+1.3 「Android 互換」とは、（i）Android 互換ウェブサイト（http://source.android.com/compatibility）に掲載されており、随時アップデートされる可能性がある Android Compatibility Definition ドキュメントに準拠し、かつ（ii）Android Compatibility Test Suite（CTS）に合格した任意の Android 実装を指します。
 
-2.本契約の同意
+1.4 「Google」とは、1600 Amphitheatre Parkway, Mountain View, CA 94043, United States に主たる事業所を有するデラウェア州法人である Google Inc. を意味します。
 
-2.1 Preview を使用するには、まず本契約に同意する必要があります。本契約に同意しない場合は Preview を使用できません。
+2. 本契約への同意
+
+2.1 Peview を使用するためには、本契約に同意する必要があります。本契約に同意しない場合は Preview を使用できません。
 
 2.2 同意するかまたは Preview を使用するためにクリックすると、本契約に同意したことになります。
 
@@ -33,59 +38,59 @@ page.image=images/cards/card-download_16-9_2x.png
 
 2.4 雇用主またはその他の事業体を代表または代理して本契約に拘束されることに同意し Preview を企業または組織の内部で使用する場合、担当者の雇用主またはその他の事業体を本契約に法的に拘束する完全な法的権限を有していることを表明および保証するものとします。担当者が必要な権限を有していない場合は、担当者の雇用主またはその他の事業体を代表または代理して、本契約に同意することも、Preview を使用することもできません。
 
-3.Google Preview ライセンス
+3. Google からの Preview ライセンス
 
-3.1 本契約の規定に従い、Google は Android プラットフォーム上で実行するアプリケーションの開発に Preview を個人的にもしくは企業または組織の内部で使用するための、ロイヤリティ フリーな、譲渡不可で、非排他的な、サブライセンス不可の、限定された、取り消し可能なライセンスを付与するものとします。
+3.1 本契約の規定に従い、Google は Android 実装と互換性のあるアプリの開発に Preview を使用するための、限定的で、世界規模の、ロイヤリティ フリーな、譲渡不可、非排他的、サブライセンス不可なライセンスを付与するものとします。
 
-3.2 Preview に関するすべての法的権利、所有権、利益（Preview に含まれる知的財産権を含む）は Google またはサードパーティが所有するものとします。「知的財産権」とは、特許法、著作権法、営業秘密法、商標法、不当競争防止法に基づいて発生するすべての権利、およびその他のすべての所有権を意味します。デベロッパーに明示的に付与されていない権利は、すべて Google が所有します。
+3.2 本 Preview は、別のプラットフォーム（Android 実装と互換性のないものも含む）のアプリの開発や別の SDK の開発には使用できません。本 Preview をその目的で使用しない場合は、Android 実装と互換性のないものを含め、自由に別のプラットフォームのアプリの開発を行うことができます。
 
-3.3 本契約で明示的に許可されている目的以外においては、Preview を使用できません。当該のサードパーティのライセンスで必要とされる場合を除き、デベロッパーは、（a） Preview または Preview の一部をコピー（バックアップ目的を除く）、修正、改造、再配布、逆コンパイル、リバース エンジニアリング、逆アセンブルまたは派生物の作成、または（b）モバイル ハンドセットまたは個人用 PC 以外のハードウェア端末への Preview の読み込み、Preview と他のソフトウェアとの結合、または Preview の一部を組み込んだソフトウェアや端末の配布はできません。
+3.3 Preview に関するすべての法的権利、所有権、利益（Preview に含まれる知的財産権を含む）は Google またはサードパーティが所有するものとします。「知的財産権」とは、特許法、著作権法、営業秘密法、商標法、不当競争防止法に基づいて発生するすべての権利、およびその他のすべての所有権を意味します。デベロッパーに明示的に付与されていない権利は、すべて Google が所有します。
 
-3.4 デベロッパーは、Android の断片化につながるような行為をしないことに同意します。これには、Preview から派生したソフトウェア開発キットの配布、作成への参加、宣伝を含みます（ただし必ずしもこれらには限定されません）。
+3.4 本契約で明示的に許可されている目的以外においては、Preview を使用できません。当該のサードパーティのライセンスで必要とされる場合を除き、デベロッパーは、（a）Preview または Preview の一部をコピー（バックアップ目的を除く）、修正、改造、再配布、逆コンパイル、リバース エンジニアリング、逆アセンブルまたは派生物の作成、または（b）モバイル ハンドセットまたは個人用コンピュータ以外のハードウェア端末への Preview の読み込み、Preview と他のソフトウェアとの結合、または Preview の一部を組み込んだソフトウェアや端末の配布はできません。
 
-3.5 オープンソース ソフトウェア ライセンス下でライセンス付与された Preview のコンポーネントの使用、複製、配布は、本契約ではなく、そのオープンソース ソフトウェアのライセンスに準拠するものとします。デベロッパーは、許諾されるすべての権利下で、そのようなオープンソース ソフトウェア ライセンスに対して、優良ライセンシーのままでいることに同意し、そのような権利を終了、停止、または違反する可能性のあるいかなる行為も差し控えることに同意するものとします。
+3.5 オープンソース ソフトウェア ライセンス下でライセンス付与された Preview のコンポーネントの使用、複製、配布は、本契約ではなく、そのオープンソース ソフトウェアのライセンスに準拠するものとします。デベロッパーは、許諾されるすべての権利下で、そのようなオープンソース ソフトウェア ライセンスに対して、良好な状態のライセンシーのままでいることに同意し、そのような権利を終了、停止、または違反する可能性のあるいかなる行為も差し控えることに同意するものとします。
 
-3.6 デベロッパーは、Google が提供する Preview の形式および性質は事前の通知なしに変更される場合があり、今後リリースされる Preview のバージョンでは、以前のバージョンの Preview で開発されたアプリケーションとの互換性がない可能性があることに同意します。デベロッパーは、Google が事前の通知なく、Google の単独の裁量でデベロッパーまたはユーザーへの Preview（または Preview 内の一部の機能）の提供を（恒久的または一時的に）停止する場合があることに同意します。
+3.6 デベロッパーは、Google が提供する Preview の形式および性質は事前の通知なしに変更される場合があり、今後リリースされる Preview のバージョンでは、以前のバージョンの Preview で開発されたアプリとの互換性がない可能性があることに同意します。デベロッパーは、Google が事前の通知なく、Google の単独の裁量でデベロッパーまたはユーザーへの Preview（または Preview 内の一部の機能）の提供を（恒久的または一時的に）停止する場合があることに同意します。
 
 3.7 本契約のいかなる部分も、Google のいかなる商標名、商標、サービスマーク、ロゴ、ドメイン名、またはその他のブランド識別表示を使用する権利もデベロッパーに付与するものではありません。
 
 3.8 デベロッパーは、Preview に添付または収録されているすべての知的財産権に関する通知（著作権および商標の通知を含む）の削除、隠ぺい、改ざんを行わないことに同意します。
 
-4.デベロッパーによる Preview の使用
+4. デベロッパーによる Preview の使用
 
-4.1 Google は、本契約に基づき Preview を使用してデベロッパーが開発したソフトウェア アプリケーションに関して、デベロッパー（またはデベロッパーのライセンサー）からいかなる権利、所有権、または利益（当該アプリケーションに含まれる知的財産権を含む）も取得するものではないことに同意します。
+4.1 Google は、本契約に基づき Preview を使用してデベロッパーが開発したソフトウェア アプリに関して、デベロッパー（またはデベロッパーのライセンサー）からいかなる権利、所有権、または利益（当該アプリに含まれる知的財産権を含む）も取得するものではないことに同意します。
 
 4.2 デベロッパーは、Preview を（a）本契約、および（b）該当する司法管轄区における適用される法律、規則、または一般に認められた慣行またはガイドライン（米国またはその他の該当国におけるデータまたはソフトウェアの輸出入に関する法律を含む）で認められている目的にのみ使用することに同意します。
 
-4.3 Preview を使用してアプリケーションを開発する場合、デベロッパーはユーザーのプライバシーおよび法的権利を保護することに同意します。ユーザーからデベロッパーにユーザー名、パスワード、またはその他のログイン情報または個人情報が提供される場合、デベロッパーは、情報がデベロッパーのアプリケーションに提供されることをユーザーに認識させ、当該ユーザーについてプライバシーに関する法的に十分な通知および保護を行わなければなりません。デベロッパーのアプリケーションに個人情報または秘密情報が保存される場合、この保存は保護された方法で行われなければなりません。ユーザーからデベロッパーのアプリケーションに Google アカウントの情報が提供された場合、デベロッパーのアプリケーションでは、ユーザーが許可したタイミングで、かつユーザーが許可した限定された目的にのみ、当該情報を使用してユーザーの Google アカウントにアクセスすることが認められるものとします。
+4.3 Preview を使用してアプリを開発する場合、デベロッパーはユーザーのプライバシーおよび法的権利を保護することに同意します。ユーザーからデベロッパーにユーザー名、パスワード、またはその他のログイン情報または個人情報が提供される場合、デベロッパーは、情報がデベロッパーのアプリに提供されることをユーザーに認識させ、当該ユーザーについてプライバシーに関する法的に十分な通知および保護を行わなければなりません。デベロッパーのアプリに個人情報または秘密情報が保存される場合、この保存は保護された方法で行われなければなりません。ユーザーからデベロッパーのアプリに Google アカウントの情報が提供された場合、デベロッパーのアプリでは、ユーザーが許可したタイミングで、かつユーザーが許可した限定された目的にのみ、当該情報を使用してユーザーの Google アカウントにアクセスすることが認められるものとします。
 
 4.4 デベロッパーは、Preview に関して、第三者（Google、およびあらゆる携帯電話会社を含むが、これらに限定されない）のサーバー、ネットワーク、またはその他の財産またはサービスへの妨害、中断、損害、または許可されていない態様でのアクセスとなる行為（そのような行為に該当する対象製品の開発または販売 / 配布を含む）に関与しないことに同意します。
 
-4.5 デベロッパーは、デベロッパーが Android および Android のアプリケーションを介して作成、送信、表示するデータ、コンテンツ、リソース、および自身の行為の結果（Google に発生する可能性のあるあらゆる損失および損害を含む）について、自身が単独で責任を負うこと（および Google がこれについてデベロッパーまたはいかなる第三者に対しても一切責任を負わないこと）に同意します。
+4.5 デベロッパーは、デベロッパーが Android および Android のアプリを介して作成、送信、表示するデータ、コンテンツ、リソース、および自身の行為の結果（Google に発生する可能性のあるあらゆる損失および損害を含む）について、自身が単独で責任を負うこと（および Google がこれについてデベロッパーまたはいかなる第三者に対しても一切責任を負わないこと）に同意します。
 
 4.6 デベロッパーは、本契約、適用される第三者の契約もしくは利用規約、または適用される法律もしくは規則に基づく自身の義務に違反したこと、および当該違反の結果（Google または第三者に発生したあらゆる損失および損害を含む）について、自身が単独で責任を負うこと（および Google がこれについてデベロッパーまたはいかなる第三者に対しても一切責任を負わないこと）に同意します。
 
-4.7 Preview は開発中であり、デベロッパーによるテスティングやフィードバックは開発プロセスの重要な一部となります。デベロッパーは、Preview の使用により、一部の機能の実装が開発中であると認識し、Preview が安定したリリースの完全な機能性を持つことに依存すべきでないことを認識するものとします。本 Preview は、公式の Android SDK のリリース後はサポート対象でなくなるため、デベロッパーは、Preview を使用するいかなるアプリケーションも公然と配布または引き渡さないことに同意するものとします。
+4.7 Preview は開発中であり、デベロッパーによるテスティングやフィードバックは開発プロセスの重要な一部となります。デベロッパーは、Preview の使用により、一部の機能の実装が開発中であると認識し、Preview が安定したリリースの完全な機能性を持つことに依存すべきでないことを認識するものとします。本 Preview は、公式の Android SDK のリリース後はサポート対象でなくなるため、デベロッパーは、Preview を使用するいかなるアプリも公然と配布または引き渡さないことに同意するものとします。
 
-5.デベロッパーの資格情報
+5. デベロッパーの認証情報
 
-5.1 デベロッパーは、Google が発行した、またはデベロッパー自身で選択した、自身のデベロッパー用資格情報の秘密を保持する責任を負うこと、および自身のデベロッパー用資格情報のもとで開発されたすべてのアプリケーションについて単独で責任を負うことに同意します。
+5.1 デベロッパーは、Google が発行した、またはデベロッパー自身で選択した、自身のデベロッパー用認証情報の秘密を保持する責任を負うこと、および自身のデベロッパー用認証情報のもとで開発されたすべてのアプリについて単独で責任を負うことに同意します。
 
-6.プライバシーおよび情報
+6. プライバシーおよび情報
 
-6.1 Google は、Preview の継続的な技術革新と改良のために、ソフトウェアから特定の使用状況統計情報（一意識別子、関連する IP アドレス、ソフトウェアのバージョン番号、Preview のどのツール/サービスがどのように使用されているかに関する情報を含むが、これらに限定されない）を収集できます。この情報が収集される前に、Preview に通知が表示され、デベロッパーの同意が求められます。デベロッパーが同意しない場合は、情報は収集されません。
+6.1 Google は、Preview の継続的な技術革新と改良のために、ソフトウェアから特定の使用統計情報（一意識別子、関連する IP アドレス、ソフトウェアのバージョン番号、Preview のどのツール/サービスがどのように使用されているかに関する情報を含むが、これらに限定されない）を収集できます。この情報が収集される前に、Preview に通知が表示され、デベロッパーの同意が求められます。デベロッパーが同意しない場合は、情報は収集されません。
 
 6.2 収集されるデータは、Preview の改良のために集約された形で精査され、Google のプライバシー ポリシー（http://www.google.com/policies/privacy/）に従って管理されます。
 
-7.第三者のアプリケーション
+7. 第三者のアプリ
 
-7.1 デベロッパーが、Preview を使用して第三者が開発したアプリケーションを実行する、あるいは第三者から提供されたデータ、コンテンツ、リソースにアクセスする場合、デベロッパーは、Google がそれらのアプリケーション、データ、コンテンツ、リソースについて責任を負わないことに同意します。デベロッパーは、そのような第三者のアプリケーションを介してアクセスするすべてのデータ、コンテンツ、リソースについては、それらを生成した者が単独で責任を負うものであり、Google はそれらの第三者のアプリケーション、データ、コンテンツ、またはリソースの使用もしくはアクセスによって生じたあらゆる損失および損害について一切責任を負わないことを理解します。
+7.1 デベロッパーが、Preview を使用して第三者が開発したアプリを実行する、あるいは第三者から提供されたデータ、コンテンツ、リソースにアクセスする場合、デベロッパーは、Google がそれらのアプリ、データ、コンテンツ、リソースについて責任を負わないことに同意します。デベロッパーは、そのような第三者のアプリを介してアクセスするすべてのデータ、コンテンツ、リソースについては、それらを生成した者が単独で責任を負うものであり、Google はそれらの第三者のアプリ、データ、コンテンツ、またはリソースの使用もしくはアクセスによって生じたあらゆる損失および損害について一切責任を負わないことを理解します。
 
-7.2 デベロッパーは、そのような第三者のアプリケーションを介して表示されるデータ、コンテンツ、リソースは、提供者（あるいは代理の第三者または事業体）が所有する知的財産権で保護されている場合があることを認識するものとします。デベロッパーは、当該所有者からの明確な許可がない限り、それらのデータ、コンテンツ、リソース（全体または一部）の変更、貸与、賃貸、担保、配布または派生物の作成を行うことはできません。
+7.2 デベロッパーは、そのような第三者のアプリを介して表示されるデータ、コンテンツ、リソースは、提供者（あるいは代理の第三者または事業体）が所有する知的財産権で保護されている場合があることを認識するものとします。デベロッパーは、当該所有者からの明確な許可がない限り、それらのデータ、コンテンツ、リソース（全体または一部）の変更、貸与、賃貸、担保、配布または派生物の作成を行うことはできません。
 
-7.3 デベロッパーは、そのような第三者のアプリケーション、データ、コンテンツまたはリソースの使用が、デベロッパーと当該第三者間の別の規約に従うものであることを認識するものとします。
+7.3 デベロッパーは、そのような第三者のアプリ、データ、コンテンツまたはリソースの使用が、デベロッパーと当該第三者間の別の規約に従うものであることを認識するものとします。
 
-8.Google API の使用
+8. Google API の使用
 
 8.1 Google API
 
@@ -93,11 +98,11 @@ page.image=images/cards/card-download_16-9_2x.png
 
 8.1.2 デベロッパーは、API を使用して Google からユーザーのデータを取得する場合、ユーザーが明示的に同意した場合のみ、およびユーザーが許可したタイミングとその目的にのみ、データを取得できることを理解し、同意します。
 
-9.本契約の終了
+9. 本契約の終了
 
 9.1 本契約は、下記の規定に従ってデベロッパーまたは Google のいずれかによって解約されるまで、継続して適用されるものとします。
 
-9.2 デベロッパーが本契約の解約を希望する場合は、Preview および関連するデベロッパー資格情報の使用を停止することで、契約を終了するものとします。
+9.2 デベロッパーが本契約の解約を希望する場合は、Preview および関連するデベロッパー認証情報の使用を停止することで、契約を終了するものとします。
 
 9.3 Google は、理由の有無にかかわらず、書面で通知することでいつでもデベロッパーとの本契約を解約することができます。
 
@@ -121,7 +126,7 @@ page.image=images/cards/card-download_16-9_2x.png
 
 12.補償
 
-12.1 法律で認められる最大限の範囲内において、デベロッパーは、（a）デベロッパーが Preview を使用したこと、および（b）デベロッパーが Preview で開発したアプリケーションが他者のいかなる知的財産権を侵害していること、または他者の名誉を毀損している、もしくは他者のパブリシティ権もしくはプライバシー権を侵害していること、および（c）デベロッパーが本契約に違反したことから発生したあらゆる申し立て、普通法上の訴訟、衡平法上の訴訟、または法的手続き、ならびにあらゆる損失、責任、損害、費用、および経費（合理的な弁護士報酬を含む）について、Google、その関連会社、ならびに当該各社の取締役、役員、従業員、代理人を防御し、補償し、免責することに同意します。
+12.1 法律で認められる最大限の範囲内において、デベロッパーは、（a）デベロッパーが Preview を使用したこと、および（b）デベロッパーが Preview で開発したアプリが他者のいかなる知的財産権を侵害していること、または他者の名誉を毀損している、もしくは他者のパブリシティ権もしくはプライバシー権を侵害していること、および（c）デベロッパーが本契約に違反したことから発生したあらゆる申し立て、普通法上の訴訟、衡平法上の訴訟、または法的手続き、ならびにあらゆる損失、責任、損害、費用、および経費（合理的な弁護士報酬を含む）について、Google、その関連会社、ならびに当該各社の取締役、役員、従業員、代理人を防御し、補償し、免責することに同意します。
 
 13.契約の変更
 
@@ -162,146 +167,324 @@ page.image=images/cards/card-download_16-9_2x.png
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>本書の内容</h2>
+    <h2>このドキュメントの内容</h2>
       <ol>
-        <li><a href="#sdk">Android 6.0 SDK</a></li>
-        <li><a href="#docs">デベロッパー ドキュメント</a></li>
-        <li><a href="#images">ハードウェアのシステム イメージ</a></li>
+        <li><a href="#device-preview">ハードウェア端末をセットアップする</a>
+          <ol>
+            <li><a href="#ota">OTA アップデートを取得する</a></li>
+            <li><a href="#flash">手動で端末への書き込みを行う</a></li>
+            <li><a href="#revertDevice">アンインストールする</a></li>
+          </ol>
+        </li>
+        <li><a href="#setupAVD">エミュレータをセットアップする</a></li>
       </ol>
-
-     <h2>Legacy downloads</h2>
-        <ol>
-           <li><a href="{@docRoot}preview/download_mp1.html">Developer Preview 1</a></li>
-           <li><a href="{@docRoot}preview/download_mp2.html">Developer Preview 2</a></li>
-        </ol>
   </div>
 </div>
 
+<p>
+  新しいプラットフォーム上でアプリを実行してテストするには、Android N のランタイム環境をセットアップする必要があります。
+これを行うには、以下のいずれかの方法を使用します。
+</p>
+
+<ul>
+  <li>Android N をサポート対象のハードウェア端末にインストールする。</li>
+  <li>Android N が動作する Android エミュレータをセットアップする。</li>
+</ul>
 
 <p>
-  Android M Preview SDK には、アプリとプラットフォームの次期リリースで提供される新しい API とのテストに役立つ開発ツール、Android システム ファイル、ライブラリ ファイルが含まれています。
-このドキュメントでは、アプリのテスト用にダウンロードできる Preview のコンポーネントを入手する方法について説明します。
+  既存の APK とハードウェア端末またはエミュレータがあれば、新しいプラットフォーム上でアプリの基本的な互換性テストを実施できます。
+
+基本的なテストのために開発環境全体をアップデートする必要はありません。
+
+</p>
+
+<p>
+  アプリを Android N 向けに修正したり、Android N の API を使用したりする場合は、Android N 用にアップデートされた開発環境をセットアップする必要があります。詳細は <a href="{@docRoot}preview/setup-sdk.html">Android N 向けの開発準備</a>の説明をご覧ください。
+
+
 
 </p>
 
 
-<h2 id="sdk">Android 6.0 SDK</h2>
+<h2 id="device-preview">ハードウェア端末をセットアップする</h2>
 
 <p>
-  Preview SDK <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK マネージャー</a>経由でダウンロードできます。Preview SDK のダウンロードと設定の詳細については、<a href="{@docRoot}preview/setup-sdk.html#downloadSdk">Set Up the Preview SDK</a> をご覧ください。
+  N Developer Preview は、携帯端末やタブレット、テレビなど、アプリのテストに使用するさまざまなハードウェア端末のシステム アップデートに対応しています。
 
 </p>
 
+<p>
+  対象機種をお持ちの場合は、以下のいずれかの方法で Developer Preview マイルストーン ビルドにアップデートできます。
 
-<h2 id="docs">デベロッパー ドキュメント</h2>
+</p>
+
+<ul>
+  <li><a href="https://g.co/androidbeta">Android ベータ版プログラム</a>により<strong>自動 OTA アップデートを受信するために端末を登録する</strong>
+登録した端末は、N Developer Preview のマイルストーン ビルドごとに、定期的に無線（OTA）アップデートを受信できます。
+既存の環境から N Developer Preview のさまざまなリリースへシームレスに移行できるため、このベータ版プログラムに登録することをお勧めします。
+
+</li>
+  <li><strong>Developer Preview のシステム イメージをダウンロードして、端末に書き込む</strong>
+  手動で書き込みをした端末には、OTA アップデートが自動で配信されません。ただし、端末を Android ベータ版プログラムに登録すれば、OTA アップデートを取得できるようになります。
+ </li>
+</ul>
+
+<h3 id="ota">自動 OTA アップデートを受信するために端末を登録する</h3>
 
 <p>
-  デベロッパー ドキュメントのダウンロード パッケージでは、詳細な Preview の API リファレンス情報や API の比較レポートが提供されます。
+  対象機種（以下のダウンロードの表をご覧ください）をお持ちの場合は、<a href="https://g.co/androidbeta">Android ベータ版プログラム</a>に端末を登録すると、Android のプレビュー版への OTA アップデートを受信できます。
+
+正式なシステム アップデートと同様に、OTA アップデートのダウンロードや端末の更新は自動で行われます。
+
+
+</p>
+
+<p>
+  端末はいつでも登録解除できます。その端末で利用可能な Android の最新の実稼働向けバージョン（Android 6.0 Marshmallow など）への OTA アップデートが端末に配信されます。
+
+アップデート時はオールリセットされ、端末上のユーザーデータは削除されます。
+端末の登録解除前には、<strong>重要なデータをバックアップ</strong>しておいてください。
+
+</p>
+
+<p>
+  詳細情報や端末の登録方法については、<a href="https://g.co/androidbeta">Android ベータ版プログラム</a>のウェブサイトをご覧ください。
+
+</p>
+
+<p class="note"><strong>注:</strong>
+  登録を解除すると端末はオールリセットされるので、重要なデータはあらかじめバックアップしておいてください。
+
+</p>
+
+<h3 id="flash">手動で端末への書き込みを行う</h3>
+
+<p>
+  最新の Developer Preview のシステム イメージはいつでもダウンロードして、手動で端末に書き込むことができます。
+テスト端末用のシステム イメージは、以下の表からダウンロード可能です。
+テスト環境を詳細に管理したり、自動テストなどで頻繁に再インストールが必要な場合は、このように手動で端末に書き込みをする方法が便利です。
+
+
+</p>
+
+<!-- You can flash by ota or system image --><p>
+  端末にシステム イメージをインストールすると、<strong>端末からすべてのデータが削除</strong>されるため、あらかじめデータをバックアップしておいてください。
+
+</p>
+
+<p>
+  端末上のデータをバックアップして、ご自身の端末用のシステム イメージを以下からダウンロードした後、<a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a> の手順に従って端末にイメージを書き込みます。
+
+
+</p>
+
+<p>
+  手動でシステム イメージを書き込んだ端末には、以降の Developer Preview マイルストーン ビルドへの <strong>OTA アップデートが自動配信されません</strong>。
+
+そのため Developer Preview マイルストーンごとに環境を最新にして、新しいシステム イメージを書き込む必要があります。
+
+</p>
+
+<p>
+  手動で端末に書き込みを行った後でも、<a href="https://g.co/androidbeta">Android ベータ版プログラム</a>に端末を登録すれば OTA アップデートを受信できるようになります。
+
+次のプレビュー版への OTA アップデートを受信したい方は、いつでも端末登録が可能です。
+
 </p>
 
 <table>
   <tr>
-    <th scope="col">Description</th>
-    <th scope="col">Download / Checksums</th>
+    <th scope="col">端末</th>
+    <th scope="col">ダウンロード / チェックサム</th>
   </tr>
-  <tr id="docs-dl">
-    <td>Android M Preview 3<br>Developer Docs</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >m-preview-3-developer-docs.zip</a><br>
-      MD5: d99b14b0c06d31c8dfecb25072654ca3<br>
-      SHA-1: 9cefeeda07676130da606a1796e1c00fffc667c1 
+
+  <tr id="bullhead">
+    <td>Nexus 5X <br>"bullhead"</td>
+    <td><a href="#top" onclick="onDownload(this)">bullhead-npd35k-factory-5ba40535.tgz</a><br>
+      MD5: b6c5d79a21815ee21db41822dcf61e9f<br>
+      SHA-1:5ba4053577007d15c96472206e3a79bc80ab194c
     </td>
   </tr>
-</table>
 
-<h2 id="images">ハードウェアのシステム イメージ</h2>
-
-<p>
-  これらのシステム イメージでは、テスト用に物理端末にプラットフォームのプレビュー バージョンをインストールできます。
-端末にこれらのイメージを 1 つ以上設定すると、アプリをインストールして、プラットフォームの次期バージョンでアプリがどのように動作するかをテストできます。
-端末にシステム イメージをインストールするプロセスでは、<em>端末からすべてのデータが削除</em>されるため、システム イメージのインストール前にデータをバックアップする必要があります。
-
-
-</p>
-
-<p class="warning">
-  <b>警告:</b> 次の Android システム イメージはプレビュー版であり、今後変更される可能性があります。デベロッパーによるシステム イメージの使用は、Android SDK Preview 使用許諾契約に準拠するものとします。
-Android Preview システム イメージは安定したリリースではなく、お使いのコンピュータ システム、端末、データに影響を与える可能性のあるエラーや欠陥が含まれている場合があります。
-
-プレビュー版の Android システム イメージは工場出荷版の OS と同等のテストを受けておらず、お使いの電話やインストールされているサービス、アンインストールの動作停止を引き起こす場合があります。
-
-
-</p>
-
-<table>
-  <tr>
-    <th scope="col">Device</th>
-    <th scope="col">Download / Checksums</th>
-  </tr>
-  <tr id="hammerhead">
-    <td>Nexus 5 (GSM/LTE) <br>"hammerhead"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >hammerhead-MPA44I-preview-2ebbc049.tgz</a><br>
-      MD5: 91a924fb0c9f8e716e3b4c9954fd0dbb<br>
-      SHA-1: 2ebbc049b68c4da8baeee3e42bb94d7a965ba4a3
-    </td>
-  </tr>
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >shamu-MPA44I-preview-62b9c486.tgz</a><br>
-      MD5: ac6e58da86125073d9c395257fd42664<br>
-      SHA-1: 62b9c486fd7a5020e228d53ca5acd5c1857e48ff
+    <td><a href="#top" onclick="onDownload(this)">shamu-npd35k-factory-a33bf20c.tgz</a><br>
+      MD5: e1cf9c57cfb11bebe7f1f5bfbf05d7ab<br>
+      SHA-1: a33bf20c719206bcf08d1edd8da6c0ff9d50f69c
     </td>
   </tr>
+
+  <tr id="angler">
+    <td>Nexus 6P <br>"angler"</td>
+    <td><a href="#top" onclick="onDownload(this)">angler-npd35k-factory-81c341d5.tgz</a><br>
+      MD5: e93de7949433339856124c3729c15ebb<br>
+      SHA-1:81c341d57ef2cd139569b055d5d59e9e592a7abd
+    </td>
+  </tr>
+
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >volantis-MPA44I-preview-5c30a6e2.tgz</a><br>
-      MD5: 7f83768757913d3fea945a661020d185<br>
-      SHA-1: 5c30a6e2acd11a81f4105b12d23ff654f534f699
+    <td><a href="#top" onclick="onDownload(this)">volantis-npd35k-factory-2b50e19d.tgz</a><br>
+      MD5:565be87ebb2d5937e2abe1a42645864b<br>
+      SHA-1:2b50e19dae2667b27f911e3c61ed64860caf43e1
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>"volantisg"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantisg-npd35k-factory-2e89ebe6.tgz</a><br>
+      MD5: a8464e15c6683fe2afa378a63e205fda<br>
+      SHA-1:2e89ebe67a46b2f3beb050746c13341cd11fa678
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >fugu-MPA44I-preview-2860040a.tgz</a><br>
-      MD5: 438da8d37da9e341a69cfb16a4001ac5<br>
-      SHA-1: 2860040a326582f1ff5f702bf9a1ef002717fc98
+    <td><a href="#top" onclick="onDownload(this)">fugu-npd35k-factory-1de74874.tgz</a><br>
+      MD5: c0dbb7db671f61b2785da5001cedefcb<br>
+      SHA-1:1de74874f8d83e14d642f13b5a2130fc2aa55873
+    </td>
+  </tr>
+
+  <tr id="ryu">
+    <td>Pixel C <br>"ryu"</td>
+    <td><a href="#top" onclick="onDownload(this)">ryu-npd35k-factory-b4eed85d.tgz</a><br>
+      MD5: bdcb6f770e753668b5fadff2a6678e0d<br>
+      SHA-1: b4eed85de0d42c200348a8629084f78e24f72ac2
+    </td>
+  </tr>
+
+  <tr id="seed">
+    <td>General Mobile 4G（Android One） <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npd35k-factory-5ab1212b.tgz</a><br>
+      MD5:7d34a9774fdd6e025d485ce6cfc23c4c<br>
+      SHA-1:5ab1212bc9417269d391aacf1e672fff24b4ecc5
+    </td>
+  </tr>
+
+  <tr id="xperia">
+    <td>Sony Xperia Z3 <br> （D6603 および D6653）</td>
+    <td>ダウンロード:<a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
+      詳細については、<a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">Xperia Z3 に Android N Developer Preview を試す</a>を参照してください。
     </td>
   </tr>
 
 </table>
 
-<h3 id="install-image">端末にイメージをインストールする</h3>
+<h3 id="revertDevice">プレビュー版を端末からアンインストールする</h3>
 
 <p>
-  テスト用に端末イメージを使用するには、互換性のある端末にインストールする必要があります。次の手順に従って、システム イメージをインストールします。
+  以下のいずれかの方法で、プレビュー版を端末からアンインストールできます。
+ </p>
+  <ul>
+    <li><strong>工場出荷時仕様のシステム イメージを取得</strong>して、手動で端末に書き込みます。
+
+      <ul>
+          <li><strong>Nexus 端末と Pixel C 端末</strong>については、Nexus 端末の<a href="http://developers.google.com/android/nexus/images">ファクトリー イメージ</a>のページを参照してダウンロードしてください。
+
+ </li>
+        <li><strong>他の端末</strong>については、端末メーカーに直接お問い合わせください。
+その他の端末については、直接端末メーカーにお問い合わせください。Android ベータ版プログラムの対象機種については、端末をプログラムに登録した後、登録を解除することができます（詳細は以下をご覧ください）。
+
+</li>
+      </ul>
+    </li>
+    <li><strong>Android ベータ版プログラムから端末を登録解除します。</strong>Android ベータ版プログラムへの端末の登録を解除します。<a href="https://g.co/androidbeta">Android ベータ版プログラム</a>に登録中の端末は、その種類のよらず、簡単に登録を解除することができます。
+
+
+  <p>
+    その端末で利用可能な Android の最新の実稼働向けバージョン（Android 6.0 Marshmallow など）への OTA アップデートが端末に配信されます。
+
+    アップデート時はオールリセットされ、端末上のユーザーデータは削除されます。
+端末の登録解除前には、<strong>重要なデータをバックアップ</strong>しておいてください。
+
+  </p>
+  </li>
+</ul>
+
+<p class="note"><strong>注:</strong>
+  プログラムの終了前に Developer Preview のシステム イメージをアンインストールすると、端末はオールリセットされ、すべてのユーザーデータが削除されます。
+
 
 </p>
+
+
+<h2 id="setupAVD">エミュレータをセットアップする</h2>
+
+<p>Android エミュレータで Android N Preview を実行するには、Android N Preview SDK をダウンロードして、エミュレータ用の仮想端末を準備する必要があります。
+
+</p>
+
+<p>まずは以下の手順で Android N Preview SDK をダウンロードします（既に <a href="{@docRoot}preview/setup-sdk.html">Android N 向けの開発準備</a>でダウンロード済みの場合は、この手順は飛ばしてください）。
+
+
 
 <ol>
-  <li>この一覧の中からいずれかのシステム イメージ パッケージをダウンロードして、解凍します。</li>
-  <li>保持するデータを端末からバックアップします。</li>
-  <li>
-<a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
- の手順に従って端末にイメージをフラッシュします。</li>
+  <li>Android Studio で設定ダイアログを開きます（Windows、Linux では <strong>[File] &gt; [Settings]</strong>、Mac では <strong>[Android Studio] &gt; [Preferences]</strong>）。
+
+左側のパネルで、<strong>[Appearance &amp; Behavior] &gt; [System Settings] &gt; [Android SDK]</strong> を選択します。
+
+
+
+  <li>[<strong>SDK Platforms</strong>] タブをクリックして、[<strong>Android N Preview</strong>] チェック ボックスを選択します。
+</li>
+
+  <li>[<strong>SDK Tools</strong>] タブをクリックして、[<strong>Android SDK Build Tools</strong>]、[<strong>Android SDK Platform-Tools</strong>]、[<strong>Android SDK Tools</strong>] のチェック ボックスをオンにします。
+
+
+
+  </li>
+
+  <li>[<strong>OK</strong>] をクリックして、インストールするパッケージの使用許諾に同意します。
+
+  </li>
 </ol>
 
-<p class="note">
-  <strong>注:</strong> 開発用端末に Preview のシステム イメージをフラッシュすると、OTA アップデートを通じて次のプレビュー リリースに自動的にアップグレードされます。
+<p>これで <strong>Android SDK Built-Tools 24.0 0 rc1</strong>、<strong>Platform-Tools 24.0.0 rc1</strong>、<strong>SDK Tools 25.0.9</strong> がインストールされます。SDK Tools を 25.0.9 にアップデートしないと、Android N の x86_64 システム イメージは動作しません。
+
 
 </p>
 
-<h3 id="revertDevice">端末を工場出荷時の仕様に戻す</h3>
+
+<p>次に Android N のシステム イメージを使用して仮想端末を作成します。</p>
+
+<ol>
+  <li><strong>[Tools] &gt; [Android] &gt; [AVD Manager]</strong> を選択して、AVD Manager を起動します。
+</li>
+  <li>[<strong>Create Virtual Device</strong>] をクリックします。</li>
+  <li>Nexus 5X、Nexus 6P、Nexus 9、Android TV などの端末を選択して、[<strong>Next</strong>] をクリックします。
+</li>
+  <li><strong>N</strong> システム イメージ（<strong>x86</strong> ABI）を選択して [<strong>Next</strong>] をクリックします
+
+    （現時点で Android N Preview の Android エミュレータに対応しているのは x86 システム イメージだけです）。
+
+  <li>残りの AVD 設定を終えたら [<strong>Finish</strong>] をクリックします。
+</li>
+</ol>
+
+<p>これで Android N Preview AVD で Android エミュレータを起動できます。</p>
 
 <p>
-  Preview をアンインストールして、工場出荷時の仕様に戻すには、
-<a href="http://developers.google.com/android/nexus/images">developers.google.com/android</a> にアクセス
-して、端末にフラッシュするイメージをダウンロードします。同じページの手順に従って端末にイメージをフラッシュします。
+<a href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a> に対応した Android Studio 2.1 のプレビュー版をインストールすると、Android Studio 1.5 よりもパフォーマンスが格段に向上し、Android エミュレータをより快適にお使いいただけます。
+
 
 </p>
+
+<p>仮想端末の作成については、<a href="{@docRoot}tools/devices/index.html">仮想端末を管理する</a>で詳細をご覧ください。
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   </div><!-- landing -->
 

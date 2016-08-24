@@ -22,6 +22,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.view.GestureDetector;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.widget.OverScroller;
@@ -60,6 +61,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
+    private boolean mMouseHoveringAtEdge;
     private long mLastFlingTime;
 
     public SystemGesturesPointerEventListener(Context context, Callbacks callbacks) {
@@ -87,7 +89,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
 
     @Override
     public void onPointerEvent(MotionEvent event) {
-        if (mGestureDetector != null) {
+        if (mGestureDetector != null && event.isTouchEvent()) {
             mGestureDetector.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
@@ -96,6 +98,10 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                 mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
+                if (mMouseHoveringAtEdge) {
+                    mMouseHoveringAtEdge = false;
+                    mCallbacks.onMouseLeaveFromEdge();
+                }
                 mCallbacks.onDown();
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -121,6 +127,21 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
                     } else if (swipe == SWIPE_FROM_RIGHT) {
                         if (DEBUG) Slog.d(TAG, "Firing onSwipeFromRight");
                         mCallbacks.onSwipeFromRight();
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_MOVE:
+                if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                    if (!mMouseHoveringAtEdge && event.getY() == 0) {
+                        mCallbacks.onMouseHoverAtTop();
+                        mMouseHoveringAtEdge = true;
+                    } else if (!mMouseHoveringAtEdge && event.getY() >= screenHeight - 1) {
+                        mCallbacks.onMouseHoverAtBottom();
+                        mMouseHoveringAtEdge = true;
+                    } else if (mMouseHoveringAtEdge
+                            && (event.getY() > 0 && event.getY() < screenHeight - 1)) {
+                        mCallbacks.onMouseLeaveFromEdge();
+                        mMouseHoveringAtEdge = false;
                     }
                 }
                 break;
@@ -247,6 +268,9 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         void onFling(int durationMs);
         void onDown();
         void onUpOrCancel();
+        void onMouseHoverAtTop();
+        void onMouseHoverAtBottom();
+        void onMouseLeaveFromEdge();
         void onDebug();
     }
 }

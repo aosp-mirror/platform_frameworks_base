@@ -117,7 +117,10 @@ public class Shader {
         }
     }
 
-    /* package */ long getNativeInstance() {
+    /**
+     * @hide
+     */
+    public long getNativeInstance() {
         return native_instance;
     }
 

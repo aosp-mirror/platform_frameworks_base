@@ -1,0 +1,90 @@
+page.title=Gameloft drives viral distribution with friend invitations
+page.metaDescription=Gameloft makes extensive use of Google Play games services.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/gameloft-asphalt8.jpg
+page.timestamp=1454440882
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img
+  src="{@docRoot}images/distribute/stories/gameloft-asphalt8-icon.png"
+  height="113" />
+</div>
+
+<p>
+  Founded in 2000 Gameloft has grown to deliver over 500 games, with over 2
+  million of their games being downloaded every day across smartphones and
+  feature phones.
+</p>
+
+<p>
+  Gameloft makes extensive use of Google Play games services.
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.gameloft.android.ANMP.GloftA8HM">
+  Asphalt 8: Airborne</a> is no exception including Google Play games services
+  sign-in, leaderboards, and achievements.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  To drive downloads of Asphalt 8: Airborne, Gameloft introduced friend invites.
+  Gameloft chose to display the invite option clearly next to social media
+  iconography, which started a smooth and easy friends invite flow. Then the
+  friend invites look and feel was designed to fit the game’s artistic style to
+  create a more trusted and immersive experience.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:310px">
+  <img
+   src="{@docRoot}images/distribute/stories/gameloft-asphalt8-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/gameloft-asphalt8-screenshot.png 1x
+  {@docRoot}images/distribute/stories/gameloft-asphalt8-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Friend invites match the game’s artistic style
+  </p>
+</div>
+
+<p>
+  Gameloft found that adding friends invites enhanced the overall user
+  experience and helped increase viral distribution of Asphalt 8: Airborne.
+</p>
+
+<p>
+  In addition, retention and the percentage of payers are positively correlated
+  with Google Play games sign-ins. Users that signed-in are <b>300 percent more
+  likely to come back after three days, and 400 percent more likely after seven
+  days</b>. In addition, they’re <b>3.5 times more likely to convert to payers
+  </b>.
+</p>
+
+<p>
+  Gameloft’s experience with Google Play games services has resulted in their
+  integration into the majority of Gameloft’s games.
+</p>
+
+<p>
+  See examples of how Gameloft integrated Google Play games services into the
+  <a class="external-link"
+  href="{@docRoot}shareables/stories/Gameloft_Asphalt8_gpgs.pdf">
+  UI of Asphalt 8</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to add
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/realtimeMultiplayer#invitations">
+  friend invitations</a> in your multi-player games and more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase your player
+  engagement and revenues.
+</p>

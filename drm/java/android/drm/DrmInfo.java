@@ -17,6 +17,7 @@
 package android.drm;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -52,7 +53,7 @@ public class DrmInfo {
         if (!isValid()) {
             final String msg = "infoType: " + infoType + "," +
                                "mimeType: " + mimeType + "," +
-                               "data: " + data;
+                               "data: " + Arrays.toString(data);
 
             throw new IllegalArgumentException(msg);
         }
@@ -79,7 +80,7 @@ public class DrmInfo {
         if (!isValid()) {
             final String msg = "infoType: " + infoType + "," +
                                "mimeType: " + mimeType + "," +
-                               "data: " + mData;
+                               "data: " + Arrays.toString(mData);
 
             throw new IllegalArgumentException();
         }

@@ -38,8 +38,9 @@ import com.android.internal.view.IInputContextCallback;
     
     void getExtractedText(in ExtractedTextRequest request, int flags, int seq,
             IInputContextCallback callback);
-    
-    void deleteSurroundingText(int leftLength, int rightLength);
+
+    void deleteSurroundingText(int beforeLength, int afterLength);
+    void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
 
     void setComposingText(CharSequence text, int newCursorPosition);
 

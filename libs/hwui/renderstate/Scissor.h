@@ -22,11 +22,14 @@
 namespace android {
 namespace uirenderer {
 
+class Rect;
+
 class Scissor {
     friend class RenderState;
 public:
     bool setEnabled(bool enabled);
     bool set(GLint x, GLint y, GLint width, GLint height);
+    void set(int viewportHeight, const Rect& clip);
     void reset();
     bool isEnabled() { return mEnabled; }
     void dump();

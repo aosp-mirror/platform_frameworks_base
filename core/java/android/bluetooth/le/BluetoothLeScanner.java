@@ -278,7 +278,7 @@ public final class BluetoothLeScanner {
         private List<List<ResultStorageDescriptor>> mResultStorages;
 
         // mLeHandle 0: not registered
-        // -1: scan stopped
+        // -1: scan stopped or registration failed
         // > 0: registered and scan started
         private int mClientIf;
 
@@ -310,6 +310,9 @@ public final class BluetoothLeScanner {
                 if (mClientIf > 0) {
                     mLeScanClients.put(mScanCallback, this);
                 } else {
+                    // Registration timed out or got exception, reset clientIf to -1 so no
+                    // subsequent operations can proceed.
+                    if (mClientIf == 0) mClientIf = -1;
                     postCallbackError(mScanCallback,
                             ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED);
                 }
@@ -352,19 +355,19 @@ public final class BluetoothLeScanner {
         @Override
         public void onClientRegistered(int status, int clientIf) {
             Log.d(TAG, "onClientRegistered() - status=" + status +
-                    " clientIf=" + clientIf);
+                    " clientIf=" + clientIf + " mClientIf=" + mClientIf);
             synchronized (this) {
-                if (mClientIf == -1) {
-                    if (DBG) Log.d(TAG, "onClientRegistered LE scan canceled");
-                }
-
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    mClientIf = clientIf;
                     try {
-                        mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters,
-                                mWorkSource, mResultStorages,
-                                ActivityThread.currentOpPackageName());
-
+                        if (mClientIf == -1) {
+                            // Registration succeeds after timeout, unregister client.
+                            mBluetoothGatt.unregisterClient(clientIf);
+                        } else {
+                            mClientIf = clientIf;
+                            mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters,
+                                    mWorkSource, mResultStorages,
+                                    ActivityThread.currentOpPackageName());
+                        }
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mClientIf = -1;

@@ -19,9 +19,10 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.content.Context;
 import android.view.ViewPropertyAnimator;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+
+import com.android.systemui.Interpolators;
 
 /**
  * Utility class to calculate general fling animation when the finger is released.
@@ -41,8 +42,6 @@ public class FlingAnimationUtils {
     private static final float LINEAR_OUT_SLOW_IN_START_GRADIENT = 1.0f / LINEAR_OUT_SLOW_IN_X2;
 
     private Interpolator mLinearOutSlowIn;
-    private Interpolator mFastOutSlowIn;
-    private Interpolator mFastOutLinearIn;
 
     private float mMinVelocityPxPerSecond;
     private float mMaxLengthSeconds;
@@ -53,10 +52,6 @@ public class FlingAnimationUtils {
     public FlingAnimationUtils(Context ctx, float maxLengthSeconds) {
         mMaxLengthSeconds = maxLengthSeconds;
         mLinearOutSlowIn = new PathInterpolator(0, 0, LINEAR_OUT_SLOW_IN_X2, 1);
-        mFastOutSlowIn
-                = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_slow_in);
-        mFastOutLinearIn
-                = AnimationUtils.loadInterpolator(ctx, android.R.interpolator.fast_out_linear_in);
         mMinVelocityPxPerSecond
                 = MIN_VELOCITY_DP_PER_SECOND * ctx.getResources().getDisplayMetrics().density;
         mHighVelocityPxPerSecond
@@ -150,7 +145,7 @@ public class FlingAnimationUtils {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            mAnimatorProperties.interpolator = mFastOutSlowIn;
+            mAnimatorProperties.interpolator = Interpolators.FAST_OUT_SLOW_IN;
         }
         mAnimatorProperties.duration = (long) (durationSeconds * 1000);
         return mAnimatorProperties;
@@ -223,7 +218,7 @@ public class FlingAnimationUtils {
 
             // Just use a normal interpolator which doesn't take the velocity into account.
             durationSeconds = maxLengthSeconds;
-            mAnimatorProperties.interpolator = mFastOutLinearIn;
+            mAnimatorProperties.interpolator = Interpolators.FAST_OUT_LINEAR_IN;
         }
         mAnimatorProperties.duration = (long) (durationSeconds * 1000);
         return mAnimatorProperties;

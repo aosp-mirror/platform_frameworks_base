@@ -54,7 +54,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
      * Timeout in which we are waiting for the system to start the mock
      * accessibility services.
      */
-    private static final long TIMEOUT_START_MOCK_ACCESSIBILITY_SERVICES = 300;
+    private static final long TIMEOUT_START_MOCK_ACCESSIBILITY_SERVICES = 1000;
 
     /**
      * Timeout used for testing that a service is notified only upon a
@@ -66,6 +66,12 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
      * The interface used to talk to the tested service.
      */
     private IAccessibilityManager mManagerService;
+
+    @Override
+    protected void setUp() throws Exception {
+        // Reset the state.
+        ensureOnlyMockServicesEnabled(getContext(), false, false);
+    }
 
     @Override
     public void setContext(Context context) {
@@ -92,6 +98,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testAddClient_AccessibilityDisabledThenEnabled() throws Exception {
+        // at least some service must be enabled, otherwise accessibility will always be disabled.
+        ensureOnlyMockServicesEnabled(mContext, true, false);
+
         // make sure accessibility is disabled
         ensureAccessibilityEnabled(mContext, false);
 
@@ -99,7 +108,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         MyMockAccessibilityManagerClient mockClient = new MyMockAccessibilityManagerClient();
 
         // invoke the method under test
-        final int stateFlagsDisabled = mManagerService.addClient(mockClient, UserHandle.USER_OWNER);
+        final int stateFlagsDisabled =
+                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
         boolean enabledAccessibilityDisabled =
             (stateFlagsDisabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -111,10 +121,10 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         ensureAccessibilityEnabled(mContext, true);
 
         // invoke the method under test
-        final int stateFlagsEnabled = mManagerService.addClient(mockClient, UserHandle.USER_OWNER);
+        final int stateFlagsEnabled =
+                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
         boolean enabledAccessibilityEnabled =
             (stateFlagsEnabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
-
 
         // check expected result
         assertTrue("The client must be enabled since accessibility is enabled.",
@@ -123,6 +133,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testAddClient_AccessibilityEnabledThenDisabled() throws Exception {
+        // at least some service must be enabled, otherwise accessibility will always be disabled.
+        ensureOnlyMockServicesEnabled(mContext, true, false);
+
         // enable accessibility before registering the client
         ensureAccessibilityEnabled(mContext, true);
 
@@ -130,7 +143,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         MyMockAccessibilityManagerClient mockClient = new MyMockAccessibilityManagerClient();
 
         // invoke the method under test
-        final int stateFlagsEnabled = mManagerService.addClient(mockClient, UserHandle.USER_OWNER);
+        final int stateFlagsEnabled =
+                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
         boolean enabledAccessibilityEnabled =
             (stateFlagsEnabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -142,7 +156,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         ensureAccessibilityEnabled(mContext, false);
 
         // invoke the method under test
-        final int stateFlagsDisabled = mManagerService.addClient(mockClient, UserHandle.USER_OWNER);
+        final int stateFlagsDisabled =
+                mManagerService.addClient(mockClient, UserHandle.USER_CURRENT);
         boolean enabledAccessibilityDisabled =
             (stateFlagsDisabled & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
 
@@ -162,7 +177,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
         // look for the two mock services
         for (AccessibilityServiceInfo info : mManagerService.getInstalledAccessibilityServiceList(
-                UserHandle.USER_OWNER)) {
+                UserHandle.USER_CURRENT)) {
             ServiceInfo serviceInfo = info.getResolveInfo().serviceInfo;
             if (packageName.equals(serviceInfo.packageName)) {
                 if (firstMockServiceClassName.equals(serviceInfo.name)) {
@@ -181,11 +196,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @LargeTest
     public void testSendAccessibilityEvent_OneService_MatchingPackageAndEventType()
             throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility service
         ensureOnlyMockServicesEnabled(mContext, true, false);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the mock service
         MockAccessibilityService service = MyFirstMockAccessibilityService.sInstance;
@@ -203,7 +218,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         service.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(service);
@@ -211,11 +226,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testSendAccessibilityEvent_OneService_NotMatchingPackage() throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility service
         ensureOnlyMockServicesEnabled(mContext, true, false);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the mock service
         MockAccessibilityService service = MyFirstMockAccessibilityService.sInstance;
@@ -233,7 +248,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         service.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(service);
@@ -241,11 +256,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testSendAccessibilityEvent_OneService_NotMatchingEventType() throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility service
         ensureOnlyMockServicesEnabled(mContext, true, false);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the mock service
         MockAccessibilityService service = MyFirstMockAccessibilityService.sInstance;
@@ -263,7 +278,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         service.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(service);
@@ -271,11 +286,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testSendAccessibilityEvent_OneService_NotifivationAfterTimeout() throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility service
         ensureOnlyMockServicesEnabled(mContext, true, false);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the mock service
         MockAccessibilityService service = MyFirstMockAccessibilityService.sInstance;
@@ -299,8 +314,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         service.replay();
 
         // send the events
-        mManagerService.sendAccessibilityEvent(firstEvent, UserHandle.USER_OWNER);
-        mManagerService.sendAccessibilityEvent(secondEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(firstEvent, UserHandle.USER_CURRENT);
+        mManagerService.sendAccessibilityEvent(secondEvent, UserHandle.USER_CURRENT);
 
         // wait for #sendAccessibilityEvent to reach the backing service
         Thread.sleep(TIMEOUT_BINDER_CALL);
@@ -322,11 +337,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @LargeTest
     public void testSendAccessibilityEvent_TwoServices_MatchingPackageAndEventType_DiffFeedback()
             throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility services
         ensureOnlyMockServicesEnabled(mContext, true, true);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the first mock service
         MockAccessibilityService firstService = MyFirstMockAccessibilityService.sInstance;
@@ -356,7 +371,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         secondService.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(firstService);
@@ -366,11 +381,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @LargeTest
     public void testSendAccessibilityEvent_TwoServices_MatchingPackageAndEventType()
             throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility services
         ensureOnlyMockServicesEnabled(mContext, true, true);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the first mock service
         MockAccessibilityService firstService = MyFirstMockAccessibilityService.sInstance;
@@ -395,7 +410,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         secondService.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(firstService);
@@ -405,11 +420,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @LargeTest
     public void testSendAccessibilityEvent_TwoServices_MatchingPackageAndEventType_OneDefault()
             throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility services
         ensureOnlyMockServicesEnabled(mContext, true, true);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the first mock service
         MockAccessibilityService firstService = MyFirstMockAccessibilityService.sInstance;
@@ -436,7 +451,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         secondService.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(firstService);
@@ -446,11 +461,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @LargeTest
     public void testSendAccessibilityEvent_TwoServices_MatchingPackageAndEventType_TwoDefault()
             throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility services
         ensureOnlyMockServicesEnabled(mContext, true, true);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the first mock service
         MockAccessibilityService firstService = MyFirstMockAccessibilityService.sInstance;
@@ -479,7 +494,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         secondService.replay();
 
         // send the event
-        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_OWNER);
+        mManagerService.sendAccessibilityEvent(sentEvent, UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(firstService);
@@ -488,11 +503,11 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testInterrupt() throws Exception {
-        // set the accessibility setting value
-        ensureAccessibilityEnabled(mContext, true);
-
         // enable the mock accessibility services
         ensureOnlyMockServicesEnabled(mContext, true, true);
+
+        // set the accessibility setting value
+        ensureAccessibilityEnabled(mContext, true);
 
         // configure the first mock service
         MockAccessibilityService firstService = MyFirstMockAccessibilityService.sInstance;
@@ -514,7 +529,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         secondService.replay();
 
         // call the method under test
-        mManagerService.interrupt(UserHandle.USER_OWNER);
+        mManagerService.interrupt(UserHandle.USER_CURRENT);
 
         // verify if all expected methods have been called
         assertMockServiceVerifiedWithinTimeout(firstService);
@@ -534,7 +549,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         sentEvent.setContentDescription("ContentDescription");
         sentEvent.setCurrentItemIndex(1);
         sentEvent.setEnabled(true);
-        sentEvent.setEventType(AccessibilityEvent.TYPE_VIEW_CLICKED);
+        sentEvent.setEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT);
         sentEvent.setEventTime(1000);
         sentEvent.setFromIndex(1);
         sentEvent.setFullScreen(true);
@@ -568,8 +583,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
      * @throws Exception If any error occurs.
      */
     private void ensureAccessibilityEnabled(Context context, boolean enabled) throws Exception {
-        boolean isEnabled = (Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1 ? true : false);
+        boolean isEnabled = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
 
         if (isEnabled == enabled) {
             return;
@@ -608,12 +623,13 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
             servicesToEnable.append(MySecondMockAccessibilityService.sComponentName).append(":");
         }
 
+        Settings.Secure.putString(context.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, servicesToEnable.toString());
+
+        // Optimization. If things will not change, we don't have to do anything.
         if (servicesToEnable.equals(enabledServices)) {
             return;
         }
-
-        Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, servicesToEnable.toString());
 
         // we have enabled the services of interest and need to wait until they
         // are instantiated and started (if needed) and the system binds to them
@@ -664,13 +680,13 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
             throws Exception {
         Exception lastVerifyException = null;
         long beginTime = SystemClock.uptimeMillis();
-        long pollTmeout = TIMEOUT_BINDER_CALL / 5;
+        long pollTimeout = TIMEOUT_BINDER_CALL / 5;
 
         // poll until the timeout has elapsed
         while (SystemClock.uptimeMillis() - beginTime < TIMEOUT_BINDER_CALL) {
             // sleep first since immediate call will always fail
             try {
-                Thread.sleep(pollTmeout);
+                Thread.sleep(pollTimeout);
             } catch (InterruptedException ie) {
                 /* ignore */
             }

@@ -622,7 +622,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     /** @hide */
-    public void initialize(MenuBuilder menu) {
+    public void initialize(@Nullable MenuBuilder menu) {
         mMenu = menu;
     }
 

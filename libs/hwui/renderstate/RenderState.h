@@ -16,23 +16,25 @@
 #ifndef RENDERSTATE_H
 #define RENDERSTATE_H
 
-#include <set>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#include <utils/Mutex.h>
-#include <utils/Functor.h>
-#include <utils/RefBase.h>
-#include <private/hwui/DrawGlInfo.h>
-#include <renderstate/Blend.h>
-
 #include "AssetAtlas.h"
 #include "Caches.h"
 #include "Glop.h"
+#include "renderstate/Blend.h"
 #include "renderstate/MeshState.h"
+#include "renderstate/OffscreenBufferPool.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/Scissor.h"
 #include "renderstate/Stencil.h"
 #include "utils/Macros.h"
+
+#include <set>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <ui/Region.h>
+#include <utils/Mutex.h>
+#include <utils/Functor.h>
+#include <utils/RefBase.h>
+#include <private/hwui/DrawGlInfo.h>
 
 namespace android {
 namespace uirenderer {
@@ -49,15 +51,21 @@ class RenderThread;
 // wrapper of Caches for users to migrate to.
 class RenderState {
     PREVENT_COPY_AND_ASSIGN(RenderState);
+    friend class renderthread::RenderThread;
+    friend class Caches;
 public:
     void onGLContextCreated();
     void onGLContextDestroyed();
+
+    void flush(Caches::FlushMode flushMode);
 
     void setViewport(GLsizei width, GLsizei height);
     void getViewport(GLsizei* outWidth, GLsizei* outHeight);
 
     void bindFramebuffer(GLuint fbo);
-    GLint getFramebuffer() { return mFramebuffer; }
+    GLuint getFramebuffer() { return mFramebuffer; }
+    GLuint createFramebuffer();
+    void deleteFramebuffer(GLuint fbo);
 
     void invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info);
 
@@ -78,13 +86,11 @@ public:
         mRegisteredContexts.erase(context);
     }
 
-    void requireGLContext();
-
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
-    void render(const Glop& glop);
+    void render(const Glop& glop, const Matrix4& orthoMatrix);
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }
@@ -92,14 +98,13 @@ public:
     Scissor& scissor() { return *mScissor; }
     Stencil& stencil() { return *mStencil; }
 
-    void dump();
-private:
-    friend class renderthread::RenderThread;
-    friend class Caches;
+    OffscreenBufferPool& layerPool() { return mLayerPool; }
 
+    void dump();
+
+private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
-    void assertOnGLThread();
 
     explicit RenderState(renderthread::RenderThread& thread);
     ~RenderState();
@@ -112,6 +117,8 @@ private:
     MeshState* mMeshState = nullptr;
     Scissor* mScissor = nullptr;
     Stencil* mStencil = nullptr;
+
+    OffscreenBufferPool mLayerPool;
 
     AssetAtlas mAssetAtlas;
     std::set<Layer*> mActiveLayers;

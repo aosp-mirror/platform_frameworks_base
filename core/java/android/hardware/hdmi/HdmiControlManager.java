@@ -93,7 +93,8 @@ public final class HdmiControlManager {
     public static final int RESULT_TIMEOUT = 1;
     public static final int RESULT_SOURCE_NOT_AVAILABLE = 2;
     public static final int RESULT_TARGET_NOT_AVAILABLE = 3;
-    public static final int RESULT_ALREADY_IN_PROGRESS = 4;
+
+    @Deprecated public static final int RESULT_ALREADY_IN_PROGRESS = 4;
     public static final int RESULT_EXCEPTION = 5;
     public static final int RESULT_INCORRECT_MODE = 6;
     public static final int RESULT_COMMUNICATION_FAILED = 7;
@@ -266,7 +267,7 @@ public final class HdmiControlManager {
             try {
                 types = mService.getSupportedTypes();
             } catch (RemoteException e) {
-                // Do nothing.
+                throw e.rethrowFromSystemServer();
             }
         }
         mHasTvDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_TV);
@@ -402,7 +403,7 @@ public final class HdmiControlManager {
         try {
             mService.addHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to add hotplug event listener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -424,7 +425,7 @@ public final class HdmiControlManager {
         try {
             mService.removeHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to remove hotplug event listener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

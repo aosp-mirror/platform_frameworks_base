@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.content.pm.ActivityInfo.Config;
 import android.graphics.*;
 import android.graphics.PorterDuff.Mode;
 import android.content.res.ColorStateList;
@@ -70,7 +71,7 @@ public class ColorDrawable extends Drawable {
     }
 
     @Override
-    public int getChangingConfigurations() {
+    public @Config int getChangingConfigurations() {
         return super.getChangingConfigurations() | mColorState.getChangingConfigurations();
     }
 
@@ -292,7 +293,7 @@ public class ColorDrawable extends Drawable {
         int mBaseColor; // base color, independent of setAlpha()
         @ViewDebug.ExportedProperty
         int mUseColor;  // basecolor modulated by setAlpha()
-        int mChangingConfigurations;
+        @Config int mChangingConfigurations;
         ColorStateList mTint = null;
         Mode mTintMode = DEFAULT_TINT_MODE;
 
@@ -326,7 +327,7 @@ public class ColorDrawable extends Drawable {
         }
 
         @Override
-        public int getChangingConfigurations() {
+        public @Config int getChangingConfigurations() {
             return mChangingConfigurations
                     | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }

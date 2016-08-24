@@ -18,16 +18,16 @@
     <item
         android:id="@+id/checked"
         android:state_checked="true"
-        android:drawable="@drawable/ic_checkbox_checked" />
+        android:drawable="@drawable/btn_checkbox_checked_mtrl" />
     <item
         android:id="@+id/unchecked"
-        android:drawable="@drawable/ic_checkbox_unchecked" />
+        android:drawable="@drawable/btn_checkbox_unchecked_mtrl" />
     <transition
         android:fromId="@+id/unchecked"
         android:toId="@+id/checked"
-        android:drawable="@drawable/ic_checkbox_unchecked_to_checked_animation" />
+        android:drawable="@drawable/btn_checkbox_unchecked_to_checked_mtrl_animation" />
     <transition
         android:fromId="@+id/checked"
         android:toId="@+id/unchecked"
-        android:drawable="@drawable/ic_checkbox_checked_to_unchecked_animation" />
+        android:drawable="@drawable/btn_checkbox_checked_to_unchecked_mtrl_animation" />
 </animated-selector>

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 // The highest z value can't be higher than (CASTER_Z_CAP_RATIO * light.z)
 #define CASTER_Z_CAP_RATIO 0.95f
 
@@ -44,20 +42,20 @@
 // For each RADIANS_DIVISOR, we would allocate one more vertex b/t the normals.
 #define SPOT_CORNER_RADIANS_DIVISOR (M_PI / SPOT_EXTRA_CORNER_VERTEX_PER_PI)
 
-// For performance, we use (1 - alpha) value for the shader input.
-#define TRANSFORMED_PENUMBRA_ALPHA 1.0f
-#define TRANSFORMED_UMBRA_ALPHA 0.0f
+#define PENUMBRA_ALPHA 0.0f
+#define UMBRA_ALPHA 1.0f
+
+#include "SpotShadow.h"
+
+#include "ShadowTessellator.h"
+#include "Vertex.h"
+#include "VertexBuffer.h"
+#include "utils/MathUtils.h"
 
 #include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <utils/Log.h>
-
-#include "ShadowTessellator.h"
-#include "SpotShadow.h"
-#include "Vertex.h"
-#include "VertexBuffer.h"
-#include "utils/MathUtils.h"
 
 // TODO: After we settle down the new algorithm, we can remove the old one and
 // its utility functions.
@@ -545,7 +543,7 @@ void SpotShadow::createSpotShadow(bool isCasterOpaque, const Vector3& lightCente
         }
 
         float ratioVI = outlineData[i].radius / distOutline;
-        minRaitoVI = MathUtils::min(minRaitoVI, ratioVI);
+        minRaitoVI = std::min(minRaitoVI, ratioVI);
         if (ratioVI >= (1 - FAKE_UMBRA_SIZE_RATIO)) {
             ratioVI = (1 - FAKE_UMBRA_SIZE_RATIO);
         }
@@ -942,11 +940,11 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
     // Fill the IB and VB for the penumbra area.
     for (int i = 0; i < newPenumbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], newPenumbra[i].x,
-                newPenumbra[i].y, TRANSFORMED_PENUMBRA_ALPHA);
+                newPenumbra[i].y, PENUMBRA_ALPHA);
     }
     for (int i = 0; i < umbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], umbra[i].x, umbra[i].y,
-                TRANSFORMED_UMBRA_ALPHA);
+                UMBRA_ALPHA);
     }
 
     for (int i = 0; i < verticesPairIndex; i++) {
@@ -986,14 +984,14 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
-                    closerVertex.x, closerVertex.y, TRANSFORMED_UMBRA_ALPHA);
+                    closerVertex.x, closerVertex.y, UMBRA_ALPHA);
         }
     } else {
         // If there is no occluded umbra at all, then draw the triangle fan
         // starting from the centroid to all umbra vertices.
         int lastCentroidIndex = vertexBufferIndex;
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid.x,
-                centroid.y, TRANSFORMED_UMBRA_ALPHA);
+                centroid.y, UMBRA_ALPHA);
         for (int i = 0; i < umbraLength; i++) {
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = lastCentroidIndex;

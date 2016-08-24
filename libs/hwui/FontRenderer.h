@@ -21,15 +21,15 @@
 #include "font/CacheTexture.h"
 #include "font/CachedGlyphInfo.h"
 #include "font/Font.h"
-#include "utils/SortedList.h"
 
 #include <utils/LruCache.h>
-#include <utils/Vector.h>
 #include <utils/StrongPointer.h>
 
 #include <SkPaint.h>
 
 #include <GLES2/gl2.h>
+
+#include <vector>
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"
@@ -44,13 +44,31 @@ namespace RSC {
 namespace android {
 namespace uirenderer {
 
+#if HWUI_NEW_OPS
+class BakedOpState;
+class BakedOpRenderer;
+struct ClipBase;
+#else
 class OpenGLRenderer;
+#endif
 
 class TextDrawFunctor {
 public:
-    TextDrawFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
+    TextDrawFunctor(
+#if HWUI_NEW_OPS
+            BakedOpRenderer* renderer,
+            const BakedOpState* bakedState,
+            const ClipBase* clip,
+#else
+            OpenGLRenderer* renderer,
+#endif
+            float x, float y, bool pureTranslate,
             int alpha, SkXfermode::Mode mode, const SkPaint* paint)
         : renderer(renderer)
+#if HWUI_NEW_OPS
+        , bakedState(bakedState)
+        , clip(clip)
+#endif
         , x(x)
         , y(y)
         , pureTranslate(pureTranslate)
@@ -61,7 +79,13 @@ public:
 
     void draw(CacheTexture& texture, bool linearFiltering);
 
+#if HWUI_NEW_OPS
+    BakedOpRenderer* renderer;
+    const BakedOpState* bakedState;
+    const ClipBase* clip;
+#else
     OpenGLRenderer* renderer;
+#endif
     float x;
     float y;
     bool pureTranslate;
@@ -72,30 +96,24 @@ public:
 
 class FontRenderer {
 public:
-    FontRenderer();
+    FontRenderer(const uint8_t* gammaTable);
     ~FontRenderer();
 
-    void flushLargeCaches(Vector<CacheTexture*>& cacheTextures);
+    void flushLargeCaches(std::vector<CacheTexture*>& cacheTextures);
     void flushLargeCaches();
-
-    void setGammaTable(const uint8_t* gammaTable) {
-        mGammaTable = gammaTable;
-    }
 
     void setFont(const SkPaint* paint, const SkMatrix& matrix);
 
-    void precache(const SkPaint* paint, const char* text, int numGlyphs, const SkMatrix& matrix);
+    void precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, const SkMatrix& matrix);
     void endPrecaching();
 
-    // bounds is an out parameter
-    bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
-            uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, const float* positions,
-            Rect* bounds, TextDrawFunctor* functor, bool forceFinish = true);
+    bool renderPosText(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
+            int numGlyphs, int x, int y, const float* positions,
+            Rect* outBounds, TextDrawFunctor* functor, bool forceFinish = true);
 
-    // bounds is an out parameter
-    bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
-            uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-            float hOffset, float vOffset, Rect* bounds, TextDrawFunctor* functor);
+    bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
+            int numGlyphs, const SkPath* path,
+            float hOffset, float vOffset, Rect* outBounds, TextDrawFunctor* functor);
 
     struct DropShadow {
         uint32_t width;
@@ -107,8 +125,8 @@ public:
 
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
-    DropShadow renderDropShadow(const SkPaint* paint, const char *text, uint32_t startIndex,
-            uint32_t len, int numGlyphs, float radius, const float* positions);
+    DropShadow renderDropShadow(const SkPaint* paint, const glyph_t *glyphs, int numGlyphs,
+            float radius, const float* positions);
 
     void setTextureFiltering(bool linearFiltering) {
         mLinearFiltering = linearFiltering;
@@ -127,7 +145,7 @@ private:
     CacheTexture* createCacheTexture(int width, int height, GLenum format, bool allocate);
     void cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
             uint32_t *retOriginX, uint32_t *retOriginY, bool precaching);
-    CacheTexture* cacheBitmapInTexture(Vector<CacheTexture*>& cacheTextures, const SkGlyph& glyph,
+    CacheTexture* cacheBitmapInTexture(std::vector<CacheTexture*>& cacheTextures, const SkGlyph& glyph,
             uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
@@ -136,7 +154,7 @@ private:
     void initRender(const Rect* clip, Rect* bounds, TextDrawFunctor* functor);
     void finishRender();
 
-    void issueDrawCommand(Vector<CacheTexture*>& cacheTextures);
+    void issueDrawCommand(std::vector<CacheTexture*>& cacheTextures);
     void issueDrawCommand();
     void appendMeshQuadNoClip(float x1, float y1, float u1, float v1,
             float x2, float y2, float u2, float v2,
@@ -162,8 +180,8 @@ private:
     uint32_t mLargeCacheWidth;
     uint32_t mLargeCacheHeight;
 
-    Vector<CacheTexture*> mACacheTextures;
-    Vector<CacheTexture*> mRGBACacheTextures;
+    std::vector<CacheTexture*> mACacheTextures;
+    std::vector<CacheTexture*> mRGBACacheTextures;
 
     Font* mCurrentFont;
     LruCache<Font::FontDescription, Font*> mActiveFonts;

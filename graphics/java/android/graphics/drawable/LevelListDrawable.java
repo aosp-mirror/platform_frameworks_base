@@ -88,7 +88,13 @@ public class LevelListDrawable extends DrawableContainer {
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
+        updateDensity(r);
 
+        inflateChildElements(r, parser, attrs, theme);
+    }
+
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
         int type;
 
         int low = 0;

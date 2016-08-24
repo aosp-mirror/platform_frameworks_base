@@ -17,14 +17,17 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -32,47 +35,102 @@ import static com.android.internal.util.Preconditions.*;
  * A class for describing camera output, which contains a {@link Surface} and its specific
  * configuration for creating capture session.
  *
- * @see CameraDevice#createCaptureSession
+ * @see CameraDevice#createCaptureSessionByOutputConfiguration
  *
- * @hide
  */
 public final class OutputConfiguration implements Parcelable {
 
     /**
      * Rotation constant: 0 degree rotation (no rotation)
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_0 = 0;
 
     /**
      * Rotation constant: 90 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_90 = 1;
 
     /**
      * Rotation constant: 180 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_180 = 2;
 
     /**
      * Rotation constant: 270 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_270 = 3;
 
     /**
-     * Create a new immutable SurfaceConfiguration instance.
+     * Invalid surface group ID.
+     *
+     *<p>An {@link OutputConfiguration} with this value indicates that the included surface
+     *doesn't belong to any surface group.</p>
+     */
+    public static final int SURFACE_GROUP_ID_NONE = -1;
+
+    /**
+     * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
      *
      * @param surface
      *          A Surface for camera to output to.
      *
-     * <p>This constructor creates a default configuration</p>
+     * <p>This constructor creates a default configuration, with a surface group ID of
+     * {@value #SURFACE_GROUP_ID_NONE}.</p>
      *
      */
-    public OutputConfiguration(Surface surface) {
-        this(surface, ROTATION_0);
+    public OutputConfiguration(@NonNull Surface surface) {
+        this(SURFACE_GROUP_ID_NONE, surface, ROTATION_0);
     }
 
     /**
-     * Create a new immutable SurfaceConfiguration instance.
+     * Create a new {@link OutputConfiguration} instance with a {@link Surface},
+     * with a surface group ID.
+     *
+     * <p>
+     * A surface group ID is used to identify which surface group this output surface belongs to. A
+     * surface group is a group of output surfaces that are not intended to receive camera output
+     * buffer streams simultaneously. The {@link CameraDevice} may be able to share the buffers used
+     * by all the surfaces from the same surface group, therefore may reduce the overall memory
+     * footprint. The application should only set the same set ID for the streams that are not
+     * simultaneously streaming. A negative ID indicates that this surface doesn't belong to any
+     * surface group. The default value is {@value #SURFACE_GROUP_ID_NONE}.</p>
+     *
+     * <p>For example, a video chat application that has an adaptive output resolution feature would
+     * need two (or more) output resolutions, to switch resolutions without any output glitches.
+     * However, at any given time, only one output is active to minimize outgoing network bandwidth
+     * and encoding overhead.  To save memory, the application should set the video outputs to have
+     * the same non-negative group ID, so that the camera device can share the same memory region
+     * for the alternating outputs.</p>
+     *
+     * <p>It is not an error to include output streams with the same group ID in the same capture
+     * request, but the resulting memory consumption may be higher than if the two streams were
+     * not in the same surface group to begin with, especially if the outputs have substantially
+     * different dimensions.</p>
+     *
+     * @param surfaceGroupId
+     *          A group ID for this output, used for sharing memory between multiple outputs.
+     * @param surface
+     *          A Surface for camera to output to.
+     *
+     */
+    public OutputConfiguration(int surfaceGroupId, @NonNull Surface surface) {
+        this(surfaceGroupId, surface, ROTATION_0);
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance.
      *
      * <p>This constructor takes an argument for desired camera rotation</p>
      *
@@ -80,38 +138,93 @@ public final class OutputConfiguration implements Parcelable {
      *          A Surface for camera to output to.
      * @param rotation
      *          The desired rotation to be applied on camera output. Value must be one of
-     *          ROTATION_[0, 90, 180, 270]. Note that when the rotation is 90 or 270 degree,
+     *          ROTATION_[0, 90, 180, 270]. Note that when the rotation is 90 or 270 degrees,
      *          application should make sure corresponding surface size has width and height
-     *          transposed corresponding to the width and height without rotation. For example,
+     *          transposed relative to the width and height without rotation. For example,
      *          if application needs camera to capture 1280x720 picture and rotate it by 90 degree,
      *          application should set rotation to {@code ROTATION_90} and make sure the
      *          corresponding Surface size is 720x1280. Note that {@link CameraDevice} might
      *          throw {@code IllegalArgumentException} if device cannot perform such rotation.
-     *
+     * @hide
      */
-    public OutputConfiguration(Surface surface, int rotation) {
+    @SystemApi
+    public OutputConfiguration(@NonNull Surface surface, int rotation) {
+        this(SURFACE_GROUP_ID_NONE, surface, rotation);
+    }
+
+
+    /**
+     * Create a new {@link OutputConfiguration} instance, with rotation and a group ID.
+     *
+     * <p>This constructor takes an argument for desired camera rotation and for the surface group
+     * ID.  See {@link #OutputConfiguration(int, Surface)} for details of the group ID.</p>
+     *
+     * @param surfaceGroupId
+     *          A group ID for this output, used for sharing memory between multiple outputs.
+     * @param surface
+     *          A Surface for camera to output to.
+     * @param rotation
+     *          The desired rotation to be applied on camera output. Value must be one of
+     *          ROTATION_[0, 90, 180, 270]. Note that when the rotation is 90 or 270 degrees,
+     *          application should make sure corresponding surface size has width and height
+     *          transposed relative to the width and height without rotation. For example,
+     *          if application needs camera to capture 1280x720 picture and rotate it by 90 degree,
+     *          application should set rotation to {@code ROTATION_90} and make sure the
+     *          corresponding Surface size is 720x1280. Note that {@link CameraDevice} might
+     *          throw {@code IllegalArgumentException} if device cannot perform such rotation.
+     * @hide
+     */
+    @SystemApi
+    public OutputConfiguration(int surfaceGroupId, @NonNull Surface surface, int rotation) {
         checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        mSurfaceGroupId = surfaceGroupId;
         mSurface = surface;
         mRotation = rotation;
         mConfiguredSize = SurfaceUtils.getSurfaceSize(surface);
         mConfiguredFormat = SurfaceUtils.getSurfaceFormat(surface);
         mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(surface);
+        mConfiguredGenerationId = surface.getGenerationId();
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
+     * instance.
+     *
+     * @param other Another {@link OutputConfiguration} instance to be copied.
+     *
+     * @hide
+     */
+    public OutputConfiguration(@NonNull OutputConfiguration other) {
+        if (other == null) {
+            throw new IllegalArgumentException("OutputConfiguration shouldn't be null");
+        }
+
+        this.mSurface = other.mSurface;
+        this.mRotation = other.mRotation;
+        this.mSurfaceGroupId = other.mSurfaceGroupId;
+        this.mConfiguredDataspace = other.mConfiguredDataspace;
+        this.mConfiguredFormat = other.mConfiguredFormat;
+        this.mConfiguredSize = other.mConfiguredSize;
+        this.mConfiguredGenerationId = other.mConfiguredGenerationId;
     }
 
     /**
      * Create an OutputConfiguration from Parcel.
      */
-    private OutputConfiguration(Parcel source) {
+    private OutputConfiguration(@NonNull Parcel source) {
         int rotation = source.readInt();
+        int surfaceSetId = source.readInt();
         Surface surface = Surface.CREATOR.createFromParcel(source);
         checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        mSurfaceGroupId = surfaceSetId;
         mSurface = surface;
         mRotation = rotation;
         mConfiguredSize = SurfaceUtils.getSurfaceSize(mSurface);
         mConfiguredFormat = SurfaceUtils.getSurfaceFormat(mSurface);
         mConfiguredDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
+        mConfiguredGenerationId = mSurface.getGenerationId();
     }
 
     /**
@@ -119,6 +232,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the {@link Surface} associated with this {@link OutputConfiguration}.
      */
+    @NonNull
     public Surface getSurface() {
         return mSurface;
     }
@@ -128,9 +242,22 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the rotation associated with this {@link OutputConfiguration}.
      *         Value will be one of ROTATION_[0, 90, 180, 270]
+     *
+     * @hide
      */
+    @SystemApi
     public int getRotation() {
         return mRotation;
+    }
+
+    /**
+     * Get the surface group ID associated with this {@link OutputConfiguration}.
+     *
+     * @return the surface group ID associated with this {@link OutputConfiguration}.
+     *         The default value is {@value #SURFACE_GROUP_ID_NONE}.
+     */
+    public int getSurfaceGroupId() {
+        return mSurfaceGroupId;
     }
 
     public static final Parcelable.Creator<OutputConfiguration> CREATOR =
@@ -163,6 +290,7 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("dest must not be null");
         }
         dest.writeInt(mRotation);
+        dest.writeInt(mSurfaceGroupId);
         mSurface.writeToParcel(dest, flags);
     }
 
@@ -183,11 +311,13 @@ public final class OutputConfiguration implements Parcelable {
             return true;
         } else if (obj instanceof OutputConfiguration) {
             final OutputConfiguration other = (OutputConfiguration) obj;
-            return mSurface == other.mSurface &&
-                   mRotation == other.mRotation &&
+            return mRotation == other.mRotation &&
+                   mSurface == other.mSurface &&
+                   mConfiguredGenerationId == other.mConfiguredGenerationId &&
                    mConfiguredSize.equals(other.mConfiguredSize) &&
                    mConfiguredFormat == other.mConfiguredFormat &&
-                   mConfiguredDataspace == other.mConfiguredDataspace;
+                   mConfiguredDataspace == other.mConfiguredDataspace &&
+                   mSurfaceGroupId == other.mSurfaceGroupId;
         }
         return false;
     }
@@ -197,15 +327,20 @@ public final class OutputConfiguration implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCode(mSurface.hashCode(), mRotation);
+        return HashCodeHelpers.hashCode(
+            mRotation, mSurface.hashCode(), mConfiguredGenerationId,
+            mConfiguredSize.hashCode(), mConfiguredFormat, mConfiguredDataspace, mSurfaceGroupId);
     }
 
     private static final String TAG = "OutputConfiguration";
     private final Surface mSurface;
     private final int mRotation;
+    private int mSurfaceGroupId;
 
     // The size, format, and dataspace of the surface when OutputConfiguration is created.
     private final Size mConfiguredSize;
     private final int mConfiguredFormat;
     private final int mConfiguredDataspace;
+    // Surface generation ID to distinguish changes to Surface native internals
+    private final int mConfiguredGenerationId;
 }

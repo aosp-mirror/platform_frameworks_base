@@ -16,160 +16,69 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
-import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
-import static com.android.documentsui.BaseActivity.State.ACTION_GET_CONTENT;
-import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_COPY_DESTINATION;
-import static com.android.documentsui.BaseActivity.State.ACTION_OPEN_TREE;
-import static com.android.documentsui.DirectoryFragment.ANIM_DOWN;
-import static com.android.documentsui.DirectoryFragment.ANIM_NONE;
-import static com.android.documentsui.DirectoryFragment.ANIM_UP;
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
+import static com.android.documentsui.State.ACTION_OPEN;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
-import android.graphics.Point;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Root;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.BaseAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
-import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.dirlist.AnimationView;
+import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
+
+import libcore.io.IoUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
-    public static final String TAG = "Documents";
-
-    private boolean mShowAsDialog;
-
-    private Toolbar mToolbar;
-    private Spinner mToolbarStack;
-
-    private Toolbar mRootsToolbar;
-
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private View mRootsDrawer;
-
-    private DirectoryContainerView mDirectoryContainer;
-
-    private State mState;
-
-    private ItemSelectedListener mStackListener;
-    private BaseAdapter mStackAdapter;
+    private static final String TAG = "DocumentsActivity";
 
     public DocumentsActivity() {
-        super(TAG);
+        super(R.layout.documents_activity, TAG);
     }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        setResult(Activity.RESULT_CANCELED);
-        setContentView(R.layout.activity);
-
-        final Context context = this;
-        final Resources res = getResources();
-        mShowAsDialog = res.getBoolean(R.bool.show_as_dialog);
-
-        if (mShowAsDialog) {
-            // Strongly define our horizontal dimension; we leave vertical as
-            // WRAP_CONTENT so that system resizes us when IME is showing.
-            final WindowManager.LayoutParams a = getWindow().getAttributes();
-
-            final Point size = new Point();
-            getWindowManager().getDefaultDisplay().getSize(size);
-            a.width = (int) res.getFraction(R.dimen.dialog_width, size.x, size.x);
-
-            getWindow().setAttributes(a);
-
-        } else {
-            // Non-dialog means we have a drawer
-            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    R.drawable.ic_hamburger, R.string.drawer_open, R.string.drawer_close);
-
-            mDrawerLayout.setDrawerListener(mDrawerListener);
-
-            mRootsDrawer = findViewById(R.id.drawer_roots);
-        }
-
-        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
-
-        mState = (icicle != null)
-                ? icicle.<State>getParcelable(EXTRA_STATE)
-                : buildDefaultState();
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitleTextAppearance(context,
-                android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
-
-        mStackAdapter = new StackAdapter();
-        mStackListener = new ItemSelectedListener();
-        mToolbarStack = (Spinner) findViewById(R.id.stack);
-        mToolbarStack.setOnItemSelectedListener(mStackListener);
-
-        mRootsToolbar = (Toolbar) findViewById(R.id.roots_toolbar);
-        if (mRootsToolbar != null) {
-            mRootsToolbar.setTitleTextAppearance(context,
-                    android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
-        }
-
-        setActionBar(mToolbar);
-
-        // Hide roots when we're managing a specific root
-        if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-            if (mShowAsDialog) {
-                findViewById(R.id.container_roots).setVisibility(View.GONE);
-            } else {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            }
-        }
-
         if (mState.action == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
         } else if (mState.action == ACTION_OPEN_TREE ||
-                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                   mState.action == ACTION_PICK_COPY_DESTINATION) {
             PickFragment.show(getFragmentManager());
         }
 
@@ -181,38 +90,34 @@ public class DocumentsActivity extends BaseActivity {
         } else if (mState.action == ACTION_OPEN ||
                    mState.action == ACTION_CREATE ||
                    mState.action == ACTION_OPEN_TREE ||
-                   mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                   mState.action == ACTION_PICK_COPY_DESTINATION) {
             RootsFragment.show(getFragmentManager(), null);
         }
 
-        if (!mState.restored) {
-            // In this case, we set the activity title in AsyncTask.onPostExecute().  To prevent
-            // talkback from reading aloud the default title, we clear it here.
-            setTitle("");
-            if (mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE) {
-                final Uri rootUri = getIntent().getData();
-                new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
-            } else {
-                new RestoreStackTask().execute();
-            }
-
-            // Show a failure dialog if there was a failed operation.
-            final Intent intent = getIntent();
-            final DocumentStack dstStack = intent.getParcelableExtra(CopyService.EXTRA_STACK);
-            final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
-            if (failure != 0) {
-                final ArrayList<DocumentInfo> failedSrcList =
-                        intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
-                FailureDialogFragment.show(getFragmentManager(), failure, failedSrcList, dstStack);
-            }
+        if (mState.restored) {
+            if (DEBUG) Log.d(TAG, "Stack already resolved");
         } else {
-            onCurrentDirectoryChanged(ANIM_NONE);
+            // We set the activity title in AsyncTask.onPostExecute().
+            // To prevent talkback from reading aloud the default title, we clear it here.
+            setTitle("");
+
+            // As a matter of policy we don't load the last used stack for the copy
+            // destination picker (user is already in Files app).
+            // Concensus was that the experice was too confusing.
+            // In all other cases, where the user is visiting us from another app
+            // we restore the stack as last used from that app.
+            if (mState.action == ACTION_PICK_COPY_DESTINATION) {
+                if (DEBUG) Log.d(TAG, "Launching directly into Home directory.");
+                loadRoot(getDefaultRoot());
+            } else {
+                if (DEBUG) Log.d(TAG, "Attempting to load last used stack for calling package.");
+                new LoadLastUsedStackTask(this).execute();
+            }
         }
     }
 
-    private State buildDefaultState() {
-        State state = new State();
-
+    @Override
+    void includeState(State state) {
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
@@ -223,12 +128,8 @@ public class DocumentsActivity extends BaseActivity {
             state.action = ACTION_GET_CONTENT;
         } else if (Intent.ACTION_OPEN_DOCUMENT_TREE.equals(action)) {
             state.action = ACTION_OPEN_TREE;
-        } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
-            state.action = ACTION_MANAGE;
-        } else if (DocumentsContract.ACTION_BROWSE_DOCUMENT_ROOT.equals(action)) {
-            state.action = ACTION_BROWSE;
-        } else if (DocumentsIntent.ACTION_OPEN_COPY_DESTINATION.equals(action)) {
-            state.action = ACTION_OPEN_COPY_DESTINATION;
+        } else if (Shared.ACTION_PICK_COPY_DESTINATION.equals(action)) {
+            state.action = ACTION_PICK_COPY_DESTINATION;
         }
 
         if (state.action == ACTION_OPEN || state.action == ACTION_GET_CONTENT) {
@@ -236,81 +137,20 @@ public class DocumentsActivity extends BaseActivity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
-            state.acceptMimes = new String[] { "*/*" };
-            state.allowMultiple = true;
-        } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
-            state.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
-        } else {
-            state.acceptMimes = new String[] { intent.getType() };
+        if (state.action == ACTION_OPEN || state.action == ACTION_GET_CONTENT
+                || state.action == ACTION_CREATE) {
+            state.openableOnly = intent.hasCategory(Intent.CATEGORY_OPENABLE);
         }
 
-        state.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
-        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        state.showAdvanced = state.forceAdvanced
-                | LocalPreferences.getDisplayAdvancedDevices(this);
-
-        if (state.action == ACTION_MANAGE || state.action == ACTION_BROWSE) {
-            state.showSize = true;
-        } else {
-            state.showSize = LocalPreferences.getDisplayFileSize(this);
-        }
-        if (state.action == ACTION_OPEN_COPY_DESTINATION) {
+        if (state.action == ACTION_PICK_COPY_DESTINATION) {
+            // Indicates that a copy operation (or move) includes a directory.
+            // Why? Directory creation isn't supported by some roots (like Downloads).
+            // This allows us to restrict available roots to just those with support.
             state.directoryCopy = intent.getBooleanExtra(
-                    BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, false);
-        }
-
-        state.excludedAuthorities = getExcludedAuthorities();
-
-        return state;
-    }
-
-    private class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
-        private Uri mRootUri;
-
-        public RestoreRootTask(Uri rootUri) {
-            mRootUri = rootUri;
-        }
-
-        @Override
-        protected RootInfo doInBackground(Void... params) {
-            final String rootId = DocumentsContract.getRootId(mRootUri);
-            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
-        }
-
-        @Override
-        protected void onPostExecute(RootInfo root) {
-            if (isDestroyed()) return;
-            mState.restored = true;
-
-            if (root != null) {
-                onRootPicked(root);
-            } else {
-                Log.w(TAG, "Failed to find root: " + mRootUri);
-                finish();
-            }
-        }
-    }
-
-    @Override
-    void onStackRestored(boolean restored, boolean external) {
-        // Show drawer when no stack restored, but only when requesting
-        // non-visual content. However, if we last used an external app,
-        // drawer is always shown.
-
-        boolean showDrawer = false;
-        if (!restored) {
-            showDrawer = true;
-        }
-        if (MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mState.acceptMimes)) {
-            showDrawer = false;
-        }
-        if (external && mState.action == ACTION_GET_CONTENT) {
-            showDrawer = true;
-        }
-
-        if (showDrawer) {
-            setRootsDrawerOpen(true);
+                    Shared.EXTRA_DIRECTORY_COPY, false);
+            state.copyOperationSubType = intent.getIntExtra(
+                    FileOperationService.EXTRA_OPERATION,
+                    FileOperationService.OPERATION_COPY);
         }
     }
 
@@ -324,7 +164,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult() code=" + resultCode);
+        if (DEBUG) Log.d(TAG, "onActivityResult() code=" + resultCode);
 
         // Only relay back results when not canceled; otherwise stick around to
         // let the user pick another app/backend.
@@ -344,234 +184,103 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    private DrawerListener mDrawerListener = new DrawerListener() {
-        @Override
-        public void onDrawerSlide(View drawerView, float slideOffset) {
-            mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-        }
-
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            mDrawerToggle.onDrawerOpened(drawerView);
-        }
-
-        @Override
-        public void onDrawerClosed(View drawerView) {
-            mDrawerToggle.onDrawerClosed(drawerView);
-        }
-
-        @Override
-        public void onDrawerStateChanged(int newState) {
-            mDrawerToggle.onDrawerStateChanged(newState);
-        }
-    };
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (mDrawerToggle != null) {
-            mDrawerToggle.syncState();
-        }
-        updateActionBar();
-    }
-
-    public void setRootsDrawerOpen(boolean open) {
-        if (!mShowAsDialog) {
-            if (open) {
-                mDrawerLayout.openDrawer(mRootsDrawer);
-            } else {
-                mDrawerLayout.closeDrawer(mRootsDrawer);
-            }
-        }
-    }
-
-    private boolean isRootsDrawerOpen() {
-        if (mShowAsDialog) {
-            return false;
-        } else {
-            return mDrawerLayout.isDrawerOpen(mRootsDrawer);
-        }
+        mDrawer.update();
+        mNavigator.update();
     }
 
     @Override
-    public void updateActionBar() {
-        if (mRootsToolbar != null) {
-            final String prompt = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
-            if (prompt != null) {
-                mRootsToolbar.setTitle(prompt);
+    public String getDrawerTitle() {
+        String title = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
+        if (title == null) {
+            if (mState.action == ACTION_OPEN ||
+                mState.action == ACTION_GET_CONTENT ||
+                mState.action == ACTION_OPEN_TREE) {
+                title = getResources().getString(R.string.title_open);
+            } else if (mState.action == ACTION_CREATE ||
+                       mState.action == ACTION_PICK_COPY_DESTINATION) {
+                title = getResources().getString(R.string.title_save);
             } else {
-                if (mState.action == ACTION_OPEN ||
-                    mState.action == ACTION_GET_CONTENT ||
-                    mState.action == ACTION_OPEN_TREE) {
-                    mRootsToolbar.setTitle(R.string.title_open);
-                } else if (mState.action == ACTION_CREATE ||
-                           mState.action == ACTION_OPEN_COPY_DESTINATION) {
-                    mRootsToolbar.setTitle(R.string.title_save);
-                }
+                // If all else fails, just call it "Documents".
+                title = getResources().getString(R.string.app_label);
             }
         }
 
-        if (!mShowAsDialog && mDrawerLayout.getDrawerLockMode(mRootsDrawer) ==
-                DrawerLayout.LOCK_MODE_UNLOCKED) {
-            mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setRootsDrawerOpen(true);
-                }
-            });
-        } else {
-            mToolbar.setNavigationIcon(null);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(null);
-        }
-
-        if (mSearchManager.isExpanded()) {
-            mToolbar.setTitle(null);
-            mToolbarStack.setVisibility(View.GONE);
-            mToolbarStack.setAdapter(null);
-        } else {
-            if (mState.stack.size() <= 1) {
-                mToolbar.setTitle(getCurrentRoot().title);
-                mToolbarStack.setVisibility(View.GONE);
-                mToolbarStack.setAdapter(null);
-            } else {
-                mToolbar.setTitle(null);
-                mToolbarStack.setVisibility(View.VISIBLE);
-                mToolbarStack.setAdapter(mStackAdapter);
-
-                mStackListener.mIgnoreNextNavigation = true;
-                mToolbarStack.setSelection(mStackAdapter.getCount() - 1);
-            }
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean showMenu = super.onCreateOptionsMenu(menu);
-
-        // Most actions are visible when showing as dialog
-        if (mShowAsDialog) {
-            expandMenus(menu);
-        }
-        return showMenu;
+        return title;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
+
+        boolean picking = mState.action == ACTION_CREATE
+                || mState.action == ACTION_OPEN_TREE
+                || mState.action == ACTION_PICK_COPY_DESTINATION;
+
+        if (picking) {
+            // May already be hidden because the root
+            // doesn't support search.
+            mSearchManager.showMenu(false);
+        }
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
-                || mState.action == ACTION_BROWSE);
-        if (mState.action == ACTION_CREATE
-                || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_OPEN_COPY_DESTINATION) {
-            createDir.setVisible(cwd != null && cwd.isCreateSupported());
-            mSearchManager.showMenu(false);
 
-            // No display options in recent directories
-            if (cwd == null) {
-                grid.setVisible(false);
-                list.setVisible(false);
-                fileSizeVisible = false;
-            }
+        createDir.setVisible(picking);
+        createDir.setEnabled(canCreateDirectory());
 
-            if (mState.action == ACTION_CREATE) {
-                final FragmentManager fm = getFragmentManager();
-                SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
-            }
-        } else {
-            createDir.setVisible(false);
+        // No display options in recent directories
+        boolean inRecents = cwd == null;
+        if (picking && inRecents) {
+            grid.setVisible(false);
+            list.setVisible(false);
         }
 
-        advanced.setVisible(!(mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE));
-        fileSize.setVisible(fileSizeVisible);
+        fileSize.setVisible(fileSize.isVisible() && !picking);
 
-        settings.setVisible((mState.action == ACTION_MANAGE || mState.action == ACTION_BROWSE)
-                && (root.flags & Root.FLAG_HAS_SETTINGS) != 0);
+        if (mState.action == ACTION_CREATE) {
+            final FragmentManager fm = getFragmentManager();
+            SaveFragment.get(fm).prepareForDirectory(cwd);
+        }
+
+        Menus.disableHiddenItems(menu);
 
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // While action bar is expanded, the state stack UI is hidden.
-        if (mSearchManager.cancelSearch()) {
-            return;
-        }
-
-        if (!mState.stackTouched) {
-            super.onBackPressed();
-            return;
-        }
-
-        final int size = mState.stack.size();
-        if (size > 1) {
-            mState.stack.pop();
-            onCurrentDirectoryChanged(ANIM_UP);
-        } else if (size == 1 && !isRootsDrawerOpen()) {
-            // TODO: open root drawer once we can capture back key
-            super.onBackPressed();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public State getDisplayState() {
-        return mState;
-    }
-
-    @Override
-    void onDirectoryChanged(int anim) {
+    void refreshDirectory(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
-
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
 
         if (cwd == null) {
             // No directory means recents
             if (mState.action == ACTION_CREATE ||
                 mState.action == ACTION_OPEN_TREE ||
-                mState.action == ACTION_OPEN_COPY_DESTINATION) {
+                mState.action == ACTION_PICK_COPY_DESTINATION) {
                 RecentsCreateFragment.show(fm);
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
 
-                // Start recents in grid when requesting visual things
-                final boolean visualMimes = MimePredicate.mimeMatches(
+                // In recents we pick layout mode based on the mimetype,
+                // picking GRID for visual types. We intentionally don't
+                // consult a user's saved preferences here since they are
+                // set per root (not per root and per mimetype).
+                boolean visualMimes = MimePredicate.mimeMatches(
                         MimePredicate.VISUAL_MIMES, mState.acceptMimes);
-                mState.userMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
-                mState.derivedMode = mState.userMode;
+                mState.derivedMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
             }
         } else {
-            if (mState.currentSearch != null) {
-                // Ongoing search
-                DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
-            } else {
                 // Normal boring directory
-                DirectoryFragment.showNormal(fm, root, cwd, anim);
-            }
+                DirectoryFragment.showDirectory(fm, root, cwd, anim);
         }
 
         // Forget any replacement target
@@ -583,72 +292,48 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (mState.action == ACTION_OPEN_TREE ||
-            mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            mState.action == ACTION_PICK_COPY_DESTINATION) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
-                pick.setPickTarget(mState.action, cwd);
+                pick.setPickTarget(mState.action, mState.copyOperationSubType, cwd);
             }
         }
     }
 
     void onSaveRequested(DocumentInfo replaceTarget) {
-        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getCurrentExecutor());
+        new ExistingFinishTask(this, replaceTarget.derivedUri)
+                .executeOnExecutor(getExecutorForCurrentDirectory());
+    }
+
+    @Override
+    void onDirectoryCreated(DocumentInfo doc) {
+        assert(doc.isDirectory());
+        openContainerDocument(doc);
     }
 
     void onSaveRequested(String mimeType, String displayName) {
-        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getCurrentExecutor());
+        new CreateFinishTask(this, mimeType, displayName)
+                .executeOnExecutor(getExecutorForCurrentDirectory());
     }
 
     @Override
     void onRootPicked(RootInfo root) {
         super.onRootPicked(root);
-        setRootsDrawerOpen(false);
+        mNavigator.revealRootsDrawer(false);
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc) {
+    public void onDocumentPicked(DocumentInfo doc, Model model) {
         final FragmentManager fm = getFragmentManager();
-        if (doc.isDirectory()) {
-            mState.stack.push(doc);
-            mState.stackTouched = true;
-            onCurrentDirectoryChanged(ANIM_DOWN);
+        if (doc.isContainer()) {
+            openContainerDocument(doc);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
-            new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getCurrentExecutor());
+            new ExistingFinishTask(this, doc.derivedUri)
+                    .executeOnExecutor(getExecutorForCurrentDirectory());
         } else if (mState.action == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
-        } else if (mState.action == ACTION_MANAGE) {
-            // First try managing the document; we expect manager to filter
-            // based on authority, so we don't grant.
-            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
-            manage.setData(doc.derivedUri);
-
-            try {
-                startActivity(manage);
-            } catch (ActivityNotFoundException ex) {
-                // Fall back to viewing
-                final Intent view = new Intent(Intent.ACTION_VIEW);
-                view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                view.setData(doc.derivedUri);
-
-                try {
-                    startActivity(view);
-                } catch (ActivityNotFoundException ex2) {
-                    Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else if (mState.action == ACTION_BROWSE) {
-            // Go straight to viewing
-            final Intent view = new Intent(Intent.ACTION_VIEW);
-            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            view.setData(doc.derivedUri);
-
-            try {
-                startActivity(view);
-            } catch (ActivityNotFoundException ex) {
-                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
@@ -660,7 +345,8 @@ public class DocumentsActivity extends BaseActivity {
             for (int i = 0; i < size; i++) {
                 uris[i] = docs.get(i).derivedUri;
             }
-            new ExistingFinishTask(uris).executeOnExecutor(getCurrentExecutor());
+            new ExistingFinishTask(this, uris)
+                    .executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -669,24 +355,23 @@ public class DocumentsActivity extends BaseActivity {
         if (mState.action == ACTION_OPEN_TREE) {
             result = DocumentsContract.buildTreeDocumentUri(
                     pickTarget.authority, pickTarget.documentId);
-        } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+        } else if (mState.action == ACTION_PICK_COPY_DESTINATION) {
             result = pickTarget.derivedUri;
         } else {
             // Should not be reached.
             throw new IllegalStateException("Invalid mState.action.");
         }
-        new PickFinishTask(result).executeOnExecutor(getCurrentExecutor());
+        new PickFinishTask(this, result).executeOnExecutor(getExecutorForCurrentDirectory());
     }
 
-    @Override
-    void saveStackBlocking() {
+    void writeStackToRecentsBlocking() {
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
         final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
         if (mState.action == ACTION_CREATE ||
             mState.action == ACTION_OPEN_TREE ||
-            mState.action == ACTION_OPEN_COPY_DESTINATION) {
+            mState.action == ACTION_PICK_COPY_DESTINATION) {
             // Remember stack for last create
             values.clear();
             values.put(RecentColumns.KEY, mState.stack.buildKey());
@@ -704,7 +389,7 @@ public class DocumentsActivity extends BaseActivity {
 
     @Override
     void onTaskFinished(Uri... uris) {
-        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
+        if (DEBUG) Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
         if (uris.length == 1) {
@@ -725,10 +410,11 @@ public class DocumentsActivity extends BaseActivity {
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-        } else if (mState.action == ACTION_OPEN_COPY_DESTINATION) {
+        } else if (mState.action == ACTION_PICK_COPY_DESTINATION) {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
-            intent.putExtra(CopyService.EXTRA_STACK, (Parcelable) mState.stack);
+            intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
+            intent.putExtra(FileOperationService.EXTRA_OPERATION, mState.copyOperationSubType);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -739,69 +425,140 @@ public class DocumentsActivity extends BaseActivity {
         finish();
     }
 
+
     public static DocumentsActivity get(Fragment fragment) {
         return (DocumentsActivity) fragment.getActivity();
     }
 
-    private final class PickFinishTask extends AsyncTask<Void, Void, Void> {
+    /**
+     * Loads the last used path (stack) from Recents (history).
+     * The path selected is based on the calling package name. So the last
+     * path for an app like Gmail can be different than the last path
+     * for an app like DropBox.
+     */
+    private static final class LoadLastUsedStackTask
+            extends PairedTask<DocumentsActivity, Void, Void> {
+
+        private volatile boolean mRestoredStack;
+        private volatile boolean mExternal;
+        private State mState;
+
+        public LoadLastUsedStackTask(DocumentsActivity activity) {
+            super(activity);
+            mState = activity.mState;
+        }
+
+        @Override
+        protected Void run(Void... params) {
+            if (DEBUG && !mState.stack.isEmpty()) {
+                Log.w(TAG, "Overwriting existing stack.");
+            }
+            RootsCache roots = DocumentsApplication.getRootsCache(mOwner);
+
+            String packageName = mOwner.getCallingPackageMaybeExtra();
+            Uri resumeUri = RecentsProvider.buildResume(packageName);
+            Cursor cursor = mOwner.getContentResolver().query(resumeUri, null, null, null, null);
+            try {
+                if (cursor.moveToFirst()) {
+                    mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
+                    final byte[] rawStack = cursor.getBlob(
+                            cursor.getColumnIndex(ResumeColumns.STACK));
+                    DurableUtils.readFromArray(rawStack, mState.stack);
+                    mRestoredStack = true;
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to resume: " + e);
+            } finally {
+                IoUtils.closeQuietly(cursor);
+            }
+
+            if (mRestoredStack) {
+                // Update the restored stack to ensure we have freshest data
+                final Collection<RootInfo> matchingRoots = roots.getMatchingRootsBlocking(mState);
+                try {
+                    mState.stack.updateRoot(matchingRoots);
+                    mState.stack.updateDocuments(mOwner.getContentResolver());
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "Failed to restore stack for package: " + packageName
+                            + " because of error: "+ e);
+                    mState.stack.reset();
+                    mRestoredStack = false;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void finish(Void result) {
+            mState.restored = true;
+            mState.external = mExternal;
+            mOwner.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
+        }
+    }
+
+    private static final class PickFinishTask extends PairedTask<DocumentsActivity, Void, Void> {
         private final Uri mUri;
 
-        public PickFinishTask(Uri uri) {
+        public PickFinishTask(DocumentsActivity activity, Uri uri) {
+            super(activity);
             mUri = uri;
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
+        protected Void run(Void... params) {
+            mOwner.writeStackToRecentsBlocking();
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            onTaskFinished(mUri);
+        protected void finish(Void result) {
+            mOwner.onTaskFinished(mUri);
         }
     }
 
-    final class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
+    private static final class ExistingFinishTask extends PairedTask<DocumentsActivity, Void, Void> {
         private final Uri[] mUris;
 
-        public ExistingFinishTask(Uri... uris) {
+        public ExistingFinishTask(DocumentsActivity activity, Uri... uris) {
+            super(activity);
             mUris = uris;
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
+        protected Void run(Void... params) {
+            mOwner.writeStackToRecentsBlocking();
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            onTaskFinished(mUris);
+        protected void finish(Void result) {
+            mOwner.onTaskFinished(mUris);
         }
     }
 
     /**
      * Task that creates a new document in the background.
      */
-    final class CreateFinishTask extends AsyncTask<Void, Void, Uri> {
+    private static final class CreateFinishTask extends PairedTask<DocumentsActivity, Void, Uri> {
         private final String mMimeType;
         private final String mDisplayName;
 
-        public CreateFinishTask(String mimeType, String displayName) {
+        public CreateFinishTask(DocumentsActivity activity, String mimeType, String displayName) {
+            super(activity);
             mMimeType = mimeType;
             mDisplayName = displayName;
         }
 
         @Override
-        protected void onPreExecute() {
-            setPending(true);
+        protected void prepare() {
+            mOwner.setPending(true);
         }
 
         @Override
-        protected Uri doInBackground(Void... params) {
-            final ContentResolver resolver = getContentResolver();
-            final DocumentInfo cwd = getCurrentDirectory();
+        protected Uri run(Void... params) {
+            final ContentResolver resolver = mOwner.getContentResolver();
+            final DocumentInfo cwd = mOwner.getCurrentDirectory();
 
             ContentProviderClient client = null;
             Uri childUri = null;
@@ -817,22 +574,22 @@ public class DocumentsActivity extends BaseActivity {
             }
 
             if (childUri != null) {
-                saveStackBlocking();
+                mOwner.writeStackToRecentsBlocking();
             }
 
             return childUri;
         }
 
         @Override
-        protected void onPostExecute(Uri result) {
+        protected void finish(Uri result) {
             if (result != null) {
-                onTaskFinished(result);
+                mOwner.onTaskFinished(result);
             } else {
-                Toast.makeText(DocumentsActivity.this, R.string.save_error, Toast.LENGTH_SHORT)
-                        .show();
+                Snackbars.makeSnackbar(
+                        mOwner, R.string.save_error, Snackbar.LENGTH_SHORT).show();
             }
 
-            setPending(false);
+            mOwner.setPending(false);
         }
     }
 }

@@ -119,18 +119,12 @@ public class Touch {
             ds = buffer.getSpans(0, buffer.length(), DragState.class);
 
             if (ds.length > 0) {
-                ds[0].mIsSelectionStarted = false;
-
                 if (ds[0].mFarEnough == false) {
                     int slop = ViewConfiguration.get(widget.getContext()).getScaledTouchSlop();
 
                     if (Math.abs(event.getX() - ds[0].mX) >= slop ||
                         Math.abs(event.getY() - ds[0].mY) >= slop) {
                         ds[0].mFarEnough = true;
-                        if (event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
-                            ds[0].mIsActivelySelecting = true;
-                            ds[0].mIsSelectionStarted = true;
-                        }
                     }
                 }
 
@@ -142,13 +136,9 @@ public class Touch {
                             || MetaKeyKeyListener.getMetaState(buffer,
                                     MetaKeyKeyListener.META_SELECTING) != 0;
 
-                    if (!event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
-                        ds[0].mIsActivelySelecting = false;
-                    }
-
                     float dx;
                     float dy;
-                    if (cap && event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
+                    if (cap) {
                         // if we're selecting, we want the scroll to go in
                         // the direction of the drag
                         dx = event.getX() - ds[0].mX;
@@ -172,9 +162,7 @@ public class Touch {
                     int oldX = widget.getScrollX();
                     int oldY = widget.getScrollY();
 
-                    if (!event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
-                        scrollTo(widget, layout, nx, ny);
-                    }
+                    scrollTo(widget, layout, nx, ny);
 
                     // If we actually scrolled, then cancel the up action.
                     if (oldX != widget.getScrollX() || oldY != widget.getScrollY()) {
@@ -207,37 +195,6 @@ public class Touch {
         return ds.length > 0 ? ds[0].mScrollY : -1;
     }
 
-    /**
-     * Checks if selection is still active.
-     * This is useful for extending Selection span on buffer.
-     * @param buffer The text buffer.
-     * @return true if buffer has been marked for selection.
-     *
-     * @hide
-     */
-    static boolean isActivelySelecting(Spannable buffer) {
-        DragState[] ds;
-        ds = buffer.getSpans(0, buffer.length(), DragState.class);
-
-        return ds.length > 0 && ds[0].mIsActivelySelecting;
-    }
-
-    /**
-     * Checks if selection has begun (are we out of slop?).
-     * Note: DragState.mIsSelectionStarted goes back to false with the very next event.
-     * This is useful for starting Selection span on buffer.
-     * @param buffer The text buffer.
-     * @return true if selection has started on the buffer.
-     *
-     * @hide
-     */
-    static boolean isSelectionStarted(Spannable buffer) {
-        DragState[] ds;
-        ds = buffer.getSpans(0, buffer.length(), DragState.class);
-
-        return ds.length > 0 && ds[0].mIsSelectionStarted;
-    }
-
     private static class DragState implements NoCopySpan {
         public float mX;
         public float mY;
@@ -245,8 +202,6 @@ public class Touch {
         public int mScrollY;
         public boolean mFarEnough;
         public boolean mUsed;
-        public boolean mIsActivelySelecting;
-        public boolean mIsSelectionStarted;
 
         public DragState(float x, float y, int scrollX, int scrollY) {
             mX = x;

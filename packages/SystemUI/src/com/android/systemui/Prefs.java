@@ -30,7 +30,7 @@ public final class Prefs {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-        Key.SEARCH_APP_WIDGET_ID,
+        Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
         Key.DEBUG_MODE_ENABLED,
         Key.HOTSPOT_TILE_LAST_USED,
         Key.COLOR_INVERSION_TILE_LAST_USED,
@@ -41,10 +41,16 @@ public final class Prefs {
         Key.DND_FAVORITE_BUCKET_INDEX,
         Key.DND_NONE_SELECTED,
         Key.DND_FAVORITE_ZEN,
+        Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN,
+        Key.QS_HOTSPOT_ADDED,
+        Key.QS_DATA_SAVER_ADDED,
+        Key.QS_DATA_SAVER_DIALOG_SHOWN,
+        Key.QS_INVERT_COLORS_ADDED,
+        Key.QS_WORK_ADDED,
+        Key.QS_NIGHT_ADDED,
     })
     public @interface Key {
-        String SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
-        String SEARCH_APP_WIDGET_PACKAGE = "searchAppWidgetPackage";
+        String OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME = "OverviewLastStackTaskActiveTime";
         String DEBUG_MODE_ENABLED = "debugModeEnabled";
         String HOTSPOT_TILE_LAST_USED = "HotspotTileLastUsed";
         String COLOR_INVERSION_TILE_LAST_USED = "ColorInversionTileLastUsed";
@@ -55,6 +61,13 @@ public final class Prefs {
         String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
         String DND_NONE_SELECTED = "DndNoneSelected";
         String DND_FAVORITE_ZEN = "DndFavoriteZen";
+        String TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN = "TvPictureInPictureOnboardingShown";
+        String QS_HOTSPOT_ADDED = "QsHotspotAdded";
+        String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
+        String QS_DATA_SAVER_DIALOG_SHOWN = "QsDataSaverDialogShown";
+        String QS_INVERT_COLORS_ADDED = "QsInvertColorsAdded";
+        String QS_WORK_ADDED = "QsWorkAdded";
+        String QS_NIGHT_ADDED = "QsNightAdded";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

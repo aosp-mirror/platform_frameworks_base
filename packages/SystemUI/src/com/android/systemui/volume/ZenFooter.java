@@ -70,16 +70,6 @@ public class ZenFooter extends LinearLayout {
     }
 
     public void init(final ZenModeController controller) {
-        controller.addCallback(new ZenModeController.Callback() {
-            @Override
-            public void onZenChanged(int zen) {
-                setZen(zen);
-            }
-            @Override
-            public void onConfigChanged(ZenModeConfig config) {
-                setConfig(config);
-            }
-        });
         mEndNowButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,7 +79,12 @@ public class ZenFooter extends LinearLayout {
         mZen = controller.getZen();
         mConfig = controller.getConfig();
         mController = controller;
+        mController.addCallback(mZenCallback);
         update();
+    }
+
+    public void cleanup() {
+        mController.removeCallback(mZenCallback);
     }
 
     private void setZen(int zen) {
@@ -131,7 +126,7 @@ public class ZenFooter extends LinearLayout {
 
         final boolean isForever = mConfig != null && mConfig.manualRule != null
                 && mConfig.manualRule.conditionId == null;
-        final String line2 =
+        final CharSequence line2 =
                 isForever ? mContext.getString(com.android.internal.R.string.zen_mode_forever_dnd)
                 : ZenModeConfig.getConditionSummary(mContext, mConfig, mController.getCurrentUser(),
                         true /*shortVersion*/);
@@ -139,8 +134,18 @@ public class ZenFooter extends LinearLayout {
     }
 
     public void onConfigurationChanged() {
-        mSpTexts.update();
         Util.setText(mEndNowButton, mContext.getString(R.string.volume_zen_end_now));
+        mSpTexts.update();
     }
 
+    private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
+        @Override
+        public void onZenChanged(int zen) {
+            setZen(zen);
+        }
+        @Override
+        public void onConfigChanged(ZenModeConfig config) {
+            setConfig(config);
+        }
+    };
 }

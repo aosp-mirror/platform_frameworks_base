@@ -213,7 +213,7 @@ public abstract class RegisteredServicesCache<V> {
         @Override
         public void onReceive(Context context, Intent intent) {
             // External apps can't coexist with multi-user, so scan owner
-            handlePackageEvent(intent, UserHandle.USER_OWNER);
+            handlePackageEvent(intent, UserHandle.USER_SYSTEM);
         }
     };
 
@@ -294,14 +294,16 @@ public abstract class RegisteredServicesCache<V> {
      */
     public static class ServiceInfo<V> {
         public final V type;
+        public final ComponentInfo componentInfo;
         public final ComponentName componentName;
         public final int uid;
 
         /** @hide */
-        public ServiceInfo(V type, ComponentName componentName, int uid) {
+        public ServiceInfo(V type, ComponentInfo componentInfo, ComponentName componentName) {
             this.type = type;
+            this.componentInfo = componentInfo;
             this.componentName = componentName;
-            this.uid = uid;
+            this.uid = (componentInfo != null) ? componentInfo.applicationInfo.uid : -1;
         }
 
         @Override
@@ -362,8 +364,10 @@ public abstract class RegisteredServicesCache<V> {
     @VisibleForTesting
     protected List<ResolveInfo> queryIntentServices(int userId) {
         final PackageManager pm = mContext.getPackageManager();
-        return pm.queryIntentServicesAsUser(
-                new Intent(mInterfaceName), PackageManager.GET_META_DATA, userId);
+        return pm.queryIntentServicesAsUser(new Intent(mInterfaceName),
+                PackageManager.GET_META_DATA | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                userId);
     }
 
     /**
@@ -563,9 +567,7 @@ public abstract class RegisteredServicesCache<V> {
                 return null;
             }
             final android.content.pm.ServiceInfo serviceInfo = service.serviceInfo;
-            final ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
-            final int uid = applicationInfo.uid;
-            return new ServiceInfo<V>(v, componentName, uid);
+            return new ServiceInfo<V>(v, serviceInfo, componentName);
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException(
                     "Unable to load resources for pacakge " + si.packageName);

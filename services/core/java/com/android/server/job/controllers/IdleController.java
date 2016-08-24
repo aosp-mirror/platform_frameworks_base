@@ -26,8 +26,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
@@ -36,12 +38,8 @@ public class IdleController extends StateController {
 
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming for at least this long
-    private static final long INACTIVITY_IDLE_THRESHOLD = 71 * 60 * 1000; // millis; 71 min
-    private static final long IDLE_WINDOW_SLOP = 5 * 60 * 1000; // 5 minute window, to be nice
-
-    private static final String ACTION_TRIGGER_IDLE =
-            "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE";
-
+    private long mInactivityIdleThreshold;
+    private long mIdleWindowSlop;
     final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     IdlenessTracker mIdleTracker;
 
@@ -52,14 +50,15 @@ public class IdleController extends StateController {
     public static IdleController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
-                sController = new IdleController(service, service.getContext());
+                sController = new IdleController(service, service.getContext(), service.getLock());
             }
             return sController;
         }
     }
 
-    private IdleController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private IdleController(StateChangedListener stateChangedListener, Context context,
+                Object lock) {
+        super(stateChangedListener, context, lock);
         initIdleStateTracking();
     }
 
@@ -67,29 +66,25 @@ public class IdleController extends StateController {
      * StateController interface
      */
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus) {
+    public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasIdleConstraint()) {
-            synchronized (mTrackedTasks) {
-                mTrackedTasks.add(taskStatus);
-                taskStatus.idleConstraintSatisfied.set(mIdleTracker.isIdle());
-            }
+            mTrackedTasks.add(taskStatus);
+            taskStatus.setIdleConstraintSatisfied(mIdleTracker.isIdle());
         }
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus) {
-        synchronized (mTrackedTasks) {
-            mTrackedTasks.remove(taskStatus);
-        }
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, JobStatus incomingJob, boolean forUpdate) {
+        mTrackedTasks.remove(taskStatus);
     }
 
     /**
      * Interaction with the task manager service
      */
     void reportNewIdleState(boolean isIdle) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             for (JobStatus task : mTrackedTasks) {
-                task.idleConstraintSatisfied.set(isIdle);
+                task.setIdleConstraintSatisfied(isIdle);
             }
         }
         mStateChangedListener.onControllerStateChanged();
@@ -100,6 +95,10 @@ public class IdleController extends StateController {
      * significant state changes occur
      */
     private void initIdleStateTracking() {
+        mInactivityIdleThreshold = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_jobSchedulerInactivityIdleThreshold);
+        mIdleWindowSlop = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_jobSchedulerIdleWindowSlop);
         mIdleTracker = new IdlenessTracker();
         mIdleTracker.startTracking();
     }
@@ -113,7 +112,7 @@ public class IdleController extends StateController {
         public IdlenessTracker() {
             mAlarm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-            Intent intent = new Intent(ACTION_TRIGGER_IDLE)
+            Intent intent = new Intent(ActivityManagerService.ACTION_TRIGGER_IDLE)
                     .setPackage("android")
                     .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mIdleTriggerIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
@@ -140,7 +139,7 @@ public class IdleController extends StateController {
             filter.addAction(Intent.ACTION_DREAMING_STOPPED);
 
             // Debugging/instrumentation
-            filter.addAction(ACTION_TRIGGER_IDLE);
+            filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
             mContext.registerReceiver(this, filter);
         }
@@ -168,15 +167,15 @@ public class IdleController extends StateController {
                 // alarm that will tell us when we have decided the device is
                 // truly idle.
                 final long nowElapsed = SystemClock.elapsedRealtime();
-                final long when = nowElapsed + INACTIVITY_IDLE_THRESHOLD;
+                final long when = nowElapsed + mInactivityIdleThreshold;
                 if (DEBUG) {
                     Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
                             + when);
                 }
                 mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        when, IDLE_WINDOW_SLOP, mIdleTriggerIntent);
-            } else if (action.equals(ACTION_TRIGGER_IDLE)) {
+                        when, mIdleWindowSlop, mIdleTriggerIntent);
+            } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
                 // idle time starts now. Do not set mIdle if screen is on.
                 if (!mIdle && !mScreenOn) {
                     if (DEBUG) {
@@ -190,17 +189,22 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
-        synchronized (mTrackedTasks) {
-            pw.print("Idle: ");
-            pw.println(mIdleTracker.isIdle() ? "true" : "false");
-            pw.println(mTrackedTasks.size());
-            for (int i = 0; i < mTrackedTasks.size(); i++) {
-                final JobStatus js = mTrackedTasks.get(i);
-                pw.print("  ");
-                pw.print(String.valueOf(js.hashCode()).substring(0, 3));
-                pw.println("..");
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
+        pw.print("Idle: ");
+        pw.println(mIdleTracker.isIdle() ? "true" : "false");
+        pw.print("Tracking ");
+        pw.print(mTrackedTasks.size());
+        pw.println(":");
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.get(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
             }
+            pw.print("  #");
+            js.printUniqueId(pw);
+            pw.print(" from ");
+            UserHandle.formatUid(pw, js.getSourceUid());
+            pw.println();
         }
     }
 }

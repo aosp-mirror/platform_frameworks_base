@@ -3,8 +3,8 @@
 
 #include "SkCamera.h"
 
-#include "Canvas.h"
 #include "GraphicsJNI.h"
+#include <hwui/Canvas.h>
 
 static jfieldID gNativeInstanceFieldID;
 

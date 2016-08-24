@@ -17,29 +17,25 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.printspooler"
-    android:versionName="1"
-    android:versionCode="1">
+    package="com.android.printspooler">
 
     <!-- Allows an application to call APIs that give it access to all print jobs
          on the device. Usually an app can access only the print jobs it created. -->
     <permission
         android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"
-        android:label="@string/permlab_accessAllPrintJobs"
-        android:description="@string/permdesc_accessAllPrintJobs"
         android:protectionLevel="signature" />
 
     <!-- May be required by the settings and add printer activities of a
          print service if the developer wants only trusted system code to
          be able to launch these activities. -->
     <permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
-        android:label="@string/permlab_startPrintServiceConfigActivity"
-        android:description="@string/permdesc_startPrintServiceConfigActivity"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowClearUserData="true"
@@ -61,9 +57,9 @@
 
         <activity
             android:name=".ui.PrintActivity"
-            android:configChanges="orientation|screenSize"
+            android:configChanges="mnc|mnc|touchscreen|navigation|screenLayout|screenSize|smallestScreenSize|orientation|locale|keyboard|keyboardHidden|fontScale|uiMode|layoutDirection|density"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-            android:theme="@style/PrintActivity">
+            android:theme="@style/Theme.PrintActivity">
             <intent-filter>
                 <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -74,7 +70,14 @@
         <activity
             android:name=".ui.SelectPrinterActivity"
             android:label="@string/all_printers_label"
-            android:theme="@android:style/Theme.Material.Settings"
+            android:theme="@style/Theme.SelectPrinterActivity"
+            android:exported="false">
+        </activity>
+
+        <activity
+            android:name=".ui.AddPrinterActivity"
+            android:label="@string/print_add_printer"
+            android:theme="@style/Theme.AddPrinterActivity"
             android:exported="false">
         </activity>
 

@@ -19,6 +19,7 @@ package android.content;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
+import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,27 +33,34 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The public interface object used to interact with a {@link ContentProvider}. This is obtained by
- * calling {@link ContentResolver#acquireContentProviderClient}. This object must be released
- * using {@link #release} in order to indicate to the system that the {@link ContentProvider} is
- * no longer needed and can be killed to free up resources.
- *
- * <p>Note that you should generally create a new ContentProviderClient instance
- * for each thread that will be performing operations.  Unlike
+ * The public interface object used to interact with a specific
+ * {@link ContentProvider}.
+ * <p>
+ * Instances can be obtained by calling
+ * {@link ContentResolver#acquireContentProviderClient} or
+ * {@link ContentResolver#acquireUnstableContentProviderClient}. Instances must
+ * be released using {@link #close()} in order to indicate to the system that
+ * the underlying {@link ContentProvider} is no longer needed and can be killed
+ * to free up resources.
+ * <p>
+ * Note that you should generally create a new ContentProviderClient instance
+ * for each thread that will be performing operations. Unlike
  * {@link ContentResolver}, the methods here such as {@link #query} and
- * {@link #openFile} are not thread safe -- you must not call
- * {@link #release()} on the ContentProviderClient those calls are made from
- * until you are finished with the data they have returned.
+ * {@link #openFile} are not thread safe -- you must not call {@link #close()}
+ * on the ContentProviderClient those calls are made from until you are finished
+ * with the data they have returned.
  */
-public class ContentProviderClient {
+public class ContentProviderClient implements AutoCloseable {
     private static final String TAG = "ContentProviderClient";
 
     @GuardedBy("ContentProviderClient.class")
@@ -63,22 +71,23 @@ public class ContentProviderClient {
     private final String mPackageName;
     private final boolean mStable;
 
-    private final CloseGuard mGuard = CloseGuard.get();
+    private final AtomicBoolean mClosed = new AtomicBoolean();
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private long mAnrTimeout;
     private NotRespondingRunnable mAnrRunnable;
 
-    private boolean mReleased;
-
     /** {@hide} */
-    ContentProviderClient(
+    @VisibleForTesting
+    public ContentProviderClient(
             ContentResolver contentResolver, IContentProvider contentProvider, boolean stable) {
         mContentResolver = contentResolver;
         mContentProvider = contentProvider;
         mPackageName = contentResolver.mPackageName;
+
         mStable = stable;
 
-        mGuard.open("release");
+        mCloseGuard.open("close");
     }
 
     /** {@hide} */
@@ -133,8 +142,18 @@ public class ContentProviderClient {
                 remoteCancellationSignal = mContentProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return mContentProvider.query(mPackageName, url, projection, selection, selectionArgs,
-                    sortOrder, remoteCancellationSignal);
+            final Cursor cursor = mContentProvider.query(mPackageName, url, projection, selection,
+                    selectionArgs, sortOrder, remoteCancellationSignal);
+            if (cursor == null) {
+                return null;
+            }
+
+            if ("com.google.android.gms".equals(mPackageName)) {
+                // They're casting to a concrete subclass, sigh
+                return cursor;
+            } else {
+                return new CursorWrapperInner(cursor);
+            }
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -446,29 +465,42 @@ public class ContentProviderClient {
     }
 
     /**
-     * Call this to indicate to the system that the associated {@link ContentProvider} is no
-     * longer needed by this {@link ContentProviderClient}.
-     * @return true if this was release, false if it was already released
+     * Closes this client connection, indicating to the system that the
+     * underlying {@link ContentProvider} is no longer needed.
      */
+    @Override
+    public void close() {
+        closeInternal();
+    }
+
+    /**
+     * @deprecated replaced by {@link #close()}.
+     */
+    @Deprecated
     public boolean release() {
-        synchronized (this) {
-            if (mReleased) {
-                throw new IllegalStateException("Already released");
-            }
-            mReleased = true;
-            mGuard.close();
+        return closeInternal();
+    }
+
+    private boolean closeInternal() {
+        mCloseGuard.close();
+        if (mClosed.compareAndSet(false, true)) {
             if (mStable) {
                 return mContentResolver.releaseProvider(mContentProvider);
             } else {
                 return mContentResolver.releaseUnstableProvider(mContentProvider);
             }
+        } else {
+            return false;
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (mGuard != null) {
-            mGuard.warnIfOpen();
+        try {
+            mCloseGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
         }
     }
 
@@ -500,6 +532,31 @@ public class ContentProviderClient {
         public void run() {
             Log.w(TAG, "Detected provider not responding: " + mContentProvider);
             mContentResolver.appNotRespondingViaProvider(mContentProvider);
+        }
+    }
+
+    private final class CursorWrapperInner extends CrossProcessCursorWrapper {
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+
+        CursorWrapperInner(Cursor cursor) {
+            super(cursor);
+            mCloseGuard.open("close");
+        }
+
+        @Override
+        public void close() {
+            mCloseGuard.close();
+            super.close();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                mCloseGuard.warnIfOpen();
+                close();
+            } finally {
+                super.finalize();
+            }
         }
     }
 }

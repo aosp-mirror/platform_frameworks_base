@@ -27,28 +27,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A mapping from String values to various Parcelable types.
+ * A mapping from String keys to various {@link Parcelable} values.
  *
+ * @see PersistableBundle
  */
 public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
+    private static final int FLAG_HAS_FDS = 1 << 8;
+    private static final int FLAG_HAS_FDS_KNOWN = 1 << 9;
+    private static final int FLAG_ALLOW_FDS = 1 << 10;
+
     public static final Bundle EMPTY;
-    static final Parcel EMPTY_PARCEL;
 
     static {
         EMPTY = new Bundle();
         EMPTY.mMap = ArrayMap.EMPTY;
-        EMPTY_PARCEL = BaseBundle.EMPTY_PARCEL;
     }
-
-    private boolean mHasFds = false;
-    private boolean mFdsKnown = true;
-    private boolean mAllowFds = true;
 
     /**
      * Constructs a new, empty Bundle.
      */
     public Bundle() {
         super();
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -59,16 +59,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     Bundle(Parcel parcelledData) {
         super(parcelledData);
-
-        mHasFds = mParcelledData.hasFileDescriptors();
-        mFdsKnown = true;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        if (mParcelledData.hasFileDescriptors()) {
+            mFlags |= FLAG_HAS_FDS;
+        }
     }
 
     /* package */ Bundle(Parcel parcelledData, int length) {
         super(parcelledData, length);
-
-        mHasFds = mParcelledData.hasFileDescriptors();
-        mFdsKnown = true;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        if (mParcelledData.hasFileDescriptors()) {
+            mFlags |= FLAG_HAS_FDS;
+        }
     }
 
     /**
@@ -80,6 +82,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(ClassLoader loader) {
         super(loader);
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -90,6 +93,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(int capacity) {
         super(capacity);
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -100,9 +104,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(Bundle b) {
         super(b);
-
-        mHasFds = b.mHasFds;
-        mFdsKnown = b.mFdsKnown;
+        mFlags = b.mFlags;
     }
 
     /**
@@ -113,6 +115,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public Bundle(PersistableBundle b) {
         super(b);
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
     }
 
     /**
@@ -145,11 +148,42 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         return super.getClassLoader();
     }
 
-    /** @hide */
+    /** {@hide} */
     public boolean setAllowFds(boolean allowFds) {
-        boolean orig = mAllowFds;
-        mAllowFds = allowFds;
+        final boolean orig = (mFlags & FLAG_ALLOW_FDS) != 0;
+        if (allowFds) {
+            mFlags |= FLAG_ALLOW_FDS;
+        } else {
+            mFlags &= ~FLAG_ALLOW_FDS;
+        }
         return orig;
+    }
+
+    /**
+     * Mark if this Bundle is okay to "defuse." That is, it's okay for system
+     * processes to ignore any {@link BadParcelableException} encountered when
+     * unparceling it, leaving an empty bundle in its place.
+     * <p>
+     * This should <em>only</em> be set when the Bundle reaches its final
+     * destination, otherwise a system process may clobber contents that were
+     * destined for an app that could have unparceled them.
+     *
+     * @hide
+     */
+    public void setDefusable(boolean defusable) {
+        if (defusable) {
+            mFlags |= FLAG_DEFUSABLE;
+        } else {
+            mFlags &= ~FLAG_DEFUSABLE;
+        }
+    }
+
+    /** {@hide} */
+    public static Bundle setDefusable(Bundle bundle, boolean defusable) {
+        if (bundle != null) {
+            bundle.setDefusable(defusable);
+        }
+        return bundle;
     }
 
     /**
@@ -167,9 +201,19 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @Override
     public void clear() {
         super.clear();
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+    }
 
-        mHasFds = false;
-        mFdsKnown = true;
+    /**
+     * Removes any entry with the given key from the mapping of this Bundle.
+     *
+     * @param key a String key
+     */
+    public void remove(String key) {
+        super.remove(key);
+        if ((mFlags & FLAG_HAS_FDS) != 0) {
+            mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        }
     }
 
     /**
@@ -182,16 +226,20 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         bundle.unparcel();
         mMap.putAll(bundle.mMap);
 
-        // fd state is now known if and only if both bundles already knew
-        mHasFds |= bundle.mHasFds;
-        mFdsKnown = mFdsKnown && bundle.mFdsKnown;
+        // FD state is now known if and only if both bundles already knew
+        if ((bundle.mFlags & FLAG_HAS_FDS) != 0) {
+            mFlags |= FLAG_HAS_FDS;
+        }
+        if ((bundle.mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
+            mFlags &= ~FLAG_HAS_FDS_KNOWN;
+        }
     }
 
     /**
      * Reports whether the bundle contains any parcelled file descriptors.
      */
     public boolean hasFileDescriptors() {
-        if (!mFdsKnown) {
+        if ((mFlags & FLAG_HAS_FDS_KNOWN) == 0) {
             boolean fdFound = false;    // keep going until we find one or run out of data
 
             if (mParcelledData != null) {
@@ -247,10 +295,14 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
                 }
             }
 
-            mHasFds = fdFound;
-            mFdsKnown = true;
+            if (fdFound) {
+                mFlags |= FLAG_HAS_FDS;
+            } else {
+                mFlags &= ~FLAG_HAS_FDS;
+            }
+            mFlags |= FLAG_HAS_FDS_KNOWN;
         }
-        return mHasFds;
+        return (mFlags & FLAG_HAS_FDS) != 0;
     }
 
     /**
@@ -274,6 +326,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
                 mMap.removeAt(i);
             }
         }
+        mFlags |= FLAG_HAS_FDS_KNOWN;
+        mFlags &= ~FLAG_HAS_FDS;
     }
 
     /**
@@ -346,7 +400,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public void putParcelable(@Nullable String key, @Nullable Parcelable value) {
         unparcel();
         mMap.put(key, value);
-        mFdsKnown = false;
+        mFlags &= ~FLAG_HAS_FDS_KNOWN;
     }
 
     /**
@@ -384,7 +438,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public void putParcelableArray(@Nullable String key, @Nullable Parcelable[] value) {
         unparcel();
         mMap.put(key, value);
-        mFdsKnown = false;
+        mFlags &= ~FLAG_HAS_FDS_KNOWN;
     }
 
     /**
@@ -399,14 +453,14 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             @Nullable ArrayList<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
-        mFdsKnown = false;
+        mFlags &= ~FLAG_HAS_FDS_KNOWN;
     }
 
     /** {@hide} */
     public void putParcelableList(String key, List<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
-        mFdsKnown = false;
+        mFlags &= ~FLAG_HAS_FDS_KNOWN;
     }
 
     /**
@@ -421,7 +475,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             @Nullable SparseArray<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
-        mFdsKnown = false;
+        mFlags &= ~FLAG_HAS_FDS_KNOWN;
     }
 
     /**
@@ -1074,7 +1128,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        final boolean oldAllowFds = parcel.pushAllowFds(mAllowFds);
+        final boolean oldAllowFds = parcel.pushAllowFds((mFlags & FLAG_ALLOW_FDS) != 0);
         try {
             super.writeToParcelInner(parcel, flags);
         } finally {
@@ -1089,14 +1143,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public void readFromParcel(Parcel parcel) {
         super.readFromParcelInner(parcel);
-        mHasFds = mParcelledData.hasFileDescriptors();
-        mFdsKnown = true;
+        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
+        if (mParcelledData.hasFileDescriptors()) {
+            mFlags |= FLAG_HAS_FDS;
+        }
     }
 
     @Override
     public synchronized String toString() {
         if (mParcelledData != null) {
-            if (mParcelledData == EMPTY_PARCEL) {
+            if (isEmptyParcel()) {
                 return "Bundle[EMPTY_PARCEL]";
             } else {
                 return "Bundle[mParcelledData.dataSize=" +
@@ -1105,5 +1161,4 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
         return "Bundle[" + mMap.toString() + "]";
     }
-
 }

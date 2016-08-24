@@ -1,0 +1,400 @@
+page.title=Adding a Guided Step
+page.tags=tv,guided step,GuidedStepFragment,GuidedAction
+page.keywords=tv,GuidedStepFragment,GuidedAction
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#details">Provide Details for a Step</a></li>
+    <li><a href="#actions">Create and Handle User Actions</a></li>
+    <li><a href="#sequence">Group Guided Steps Into a Guided Sequence</a></li>
+    <li><a href="#presentation">Customize Step Presentation</a></li>
+  </ol>
+  <h2>Try it out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+    Leanback sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+Your application might have multi-step tasks for users. For example, your app might need to guide
+users through purchasing additional content, or setting up a complex configuration setting, or
+simply confirming a decision. All of these tasks require walking users through one or more ordered
+steps or decisions.
+</p>
+
+<p>
+The <a href=
+"{@docRoot}tools/support-library/features.html#v17-leanback">v17 Leanback support library</a>
+provides classes to implement multi-step user tasks. This lesson discusses how to use the
+{@link android.support.v17.leanback.app.GuidedStepFragment} class to guide a user through a series
+of decisions to accomplish a task. {@link android.support.v17.leanback.app.GuidedStepFragment} uses
+TV UI best practices to make multi-step tasks easy to understand and navigate on TV devices.
+</p>
+
+<h2 id="details">Provide Details for a Step</h2>
+
+<p>
+A {@link android.support.v17.leanback.app.GuidedStepFragment} represents a single step in a series
+of steps. Visually it provides a guidance view on the left with step information. On the right,
+{@link android.support.v17.leanback.app.GuidedStepFragment} provides a view containing a
+list of possible actions or decisions for this step.
+</p>
+
+<img src="{@docRoot}images/training/tv/playback/guided-step-screen.png"
+srcset="{@docRoot}images/training/tv/playback/guided-step-screen.png 1x,
+{@docRoot}images/training/tv/playback/guided-step-screen-2x.png 2x" />
+<p class="img-caption"><strong>Figure 1.</strong> An example guided step.</p>
+
+<p>
+For each step in your multi-step task, extend
+{@link android.support.v17.leanback.app.GuidedStepFragment} and provide context information about
+the step and actions the user can take. Override
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateGuidance onCreateGuidance()}
+and return a new
+{@link android.support.v17.leanback.widget.GuidanceStylist.Guidance} that contains context
+information, such as the step title, description, and icon.
+</p>
+
+<pre>
+&#64;Override
+public GuidanceStylist.Guidance onCreateGuidance(Bundle savedInstanceState) {
+    String title = getString(R.string.guidedstep_first_title);
+    String breadcrumb = getString(R.string.guidedstep_first_breadcrumb);
+    String description = getString(R.string.guidedstep_first_description);
+    Drawable icon = getActivity().getDrawable(R.drawable.guidedstep_main_icon_1);
+    return new GuidanceStylist.Guidance(title, description, breadcrumb, icon);
+}
+</pre>
+
+<p>
+Add your {@link android.support.v17.leanback.app.GuidedStepFragment} subclass to your desired
+activity by calling
+{@link android.support.v17.leanback.app.GuidedStepFragment#add GuidedStepFragment.add()}
+in your activity’s {@link android.app.Activity#onCreate onCreate()} method.
+
+If your activity contains only {@link android.support.v17.leanback.app.GuidedStepFragment}
+objects, use {@link android.support.v17.leanback.app.GuidedStepFragment#addAsRoot
+GuidedStepFragment.addAsRoot()} instead of
+{@link android.support.v17.leanback.app.GuidedStepFragment#add add()} to add the first
+{@link android.support.v17.leanback.app.GuidedStepFragment}. Using
+{@link android.support.v17.leanback.app.GuidedStepFragment#addAsRoot
+addAsRoot()} ensures that if the user presses the Back button on the TV remote when viewing
+the first {@link android.support.v17.leanback.app.GuidedStepFragment}, both the
+{@link android.support.v17.leanback.app.GuidedStepFragment} and the parent activity will close.
+</p>
+
+<p class="note"<strong>Note:</strong> Add
+{@link android.support.v17.leanback.app.GuidedStepFragment} objects programmatically
+and not in your layout XML files.</p>
+
+<h2 id="actions">Create and Handle User Actions</h2>
+
+<p>
+Add user actions by overriding
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateActions onCreateActions()}.
+In your override, add a new {@link android.support.v17.leanback.widget.GuidedAction} for each
+action item, and provide the action string, description, and ID. Use
+{@link android.support.v17.leanback.widget.GuidedAction.Builder} to add new actions.
+</p>
+
+<pre>
+&#64;Override
+public void onCreateActions(List&lt;GuidedAction&gt; actions, Bundle savedInstanceState) {
+    // Add "Continue" user action for this step
+    actions.add(new GuidedAction.Builder()
+           .id(CONTINUE)
+           .title(getString(R.string.guidedstep_continue))
+           .description(getString(R.string.guidedstep_letsdoit))
+           .hasNext(true)
+           .build());
+...
+</pre>
+
+<p>
+Actions aren't limited to single-line selections. Here are additional types of
+actions you can create:
+</p>
+
+<ul>
+<li>
+Add an information label action by setting
+{@link android.support.v17.leanback.widget.GuidedAction.Builder#infoOnly infoOnly(true)}.
+If you set <code>infoOnly</code> to true, the user can't select the action. To
+provide additional information about user choices, use label actions.
+</li>
+<li>
+Add an editable text action by setting
+{@link android.support.v17.leanback.widget.GuidedAction.Builder#editable editable(true)}. If
+<code>editable</code> is true, when the action is selected the user can enter text using the
+remote or a connected keyboard. Override
+{@link android.support.v17.leanback.app.GuidedStepFragment#onGuidedActionEdited
+onGuidedActionEdited()} or
+{@code onGuidedActionEditedAndProceed()} to get the modified text the user entered.
+</li>
+<li>
+Add a set of actions that behave as checkable radio buttons by using
+{@link android.support.v17.leanback.widget.GuidedAction.Builder#checkSetId checkSetId()}
+with a common ID value to group actions into a set. All actions in the same list with the same
+check-set ID are considered linked. When the user selects one of the actions within that set, that
+action becomes checked, while all other actions become unchecked.
+</li>
+<li>
+Add a date-picker action by using
+{@code GuidedDatePickerAction.Builder}
+instead of
+{@link android.support.v17.leanback.widget.GuidedAction.Builder} in
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateActions
+onCreateActions()}. Override
+{@link android.support.v17.leanback.app.GuidedStepFragment#onGuidedActionEdited
+onGuidedActionEdited()} or
+{@code onGuidedActionEditedAndProceed()} to get the modified date value the user entered.
+</li>
+<li>
+Add an action that uses subactions to let the user pick from an extended list of
+choices. Subactions are described in <a href="#subactions">Add subactions</a>.
+</li>
+<li>
+Add a button action that appears to the right of the actions list and is easily
+accessible. Button actions are described in <a href="#buttonactions">Add button
+actions</a>.</li>
+</ul>
+
+<p>
+You can also add a visual indicator&mdash;to indicate that selecting the action
+leads to a new step&mdash;by setting
+{@link android.support.v17.leanback.widget.GuidedAction#hasNext hasNext(true)}.
+For all the different attributes that you can set, see
+{@link android.support.v17.leanback.widget.GuidedAction}.
+</p>
+
+<p>
+To respond to actions, override
+{@link android.support.v17.leanback.app.GuidedStepFragment#onGuidedActionClicked
+onGuidedActionClicked()} and process the passed-in
+{@link android.support.v17.leanback.widget.GuidedAction}. Identify the selected action by
+examining {@link android.support.v17.leanback.widget.GuidedAction#getId GuidedAction.getId()}.
+</p>
+
+<h3 id="subactions">Add subactions</h3>
+
+<p>
+Some actions might require giving the user an additional set of choices. A
+{@link android.support.v17.leanback.widget.GuidedAction} can specify a list of
+subactions that get displayed as a drop-down list of child actions.
+</p>
+
+<img src="{@docRoot}images/training/tv/playback/guided-step-subaction.png"
+srcset="{@docRoot}images/training/tv/playback/guided-step-subaction.png 1x,
+{@docRoot}images/training/tv/playback/guided-step-subaction-2x.png 2x" />
+<p class="img-caption"><strong>Figure 2.</strong> Guided step subactions.</p>
+
+<p>
+The subaction list can contain regular actions or radio button actions, but
+not date-picker or editable text actions. Also, a subaction cannot have its own
+set of subactions as the system does not support more than one level of subactions.
+Deeply nested sets of actions create a poor user experience.
+</p>
+
+<p>
+To add subactions, first create and populate a list of
+{@link android.support.v17.leanback.widget.GuidedAction GuidedActions} that will
+act as subactions:
+</p>
+
+<pre>
+List&lt;GuidedAction&gt; subActions = new ArrayList&lt;GuidedAction&gt;();
+subActions.add(new GuidedAction.Builder()
+       .id(SUBACTION1)
+       .title(getString(R.string.guidedstep_subaction1_title))
+       .description(getString(R.string.guidedstep_subaction1_desc))
+       .build());
+...
+</pre>
+
+<p>
+In {@link android.support.v17.leanback.app.GuidedStepFragment#onCreateActions
+onCreateActions()}, create a top-level
+{@link android.support.v17.leanback.widget.GuidedAction} that will display the
+list of subactions when selected:
+</p>
+
+<pre>
+&#64;Override
+public void onCreateActions(List&lt;GuidedAction&gt; actions, Bundle savedInstanceState) {
+...
+    actions.add(new GuidedAction.Builder()
+           .id(SUBACTIONS)
+           .title(getString(R.string.guidedstep_subactions_title))
+           .description(getString(R.string.guidedstep_subactions_desc))
+           <b>.subActions(subActions)</b>
+           .build());
+...
+}
+</pre>
+
+<p>
+Finally, respond to subaction selections by overriding
+{@code onSubGuidedActionClicked()}:
+</p>
+
+<pre>
+&#64;Override
+public boolean onSubGuidedActionClicked(GuidedAction action) {
+   // Check for which action was clicked, and handle as needed
+   if (action.getId() == SUBACTION1) {
+       // Subaction 1 selected
+   }
+   // Return true to collapse the subactions drop-down list, or
+   // false to keep the drop-down list expanded.
+   return true;
+}
+</pre>
+
+<h3 id="buttonactions">Add button actions</h3>
+
+<p>
+If your guided step has a large list of actions, users may have to scroll through the list
+to access the most commonly used actions. Use button actions to separate
+commonly used actions from the action list. Button actions appear to the right
+of the action list and are easy to navigate to.
+</p>
+
+<img src="{@docRoot}images/training/tv/playback/guided-step-buttonaction.png"
+srcset="{@docRoot}images/training/tv/playback/guided-step-buttonaction.png 1x,
+{@docRoot}images/training/tv/playback/guided-step-buttonaction-2x.png 2x" />
+<p class="img-caption"><strong>Figure 3.</strong> Guided step button actions.</p>
+
+<p>
+Button actions are created and handled just like regular actions, but you create
+button actions in
+{@code onCreateButtonActions()} instead of
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateActions
+onCreateActions()}. Respond to button actions in
+{@link android.support.v17.leanback.app.GuidedStepFragment#onGuidedActionClicked
+onGuidedActionClicked()}.
+</p>
+
+<p>
+Use button actions for simple actions, such as navigation actions between steps.
+Don't use the date-picker action or other editable actions as button actions.
+Also, button actions cannot have subactions.
+</p>
+
+<h2 id="sequence">Group Guided Steps Into a Guided Sequence</h2>
+
+<p>
+A {@link android.support.v17.leanback.app.GuidedStepFragment} represents a single step, however
+you might have several steps in an ordered sequence. Group multiple
+{@link android.support.v17.leanback.app.GuidedStepFragment} objects together by using
+{@link android.support.v17.leanback.app.GuidedStepFragment#add GuidedStepFragment.add()} to add
+the next step in the sequence to the fragment stack.
+</p>
+
+<pre>
+&#64;Override
+public void onGuidedActionClicked(GuidedAction action) {
+    FragmentManager fm = getFragmentManager();
+    if (action.getId() == CONTINUE) {
+       GuidedStepFragment.add(fm, new SecondStepFragment());
+    }
+...
+</pre>
+
+<p>
+If the user presses the Back button on the TV remote, the device shows the previous
+{@link android.support.v17.leanback.app.GuidedStepFragment} on the fragment stack. If you
+decide to provide your own {@link android.support.v17.leanback.widget.GuidedAction} that
+returns to the previous step, you can implement the Back behavior by calling
+{@link android.app.FragmentManager#popBackStack getFragmentManager().popBackStack()}.
+If you need to return the user to an even earlier step in the sequence, use
+{@code popBackStackToGuidedStepFragment()} to return to a specific
+{@link android.support.v17.leanback.app.GuidedStepFragment} in the fragment stack.
+</p>
+
+<p>
+When the user has finished the last step in the sequence, use
+{@code finishGuidedStepFragments()} to remove all
+{@link android.support.v17.leanback.app.GuidedStepFragment GuidedStepFragments}
+from the current stack and return to the original parent activity. If the
+first {@link android.support.v17.leanback.app.GuidedStepFragment} was added
+using {@link android.support.v17.leanback.app.GuidedStepFragment#addAsRoot
+addAsRoot()}, calling
+{@code finishGuidedStepFragments()} will also close the parent activity.
+</p>
+
+<h2 id="presentation">Customize Step Presentation</h2>
+
+<p>
+The {@link android.support.v17.leanback.app.GuidedStepFragment} class can use custom
+themes that control presentation aspects such as title text formatting or step transition
+animations. Custom themes must inherit from
+{@link android.support.v17.leanback.R.style#Theme_Leanback_GuidedStep}, and can provide
+overriding values for attributes defined in
+{@link android.support.v17.leanback.widget.GuidanceStylist} and
+{@link android.support.v17.leanback.widget.GuidedActionsStylist}.
+</p>
+
+<p>
+To apply a custom theme to your GuidedStepFragment, do one of the following:
+</p>
+
+<ul>
+<li>
+Apply the theme to the parent activity by setting the <code>android:theme</code> attribute to the
+activity element in the Android manifest. Setting this attribute applies the theme to all child
+views and is the easiest way to apply a custom theme if the parent activity contains only
+{@link android.support.v17.leanback.app.GuidedStepFragment} objects.
+</li>
+<li>
+If your activity already uses a custom theme and you don’t want to apply
+{@link android.support.v17.leanback.app.GuidedStepFragment} styles to other views in the activity,
+add the
+{@link android.support.v17.leanback.R.styleable#LeanbackGuidedStepTheme_guidedStepTheme}
+attribute to your existing custom activity theme. This attribute points to the custom theme that
+only the {@link android.support.v17.leanback.app.GuidedStepFragment} objects in your
+activity use.
+</li>
+<li>
+If you use {@link android.support.v17.leanback.app.GuidedStepFragment} objects in different
+activities that are part of the same overall multi-step task and want to use a consistent
+visual theme across all steps, override
+{@link android.support.v17.leanback.app.GuidedStepFragment#onProvideTheme
+GuidedStepFragment.onProvideTheme()} and return your custom theme.
+</li>
+</ul>
+
+<p>
+For more information on how to add styles and themes, see
+<a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a>.
+</p>
+
+<p>
+The {@link android.support.v17.leanback.app.GuidedStepFragment} class uses special
+<em>stylist classes</em> to access and apply theme attributes.
+The {@link android.support.v17.leanback.widget.GuidanceStylist} class uses theme information
+to control presentation of the left guidance view, while the
+{@link android.support.v17.leanback.widget.GuidedActionsStylist} class uses theme information
+to control presentation of the right actions view.
+</p>
+
+<p>
+To customize the visual style of your steps beyond what theme customization can provide, subclass
+{@link android.support.v17.leanback.widget.GuidanceStylist} or
+{@link android.support.v17.leanback.widget.GuidedActionsStylist} and return your subclass in
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateGuidanceStylist
+GuidedStepFragment.onCreateGuidanceStylist()} or
+{@link android.support.v17.leanback.app.GuidedStepFragment#onCreateActionsStylist
+GuidedStepFragment.onCreateActionsStylist()}.
+For details on what you can customize in these subclasses, see the documentation on
+{@link android.support.v17.leanback.widget.GuidanceStylist} and
+{@link android.support.v17.leanback.widget.GuidedActionsStylist}.
+</p>

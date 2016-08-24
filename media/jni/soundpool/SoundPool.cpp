@@ -554,6 +554,10 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     if (bufidx >= 0) {
                         size_t bufsize;
                         uint8_t *buf = AMediaCodec_getInputBuffer(codec, bufidx, &bufsize);
+                        if (buf == nullptr) {
+                            ALOGE("AMediaCodec_getInputBuffer returned nullptr, short decode");
+                            break;
+                        }
                         int sampleSize = AMediaExtractor_readSampleData(ex, buf, bufsize);
                         ALOGV("read %d", sampleSize);
                         if (sampleSize < 0) {
@@ -563,10 +567,16 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                         }
                         int64_t presentationTimeUs = AMediaExtractor_getSampleTime(ex);
 
-                        AMediaCodec_queueInputBuffer(codec, bufidx,
+                        media_status_t mstatus = AMediaCodec_queueInputBuffer(codec, bufidx,
                                 0 /* offset */, sampleSize, presentationTimeUs,
                                 sawInputEOS ? AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM : 0);
-                        AMediaExtractor_advance(ex);
+                        if (mstatus != AMEDIA_OK) {
+                            // AMEDIA_ERROR_UNKNOWN == { -ERANGE -EINVAL -EACCES }
+                            ALOGE("AMediaCodec_queueInputBuffer returned status %d, short decode",
+                                    (int)mstatus);
+                            break;
+                        }
+                        (void)AMediaExtractor_advance(ex);
                     }
                 }
 
@@ -581,6 +591,10 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     ALOGV("got decoded buffer size %d", info.size);
 
                     uint8_t *buf = AMediaCodec_getOutputBuffer(codec, status, NULL /* out_size */);
+                    if (buf == nullptr) {
+                        ALOGE("AMediaCodec_getOutputBuffer returned nullptr, short decode");
+                        break;
+                    }
                     size_t dataSize = info.size;
                     if (dataSize > available) {
                         dataSize = available;
@@ -589,7 +603,14 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     writePos += dataSize;
                     written += dataSize;
                     available -= dataSize;
-                    AMediaCodec_releaseOutputBuffer(codec, status, false /* render */);
+                    media_status_t mstatus = AMediaCodec_releaseOutputBuffer(
+                            codec, status, false /* render */);
+                    if (mstatus != AMEDIA_OK) {
+                        // AMEDIA_ERROR_UNKNOWN == { -ERANGE -EINVAL -EACCES }
+                        ALOGE("AMediaCodec_releaseOutputBuffer returned status %d, short decode",
+                                (int)mstatus);
+                        break;
+                    }
                     if (available == 0) {
                         // there might be more data, but there's no space for it
                         sawOutputEOS = true;
@@ -602,26 +623,29 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     ALOGV("format changed to: %s", AMediaFormat_toString(format));
                 } else if (status == AMEDIACODEC_INFO_TRY_AGAIN_LATER) {
                     ALOGV("no output buffer right now");
+                } else if (status <= AMEDIA_ERROR_BASE) {
+                    ALOGE("decode error: %d", status);
+                    break;
                 } else {
                     ALOGV("unexpected info code: %d", status);
                 }
             }
 
-            AMediaCodec_stop(codec);
-            AMediaCodec_delete(codec);
-            AMediaExtractor_delete(ex);
+            (void)AMediaCodec_stop(codec);
+            (void)AMediaCodec_delete(codec);
+            (void)AMediaExtractor_delete(ex);
             if (!AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_SAMPLE_RATE, (int32_t*) rate) ||
                     !AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_CHANNEL_COUNT, numChannels)) {
-                AMediaFormat_delete(format);
+                (void)AMediaFormat_delete(format);
                 return UNKNOWN_ERROR;
             }
-            AMediaFormat_delete(format);
+            (void)AMediaFormat_delete(format);
             *memsize = written;
             return OK;
         }
-        AMediaFormat_delete(format);
+        (void)AMediaFormat_delete(format);
     }
-    AMediaExtractor_delete(ex);
+    (void)AMediaExtractor_delete(ex);
     return UNKNOWN_ERROR;
 }
 
@@ -652,7 +676,7 @@ status_t Sample::doLoad()
        goto error;
     }
 
-    if ((numChannels < 1) || (numChannels > 8)) {
+    if ((numChannels < 1) || (numChannels > FCC_8)) {
         ALOGE("Sample channel count (%d) out of range", numChannels);
         status = BAD_VALUE;
         goto error;

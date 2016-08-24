@@ -35,6 +35,7 @@
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkColorFilter.h>
+#include <SkDrawLooper.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkRegion.h>
@@ -44,11 +45,12 @@
 #include <utils/Functor.h>
 #include <utils/RefBase.h>
 #include <utils/SortedVector.h>
-#include <utils/Vector.h>
 
 #include <cutils/compiler.h>
 
 #include <androidfw/ResourceTypes.h>
+
+#include <vector>
 
 class SkShader;
 
@@ -117,15 +119,6 @@ public:
     explicit OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
 
-    /**
-     * Sets the dimension of the underlying drawing surface. This method must
-     * be called at least once every time the drawing surface changes size.
-     *
-     * @param width The width in pixels of the underlysing surface
-     * @param height The height in pixels of the underlysing surface
-     */
-    void setViewport(int width, int height) { mState.setViewport(width, height); }
-
     void initProperties();
     void initLight(float lightRadius, uint8_t ambientShadowAlpha,
             uint8_t spotShadowAlpha);
@@ -141,21 +134,8 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared
      */
-    virtual void prepareDirty(float left, float top, float right, float bottom,
-            bool opaque);
-
-    /**
-     * Prepares the renderer to draw a frame. This method must be invoked
-     * at the beginning of each frame. When this method is invoked, the
-     * entire drawing surface is assumed to be redrawn.
-     *
-     * @param opaque If true, the target surface is considered opaque
-     *               and will not be cleared. If false, the target surface
-     *               will be cleared
-     */
-    void prepare(bool opaque) {
-        prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
-    }
+    virtual void prepareDirty(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Indicates the end of a frame. This method must be invoked whenever
@@ -186,7 +166,7 @@ public:
             const SkPaint* paint, int flags);
 
     void drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
-    void drawLayer(Layer* layer, float x, float y);
+    void drawLayer(Layer* layer);
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
@@ -211,11 +191,9 @@ public:
     void drawPath(const SkPath* path, const SkPaint* paint);
     void drawLines(const float* points, int count, const SkPaint* paint);
     void drawPoints(const float* points, int count, const SkPaint* paint);
-    void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+    void drawTextOnPath(const glyph_t* glyphs, int bytesCount, int count, const SkPath* path,
             float hOffset, float vOffset, const SkPaint* paint);
-    void drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint);
-    void drawText(const char* text, int bytesCount, int count, float x, float y,
+    void drawText(const glyph_t* glyphs, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = DrawOpMode::kImmediate);
     void drawRects(const float* rects, int count, const SkPaint* paint);
@@ -280,57 +258,6 @@ public:
     void endMark() const;
 
     /**
-     * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER. This method does
-     * not multiply the paint's alpha by the current snapshot's alpha, and does
-     * not replace the alpha with the overrideLayerAlpha
-     *
-     * @param paint The paint to extract values from
-     * @param alpha Where to store the resulting alpha
-     * @param mode Where to store the resulting xfermode
-     */
-    static inline void getAlphaAndModeDirect(const SkPaint* paint, int* alpha,
-            SkXfermode::Mode* mode) {
-        *mode = getXfermodeDirect(paint);
-        *alpha = getAlphaDirect(paint);
-    }
-
-    static inline SkXfermode::Mode getXfermodeDirect(const SkPaint* paint) {
-        if (!paint) return SkXfermode::kSrcOver_Mode;
-        return PaintUtils::getXfermode(paint->getXfermode());
-    }
-
-    static inline int getAlphaDirect(const SkPaint* paint) {
-        if (!paint) return 255;
-        return paint->getAlpha();
-    }
-
-    struct TextShadow {
-        SkScalar radius;
-        float dx;
-        float dy;
-        SkColor color;
-    };
-
-    static inline bool getTextShadow(const SkPaint* paint, TextShadow* textShadow) {
-        SkDrawLooper::BlurShadowRec blur;
-        if (paint && paint->getLooper() && paint->getLooper()->asABlurShadow(&blur)) {
-            if (textShadow) {
-                textShadow->radius = Blur::convertSigmaToRadius(blur.fSigma);
-                textShadow->dx = blur.fOffset.fX;
-                textShadow->dy = blur.fOffset.fY;
-                textShadow->color = blur.fColor;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    static inline bool hasTextShadow(const SkPaint* paint) {
-        return getTextShadow(paint, nullptr);
-    }
-
-    /**
      * Build the best transform to use to rasterize text given a full
      * transform matrix, and whether filteration is needed.
      *
@@ -366,8 +293,10 @@ public:
     void restore();
     void restoreToCount(int saveCount);
 
-    void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
-    void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
+    void setGlobalMatrix(const Matrix4& matrix) {
+        mState.setMatrix(matrix);
+    }
+    void setLocalMatrix(const Matrix4& matrix);
     void setLocalMatrix(const SkMatrix& matrix);
     void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
 
@@ -426,7 +355,8 @@ protected:
      * Perform the setup specific to a frame. This method does not
      * issue any OpenGL commands.
      */
-    void setupFrameState(float left, float top, float right, float bottom, bool opaque);
+    void setupFrameState(int viewportWidth, int viewportHeight,
+            float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Indicates the start of rendering. This method will setup the
@@ -510,16 +440,6 @@ protected:
     void drawTextureLayer(Layer* layer, const Rect& rect);
 
     /**
-     * Gets the alpha and xfermode out of a paint object. If the paint is null
-     * alpha will be 255 and the xfermode will be SRC_OVER. Accounts for snapshot alpha.
-     *
-     * @param paint The paint to extract values from
-     * @param alpha Where to store the resulting alpha
-     * @param mode Where to store the resulting xfermode
-     */
-    inline void getAlphaAndMode(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) const;
-
-    /**
      * Gets the alpha from a layer, accounting for snapshot alpha
      *
      * @param layer The layer from which the alpha is extracted
@@ -552,27 +472,6 @@ private:
      * rendering on some tiler architectures.
      */
     void discardFramebuffer(float left, float top, float right, float bottom);
-
-    /**
-     * Tells the GPU what part of the screen is about to be redrawn.
-     * This method will use the current layer space clip rect.
-     * This method needs to be invoked every time getTargetFbo() is
-     * bound again.
-     */
-    void startTilingCurrentClip(bool opaque = false, bool expand = false);
-
-    /**
-     * Tells the GPU what part of the screen is about to be redrawn.
-     * This method needs to be invoked every time getTargetFbo() is
-     * bound again.
-     */
-    void startTiling(const Rect& clip, int windowHeight, bool opaque = false, bool expand = false);
-
-    /**
-     * Tells the GPU that we are done drawing the frame or that we
-     * are switching to another render target.
-     */
-    void endTiling();
 
     /**
      * Sets the clipping rectangle using glScissor. The clip is defined by
@@ -736,24 +635,11 @@ private:
      */
     void drawConvexPath(const SkPath& path, const SkPaint* paint);
 
-    /**
-     * Draws text underline and strike-through if needed.
-     *
-     * @param text The text to decor
-     * @param bytesCount The number of bytes in the text
-     * @param totalAdvance The total advance in pixels, defines underline/strikethrough length
-     * @param x The x coordinate where the text will be drawn
-     * @param y The y coordinate where the text will be drawn
-     * @param paint The paint to draw the text with
-     */
-    void drawTextDecorations(float totalAdvance, float x, float y, const SkPaint* paint);
-
    /**
      * Draws shadow layer on text (with optional positions).
      *
      * @param paint The paint to draw the shadow with
      * @param text The text to draw
-     * @param bytesCount The number of bytes in the text
      * @param count The number of glyphs in the text
      * @param positions The x, y positions of individual glyphs (or NULL)
      * @param fontRenderer The font renderer object
@@ -761,7 +647,7 @@ private:
      * @param x The x coordinate where the shadow will be drawn
      * @param y The y coordinate where the shadow will be drawn
      */
-    void drawTextShadow(const SkPaint* paint, const char* text, int bytesCount, int count,
+    void drawTextShadow(const SkPaint* paint, const glyph_t* glyphs, int count,
             const float* positions, FontRenderer& fontRenderer, int alpha,
             float x, float y);
 
@@ -855,15 +741,11 @@ private:
     // List of rectangles to clear after saveLayer() is invoked
     std::vector<Rect> mLayers;
     // List of layers to update at the beginning of a frame
-    Vector< sp<Layer> > mLayerUpdates;
+    std::vector< sp<Layer> > mLayerUpdates;
 
     // See PROPERTY_DISABLE_SCISSOR_OPTIMIZATION in
     // Properties.h
     bool mScissorOptimizationDisabled;
-
-    // No-ops start/endTiling when set
-    bool mSuppressTiling;
-    bool mFirstFrameAfterResize;
 
     bool mSkipOutlineClip;
 

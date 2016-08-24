@@ -9,59 +9,56 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<section class="dac-expand dac-hero dac-section-light">
+
+ <section class="dac-expand dac-hero dac-light">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <img class="dac-hero-image" src="{@docRoot}images/develop/hero_image_studio5_2x.png"
-          srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x" />
+        <img class="dac-hero-image" src="/images/develop/hero_image_studio5_2x.png" srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x">
       </div>
-      <div class="col-1of2 col-pull-1of2">
-        <h1 class="dac-hero-title">Get Started with Android Studio</h1>
-        <p class="dac-hero-description">
-        Everything you need to build incredible app experiences on phones and tablets, Wear, TV, and Auto. </p>
-        </p>
-        <a class="dac-hero-cta" href="{@docRoot}sdk/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Set up Android Studio
-        </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}training/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Build your first app
-        </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}guide/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Learn about Android
-        </a><br>
-        <a class="dac-hero-cta" href="{@docRoot}samples/index.html">
-          <span class="dac-sprite dac-auto-chevron"></span>
-          Sample projects
-        </a><br>
+      <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
+        <h1 class="dac-hero-title">
+            <a style="color:inherit" href="{@docRoot}studio/index.html">
+            Android Studio 2.1,<br>now available!</a></h1>
+
+<p class="dac-hero-description">Android Studio provides the fastest tools for
+building apps on every type of Android device.</p>
+
+<p class="dac-hero-description">The latest version, Android Studio 2.1, adds
+support for N Preview development on top of the faster Android Emulator and
+Instant Run feature from 2.0.</p>
+
+<p style="margin-top:24px">
+    <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get Android Studio
+    </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
+    <a class="dac-hero-cta" href="{@docRoot}studio/releases/index.html">
+    <span class="dac-sprite dac-auto-chevron"></span>
+    See the release notes</a>
+</p>
+
       </div>
     </div>
-    <!--<div class="dac-section dac-small">
-      <div class="resource-widget resource-flow-layout col-16"
-           data-query="collection:develop/landing/mainlinks"
-           data-cardSizes="6x2"
-           data-maxResults="6"></div>
-    </div>-->
   </div>
 </section>
+
 <div class="wrap dac-offset-parent">
   <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
     <i class="dac-sprite dac-arrow-down-gray"></i>
   </a>
 </div>
 
-<section class="dac-section dac-gray dac-small dac-invert" id="latest"><div class="wrap">
+<section class="dac-section dac-gray dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
   <div class="resource-widget resource-flow-layout col-16"
-       data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
-       data-query="collection:develop/landing/latest"
-       data-sortOrder="-timestamp"
-       data-cardSizes="6x6"
-       data-maxResults="12"
-       data-initial-results="3"></div>
+    data-query="type:youtube+tag:develop+tag:featured, type:blog+tag:develop+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
 </div></section>
 
 <section class="dac-section dac-light"><div class="wrap">
@@ -72,9 +69,26 @@ excludeFromSuggestions=true
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/tools"
        data-cardSizes="6x6"
-       data-maxResults="15"
+       data-maxResults="24"
        data-initial-results="3"
-       data-sortOrder="random"></div>
+       data-items-per-page="6"></div>
+</div></section>
+
+<section class="dac-section dac-gray"><div class="wrap">
+  <h1 class="dac-section-title">Android development patterns</h1>
+  <div class="dac-section-subtitle">
+    Fundamental components and best practices that can help you build better apps.
+  </div>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/devpatterns"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  <ul class="dac-section-links">
+    <li class="dac-section-link"><a href="https://www.youtube.com/playlist?list=PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Playlist
+    </a></li>
+  </ul>
 </div></section>
 
 <section class="dac-section dac-section-light"><div class="wrap">
@@ -97,7 +111,7 @@ excludeFromSuggestions=true
 <section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Ubiquitous computing on Android</h1>
   <div class="dac-section-subtitle">
-    A great experience for your users across devices. 
+    A great experience for your users across devices.
   </div>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/ubicomp"
@@ -128,5 +142,6 @@ excludeFromSuggestions=true
        data-sortOrder="random"
        data-cardSizes="6x6"
        data-initial-results="6"
-       data-maxResults="12"></div>
+       data-items-per-page="24"
+       data-maxResults="24"></div>
 </div></section>

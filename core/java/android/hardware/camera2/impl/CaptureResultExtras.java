@@ -28,6 +28,7 @@ public class CaptureResultExtras implements Parcelable {
     private int precaptureTriggerId;
     private long frameNumber;
     private int partialResultCount;
+    private int errorStreamId;
 
     public static final Parcelable.Creator<CaptureResultExtras> CREATOR =
             new Parcelable.Creator<CaptureResultExtras>() {
@@ -48,13 +49,14 @@ public class CaptureResultExtras implements Parcelable {
 
     public CaptureResultExtras(int requestId, int subsequenceId, int afTriggerId,
                                int precaptureTriggerId, long frameNumber,
-                               int partialResultCount) {
+                               int partialResultCount, int errorStreamId) {
         this.requestId = requestId;
         this.subsequenceId = subsequenceId;
         this.afTriggerId = afTriggerId;
         this.precaptureTriggerId = precaptureTriggerId;
         this.frameNumber = frameNumber;
         this.partialResultCount = partialResultCount;
+        this.errorStreamId = errorStreamId;
     }
 
     @Override
@@ -70,6 +72,7 @@ public class CaptureResultExtras implements Parcelable {
         dest.writeInt(precaptureTriggerId);
         dest.writeLong(frameNumber);
         dest.writeInt(partialResultCount);
+        dest.writeInt(errorStreamId);
     }
 
     public void readFromParcel(Parcel in) {
@@ -79,6 +82,7 @@ public class CaptureResultExtras implements Parcelable {
         precaptureTriggerId = in.readInt();
         frameNumber = in.readLong();
         partialResultCount = in.readInt();
+        errorStreamId = in.readInt();
     }
 
     public int getRequestId() {
@@ -103,5 +107,9 @@ public class CaptureResultExtras implements Parcelable {
 
     public int getPartialResultCount() {
         return partialResultCount;
+    }
+
+    public int getErrorStreamId() {
+        return errorStreamId;
     }
 }

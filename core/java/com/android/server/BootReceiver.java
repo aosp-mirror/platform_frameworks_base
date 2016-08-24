@@ -19,21 +19,37 @@ package com.android.server;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.IPackageManager;
 import android.os.Build;
 import android.os.DropBoxManager;
+import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.storage.StorageManager;
 import android.provider.Downloads;
+import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.Xml;
+
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Performs a number of miscellaneous, non-system-critical actions
@@ -59,6 +75,10 @@ public class BootReceiver extends BroadcastReceiver {
 
     // Keep a reference to the observer so the finalizer doesn't disable it.
     private static FileObserver sTombstoneObserver = null;
+
+    private static final String LOG_FILES_FILE = "log-files.xml";
+    private static final AtomicFile sFile = new AtomicFile(new File(
+            Environment.getDataSystemDirectory(), LOG_FILES_FILE));
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -95,7 +115,6 @@ public class BootReceiver extends BroadcastReceiver {
 
     private void logBootEvents(Context ctx) throws IOException {
         final DropBoxManager db = (DropBoxManager) ctx.getSystemService(Context.DROPBOX_SERVICE);
-        final SharedPreferences prefs = ctx.getSharedPreferences("log_files", Context.MODE_PRIVATE);
         final String headers = new StringBuilder(512)
             .append("Build: ").append(Build.FINGERPRINT).append("\n")
             .append("Hardware: ").append(Build.BOARD).append("\n")
@@ -108,7 +127,7 @@ public class BootReceiver extends BroadcastReceiver {
             .append("\n").toString();
         final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
 
-        String recovery = RecoverySystem.handleAftermath();
+        String recovery = RecoverySystem.handleAftermath(ctx);
         if (recovery != null && db != null) {
             db.addText("SYSTEM_RECOVERY_LOG", headers + recovery);
         }
@@ -122,9 +141,10 @@ public class BootReceiver extends BroadcastReceiver {
                 .toString();
         }
 
+        HashMap<String, Long> timestamps = readTimestamps();
+
         if (SystemProperties.getLong("ro.runtime.firstboot", 0) == 0) {
-            if ("encrypted".equals(SystemProperties.get("ro.crypto.state"))
-                && "trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))){
+            if (StorageManager.inCryptKeeperBounce()) {
                 // Encrypted, first boot to get PIN/pattern/password so data is tmpfs
                 // Don't set ro.runtime.firstboot so that we will do this again
                 // when data is properly mounted
@@ -135,17 +155,16 @@ public class BootReceiver extends BroadcastReceiver {
             if (db != null) db.addText("SYSTEM_BOOT", headers);
 
             // Negative sizes mean to take the *tail* of the file (see FileUtils.readTextFile())
-            addFileWithFootersToDropBox(db, prefs, headers, lastKmsgFooter,
+            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
                     "/proc/last_kmsg", -LOG_SIZE, "SYSTEM_LAST_KMSG");
-            addFileWithFootersToDropBox(db, prefs, headers, lastKmsgFooter,
-                    "/sys/fs/pstore/console-ramoops", -LOG_SIZE,
-                    "SYSTEM_LAST_KMSG");
-            addFileToDropBox(db, prefs, headers, "/cache/recovery/log",
-                    -LOG_SIZE, "SYSTEM_RECOVERY_LOG");
-            addFileToDropBox(db, prefs, headers, "/cache/recovery/last_kmsg",
+            addFileWithFootersToDropBox(db, timestamps, headers, lastKmsgFooter,
+                    "/sys/fs/pstore/console-ramoops", -LOG_SIZE, "SYSTEM_LAST_KMSG");
+            addFileToDropBox(db, timestamps, headers, "/cache/recovery/log", -LOG_SIZE,
+                    "SYSTEM_RECOVERY_LOG");
+            addFileToDropBox(db, timestamps, headers, "/cache/recovery/last_kmsg",
                     -LOG_SIZE, "SYSTEM_RECOVERY_KMSG");
-            addAuditErrorsToDropBox(db, prefs, headers, -LOG_SIZE, "SYSTEM_AUDIT");
-            addFsckErrorsToDropBox(db, prefs, headers, -LOG_SIZE, "SYSTEM_FSCK");
+            addAuditErrorsToDropBox(db, timestamps, headers, -LOG_SIZE, "SYSTEM_AUDIT");
+            addFsckErrorsToDropBox(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
         } else {
             if (db != null) db.addText("SYSTEM_RESTART", headers);
         }
@@ -154,24 +173,29 @@ public class BootReceiver extends BroadcastReceiver {
         File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
         for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
             if (tombstoneFiles[i].isFile()) {
-                addFileToDropBox(db, prefs, headers, tombstoneFiles[i].getPath(),
+                addFileToDropBox(db, timestamps, headers, tombstoneFiles[i].getPath(),
                         LOG_SIZE, "SYSTEM_TOMBSTONE");
             }
         }
+
+        writeTimestamps(timestamps);
 
         // Start watching for new tombstone files; will record them as they occur.
         // This gets registered with the singleton file observer thread.
         sTombstoneObserver = new FileObserver(TOMBSTONE_DIR.getPath(), FileObserver.CLOSE_WRITE) {
             @Override
             public void onEvent(int event, String path) {
+                HashMap<String, Long> timestamps = readTimestamps();
                 try {
                     File file = new File(TOMBSTONE_DIR, path);
                     if (file.isFile()) {
-                        addFileToDropBox(db, prefs, headers, file.getPath(), LOG_SIZE, "SYSTEM_TOMBSTONE");
+                        addFileToDropBox(db, timestamps, headers, file.getPath(), LOG_SIZE,
+                                "SYSTEM_TOMBSTONE");
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Can't log tombstone", e);
                 }
+                writeTimestamps(timestamps);
             }
         };
 
@@ -179,14 +203,13 @@ public class BootReceiver extends BroadcastReceiver {
     }
 
     private static void addFileToDropBox(
-            DropBoxManager db, SharedPreferences prefs,
+            DropBoxManager db, HashMap<String, Long> timestamps,
             String headers, String filename, int maxSize, String tag) throws IOException {
-        addFileWithFootersToDropBox(db, prefs, headers, "", filename, maxSize,
-                tag);
+        addFileWithFootersToDropBox(db, timestamps, headers, "", filename, maxSize, tag);
     }
 
     private static void addFileWithFootersToDropBox(
-            DropBoxManager db, SharedPreferences prefs,
+            DropBoxManager db, HashMap<String, Long> timestamps,
             String headers, String footers, String filename, int maxSize,
             String tag) throws IOException {
         if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
@@ -195,20 +218,20 @@ public class BootReceiver extends BroadcastReceiver {
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 
-        if (prefs != null) {
-            long lastTime = prefs.getLong(filename, 0);
-            if (lastTime == fileTime) return;  // Already logged this particular file
-            // TODO: move all these SharedPreferences Editor commits
-            // outside this function to the end of logBootEvents
-            prefs.edit().putLong(filename, fileTime).apply();
+        if (timestamps.containsKey(filename) && timestamps.get(filename) == fileTime) {
+            return;  // Already logged this particular file
         }
 
+        timestamps.put(filename, fileTime);
+
         Slog.i(TAG, "Copying " + filename + " to DropBox (" + tag + ")");
-        db.addText(tag, headers + FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n") + footers);
+        db.addText(tag, headers + FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n") +
+                footers);
     }
 
-    private static void addAuditErrorsToDropBox(DropBoxManager db,  SharedPreferences prefs,
-            String headers, int maxSize, String tag) throws IOException {
+    private static void addAuditErrorsToDropBox(DropBoxManager db,
+            HashMap<String, Long> timestamps, String headers, int maxSize, String tag)
+            throws IOException {
         if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
         Slog.i(TAG, "Copying audit failures to DropBox");
 
@@ -221,13 +244,11 @@ public class BootReceiver extends BroadcastReceiver {
 
         if (fileTime <= 0) return;  // File does not exist
 
-        if (prefs != null) {
-            long lastTime = prefs.getLong(tag, 0);
-            if (lastTime == fileTime) return;  // Already logged this particular file
-            // TODO: move all these SharedPreferences Editor commits
-            // outside this function to the end of logBootEvents
-            prefs.edit().putLong(tag, fileTime).apply();
+        if (timestamps.containsKey(tag) && timestamps.get(tag) == fileTime) {
+            return;  // Already logged this particular file
         }
+
+        timestamps.put(tag, fileTime);
 
         String log = FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n");
         StringBuilder sb = new StringBuilder();
@@ -240,8 +261,9 @@ public class BootReceiver extends BroadcastReceiver {
         db.addText(tag, headers + sb.toString());
     }
 
-    private static void addFsckErrorsToDropBox(DropBoxManager db,  SharedPreferences prefs,
-            String headers, int maxSize, String tag) throws IOException {
+    private static void addFsckErrorsToDropBox(DropBoxManager db,
+            HashMap<String, Long> timestamps, String headers, int maxSize, String tag)
+            throws IOException {
         boolean upload_needed = false;
         if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
         Slog.i(TAG, "Checking for fsck errors");
@@ -260,10 +282,103 @@ public class BootReceiver extends BroadcastReceiver {
         }
 
         if (upload_needed) {
-            addFileToDropBox(db, prefs, headers, "/dev/fscklogs/log", maxSize, tag);
+            addFileToDropBox(db, timestamps, headers, "/dev/fscklogs/log", maxSize, tag);
         }
 
         // Remove the file so we don't re-upload if the runtime restarts.
         file.delete();
+    }
+
+    private static HashMap<String, Long> readTimestamps() {
+        synchronized (sFile) {
+            HashMap<String, Long> timestamps = new HashMap<String, Long>();
+            boolean success = false;
+            try (final FileInputStream stream = sFile.openRead()) {
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(stream, StandardCharsets.UTF_8.name());
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.START_TAG
+                        && type != XmlPullParser.END_DOCUMENT) {
+                    ;
+                }
+
+                if (type != XmlPullParser.START_TAG) {
+                    throw new IllegalStateException("no start tag found");
+                }
+
+                int outerDepth = parser.getDepth();  // Skip the outer <log-files> tag.
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                    if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                        continue;
+                    }
+
+                    String tagName = parser.getName();
+                    if (tagName.equals("log")) {
+                        final String filename = parser.getAttributeValue(null, "filename");
+                        final long timestamp = Long.valueOf(parser.getAttributeValue(
+                                    null, "timestamp"));
+                        timestamps.put(filename, timestamp);
+                    } else {
+                        Slog.w(TAG, "Unknown tag: " + parser.getName());
+                        XmlUtils.skipCurrentTag(parser);
+                    }
+                }
+                success = true;
+            } catch (FileNotFoundException e) {
+                Slog.i(TAG, "No existing last log timestamp file " + sFile.getBaseFile() +
+                        "; starting empty");
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed parsing " + e);
+            } catch (IllegalStateException e) {
+                Slog.w(TAG, "Failed parsing " + e);
+            } catch (NullPointerException e) {
+                Slog.w(TAG, "Failed parsing " + e);
+            } catch (XmlPullParserException e) {
+                Slog.w(TAG, "Failed parsing " + e);
+            } finally {
+                if (!success) {
+                    timestamps.clear();
+                }
+            }
+            return timestamps;
+        }
+    }
+
+    private void writeTimestamps(HashMap<String, Long> timestamps) {
+        synchronized (sFile) {
+            final FileOutputStream stream;
+            try {
+                stream = sFile.startWrite();
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to write timestamp file: " + e);
+                return;
+            }
+
+            try {
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(stream, StandardCharsets.UTF_8.name());
+                out.startDocument(null, true);
+                out.startTag(null, "log-files");
+
+                Iterator<String> itor = timestamps.keySet().iterator();
+                while (itor.hasNext()) {
+                    String filename = itor.next();
+                    out.startTag(null, "log");
+                    out.attribute(null, "filename", filename);
+                    out.attribute(null, "timestamp", timestamps.get(filename).toString());
+                    out.endTag(null, "log");
+                }
+
+                out.endTag(null, "log-files");
+                out.endDocument();
+
+                sFile.finishWrite(stream);
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to write timestamp file, using the backup: " + e);
+                sFile.failWrite(stream);
+            }
+        }
     }
 }

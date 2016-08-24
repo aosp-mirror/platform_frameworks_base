@@ -16,11 +16,15 @@
 
 package android.print;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -32,12 +36,15 @@ import android.os.RemoteException;
 import android.print.PrintDocumentAdapter.LayoutResultCallback;
 import android.print.PrintDocumentAdapter.WriteResultCallback;
 import android.printservice.PrintServiceInfo;
+import android.printservice.recommendation.IRecommendationsChangeListener;
+import android.printservice.recommendation.RecommendationInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
 
+import com.android.internal.util.Preconditions;
 import libcore.io.IoUtils;
 
 import java.lang.ref.WeakReference;
@@ -108,6 +115,39 @@ public final class PrintManager {
     private static final boolean DEBUG = false;
 
     private static final int MSG_NOTIFY_PRINT_JOB_STATE_CHANGED = 1;
+    private static final int MSG_NOTIFY_PRINT_SERVICES_CHANGED = 2;
+    private static final int MSG_NOTIFY_PRINT_SERVICE_RECOMMENDATIONS_CHANGED = 3;
+
+    /**
+     * Package name of print spooler.
+     *
+     * @hide
+     */
+    public static final String PRINT_SPOOLER_PACKAGE_NAME = "com.android.printspooler";
+
+    /**
+     * Select enabled services.
+     * </p>
+     * @see #getPrintServices
+     * @hide
+     */
+    public static final int ENABLED_SERVICES = 1 << 0;
+
+    /**
+     * Select disabled services.
+     * </p>
+     * @see #getPrintServices
+     * @hide
+     */
+    public static final int DISABLED_SERVICES = 1 << 1;
+
+    /**
+     * Select all services.
+     * </p>
+     * @see #getPrintServices
+     * @hide
+     */
+    public static final int ALL_SERVICES = ENABLED_SERVICES | DISABLED_SERVICES;
 
     /**
      * The action for launching the print dialog activity.
@@ -162,7 +202,13 @@ public final class PrintManager {
 
     private final Handler mHandler;
 
-    private Map<PrintJobStateChangeListener, PrintJobStateChangeListenerWrapper> mPrintJobStateChangeListeners;
+    private Map<PrintJobStateChangeListener, PrintJobStateChangeListenerWrapper>
+            mPrintJobStateChangeListeners;
+    private Map<PrintServicesChangeListener, PrintServicesChangeListenerWrapper>
+            mPrintServicesChangeListeners;
+    private Map<PrintServiceRecommendationsChangeListener,
+            PrintServiceRecommendationsChangeListenerWrapper>
+            mPrintServiceRecommendationsChangeListeners;
 
     /** @hide */
     public interface PrintJobStateChangeListener {
@@ -175,11 +221,31 @@ public final class PrintManager {
         public void onPrintJobStateChanged(PrintJobId printJobId);
     }
 
+    /** @hide */
+    public interface PrintServicesChangeListener {
+
+        /**
+         * Callback notifying that the print services changed.
+         */
+        public void onPrintServicesChanged();
+    }
+
+    /** @hide */
+    public interface PrintServiceRecommendationsChangeListener {
+
+        /**
+         * Callback notifying that the print service recommendations changed.
+         */
+        void onPrintServiceRecommendationsChanged();
+    }
+
     /**
      * Creates a new instance.
      *
      * @param context The current context in which to operate.
      * @param service The backing system service.
+     * @param userId The user id in which to operate.
+     * @param appId The application id in which to operate.
      * @hide
      */
     public PrintManager(Context context, IPrintManager service, int userId, int appId) {
@@ -201,6 +267,22 @@ public final class PrintManager {
                             listener.onPrintJobStateChanged(printJobId);
                         }
                         args.recycle();
+                    } break;
+                    case MSG_NOTIFY_PRINT_SERVICES_CHANGED: {
+                        PrintServicesChangeListenerWrapper wrapper =
+                                (PrintServicesChangeListenerWrapper) message.obj;
+                        PrintServicesChangeListener listener = wrapper.getListener();
+                        if (listener != null) {
+                            listener.onPrintServicesChanged();
+                        }
+                    } break;
+                    case MSG_NOTIFY_PRINT_SERVICE_RECOMMENDATIONS_CHANGED: {
+                        PrintServiceRecommendationsChangeListenerWrapper wrapper =
+                                (PrintServiceRecommendationsChangeListenerWrapper) message.obj;
+                        PrintServiceRecommendationsChangeListener listener = wrapper.getListener();
+                        if (listener != null) {
+                            listener.onPrintServiceRecommendationsChanged();
+                        }
                     } break;
                 }
             }
@@ -227,9 +309,8 @@ public final class PrintManager {
         try {
             return mService.getPrintJobInfo(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting a print job info:" + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -253,7 +334,7 @@ public final class PrintManager {
             mService.addPrintJobStateChangeListener(wrappedListener, mAppId, mUserId);
             mPrintJobStateChangeListeners.put(listener, wrappedListener);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error adding print job state change listener", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -283,13 +364,14 @@ public final class PrintManager {
         try {
             mService.removePrintJobStateChangeListener(wrappedListener, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error removing print job state change listener", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
     /**
      * Gets a print job given its id.
      *
+     * @param printJobId The id of the print job.
      * @return The print job list.
      * @see PrintJob
      * @hide
@@ -305,9 +387,31 @@ public final class PrintManager {
                 return new PrintJob(printJob, this);
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print job", re);
+            throw re.rethrowFromSystemServer();
         }
         return null;
+    }
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @hide
+     */
+    public Icon getCustomPrinterIcon(PrinterId printerId) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return null;
+        }
+        try {
+            return mService.getCustomPrinterIcon(printerId, mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -316,7 +420,7 @@ public final class PrintManager {
      * @return The print job list.
      * @see PrintJob
      */
-    public List<PrintJob> getPrintJobs() {
+    public @NonNull List<PrintJob> getPrintJobs() {
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
             return Collections.emptyList();
@@ -333,9 +437,8 @@ public final class PrintManager {
             }
             return printJobs;
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print jobs", re);
+            throw re.rethrowFromSystemServer();
         }
-        return Collections.emptyList();
     }
 
     void cancelPrintJob(PrintJobId printJobId) {
@@ -346,7 +449,7 @@ public final class PrintManager {
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error canceling a print job: " + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -358,7 +461,7 @@ public final class PrintManager {
         try {
             mService.restartPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error restarting a print job: " + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -411,8 +514,9 @@ public final class PrintManager {
      *
      * @see PrintJob
      */
-    public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
-            PrintAttributes attributes) {
+    public @NonNull PrintJob print(@NonNull String printJobName,
+            @NonNull PrintDocumentAdapter documentAdapter,
+            @Nullable PrintAttributes attributes) {
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
             return null;
@@ -445,51 +549,181 @@ public final class PrintManager {
                 }
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error creating a print job", re);
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
 
     /**
-     * Gets the list of enabled print services.
+     * Listen for changes to the installed and enabled print services.
      *
-     * @return The enabled service list or an empty list.
-     * @hide
+     * @param listener the listener to add
+     *
+     * @see android.print.PrintManager#getPrintServices
      */
-    public List<PrintServiceInfo> getEnabledPrintServices() {
+    void addPrintServicesChangeListener(@NonNull PrintServicesChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
-            return Collections.emptyList();
+            return;
         }
+        if (mPrintServicesChangeListeners == null) {
+            mPrintServicesChangeListeners = new ArrayMap<>();
+        }
+        PrintServicesChangeListenerWrapper wrappedListener =
+                new PrintServicesChangeListenerWrapper(listener, mHandler);
         try {
-            List<PrintServiceInfo> enabledServices = mService.getEnabledPrintServices(mUserId);
-            if (enabledServices != null) {
-                return enabledServices;
+            mService.addPrintServicesChangeListener(wrappedListener, mUserId);
+            mPrintServicesChangeListeners.put(listener, wrappedListener);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop listening for changes to the installed and enabled print services.
+     *
+     * @param listener the listener to remove
+     *
+     * @see android.print.PrintManager#getPrintServices
+     */
+    void removePrintServicesChangeListener(@NonNull PrintServicesChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
+        if (mPrintServicesChangeListeners == null) {
+            return;
+        }
+        PrintServicesChangeListenerWrapper wrappedListener =
+                mPrintServicesChangeListeners.remove(listener);
+        if (wrappedListener == null) {
+            return;
+        }
+        if (mPrintServicesChangeListeners.isEmpty()) {
+            mPrintServicesChangeListeners = null;
+        }
+        wrappedListener.destroy();
+        try {
+            mService.removePrintServicesChangeListener(wrappedListener, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error removing print services change listener", re);
+        }
+    }
+
+    /**
+     * Gets the list of print services, but does not register for updates. The user has to register
+     * for updates by itself, or use {@link PrintServicesLoader}.
+     *
+     * @param selectionFlags flags selecting which services to get. Either
+     *                       {@link #ENABLED_SERVICES},{@link #DISABLED_SERVICES}, or both.
+     *
+     * @return The print service list or an empty list.
+     *
+     * @see #addPrintServicesChangeListener(PrintServicesChangeListener)
+     * @see #removePrintServicesChangeListener(PrintServicesChangeListener)
+     *
+     * @hide
+     */
+    public @NonNull List<PrintServiceInfo> getPrintServices(int selectionFlags) {
+        Preconditions.checkFlagsArgument(selectionFlags, ALL_SERVICES);
+
+        try {
+            List<PrintServiceInfo> services = mService.getPrintServices(selectionFlags, mUserId);
+            if (services != null) {
+                return services;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting the enabled print services", re);
+            throw re.rethrowFromSystemServer();
         }
         return Collections.emptyList();
     }
 
     /**
-     * Gets the list of installed print services.
+     * Listen for changes to the print service recommendations.
      *
-     * @return The installed service list or an empty list.
-     * @hide
+     * @param listener the listener to add
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
      */
-    public List<PrintServiceInfo> getInstalledPrintServices() {
+    void addPrintServiceRecommendationsChangeListener(
+            @NonNull PrintServiceRecommendationsChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
-            return Collections.emptyList();
+            return;
         }
+        if (mPrintServiceRecommendationsChangeListeners == null) {
+            mPrintServiceRecommendationsChangeListeners = new ArrayMap<>();
+        }
+        PrintServiceRecommendationsChangeListenerWrapper wrappedListener =
+                new PrintServiceRecommendationsChangeListenerWrapper(listener, mHandler);
         try {
-            List<PrintServiceInfo> installedServices = mService.getInstalledPrintServices(mUserId);
-            if (installedServices != null) {
-                return installedServices;
+            mService.addPrintServiceRecommendationsChangeListener(wrappedListener, mUserId);
+            mPrintServiceRecommendationsChangeListeners.put(listener, wrappedListener);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Stop listening for changes to the print service recommendations.
+     *
+     * @param listener the listener to remove
+     *
+     * @see android.print.PrintManager#getPrintServiceRecommendations
+     */
+    void removePrintServiceRecommendationsChangeListener(
+            @NonNull PrintServiceRecommendationsChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
+        if (mPrintServiceRecommendationsChangeListeners == null) {
+            return;
+        }
+        PrintServiceRecommendationsChangeListenerWrapper wrappedListener =
+                mPrintServiceRecommendationsChangeListeners.remove(listener);
+        if (wrappedListener == null) {
+            return;
+        }
+        if (mPrintServiceRecommendationsChangeListeners.isEmpty()) {
+            mPrintServiceRecommendationsChangeListeners = null;
+        }
+        wrappedListener.destroy();
+        try {
+            mService.removePrintServiceRecommendationsChangeListener(wrappedListener, mUserId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the list of print service recommendations, but does not register for updates. The user
+     * has to register for updates by itself, or use {@link PrintServiceRecommendationsLoader}.
+     *
+     * @return The print service recommendations list or an empty list.
+     *
+     * @see #addPrintServiceRecommendationsChangeListener
+     * @see #removePrintServiceRecommendationsChangeListener
+     *
+     * @hide
+     */
+    public @NonNull List<RecommendationInfo> getPrintServiceRecommendations() {
+        try {
+            List<RecommendationInfo> recommendations =
+                    mService.getPrintServiceRecommendations(mUserId);
+            if (recommendations != null) {
+                return recommendations;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting the installed print services", re);
+            throw re.rethrowFromSystemServer();
         }
         return Collections.emptyList();
     }
@@ -505,7 +739,30 @@ public final class PrintManager {
         return new PrinterDiscoverySession(mService, mContext, mUserId);
     }
 
-    private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub
+    /**
+     * Enable or disable a print service.
+     *
+     * @param service The service to enabled or disable
+     * @param isEnabled whether the service should be enabled or disabled
+     *
+     * @hide
+     */
+    public void setPrintServiceEnabled(@NonNull ComponentName service, boolean isEnabled) {
+        if (mService == null) {
+            Log.w(LOG_TAG, "Feature android.software.print not available");
+            return;
+        }
+        try {
+            mService.setPrintServiceEnabled(service, isEnabled, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error enabling or disabling " + service, re);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub
             implements ActivityLifecycleCallbacks {
         private final Object mLock = new Object();
 
@@ -521,6 +778,12 @@ public final class PrintManager {
 
         public PrintDocumentAdapterDelegate(Activity activity,
                 PrintDocumentAdapter documentAdapter) {
+            if (activity.isFinishing()) {
+                // The activity is already dead hence the onActivityDestroyed callback won't be
+                // triggered. Hence it is not save to print in this situation.
+                throw new IllegalStateException("Cannot start printing for finishing activity");
+            }
+
             mActivity = activity;
             mDocumentAdapter = documentAdapter;
             mHandler = new MyHandler(mActivity.getMainLooper());
@@ -1031,7 +1294,10 @@ public final class PrintManager {
         }
     }
 
-    private static final class PrintJobStateChangeListenerWrapper extends
+    /**
+     * @hide
+     */
+    public static final class PrintJobStateChangeListenerWrapper extends
             IPrintJobStateChangeListener.Stub {
         private final WeakReference<PrintJobStateChangeListener> mWeakListener;
         private final WeakReference<Handler> mWeakHandler;
@@ -1060,6 +1326,71 @@ public final class PrintManager {
         }
 
         public PrintJobStateChangeListener getListener() {
+            return mWeakListener.get();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static final class PrintServicesChangeListenerWrapper extends
+            IPrintServicesChangeListener.Stub {
+        private final WeakReference<PrintServicesChangeListener> mWeakListener;
+        private final WeakReference<Handler> mWeakHandler;
+
+        public PrintServicesChangeListenerWrapper(PrintServicesChangeListener listener,
+                Handler handler) {
+            mWeakListener = new WeakReference<>(listener);
+            mWeakHandler = new WeakReference<>(handler);
+        }
+
+        @Override
+        public void onPrintServicesChanged() {
+            Handler handler = mWeakHandler.get();
+            PrintServicesChangeListener listener = mWeakListener.get();
+            if (handler != null && listener != null) {
+                handler.obtainMessage(MSG_NOTIFY_PRINT_SERVICES_CHANGED, this).sendToTarget();
+            }
+        }
+
+        public void destroy() {
+            mWeakListener.clear();
+        }
+
+        public PrintServicesChangeListener getListener() {
+            return mWeakListener.get();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static final class PrintServiceRecommendationsChangeListenerWrapper extends
+            IRecommendationsChangeListener.Stub {
+        private final WeakReference<PrintServiceRecommendationsChangeListener> mWeakListener;
+        private final WeakReference<Handler> mWeakHandler;
+
+        public PrintServiceRecommendationsChangeListenerWrapper(
+                PrintServiceRecommendationsChangeListener listener, Handler handler) {
+            mWeakListener = new WeakReference<>(listener);
+            mWeakHandler = new WeakReference<>(handler);
+        }
+
+        @Override
+        public void onRecommendationsChanged() {
+            Handler handler = mWeakHandler.get();
+            PrintServiceRecommendationsChangeListener listener = mWeakListener.get();
+            if (handler != null && listener != null) {
+                handler.obtainMessage(MSG_NOTIFY_PRINT_SERVICE_RECOMMENDATIONS_CHANGED,
+                        this).sendToTarget();
+            }
+        }
+
+        public void destroy() {
+            mWeakListener.clear();
+        }
+
+        public PrintServiceRecommendationsChangeListener getListener() {
             return mWeakListener.get();
         }
     }

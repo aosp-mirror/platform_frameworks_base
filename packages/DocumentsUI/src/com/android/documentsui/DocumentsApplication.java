@@ -63,11 +63,13 @@ public class DocumentsApplication extends Application {
 
     @Override
     public void onCreate() {
+        super.onCreate();
+
         final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final int memoryClassBytes = am.getMemoryClass() * 1024 * 1024;
 
         mRoots = new RootsCache(this);
-        mRoots.updateAsync();
+        mRoots.updateAsync(false);
 
         mThumbnails = new ThumbnailCache(memoryClassBytes / 4);
 
@@ -103,7 +105,7 @@ public class DocumentsApplication extends Application {
                 final String packageName = data.getSchemeSpecificPart();
                 mRoots.updatePackageAsync(packageName);
             } else {
-                mRoots.updateAsync();
+                mRoots.updateAsync(true);
             }
         }
     };

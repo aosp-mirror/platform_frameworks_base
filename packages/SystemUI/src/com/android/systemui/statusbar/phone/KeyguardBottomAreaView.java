@@ -45,8 +45,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -55,6 +53,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.CommandQueue;
@@ -111,7 +110,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private AccessibilityController mAccessibilityController;
     private PhoneStatusBar mPhoneStatusBar;
 
-    private final Interpolator mLinearOutSlowInInterpolator;
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
@@ -146,8 +144,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -234,6 +230,24 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
+
+        ViewGroup.LayoutParams lp = mCameraImageView.getLayoutParams();
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
+        mCameraImageView.setLayoutParams(lp);
+        mCameraImageView.setImageDrawable(mContext.getDrawable(R.drawable.ic_camera_alt_24dp));
+
+        lp = mLockIcon.getLayoutParams();
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
+        mLockIcon.setLayoutParams(lp);
+        mLockIcon.update(true /* force */);
+
+        lp = mLeftAffordanceView.getLayoutParams();
+        lp.width = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_width);
+        lp.height = getResources().getDimensionPixelSize(R.dimen.keyguard_affordance_height);
+        mLeftAffordanceView.setLayoutParams(lp);
+        updateLeftAffordanceIcon();
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -494,7 +508,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             AsyncTask.execute(runnable);
         } else {
             mPhoneStatusBar.executeRunnableDismissingKeyguard(runnable, null /* cancelAction */,
-                    false /* dismissShade */, false /* afterKeyguardGone */);
+                    false /* dismissShade */, false /* afterKeyguardGone */, true /* deferred */);
         }
     }
 
@@ -600,7 +614,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText.setAlpha(0f);
         mIndicationText.animate()
                 .alpha(1f)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
@@ -610,7 +624,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         element.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setStartDelay(delay)
                 .setDuration(DOZE_ANIMATION_ELEMENT_DURATION);
     }

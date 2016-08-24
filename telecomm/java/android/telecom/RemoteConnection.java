@@ -90,6 +90,18 @@ public final class RemoteConnection {
                 int connectionCapabilities) {}
 
         /**
+         * Indicates that the call properties of this {@code RemoteConnection} have changed.
+         * See {@link #getConnectionProperties()}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param connectionProperties The new properties of the {@code RemoteConnection}.
+         * @hide
+         */
+        public void onConnectionPropertiesChanged(
+                RemoteConnection connection,
+                int connectionProperties) {}
+
+        /**
          * Invoked when the post-dial sequence in the outgoing {@code Connection} has reached a
          * pause character. This causes the post-dial signals to stop pending user confirmation. An
          * implementation should present this choice to the user and invoke
@@ -209,6 +221,18 @@ public final class RemoteConnection {
          * @param extras The extras containing other information associated with the connection.
          */
         public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
+
+        /**
+         * Handles a connection event propagated to this {@link RemoteConnection}.
+         * <p>
+         * Connection events originate from {@link Connection#sendConnectionEvent(String, Bundle)}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param event The connection event.
+         * @param extras Extras associated with the event.
+         * @hide
+         */
+        public void onConnectionEvent(RemoteConnection connection, String event, Bundle extras) {}
     }
 
     /**
@@ -577,6 +601,7 @@ public final class RemoteConnection {
     private boolean mRingbackRequested;
     private boolean mConnected;
     private int mConnectionCapabilities;
+    private int mConnectionProperties;
     private int mVideoState;
     private VideoProvider mVideoProvider;
     private boolean mIsVoipAudioMode;
@@ -613,6 +638,7 @@ public final class RemoteConnection {
         mDisconnectCause = connection.getDisconnectCause();
         mRingbackRequested = connection.isRingbackRequested();
         mConnectionCapabilities = connection.getConnectionCapabilities();
+        mConnectionProperties = connection.getConnectionProperties();
         mVideoState = connection.getVideoState();
         mVideoProvider = new RemoteConnection.VideoProvider(connection.getVideoProvider());
         mIsVoipAudioMode = connection.getIsVoipAudioMode();
@@ -705,6 +731,17 @@ public final class RemoteConnection {
      */
     public int getConnectionCapabilities() {
         return mConnectionCapabilities;
+    }
+
+    /**
+     * Obtains the properties of this {@code RemoteConnection}.
+     *
+     * @return A bitmask of the properties of the {@code RemoteConnection}, as defined in the
+     *         {@code PROPERTY_*} constants in class {@link Connection}.
+     * @hide
+     */
+    public int getConnectionProperties() {
+        return mConnectionProperties;
     }
 
     /**
@@ -953,6 +990,21 @@ public final class RemoteConnection {
     }
 
     /**
+     * Instructs this {@link RemoteConnection} to pull itself to the local device.
+     * <p>
+     * See {@link Call#pullExternalCall()} for more information.
+     * @hide
+     */
+    public void pullExternalCall() {
+        try {
+            if (mConnected) {
+                mConnectionService.pullExternalCall(mConnectionId);
+            }
+        } catch (RemoteException ignored) {
+        }
+    }
+
+    /**
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
@@ -1081,6 +1133,23 @@ public final class RemoteConnection {
                 @Override
                 public void run() {
                     callback.onConnectionCapabilitiesChanged(connection, connectionCapabilities);
+                }
+            });
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void setConnectionProperties(final int connectionProperties) {
+        mConnectionProperties = connectionProperties;
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionPropertiesChanged(connection, connectionProperties);
                 }
             });
         }
@@ -1277,15 +1346,49 @@ public final class RemoteConnection {
     }
 
     /** @hide */
-    void setExtras(final Bundle extras) {
-        mExtras = extras;
+    void putExtras(final Bundle extras) {
+        if (mExtras == null) {
+            mExtras = new Bundle();
+        }
+        mExtras.putAll(extras);
+
+        notifyExtrasChanged();
+    }
+
+    /** @hide */
+    void removeExtras(List<String> keys) {
+        if (mExtras == null || keys == null || keys.isEmpty()) {
+            return;
+        }
+        for (String key : keys) {
+            mExtras.remove(key);
+        }
+
+        notifyExtrasChanged();
+    }
+
+    private void notifyExtrasChanged() {
         for (CallbackRecord record : mCallbackRecords) {
             final RemoteConnection connection = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onExtrasChanged(connection, extras);
+                    callback.onExtrasChanged(connection, mExtras);
+                }
+            });
+        }
+    }
+
+    /** @hide */
+    void onConnectionEvent(final String event, final Bundle extras) {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionEvent(connection, event, extras);
                 }
             });
         }

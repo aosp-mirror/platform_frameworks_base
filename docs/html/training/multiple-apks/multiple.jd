@@ -169,7 +169,7 @@ boot, you also have swanky codenames for each one, since "Have we tested red on 
 easier to ask your cubie than "Have we tested  the 3-to-10 xlarge APK against the Xoom?"  Print this
 chart out and hand it to every person working on your codebase.  Life just got a lot easier.</p>
 
-<h2 id="CreateLibrary">Put All Common Code and Resources in a Library Project.</h2>
+<h2 id="CreateLibrary">Put All Common Code and Resources in a Library Project</h2>
 
 <p>Whether you’re modifying an existing Android application or starting one from scratch, this is
 the first thing that you should do to the codebase, and by the far the most important.  Everything
@@ -178,16 +178,9 @@ color themes, bugs fixed in shared code), which improves your development time a
 likelihood of mistakes that could have been easily avoided.</p>
 
 <p class="note"><strong>Note:</strong>  While the implementation details of how to create and
-include library projects are beyond the scope of this lesson, you can get up to speed quickly on
-their creation at the following links:</p>
-<ul>
-<li><a
-href="{@docRoot}tools/projects/projects-eclipse.html#SettingUpLibraryProject">Setting up
-a library project (Eclipse)</a></li>
-<li><a
-href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Setting up
-a library project (Command line)</a></li>
-</ul>
+include library projects are beyond the scope of this lesson, you can get up to speed
+by reading <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 <p>If you’re converting an existing application to use multiple APK support,
 scour your codebase for every localized string file, list of values, theme
@@ -204,7 +197,7 @@ to the library section without screwing anything up.</p>
 
 <h2 id="CreateAPKs">Create New APK Projects</h2>
 <p>There should be a separate Android project for each APK you’re going to release.  For easy
-organization, place the library project and all related APK projects under the same parent folder. 
+organization, place the library project and all related APK projects under the same parent folder.
 Also remember that each APK needs to have the same package name, although they don’t necessarily
 need to share the package name with the library.  If you were to have 3 APKs following the scheme
 described earlier, your root directory might look like this:</p>

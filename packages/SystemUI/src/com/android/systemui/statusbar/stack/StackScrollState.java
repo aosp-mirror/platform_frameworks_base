@@ -25,11 +25,9 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.SpeedBumpView;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A state of a {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout} which
@@ -40,12 +38,12 @@ public class StackScrollState {
     private static final String CHILD_NOT_FOUND_TAG = "StackScrollStateNoSuchChild";
 
     private final ViewGroup mHostView;
-    private Map<ExpandableView, StackViewState> mStateMap;
+    private WeakHashMap<ExpandableView, StackViewState> mStateMap;
     private final int mClearAllTopPadding;
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
-        mStateMap = new HashMap<ExpandableView, StackViewState>();
+        mStateMap = new WeakHashMap<>();
         mClearAllTopPadding = hostView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.clear_all_padding_top);
     }
@@ -65,7 +63,7 @@ public class StackScrollState {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 List<ExpandableNotificationRow> children =
                         row.getNotificationChildren();
-                if (row.areChildrenExpanded() && children != null) {
+                if (row.isSummaryWithChildren() && children != null) {
                     for (ExpandableNotificationRow childRow : children) {
                         resetViewState(childRow);
                     }
@@ -83,8 +81,10 @@ public class StackScrollState {
         // initialize with the default values of the view
         viewState.height = view.getIntrinsicHeight();
         viewState.gone = view.getVisibility() == View.GONE;
-        viewState.alpha = 1;
+        viewState.alpha = 1f;
+        viewState.shadowAlpha = 1f;
         viewState.notGoneIndex = -1;
+        viewState.hidden = false;
     }
 
     public StackViewState getViewStateForView(View requestedView) {
@@ -107,15 +107,13 @@ public class StackScrollState {
             if (!applyState(child, state)) {
                 continue;
             }
-            if(child instanceof SpeedBumpView) {
-                performSpeedBumpAnimation(i, (SpeedBumpView) child, state, 0);
-            } else if (child instanceof DismissView) {
+            if (child instanceof DismissView) {
                 DismissView dismissView = (DismissView) child;
-                boolean visible = state.topOverLap < mClearAllTopPadding;
+                boolean visible = state.clipTopAmount < mClearAllTopPadding;
                 dismissView.performVisibilityAnimation(visible && !dismissView.willBeGone());
             } else if (child instanceof EmptyShadeView) {
                 EmptyShadeView emptyShadeView = (EmptyShadeView) child;
-                boolean visible = state.topOverLap <= 0;
+                boolean visible = state.clipTopAmount <= 0;
                 emptyShadeView.performVisibilityAnimation(
                         visible && !emptyShadeView.willBeGone());
             }
@@ -146,6 +144,14 @@ public class StackScrollState {
             view.setActualHeight(newHeight, false /* notifyListeners */);
         }
 
+        float shadowAlpha = view.getShadowAlpha();
+        float newShadowAlpha = state.shadowAlpha;
+
+        // apply shadowAlpha
+        if (shadowAlpha != newShadowAlpha) {
+            view.setShadowAlpha(newShadowAlpha);
+        }
+
         // apply dimming
         view.setDimmed(state.dimmed, false /* animate */);
 
@@ -164,12 +170,11 @@ public class StackScrollState {
         if (oldClipTopAmount != state.clipTopAmount) {
             view.setClipTopAmount(state.clipTopAmount);
         }
-        float oldClipTopOptimization = view.getClipTopOptimization();
-        if (oldClipTopOptimization != state.topOverLap) {
-            view.setClipTopOptimization(state.topOverLap);
-        }
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (state.isBottomClipped) {
+                row.setClipToActualHeight(true);
+            }
             row.applyChildrenState(this);
         }
         return true;
@@ -183,12 +188,10 @@ public class StackScrollState {
         float yTranslation = view.getTranslationY();
         float xTranslation = view.getTranslationX();
         float zTranslation = view.getTranslationZ();
-        float scale = view.getScaleX();
         float newAlpha = state.alpha;
         float newYTranslation = state.yTranslation;
         float newZTranslation = state.zTranslation;
-        float newScale = state.scale;
-        boolean becomesInvisible = newAlpha == 0.0f;
+        boolean becomesInvisible = newAlpha == 0.0f || state.hidden;
         if (alpha != newAlpha && xTranslation == 0) {
             // apply layer type
             boolean becomesFullyVisible = newAlpha == 1.0f;
@@ -225,34 +228,5 @@ public class StackScrollState {
         if (zTranslation != newZTranslation) {
             view.setTranslationZ(newZTranslation);
         }
-
-        // apply scale
-        if (scale != newScale) {
-            view.setScaleX(newScale);
-            view.setScaleY(newScale);
-        }
     }
-
-    public void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, StackViewState state,
-            long delay) {
-        View nextChild = getNextChildNotGone(i);
-        if (nextChild != null) {
-            float lineEnd = state.yTranslation + state.height / 2;
-            StackViewState nextState = getViewStateForView(nextChild);
-            boolean startIsAboveNext = nextState.yTranslation > lineEnd;
-            speedBump.animateDivider(startIsAboveNext, delay, null /* onFinishedRunnable */);
-        }
-    }
-
-    private View getNextChildNotGone(int childIndex) {
-        int childCount = mHostView.getChildCount();
-        for (int i = childIndex + 1; i < childCount; i++) {
-            View child = mHostView.getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
-                return child;
-            }
-        }
-        return null;
-    }
-
 }

@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -44,6 +45,8 @@ import android.os.UserManager;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.util.SparseArray;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.text.Collator;
@@ -88,7 +91,7 @@ public class ApplicationsState {
     final PackageManager mPm;
     final IPackageManager mIpm;
     final UserManager mUm;
-    final int mOwnerRetrieveFlags;
+    final int mAdminRetrieveFlags;
     final int mRetrieveFlags;
     PackageIntentReceiver mPackageIntentReceiver;
 
@@ -115,15 +118,15 @@ public class ApplicationsState {
 
     final HandlerThread mThread;
     final BackgroundHandler mBackgroundHandler;
-    final MainHandler mMainHandler = new MainHandler();
+    final MainHandler mMainHandler = new MainHandler(Looper.getMainLooper());
 
     private ApplicationsState(Application app) {
         mContext = app;
         mPm = mContext.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mUm = (UserManager) app.getSystemService(Context.USER_SERVICE);
-        for (UserHandle user : mUm.getUserProfiles()) {
-            mEntriesMap.put(user.getIdentifier(), new HashMap<String, AppEntry>());
+        for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
+            mEntriesMap.put(userId, new HashMap<String, AppEntry>());
         }
         mThread = new HandlerThread("ApplicationsState.Loader",
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -131,7 +134,7 @@ public class ApplicationsState {
         mBackgroundHandler = new BackgroundHandler(mThread.getLooper());
 
         // Only the owner can see all apps.
-        mOwnerRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
+        mAdminRetrieveFlags = PackageManager.GET_UNINSTALLED_PACKAGES |
                 PackageManager.GET_DISABLED_COMPONENTS |
                 PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS;
         mRetrieveFlags = PackageManager.GET_DISABLED_COMPONENTS |
@@ -181,17 +184,17 @@ public class ApplicationsState {
             mPackageIntentReceiver.registerReceiver();
         }
         mApplications = new ArrayList<ApplicationInfo>();
-        for (UserHandle user : mUm.getUserProfiles()) {
+        for (UserInfo user : mUm.getProfiles(UserHandle.myUserId())) {
             try {
                 // If this user is new, it needs a map created.
-                if (mEntriesMap.indexOfKey(user.getIdentifier()) < 0) {
-                    mEntriesMap.put(user.getIdentifier(), new HashMap<String, AppEntry>());
+                if (mEntriesMap.indexOfKey(user.id) < 0) {
+                    mEntriesMap.put(user.id, new HashMap<String, AppEntry>());
                 }
                 @SuppressWarnings("unchecked")
                 ParceledListSlice<ApplicationInfo> list =
                         mIpm.getInstalledApplications(
-                                user.isOwner() ? mOwnerRetrieveFlags : mRetrieveFlags,
-                                user.getIdentifier());
+                                user.isAdmin() ? mAdminRetrieveFlags : mRetrieveFlags,
+                                user.id);
                 mApplications.addAll(list.getList());
             } catch (RemoteException e) {
             }
@@ -315,7 +318,7 @@ public class ApplicationsState {
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
             if (entry != null) {
-                mPm.getPackageSizeInfo(packageName, userId, mBackgroundHandler.mStatsObserver);
+                mPm.getPackageSizeInfoAsUser(packageName, userId, mBackgroundHandler.mStatsObserver);
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...requestSize releasing lock");
         }
@@ -363,7 +366,7 @@ public class ApplicationsState {
                     return;
                 }
                 ApplicationInfo info = mIpm.getApplicationInfo(pkgName,
-                        userId == UserHandle.USER_OWNER ? mOwnerRetrieveFlags : mRetrieveFlags,
+                        mUm.isUserAdmin(userId) ? mAdminRetrieveFlags : mRetrieveFlags,
                         userId);
                 if (info == null) {
                     return;
@@ -425,7 +428,8 @@ public class ApplicationsState {
     }
 
     private void addUser(int userId) {
-        if (mUm.getUserProfiles().contains(new UserHandle(userId))) {
+        final int profileIds[] = mUm.getProfileIdsWithDisabled(UserHandle.myUserId());
+        if (ArrayUtils.contains(profileIds, userId)) {
             synchronized (mEntriesMap) {
                 mEntriesMap.put(userId, new HashMap<String, AppEntry>());
                 if (mResumed) {
@@ -533,6 +537,7 @@ public class ApplicationsState {
         Comparator<AppEntry> mRebuildComparator;
         ArrayList<AppEntry> mRebuildResult;
         ArrayList<AppEntry> mLastAppList;
+        boolean mRebuildForeground;
 
         Session(Callbacks callbacks) {
             mCallbacks = callbacks;
@@ -571,6 +576,11 @@ public class ApplicationsState {
 
         // Creates a new list of app entries with the given filter and comparator.
         public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator) {
+            return rebuild(filter, comparator, true);
+        }
+
+        public ArrayList<AppEntry> rebuild(AppFilter filter, Comparator<AppEntry> comparator,
+                boolean foreground) {
             synchronized (mRebuildSync) {
                 synchronized (mEntriesMap) {
                     mRebuildingSessions.add(this);
@@ -578,6 +588,7 @@ public class ApplicationsState {
                     mRebuildAsync = false;
                     mRebuildFilter = filter;
                     mRebuildComparator = comparator;
+                    mRebuildForeground = foreground;
                     mRebuildResult = null;
                     if (!mBackgroundHandler.hasMessages(BackgroundHandler.MSG_REBUILD_LIST)) {
                         Message msg = mBackgroundHandler.obtainMessage(
@@ -619,9 +630,11 @@ public class ApplicationsState {
                 mRebuildRequested = false;
                 mRebuildFilter = null;
                 mRebuildComparator = null;
+                if (mRebuildForeground) {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+                    mRebuildForeground = false;
+                }
             }
-
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
             if (filter != null) {
                 filter.init();
@@ -636,10 +649,13 @@ public class ApplicationsState {
             if (DEBUG) Log.i(TAG, "Rebuilding...");
             for (int i=0; i<apps.size(); i++) {
                 AppEntry entry = apps.get(i);
-                if (filter == null || filter.filterApp(entry)) {
+                if (entry != null && (filter == null || filter.filterApp(entry))) {
                     synchronized (mEntriesMap) {
                         if (DEBUG_LOCKING) Log.v(TAG, "rebuild acquired lock");
-                        entry.ensureLabel(mContext);
+                        if (comparator != null) {
+                            // Only need the label if we are going to be sorting.
+                            entry.ensureLabel(mContext);
+                        }
                         if (DEBUG) Log.i(TAG, "Using " + entry.info.packageName + ": " + entry);
                         filteredApps.add(entry);
                         if (DEBUG_LOCKING) Log.v(TAG, "rebuild releasing lock");
@@ -647,7 +663,9 @@ public class ApplicationsState {
                 }
             }
 
-            Collections.sort(filteredApps, comparator);
+            if (comparator != null) {
+                Collections.sort(filteredApps, comparator);
+            }
 
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
@@ -685,6 +703,10 @@ public class ApplicationsState {
         static final int MSG_RUNNING_STATE_CHANGED = 6;
         static final int MSG_LAUNCHER_INFO_CHANGED = 7;
         static final int MSG_LOAD_ENTRIES_COMPLETE = 8;
+
+        public MainHandler(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -820,8 +842,18 @@ public class ApplicationsState {
 
                     for (int i = 0; i < mEntriesMap.size(); i++) {
                         int userId = mEntriesMap.keyAt(i);
-                        List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(launchIntent,
-                                PackageManager.GET_DISABLED_COMPONENTS, userId);
+                        // If we do not specify MATCH_DIRECT_BOOT_AWARE or
+                        // MATCH_DIRECT_BOOT_UNAWARE, system will derive and update the flags
+                        // according to the user's lock state. When the user is locked, components
+                        // with ComponentInfo#directBootAware == false will be filtered. We should
+                        // explicitly include both direct boot aware and unaware components here.
+                        List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
+                                launchIntent,
+                                PackageManager.GET_DISABLED_COMPONENTS
+                                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                userId
+                        );
                         synchronized (mEntriesMap) {
                             if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER acquired lock");
                             HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
@@ -901,7 +933,7 @@ public class ApplicationsState {
                                     entry.sizeLoadStart = now;
                                     mCurComputingSizePkg = entry.info.packageName;
                                     mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
-                                    mPm.getPackageSizeInfo(mCurComputingSizePkg,
+                                    mPm.getPackageSizeInfoAsUser(mCurComputingSizePkg,
                                             mCurComputingSizeUserId, mStatsObserver);
                                 }
                                 if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
@@ -1097,6 +1129,10 @@ public class ApplicationsState {
 
         public boolean mounted;
 
+        /**
+         * Setting this to {@code true} prevents the entry to be filtered by
+         * {@link #FILTER_DOWNLOADED_AND_LAUNCHER}.
+         */
         public boolean hasLauncherEntry;
 
         public String getNormalizedLabel() {
@@ -1180,44 +1216,55 @@ public class ApplicationsState {
         }
     }
 
+    /**
+     * Compare by label, then package name, then uid.
+     */
     public static final Comparator<AppEntry> ALPHA_COMPARATOR = new Comparator<AppEntry>() {
         private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
-            return sCollator.compare(object1.label, object2.label);
+            int compareResult = sCollator.compare(object1.label, object2.label);
+            if (compareResult != 0) {
+                return compareResult;
+            }
+            if (object1.info != null && object2.info != null) {
+                compareResult =
+                    sCollator.compare(object1.info.packageName, object2.info.packageName);
+                if (compareResult != 0) {
+                    return compareResult;
+                }
+            }
+            return object1.info.uid - object2.info.uid;
         }
     };
 
     public static final Comparator<AppEntry> SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.size < object2.size) return 1;
             if (object1.size > object2.size) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
     public static final Comparator<AppEntry> INTERNAL_SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.internalSize < object2.internalSize) return 1;
             if (object1.internalSize > object2.internalSize) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
     public static final Comparator<AppEntry> EXTERNAL_SIZE_COMPARATOR
             = new Comparator<AppEntry>() {
-        private final Collator sCollator = Collator.getInstance();
         @Override
         public int compare(AppEntry object1, AppEntry object2) {
             if (object1.externalSize < object2.externalSize) return 1;
             if (object1.externalSize > object2.externalSize) return -1;
-            return sCollator.compare(object1.label, object2.label);
+            return ALPHA_COMPARATOR.compare(object1, object2);
         }
     };
 
@@ -1239,20 +1286,17 @@ public class ApplicationsState {
         }
     };
 
-    public static final AppFilter FILTER_PERSONAL_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
-        private int mCurrentUser;
-
+    public static final AppFilter FILTER_WITHOUT_DISABLED_UNTIL_USED = new AppFilter() {
         public void init() {
-            mCurrentUser = ActivityManager.getCurrentUser();
+            // do nothings
         }
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            return UserHandle.getUserId(entry.info.uid) == mCurrentUser &&
-                    entry.info.enabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
+            return entry.info.enabledSetting
+                    != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
         }
     };
-
 
     public static final AppFilter FILTER_WORK = new AppFilter() {
         private int mCurrentUser;
@@ -1267,6 +1311,9 @@ public class ApplicationsState {
         }
     };
 
+    /**
+     * Displays a combined list with "downloaded" and "visible in launcher" apps only.
+     */
     public static final AppFilter FILTER_DOWNLOADED_AND_LAUNCHER = new AppFilter() {
         public void init() {
         }

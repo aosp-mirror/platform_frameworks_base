@@ -7,7 +7,9 @@
 
     <application
         android:label="@string/app_label"
-        android:process="com.android.proxyhandler">
+        android:process="com.android.proxyhandler"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
 
         <service android:name=".ProxyService"
             android:exported="true">

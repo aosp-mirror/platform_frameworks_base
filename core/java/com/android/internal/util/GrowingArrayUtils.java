@@ -97,6 +97,21 @@ public final class GrowingArrayUtils {
     }
 
     /**
+     * Primitive float version of {@link #append(Object[], int, Object)}.
+     */
+    public static float[] append(float[] array, int currentSize, float element) {
+        assert currentSize <= array.length;
+
+        if (currentSize + 1 > array.length) {
+            float[] newArray = ArrayUtils.newUnpaddedFloatArray(growSize(currentSize));
+            System.arraycopy(array, 0, newArray, 0, currentSize);
+            array = newArray;
+        }
+        array[currentSize] = element;
+        return array;
+    }
+
+    /**
      * Inserts an element into the array at the specified index, growing the array if there is no
      * more room.
      *

@@ -1,0 +1,395 @@
+page.title=Background Optimizations
+page.metaDescription=New restrictions to implicit broadcasts.
+page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>
+      In this document
+    </h2>
+
+    <ol>
+      <li>
+        <a href="#connectivity-action">Restrictions on CONNECTIVITY_ACTION</a>
+      </li>
+
+      <li>
+        <a href="#sched-jobs">Scheduling Network Jobs on Unmetered
+        Connections</a>
+      </li>
+
+      <li>
+        <a href="#monitor-conn">Monitoring Network Connectivity While the App
+        is Running</a>
+      </li>
+
+      <li>
+        <a href="#media-broadcasts">Restrictions on NEW_PICTURE and
+        NEW_VIDEO</a>
+      </li>
+
+      <li>
+        <a href="#new-jobinfo">New JobInfo methods</a>
+      </li>
+
+      <li>
+        <a href="#new-jobparam">New JobParameter Methods</a>
+      </li>
+
+      <li>
+        <a href="#further-optimization">Further Optimizing Your App</a>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<p>
+  Background processes can be memory- and battery-intensive. For example, an
+  implicit broadcast may start many background processes that have registered
+  to listen for it, even if those processes may not do much work. This can have
+  a substantial impact on both device performance and user experience.
+</p>
+
+<p>
+  To alleviate this issue, Android N applies the following
+  restrictions:
+</p>
+
+<ul>
+  <li>Apps targeting the Preview do not receive {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
+  register to receive them in their manifest. Apps that are running can still
+  listen for {@code CONNECTIVITY_CHANGE} on their main thread by registering a
+  {@link android.content.BroadcastReceiver} with {@link
+  android.content.Context#registerReceiver Context.registerReceiver()}.
+  </li>
+
+  <li>Apps cannot send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
+  affects all apps, not only those targeting the Preview.
+  </li>
+</ul>
+
+<p>
+  If your app uses any of these intents, you should remove dependencies on
+  them as soon as possible so that you can target Android N devices properly.
+  The Android framework provides several solutions to mitigate the need for
+  these implicit broadcasts. For example, {@link android.app.job.JobScheduler}
+  and <a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> provide robust mechanisms to schedule network
+  operations when specified conditions, such as a connection to an unmetered
+  network, are met. You can now also use {@link android.app.job.JobScheduler}
+  to react to changes to content providers. {@link android.app.job.JobInfo}
+  objects encapsulate the parameters that {@link android.app.job.JobScheduler}
+  uses to schedule your job. When the conditions of the job are met, the system
+  executes this job on your app's {@link android.app.job.JobService}.
+</p>
+
+<p>
+  In this document, we will learn how to use alternative methods, such as
+  {@link android.app.job.JobScheduler}, to adapt your app to these new
+  restrictions.
+</p>
+
+<h2 id="connectivity-action">
+  Restrictions on CONNECTIVITY_ACTION
+</h2>
+
+<p>
+  Apps targeting the Android N do not receive {@link
+  android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
+  register to receive them in their manifest, and processes that depend on this
+  broadcast will not start. This could pose a problem for apps that want
+  to listen for network changes or perform bulk network activities when the
+  device connects to an unmetered network. Several solutions to get around this
+  restriction already exist in the Android framework, but choosing the right
+  one depends on what you want your app to accomplish.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> A {@link android.content.BroadcastReceiver} registered with
+  {@link android.content.Context#registerReceiver Context.registerReceiver()}
+  continues to receive these broadcasts while the app is running.
+</p>
+
+<h3 id="sched-jobs">
+  Scheduling Network Jobs on Unmetered Connections
+</h3>
+
+<p>
+  When using the {@link android.app.job.JobInfo.Builder JobInfo.Builder} class
+  to build your {@link android.app.job.JobInfo} object, apply the {@link
+  android.app.job.JobInfo.Builder#setRequiredNetworkType
+  setRequiredNetworkType()} method and pass {@link android.app.job.JobInfo
+  JobInfo.NETWORK_TYPE_UNMETERED} as a job parameter. The following code sample
+  schedules a service to run when the device connects to an unmetered
+  network and is charging:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+      (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo job = new JobInfo.Builder(
+    MY_BACKGROUND_JOB,
+    new ComponentName(context, MyJobService.class))
+      .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+      .setRequiresCharging(true)
+      .build();
+  js.schedule(job);
+}
+</pre>
+
+<p>
+  When the conditions for your job are met, your app receives a callback to run
+  the {@link android.app.job.JobService#onStartJob onStartJob()} method in the
+  specified {@code JobService.class}. To see more examples of {@link
+  android.app.job.JobScheduler} implementation, see the <a href=
+  "{@docRoot}samples/JobScheduler/index.html">JobScheduler sample app</a>.
+</p>
+
+<p>
+  Applications that use GMSCore services, and target Android 5.0 (API level 21)
+  or lower, can use <a href=
+  "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
+  {@code GcmNetworkManager}</a> and specify {@code Task.NETWORK_STATE_UNMETERED}.
+</p>
+
+<h3 id="monitor-conn">
+  Monitoring Network Connectivity While the App is Running
+</h3>
+
+<p>
+  Apps that are running can still listen for {@code CONNECTIVITY_CHANGE} with a
+  registered {@link android.content.BroadcastReceiver}. However, the {@link
+  android.net.ConnectivityManager} API provides a more robust method to request
+  a callback only when specified network conditions are met.
+</p>
+
+<p>
+  {@link android.net.NetworkRequest} objects define the parameters of the
+  network callback in terms of {@link android.net.NetworkCapabilities}. You
+  create {@link android.net.NetworkRequest} objects with the {@link
+  android.net.NetworkRequest.Builder NetworkRequest.Builder} class. {@link
+  android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest,
+  android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}
+  then passes the {@link android.net.NetworkRequest} object to the system. When
+  the network conditions are met, the app receives a callback to execute the
+  {@link android.net.ConnectivityManager.NetworkCallback#onAvailable
+  onAvailable()} method defined in its {@link
+  android.net.ConnectivityManager.NetworkCallback} class.
+</p>
+
+<p>
+  The app continues to receive callbacks until either the app exits or it calls
+  {@link android.net.ConnectivityManager#unregisterNetworkCallback
+  unregisterNetworkCallback()}.
+</p>
+
+<h2 id="media-broadcasts">
+  Restrictions on NEW_PICTURE and NEW_VIDEO
+</h2>
+
+<p>
+  In the Android N, apps are not able to send or receive {@link
+  android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
+  android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This restriction helps
+  alleviate the performance and user experience impacts when several apps must
+  wake up in order to process a new image or video. Android N
+  extends {@link android.app.job.JobInfo} and {@link
+  android.app.job.JobParameters} to provide an alternative solution.
+</p>
+
+<h3 id="new-jobinfo">
+  New JobInfo methods
+</h3>
+
+<p>
+  To trigger jobs on content URI changes, Android N extends
+  the {@link android.app.job.JobInfo} API with the following methods:
+</p>
+
+<dl>
+  <dt>
+    {@code JobInfo.TriggerContentUri()}
+  </dt>
+
+  <dd>
+    Encapsulates parameters required to trigger a job on content URI changes.
+  </dd>
+
+  <dt>
+    {@code JobInfo.Builder.addTriggerContentUri()}
+  </dt>
+
+  <dd>
+    Passes a {@code TriggerContentUri} object to {@link
+    android.app.job.JobInfo}. A {@link android.database.ContentObserver}
+    monitors the encapsulated content URI. If there are multiple {@code
+    TriggerContentUri} objects associated with a job, the system provides a
+    callback even if it reports a change in only one of the content URIs.
+  </dd>
+
+  <dd>
+    Add the {@code TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS} flag to
+    trigger the job if any descendants of the given URI change. This flag
+    corresponds to the {@code notifyForDescendants} parameter passed to {@link
+    android.content.ContentResolver#registerContentObserver
+    registerContentObserver()}.
+  </dd>
+</dl>
+
+<p class="note">
+  <strong>Note:</strong> {@code TriggerContentUri()} cannot be used in
+  combination with {@link android.app.job.JobInfo.Builder#setPeriodic
+  setPeriodic()} or {@link android.app.job.JobInfo.Builder#setPersisted
+  setPersisted()}. To continually monitor for content changes, schedule a new
+  {@link android.app.job.JobInfo} before the app’s {@link
+  android.app.job.JobService} finishes handling the most recent callback.
+</p>
+
+<p>
+  The following sample code schedules a job to trigger when the system reports
+  a change to the content URI, {@code MEDIA_URI}:
+</p>
+
+<pre>
+public static final int MY_BACKGROUND_JOB = 0;
+...
+public static void scheduleJob(Context context) {
+  JobScheduler js =
+          (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+  JobInfo.Builder builder = new JobInfo.Builder(
+          MY_BACKGROUND_JOB,
+          new ComponentName(context, MediaContentJob.class));
+  builder.addTriggerContentUri(
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+          JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
+  js.schedule(builder.build());
+}
+</pre>
+<p>
+  When the system reports a change in the specified content URI(s), your app
+  receives a callback and a {@link android.app.job.JobParameters} object is
+  passed to the {@link android.app.job.JobService#onStartJob onStartJob()}
+  method in {@code MediaContentJob.class}.
+</p>
+
+<h3 id="new-jobparam">
+  New JobParameter Methods
+</h3>
+
+<p>
+  Android N also extends {@link android.app.job.JobParameters} to
+  allow your app to receive useful information about what content authorities
+  and URIs triggered the job:
+</p>
+
+<dl>
+  <dt>
+    {@code Uri[] getTriggeredContentUris()}
+  </dt>
+
+  <dd>
+    Returns an array of URIs that have triggered the job. This will be {@code
+    null} if either no URIs have triggered the job (for example, the job was
+    triggered due to a deadline or some other reason), or the number of changed
+    URIs is greater than 50.
+  </dd>
+
+  <dt>
+    {@code String[] getTriggeredContentAuthorities()}
+  </dt>
+
+  <dd>
+    Returns a string array of content authorities that have triggered the job.
+    If the returned array is not {@code null}, use {@code getTriggeredContentUris()}
+    to retrieve the details of which URIs have changed.
+  </dd>
+</dl>
+
+<p>
+  The following sample code overrides the {@link
+  android.app.job.JobService#onStartJob JobService.onStartJob()} method and
+  records the content authorities and URIs that have triggered the job:
+</p>
+
+<pre>
+&#64;Override
+public boolean onStartJob(JobParameters params) {
+  StringBuilder sb = new StringBuilder();
+  sb.append("Media content has changed:\n");
+  if (params.getTriggeredContentAuthorities() != null) {
+      sb.append("Authorities: ");
+      boolean first = true;
+      for (String auth :
+          params.getTriggeredContentAuthorities()) {
+          if (first) {
+              first = false;
+          } else {
+             sb.append(", ");
+          }
+           sb.append(auth);
+      }
+      if (params.getTriggeredContentUris() != null) {
+          for (Uri uri : params.getTriggeredContentUris()) {
+              sb.append("\n");
+              sb.append(uri);
+          }
+      }
+  } else {
+      sb.append("(No content)");
+  }
+  Log.i(TAG, sb.toString());
+  return true;
+}
+</pre>
+
+<h2 id="further-optimization">
+  Further Optimizing Your App
+</h2>
+
+<p>
+  Optimizing your apps to run on low-memory devices, or in low-memory
+  conditions, can improve performance and user experience. Removing
+  dependencies on background services and statically-registered implicit
+  broadcast receivers can help your app run better on such devices. Although
+  Android N takes steps to reduce some of these issues, it is
+  recommended that you optimize your app to run without the use of these
+  background processes entirely.
+</p>
+
+<p>
+  Android N introduces some additional <a href=
+  "{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> commands that
+  you can use to test app behavior with those background processes disabled:
+</p>
+
+<ul>
+  <li>To simulate conditions where implicit broadcasts and background services
+  are unavailable, enter the following command:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package_name&gt; RUN_IN_BACKGROUND ignore}
+</pre>
+  </li>
+
+  <li>To re-enable implicit broadcasts and background services, enter the
+  following command:
+  </li>
+
+  <li style="list-style: none; display: inline">
+<pre class="no-pretty-print">
+{@code $ adb shell cmd appops set &lt;package_name&gt; RUN_IN_BACKGROUND allow}
+</pre>
+  </li>
+</ul>

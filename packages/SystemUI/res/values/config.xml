@@ -20,15 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <bool name="config_recents_interface_for_tablets">false</bool>
-
-    <!-- Whether recents thumbnails should stretch in both x and y to fill their
-     ImageView -->
-    <bool name="config_recents_thumbnail_image_fits_to_xy">false</bool>
-
     <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
     for devices where the java drawing of round rects may be slow -->
     <bool name="config_recents_use_hardware_layers">false</bool>
@@ -45,9 +36,6 @@
     <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
          certain GPU's and thus can be turned off with only minimal visual impact. -->
     <bool name="config_notifications_round_rect_clipping">true</bool>
-
-    <!-- The theme to use for RecentsActivity. -->
-    <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
 
     <!-- Control whether status bar should distinguish HSPA data icon form UMTS
     data icon on devices -->
@@ -92,34 +80,27 @@
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
 
-    <!-- Whether we're using the tablet-optimized recents interface (we use this
-     value at runtime for some things) -->
-    <integer name="status_bar_recents_bg_gradient_degrees">90</integer>
-
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
 
     <bool name="config_dead_zone_flash">false</bool>
 
-    <!-- Min alpha % that recent items will fade to while being dismissed -->
-    <integer name="config_recent_item_min_alpha">3</integer>
+    <!-- Whether QuickSettings is in a phone landscape -->
+    <bool name="quick_settings_wide">false</bool>
 
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
 
-    <!-- The maximum number of rows in the QuickSettings -->
-    <integer name="quick_settings_max_rows">4</integer>
-
-    <!-- The maximum number of rows in the QuickSettings when on the keyguard -->
-    <integer name="quick_settings_max_rows_keyguard">3</integer>
+    <!-- The number of rows in the QuickSettings -->
+    <integer name="quick_settings_num_rows">1</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,bt,inversion,dnd,cell,airplane,rotation,flashlight,location,cast,hotspot
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -131,9 +112,6 @@
     <!-- Timeouts for brightness dialog to disappear -->
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
-
-    <!-- The maximum number of items to be displayed in quick settings -->
-    <integer name="quick_settings_detail_max_item_count">7</integer>
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
@@ -152,66 +130,51 @@
     <integer name="touch_acceptance_delay">700</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
-    <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
-
-    <!-- The min animation duration for animating views that are currently visible. -->
-    <integer name="recents_filter_animate_current_views_duration">250</integer>
-
-    <!-- The min animation duration for animating views that are newly visible. -->
-    <integer name="recents_filter_animate_new_views_duration">250</integer>
-
-    <!-- The duration of the window transition when coming to Recents from an app.
-         In order to defer the in-app animations until after the transition is complete,
-         we also need to use this value as the starting delay when animating the first
-         task decorations in. -->
-    <integer name="recents_enter_from_app_transition_duration">325</integer>
+    <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
 
     <!-- The duration for animating the task decorations in after transitioning from an app. -->
     <integer name="recents_task_enter_from_app_duration">200</integer>
 
+    <!-- The duration for animating the task decorations in after transitioning from an app. -->
+    <integer name="recents_task_enter_from_affiliated_app_duration">125</integer>
+
     <!-- The duration for animating the task decorations out before transitioning to an app. -->
     <integer name="recents_task_exit_to_app_duration">125</integer>
-
-    <!-- The duration of the window transition when coming to Recents from the Launcher.
-         In order to defer the in-app animations until after the transition is complete,
-         we also need to use this value as the starting delay when animating the task views
-         in from the bottom of the screen. -->
-    <integer name="recents_enter_from_home_transition_duration">100</integer>
-
-    <!-- The duration for animating the task from the bottom of the screen when transitioning
-     from home. -->
-    <integer name="recents_task_enter_from_home_duration">225</integer>
-
-    <!-- The stagger for each task when animating the task from the bottom of the screen when 
-     transitioning from home. -->
-    <integer name="recents_task_enter_from_home_stagger_delay">12</integer>
-
-    <!-- The duration of the animation of the tasks to the bottom of the screen when leaving
-     Recents to go back to the Launcher. -->
-    <integer name="recents_task_exit_to_home_duration">225</integer>
 
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
 
-    <!-- The animation duration for animating the removal of a task view. -->
-    <integer name="recents_animate_task_view_remove_duration">250</integer>
+    <!-- The animation duration for scrolling the stack to a particular item. -->
+    <integer name="recents_animate_task_stack_scroll_duration">200</integer>
 
     <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_animate_task_stack_scroll_duration">225</integer>
+    <integer name="recents_auto_advance_duration">750</integer>
 
-    <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
-    <integer name="recents_max_task_stack_view_dim">96</integer>
+    <!-- The animation duration for subsequent scrolling the stack to a particular item. -->
+    <integer name="recents_subsequent_auto_advance_duration">1000</integer>
 
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
 
-    <!-- Transposes the search bar layout in landscape. -->
-    <bool name="recents_has_transposed_search_bar">true</bool>
-
-    <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
-    <bool name="recents_has_transposed_nav_bar">true</bool>
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">0</integer>
+
+    <!-- In multi-window, determines whether the stack where recents lives should grow from
+         the smallest position when being launched. -->
+    <bool name="recents_grow_in_multiwindow">true</bool>
+
+    <!-- Animation duration when using long press on recents to dock -->
+    <integer name="long_press_dock_anim_duration">250</integer>
+
+    <!-- Recents: The relative range of visible tasks from the current scroll position
+         while the stack is focused. -->
+    <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
+    <item name="recents_layout_focused_range_max" format="float" type="integer">2</item>
+
+    <!-- Recents: The relative range of visible tasks from the current scroll position
+         while the stack is not focused. -->
+    <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
+    <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
@@ -289,6 +252,17 @@
 
     <!-- Duration of the expansion animation in the volume dialog -->
     <item name="volume_expand_animation_duration" type="integer">300</item>
+
+    <!-- Whether to show the full screen user switcher. -->
+    <bool name="config_enableFullscreenUserSwitcher">false</bool>
+
+    <!-- SystemUIFactory component -->
+    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
+
+    <!-- Nav bar button default ordering/layout -->
+    <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
+
+    <bool name="quick_settings_show_full_alarm">false</bool>
 
 </resources>
 

@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 
-<LinearLayout
+<com.android.internal.widget.AlertDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
@@ -28,20 +28,24 @@
         android:id="@+id/contentPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:minHeight="48dp">
 
         <ScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/dialog_padding_top_material"
             android:clipToPadding="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <Space
+                    android:id="@+id/textSpacerNoTitle"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dialog_padding_top_material" />
 
                 <TextView
                     android:id="@+id/message"
@@ -54,7 +58,7 @@
                 <Space
                     android:id="@+id/textSpacerNoButtons"
                     android:visibility="gone"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="@dimen/dialog_padding_top_material" />
             </LinearLayout>
         </ScrollView>
@@ -64,7 +68,6 @@
         android:id="@+id/customPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:minHeight="48dp">
 
         <FrameLayout
@@ -73,5 +76,8 @@
             android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <include layout="@layout/alert_dialog_button_bar_material" />
-</LinearLayout>
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/alert_dialog_button_bar_material" />
+</com.android.internal.widget.AlertDialogLayout>

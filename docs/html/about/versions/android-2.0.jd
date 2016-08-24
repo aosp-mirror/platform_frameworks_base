@@ -25,11 +25,6 @@ sdk.platform.majorMinor=major
         </ol></li>
   </ol>
 
-  <h2>See Also</h2>
-  <ol>
-    <li><a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a></li>
-  </ol>
-
 </div>
 </div>
 
@@ -49,9 +44,7 @@ compliant and includes no external libraries. </p>
 
 <p>To get started developing or testing against the Android
 {@sdkPlatformVersion} platform, use the Android SDK and AVD Manager tool to
-download the platform into your SDK. For more information,
-see <a href="{@docRoot}sdk/exploring.html">Exploring the
-SDK</a>.</p>
+download the platform into your SDK.</p>
 
 
 <h2 id="features">Platform Highlights</h2>
@@ -75,12 +68,12 @@ function toggleDiv(link) {
     //$(".toggleme", toggleable).slideDown("fast");
     toggleable.removeClass("closed");
     toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/styles/disclosure_up.png"));
   } else {
     //$(".toggleme", toggleable).slideUp("fast");
     toggleable.removeClass("open");
     toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/styles/disclosure_down.png"));
   }
   return false;
 }
@@ -106,7 +99,7 @@ padding: .25em 1em;
 
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
+        <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-img" height="9px" width="9px" />
         Android 2.0, Revision 1</a> <em>(October 2009)</em></a>
   <div class="toggleme">
 <dl>

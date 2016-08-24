@@ -21,6 +21,7 @@
     android:orientation="horizontal"
     android:baselineAligned="false"
     android:gravity="center_vertical"
+    android:fitsSystemWindows="true"
     android:minHeight="?android:attr/listPreferredItemHeightSmall">
 
     <FrameLayout

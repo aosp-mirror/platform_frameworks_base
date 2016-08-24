@@ -35,9 +35,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Enrollment information about the different available keyphrases.
@@ -82,8 +85,16 @@ public class KeyphraseEnrollmentInfo {
     public static final String EXTRA_VOICE_KEYPHRASE_LOCALE =
             "com.android.intent.extra.VOICE_KEYPHRASE_LOCALE";
 
-    private KeyphraseMetadata[] mKeyphrases;
-    private String mEnrollmentPackage;
+    /**
+     * List of available keyphrases.
+     */
+    final private KeyphraseMetadata[] mKeyphrases;
+
+    /**
+     * Map between KeyphraseMetadata and the package name of the enrollment app that provides it.
+     */
+    final private Map<KeyphraseMetadata, String> mKeyphrasePackageMap;
+
     private String mParseError;
 
     public KeyphraseEnrollmentInfo(PackageManager pm) {
@@ -94,15 +105,17 @@ public class KeyphraseEnrollmentInfo {
                 new Intent(ACTION_MANAGE_VOICE_KEYPHRASES), PackageManager.MATCH_DEFAULT_ONLY);
         if (ris == null || ris.isEmpty()) {
             // No application capable of enrolling for voice keyphrases is present.
-            mParseError = "No enrollment application found";
+            mParseError = "No enrollment applications found";
+            mKeyphrasePackageMap = Collections.<KeyphraseMetadata, String>emptyMap();
+            mKeyphrases = null;
             return;
         }
 
-        boolean found = false;
-        ApplicationInfo ai = null;
+        List<String> parseErrors = new LinkedList<String>();
+        mKeyphrasePackageMap = new HashMap<KeyphraseMetadata, String>();
         for (ResolveInfo ri : ris) {
             try {
-                ai = pm.getApplicationInfo(
+                ApplicationInfo ai = pm.getApplicationInfo(
                         ri.activityInfo.packageName, PackageManager.GET_META_DATA);
                 if ((ai.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) == 0) {
                     // The application isn't privileged (/system/priv-app).
@@ -116,27 +129,45 @@ public class KeyphraseEnrollmentInfo {
                     Slog.w(TAG, ai.packageName + " does not require MANAGE_VOICE_KEYPHRASES");
                     continue;
                 }
-                mEnrollmentPackage = ai.packageName;
-                found = true;
-                break;
+
+                mKeyphrasePackageMap.put(
+                        getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors),
+                        ai.packageName);
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.w(TAG, "error parsing voice enrollment meta-data", e);
+                String error = "error parsing voice enrollment meta-data for "
+                        + ri.activityInfo.packageName;
+                parseErrors.add(error + ": " + e);
+                Slog.w(TAG, error, e);
             }
         }
 
-        if (!found) {
+        if (mKeyphrasePackageMap.isEmpty()) {
+            String error = "No suitable enrollment application found";
+            parseErrors.add(error);
+            Slog.w(TAG, error);
             mKeyphrases = null;
-            mParseError = "No suitable enrollment application found";
-            return;
+        } else {
+            mKeyphrases = mKeyphrasePackageMap.keySet().toArray(
+                    new KeyphraseMetadata[mKeyphrasePackageMap.size()]);
         }
 
+        if (!parseErrors.isEmpty()) {
+            mParseError = TextUtils.join("\n", parseErrors);
+        }
+    }
+
+    private KeyphraseMetadata getKeyphraseMetadataFromApplicationInfo(PackageManager pm,
+            ApplicationInfo ai, List<String> parseErrors) {
         XmlResourceParser parser = null;
+        String packageName = ai.packageName;
+        KeyphraseMetadata keyphraseMetadata = null;
         try {
             parser = ai.loadXmlMetaData(pm, VOICE_KEYPHRASE_META_DATA);
             if (parser == null) {
-                mParseError = "No " + VOICE_KEYPHRASE_META_DATA + " meta-data for "
-                        + ai.packageName;
-                return;
+                String error = "No " + VOICE_KEYPHRASE_META_DATA + " meta-data for " + packageName;
+                parseErrors.add(error);
+                Slog.w(TAG, error);
+                return null;
             }
 
             Resources res = pm.getResourcesForApplication(ai);
@@ -149,48 +180,55 @@ public class KeyphraseEnrollmentInfo {
 
             String nodeName = parser.getName();
             if (!"voice-enrollment-application".equals(nodeName)) {
-                mParseError = "Meta-data does not start with voice-enrollment-application tag";
-                return;
+                String error = "Meta-data does not start with voice-enrollment-application tag for "
+                        + packageName;
+                parseErrors.add(error);
+                Slog.w(TAG, error);
+                return null;
             }
 
             TypedArray array = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.VoiceEnrollmentApplication);
-            initializeKeyphrasesFromTypedArray(array);
+            keyphraseMetadata = getKeyphraseFromTypedArray(array, packageName, parseErrors);
             array.recycle();
         } catch (XmlPullParserException e) {
-            mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
-            return;
+            String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
+            parseErrors.add(error + ": " + e);
+            Slog.w(TAG, error, e);
         } catch (IOException e) {
-            mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
-            return;
+            String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
+            parseErrors.add(error + ": " + e);
+            Slog.w(TAG, error, e);
         } catch (PackageManager.NameNotFoundException e) {
-            mParseError = "Error parsing keyphrase enrollment meta-data: " + e;
-            Slog.w(TAG, "error parsing keyphrase enrollment meta-data", e);
-            return;
+            String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
+            parseErrors.add(error + ": " + e);
+            Slog.w(TAG, error, e);
         } finally {
             if (parser != null) parser.close();
         }
+        return keyphraseMetadata;
     }
 
-    private void initializeKeyphrasesFromTypedArray(TypedArray array) {
+    private KeyphraseMetadata getKeyphraseFromTypedArray(TypedArray array, String packageName,
+            List<String> parseErrors) {
         // Get the keyphrase ID.
         int searchKeyphraseId = array.getInt(
                 com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphraseId, -1);
         if (searchKeyphraseId <= 0) {
-            mParseError = "No valid searchKeyphraseId specified in meta-data";
-            Slog.w(TAG, mParseError);
-            return;
+            String error = "No valid searchKeyphraseId specified in meta-data for " + packageName;
+            parseErrors.add(error);
+            Slog.w(TAG, error);
+            return null;
         }
 
         // Get the keyphrase text.
         String searchKeyphrase = array.getString(
                 com.android.internal.R.styleable.VoiceEnrollmentApplication_searchKeyphrase);
         if (searchKeyphrase == null) {
-            mParseError = "No valid searchKeyphrase specified in meta-data";
-            Slog.w(TAG, mParseError);
-            return;
+            String error = "No valid searchKeyphrase specified in meta-data for " + packageName;
+            parseErrors.add(error);
+            Slog.w(TAG, error);
+            return null;
         }
 
         // Get the supported locales.
@@ -198,9 +236,11 @@ public class KeyphraseEnrollmentInfo {
                 com.android.internal.R.styleable
                         .VoiceEnrollmentApplication_searchKeyphraseSupportedLocales);
         if (searchKeyphraseSupportedLocales == null) {
-            mParseError = "No valid searchKeyphraseSupportedLocales specified in meta-data";
-            Slog.w(TAG, mParseError);
-            return;
+            String error = "No valid searchKeyphraseSupportedLocales specified in meta-data for "
+                    + packageName;
+            parseErrors.add(error);
+            Slog.w(TAG, error);
+            return null;
         }
         ArraySet<Locale> locales = new ArraySet<>();
         // Try adding locales if the locale string is non-empty.
@@ -214,9 +254,11 @@ public class KeyphraseEnrollmentInfo {
                 // We catch a generic exception here because we don't want the system service
                 // to be affected by a malformed metadata because invalid locales were specified
                 // by the system application.
-                mParseError = "Error reading searchKeyphraseSupportedLocales from meta-data";
-                Slog.w(TAG, mParseError, ex);
-                return;
+                String error = "Error reading searchKeyphraseSupportedLocales from meta-data for "
+                        + packageName;
+                parseErrors.add(error);
+                Slog.w(TAG, error);
+                return null;
             }
         }
 
@@ -224,13 +266,13 @@ public class KeyphraseEnrollmentInfo {
         int recognitionModes = array.getInt(com.android.internal.R.styleable
                 .VoiceEnrollmentApplication_searchKeyphraseRecognitionFlags, -1);
         if (recognitionModes < 0) {
-            mParseError = "No valid searchKeyphraseRecognitionFlags specified in meta-data";
-            Slog.w(TAG, mParseError);
-            return;
+            String error = "No valid searchKeyphraseRecognitionFlags specified in meta-data for "
+                    + packageName;
+            parseErrors.add(error);
+            Slog.w(TAG, error);
+            return null;
         }
-        mKeyphrases = new KeyphraseMetadata[1];
-        mKeyphrases[0] = new KeyphraseMetadata(searchKeyphraseId, searchKeyphrase, locales,
-                recognitionModes);
+        return new KeyphraseMetadata(searchKeyphraseId, searchKeyphrase, locales, recognitionModes);
     }
 
     public String getParseError() {
@@ -259,14 +301,15 @@ public class KeyphraseEnrollmentInfo {
      *         given keyphrase/locale combination isn't possible.
      */
     public Intent getManageKeyphraseIntent(int action, String keyphrase, Locale locale) {
-        if (mEnrollmentPackage == null || mEnrollmentPackage.isEmpty()) {
+        if (mKeyphrasePackageMap == null || mKeyphrasePackageMap.isEmpty()) {
             Slog.w(TAG, "No enrollment application exists");
             return null;
         }
 
-        if (getKeyphraseMetadata(keyphrase, locale) != null) {
+        KeyphraseMetadata keyphraseMetadata = getKeyphraseMetadata(keyphrase, locale);
+        if (keyphraseMetadata != null) {
             Intent intent = new Intent(ACTION_MANAGE_VOICE_KEYPHRASES)
-                    .setPackage(mEnrollmentPackage)
+                    .setPackage(mKeyphrasePackageMap.get(keyphraseMetadata))
                     .putExtra(EXTRA_VOICE_KEYPHRASE_HINT_TEXT, keyphrase)
                     .putExtra(EXTRA_VOICE_KEYPHRASE_LOCALE, locale.toLanguageTag())
                     .putExtra(EXTRA_VOICE_KEYPHRASE_ACTION, action);
@@ -286,26 +329,23 @@ public class KeyphraseEnrollmentInfo {
      *         and locale, null otherwise.
      */
     public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, Locale locale) {
-        if (mKeyphrases == null || mKeyphrases.length == 0) {
-            Slog.w(TAG, "Enrollment application doesn't support keyphrases");
-            return null;
+        if (mKeyphrases != null && mKeyphrases.length > 0) {
+          for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
+              // Check if the given keyphrase is supported in the locale provided by
+              // the enrollment application.
+              if (keyphraseMetadata.supportsPhrase(keyphrase)
+                      && keyphraseMetadata.supportsLocale(locale)) {
+                  return keyphraseMetadata;
+              }
+          }
         }
-        for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
-            // Check if the given keyphrase is supported in the locale provided by
-            // the enrollment application.
-            if (keyphraseMetadata.supportsPhrase(keyphrase)
-                    && keyphraseMetadata.supportsLocale(locale)) {
-                return keyphraseMetadata;
-            }
-        }
-        Slog.w(TAG, "Enrollment application doesn't support the given keyphrase/locale");
+        Slog.w(TAG, "No Enrollment application supports the given keyphrase/locale");
         return null;
     }
 
     @Override
     public String toString() {
-        return "KeyphraseEnrollmentInfo [Keyphrases=" + Arrays.toString(mKeyphrases)
-                + ", EnrollmentPackage=" + mEnrollmentPackage + ", ParseError=" + mParseError
-                + "]";
+        return "KeyphraseEnrollmentInfo [Keyphrases=" + mKeyphrasePackageMap.toString()
+                + ", ParseError=" + mParseError + "]";
     }
 }

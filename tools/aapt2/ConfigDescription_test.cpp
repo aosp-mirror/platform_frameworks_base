@@ -15,7 +15,9 @@
  */
 
 #include "ConfigDescription.h"
-#include "StringPiece.h"
+#include "SdkConstants.h"
+
+#include "util/StringPiece.h"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -77,6 +79,21 @@ TEST(ConfigDescriptionTest, ParseCarAttribute) {
     ConfigDescription config;
     EXPECT_TRUE(TestParse("car", &config));
     EXPECT_EQ(android::ResTable_config::UI_MODE_TYPE_CAR, config.uiMode);
+}
+
+TEST(ConfigDescriptionTest, TestParsingRoundQualifier) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("round", &config));
+    EXPECT_EQ(android::ResTable_config::SCREENROUND_YES,
+    config.screenLayout2 & android::ResTable_config::MASK_SCREENROUND);
+    EXPECT_EQ(SDK_MARSHMALLOW, config.sdkVersion);
+    EXPECT_EQ(std::string("round-v23"), config.toString().string());
+
+    EXPECT_TRUE(TestParse("notround", &config));
+    EXPECT_EQ(android::ResTable_config::SCREENROUND_NO,
+              config.screenLayout2 & android::ResTable_config::MASK_SCREENROUND);
+    EXPECT_EQ(SDK_MARSHMALLOW, config.sdkVersion);
+    EXPECT_EQ(std::string("notround-v23"), config.toString().string());
 }
 
 } // namespace aapt

@@ -1,0 +1,169 @@
+page.title=High-Performance Audio Basics
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#overview">Building Great Audio Apps</a></li>
+        <li><a href="#adding">Adding OpenSL ES to Your App</a></li>
+        <li><a href="#building">Building and Debugging</a></li>
+        <li><a href="#power">Audio Power Consumption</a></li>
+        <li><a href="#samples">Samples</a></li>
+      </ol>
+    </div>
+  </div>
+
+<a href="https://www.youtube.com/watch?v=d3kfEeMZ65c" class="notice-developers-video">
+<div>
+    <h3>Video</h3>
+    <p>Google I/O 2013 - High Performance Audio</p>
+</div>
+</a>
+
+<p>
+The Khronos Group's OpenSL ES™ standard exposes audio features
+similar to those in the {@link android.media.MediaPlayer} and {@link android.media.MediaRecorder}
+APIs in the Android Java framework. OpenSL ES provides a C language interface as well as
+C++ bindings, allowing you to call it from code written in either language.
+</p>
+
+<p>
+This page describes the typical use cases for these high-performance audio APIs, how to add them
+into your app's source code, and how to incorporate them into the build process.
+</p>
+
+<h2 id="overview">Building Great Audio Apps</h2>
+
+<p>
+The OpenSL ES APIs are available to help you develop and improve your app's audio performance.
+ Some typical use cases include the following:</p>
+
+<ul>
+  <li>Digital Audio Workstations (DAWs).</li>
+  <li>Synthesizers.</li>
+  <li>Drum machines.</li>
+  <li>Music learning apps.</li>
+  <li>Karaoke apps.</li>
+  <li>DJ mixing.</li>
+  <li>Audio effects.</li>
+  <li>Video/audio conferencing.</li>
+</ul>
+
+<h2 id="adding">Adding OpenSL ES to your App</h2>
+
+<p>
+You can call OpenSL ES from both C and C++ code. To add the core OpenSL ES
+feature set to your app, include the {@code OpenSLES.h} header file:
+
+</p>
+<pre>
+#include &lt;SLES/OpenSLES.h&gt;
+</pre>
+
+<p>
+To add the OpenSL ES <a href="{@docRoot}ndk/guides/audio/opensl-for-android.html#ae">
+Android extensions</a> as well, include the {@code OpenSLES_Android.h} header file:
+</p>
+<pre>
+#include &lt;SLES/OpenSLES_Android.h&gt;
+</pre>
+
+<p>
+When you include the {@code OpenSLES_Android.h} header file, the following headers are included
+automatically:
+</p>
+<pre>
+#include &lt;SLES/OpenSLES_AndroidConfiguration.h&gt;
+#include &lt;SLES/OpenSLES_AndroidMetadata.h&gt;
+</pre>
+
+<p class="note"><strong>Note: </strong>
+These headers are not required, but are shown as an aid in learning the API.
+</p>
+
+<h2 id="building">Building and Debugging</h2>
+
+<p>
+You can incorporate OpenSL ES into your build by specifying it in the
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file that serves as one of the
+NDK build system's makefiles. Add the following line to
+<a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a>:
+</p>
+
+<pre>
+LOCAL_LDLIBS += -lOpenSLES
+</pre>
+
+<p>
+For robust debugging, we recommend that you examine the {@code SLresult} value that most of
+the OpenSL ES APIs return. You can use
+<a class="external-link" href="http://en.wikipedia.org/wiki/Assertion_(computing)">asserts</a>
+or more advanced error-handling logic for debugging; neither offers
+an inherent advantage for working with OpenSL ES, although one or the other might be more suitable
+for a given use case.
+</p>
+
+<p>
+We use asserts in our <a class="external-link" href="https://github.com/googlesamples/android-ndk">
+examples</a>, because they help catch unrealistic conditions that would indicate a coding error. We
+have used explicit error handling for other conditions more likely to occur in production.
+</p>
+
+<p>
+Many API errors result in a log entry, in addition to a non-zero result code. Such log entries
+can provide additional detail that proves especially useful for relatively complex APIs such as
+<a class="external-link" href="https://www.khronos.org/registry/sles/specs/OpenSL_ES_Specification_1.1.pdf">
+{@code Engine::CreateAudioPlayer}</a>.
+</p>
+
+<p>
+You can view the log either from the command line or from Android Studio. To examine the log from
+the command line, type the following:
+</p>
+
+<pre class="no-pretty-print">
+$ adb logcat
+</pre>
+
+<p>
+To examine the log from Android Studio, either click the <strong>Logcat</strong> tab in the
+<a href="{@docRoot}tools/debugging/debugging-studio.html#runDebug">Debug</a>
+window, or click the <strong>Devices | logcat</strong> tab in the
+<a href="{@docRoot}tools/debugging/debugging-studio.html#systemLogView">Android DDMS</a>
+window.
+</p>
+<h2 id="power">Audio Power Consumption</h2>
+<p>Constantly outputting audio incurs significant power consumption. Ensure that you stop the
+ output in the
+ <a href="{@docRoot}reference/android/app/Activity.html#onPause()">onPause()</a> method.
+ Also consider pausing the silent output after some period of user inactivity.
+</p>
+<h2 id="samples">Samples</h2>
+
+<p>
+Supported and tested example code that you can use as a model for your own code resides both locally
+and on
+<a class="external-link" href="https://github.com/googlesamples/android-audio-high-performance/">
+GitHub</a>. The local examples are located in
+{@code platforms/android-9/samples/native-audio/}, under your NDK root installation directory.
+On GitHub, they are available from the
+<a class="external-link" href="https://github.com/googlesamples/android-ndk">{@code android-ndk}</a>
+repository, in the
+<a class="external-link" href="https://github.com/googlesamples/android-ndk/tree/master/audio-echo">
+{@code audio-echo}</a> and
+<a class="external-link" href="https://github.com/googlesamples/android-ndk/tree/master/native-audio">
+{@code native-audio}</a> directories.
+</p>
+<p>The Android NDK implementation of OpenSL ES differs
+from the reference specification for OpenSL ES 1.0.1 in a number of respects.
+These differences are an important reason as to why sample code that
+you copy directly from the OpenSL ES reference specification may not work in your
+Android app.
+</p>
+<p>
+For more information on differences between the reference specification and the
+Android implementation, see
+<a href="{@docRoot}ndk/guides/audio/opensl-for-android.html">
+OpenSL ES for Android</a>.

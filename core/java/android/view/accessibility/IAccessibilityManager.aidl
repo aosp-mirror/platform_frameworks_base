@@ -51,12 +51,16 @@ interface IAccessibilityManager {
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
-        in AccessibilityServiceInfo info);
+        in AccessibilityServiceInfo info, int flags);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 
     void temporaryEnableAccessibilityStateUntilKeyguardRemoved(in ComponentName service,
             boolean touchExplorationEnabled);
 
-    IBinder getWindowToken(int windowId);
+    IBinder getWindowToken(int windowId, int userId);
+
+    void enableAccessibilityService(in ComponentName service, int userId);
+
+    void disableAccessibilityService(in ComponentName service, int userId);
 }

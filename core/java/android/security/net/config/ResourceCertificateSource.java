@@ -44,7 +44,7 @@ public class ResourceCertificateSource implements CertificateSource {
 
     public ResourceCertificateSource(int resourceId, Context context) {
         mResourceId = resourceId;
-        mContext = context.getApplicationContext();
+        mContext = context;
     }
 
     private void ensureInitialized() {
@@ -114,5 +114,10 @@ public class ResourceCertificateSource implements CertificateSource {
             certs.add(anchor.getTrustedCert());
         }
         return certs;
+    }
+
+    @Override
+    public void handleTrustStorageUpdate() {
+        // Nothing to do, resource sources never change.
     }
 }

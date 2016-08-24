@@ -197,6 +197,19 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
 
     /**
+     * Network specifier for factories which want to match any network specifier
+     * (NS) in a request. Behavior:
+     * <li>Empty NS in request matches any network factory NS</li>
+     * <li>Empty NS in the network factory NS only matches a request with an
+     * empty NS</li>
+     * <li>"*" (this constant) NS in the network factory matches requests with
+     * any NS</li>
+     *
+     * @hide
+     */
+    public static final String MATCH_ALL_REQUESTS_NETWORK_SPECIFIER = "*";
+
+    /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
      * NetworkFactory / NetworkAgent model does not deal well with the situation where a
      * capability's presence cannot be known in advance. If such a capability is requested, then we
@@ -235,7 +248,7 @@ public final class NetworkCapabilities implements Parcelable {
      * for a network to satisfy a request, all capabilities requested must be satisfied.
      *
      * @param capability the {@code NetworkCapabilities.NET_CAPABILITY_*} to be added.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities addCapability(int capability) {
@@ -250,7 +263,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Removes (if found) the given capability from this {@code NetworkCapability} instance.
      *
      * @param capability the {@code NetworkCapabilities.NET_CAPABILTIY_*} to be removed.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities removeCapability(int capability) {
@@ -405,7 +418,7 @@ public final class NetworkCapabilities implements Parcelable {
      * {@code NetworkCapabilities.NET_CAPABILITY_*} listed above.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be added.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities addTransportType(int transportType) {
@@ -421,7 +434,7 @@ public final class NetworkCapabilities implements Parcelable {
      * Removes (if found) the given transport from this {@code NetworkCapability} instance.
      *
      * @param transportType the {@code NetworkCapabilities.TRANSPORT_*} to be removed.
-     * @return This NetworkCapability to facilitate chaining.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
     public NetworkCapabilities removeTransportType(int transportType) {
@@ -565,14 +578,16 @@ public final class NetworkCapabilities implements Parcelable {
      * @param networkSpecifier An {@code String} of opaque format used to specify the bearer
      *                         specific network specifier where the bearer has a choice of
      *                         networks.
+     * @return This NetworkCapabilities instance, to facilitate chaining.
      * @hide
      */
-    public void setNetworkSpecifier(String networkSpecifier) {
+    public NetworkCapabilities setNetworkSpecifier(String networkSpecifier) {
         if (TextUtils.isEmpty(networkSpecifier) == false && Long.bitCount(mTransportTypes) != 1) {
             throw new IllegalStateException("Must have a single transport specified to use " +
                     "setNetworkSpecifier");
         }
         mNetworkSpecifier = networkSpecifier;
+        return this;
     }
 
     /**
@@ -596,7 +611,8 @@ public final class NetworkCapabilities implements Parcelable {
     }
     private boolean satisfiedBySpecifier(NetworkCapabilities nc) {
         return (TextUtils.isEmpty(mNetworkSpecifier) ||
-                mNetworkSpecifier.equals(nc.mNetworkSpecifier));
+                mNetworkSpecifier.equals(nc.mNetworkSpecifier) ||
+                MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(nc.mNetworkSpecifier));
     }
     private boolean equalsSpecifier(NetworkCapabilities nc) {
         if (TextUtils.isEmpty(mNetworkSpecifier)) {
@@ -793,17 +809,7 @@ public final class NetworkCapabilities implements Parcelable {
     @Override
     public String toString() {
         int[] types = getTransportTypes();
-        String transports = (types.length > 0 ? " Transports: " : "");
-        for (int i = 0; i < types.length;) {
-            switch (types[i]) {
-                case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
-                case TRANSPORT_WIFI:        transports += "WIFI"; break;
-                case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
-                case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
-                case TRANSPORT_VPN:         transports += "VPN"; break;
-            }
-            if (++i < types.length) transports += "|";
-        }
+        String transports = (types.length > 0) ? " Transports: " + transportNamesOf(types) : "";
 
         types = getCapabilities();
         String capabilities = (types.length > 0 ? " Capabilities: " : "");
@@ -842,5 +848,23 @@ public final class NetworkCapabilities implements Parcelable {
         String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
 
         return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength + "]";
+    }
+
+    /**
+     * @hide
+     */
+    public static String transportNamesOf(int[] types) {
+        String transports = "";
+        for (int i = 0; i < types.length;) {
+            switch (types[i]) {
+                case TRANSPORT_CELLULAR:    transports += "CELLULAR"; break;
+                case TRANSPORT_WIFI:        transports += "WIFI"; break;
+                case TRANSPORT_BLUETOOTH:   transports += "BLUETOOTH"; break;
+                case TRANSPORT_ETHERNET:    transports += "ETHERNET"; break;
+                case TRANSPORT_VPN:         transports += "VPN"; break;
+            }
+            if (++i < types.length) transports += "|";
+        }
+        return transports;
     }
 }

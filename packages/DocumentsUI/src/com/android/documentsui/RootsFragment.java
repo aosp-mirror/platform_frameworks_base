@@ -16,6 +16,9 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -28,8 +31,10 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,11 +46,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.documentsui.BaseActivity.State;
-import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,12 +60,13 @@ import java.util.Objects;
  */
 public class RootsFragment extends Fragment {
 
+    private static final String TAG = "RootsFragment";
+    private static final String EXTRA_INCLUDE_APPS = "includeApps";
+
     private ListView mList;
     private RootsAdapter mAdapter;
-
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
 
-    private static final String EXTRA_INCLUDE_APPS = "includeApps";
 
     public static void show(FragmentManager fm, Intent includeApps) {
         final Bundle args = new Bundle();
@@ -83,13 +87,11 @@ public class RootsFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final Context context = inflater.getContext();
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
-        mList = (ListView) view.findViewById(android.R.id.list);
+        mList = (ListView) view.findViewById(R.id.roots_list);
         mList.setOnItemClickListener(mItemListener);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         return view;
     }
 
@@ -110,11 +112,13 @@ public class RootsFragment extends Fragment {
             @Override
             public void onLoadFinished(
                     Loader<Collection<RootInfo>> loader, Collection<RootInfo> result) {
-                if (!isAdded()) return;
+                if (!isAdded()) {
+                    return;
+                }
 
-                final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
+                Intent handlerAppIntent = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, includeApps);
+                mAdapter = new RootsAdapter(context, result, handlerAppIntent, state);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -149,7 +153,9 @@ public class RootsFragment extends Fragment {
     }
 
     public void onCurrentRootChanged() {
-        if (mAdapter == null) return;
+        if (mAdapter == null) {
+            return;
+        }
 
         final RootInfo root = ((BaseActivity) getActivity()).getCurrentRoot();
         for (int i = 0; i < mAdapter.getCount(); i++) {
@@ -158,10 +164,18 @@ public class RootsFragment extends Fragment {
                 final RootInfo testRoot = ((RootItem) item).root;
                 if (Objects.equals(testRoot, root)) {
                     mList.setItemChecked(i, true);
+                    mList.setSelection(i);
                     return;
                 }
             }
         }
+    }
+
+    /**
+     * Attempts to shift focus back to the navigation drawer.
+     */
+    public void requestFocus() {
+        mList.requestFocus();
     }
 
     private void showAppDetails(ResolveInfo ri) {
@@ -177,10 +191,16 @@ public class RootsFragment extends Fragment {
             Item item = mAdapter.getItem(position);
             if (item instanceof RootItem) {
                 BaseActivity activity = BaseActivity.get(RootsFragment.this);
-                activity.onRootPicked(((RootItem) item).root);
+                RootInfo newRoot = ((RootItem) item).root;
+                Metrics.logRootVisited(getActivity(), newRoot);
+                activity.onRootPicked(newRoot);
             } else if (item instanceof AppItem) {
                 DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
-                activity.onAppPicked(((AppItem) item).info);
+                ResolveInfo info = ((AppItem) item).info;
+                Metrics.logAppVisited(getActivity(), info);
+                activity.onAppPicked(info);
+            } else if (item instanceof SpacerItem) {
+                if (DEBUG) Log.d(TAG, "Ignoring click on spacer item.");
             } else {
                 throw new IllegalStateException("Unknown root: " + item);
             }
@@ -208,10 +228,11 @@ public class RootsFragment extends Fragment {
         }
 
         public View getView(View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
+            // Disable recycling views because 1) it's very unlikely a view can be recycled here;
+            // 2) there is no easy way for us to know with which layout id the convertView was
+            // inflated; and 3) simplicity is much appreciated at this time.
+            convertView = LayoutInflater.from(parent.getContext())
                         .inflate(mLayoutId, parent, false);
-            }
             bindView(convertView);
             return convertView;
         }
@@ -284,75 +305,71 @@ public class RootsFragment extends Fragment {
     }
 
     private static class RootsAdapter extends ArrayAdapter<Item> {
-        public RootsAdapter(Context context, Collection<RootInfo> roots, Intent includeApps) {
+
+        /**
+         * @param handlerAppIntent When not null, apps capable of handling the original
+         *     intent will be included in list of roots (in special section at bottom).
+         */
+        public RootsAdapter(Context context, Collection<RootInfo> roots,
+                @Nullable Intent handlerAppIntent, State state) {
             super(context, 0);
 
-            RootItem recents = null;
-            RootItem images = null;
-            RootItem videos = null;
-            RootItem audio = null;
-            RootItem downloads = null;
+            final List<RootItem> libraries = new ArrayList<>();
+            final List<RootItem> others = new ArrayList<>();
 
-            final List<RootInfo> clouds = Lists.newArrayList();
-            final List<RootInfo> locals = Lists.newArrayList();
+            for (final RootInfo root : roots) {
+                final RootItem item = new RootItem(root);
 
-            for (RootInfo root : roots) {
-                if (root.isRecents()) {
-                    recents = new RootItem(root);
-                } else if (root.isExternalStorage()) {
-                    locals.add(root);
-                } else if (root.isDownloads()) {
-                    downloads = new RootItem(root);
-                } else if (root.isImages()) {
-                    images = new RootItem(root);
-                } else if (root.isVideos()) {
-                    videos = new RootItem(root);
-                } else if (root.isAudio()) {
-                    audio = new RootItem(root);
+                if (root.isHome() &&
+                        !Shared.shouldShowDocumentsRoot(context, ((Activity) context).getIntent())) {
+                    continue;
+                } else if (root.isLibrary()) {
+                    if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
+                    libraries.add(item);
                 } else {
-                    clouds.add(root);
+                    if (DEBUG) Log.d(TAG, "Adding " + root + " as non-library.");
+                    others.add(item);
                 }
             }
 
             final RootComparator comp = new RootComparator();
-            Collections.sort(clouds, comp);
-            Collections.sort(locals, comp);
+            Collections.sort(libraries, comp);
+            Collections.sort(others, comp);
 
-            if (recents != null) add(recents);
+            addAll(libraries);
+            // Only add the spacer if it is actually separating something.
+            if (!libraries.isEmpty() && !others.isEmpty()) {
+                add(new SpacerItem());
+            }
+            addAll(others);
 
-            for (RootInfo cloud : clouds) {
-                add(new RootItem(cloud));
+            // Include apps that can handle this intent too.
+            if (handlerAppIntent != null) {
+                includeHandlerApps(context, handlerAppIntent);
+            }
+        }
+
+        /**
+         * Adds apps capable of handling the original intent will be included
+         * in list of roots (in special section at bottom).
+         */
+        private void includeHandlerApps(Context context, Intent handlerAppIntent) {
+            final PackageManager pm = context.getPackageManager();
+            final List<ResolveInfo> infos = pm.queryIntentActivities(
+                    handlerAppIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+            final List<AppItem> apps = new ArrayList<>();
+
+            // Omit ourselves from the list
+            for (ResolveInfo info : infos) {
+                if (!context.getPackageName().equals(info.activityInfo.packageName)) {
+                    apps.add(new AppItem(info));
+                }
             }
 
-            if (images != null) add(images);
-            if (videos != null) add(videos);
-            if (audio != null) add(audio);
-            if (downloads != null) add(downloads);
-
-            for (RootInfo local : locals) {
-                add(new RootItem(local));
-            }
-
-            if (includeApps != null) {
-                final PackageManager pm = context.getPackageManager();
-                final List<ResolveInfo> infos = pm.queryIntentActivities(
-                        includeApps, PackageManager.MATCH_DEFAULT_ONLY);
-
-                final List<AppItem> apps = Lists.newArrayList();
-
-                // Omit ourselves from the list
-                for (ResolveInfo info : infos) {
-                    if (!context.getPackageName().equals(info.activityInfo.packageName)) {
-                        apps.add(new AppItem(info));
-                    }
-                }
-
-                if (apps.size() > 0) {
-                    add(new SpacerItem());
-                    for (Item item : apps) {
-                        add(item);
-                    }
-                }
+            if (apps.size() > 0) {
+                add(new SpacerItem());
+                addAll(apps);
             }
         }
 
@@ -388,15 +405,10 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    public static class RootComparator implements Comparator<RootInfo> {
+    public static class RootComparator implements Comparator<RootItem> {
         @Override
-        public int compare(RootInfo lhs, RootInfo rhs) {
-            final int score = DocumentInfo.compareToIgnoreCaseNullable(lhs.title, rhs.title);
-            if (score != 0) {
-                return score;
-            } else {
-                return DocumentInfo.compareToIgnoreCaseNullable(lhs.summary, rhs.summary);
-            }
+        public int compare(RootItem lhs, RootItem rhs) {
+            return lhs.root.compareTo(rhs.root);
         }
     }
 }

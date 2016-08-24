@@ -19,8 +19,6 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -28,6 +26,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.R;
 
 import java.util.Formatter;
 import java.util.IllegalFormatException;
@@ -38,11 +38,17 @@ import java.util.Locale;
  * <p>
  * You can give it a start time in the {@link SystemClock#elapsedRealtime} timebase,
  * and it counts up from that, or if you don't give it a base time, it will use the
- * time at which you call {@link #start}.  By default it will display the current
+ * time at which you call {@link #start}.
+ *
+ * <p>The timer can also count downward towards the base time by
+ * setting {@link #setCountDown(boolean)} to true.
+ *
+ *  <p>By default it will display the current
  * timer value in the form "MM:SS" or "H:MM:SS", or you can use {@link #setFormat}
  * to format the timer value into an arbitrary string.
  *
  * @attr ref android.R.styleable#Chronometer_format
+ * @attr ref android.R.styleable#Chronometer_countDown
  */
 @RemoteView
 public class Chronometer extends TextView {
@@ -73,8 +79,7 @@ public class Chronometer extends TextView {
     private StringBuilder mFormatBuilder;
     private OnChronometerTickListener mOnChronometerTickListener;
     private StringBuilder mRecycle = new StringBuilder(8);
-    
-    private static final int TICK_WHAT = 2;
+    private boolean mCountDown;
     
     /**
      * Initialize this Chronometer object.
@@ -105,7 +110,8 @@ public class Chronometer extends TextView {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Chronometer, defStyleAttr, defStyleRes);
-        setFormat(a.getString(com.android.internal.R.styleable.Chronometer_format));
+        setFormat(a.getString(R.styleable.Chronometer_format));
+        setCountDown(a.getBoolean(R.styleable.Chronometer_countDown, false));
         a.recycle();
 
         init();
@@ -114,6 +120,28 @@ public class Chronometer extends TextView {
     private void init() {
         mBase = SystemClock.elapsedRealtime();
         updateText(mBase);
+    }
+
+    /**
+     * Set this view to count down to the base instead of counting up from it.
+     *
+     * @param countDown whether this view should count down
+     *
+     * @see #setBase(long)
+     */
+    @android.view.RemotableViewMethod
+    public void setCountDown(boolean countDown) {
+        mCountDown = countDown;
+        updateText(SystemClock.elapsedRealtime());
+    }
+
+    /**
+     * @return whether this view counts down
+     *
+     * @see #setCountDown(boolean)
+     */
+    public boolean isCountDown() {
+        return mCountDown;
     }
 
     /**
@@ -235,9 +263,17 @@ public class Chronometer extends TextView {
 
     private synchronized void updateText(long now) {
         mNow = now;
-        long seconds = now - mBase;
+        long seconds = mCountDown ? mBase - now : now - mBase;
         seconds /= 1000;
+        boolean negative = false;
+        if (seconds < 0) {
+            seconds = -seconds;
+            negative = true;
+        }
         String text = DateUtils.formatElapsedTime(mRecycle, seconds);
+        if (negative) {
+            text = getResources().getString(R.string.negative_duration, text);
+        }
 
         if (mFormat != null) {
             Locale loc = Locale.getDefault();
@@ -266,20 +302,21 @@ public class Chronometer extends TextView {
             if (running) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                mHandler.sendMessageDelayed(Message.obtain(mHandler, TICK_WHAT), 1000);
+                postDelayed(mTickRunnable, 1000);
             } else {
-                mHandler.removeMessages(TICK_WHAT);
+                removeCallbacks(mTickRunnable);
             }
             mRunning = running;
         }
     }
-    
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message m) {
+
+    private final Runnable mTickRunnable = new Runnable() {
+        @Override
+        public void run() {
             if (mRunning) {
                 updateText(SystemClock.elapsedRealtime());
                 dispatchChronometerTick();
-                sendMessageDelayed(Message.obtain(this, TICK_WHAT), 1000);
+                postDelayed(mTickRunnable, 1000);
             }
         }
     };

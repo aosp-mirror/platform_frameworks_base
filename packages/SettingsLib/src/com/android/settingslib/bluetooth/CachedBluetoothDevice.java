@@ -835,7 +835,7 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
     public int getConnectionSummary() {
         boolean profileConnected = false;       // at least one profile is connected
         boolean a2dpNotConnected = false;       // A2DP is preferred but not connected
-        boolean headsetNotConnected = false;    // Headset is preferred but not connected
+        boolean hfpNotConnected = false;    // HFP is preferred but not connected
 
         for (LocalBluetoothProfile profile : getProfiles()) {
             int connectionStatus = getProfileConnectionState(profile);
@@ -851,11 +851,12 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
 
                 case BluetoothProfile.STATE_DISCONNECTED:
                     if (profile.isProfileReady()) {
-                        if ((profile instanceof A2dpProfile)||
+                        if ((profile instanceof A2dpProfile) ||
                             (profile instanceof A2dpSinkProfile)){
                             a2dpNotConnected = true;
-                        } else if (profile instanceof HeadsetProfile) {
-                            headsetNotConnected = true;
+                        } else if ((profile instanceof HeadsetProfile) ||
+                                   (profile instanceof HfpClientProfile)) {
+                            hfpNotConnected = true;
                         }
                     }
                     break;
@@ -863,11 +864,11 @@ public final class CachedBluetoothDevice implements Comparable<CachedBluetoothDe
         }
 
         if (profileConnected) {
-            if (a2dpNotConnected && headsetNotConnected) {
+            if (a2dpNotConnected && hfpNotConnected) {
                 return R.string.bluetooth_connected_no_headset_no_a2dp;
             } else if (a2dpNotConnected) {
                 return R.string.bluetooth_connected_no_a2dp;
-            } else if (headsetNotConnected) {
+            } else if (hfpNotConnected) {
                 return R.string.bluetooth_connected_no_headset;
             } else {
                 return R.string.bluetooth_connected;

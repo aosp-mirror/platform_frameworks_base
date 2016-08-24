@@ -16,17 +16,16 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-
-import java.util.Calendar;
-
-import com.android.internal.R;
 
 /**
  * Displays a selectable list of years.
@@ -37,8 +36,6 @@ class YearPickerView extends ListView {
     private final int mChildSize;
 
     private OnYearSelectedListener mOnYearSelectedListener;
-
-    private long mCurrentTimeMillis;
 
     public YearPickerView(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.listViewStyle);
@@ -77,10 +74,6 @@ class YearPickerView extends ListView {
 
     public void setOnYearSelectedListener(OnYearSelectedListener listener) {
         mOnYearSelectedListener = listener;
-    }
-
-    public void setDate(long currentTimeMillis) {
-        mCurrentTimeMillis = currentTimeMillis;
     }
 
     /**

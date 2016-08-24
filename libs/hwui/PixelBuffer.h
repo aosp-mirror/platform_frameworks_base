@@ -91,14 +91,6 @@ public:
     virtual uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) = 0;
 
     /**
-     * Unmaps this buffer, if needed. After the buffer is unmapped,
-     * the pointer previously returned by map() becomes invalid and
-     * should not be used. After calling this method, getMappedPointer()
-     * will always return NULL.
-     */
-    virtual void unmap() = 0;
-
-    /**
      * Returns the current access mode for this buffer. If the buffer
      * is not mapped, this method returns kAccessMode_None.
      */
@@ -203,6 +195,14 @@ protected:
     PixelBuffer(GLenum format, uint32_t width, uint32_t height):
             mFormat(format), mWidth(width), mHeight(height), mAccessMode(kAccessMode_None) {
     }
+
+    /**
+     * Unmaps this buffer, if needed. After the buffer is unmapped,
+     * the pointer previously returned by map() becomes invalid and
+     * should not be used. After calling this method, getMappedPointer()
+     * will always return NULL.
+     */
+    virtual void unmap() = 0;
 
     GLenum mFormat;
 

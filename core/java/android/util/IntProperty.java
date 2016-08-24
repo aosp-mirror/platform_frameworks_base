@@ -15,18 +15,14 @@
  */
 package android.util;
 
-import android.util.Property;
-
 /**
  * An implementation of {@link android.util.Property} to be used specifically with fields of type
  * <code>int</code>. This type-specific subclass enables performance benefit by allowing
- * calls to a {@link #set(Object, Integer) set()} function that takes the primitive
+ * calls to a {@link #setValue(Object, int) setValue()} function that takes the primitive
  * <code>int</code> type and avoids autoboxing and other overhead associated with the
  * <code>Integer</code> class.
  *
  * @param <T> The class on which the Property is declared.
- *
- * @hide
  */
 public abstract class IntProperty<T> extends Property<T, Integer> {
 
@@ -35,7 +31,7 @@ public abstract class IntProperty<T> extends Property<T, Integer> {
     }
 
     /**
-     * A type-specific override of the {@link #set(Object, Integer)} that is faster when dealing
+     * A type-specific variant of {@link #set(Object, Integer)} that is faster when dealing
      * with fields of type <code>int</code>.
      */
     public abstract void setValue(T object, int value);

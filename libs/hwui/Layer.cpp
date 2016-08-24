@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "Layer.h"
 
 #include "Caches.h"
@@ -38,7 +36,8 @@ namespace android {
 namespace uirenderer {
 
 Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
-        : state(kState_Uncached)
+        : GpuMemoryTracker(GpuObjectType::Layer)
+        , state(State::Uncached)
         , caches(Caches::getInstance())
         , renderState(renderState)
         , texture(caches)
@@ -47,8 +46,8 @@ Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
     renderTarget = GL_TEXTURE_2D;
-    texture.width = layerWidth;
-    texture.height = layerHeight;
+    texture.mWidth = layerWidth;
+    texture.mHeight = layerHeight;
     renderState.registerLayer(this);
 }
 
@@ -56,10 +55,9 @@ Layer::~Layer() {
     renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
 
-    if (stencil || fbo || texture.id) {
-        renderState.requireGLContext();
+    if (stencil || fbo || texture.mId) {
         removeFbo();
-        deleteTexture();
+        texture.deleteTexture();
     }
 
     delete[] mesh;
@@ -67,7 +65,7 @@ Layer::~Layer() {
 
 void Layer::onGlContextLost() {
     removeFbo();
-    deleteTexture();
+    texture.deleteTexture();
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
@@ -157,8 +155,7 @@ void Layer::removeFbo(bool flush) {
 
     if (fbo) {
         if (flush) LayerRenderer::flushLayer(renderState, this);
-        // If put fails the cache will delete the FBO
-        caches.fboCache.put(fbo);
+        renderState.deleteFramebuffer(fbo);
         fbo = 0;
     }
 }
@@ -172,7 +169,8 @@ void Layer::updateDeferred(RenderNode* renderNode, int left, int top, int right,
 }
 
 void Layer::setPaint(const SkPaint* paint) {
-    OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
+    alpha = PaintUtils::getAlphaDirect(paint);
+    mode = PaintUtils::getXfermodeDirect(paint);
     setColorFilter((paint) ? paint->getColorFilter() : nullptr);
 }
 
@@ -181,8 +179,8 @@ void Layer::setColorFilter(SkColorFilter* filter) {
 }
 
 void Layer::bindTexture() const {
-    if (texture.id) {
-        caches.textureState().bindTexture(renderTarget, texture.id);
+    if (texture.mId) {
+        caches.textureState().bindTexture(renderTarget, texture.mId);
     }
 }
 
@@ -193,29 +191,27 @@ void Layer::bindStencilRenderBuffer() const {
 }
 
 void Layer::generateTexture() {
-    if (!texture.id) {
-        glGenTextures(1, &texture.id);
-    }
-}
-
-void Layer::deleteTexture() {
-    if (texture.id) {
-        texture.deleteTexture();
-        texture.id = 0;
+    if (!texture.mId) {
+        glGenTextures(1, &texture.mId);
     }
 }
 
 void Layer::clearTexture() {
-    caches.textureState().unbindTexture(texture.id);
-    texture.id = 0;
+    // There's a rare possibility that Caches could have been destroyed already
+    // since this method is queued up as a task.
+    // Since this is a reset method, treat this as non-fatal.
+    if (caches.isInitialized()) {
+        caches.textureState().unbindTexture(texture.mId);
+    }
+    texture.mId = 0;
 }
 
 void Layer::allocateTexture() {
 #if DEBUG_LAYERS
     ALOGD("  Allocate layer: %dx%d", getWidth(), getHeight());
 #endif
-    if (texture.id) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    if (texture.mId) {
+        texture.updateSize(getWidth(), getHeight(), GL_RGBA);
         glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
@@ -238,8 +234,7 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
     DeferStateStruct deferredState(*deferredList, *renderer,
             RenderNode::kReplayFlag_ClipChildren);
 
-    renderer->setViewport(width, height);
-    renderer->setupFrameState(dirtyRect.left, dirtyRect.top,
+    renderer->setupFrameState(width, height, dirtyRect.left, dirtyRect.top,
             dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     renderNode->computeOrdering();
@@ -260,9 +255,8 @@ void Layer::flush() {
         ATRACE_LAYER_WORK("Issue");
         renderer->startMark((renderNode.get() != nullptr) ? renderNode->getName() : "Layer");
 
-        renderer->setViewport(layer.getWidth(), layer.getHeight());
-        renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
-                !isBlend());
+        renderer->prepareDirty(layer.getWidth(), layer.getHeight(),
+                dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom, !isBlend());
 
         deferredList->flush(*renderer, dirtyRect);
 
@@ -279,9 +273,8 @@ void Layer::render(const OpenGLRenderer& rootRenderer) {
     ATRACE_LAYER_WORK("Direct-Issue");
 
     updateLightPosFromRenderer(rootRenderer);
-    renderer->setViewport(layer.getWidth(), layer.getHeight());
-    renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
-            !isBlend());
+    renderer->prepareDirty(layer.getWidth(), layer.getHeight(),
+            dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom, !isBlend());
 
     renderer->drawRenderNode(renderNode.get(), dirtyRect, RenderNode::kReplayFlag_ClipChildren);
 

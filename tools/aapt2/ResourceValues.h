@@ -17,8 +17,11 @@
 #ifndef AAPT_RESOURCE_VALUES_H
 #define AAPT_RESOURCE_VALUES_H
 
+#include "Diagnostics.h"
 #include "Resource.h"
 #include "StringPool.h"
+#include "io/File.h"
+#include "util/Maybe.h"
 
 #include <array>
 #include <androidfw/ResourceTypes.h>
@@ -27,9 +30,7 @@
 
 namespace aapt {
 
-struct ValueVisitor;
-struct ConstValueVisitor;
-struct ValueVisitorArgs;
+struct RawValueVisitor;
 
 /**
  * A resource value. This is an all-encompassing representation
@@ -39,26 +40,54 @@ struct ValueVisitorArgs;
  * but it is the simplest strategy.
  */
 struct Value {
-    /**
-     * Whether or not this is an Item.
-     */
-    virtual bool isItem() const;
+	virtual ~Value() = default;
 
     /**
-     * Whether this value is weak and can be overriden without
-     * warning or error. Default for base class is false.
+     * Whether this value is weak and can be overridden without
+     * warning or error. Default is false.
      */
-    virtual bool isWeak() const;
+    bool isWeak() const {
+        return mWeak;
+    }
+
+    void setWeak(bool val) {
+        mWeak = val;
+    }
+
+    /**
+     * Returns the source where this value was defined.
+     */
+    const Source& getSource() const {
+        return mSource;
+    }
+
+    void setSource(const Source& source) {
+        mSource = source;
+    }
+
+    void setSource(Source&& source) {
+        mSource = std::move(source);
+    }
+
+    /**
+     * Returns the comment that was associated with this resource.
+     */
+    StringPiece16 getComment() const {
+        return mComment;
+    }
+
+    void setComment(const StringPiece16& str) {
+        mComment = str.toString();
+    }
+
+    void setComment(std::u16string&& str) {
+        mComment = std::move(str);
+    }
 
     /**
      * Calls the appropriate overload of ValueVisitor.
      */
-    virtual void accept(ValueVisitor& visitor, ValueVisitorArgs&& args) = 0;
-
-    /**
-     * Const version of accept().
-     */
-    virtual void accept(ConstValueVisitor& visitor, ValueVisitorArgs&& args) const = 0;
+    virtual void accept(RawValueVisitor* visitor) = 0;
 
     /**
      * Clone the value.
@@ -68,7 +97,12 @@ struct Value {
     /**
      * Human readable printout of this value.
      */
-    virtual void print(std::ostream& out) const = 0;
+    virtual void print(std::ostream* out) const = 0;
+
+protected:
+    Source mSource;
+    std::u16string mComment;
+    bool mWeak = false;
 };
 
 /**
@@ -76,8 +110,7 @@ struct Value {
  */
 template <typename Derived>
 struct BaseValue : public Value {
-    virtual void accept(ValueVisitor& visitor, ValueVisitorArgs&& args) override;
-    virtual void accept(ConstValueVisitor& visitor, ValueVisitorArgs&& args) const override;
+    void accept(RawValueVisitor* visitor) override;
 };
 
 /**
@@ -85,20 +118,15 @@ struct BaseValue : public Value {
  */
 struct Item : public Value {
     /**
-     * An Item is, of course, an Item.
-     */
-    virtual bool isItem() const override;
-
-    /**
      * Clone the Item.
      */
     virtual Item* clone(StringPool* newPool) const override = 0;
 
     /**
      * Fills in an android::Res_value structure with this Item's binary representation.
-     * Returns false if an error ocurred.
+     * Returns false if an error occurred.
      */
-    virtual bool flatten(android::Res_value& outValue) const = 0;
+    virtual bool flatten(android::Res_value* outValue) const = 0;
 };
 
 /**
@@ -106,8 +134,7 @@ struct Item : public Value {
  */
 template <typename Derived>
 struct BaseItem : public Item {
-    virtual void accept(ValueVisitor& visitor, ValueVisitorArgs&& args) override;
-    virtual void accept(ConstValueVisitor& visitor, ValueVisitorArgs&& args) const override;
+    void accept(RawValueVisitor* visitor) override;
 };
 
 /**
@@ -122,28 +149,28 @@ struct Reference : public BaseItem<Reference> {
         kAttribute,
     };
 
-    ResourceName name;
-    ResourceId id;
+    Maybe<ResourceName> name;
+    Maybe<ResourceId> id;
     Reference::Type referenceType;
     bool privateReference = false;
 
     Reference();
-    Reference(const ResourceNameRef& n, Type type = Type::kResource);  // NOLINT(implicit)
+    explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
     explicit Reference(const ResourceId& i, Type type = Type::kResource);
 
-    bool flatten(android::Res_value& outValue) const override;
+    bool flatten(android::Res_value* outValue) const override;
     Reference* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 /**
  * An ID resource. Has no real value, just a place holder.
  */
 struct Id : public BaseItem<Id> {
-    bool isWeak() const override;
-    bool flatten(android::Res_value& out) const override;
+    Id() { mWeak = true; }
+    bool flatten(android::Res_value* out) const override;
     Id* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 /**
@@ -156,9 +183,9 @@ struct RawString : public BaseItem<RawString> {
 
     explicit RawString(const StringPool::Ref& ref);
 
-    bool flatten(android::Res_value& outValue) const override;
+    bool flatten(android::Res_value* outValue) const override;
     RawString* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 struct String : public BaseItem<String> {
@@ -166,9 +193,17 @@ struct String : public BaseItem<String> {
 
     explicit String(const StringPool::Ref& ref);
 
-    bool flatten(android::Res_value& outValue) const override;
+    // Whether the string is marked as translateable. This does not persist when flattened.
+    // It is only used during compilation phase.
+    void setTranslateable(bool val);
+    bool isTranslateable() const;
+
+    bool flatten(android::Res_value* outValue) const override;
     String* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
+
+private:
+    bool mTranslateable;
 };
 
 struct StyledString : public BaseItem<StyledString> {
@@ -176,20 +211,33 @@ struct StyledString : public BaseItem<StyledString> {
 
     explicit StyledString(const StringPool::StyleRef& ref);
 
-    bool flatten(android::Res_value& outValue) const override;
+    // Whether the string is marked as translateable. This does not persist when flattened.
+    // It is only used during compilation phase.
+    void setTranslateable(bool val);
+    bool isTranslateable() const;
+
+    bool flatten(android::Res_value* outValue) const override;
     StyledString* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
+
+private:
+    bool mTranslateable;
 };
 
 struct FileReference : public BaseItem<FileReference> {
     StringPool::Ref path;
 
+    /**
+     * A handle to the file object from which this file can be read.
+     */
+    io::IFile* file = nullptr;
+
     FileReference() = default;
     explicit FileReference(const StringPool::Ref& path);
 
-    bool flatten(android::Res_value& outValue) const override;
+    bool flatten(android::Res_value* outValue) const override;
     FileReference* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 /**
@@ -200,10 +248,11 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
 
     BinaryPrimitive() = default;
     explicit BinaryPrimitive(const android::Res_value& val);
+    BinaryPrimitive(uint8_t dataType, uint32_t data);
 
-    bool flatten(android::Res_value& outValue) const override;
+    bool flatten(android::Res_value* outValue) const override;
     BinaryPrimitive* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 struct Attribute : public BaseValue<Attribute> {
@@ -212,18 +261,17 @@ struct Attribute : public BaseValue<Attribute> {
         uint32_t value;
     };
 
-    bool weak;
     uint32_t typeMask;
-    uint32_t minInt;
-    uint32_t maxInt;
+    int32_t minInt;
+    int32_t maxInt;
     std::vector<Symbol> symbols;
 
     explicit Attribute(bool w, uint32_t t = 0u);
 
-    bool isWeak() const override;
-    virtual Attribute* clone(StringPool* newPool) const override;
-    void printMask(std::ostream& out) const;
-    virtual void print(std::ostream& out) const override;
+    Attribute* clone(StringPool* newPool) const override;
+    void printMask(std::ostream* out) const;
+    void print(std::ostream* out) const override;
+    bool matches(const Item* item, DiagMessage* outMsg) const;
 };
 
 struct Style : public BaseValue<Style> {
@@ -232,7 +280,7 @@ struct Style : public BaseValue<Style> {
         std::unique_ptr<Item> value;
     };
 
-    Reference parent;
+    Maybe<Reference> parent;
 
     /**
      * If set to true, the parent was auto inferred from the
@@ -243,14 +291,14 @@ struct Style : public BaseValue<Style> {
     std::vector<Entry> entries;
 
     Style* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 struct Array : public BaseValue<Array> {
     std::vector<std::unique_ptr<Item>> items;
 
     Array* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 struct Plural : public BaseValue<Plural> {
@@ -267,180 +315,31 @@ struct Plural : public BaseValue<Plural> {
     std::array<std::unique_ptr<Item>, Count> values;
 
     Plural* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 struct Styleable : public BaseValue<Styleable> {
     std::vector<Reference> entries;
 
     Styleable* clone(StringPool* newPool) const override;
-    void print(std::ostream& out) const override;
+    void print(std::ostream* out) const override;
 };
 
 /**
  * Stream operator for printing Value objects.
  */
 inline ::std::ostream& operator<<(::std::ostream& out, const Value& value) {
-    value.print(out);
+    value.print(&out);
     return out;
 }
 
 inline ::std::ostream& operator<<(::std::ostream& out, const Attribute::Symbol& s) {
-    return out << s.symbol.name.entry << "=" << s.value;
-}
-
-/**
- * The argument object that gets passed through the value
- * back to the ValueVisitor. Subclasses of ValueVisitor should
- * subclass ValueVisitorArgs to contain the data they need
- * to operate.
- */
-struct ValueVisitorArgs {};
-
-/**
- * Visits a value and runs the appropriate method based on its type.
- */
-struct ValueVisitor {
-    virtual void visit(Reference& reference, ValueVisitorArgs& args) {
-        visitItem(reference, args);
+    if (s.symbol.name) {
+        out << s.symbol.name.value().entry;
+    } else {
+        out << "???";
     }
-
-    virtual void visit(RawString& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(String& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(StyledString& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(FileReference& file, ValueVisitorArgs& args) {
-        visitItem(file, args);
-    }
-
-    virtual void visit(Id& id, ValueVisitorArgs& args) {
-        visitItem(id, args);
-    }
-
-    virtual void visit(BinaryPrimitive& primitive, ValueVisitorArgs& args) {
-        visitItem(primitive, args);
-    }
-
-    virtual void visit(Attribute& attr, ValueVisitorArgs& args) {}
-    virtual void visit(Style& style, ValueVisitorArgs& args) {}
-    virtual void visit(Array& array, ValueVisitorArgs& args) {}
-    virtual void visit(Plural& array, ValueVisitorArgs& args) {}
-    virtual void visit(Styleable& styleable, ValueVisitorArgs& args) {}
-
-    virtual void visitItem(Item& item, ValueVisitorArgs& args) {}
-};
-
-/**
- * Const version of ValueVisitor.
- */
-struct ConstValueVisitor {
-    virtual void visit(const Reference& reference, ValueVisitorArgs& args) {
-        visitItem(reference, args);
-    }
-
-    virtual void visit(const RawString& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(const String& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(const StyledString& string, ValueVisitorArgs& args) {
-        visitItem(string, args);
-    }
-
-    virtual void visit(const FileReference& file, ValueVisitorArgs& args) {
-        visitItem(file, args);
-    }
-
-    virtual void visit(const Id& id, ValueVisitorArgs& args) {
-        visitItem(id, args);
-    }
-
-    virtual void visit(const BinaryPrimitive& primitive, ValueVisitorArgs& args) {
-        visitItem(primitive, args);
-    }
-
-    virtual void visit(const Attribute& attr, ValueVisitorArgs& args) {}
-    virtual void visit(const Style& style, ValueVisitorArgs& args) {}
-    virtual void visit(const Array& array, ValueVisitorArgs& args) {}
-    virtual void visit(const Plural& array, ValueVisitorArgs& args) {}
-    virtual void visit(const Styleable& styleable, ValueVisitorArgs& args) {}
-
-    virtual void visitItem(const Item& item, ValueVisitorArgs& args) {}
-};
-
-/**
- * Convenience Visitor that forwards a specific type to a function.
- * Args are not used as the function can bind variables. Do not use
- * directly, use the wrapper visitFunc() method.
- */
-template <typename T, typename TFunc>
-struct ValueVisitorFunc : ValueVisitor {
-    TFunc func;
-
-    explicit ValueVisitorFunc(TFunc f) : func(f) {
-    }
-
-    void visit(T& value, ValueVisitorArgs&) override {
-        func(value);
-    }
-};
-
-/**
- * Const version of ValueVisitorFunc.
- */
-template <typename T, typename TFunc>
-struct ConstValueVisitorFunc : ConstValueVisitor {
-    TFunc func;
-
-    explicit ConstValueVisitorFunc(TFunc f) : func(f) {
-    }
-
-    void visit(const T& value, ValueVisitorArgs&) override {
-        func(value);
-    }
-};
-
-template <typename T, typename TFunc>
-void visitFunc(Value& value, TFunc f) {
-    ValueVisitorFunc<T, TFunc> visitor(f);
-    value.accept(visitor, ValueVisitorArgs{});
-}
-
-template <typename T, typename TFunc>
-void visitFunc(const Value& value, TFunc f) {
-    ConstValueVisitorFunc<T, TFunc> visitor(f);
-    value.accept(visitor, ValueVisitorArgs{});
-}
-
-template <typename Derived>
-void BaseValue<Derived>::accept(ValueVisitor& visitor, ValueVisitorArgs&& args) {
-    visitor.visit(static_cast<Derived&>(*this), args);
-}
-
-template <typename Derived>
-void BaseValue<Derived>::accept(ConstValueVisitor& visitor, ValueVisitorArgs&& args) const {
-    visitor.visit(static_cast<const Derived&>(*this), args);
-}
-
-template <typename Derived>
-void BaseItem<Derived>::accept(ValueVisitor& visitor, ValueVisitorArgs&& args) {
-    visitor.visit(static_cast<Derived&>(*this), args);
-}
-
-template <typename Derived>
-void BaseItem<Derived>::accept(ConstValueVisitor& visitor, ValueVisitorArgs&& args) const {
-    visitor.visit(static_cast<const Derived&>(*this), args);
+    return out << "=" << s.value;
 }
 
 } // namespace aapt

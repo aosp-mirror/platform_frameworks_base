@@ -1,0 +1,307 @@
+page.title=Nguyên tắc Thiết kế Android
+@jd:body
+
+<p>Những nguyên tắc thiết kế này được xây dựng bởi và dành cho
+Nhóm Trải nghiệm Người dùng Android để đảm bảo lợi ích tốt nhất cho người dùng.
+Đối với nhà phát triển và nhà thiết kế Android, chúng tiếp tục
+nhấn mạnh những nguyên tắc chỉ đạo thiết kế chi tiết hơn dành cho các loại
+thiết bị khác nhau.</p>
+
+<p>
+Hãy cân nhắc những nguyên tắc này khi áp dụng sự sáng tạo
+và tư duy thiết kế của mình. Thay đổi có mục đích.
+</p>
+
+<h2 id="enchant-me">Thu hút tôi</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="delight-me">Khiến tôi xao xuyến vì ngạc nhiên</h4>
+<p>Cảnh vật đẹp, hoạt hình được bố trí cẩn thận hay hiệu ứng âm thanh đúng lúc khiến
+trải nghiệm càng thêm phần thích thú. Hiệu ứng tinh tế góp phần đem lại cảm giác nhẹ nhàng nhưng
+mạnh mẽ trong tầm tay.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="real-objects-more-fun">Các đối tượng đời thật trông thú vị hơn các nút bấm và menu</h4>
+<p>Để người dùng trực tiếp chạm và thao tác các đối tượng trong ứng dụng của bạn. Làm như vậy vừa giảm nỗ lực nhận thức
+cần thiết để thực hiện một tác vụ, vừa đem lại sự thỏa mãn về cảm xúc.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="make-it-mine">Hãy để tôi biến nó thành của mình</h4>
+<p>Người dùng thích cảm giác tiếp xúc cá nhân bởi nó giúp họ cảm thấy rất tự nhiên và nắm quyền kiểm soát. Cung cấp
+thiết lập mặc định tuyệt đẹp, dễ cảm nhận, nhưng cũng phải xét đến những tùy chỉnh thú vị, có thể lựa chọn để không cản trở
+nhiệm vụ chính yếu.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="get-to-know-me">Hiểu rõ về tôi</h4>
+<p>Tìm hiểu sở thích của người dùng qua thời gian. Thay vì bảo họ chọn
+đi chọn lại cùng một thứ, hãy bố trí để những lựa chọn trước đó dễ dàng trong tầm với.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">Đơn giản hóa cuộc sống của tôi</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="keep-it-brief">Hãy ngắn gọn</h4>
+<p>Sử dụng những cụm từ ngắn với từ ngữ đơn giản. Người dùng thường hay bỏ qua những câu dài dòng.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="pictures-faster-than-words">Hình ảnh đến nhanh hơn câu chữ</h4>
+<p>Hãy nghĩ đến việc dùng hình ảnh để giải thích ý tưởng. Chúng dễ thu hút sự chú ý của người dùng và có thể hiệu quả hơn nhiều
+so với từ ngữ.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="decide-for-me">Quyết định hộ tôi nhưng phải để tôi “chốt hạ”</h4>
+<p>Hãy đưa ra phán đoán tốt nhất và hành động thay vì hỏi trước. Quá nhiều lựa chọn và quyết định khiến người dùng
+không vui. Phòng trường hợp bạn sai, hãy cho 'hoàn tác'.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="only-show-when-i-need-it">Chỉ hiện những thứ tôi cần khi tôi cần đến</h4>
+<p>Người dùng sẽ bị quá tải khi họ thấy quá nhiều thứ cùng lúc. Hãy chia các tác vụ và thông tin thành những đoạn nhỏ,
+dễ nắm bắt. Ẩn những tùy chọn không thiết yếu vào thời điểm đó và nhắc người dùng khi đi qua chúng.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="always-know-where-i-am">Tôi cần luôn biết mình đang ở đâu</h4>
+<p>Khiến người khác tự tin rằng họ biết mình đang ở đâu. Khiến những địa điểm trong ứng dụng của bạn trông khác biệt
+và sử dụng chuyển tiếp để thể hiện mối quan hệ giữa các màn hình. Cung cấp phản hồi về các tác vụ đang diễn ra.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="never-lose-my-stuff">Không bao giờ đánh mất những thứ của tôi</h4>
+<p>Lưu những thứ người dùng mất thời gian để tạo và cho phép họ truy cập chúng từ mọi nơi. Nhớ các cài đặt,
+thao tác chạm cá nhân và nội dung khởi tạo giữa các điện thoại, máy tính bảng và máy tính. Điều đó sẽ khiến việc nâng cấp
+trở nên dễ dàng nhất trên đời.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="looks-same-should-act-same">Nếu bề ngoài giống nhau thì hành động cũng phải như nhau</h4>
+<p>Giúp người dùng phân biệt sự khác nhau về chức năng bằng cách khiến bề ngoài trông khác biệt thay vì chỉ khác một chút.
+Tránh những chế độ trông giống nhau nhưng lại phản hồi khác nhau với cùng nội dung đầu vào.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="interrupt-only-if-important">Chỉ làm tôi gián đoạn nếu thật sự quan trọng</h4>
+<p>Như một trợ lý cá nhân đúng nghĩa, hãy tránh làm người dùng mất thời gian vào thứ không quan trọng. Người dùng thường muốn
+tập trung và trừ trường hợp rất quan trọng và nhạy cảm về thời gian, nếu không việc gián đoạn có thể khiến họ khó chịu.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">Làm tôi ấn tượng</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="give-me-tricks">Cho tôi xem những trò có thể áp dụng ở mọi nơi</h4>
+<p>Người dùng thấy thích thú khi họ tự khám phá mọi thứ. Thiết kế ứng dụng của bạn dễ học hỏi hơn nhờ
+tận dụng các kiểu mẫu trực quan và trí nhớ có điều kiện từ các ứng dụng Android khác. Ví dụ, cử chỉ trượt nhanh
+có thể là một lối tắt điều hướng hay.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="its-not-my-fault">Không phải lỗi của tôi</h4>
+<p>Nhẹ nhàng trong cách nhắc người dùng sửa lỗi. Họ luôn muốn cảm thấy thông minh khi dùng ứng dụng
+của bạn. Nếu có gì đó không đúng, hãy đưa ra chỉ dẫn khắc phục rõ ràng nhưng bỏ qua những chi tiết kỹ thuật.
+Nếu bạn có thể khắc phục mà không làm phiền họ thì càng tuyệt.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="sprinkle-encouragement">Khơi gợi sự khuyến khích</h4>
+<p>Chia các nhiệm vụ phức tạp thành nhiều bước nhỏ hơn và dễ hoàn thành. Phản hồi hành động,
+kể cả khi đó chỉ là một vầng sáng nhỏ.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="do-heavy-lifting-for-me">Làm giúp tôi những chuyện nặng nhọc</h4>
+<p>Khiến người mới cảm thấy mình như chuyên gia bằng cách cho phép họ làm những việc mà họ chưa từng nghĩ mình có thể làm được. Ví
+dụ, các lối tắt kết hợp nhiều hiệu ứng ảnh chụp có thể khiến một bức ảnh nghiệp dư trở nên đáng kinh ngạc
+chỉ sau vài bước.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="make-important-things-fast">Nhanh chóng đến phần quan trọng</h4>
+<p>Không phải hành động nào cũng như nhau. Quyết định xem điều gì là quan trọng nhất trong ứng dụng của bạn và khiến nó dễ tìm thấy và
+nhanh chóng được sử dụng, ví dụ như nút chụp trong camera hoặc nút tạm dừng trong một trình phát nhạc.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>

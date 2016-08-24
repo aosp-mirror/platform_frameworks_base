@@ -19,7 +19,6 @@ package com.android.documentsui;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
-import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 
 import java.util.Collection;
@@ -51,7 +50,7 @@ public class RootsLoader extends AsyncTaskLoader<Collection<RootInfo>> {
         if (isReset()) {
             return;
         }
-        Collection<RootInfo> oldResult = mResult;
+
         mResult = result;
 
         if (isStarted()) {

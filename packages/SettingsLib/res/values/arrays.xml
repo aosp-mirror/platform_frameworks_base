@@ -78,4 +78,312 @@
         <!-- Status message of Wi-Fi when connectiong is being verified. -->
         <item>Temporarily avoiding poor connection</item>
     </string-array>
+
+    <!-- Titles for HDCP checking preference. [CHAR LIMIT=35] -->
+    <string-array name="hdcp_checking_titles">
+        <item>Never check</item>
+        <item>Check for DRM content only</item>
+        <item>Always check</item>
+    </string-array>
+
+    <!-- Values for HDCP checking preference. -->
+    <string-array name="hdcp_checking_values" translatable="false" >
+        <item>never</item>
+        <item>drm-only</item>
+        <item>always</item>
+    </string-array>
+
+    <!-- Summaries for HDCP checking preference. [CHAR LIMIT=100]-->
+    <string-array name="hdcp_checking_summaries" >
+        <item>Never use HDCP checking</item>
+        <item>Use HDCP checking for DRM content only</item>
+        <item>Always use HDCP checking</item>
+    </string-array>
+
+    <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
+    <string-array name="select_logd_size_titles">
+        <item>Off</item>
+        <item>64K</item>
+        <item>256K</item>
+        <item>1M</item>
+        <item>4M</item>
+        <item>16M</item>
+    </string-array>
+
+    <!-- Titles for logd limit size lowram selection preference. [CHAR LIMIT=14] -->
+    <string-array name="select_logd_size_lowram_titles">
+        <item>Off</item>
+        <item>64K</item>
+        <item>256K</item>
+        <item>1M</item>
+    </string-array>
+
+    <!-- Values for logd limit size selection preference. -->
+    <string-array name="select_logd_size_values" translatable="false" >
+        <item>32768</item>
+        <item>65536</item>
+        <item>262144</item>
+        <item>1048576</item>
+        <item>4194304</item>
+        <item>16777216</item>
+    </string-array>
+
+    <!-- Summaries for logd limit size selection preference. [CHAR LIMIT=50]-->
+    <string-array name="select_logd_size_summaries" >
+        <item>Off</item>
+        <item>64K per log buffer</item>
+        <item>256K per log buffer</item>
+        <item>1M per log buffer</item>
+        <item>4M per log buffer</item>
+        <item>16M per log buffer</item>
+    </string-array>
+
+    <!-- Values for logpersist state selection preference. -->
+    <string-array name="select_logpersist_values" translatable="false" >
+        <item></item>
+        <item>all</item>
+        <item>default,security,kernel</item>
+        <item>kernel</item>
+    </string-array>
+
+    <!-- Titles for logpersist state selection preference. [CHAR LIMIT=26] -->
+    <string-array name="select_logpersist_titles">
+        <item>Off</item>
+        <item>All</item>
+        <item>All but radio</item>
+        <item>kernel only</item>
+    </string-array>
+
+    <!-- Summaries for logpersist state selection preference. [CHAR LIMIT=50]-->
+    <string-array name="select_logpersist_summaries" >
+        <item>Off</item>
+        <item>All log buffers</item>
+        <item>All but radio log buffers</item>
+        <item>kernel log buffer only</item>
+    </string-array>
+
+    <!-- Titles for window animation scale preference. [CHAR LIMIT=35] -->
+    <string-array name="window_animation_scale_entries">
+        <item>Animation off</item>
+        <item>Animation scale .5x</item>
+        <item>Animation scale 1x</item>
+        <item>Animation scale 1.5x</item>
+        <item>Animation scale 2x</item>
+        <item>Animation scale 5x</item>
+        <item>Animation scale 10x</item>
+    </string-array>
+
+    <!-- Values for window animation scale preference. -->
+    <string-array name="window_animation_scale_values" translatable="false" >
+        <item>0</item>
+        <item>.5</item>
+        <item>1</item>
+        <item>1.5</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
+
+    <!-- Titles for transition animation scale preference. [CHAR LIMIT=35] -->
+    <string-array name="transition_animation_scale_entries">
+        <item>Animation off</item>
+        <item>Animation scale .5x</item>
+        <item>Animation scale 1x</item>
+        <item>Animation scale 1.5x</item>
+        <item>Animation scale 2x</item>
+        <item>Animation scale 5x</item>
+        <item>Animation scale 10x</item>
+    </string-array>
+
+    <!-- Values for transition animation scale preference. -->
+    <string-array name="transition_animation_scale_values" translatable="false" >
+        <item>0</item>
+        <item>.5</item>
+        <item>1</item>
+        <item>1.5</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
+
+    <!-- Titles for animator duration scale preference. [CHAR LIMIT=35] -->
+    <string-array name="animator_duration_scale_entries">
+        <item>Animation off</item>
+        <item>Animation scale .5x</item>
+        <item>Animation scale 1x</item>
+        <item>Animation scale 1.5x</item>
+        <item>Animation scale 2x</item>
+        <item>Animation scale 5x</item>
+        <item>Animation scale 10x</item>
+    </string-array>
+
+    <!-- Values for animator duration scale preference. -->
+    <string-array name="animator_duration_scale_values" translatable="false" >
+        <item>0</item>
+        <item>.5</item>
+        <item>1</item>
+        <item>1.5</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
+
+    <!-- Titles for overlay display devices preference. [CHAR LIMIT=35] -->
+    <string-array name="overlay_display_devices_entries">
+        <item>None</item>
+        <item>480p</item>
+        <item>480p (secure)</item>
+        <item>720p</item>
+        <item>720p (secure)</item>
+        <item>1080p</item>
+        <item>1080p (secure)</item>
+        <item>4K</item>
+        <item>4K (secure)</item>
+        <item>4K (upscaled)</item>
+        <item>4K (upscaled, secure)</item>
+        <item>720p, 1080p (dual screen)</item>
+    </string-array>
+
+    <!-- Values for overlay display devices preference. -->
+    <string-array name="overlay_display_devices_values" translatable="false" >
+        <item></item>
+        <item>720x480/142</item>
+        <item>720x480/142,secure</item>
+        <item>1280x720/213</item>
+        <item>1280x720/213,secure</item>
+        <item>1920x1080/320</item>
+        <item>1920x1080/320,secure</item>
+        <item>3840x2160/320</item>
+        <item>3840x2160/320,secure</item>
+        <item>1920x1080/320|3840x2160/640</item>
+        <item>1920x1080/320|3840x2160/640,secure</item>
+        <item>1280x720/213;1920x1080/320</item>
+    </string-array>
+
+    <!-- Titles for OpenGL traces preference. [CHAR LIMIT=35] -->
+    <string-array name="enable_opengl_traces_entries">
+        <item>None</item>
+        <item>Logcat</item>
+        <item>Systrace (Graphics)</item>
+        <item>Call stack on glGetError</item>
+    </string-array>
+
+    <!-- Values for OpenGL traces preference. -->
+    <string-array name="enable_opengl_traces_values" translatable="false" >
+        <item>0</item>
+        <item>1</item>
+        <item>systrace</item>
+        <item>error</item>
+    </string-array>
+
+    <!-- Titles for non-rectangular clipping preference. [CHAR LIMIT=35] -->
+    <string-array name="show_non_rect_clip_entries">
+        <item>Off</item>
+        <item>Draw non-rectangular clip region in blue</item>
+        <item>Highlight tested drawing commands in green</item>
+    </string-array>
+
+    <!-- Values for non-rectangular clipping preference. -->
+    <string-array name="show_non_rect_clip_values" translatable="false" >
+        <item>hide</item>
+        <item>region</item>
+        <item>highlight</item>
+    </string-array>
+
+    <!-- Titles for frame time tracking preference. [CHAR LIMIT=35] -->
+    <string-array name="track_frame_time_entries">
+        <item>Off</item>
+        <item>On screen as bars</item>
+        <item>In adb shell dumpsys gfxinfo</item>
+    </string-array>
+
+    <!-- Values for frame time tracking preference. -->
+    <string-array name="track_frame_time_values" translatable="false" >
+        <item>false</item>
+        <item>visual_bars</item>
+        <item>true</item>
+    </string-array>
+
+    <!-- Titles for debug overdraw preference. [CHAR LIMIT=50] -->
+    <string-array name="debug_hw_overdraw_entries">
+        <item>Off</item>
+        <item>Show overdraw areas</item>
+        <item>Show areas for Deuteranomaly</item>
+    </string-array>
+
+    <!-- Values for debug overdraw preference. -->
+    <string-array name="debug_hw_overdraw_values" translatable="false" >
+        <item>false</item>
+        <item>show</item>
+        <item>show_deuteranomaly</item>
+    </string-array>
+
+    <!-- Titles for app process limit preference. [CHAR LIMIT=35] -->
+    <string-array name="app_process_limit_entries">
+        <item>Standard limit</item>
+        <item>No background processes</item>
+        <item>At most 1 process</item>
+        <item>At most 2 processes</item>
+        <item>At most 3 processes</item>
+        <item>At most 4 processes</item>
+    </string-array>
+
+    <!-- Values for app process limit preference. -->
+    <string-array name="app_process_limit_values" translatable="false" >
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <!-- USB configuration names for Developer Settings.
+         This can be overridden by devices with additional USB configurations. -->
+    <string-array name="usb_configuration_titles">
+        <item>Charging</item>
+        <item>MTP (Media Transfer Protocol)</item>
+        <item>PTP (Picture Transfer Protocol)</item>
+        <item>RNDIS (USB Ethernet)</item>
+        <item>Audio Source</item>
+        <item>MIDI</item>
+    </string-array>
+
+    <!-- USB configuration values for Developer Settings.
+         These are lists of USB functions passed to the USB Manager to change USB configuraton.
+         This can be overridden by devices with additional USB configurations.
+         Do not translate. -->
+    <string-array name="usb_configuration_values" translatable="false">
+        <!-- Do not translate. -->
+        <item>none</item>
+        <!-- Do not translate. -->
+        <item>mtp</item>
+        <!-- Do not translate. -->
+        <item>ptp</item>
+        <!-- Do not translate. -->
+        <item>rndis</item>
+        <!-- Do not translate. -->
+        <item>audio_source</item>
+        <!-- Do not translate. -->
+        <item>midi</item>
+    </string-array>
+
+    <!-- Display color space adjustment modes for developers -->
+    <string-array name="simulate_color_space_entries" translatable="false">
+        <item>@string/daltonizer_mode_disabled</item>
+        <item>@string/daltonizer_mode_monochromacy</item>
+        <item>@string/daltonizer_mode_deuteranomaly</item>
+        <item>@string/daltonizer_mode_protanomaly</item>
+        <item>@string/daltonizer_mode_tritanomaly</item>
+    </string-array>
+
+    <!-- Values for display color space adjustment modes for developers -->
+    <string-array name="simulate_color_space_values" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>2</item>
+        <item>1</item>
+        <item>3</item>
+    </string-array>
+
 </resources>

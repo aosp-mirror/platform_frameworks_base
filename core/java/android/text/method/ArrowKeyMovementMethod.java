@@ -20,7 +20,6 @@ import android.graphics.Rect;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -222,33 +221,26 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         return lineEnd(widget, buffer);
     }
 
-    private static boolean isTouchSelecting(boolean isMouse, Spannable buffer) {
-        return isMouse ? Touch.isActivelySelecting(buffer) : isSelecting(buffer);
-    }
-
     @Override
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
         int initialScrollX = -1;
         int initialScrollY = -1;
         final int action = event.getAction();
-        final boolean isMouse = event.isFromSource(InputDevice.SOURCE_MOUSE);
 
         if (action == MotionEvent.ACTION_UP) {
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
             initialScrollY = Touch.getInitialScrollY(widget, buffer);
         }
 
+        boolean wasTouchSelecting = isSelecting(buffer);
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
-        if (widget.didTouchFocusSelect() && !isMouse) {
+        if (widget.didTouchFocusSelect()) {
             return handled;
         }
         if (action == MotionEvent.ACTION_DOWN) {
-            // Capture the mouse pointer down location to ensure selection starts
-            // right under the mouse (and is not influenced by cursor location).
-            // The code below needs to run for mouse events.
             // For touch events, the code should run only when selection is active.
-            if (isMouse || isTouchSelecting(isMouse, buffer)) {
+            if (isSelecting(buffer)) {
                 if (!widget.isFocused()) {
                     if (!widget.requestFocus()) {
                         return handled;
@@ -264,15 +256,8 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
             }
         } else if (widget.isFocused()) {
             if (action == MotionEvent.ACTION_MOVE) {
-                // Cursor can be active at any location in the text while mouse pointer can start
-                // selection from a totally different location. Use LAST_TAP_DOWN span to ensure
-                // text selection will start from mouse pointer location.
-                if (isMouse && Touch.isSelectionStarted(buffer)) {
-                    int offset = buffer.getSpanStart(LAST_TAP_DOWN);
-                    Selection.setSelection(buffer, offset);
-                }
-
-                if (isTouchSelecting(isMouse, buffer) && handled) {
+                if (isSelecting(buffer) && handled) {
+                    final int startOffset = buffer.getSpanStart(LAST_TAP_DOWN);
                     // Before selecting, make sure we've moved out of the "slop".
                     // handled will be true, if we're in select mode AND we're
                     // OUT of the slop
@@ -284,9 +269,9 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     // Update selection as we're moving the selection area.
 
                     // Get the current touch position
-                    int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-
-                    Selection.extendSelection(buffer, offset);
+                    final int offset = widget.getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection(buffer, Math.min(startOffset, offset),
+                            Math.max(startOffset, offset));
                     return true;
                 }
             } else if (action == MotionEvent.ACTION_UP) {
@@ -300,10 +285,12 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     return true;
                 }
 
-                int offset = widget.getOffsetForPosition(event.getX(), event.getY());
-                if (isTouchSelecting(isMouse, buffer)) {
+                if (wasTouchSelecting) {
+                    final int startOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+                    final int endOffset = widget.getOffsetForPosition(event.getX(), event.getY());
+                    Selection.setSelection(buffer, Math.min(startOffset, endOffset),
+                            Math.max(startOffset, endOffset));
                     buffer.removeSpan(LAST_TAP_DOWN);
-                    Selection.extendSelection(buffer, offset);
                 }
 
                 MetaKeyKeyListener.adjustMetaAfterKeypress(buffer);

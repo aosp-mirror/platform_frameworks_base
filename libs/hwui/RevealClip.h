@@ -51,7 +51,10 @@ public:
         outBounds->set(mX - mRadius, mY - mRadius,
                 mX + mRadius, mY + mRadius);
     }
+
     float getRadius() const { return mRadius; }
+    float getX() const { return mX; }
+    float getY() const { return mY; }
 
     const SkPath* getPath() const {
         if (!mShouldClip) return nullptr;

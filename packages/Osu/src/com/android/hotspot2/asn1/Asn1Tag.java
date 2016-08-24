@@ -1,0 +1,31 @@
+package com.android.hotspot2.asn1;
+
+public enum Asn1Tag {
+    UNIVZERO,
+    BOOLEAN,
+    INTEGER,
+    BITSTRING,
+    OCTET_STRING,
+    NULL,
+    OID,
+    ObjectDescriptor,
+    EXTERNAL,
+    REAL,
+    ENUMERATED,
+    UTF8String,
+    RelativeOID,
+    SEQUENCE,
+    SET,
+    NumericString,
+    PrintableString,
+    T61String,
+    VideotexString,
+    IA5String,
+    UTCTime,
+    GeneralizedTime,
+    GraphicString,
+    VisibleString,
+    GeneralString,
+    UniversalString,
+    BMPString
+}
