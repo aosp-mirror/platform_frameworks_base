@@ -18,7 +18,6 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-#include "io/File.h"
 #include "util/Util.h"
 
 #include <algorithm>
@@ -66,7 +65,7 @@ void RawString::print(std::ostream* out) const {
     *out << "(raw string) " << *value;
 }
 
-Reference::Reference() : referenceType(Reference::Type::kResource) {
+Reference::Reference() : referenceType(Type::kResource) {
 }
 
 Reference::Reference(const ResourceNameRef& n, Type t) :
@@ -74,6 +73,10 @@ Reference::Reference(const ResourceNameRef& n, Type t) :
 }
 
 Reference::Reference(const ResourceId& i, Type type) : id(i), referenceType(type) {
+}
+
+Reference::Reference(const ResourceNameRef& n, const ResourceId& i) :
+        name(n.toResourceName()), id(i), referenceType(Type::kResource) {
 }
 
 bool Reference::equals(const Value* value) const {
@@ -747,8 +750,16 @@ bool operator!=(const Reference& a, const Reference& b) {
     return a.name != b.name || a.id != b.id;
 }
 
+struct NameOnlyComparator {
+    bool operator()(const Reference& a, const Reference& b) const {
+        return a.name < b.name;
+    }
+};
+
 void Styleable::mergeWith(Styleable* other) {
-    std::set<Reference> references;
+    // Compare only names, because some References may already have their IDs assigned
+    // (framework IDs that don't change).
+    std::set<Reference, NameOnlyComparator> references;
     references.insert(entries.begin(), entries.end());
     references.insert(other->entries.begin(), other->entries.end());
     entries.clear();

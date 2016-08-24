@@ -83,19 +83,19 @@ public:
 
     void visit(Attribute* attr) override {
         {
-            Reference key = Reference(ResTable_map::ATTR_TYPE);
+            Reference key = Reference(ResourceId(ResTable_map::ATTR_TYPE));
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, attr->typeMask);
             flattenEntry(&key, &val);
         }
 
         if (attr->minInt != std::numeric_limits<int32_t>::min()) {
-            Reference key = Reference(ResTable_map::ATTR_MIN);
+            Reference key = Reference(ResourceId(ResTable_map::ATTR_MIN));
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->minInt));
             flattenEntry(&key, &val);
         }
 
         if (attr->maxInt != std::numeric_limits<int32_t>::max()) {
-            Reference key = Reference(ResTable_map::ATTR_MAX);
+            Reference key = Reference(ResourceId(ResTable_map::ATTR_MAX));
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->maxInt));
             flattenEntry(&key, &val);
         }

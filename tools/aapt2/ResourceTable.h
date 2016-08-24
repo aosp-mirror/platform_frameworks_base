@@ -38,8 +38,8 @@ namespace aapt {
 
 enum class SymbolState {
     kUndefined,
+    kPrivate,
     kPublic,
-    kPrivate
 };
 
 /**
@@ -185,13 +185,18 @@ class ResourceTable {
 public:
     ResourceTable() = default;
 
+    enum class CollisionResult {
+        kKeepOriginal,
+        kConflict,
+        kTakeNew
+    };
+
+    using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*)>;
+
     /**
      * When a collision of resources occurs, this method decides which value to keep.
-     * Returns -1 if the existing value should be chosen.
-     * Returns 0 if the collision can not be resolved (error).
-     * Returns 1 if the incoming value should be chosen.
      */
-    static int resolveValueCollision(Value* existing, Value* incoming);
+    static CollisionResult resolveValueCollision(Value* existing, Value* incoming);
 
     bool addResource(const ResourceNameRef& name,
                      const ConfigDescription& config,
@@ -299,7 +304,7 @@ private:
                          const StringPiece& product,
                          std::unique_ptr<Value> value,
                          const char* validChars,
-                         const std::function<int(Value*,Value*)>& conflictResolver,
+                         const CollisionResolverFunc& conflictResolver,
                          IDiagnostics* diag);
 
     bool setSymbolStateImpl(const ResourceNameRef& name,
