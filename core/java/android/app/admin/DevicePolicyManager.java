@@ -6465,6 +6465,18 @@ public class DevicePolicyManager {
         }
     }
 
+    /**
+     * @hide
+     * Force update user setup completed status
+     */
+    public void forceUpdateUserSetupComplete() {
+        try {
+            mService.forceUpdateUserSetupComplete();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     private void throwIfParentInstance(String functionName) {
         if (mParentInstance) {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
