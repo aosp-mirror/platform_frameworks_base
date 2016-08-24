@@ -817,6 +817,7 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int NETWORK_SELECTION_ENABLE = 0;
         /**
+         * @deprecated it is not used any more.
          * This network is disabled because higher layer (>2) network is bad
          */
         public static final int DISABLED_BAD_LINK = 1;
@@ -862,7 +863,7 @@ public class WifiConfiguration implements Parcelable {
          */
         private static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
                 "NETWORK_SELECTION_ENABLE",
-                "NETWORK_SELECTION_DISABLED_BAD_LINK",
+                "NETWORK_SELECTION_DISABLED_BAD_LINK", // deprecated
                 "NETWORK_SELECTION_DISABLED_ASSOCIATION_REJECTION ",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DHCP_FAILURE",
