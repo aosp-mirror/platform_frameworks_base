@@ -41,11 +41,13 @@ import java.util.TimeZone;
  */
 public class NetworkPolicyManager {
 
-    /* POLICY_* are masks and can be ORed */
+    /* POLICY_* are masks and can be ORed, although currently they are not.*/
     /** No specific network policy, use system default. */
     public static final int POLICY_NONE = 0x0;
     /** Reject network usage on metered networks when application in background. */
     public static final int POLICY_REJECT_METERED_BACKGROUND = 0x1;
+    /** Allow metered network use in the background even when in data usage save mode. */
+    public static final int POLICY_ALLOW_METERED_BACKGROUND = 0x4;
 
     /*
      * Rules defining whether an uid has access to a network given its type (metered / non-metered).
