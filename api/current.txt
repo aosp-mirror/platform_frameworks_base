@@ -60882,7 +60882,7 @@ package javax.crypto {
     field protected byte[] encodedParams;
   }
 
-  public abstract interface SecretKey implements java.security.Key {
+  public abstract interface SecretKey implements javax.security.auth.Destroyable java.security.Key {
     field public static final long serialVersionUID = -4795878709595146952L; // 0xbd719db928b8f538L
   }
 
@@ -60893,7 +60893,7 @@ package javax.crypto {
     method public static final javax.crypto.SecretKeyFactory getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException;
     method public static final javax.crypto.SecretKeyFactory getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException;
     method public static final javax.crypto.SecretKeyFactory getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException;
-    method public final java.security.spec.KeySpec getKeySpec(javax.crypto.SecretKey, java.lang.Class) throws java.security.spec.InvalidKeySpecException;
+    method public final java.security.spec.KeySpec getKeySpec(javax.crypto.SecretKey, java.lang.Class<?>) throws java.security.spec.InvalidKeySpecException;
     method public final java.security.Provider getProvider();
     method public final javax.crypto.SecretKey translateKey(javax.crypto.SecretKey) throws java.security.InvalidKeyException;
   }
@@ -60901,7 +60901,7 @@ package javax.crypto {
   public abstract class SecretKeyFactorySpi {
     ctor public SecretKeyFactorySpi();
     method protected abstract javax.crypto.SecretKey engineGenerateSecret(java.security.spec.KeySpec) throws java.security.spec.InvalidKeySpecException;
-    method protected abstract java.security.spec.KeySpec engineGetKeySpec(javax.crypto.SecretKey, java.lang.Class) throws java.security.spec.InvalidKeySpecException;
+    method protected abstract java.security.spec.KeySpec engineGetKeySpec(javax.crypto.SecretKey, java.lang.Class<?>) throws java.security.spec.InvalidKeySpecException;
     method protected abstract javax.crypto.SecretKey engineTranslateKey(javax.crypto.SecretKey) throws java.security.InvalidKeyException;
   }
 
