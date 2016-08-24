@@ -193,26 +193,20 @@ public class SurfaceView extends View {
     private boolean mGlobalListenersAdded;
 
     public SurfaceView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public SurfaceView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        this(context, attrs, 0);
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
 
-    private void init() {
         setWillNotDraw(true);
     }
 
