@@ -41,7 +41,6 @@ import java.util.List;
 public class UserManagerTest extends AndroidTestCase {
     private static final int REMOVE_CHECK_INTERVAL_MILLIS = 500; // 0.5 seconds
     private static final int REMOVE_TIMEOUT_MILLIS = 60 * 1000; // 60 seconds
-    private static final int SWITCH_CHECK_INTERVAL_MILLIS = 2 * 1000; // 2 seconds
     private static final int SWITCH_USER_TIMEOUT_MILLIS = 40 * 1000; // 40 seconds
 
     private final Object mUserRemoveLock = new Object();
@@ -347,16 +346,14 @@ public class UserManagerTest extends AndroidTestCase {
             ActivityManager am = getContext().getSystemService(ActivityManager.class);
             am.switchUser(userId);
             long time = System.currentTimeMillis();
-            while (am.getCurrentUser() != userId) {
-                try {
-                    mUserSwitchLock.wait(SWITCH_CHECK_INTERVAL_MILLIS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
-                    fail("Timeout waiting for the user switch to u" + userId);
-                }
+            try {
+                mUserSwitchLock.wait(SWITCH_USER_TIMEOUT_MILLIS);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (System.currentTimeMillis() - time > SWITCH_USER_TIMEOUT_MILLIS) {
+                fail("Timeout waiting for the user switch to u" + userId);
             }
         }
     }
