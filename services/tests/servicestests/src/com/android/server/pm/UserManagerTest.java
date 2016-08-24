@@ -39,6 +39,9 @@ import java.util.List;
 
 /** Test {@link UserManager} functionality. */
 public class UserManagerTest extends AndroidTestCase {
+    // Taken from UserManagerService
+    private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // 30 years
+
     private static final int REMOVE_CHECK_INTERVAL_MILLIS = 500; // 0.5 seconds
     private static final int REMOVE_TIMEOUT_MILLIS = 60 * 1000; // 60 seconds
     private static final int SWITCH_USER_TIMEOUT_MILLIS = 40 * 1000; // 40 seconds
@@ -204,18 +207,28 @@ public class UserManagerTest extends AndroidTestCase {
     @MediumTest
     public void testGetUserCreationTime() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
+        final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
                 UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+        final long endTime = System.currentTimeMillis();
         assertNotNull(profile);
-        assertTrue("creationTime must be set when the profile is created",
-                profile.creationTime > 0);
+        if (System.currentTimeMillis() > EPOCH_PLUS_30_YEARS) {
+            assertTrue("creationTime must be set when the profile is created",
+                    profile.creationTime >= startTime && profile.creationTime <= endTime);
+        } else {
+            assertTrue("creationTime must be 0 if the time is not > EPOCH_PLUS_30_years",
+                    profile.creationTime == 0);
+        }
         assertEquals(profile.creationTime, mUserManager.getUserCreationTime(
                 new UserHandle(profile.id)));
 
         long ownerCreationTime = mUserManager.getUserInfo(primaryUserId).creationTime;
         assertEquals(ownerCreationTime, mUserManager.getUserCreationTime(
                 new UserHandle(primaryUserId)));
+    }
 
+    @SmallTest
+    public void testGetUserCreationTime_nonExistentUser() throws Exception {
         try {
             int noSuchUserId = 100500;
             mUserManager.getUserCreationTime(new UserHandle(noSuchUserId));
@@ -224,7 +237,10 @@ public class UserManagerTest extends AndroidTestCase {
             assertTrue("SecurityException should be thrown for nonexistent user, but was: " + e,
                     e instanceof SecurityException);
         }
+    }
 
+    @SmallTest
+    public void testGetUserCreationTime_otherUser() throws Exception {
         UserInfo user = createUser("User 1", 0);
         try {
             mUserManager.getUserCreationTime(new UserHandle(user.id));
