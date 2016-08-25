@@ -114,7 +114,7 @@ import java.util.regex.Pattern;
 public class SettingsProvider extends ContentProvider {
     private static final boolean DEBUG = false;
 
-    private static final boolean DROP_DATABASE_ON_MIGRATION = !Build.IS_DEBUGGABLE;
+    private static final boolean DROP_DATABASE_ON_MIGRATION = true;
 
     private static final String LOG_TAG = "SettingsProvider";
 
@@ -2142,6 +2142,12 @@ public class SettingsProvider extends ContentProvider {
 
                     // Now upgrade should work fine.
                     onUpgradeLocked(mUserId, oldVersion, newVersion);
+
+                    // Make a note what happened, so we don't wonder why data was lost
+                    String reason = "Settings rebuilt! Current version: "
+                            + curVersion + " while expected: " + newVersion;
+                    getGlobalSettingsLocked().insertSettingLocked(
+                            Settings.Global.DATABASE_DOWNGRADE_REASON, reason, "android");
                 }
 
                 // Set the global settings version if owner.
@@ -2411,7 +2417,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion != newVersion) {
-                    Slog.w("SettingsProvider", "warning: upgrading settings database to version "
+                    Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
                             + newVersion + " left it at "
                             + currentVersion + " instead; this is probably a bug", new Throwable());
                     if (DEBUG) {
