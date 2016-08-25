@@ -6467,7 +6467,10 @@ public class DevicePolicyManager {
 
     /**
      * @hide
-     * Force update user setup completed status
+     * Force update user setup completed status. This API has no effect on user build.
+     * @throws {@link SecurityException} if the caller has no
+     *         {@link android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS} or the caller is
+     *         not {@link UserHandle.SYSTEM_USER}
      */
     public void forceUpdateUserSetupComplete() {
         try {

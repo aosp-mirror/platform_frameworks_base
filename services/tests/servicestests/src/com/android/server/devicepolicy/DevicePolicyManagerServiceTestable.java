@@ -357,5 +357,10 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         TelephonyManager getTelephonyManager() {
             return context.telephonyManager;
         }
+
+        @Override
+        boolean isBuildDebuggable() {
+            return context.buildMock.isDebuggable;
+        }
     }
 }
