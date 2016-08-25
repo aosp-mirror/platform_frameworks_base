@@ -2057,6 +2057,8 @@ i
             <!-- Controller for micro specific layout. -->
             <enum name="micro" value="1" />
         </attr>
+        <!-- @hide Offset when scrolling to a selection. -->
+        <attr name="selectionScrollOffset" format="dimension" />
     </declare-styleable>
 
     <!-- @hide -->
