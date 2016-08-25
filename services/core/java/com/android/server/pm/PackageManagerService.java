@@ -1119,6 +1119,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @Nullable String mSetupWizardPackage;
+    final @Nullable String mStorageManagerPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2470,6 +2471,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mExpectingBetter.clear();
+
+            // Resolve the storage manager.
+            mStorageManagerPackage = getStorageManagerPackageName();
 
             // Resolve protected action filters. Only the setup wizard is allowed to
             // have a high priority filter for these actions.
@@ -15387,6 +15391,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int uid = Binder.getCallingUid();
         if (uid != Process.SHELL_UID && uid != Process.ROOT_UID && uid != Process.SYSTEM_UID
                 && uid != getPackageUid(mRequiredInstallerPackage, 0, UserHandle.getUserId(uid))
+                && uid != getPackageUid(mStorageManagerPackage, 0, UserHandle.getUserId(uid))
                 && !isOrphaned(packageName)
                 && !isCallerSameAsInstaller(uid, packageName)) {
             try {
@@ -17680,6 +17685,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         } else {
             Slog.e(TAG, "There should probably be exactly one setup wizard; found " + matches.size()
                     + ": matches=" + matches);
+            return null;
+        }
+    }
+
+    private @Nullable String getStorageManagerPackageName() {
+        final Intent intent = new Intent(StorageManager.ACTION_MANAGE_STORAGE);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
+                        | MATCH_DISABLED_COMPONENTS,
+                UserHandle.myUserId());
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            Slog.e(TAG, "There should probably be exactly one storage manager; found "
+                    + matches.size() + ": matches=" + matches);
             return null;
         }
     }
