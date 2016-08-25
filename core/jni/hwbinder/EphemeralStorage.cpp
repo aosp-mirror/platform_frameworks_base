@@ -99,9 +99,9 @@ const hidl_vec<Type> *EphemeralStorage::allocTemporary ## Suffix ## Vector(    \
     item.mPtr = (void *)val;                                                   \
     mItems.push_back(item);                                                    \
                                                                                \
-    hidl_vec<Type> *vec =                                                      \
-        (hidl_vec<Type> *)allocTemporaryStorage(sizeof(hidl_vec<Type>));       \
+    void *vecPtr = allocTemporaryStorage(sizeof(hidl_vec<Type>));              \
                                                                                \
+    hidl_vec<Type> *vec = new (vecPtr) hidl_vec<Type>;                         \
     vec->setToExternal(const_cast<Type *>(val), len);                          \
                                                                                \
     return vec;                                                                \

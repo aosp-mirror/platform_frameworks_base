@@ -101,6 +101,14 @@ public class HwParcel {
 
     public native final IHwBinder readStrongBinder();
 
+    // Handle is stored as part of the blob.
+    public native final HwBlob readBuffer();
+
+    public native final HwBlob readEmbeddedBuffer(
+            long parentHandle, long offset);
+
+    public native final void writeBuffer(HwBlob blob);
+
     public native final void writeStatus(int status);
     public native final void verifySuccess();
     public native final void releaseTemporaryStorage();
