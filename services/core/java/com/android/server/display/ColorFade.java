@@ -547,6 +547,11 @@ final class ColorFade {
                 logEglError("eglChooseConfig");
                 return false;
             }
+            if (numEglConfigs[0] <= 0) {
+                Slog.e(TAG, "no valid config found");
+                return false;
+            }
+
             mEglConfig = eglConfigs[0];
         }
 
