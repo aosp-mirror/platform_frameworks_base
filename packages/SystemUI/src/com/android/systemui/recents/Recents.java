@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -46,6 +47,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
@@ -250,6 +252,19 @@ public class Recents extends SystemUI
             registerWithSystemUser();
         }
         putComponent(Recents.class, this);
+
+        // Migrate the old stack active time if necessary, otherwise, it will already be managed
+        // when the tasks are loaded in the system. See TaskPersister.restoreTasksForUserLocked().
+        long lastVisibleTaskActiveTime = Prefs.getLong(mContext,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
+        if (lastVisibleTaskActiveTime != -1) {
+            long uptime = SystemClock.elapsedRealtime();
+            Settings.Secure.putLongForUser(mContext.getContentResolver(),
+                    Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME,
+                    uptime - Math.max(0, System.currentTimeMillis() - lastVisibleTaskActiveTime),
+                    processUser);
+            Prefs.remove(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME);
+        }
     }
 
     @Override
