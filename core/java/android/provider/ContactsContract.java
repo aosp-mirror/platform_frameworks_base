@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -138,8 +139,20 @@ public final class ContactsContract {
     public static final String DIRECTORY_PARAM_KEY = "directory";
 
     /**
-     * A query parameter that limits the number of results returned. The
+     * A query parameter that limits the number of results returned for supported URIs. The
      * parameter value should be an integer.
+     *
+     * <p>This parameter is not supported by all URIs.  Supported URIs include, but not limited to,
+     * {@link Contacts#CONTENT_URI},
+     * {@link RawContacts#CONTENT_URI},
+     * {@link Data#CONTENT_URI},
+     * {@link CommonDataKinds.Phone#CONTENT_URI},
+     * {@link CommonDataKinds.Callable#CONTENT_URI},
+     * {@link CommonDataKinds.Email#CONTENT_URI},
+     * {@link CommonDataKinds.Contactables#CONTENT_URI},
+     *
+     * <p>In order to limit the number of rows returned by a non-supported URI, you can implement a
+     * {@link CursorWrapper} and override the {@link CursorWrapper#getCount()} methods.
      */
     public static final String LIMIT_PARAM_KEY = "limit";
 
@@ -437,6 +450,9 @@ public final class ContactsContract {
 
         /**
          * _ID of the default directory, which represents locally stored contacts.
+         * <b>This is only supported by {@link ContactsContract.Contacts#CONTENT_URI} and
+         * {@link ContactsContract.Contacts#CONTENT_FILTER_URI}.
+         * Other URLs do not support the concept of "visible" or "invisible" contacts.
          */
         public static final long DEFAULT = 0;
 
