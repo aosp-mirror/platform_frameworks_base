@@ -2561,7 +2561,7 @@ final class ActivityStack {
                     // what's left last time.
                     for (int i = next.newIntents.size() - 1; i >= 0; i--) {
                         final Intent intent = next.newIntents.get(i);
-                        if (!ActivityRecord.isMainIntent(intent)) {
+                        if (intent != null && !ActivityRecord.isMainIntent(intent)) {
                             allowSavedSurface = false;
                             break;
                         }
