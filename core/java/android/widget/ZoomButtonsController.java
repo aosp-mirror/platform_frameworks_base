@@ -69,7 +69,10 @@ import android.view.WindowManager.LayoutParams;
  * {@link View#onDetachedFromWindow} and from {@link View#onVisibilityChanged}
  * when <code>visibility != View.VISIBLE</code>.
  *
+ * @deprecated This functionality and UI is better handled with custom views and layouts
+ * rather than a dedicated zoom-control widget
  */
+@Deprecated
 public class ZoomButtonsController implements View.OnTouchListener {
 
     private static final String TAG = "ZoomButtonsController";

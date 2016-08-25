@@ -31,8 +31,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.graphics.Rect;
 
-
-
+/**
+ * This widget is a layout that contains several specifically-named child views that
+ * handle keyboard entry interpreted as standard phone dialpad digits.
+ *
+ * @deprecated Use a custom view or layout to handle this functionality instead
+ */
+@Deprecated
 public class DialerFilter extends RelativeLayout
 {
     public DialerFilter(Context context) {

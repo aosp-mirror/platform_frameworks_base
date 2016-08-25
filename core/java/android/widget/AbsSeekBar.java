@@ -36,6 +36,10 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+
+/**
+ * AbsSeekBar extends the capabilities of ProgressBar by adding a draggable thumb.
+ */
 public abstract class AbsSeekBar extends ProgressBar {
     private final Rect mTempRect = new Rect();
 
