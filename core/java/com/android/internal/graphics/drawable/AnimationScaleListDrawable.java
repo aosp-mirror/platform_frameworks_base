@@ -46,17 +46,17 @@ import java.io.IOException;
  */
 public class AnimationScaleListDrawable extends DrawableContainer implements Animatable {
     private static final String TAG = "AnimationScaleListDrawable";
-    private AnimatedScaleListState mAnimatedScaleListState;
+    private AnimationScaleListState mAnimationScaleListState;
     private boolean mMutated;
 
     public AnimationScaleListDrawable() {
         this(null, null);
     }
 
-    private AnimationScaleListDrawable(@Nullable AnimatedScaleListState state,
+    private AnimationScaleListDrawable(@Nullable AnimationScaleListState state,
             @Nullable Resources res) {
         // Every scale list drawable has its own constant state.
-        final AnimatedScaleListState newState = new AnimatedScaleListState(state, this, res);
+        final AnimationScaleListState newState = new AnimationScaleListState(state, this, res);
         setConstantState(newState);
         onStateChange(getState());
     }
@@ -68,7 +68,7 @@ public class AnimationScaleListDrawable extends DrawableContainer implements Ani
     @Override
     protected boolean onStateChange(int[] stateSet) {
         final boolean changed = super.onStateChange(stateSet);
-        int idx = mAnimatedScaleListState.getCurrentDrawableIndexBasedOnScale();
+        int idx = mAnimationScaleListState.getCurrentDrawableIndexBasedOnScale();
         return selectDrawable(idx) || changed;
     }
 
@@ -93,7 +93,7 @@ public class AnimationScaleListDrawable extends DrawableContainer implements Ani
     private void inflateChildElements(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        final AnimatedScaleListState state = mAnimatedScaleListState;
+        final AnimationScaleListState state = mAnimationScaleListState;
         final int innerDepth = parser.getDepth() + 1;
         int type;
         int depth;
@@ -134,7 +134,7 @@ public class AnimationScaleListDrawable extends DrawableContainer implements Ani
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mAnimatedScaleListState.mutate();
+            mAnimationScaleListState.mutate();
             mMutated = true;
         }
         return this;
@@ -172,14 +172,14 @@ public class AnimationScaleListDrawable extends DrawableContainer implements Ani
         return result;
     }
 
-    static class AnimatedScaleListState extends DrawableContainerState {
+    static class AnimationScaleListState extends DrawableContainerState {
         int[] mThemeAttrs = null;
         // The index of the last static drawable.
         int mStaticDrawableIndex = -1;
         // The index of the last animatable drawable.
         int mAnimatableDrawableIndex = -1;
 
-        AnimatedScaleListState(AnimatedScaleListState orig, AnimationScaleListDrawable owner,
+        AnimationScaleListState(AnimationScaleListState orig, AnimationScaleListDrawable owner,
                 Resources res) {
             super(orig, owner, res);
 
@@ -246,8 +246,8 @@ public class AnimationScaleListDrawable extends DrawableContainer implements Ani
     protected void setConstantState(@NonNull DrawableContainerState state) {
         super.setConstantState(state);
 
-        if (state instanceof AnimatedScaleListState) {
-            mAnimatedScaleListState = (AnimatedScaleListState) state;
+        if (state instanceof AnimationScaleListState) {
+            mAnimationScaleListState = (AnimationScaleListState) state;
         }
     }
 }
