@@ -572,7 +572,8 @@ public class AccessibilityRecord {
      */
     public void setBeforeText(CharSequence beforeText) {
         enforceNotSealed();
-        mBeforeText = beforeText;
+        mBeforeText = (beforeText == null) ? null
+                : beforeText.subSequence(0, beforeText.length());
     }
 
     /**
@@ -593,7 +594,8 @@ public class AccessibilityRecord {
      */
     public void setContentDescription(CharSequence contentDescription) {
         enforceNotSealed();
-        mContentDescription = contentDescription;
+        mContentDescription = (contentDescription == null) ? null
+                : contentDescription.subSequence(0, contentDescription.length());
     }
 
     /**
