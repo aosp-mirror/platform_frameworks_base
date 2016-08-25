@@ -227,6 +227,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /**
      *  System property whose value is either "true" or "false", indicating whether
+     *  device owner is present.
      */
     private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.device_owner";
 
