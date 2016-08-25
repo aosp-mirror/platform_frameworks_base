@@ -1063,6 +1063,7 @@ public class AccountManagerService
      * Should only be called inside of a clearCallingIdentity block.
      */
     private AuthenticatorDescription[] getAuthenticatorTypesInternal(int userId) {
+        mAuthenticatorCache.updateServices(userId);
         Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
                 authenticatorCollection = mAuthenticatorCache.getAllServices(userId);
         AuthenticatorDescription[] types =
@@ -1075,8 +1076,6 @@ public class AccountManagerService
         }
         return types;
     }
-
-
 
     private boolean isCrossUser(int callingUid, int userId) {
         return (userId != UserHandle.getCallingUserId()
