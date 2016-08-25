@@ -322,6 +322,21 @@ std::unique_ptr<XmlResource> inflate(const void* data, size_t dataLen, IDiagnost
     return util::make_unique<XmlResource>(ResourceFile{}, std::move(root));
 }
 
+std::unique_ptr<Node> Namespace::clone() {
+    auto ns = util::make_unique<Namespace>();
+    ns->comment = comment;
+    ns->lineNumber = lineNumber;
+    ns->columnNumber = columnNumber;
+    ns->namespacePrefix = namespacePrefix;
+    ns->namespaceUri = namespaceUri;
+
+    ns->children.reserve(children.size());
+    for (const std::unique_ptr<xml::Node>& child : children) {
+        ns->addChild(child->clone());
+    }
+    return std::move(ns);
+}
+
 Element* findRootElement(XmlResource* doc) {
     return findRootElement(doc->root.get());
 }
@@ -404,6 +419,36 @@ std::vector<Element*> Element::getChildElements() {
         }
     }
     return elements;
+}
+
+std::unique_ptr<Node> Element::clone() {
+    auto el = util::make_unique<Element>();
+    el->comment = comment;
+    el->lineNumber = lineNumber;
+    el->columnNumber = columnNumber;
+    el->name = name;
+    el->namespaceUri = namespaceUri;
+
+    el->attributes.reserve(attributes.size());
+    for (xml::Attribute& attr : attributes) {
+        // Don't copy compiled values or attributes.
+        el->attributes.push_back(xml::Attribute{ attr.namespaceUri, attr.name, attr.value });
+    }
+
+    el->children.reserve(children.size());
+    for (const std::unique_ptr<xml::Node>& child : children) {
+        el->addChild(child->clone());
+    }
+    return std::move(el);
+}
+
+std::unique_ptr<Node> Text::clone() {
+    auto t = util::make_unique<Text>();
+    t->comment = comment;
+    t->lineNumber = lineNumber;
+    t->columnNumber = columnNumber;
+    t->text = text;
+    return std::move(t);
 }
 
 void PackageAwareVisitor::visit(Namespace* ns) {

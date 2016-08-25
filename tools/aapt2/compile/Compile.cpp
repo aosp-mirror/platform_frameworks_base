@@ -20,6 +20,7 @@
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "compile/IdAssigner.h"
+#include "compile/InlineXmlFormatParser.h"
 #include "compile/Png.h"
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/XmlIdCollector.h"
@@ -38,6 +39,9 @@
 #include <dirent.h>
 #include <fstream>
 #include <string>
+
+using google::protobuf::io::CopyingOutputStreamAdaptor;
+using google::protobuf::io::ZeroCopyOutputStream;
 
 namespace aapt {
 
@@ -238,13 +242,14 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         return false;
     }
 
-    std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(&table);
-
-    // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
+    // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->finishEntry().
     {
-        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+        // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
+        // interface.
+        CopyingOutputStreamAdaptor copyingAdaptor(writer);
 
-        if (!pbTable->SerializeToZeroCopyStream(&adaptor)) {
+        std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(&table);
+        if (!pbTable->SerializeToZeroCopyStream(&copyingAdaptor)) {
             context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
             return false;
         }
@@ -266,21 +271,23 @@ static bool writeHeaderAndBufferToWriter(const StringPiece& outputPath, const Re
         return false;
     }
 
-    // Create the header.
-    std::unique_ptr<pb::CompiledFile> pbCompiledFile = serializeCompiledFileToPb(file);
-
+    // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->finishEntry().
     {
-        // The stream must be destroyed before we finish the entry, or else
-        // some data won't be flushed.
         // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
         // interface.
-        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
-        CompiledFileOutputStream outputStream(&adaptor, pbCompiledFile.get());
-        for (const BigBuffer::Block& block : buffer) {
-            if (!outputStream.Write(block.buffer.get(), block.size)) {
-                diag->error(DiagMessage(outputPath) << "failed to write data");
-                return false;
-            }
+        CopyingOutputStreamAdaptor copyingAdaptor(writer);
+        CompiledFileOutputStream outputStream(&copyingAdaptor);
+
+        // Number of CompiledFiles.
+        outputStream.WriteLittleEndian32(1);
+
+        std::unique_ptr<pb::CompiledFile> compiledFile = serializeCompiledFileToPb(file);
+        outputStream.WriteCompiledFile(compiledFile.get());
+        outputStream.WriteData(&buffer);
+
+        if (outputStream.HadError()) {
+            diag->error(DiagMessage(outputPath) << "failed to write data");
+            return false;
         }
     }
 
@@ -300,17 +307,21 @@ static bool writeHeaderAndMmapToWriter(const StringPiece& outputPath, const Reso
         return false;
     }
 
-    // Create the header.
-    std::unique_ptr<pb::CompiledFile> pbCompiledFile = serializeCompiledFileToPb(file);
-
+    // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->finishEntry().
     {
-        // The stream must be destroyed before we finish the entry, or else
-        // some data won't be flushed.
         // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
         // interface.
-        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
-        CompiledFileOutputStream outputStream(&adaptor, pbCompiledFile.get());
-        if (!outputStream.Write(map.getDataPtr(), map.getDataLength())) {
+        CopyingOutputStreamAdaptor copyingAdaptor(writer);
+        CompiledFileOutputStream outputStream(&copyingAdaptor);
+
+        // Number of CompiledFiles.
+        outputStream.WriteLittleEndian32(1);
+
+        std::unique_ptr<pb::CompiledFile> compiledFile = serializeCompiledFileToPb(file);
+        outputStream.WriteCompiledFile(compiledFile.get());
+        outputStream.WriteData(map.getDataPtr(), map.getDataLength());
+
+        if (outputStream.HadError()) {
             diag->error(DiagMessage(outputPath) << "failed to write data");
             return false;
         }
@@ -318,6 +329,28 @@ static bool writeHeaderAndMmapToWriter(const StringPiece& outputPath, const Reso
 
     if (!writer->finishEntry()) {
         diag->error(DiagMessage(outputPath) << "failed to finish writing data");
+        return false;
+    }
+    return true;
+}
+
+static bool flattenXmlToOutStream(IAaptContext* context, const StringPiece& outputPath,
+                                  xml::XmlResource* xmlRes,
+                                  CompiledFileOutputStream* out) {
+    BigBuffer buffer(1024);
+    XmlFlattenerOptions xmlFlattenerOptions;
+    xmlFlattenerOptions.keepRawValues = true;
+    XmlFlattener flattener(&buffer, xmlFlattenerOptions);
+    if (!flattener.consume(context, xmlRes)) {
+        return false;
+    }
+
+    std::unique_ptr<pb::CompiledFile> pbCompiledFile = serializeCompiledFileToPb(xmlRes->file);
+    out->WriteCompiledFile(pbCompiledFile.get());
+    out->WriteData(&buffer);
+
+    if (out->HadError()) {
+        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write data");
         return false;
     }
     return true;
@@ -344,26 +377,55 @@ static bool compileXml(IAaptContext* context, const CompileOptions& options,
         return false;
     }
 
+    xmlRes->file.name = ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
+    xmlRes->file.config = pathData.config;
+    xmlRes->file.source = pathData.source;
+
     // Collect IDs that are defined here.
     XmlIdCollector collector;
     if (!collector.consume(context, xmlRes.get())) {
         return false;
     }
 
-    xmlRes->file.name = ResourceName({}, *parseResourceType(pathData.resourceDir), pathData.name);
-    xmlRes->file.config = pathData.config;
-    xmlRes->file.source = pathData.source;
-
-    BigBuffer buffer(1024);
-    XmlFlattenerOptions xmlFlattenerOptions;
-    xmlFlattenerOptions.keepRawValues = true;
-    XmlFlattener flattener(&buffer, xmlFlattenerOptions);
-    if (!flattener.consume(context, xmlRes.get())) {
+    // Look for and process any <aapt:attr> tags and create sub-documents.
+    InlineXmlFormatParser inlineXmlFormatParser;
+    if (!inlineXmlFormatParser.consume(context, xmlRes.get())) {
         return false;
     }
 
-    if (!writeHeaderAndBufferToWriter(outputPath, xmlRes->file, buffer, writer,
-                                      context->getDiagnostics())) {
+    // Start the entry so we can write the header.
+    if (!writer->startEntry(outputPath, 0)) {
+        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to open file");
+        return false;
+    }
+
+    // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->finishEntry().
+    {
+        // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
+        // interface.
+        CopyingOutputStreamAdaptor copyingAdaptor(writer);
+        CompiledFileOutputStream outputStream(&copyingAdaptor);
+
+        std::vector<std::unique_ptr<xml::XmlResource>>& inlineDocuments =
+                inlineXmlFormatParser.getExtractedInlineXmlDocuments();
+
+        // Number of CompiledFiles.
+        outputStream.WriteLittleEndian32(1 + inlineDocuments.size());
+
+        if (!flattenXmlToOutStream(context, outputPath, xmlRes.get(), &outputStream)) {
+            return false;
+        }
+
+        for (auto& inlineXmlDoc : inlineDocuments) {
+            if (!flattenXmlToOutStream(context, outputPath, inlineXmlDoc.get(), &outputStream)) {
+                return false;
+            }
+        }
+    }
+
+    if (!writer->finishEntry()) {
+        context->getDiagnostics()->error(DiagMessage(outputPath)
+                                         << "failed to finish writing data");
         return false;
     }
     return true;

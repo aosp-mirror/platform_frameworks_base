@@ -48,9 +48,12 @@
 #include <google/protobuf/io/coded_stream.h>
 
 #include <fstream>
+#include <queue>
 #include <sys/stat.h>
 #include <unordered_map>
 #include <vector>
+
+using google::protobuf::io::CopyingOutputStreamAdaptor;
 
 namespace aapt {
 
@@ -166,19 +169,7 @@ static bool copyFileToArchive(io::IFile* file, const std::string& outPath,
     }
 
     const uint8_t* buffer = reinterpret_cast<const uint8_t*>(data->data());
-    size_t bufferSize = data->size();
-
-    // If the file ends with .flat, we must strip off the CompiledFileHeader from it.
-    if (util::stringEndsWith(file->getSource().path, ".flat")) {
-        CompiledFileInputStream inputStream(data->data(), data->size());
-        if (!inputStream.CompiledFile()) {
-            context->getDiagnostics()->error(DiagMessage(file->getSource())
-                                             << "invalid compiled file header");
-            return false;
-        }
-        buffer = reinterpret_cast<const uint8_t*>(inputStream.data());
-        bufferSize = inputStream.size();
-    }
+    const size_t bufferSize = data->size();
 
     if (context->verbose()) {
         context->getDiagnostics()->note(DiagMessage() << "writing " << outPath << " to archive");
@@ -255,42 +246,6 @@ static std::unique_ptr<xml::XmlResource> loadXml(const std::string& path, IDiagn
     return xml::inflate(&fin, diag, Source(path));
 }
 
-static std::unique_ptr<xml::XmlResource> loadBinaryXmlSkipFileExport(const Source& source,
-                                                                     const void* data, size_t len,
-                                                                     IDiagnostics* diag) {
-    CompiledFileInputStream inputStream(data, len);
-    if (!inputStream.CompiledFile()) {
-        diag->error(DiagMessage(source) << "invalid compiled file header");
-        return {};
-    }
-
-    const uint8_t* xmlData = reinterpret_cast<const uint8_t*>(inputStream.data());
-    const size_t xmlDataLen = inputStream.size();
-
-    std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(xmlData, xmlDataLen, diag, source);
-    if (!xmlRes) {
-        return {};
-    }
-    return xmlRes;
-}
-
-static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
-                                                          const void* data, size_t len,
-                                                          IDiagnostics* diag) {
-    CompiledFileInputStream inputStream(data, len);
-    const pb::CompiledFile* pbFile = inputStream.CompiledFile();
-    if (!pbFile) {
-        diag->error(DiagMessage(source) << "invalid compiled file header");
-        return {};
-    }
-
-    std::unique_ptr<ResourceFile> resFile = deserializeCompiledFileFromPb(*pbFile, source, diag);
-    if (!resFile) {
-        return {};
-    }
-    return resFile;
-}
-
 struct ResourceFileFlattenerOptions {
     bool noAutoVersion = false;
     bool noVersionVectors = false;
@@ -312,16 +267,26 @@ public:
 
 private:
     struct FileOperation {
+        ConfigDescription config;
+
+        // The entry this file came from.
+        const ResourceEntry* entry;
+
+        // The file to copy as-is.
         io::IFile* fileToCopy;
+
+        // The XML to process and flatten.
         std::unique_ptr<xml::XmlResource> xmlToFlatten;
+
+        // The destination to write this file to.
         std::string dstPath;
         bool skipVersion = false;
     };
 
     uint32_t getCompressionFlags(const StringPiece& str);
 
-    bool linkAndVersionXmlFile(const ResourceEntry* entry, const ResourceFile& fileDesc,
-                               io::IFile* file, ResourceTable* table, FileOperation* outFileOp);
+    bool linkAndVersionXmlFile(ResourceTable* table, FileOperation* fileOp,
+                               std::queue<FileOperation>* outFileOpQueue);
 
     ResourceFileFlattenerOptions mOptions;
     IAaptContext* mContext;
@@ -341,52 +306,28 @@ uint32_t ResourceFileFlattener::getCompressionFlags(const StringPiece& str) {
     return ArchiveEntry::kCompress;
 }
 
-bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
-                                                  const ResourceFile& fileDesc,
-                                                  io::IFile* file,
-                                                  ResourceTable* table,
-                                                  FileOperation* outFileOp) {
-    const StringPiece srcPath = file->getSource().path;
+bool ResourceFileFlattener::linkAndVersionXmlFile(ResourceTable* table,
+                                                  FileOperation* fileOp,
+                                                  std::queue<FileOperation>* outFileOpQueue) {
+    xml::XmlResource* doc = fileOp->xmlToFlatten.get();
+    const Source& src = doc->file.source;
+
     if (mContext->verbose()) {
-        mContext->getDiagnostics()->note(DiagMessage() << "linking " << srcPath);
+        mContext->getDiagnostics()->note(DiagMessage() << "linking " << src.path);
     }
-
-    std::unique_ptr<io::IData> data = file->openAsData();
-    if (!data) {
-        mContext->getDiagnostics()->error(DiagMessage(file->getSource()) << "failed to open file");
-        return false;
-    }
-
-    if (util::stringEndsWith(srcPath, ".flat")) {
-        outFileOp->xmlToFlatten = loadBinaryXmlSkipFileExport(file->getSource(),
-                                                              data->data(), data->size(),
-                                                              mContext->getDiagnostics());
-    } else {
-        outFileOp->xmlToFlatten = xml::inflate(data->data(), data->size(),
-                                               mContext->getDiagnostics(),
-                                               file->getSource());
-    }
-
-    if (!outFileOp->xmlToFlatten) {
-        return false;
-    }
-
-    // Copy the the file description header.
-    outFileOp->xmlToFlatten->file = fileDesc;
 
     XmlReferenceLinker xmlLinker;
-    if (!xmlLinker.consume(mContext, outFileOp->xmlToFlatten.get())) {
+    if (!xmlLinker.consume(mContext, doc)) {
         return false;
     }
 
-    if (mOptions.updateProguardSpec && !proguard::collectProguardRules(
-            outFileOp->xmlToFlatten->file.source, outFileOp->xmlToFlatten.get(), mKeepSet)) {
+    if (mOptions.updateProguardSpec && !proguard::collectProguardRules(src, doc, mKeepSet)) {
         return false;
     }
 
     if (mOptions.noXmlNamespaces) {
         XmlNamespaceRemover namespaceRemover;
-        if (!namespaceRemover.consume(mContext, outFileOp->xmlToFlatten.get())) {
+        if (!namespaceRemover.consume(mContext, doc)) {
             return false;
         }
     }
@@ -394,51 +335,58 @@ bool ResourceFileFlattener::linkAndVersionXmlFile(const ResourceEntry* entry,
     if (!mOptions.noAutoVersion) {
         if (mOptions.noVersionVectors) {
             // Skip this if it is a vector or animated-vector.
-            xml::Element* el = xml::findRootElement(outFileOp->xmlToFlatten.get());
+            xml::Element* el = xml::findRootElement(doc);
             if (el && el->namespaceUri.empty()) {
                 if (el->name == "vector" || el->name == "animated-vector") {
                     // We are NOT going to version this file.
-                    outFileOp->skipVersion = true;
+                    fileOp->skipVersion = true;
                     return true;
                 }
             }
         }
 
+        const ConfigDescription& config = fileOp->config;
+
         // Find the first SDK level used that is higher than this defined config and
         // not superseded by a lower or equal SDK level resource.
         const int minSdkVersion = mContext->getMinSdkVersion();
         for (int sdkLevel : xmlLinker.getSdkLevels()) {
-            if (sdkLevel > minSdkVersion
-                    && sdkLevel > outFileOp->xmlToFlatten->file.config.sdkVersion) {
-                if (!shouldGenerateVersionedResource(entry, outFileOp->xmlToFlatten->file.config,
-                                                     sdkLevel)) {
+            if (sdkLevel > minSdkVersion && sdkLevel > config.sdkVersion) {
+                if (!shouldGenerateVersionedResource(fileOp->entry, config, sdkLevel)) {
                     // If we shouldn't generate a versioned resource, stop checking.
                     break;
                 }
 
-                ResourceFile versionedFileDesc = outFileOp->xmlToFlatten->file;
+                ResourceFile versionedFileDesc = doc->file;
                 versionedFileDesc.config.sdkVersion = (uint16_t) sdkLevel;
+
+                FileOperation newFileOp;
+                newFileOp.xmlToFlatten = util::make_unique<xml::XmlResource>(
+                        versionedFileDesc, doc->root->clone());
+                newFileOp.config = versionedFileDesc.config;
+                newFileOp.entry = fileOp->entry;
+                newFileOp.dstPath = ResourceUtils::buildResourceFileName(
+                        versionedFileDesc, mContext->getNameMangler());
 
                 if (mContext->verbose()) {
                     mContext->getDiagnostics()->note(DiagMessage(versionedFileDesc.source)
                                                      << "auto-versioning resource from config '"
-                                                     << outFileOp->xmlToFlatten->file.config
+                                                     << config
                                                      << "' -> '"
                                                      << versionedFileDesc.config << "'");
                 }
 
-                std::string genPath = ResourceUtils::buildResourceFileName(
-                        versionedFileDesc, mContext->getNameMangler());
-
                 bool added = table->addFileReferenceAllowMangled(versionedFileDesc.name,
                                                                  versionedFileDesc.config,
                                                                  versionedFileDesc.source,
-                                                                 genPath,
-                                                                 file,
+                                                                 newFileOp.dstPath,
+                                                                 nullptr,
                                                                  mContext->getDiagnostics());
                 if (!added) {
                     return false;
                 }
+
+                outFileOpQueue->push(std::move(newFileOp));
                 break;
             }
         }
@@ -458,12 +406,11 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
         for (auto& type : pkg->types) {
             // Sort by config and name, so that we get better locality in the zip file.
             configSortedFiles.clear();
-            for (auto& entry : type->entries) {
-                // Iterate via indices because auto generated values can be inserted ahead of
-                // the value being processed.
-                for (size_t i = 0; i < entry->values.size(); i++) {
-                    ResourceConfigValue* configValue = entry->values[i].get();
+            std::queue<FileOperation> fileOperations;
 
+            // Populate the queue with all files in the ResourceTable.
+            for (auto& entry : type->entries) {
+                for (auto& configValue : entry->values) {
                     FileReference* fileRef = valueCast<FileReference>(configValue->value.get());
                     if (!fileRef) {
                         continue;
@@ -477,33 +424,65 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
                     }
 
                     FileOperation fileOp;
+                    fileOp.entry = entry.get();
                     fileOp.dstPath = *fileRef->path;
+                    fileOp.config = configValue->config;
 
                     const StringPiece srcPath = file->getSource().path;
                     if (type->type != ResourceType::kRaw &&
                             (util::stringEndsWith(srcPath, ".xml.flat") ||
                             util::stringEndsWith(srcPath, ".xml"))) {
-                        ResourceFile fileDesc;
-                        fileDesc.config = configValue->config;
-                        fileDesc.name = ResourceName(pkg->name, type->type, entry->name);
-                        fileDesc.source = fileRef->getSource();
-                        if (!linkAndVersionXmlFile(entry.get(), fileDesc, file, table, &fileOp)) {
-                            error = true;
-                            continue;
+                        std::unique_ptr<io::IData> data = file->openAsData();
+                        if (!data) {
+                            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
+                                                              << "failed to open file");
+                            return false;
                         }
 
+                        fileOp.xmlToFlatten = xml::inflate(data->data(), data->size(),
+                                                           mContext->getDiagnostics(),
+                                                           file->getSource());
+
+                        if (!fileOp.xmlToFlatten) {
+                            return false;
+                        }
+
+                        fileOp.xmlToFlatten->file.config = configValue->config;
+                        fileOp.xmlToFlatten->file.source = fileRef->getSource();
+                        fileOp.xmlToFlatten->file.name =
+                                ResourceName(pkg->name, type->type, entry->name);
+
+                        // Enqueue the XML files to be processed.
+                        fileOperations.push(std::move(fileOp));
                     } else {
                         fileOp.fileToCopy = file;
-                    }
 
-                    // NOTE(adamlesinski): Explicitly construct a StringPiece16 here, or else
-                    // we end up copying the string in the std::make_pair() method, then creating
-                    // a StringPiece16 from the copy, which would cause us to end up referencing
-                    // garbage in the map.
-                    const StringPiece entryName(entry->name);
-                    configSortedFiles[std::make_pair(configValue->config, entryName)] =
-                                      std::move(fileOp);
+                        // NOTE(adamlesinski): Explicitly construct a StringPiece here, or else
+                        // we end up copying the string in the std::make_pair() method, then
+                        // creating a StringPiece from the copy, which would cause us to end up
+                        // referencing garbage in the map.
+                        const StringPiece entryName(entry->name);
+                        configSortedFiles[std::make_pair(configValue->config, entryName)] =
+                                std::move(fileOp);
+                    }
                 }
+            }
+
+            // Now process the XML queue
+            for (; !fileOperations.empty(); fileOperations.pop()) {
+                FileOperation& fileOp = fileOperations.front();
+
+                if (!linkAndVersionXmlFile(table, &fileOp, &fileOperations)) {
+                    error = true;
+                    continue;
+                }
+
+                // NOTE(adamlesinski): Explicitly construct a StringPiece here, or else
+                // we end up copying the string in the std::make_pair() method, then creating
+                // a StringPiece from the copy, which would cause us to end up referencing
+                // garbage in the map.
+                const StringPiece entryName(fileOp.entry->name);
+                configSortedFiles[std::make_pair(fileOp.config, entryName)] = std::move(fileOp);
             }
 
             if (error) {
@@ -518,10 +497,8 @@ bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiv
                 if (fileOp.xmlToFlatten) {
                     Maybe<size_t> maxSdkLevel;
                     if (!mOptions.noAutoVersion && !fileOp.skipVersion) {
-                        maxSdkLevel =
-                                std::max<size_t>(
-                                        std::max<size_t>(config.sdkVersion, 1u),
-                                        mContext->getMinSdkVersion());
+                        maxSdkLevel = std::max<size_t>(std::max<size_t>(config.sdkVersion, 1u),
+                                                       mContext->getMinSdkVersion());
                     }
 
                     bool result = flattenXml(fileOp.xmlToFlatten.get(), fileOp.dstPath, maxSdkLevel,
@@ -866,13 +843,13 @@ public:
             return false;
         }
 
-        std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(table);
-
-        // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
-        // interface.
+        // Make sure CopyingOutputStreamAdaptor is deleted before we call writer->finishEntry().
         {
-            google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+            // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
+            // interface.
+            CopyingOutputStreamAdaptor adaptor(writer);
 
+            std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(table);
             if (!pbTable->SerializeToZeroCopyStream(&adaptor)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed to write");
                 return false;
@@ -1109,7 +1086,9 @@ public:
 
     bool mergeCompiledFile(io::IFile* file, ResourceFile* fileDesc, bool override) {
         if (mContext->verbose()) {
-            mContext->getDiagnostics()->note(DiagMessage() << "merging compiled file "
+            mContext->getDiagnostics()->note(DiagMessage()
+                                             << "merging '" << fileDesc->name
+                                             << "' from compiled file "
                                              << file->getSource());
         }
 
@@ -1230,12 +1209,40 @@ public:
                 return false;
             }
 
-            std::unique_ptr<ResourceFile> resourceFile = loadFileExportHeader(
-                    src, data->data(), data->size(), mContext->getDiagnostics());
-            if (resourceFile) {
-                return mergeCompiledFile(file, resourceFile.get(), override);
+            CompiledFileInputStream inputStream(data->data(), data->size());
+            uint32_t numFiles = 0;
+            if (!inputStream.ReadLittleEndian32(&numFiles)) {
+                mContext->getDiagnostics()->error(DiagMessage(src) << "failed read num files");
+                return false;
             }
-            return false;
+
+            for (uint32_t i = 0; i < numFiles; i++) {
+                pb::CompiledFile compiledFile;
+                if (!inputStream.ReadCompiledFile(&compiledFile)) {
+                    mContext->getDiagnostics()->error(DiagMessage(src)
+                                                      << "failed to read compiled file header");
+                    return false;
+                }
+
+                uint64_t offset, len;
+                if (!inputStream.ReadDataMetaData(&offset, &len)) {
+                    mContext->getDiagnostics()->error(DiagMessage(src)
+                                                      << "failed to read data meta data");
+                    return false;
+                }
+
+                std::unique_ptr<ResourceFile> resourceFile = deserializeCompiledFileFromPb(
+                        compiledFile, file->getSource(), mContext->getDiagnostics());
+                if (!resourceFile) {
+                    return false;
+                }
+
+                if (!mergeCompiledFile(file->createFileSegment(offset, len), resourceFile.get(),
+                                       override)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // Ignore non .flat files. This could be classes.dex or something else that happens

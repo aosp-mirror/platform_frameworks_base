@@ -23,8 +23,8 @@
 namespace aapt {
 namespace xml {
 
-std::string buildPackageNamespace(const StringPiece& package) {
-    std::string result = kSchemaPublicPrefix;
+std::string buildPackageNamespace(const StringPiece& package, bool privateReference) {
+    std::string result = privateReference ? kSchemaPrivatePrefix : kSchemaPublicPrefix;
     result.append(package.data(), package.size());
     return result;
 }

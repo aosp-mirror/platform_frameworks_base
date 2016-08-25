@@ -32,12 +32,13 @@
 namespace aapt {
 namespace xml {
 
-struct RawVisitor;
+class RawVisitor;
 
 /**
  * Base class for all XML nodes.
  */
-struct Node {
+class Node {
+public:
     Node* parent = nullptr;
     size_t lineNumber = 0;
     size_t columnNumber = 0;
@@ -48,6 +49,7 @@ struct Node {
 
     void addChild(std::unique_ptr<Node> child);
     virtual void accept(RawVisitor* visitor) = 0;
+    virtual std::unique_ptr<Node> clone() = 0;
 };
 
 /**
@@ -55,16 +57,20 @@ struct Node {
  * subclass of Node.
  */
 template <typename Derived>
-struct BaseNode : public Node {
+class BaseNode : public Node {
+public:
     virtual void accept(RawVisitor* visitor) override;
 };
 
 /**
  * A Namespace XML node. Can only have one child.
  */
-struct Namespace : public BaseNode<Namespace> {
+class Namespace : public BaseNode<Namespace> {
+public:
     std::string namespacePrefix;
     std::string namespaceUri;
+
+    std::unique_ptr<Node> clone() override;
 };
 
 struct AaptAttribute {
@@ -87,7 +93,8 @@ struct Attribute {
 /**
  * An Element XML node.
  */
-struct Element : public BaseNode<Element> {
+class Element : public BaseNode<Element> {
+public:
     std::string namespaceUri;
     std::string name;
     std::vector<Attribute> attributes;
@@ -99,19 +106,24 @@ struct Element : public BaseNode<Element> {
                                          const StringPiece& attrName,
                                          const StringPiece& attrValue);
     std::vector<xml::Element*> getChildElements();
+    std::unique_ptr<Node> clone() override;
 };
 
 /**
  * A Text (CDATA) XML node. Can not have any children.
  */
-struct Text : public BaseNode<Text> {
+class Text : public BaseNode<Text> {
+public:
     std::string text;
+
+    std::unique_ptr<Node> clone() override;
 };
 
 /**
  * An XML resource with a source, name, and XML tree.
  */
-struct XmlResource {
+class XmlResource {
+public:
     ResourceFile file;
     std::unique_ptr<xml::Node> root;
 };
@@ -136,7 +148,8 @@ Element* findRootElement(Node* node);
  * A visitor interface for the different XML Node subtypes. This will not traverse into
  * children. Use Visitor for that.
  */
-struct RawVisitor {
+class RawVisitor {
+public:
     virtual ~RawVisitor() = default;
 
     virtual void visit(Namespace* node) {}
@@ -147,7 +160,8 @@ struct RawVisitor {
 /**
  * Visitor whose default implementation visits the children nodes of any node.
  */
-struct Visitor : public RawVisitor {
+class Visitor : public RawVisitor {
+public:
     using RawVisitor::visit;
 
     void visit(Namespace* node) override {
@@ -173,6 +187,13 @@ struct Visitor : public RawVisitor {
  * An XML DOM visitor that will record the package name for a namespace prefix.
  */
 class PackageAwareVisitor : public Visitor, public IPackageDeclStack {
+public:
+    using Visitor::visit;
+
+    void visit(Namespace* ns) override;
+    Maybe<ExtractedPackage> transformPackageAlias(
+            const StringPiece& alias, const StringPiece& localPackage) const override;
+
 private:
     struct PackageDecl {
         std::string prefix;
@@ -180,13 +201,6 @@ private:
     };
 
     std::vector<PackageDecl> mPackageDecls;
-
-public:
-    using Visitor::visit;
-
-    void visit(Namespace* ns) override;
-    Maybe<ExtractedPackage> transformPackageAlias(
-            const StringPiece& alias, const StringPiece& localPackage) const override;
 };
 
 // Implementations
@@ -197,7 +211,8 @@ void BaseNode<Derived>::accept(RawVisitor* visitor) {
 }
 
 template <typename T>
-struct NodeCastImpl : public RawVisitor {
+class NodeCastImpl : public RawVisitor {
+public:
     using RawVisitor::visit;
 
     T* value = nullptr;

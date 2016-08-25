@@ -41,7 +41,8 @@ struct ArchiveEntry {
     size_t uncompressedSize;
 };
 
-struct IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
+class IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
+public:
     virtual ~IArchiveWriter() = default;
 
     virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;

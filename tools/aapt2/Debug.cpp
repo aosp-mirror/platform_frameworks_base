@@ -247,5 +247,59 @@ void Debug::dumpHex(const void* data, size_t len) {
     }
 }
 
+namespace {
+
+class XmlPrinter : public xml::Visitor {
+public:
+    using xml::Visitor::visit;
+
+    void visit(xml::Element* el) override {
+        std::cerr << mPrefix;
+        std::cerr << "E: ";
+        if (!el->namespaceUri.empty()) {
+            std::cerr << el->namespaceUri << ":";
+        }
+        std::cerr << el->name << " (line=" << el->lineNumber << ")\n";
+
+        for (const xml::Attribute& attr : el->attributes) {
+            std::cerr << mPrefix << "  A: ";
+            if (!attr.namespaceUri.empty()) {
+                std::cerr << attr.namespaceUri << ":";
+            }
+            std::cerr << attr.name << "=" << attr.value << "\n";
+        }
+
+        const size_t previousSize = mPrefix.size();
+        mPrefix += "  ";
+        xml::Visitor::visit(el);
+        mPrefix.resize(previousSize);
+    }
+
+    void visit(xml::Namespace* ns) override {
+        std::cerr << mPrefix;
+        std::cerr << "N: " << ns->namespacePrefix << "=" << ns->namespaceUri
+                << " (line=" << ns->lineNumber << ")\n";
+
+        const size_t previousSize = mPrefix.size();
+        mPrefix += "  ";
+        xml::Visitor::visit(ns);
+        mPrefix.resize(previousSize);
+    }
+
+    void visit(xml::Text* text) override {
+        std::cerr << mPrefix;
+        std::cerr << "T: '" << text->text << "'\n";
+    }
+
+private:
+    std::string mPrefix;
+};
+
+} // namespace
+
+void Debug::dumpXml(xml::XmlResource* doc) {
+    XmlPrinter printer;
+    doc->root->accept(&printer);
+}
 
 } // namespace aapt

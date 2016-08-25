@@ -268,6 +268,35 @@ Maybe<Reference> parseStyleParentReference(const StringPiece& str, std::string* 
     return result;
 }
 
+Maybe<Reference> parseXmlAttributeName(const StringPiece& str) {
+    StringPiece trimmedStr = util::trimWhitespace(str);
+    const char* start = trimmedStr.data();
+    const char* const end = start + trimmedStr.size();
+    const char* p = start;
+
+    Reference ref;
+    if (p != end && *p == '*') {
+        ref.privateReference = true;
+        start++;
+        p++;
+    }
+
+    StringPiece package;
+    StringPiece name;
+    while (p != end) {
+        if (*p == ':') {
+            package = StringPiece(start, p - start);
+            name = StringPiece(p + 1, end - (p + 1));
+            break;
+        }
+        p++;
+    }
+
+    ref.name = ResourceName(package.toString(), ResourceType::kAttr,
+                        name.empty() ? trimmedStr.toString() : name.toString());
+    return Maybe<Reference>(std::move(ref));
+}
+
 std::unique_ptr<Reference> tryParseReference(const StringPiece& str, bool* outCreate) {
     ResourceNameRef ref;
     bool privateRef = false;

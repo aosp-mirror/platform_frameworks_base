@@ -51,7 +51,7 @@ struct IResourceTableConsumer {
 };
 
 namespace xml {
-struct XmlResource;
+class XmlResource;
 }
 
 struct IXmlResourceConsumer {

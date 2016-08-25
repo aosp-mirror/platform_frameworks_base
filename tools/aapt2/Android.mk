@@ -23,6 +23,7 @@ LOCAL_PATH:= $(call my-dir)
 main := Main.cpp
 sources := \
 	compile/IdAssigner.cpp \
+	compile/InlineXmlFormatParser.cpp \
 	compile/Png.cpp \
 	compile/PseudolocaleGenerator.cpp \
 	compile/Pseudolocalizer.cpp \
@@ -31,6 +32,7 @@ sources := \
 	flatten/Archive.cpp \
 	flatten/TableFlattener.cpp \
 	flatten/XmlFlattener.cpp \
+	io/File.cpp \
 	io/FileSystem.cpp \
 	io/ZipArchive.cpp \
 	link/AutoVersioner.cpp \
@@ -77,6 +79,7 @@ sources += Format.proto
 
 testSources := \
 	compile/IdAssigner_test.cpp \
+	compile/InlineXmlFormatParser_test.cpp \
 	compile/PseudolocaleGenerator_test.cpp \
 	compile/Pseudolocalizer_test.cpp \
 	compile/XmlIdCollector_test.cpp \

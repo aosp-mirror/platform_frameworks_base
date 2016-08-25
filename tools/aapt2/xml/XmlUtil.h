@@ -30,6 +30,7 @@ constexpr const char* kSchemaPublicPrefix = "http://schemas.android.com/apk/res/
 constexpr const char* kSchemaPrivatePrefix = "http://schemas.android.com/apk/prv/res/";
 constexpr const char* kSchemaAndroid = "http://schemas.android.com/apk/res/android";
 constexpr const char* kSchemaTools = "http://schemas.android.com/tools";
+constexpr const char* kSchemaAapt = "http://schemas.android.com/aapt";
 
 /**
  * Result of extracting a package name from a namespace URI declaration.
@@ -62,8 +63,12 @@ Maybe<ExtractedPackage> extractPackageFromNamespace(const std::string& namespace
  * Returns an XML Android namespace for the given package of the form:
  *
  * http://schemas.android.com/apk/res/<package>
+ *
+ * If privateReference == true, the package will be of the form:
+ *
+ * http://schemas.android.com/apk/prv/res/<package>
  */
-std::string buildPackageNamespace(const StringPiece& package);
+std::string buildPackageNamespace(const StringPiece& package, bool privateReference=false);
 
 /**
  * Interface representing a stack of XML namespace declarations. When looking up the package

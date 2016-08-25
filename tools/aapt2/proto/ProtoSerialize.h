@@ -28,6 +28,40 @@
 
 namespace aapt {
 
+class CompiledFileOutputStream {
+public:
+    explicit CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out);
+
+    void WriteLittleEndian32(uint32_t value);
+    void WriteCompiledFile(const pb::CompiledFile* compiledFile);
+    void WriteData(const BigBuffer* buffer);
+    void WriteData(const void* data, size_t len);
+    bool HadError();
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
+
+    void ensureAlignedWrite();
+
+    google::protobuf::io::CodedOutputStream mOut;
+};
+
+class CompiledFileInputStream {
+public:
+    explicit CompiledFileInputStream(const void* data, size_t size);
+
+    bool ReadLittleEndian32(uint32_t* outVal);
+    bool ReadCompiledFile(pb::CompiledFile* outVal);
+    bool ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen);
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
+
+    void ensureAlignedRead();
+
+    google::protobuf::io::CodedInputStream mIn;
+};
+
 std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table);
 std::unique_ptr<ResourceTable> deserializeTableFromPb(const pb::ResourceTable& pbTable,
                                                       const Source& source,
@@ -37,40 +71,6 @@ std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(const ResourceFile& 
 std::unique_ptr<ResourceFile> deserializeCompiledFileFromPb(const pb::CompiledFile& pbFile,
                                                             const Source& source,
                                                             IDiagnostics* diag);
-
-class CompiledFileOutputStream : public google::protobuf::io::CopyingOutputStream {
-public:
-    CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out,
-                             pb::CompiledFile* pbFile);
-    bool Write(const void* data, int size) override;
-    bool Finish();
-
-private:
-    bool ensureFileWritten();
-
-    google::protobuf::io::CodedOutputStream mOut;
-    pb::CompiledFile* mPbFile;
-
-    DISALLOW_COPY_AND_ASSIGN(CompiledFileOutputStream);
-};
-
-class CompiledFileInputStream {
-public:
-    CompiledFileInputStream(const void* data, size_t size);
-
-    const pb::CompiledFile* CompiledFile();
-
-    const void* data();
-    size_t size();
-
-private:
-    google::protobuf::io::CodedInputStream mIn;
-    std::unique_ptr<pb::CompiledFile> mPbFile;
-    const uint8_t* mData;
-    size_t mSize;
-
-    DISALLOW_COPY_AND_ASSIGN(CompiledFileInputStream);
-};
 
 } // namespace aapt
 
