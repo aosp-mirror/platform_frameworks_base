@@ -2853,9 +2853,9 @@ public class SyncManager {
                 }
                 return SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS;
             }
-            if (state != AuthorityInfo.SYNCABLE) {
+            if (state == AuthorityInfo.NOT_SYNCABLE) {
                 if (isLoggable) {
-                    Slog.v(TAG, "    Dropping sync operation: isSyncable != SYNCABLE");
+                    Slog.v(TAG, "    Dropping sync operation: isSyncable == NOT_SYNCABLE");
                 }
                 return SYNC_OP_STATE_INVALID;
             }
