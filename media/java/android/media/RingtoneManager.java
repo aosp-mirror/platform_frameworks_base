@@ -261,6 +261,8 @@ public class RingtoneManager {
     private boolean mStopPreviousRingtone = true;
     private Ringtone mPreviousRingtone;
 
+    private boolean mIncludeParentRingtones;
+
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
      * constructed instance manages cursor(s).
@@ -268,9 +270,24 @@ public class RingtoneManager {
      * @param activity The activity used to get a managed cursor.
      */
     public RingtoneManager(Activity activity) {
+        this(activity, /* includeParentRingtones */ false);
+    }
+
+    /**
+     * Constructs a RingtoneManager. This constructor is recommended if there's the need to also
+     * list ringtones from the user's parent.
+     *
+     * @param activity The activity used to get a managed cursor.
+     * @param includeParentRingtones if true, this ringtone manager's cursor will also retrieve
+     *            ringtones from the parent of the user specified in the given activity
+     *
+     * @hide
+     */
+    public RingtoneManager(Activity activity, boolean includeParentRingtones) {
         mActivity = activity;
         mContext = activity;
         setType(mType);
+        mIncludeParentRingtones = includeParentRingtones;
     }
 
     /**
@@ -281,9 +298,23 @@ public class RingtoneManager {
      * @param context The context to used to get a cursor.
      */
     public RingtoneManager(Context context) {
+        this(context, /* includeParentRingtones */ false);
+    }
+
+    /**
+     * Constructs a RingtoneManager.
+     *
+     * @param context The context to used to get a cursor.
+     * @param includeParentRingtones if true, this ringtone manager's cursor will also retrieve
+     *            ringtones from the parent of the user specified in the given context
+     *
+     * @hide
+     */
+    public RingtoneManager(Context context, boolean includeParentRingtones) {
         mActivity = null;
         mContext = context;
         setType(mType);
+        mIncludeParentRingtones = includeParentRingtones;
     }
 
     /**
@@ -403,12 +434,36 @@ public class RingtoneManager {
         if (mCursor != null && mCursor.requery()) {
             return mCursor;
         }
-        
-        final Cursor internalCursor = getInternalRingtones();
-        final Cursor mediaCursor = getMediaRingtones();
-             
-        return mCursor = new SortCursor(new Cursor[] { internalCursor, mediaCursor },
+
+        ArrayList<Cursor> ringtoneCursors = new ArrayList<Cursor>();
+        ringtoneCursors.add(getInternalRingtones());
+        ringtoneCursors.add(getMediaRingtones());
+
+        if (mIncludeParentRingtones) {
+            Cursor parentRingtonesCursor = getParentProfileRingtones();
+            if (parentRingtonesCursor != null) {
+                ringtoneCursors.add(parentRingtonesCursor);
+            }
+        }
+
+        return mCursor = new SortCursor(ringtoneCursors.toArray(new Cursor[ringtoneCursors.size()]),
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+    }
+
+    private Cursor getParentProfileRingtones() {
+        final UserManager um = UserManager.get(mContext);
+        final UserInfo parentInfo = um.getProfileParent(mContext.getUserId());
+        if (parentInfo != null && parentInfo.id != mContext.getUserId()) {
+            final Context parentContext = createPackageContextAsUser(mContext, parentInfo.id);
+            if (parentContext != null) {
+                // We don't need to re-add the internal ringtones for the work profile since
+                // they are the same as the personal profile. We just need the external
+                // ringtones.
+                return new ExternalRingtonesCursorWrapper(getMediaRingtones(parentContext),
+                        parentInfo.id);
+            }
+        }
+        return null;
     }
 
     /**
@@ -559,7 +614,11 @@ public class RingtoneManager {
     }
 
     private Cursor getMediaRingtones() {
-        if (PackageManager.PERMISSION_GRANTED != mContext.checkPermission(
+        return getMediaRingtones(mContext);
+    }
+
+    private Cursor getMediaRingtones(Context context) {
+        if (PackageManager.PERMISSION_GRANTED != context.checkPermission(
                 android.Manifest.permission.READ_EXTERNAL_STORAGE,
                 Process.myPid(), Process.myUid())) {
             Log.w(TAG, "No READ_EXTERNAL_STORAGE permission, ignoring ringtones on ext storage");
@@ -573,7 +632,7 @@ public class RingtoneManager {
                 ? query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
                     constructBooleanTrueWhereClause(mFilterColumns), null,
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER, context)
                 : null;
     }
     
@@ -628,10 +687,19 @@ public class RingtoneManager {
             String selection,
             String[] selectionArgs,
             String sortOrder) {
+        return query(uri, projection, selection, selectionArgs, sortOrder, mContext);
+    }
+
+    private Cursor query(Uri uri,
+            String[] projection,
+            String selection,
+            String[] selectionArgs,
+            String sortOrder,
+            Context context) {
         if (mActivity != null) {
             return mActivity.managedQuery(uri, projection, selection, selectionArgs, sortOrder);
         } else {
-            return mContext.getContentResolver().query(uri, projection, selection, selectionArgs,
+            return context.getContentResolver().query(uri, projection, selection, selectionArgs,
                     sortOrder);
         }
     }
@@ -717,17 +785,14 @@ public class RingtoneManager {
         UserManager um = UserManager.get(userContext);
         UserInfo parentInfo = um.getProfileParent(userContext.getUserId());
         if (parentInfo != null) {
-            try {
-                Context targetContext = userContext.createPackageContextAsUser(
-                        userContext.getPackageName(), 0 /* flags */, UserHandle.of(parentInfo.id));
+            final Context targetContext = createPackageContextAsUser(userContext, parentInfo.id);
+            if (targetContext != null) {
                 for (int ringtoneType : RINGTONE_TYPES) {
                     Uri ringtoneUri = getActualDefaultRingtoneUri(targetContext, ringtoneType);
                     // Add user id of parent so that custom ringtones can be read and played
                     RingtoneManager.setActualDefaultRingtoneUri(userContext, ringtoneType,
                             maybeAddUserId(ringtoneUri, parentInfo.id));
                 }
-            } catch (NameNotFoundException e) {
-                Log.e(TAG, "Unable to create parent context", e);
             }
         }
     }
@@ -1111,6 +1176,22 @@ public class RingtoneManager {
 
         public Uri take() throws InterruptedException {
             return mQueue.take();
+        }
+    }
+
+    /**
+     * Attempts to create a context for the given user.
+     *
+     * @return created context, or null if package does not exist
+     * @hide
+     */
+    private static Context createPackageContextAsUser(Context context, int userId) {
+        try {
+            return context.createPackageContextAsUser(context.getPackageName(), 0 /* flags */,
+                    UserHandle.of(userId));
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Unable to create package context", e);
+            return null;
         }
     }
 }
