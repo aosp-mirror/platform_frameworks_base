@@ -258,6 +258,8 @@ public class Ringtone {
                     title = uri.getLastPathSegment();
                 }
             }
+        } else {
+            title = context.getString(com.android.internal.R.string.ringtone_silent);
         }
 
         if (title == null) {
