@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -54,6 +55,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -344,6 +346,47 @@ public abstract class RegisteredServicesCache<V> {
         }
     }
 
+    public void updateServices(int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "updateServices u" + userId);
+        }
+        List<ServiceInfo<V>> allServices;
+        synchronized (mServicesLock) {
+            final UserServices<V> user = findOrCreateUserLocked(userId);
+            // If services haven't been initialized yet - no updates required
+            if (user.services == null) {
+                return;
+            }
+            allServices = new ArrayList<>(user.services.values());
+        }
+        IntArray updatedUids = null;
+        for (ServiceInfo<V> service : allServices) {
+            int versionCode = service.componentInfo.applicationInfo.versionCode;
+            String pkg = service.componentInfo.packageName;
+            ApplicationInfo newAppInfo = null;
+            try {
+                newAppInfo = mContext.getPackageManager().getApplicationInfoAsUser(pkg, 0, userId);
+            } catch (NameNotFoundException e) {
+                // Package uninstalled - treat as null app info
+            }
+            // If package updated or removed
+            if ((newAppInfo == null) || (newAppInfo.versionCode != versionCode)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Package " + pkg + " uid=" + service.uid
+                            + " updated. New appInfo: " + newAppInfo);
+                }
+                if (updatedUids == null) {
+                    updatedUids = new IntArray();
+                }
+                updatedUids.add(service.uid);
+            }
+        }
+        if (updatedUids != null && updatedUids.size() > 0) {
+            int[] updatedUidsArray = updatedUids.toArray();
+            generateServicesMap(updatedUidsArray, userId);
+        }
+    }
+
     @VisibleForTesting
     protected boolean inSystemImage(int callerUid) {
         String[] packages = mContext.getPackageManager().getPackagesForUid(callerUid);
@@ -379,10 +422,11 @@ public abstract class RegisteredServicesCache<V> {
      */
     private void generateServicesMap(int[] changedUids, int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "generateServicesMap() for " + userId + ", changed UIDs = " + changedUids);
+            Slog.d(TAG, "generateServicesMap() for " + userId + ", changed UIDs = "
+                    + Arrays.toString(changedUids));
         }
 
-        final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<ServiceInfo<V>>();
+        final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<>();
         final List<ResolveInfo> resolveInfos = queryIntentServices(userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             try {
