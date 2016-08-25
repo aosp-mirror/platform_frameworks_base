@@ -430,7 +430,11 @@ std::u16string utf8ToUtf16(const StringPiece& utf8) {
 
     std::u16string utf16;
     utf16.resize(utf16Length);
-    utf8_to_utf16(reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length(), &*utf16.begin());
+    utf8_to_utf16(
+            reinterpret_cast<const uint8_t*>(utf8.data()),
+            utf8.length(),
+            &*utf16.begin(),
+            (size_t) utf16Length + 1);
     return utf16;
 }
 
@@ -441,8 +445,10 @@ std::string utf16ToUtf8(const StringPiece16& utf16) {
     }
 
     std::string utf8;
+    // Make room for '\0' explicitly.
+    utf8.resize(utf8Length + 1);
+    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8Length + 1);
     utf8.resize(utf8Length);
-    utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin());
     return utf8;
 }
 
