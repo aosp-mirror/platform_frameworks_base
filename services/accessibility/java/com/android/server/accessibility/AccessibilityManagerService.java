@@ -451,7 +451,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     @Override
-    public void sendAccessibilityEvent(AccessibilityEvent event, int userId) {
+    public boolean sendAccessibilityEvent(AccessibilityEvent event, int userId) {
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -459,39 +459,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             // This method does nothing for a background user.
-            if (resolvedUserId == mCurrentUserId) {
-                if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
-                    mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(
-                            event.getWindowId(), event.getSourceNodeId(),
-                            event.getEventType(), event.getAction());
-                    mSecurityPolicy.updateEventSourceLocked(event);
-                    notifyAccessibilityServicesDelayedLocked(event, false);
-                    notifyAccessibilityServicesDelayedLocked(event, true);
-                }
-                if (mHasInputFilter && mInputFilter != null) {
-                    mMainHandler.obtainMessage(
-                            MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
-                            AccessibilityEvent.obtain(event)).sendToTarget();
-                }
+            if (resolvedUserId != mCurrentUserId) {
+                return true; // yes, recycle the event
             }
-        }
-        if (OWN_PROCESS_ID != Binder.getCallingPid()) {
+            if (mSecurityPolicy.canDispatchAccessibilityEventLocked(event)) {
+                mSecurityPolicy.updateActiveAndAccessibilityFocusedWindowLocked(event.getWindowId(),
+                        event.getSourceNodeId(), event.getEventType(), event.getAction());
+                mSecurityPolicy.updateEventSourceLocked(event);
+                notifyAccessibilityServicesDelayedLocked(event, false);
+                notifyAccessibilityServicesDelayedLocked(event, true);
+            }
+            if (mHasInputFilter && mInputFilter != null) {
+                mMainHandler.obtainMessage(MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
+                        AccessibilityEvent.obtain(event)).sendToTarget();
+            }
             event.recycle();
         }
-    }
-
-    @Override
-    public void sendAccessibilityEvents(ParceledListSlice events, int userId) {
-        List<AccessibilityEvent> a11yEvents = events.getList();
-        // Grab the lock once for the entire batch
-        synchronized (mLock) {
-            int numEventsToProcess = Math.min(a11yEvents.size(),
-                    AccessibilityManager.MAX_A11Y_EVENTS_PER_SERVICE_CALL);
-            for (int i = 0; i < numEventsToProcess; i++) {
-                AccessibilityEvent event = a11yEvents.get(i);
-                sendAccessibilityEvent(event, userId);
-            }
-        }
+        return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
     @Override
