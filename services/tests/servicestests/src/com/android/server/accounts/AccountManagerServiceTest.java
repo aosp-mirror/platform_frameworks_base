@@ -337,6 +337,10 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public void invalidateCache(int userId) {
         }
+
+        @Override
+        public void updateServices(int userId) {
+        }
     }
 
     static public class MyMockContext extends MockContext {
