@@ -2289,6 +2289,21 @@ message MetricsEvent {
     // OPEN: Settings Support > Phone/Chat -> Disclaimer
     DIALOG_SUPPORT_DISCLAIMER = 519;
 
+    // OPEN: Settings Support > Travel abroad
+    DIALOG_SUPPORT_PHONE = 520;
+
+    // OPEN: Settings > Security > Factory Reset Protection dialog
+    DIALOG_FRP = 521;
+
+    // OPEN: Settings > Custom list preference with confirmation message
+    DIALOG_CUSTOM_LIST_CONFIRMATION = 522;
+
+    // OPEN: Settings > APN Editor > Error dialog
+    DIALOG_APN_EDITOR_ERROR = 523;
+
+    // OPEN: Settings > Users > Edit owner info dialog
+    DIALOG_OWNER_INFO_SETTINGS = 524;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
