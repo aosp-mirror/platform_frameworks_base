@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.PhoneLookup;
@@ -34,6 +35,9 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class to make it easier to run asynchronous caller-id lookup queries.
@@ -50,6 +54,7 @@ public class CallerInfoAsyncQuery {
     private static final int EVENT_END_OF_QUEUE = 3;
     private static final int EVENT_EMERGENCY_NUMBER = 4;
     private static final int EVENT_VOICEMAIL_NUMBER = 5;
+    private static final int EVENT_GET_GEO_DESCRIPTION = 6;
 
     private CallerInfoAsyncQueryHandler mHandler;
 
@@ -79,6 +84,7 @@ public class CallerInfoAsyncQuery {
         public Object cookie;
         public int event;
         public String number;
+        public String geoDescription;
 
         public int subId;
     }
@@ -142,6 +148,7 @@ public class CallerInfoAsyncQuery {
         private Context mContext;
         private Uri mQueryUri;
         private CallerInfo mCallerInfo;
+        private List<Runnable> mPendingListenerCallbacks = new ArrayList<>();
 
         /**
          * Our own query worker thread.
@@ -207,9 +214,30 @@ public class CallerInfoAsyncQuery {
                             reply.sendToTarget();
 
                             break;
+                        case EVENT_GET_GEO_DESCRIPTION:
+                            handleGeoDescription(msg);
+                            break;
                         default:
                     }
                 }
+            }
+
+            private void handleGeoDescription(Message msg) {
+                WorkerArgs args = (WorkerArgs) msg.obj;
+                CookieWrapper cw = (CookieWrapper) args.cookie;
+                if (!TextUtils.isEmpty(cw.number) && cw.cookie != null && mContext != null) {
+                    final long startTimeMillis = SystemClock.elapsedRealtime();
+                    cw.geoDescription = CallerInfo.getGeoDescription(mContext, cw.number);
+                    final long duration = SystemClock.elapsedRealtime() - startTimeMillis;
+                    if (duration > 500) {
+                        if (DBG) Rlog.d(LOG_TAG, "[handleGeoDescription]" +
+                                "Spends long time to retrieve Geo description: " + duration);
+                    }
+                }
+                Message reply = args.handler.obtainMessage(msg.what);
+                reply.obj = args;
+                reply.arg1 = msg.arg1;
+                reply.sendToTarget();
             }
         }
 
@@ -256,11 +284,28 @@ public class CallerInfoAsyncQuery {
             }
 
             if (cw.event == EVENT_END_OF_QUEUE) {
+                for (Runnable r : mPendingListenerCallbacks) {
+                    r.run();
+                }
+                mPendingListenerCallbacks.clear();
+
                 release();
                 if (cursor != null) {
                     cursor.close();
                 }
                 return;
+            }
+
+            // If the cw.event == EVENT_GET_GEO_DESCRIPTION, means it would not be the 1st
+            // time entering the onQueryComplete(), mCallerInfo should not be null.
+            if (cw.event == EVENT_GET_GEO_DESCRIPTION) {
+                if (mCallerInfo != null) {
+                    mCallerInfo.geoDescription = cw.geoDescription;
+                }
+                // notify that we can clean up the queue after this.
+                CookieWrapper endMarker = new CookieWrapper();
+                endMarker.event = EVENT_END_OF_QUEUE;
+                startQuery(token, endMarker, null, null, null, null, null);
             }
 
             // check the token and if needed, create the callerinfo object.
@@ -293,33 +338,23 @@ public class CallerInfoAsyncQuery {
                                 + mCallerInfo);
                     }
 
-                    // Final step: look up the geocoded description.
-                    if (ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION) {
-                        // Note we do this only if we *don't* have a valid name (i.e. if
-                        // no contacts matched the phone number of the incoming call),
-                        // since that's the only case where the incoming-call UI cares
-                        // about this field.
-                        //
-                        // (TODO: But if we ever want the UI to show the geoDescription
-                        // even when we *do* match a contact, we'll need to either call
-                        // updateGeoDescription() unconditionally here, or possibly add a
-                        // new parameter to CallerInfoAsyncQuery.startQuery() to force
-                        // the geoDescription field to be populated.)
-
-                        if (TextUtils.isEmpty(mCallerInfo.name)) {
-                            // Actually when no contacts match the incoming phone number,
-                            // the CallerInfo object is totally blank here (i.e. no name
-                            // *or* phoneNumber).  So we need to pass in cw.number as
-                            // a fallback number.
-                            mCallerInfo.updateGeoDescription(mContext, cw.number);
-                        }
-                    }
-
                     // Use the number entered by the user for display.
                     if (!TextUtils.isEmpty(cw.number)) {
                         mCallerInfo.phoneNumber = PhoneNumberUtils.formatNumber(cw.number,
                                 mCallerInfo.normalizedNumber,
                                 CallerInfo.getCurrentCountryIso(mContext));
+                    }
+
+                    // This condition refer to the google default code for geo.
+                    // If the number exists in Contacts, the CallCard would never show
+                    // the geo description, so it would be unnecessary to query it.
+                    if (ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION) {
+                        if (TextUtils.isEmpty(mCallerInfo.name)) {
+                            if (DBG) Rlog.d(LOG_TAG, "start querying geo description");
+                            cw.event = EVENT_GET_GEO_DESCRIPTION;
+                            startQuery(token, cw, null, null, null, null, null);
+                            return;
+                        }
                     }
                 }
 
@@ -333,9 +368,15 @@ public class CallerInfoAsyncQuery {
 
             //notify the listener that the query is complete.
             if (cw.listener != null) {
-                Rlog.d(LOG_TAG, "notifying listener: " + cw.listener.getClass().toString() +
-                             " for token: " + token + mCallerInfo);
-                cw.listener.onQueryComplete(token, cw.cookie, mCallerInfo);
+                mPendingListenerCallbacks.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (DBG) Rlog.d(LOG_TAG, "notifying listener: "
+                                + cw.listener.getClass().toString() + " for token: " + token
+                                + mCallerInfo);
+                        cw.listener.onQueryComplete(token, cw.cookie, mCallerInfo);
+                    }
+                });
             } else {
                 Rlog.w(LOG_TAG, "There is no listener to notify for this query.");
             }
