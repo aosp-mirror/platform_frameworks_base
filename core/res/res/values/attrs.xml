@@ -2334,8 +2334,8 @@ i
         <!-- Defines whether the vertical scrollbar track should always be drawn. -->
         <attr name="scrollbarAlwaysDrawVerticalTrack" format="boolean" />
 
-        <!-- This attribute is deprecated and will be ignored as of
-             API level 14 ({@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}).
+        <!-- This attribute is ignored in API level 14
+             ({@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}) and higher.
              Using fading edges may introduce noticeable performance
              degradations and should be used only when required by the application's
              visual design. To request fading edges with API level 14 and above,
@@ -2571,7 +2571,7 @@ i
 
         <!-- Defines the direction of layout drawing. This typically is associated with writing
              direction of the language script used. The possible values are "ltr" for Left-to-Right,
-             "rtl" for Right-to-Left, "locale" and "inherit" from parent view. If there is nothing
+             "rtl" for Right-to-Left, "locale", and "inherit" from parent view. If there is nothing
              to inherit, "locale" is used. "locale" falls back to "en-US". "ltr" is the direction
              used in "en-US". The default for this attribute is "inherit". -->
         <attr name="layoutDirection">
@@ -2585,8 +2585,7 @@ i
             <enum name="locale" value="3" />
         </attr>
 
-        <!-- Defines the direction of the text. A heuristic is used to determine the resolved text
-              direction of paragraphs. -->
+        <!-- Defines the direction of the text. -->
          <attr name="textDirection" format="integer">
             <!-- Default -->
             <enum name="inherit" value="0" />
@@ -2612,8 +2611,7 @@ i
             <enum name="firstStrongRtl" value="7" />
         </attr>
 
-        <!-- Defines the alignment of the text. A heuristic is used to determine the resolved
-            text alignment. -->
+        <!-- Defines the alignment of the text. -->
         <attr name="textAlignment" format="integer">
             <!-- Default -->
             <enum name="inherit" value="0" />
@@ -4934,7 +4932,14 @@ i
     <declare-styleable name="LinearLayout_Layout">
         <attr name="layout_width" />
         <attr name="layout_height" />
+        <!-- Indicates how much of the extra space in the LinearLayout is
+        allocated to the view associated with these LayoutParams. Specify
+        0 if the view should not be stretched. Otherwise the extra pixels
+        will be pro-rated among all views whose weight is greater than 0. -->
         <attr name="layout_weight" format="float" />
+        <!-- Gravity specifies how a component should be placed in its group of cells.
+        The default is {@link android.view.Gravity#TOP}.
+        See {@link android.widget.LinearLayout#setGravity(int)}. -->
         <attr name="layout_gravity" />
     </declare-styleable>
     <declare-styleable name="GridLayout_Layout">
