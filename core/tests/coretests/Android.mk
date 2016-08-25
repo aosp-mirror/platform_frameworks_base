@@ -30,7 +30,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     guava \
     littlemock \
     android-support-test \
-    mockito-target \
+    mockito-target-minus-junit4 \
     espresso-core \
     ub-uiautomator \
     platform-test-annotations

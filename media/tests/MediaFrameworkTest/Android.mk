@@ -10,7 +10,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_JAVA_LANGUAGE_VERSION := 1.8
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    mockito-target \
+    mockito-target-minus-junit4 \
     android-support-test \
     android-ex-camera2
 
