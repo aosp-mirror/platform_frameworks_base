@@ -18,10 +18,12 @@ package com.android.systemui.recents;
 
 import android.app.ActivityManager;
 import android.app.UiModeManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -96,7 +98,7 @@ public class Recents extends SystemUI
     // and does not reside in the home stack.
     private String mOverrideRecentsPackageName;
 
-    private Handler mHandler;
+    private Handler mHandler = new Handler();
     private RecentsImpl mImpl;
     private int mDraggingInRecentsCurrentUser;
 
@@ -162,6 +164,20 @@ public class Recents extends SystemUI
         }
     };
 
+
+    private BroadcastReceiver mSystemUserUnlockedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                if (userId != UserHandle.USER_NULL) {
+                    mImpl.onUserUnlocked(userId);
+                }
+            }
+        }
+    };
+
+
     /**
      * Returns the callbacks interface that non-system users can call.
      */
@@ -191,7 +207,7 @@ public class Recents extends SystemUI
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sTaskLoader = new RecentsTaskLoader(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
-        mHandler = new Handler();
+
         UiModeManager uiModeManager = (UiModeManager) mContext.
                 getSystemService(Context.UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
@@ -221,6 +237,12 @@ public class Recents extends SystemUI
             // For the system user, initialize an instance of the interface that we can pass to the
             // secondary user
             mSystemToUserCallbacks = new RecentsSystemUser(mContext, mImpl);
+
+            // Listen for user-unlocked to kick off preloading recents
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_USER_UNLOCKED);
+            mContext.registerReceiverAsUser(mSystemUserUnlockedReceiver, UserHandle.SYSTEM, filter,
+                    null /* permission */, null /* scheduler */);
         } else {
             // For the secondary user, bind to the primary user's service to get a persistent
             // interface to register its implementation and to later update its state
