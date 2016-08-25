@@ -19,17 +19,22 @@ package com.android.wallpaperbackup;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 
+import android.app.AppGlobals;
 import android.app.WallpaperManager;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackupDataOutput;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.Xml;
@@ -217,6 +222,19 @@ public class WallpaperBackupAgent extends BackupAgent {
             // wallpaper image present.
             restoreFromStage(imageStage, infoStage, "wp", sysWhich);
             restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
+
+            // And reset to the wallpaper service we should be using
+            ComponentName wpService = parseWallpaperComponent(infoStage, "wp");
+            if (servicePackageExists(wpService)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Using wallpaper service " + wpService);
+                }
+                mWm.setWallpaperComponent(wpService, UserHandle.USER_SYSTEM);
+            } else {
+                if (DEBUG) {
+                    Slog.v(TAG, "Can't use wallpaper service " + wpService);
+                }
+            }
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
         } finally {
@@ -274,16 +292,58 @@ public class WallpaperBackupAgent extends BackupAgent {
             } while (type != XmlPullParser.END_DOCUMENT);
         } catch (Exception e) {
             // Whoops; can't process the info file at all.  Report failure.
-            Slog.w(TAG, "Failed to parse restored metadata: " + e.getMessage());
+            Slog.w(TAG, "Failed to parse restored crop: " + e.getMessage());
             return null;
         }
 
         return cropHint;
     }
 
+    private ComponentName parseWallpaperComponent(File wallpaperInfo, String sectionTag) {
+        ComponentName name = null;
+        try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
+
+            int type;
+            do {
+                type = parser.next();
+                if (type == XmlPullParser.START_TAG) {
+                    String tag = parser.getName();
+                    if (sectionTag.equals(tag)) {
+                        final String parsedName = parser.getAttributeValue(null, "component");
+                        name = (parsedName != null)
+                                ? ComponentName.unflattenFromString(parsedName)
+                                : null;
+                        break;
+                    }
+                }
+            } while (type != XmlPullParser.END_DOCUMENT);
+        } catch (Exception e) {
+            // Whoops; can't process the info file at all.  Report failure.
+            Slog.w(TAG, "Failed to parse restored component: " + e.getMessage());
+            return null;
+        }
+        return name;
+    }
+
     private int getAttributeInt(XmlPullParser parser, String name, int defValue) {
         final String value = parser.getAttributeValue(null, name);
         return (value == null) ? defValue : Integer.parseInt(value);
+    }
+
+    private boolean servicePackageExists(ComponentName comp) {
+        try {
+            if (comp != null) {
+                final IPackageManager pm = AppGlobals.getPackageManager();
+                final PackageInfo info = pm.getPackageInfo(comp.getPackageName(),
+                        0, UserHandle.USER_SYSTEM);
+                return (info != null);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to contact package manager");
+        }
+        return false;
     }
 
     //
