@@ -86,8 +86,15 @@ public class TileServiceManager {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
-        mServices.getContext().registerReceiverAsUser(mUninstallReceiver,
+        Context context = mServices.getContext();
+        context.registerReceiverAsUser(mUninstallReceiver,
                 new UserHandle(ActivityManager.getCurrentUser()), filter, null, mHandler);
+        ComponentName component = tileLifecycleManager.getComponent();
+        if (!TileLifecycleManager.isTileAdded(context, component)) {
+            TileLifecycleManager.setTileAdded(context, component, true);
+            mStateManager.onTileAdded();
+            mStateManager.flushMessagesAndUnbind();
+        }
     }
 
     public void setTileChangeListener(TileChangeListener changeListener) {
