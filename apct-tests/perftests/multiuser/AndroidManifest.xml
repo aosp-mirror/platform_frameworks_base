@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.multiuser.frameworks.perftests">
+        package="com.android.perftests.multiuser">
 
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
@@ -26,6 +26,6 @@
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-            android:targetPackage="com.android.multiuser.frameworks.perftests"/>
+            android:targetPackage="com.android.perftests.multiuser"/>
 
 </manifest>
