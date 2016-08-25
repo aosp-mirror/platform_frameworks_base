@@ -1213,6 +1213,7 @@ please see styles_device_defaults.xml.
         <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_material</item>
         <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
         <item name="controllerType">@integer/config_alertDialogController</item>
+        <item name="selectionScrollOffset">@dimen/config_alertDialogSelectionScrollOffset</item>
     </style>
 
     <style name="AlertDialog.Material.Light" />
