@@ -2318,7 +2318,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int IMPORTANT_FOR_ACCESSIBILITY_DEFAULT = IMPORTANT_FOR_ACCESSIBILITY_AUTO;
 
     /**
-     * Mask for obtainig the bits which specify how to determine
+     * Mask for obtaining the bits which specify how to determine
      * whether a view is important for accessibility.
      */
     static final int PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK = (IMPORTANT_FOR_ACCESSIBILITY_AUTO
@@ -9177,11 +9177,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the mode for determining whether this View is important for accessibility
-     * which is if it fires accessibility events and if it is reported to
-     * accessibility services that query the screen.
+     * Gets the mode for determining whether this View is important for accessibility.
+     * A view is important for accessibility if it fires accessibility events and if it
+     * is reported to accessibility services that query the screen.
      *
-     * @return The mode for determining whether a View is important for accessibility.
+     * @return The mode for determining whether a view is important for accessibility, one
+     * of {@link #IMPORTANT_FOR_ACCESSIBILITY_AUTO}, {@link #IMPORTANT_FOR_ACCESSIBILITY_YES},
+     * {@link #IMPORTANT_FOR_ACCESSIBILITY_NO}, or
+     * {@link #IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS}.
      *
      * @attr ref android.R.styleable#View_importantForAccessibility
      *
@@ -14470,7 +14473,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * Returns the scrollbar fade duration.
      *
-     * @return the scrollbar fade duration
+     * @return the scrollbar fade duration, in milliseconds
      *
      * @attr ref android.R.styleable#View_scrollbarFadeDuration
      */
@@ -14482,7 +14485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Define the scrollbar fade duration.
      *
-     * @param scrollBarFadeDuration - the scrollbar fade duration
+     * @param scrollBarFadeDuration - the scrollbar fade duration, in milliseconds
      *
      * @attr ref android.R.styleable#View_scrollbarFadeDuration
      */
@@ -20101,7 +20104,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns the minimum height of the view.
      *
-     * @return the minimum height the view will try to be.
+     * @return the minimum height the view will try to be, in pixels
      *
      * @see #setMinimumHeight(int)
      *
@@ -20116,7 +20119,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * be able to achieve this minimum height (for example, if its parent layout
      * constrains it with less available height).
      *
-     * @param minHeight The minimum height the view will try to be.
+     * @param minHeight The minimum height the view will try to be, in pixels
      *
      * @see #getMinimumHeight()
      *
@@ -20131,7 +20134,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Returns the minimum width of the view.
      *
-     * @return the minimum width the view will try to be.
+     * @return the minimum width the view will try to be, in pixels
      *
      * @see #setMinimumWidth(int)
      *
@@ -20146,7 +20149,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * be able to achieve this minimum width (for example, if its parent layout
      * constrains it with less available width).
      *
-     * @param minWidth The minimum width the view will try to be.
+     * @param minWidth The minimum width the view will try to be, in pixels
      *
      * @see #getMinimumWidth()
      *
