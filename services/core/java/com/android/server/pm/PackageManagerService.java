@@ -455,6 +455,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
+    private static final String PACKAGE_SCHEME = "package";
+
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
 
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFF000;
@@ -1118,6 +1120,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
+    final @NonNull String mRequiredUninstallerPackage;
     final @Nullable String mSetupWizardPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
@@ -2623,6 +2626,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!mOnlyCore) {
                 mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
+                mRequiredUninstallerPackage = getRequiredUninstallerLPr();
                 mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
                 mIntentFilterVerifier = new IntentVerifierProxy(mContext,
                         mIntentFilterVerifierComponent);
@@ -2633,6 +2637,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
+                mRequiredUninstallerPackage = null;
                 mIntentFilterVerifierComponent = null;
                 mIntentFilterVerifier = null;
                 mServicesSystemSharedLibraryPackageName = null;
@@ -2743,6 +2748,22 @@ public class PackageManagerService extends IPackageManager.Stub {
         } else {
             throw new RuntimeException("There must be exactly one installer; found " + matches);
         }
+    }
+
+    private @NonNull String getRequiredUninstallerLPr() {
+        final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setData(Uri.fromParts(PACKAGE_SCHEME, "foo.bar", null));
+
+        final ResolveInfo resolveInfo = resolveIntent(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
+        if (resolveInfo == null ||
+                mResolveActivity.name.equals(resolveInfo.getComponentInfo().name)) {
+            throw new RuntimeException("There must be exactly one uninstaller; found "
+                    + resolveInfo);
+        }
+        return resolveInfo.getComponentInfo().packageName;
     }
 
     private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
@@ -11266,7 +11287,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     for (int id : resolvedUserIds) {
                         final Intent intent = new Intent(action,
-                                pkg != null ? Uri.fromParts("package", pkg, null) : null);
+                                pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
                         if (extras != null) {
                             intent.putExtras(extras);
                         }
@@ -11759,6 +11780,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (packageName.equals(mRequiredInstallerPackage)) {
             Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
                     + "\": required for package installation");
+            return false;
+        }
+
+        if (packageName.equals(mRequiredUninstallerPackage)) {
+            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+                    + "\": required for package uninstallation");
             return false;
         }
 
@@ -15326,13 +15353,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         Preconditions.checkNotNull(packageName);
         Preconditions.checkNotNull(observer);
         final int uid = Binder.getCallingUid();
-        if (uid != Process.SHELL_UID && uid != Process.ROOT_UID && uid != Process.SYSTEM_UID
-                && uid != getPackageUid(mRequiredInstallerPackage, 0, UserHandle.getUserId(uid))
-                && !isOrphaned(packageName)
-                && !isCallerSameAsInstaller(uid, packageName)) {
+        if (!isOrphaned(packageName)
+                && !isCallerAllowedToSilentlyUninstall(uid, packageName)) {
             try {
                 final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
-                intent.setData(Uri.fromParts("package", packageName, null));
+                intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
                 intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
                 observer.onUserActionRequired(intent);
             } catch (RemoteException re) {
@@ -15407,10 +15432,29 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    private boolean isCallerSameAsInstaller(int callingUid, String pkgName) {
-        final int installerPkgUid = getPackageUid(getInstallerPackageName(pkgName),
-                0 /* flags */, UserHandle.getUserId(callingUid));
-        return installerPkgUid == callingUid;
+    private boolean isCallerAllowedToSilentlyUninstall(int callingUid, String pkgName) {
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
+              || callingUid == Process.SYSTEM_UID) {
+            return true;
+        }
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        // If the caller installed the pkgName, then allow it to silently uninstall.
+        if (callingUid == getPackageUid(getInstallerPackageName(pkgName), 0, callingUserId)) {
+            return true;
+        }
+
+        // Allow package verifier to silently uninstall.
+        if (mRequiredVerifierPackage != null &&
+                callingUid == getPackageUid(mRequiredVerifierPackage, 0, callingUserId)) {
+            return true;
+        }
+
+        // Allow package uninstaller to silently uninstall.
+        if (mRequiredUninstallerPackage != null &&
+                callingUid == getPackageUid(mRequiredUninstallerPackage, 0, callingUserId)) {
+            return true;
+        }
+        return false;
     }
 
     private int[] getBlockUninstallForUsers(String packageName, int[] userIds) {
