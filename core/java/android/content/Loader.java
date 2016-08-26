@@ -44,7 +44,7 @@ import java.io.PrintWriter;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using loaders, read the
- * <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</p>
+ * <a href="{@docRoot}guide/components/loaders.html">Loaders</a> developer guide.</p>
  * </div>
  *
  * @param <D> The result returned when the load is complete
