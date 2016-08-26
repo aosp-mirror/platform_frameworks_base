@@ -22,4 +22,19 @@
 
     <!-- Default data warning level in mb -->
     <integer name="default_data_warning_level_mb">2048</integer>
+
+    <!-- Whether to send a custom package name with the PSD. translatable="false"-->
+    <bool name="config_sendPackageName">true</bool>
+
+    <!-- Name for the set of keys associating package names -->
+    <string name="config_helpPackageNameKey" translatable="false"></string>
+
+    <!-- Name for the set of values of package names -->
+    <string name="config_helpPackageNameValue" translatable="false"></string>
+
+    <!-- Intent key for the package name keys -->
+    <string name="config_helpIntentExtraKey" translatable="false"></string>
+
+    <!-- Intent key for package name values -->
+    <string name="config_helpIntentNameKey" translatable="false"></string>
 </resources>
