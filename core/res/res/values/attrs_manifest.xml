@@ -1305,7 +1305,7 @@
         <attr name="cantSaveState" format="boolean" />
         <attr name="uiOptions" />
         <!-- Declare that your application will be able to deal with RTL (right to left) layouts.
-             If set to  false (default value), your application will not care about RTL layouts. -->
+             The default value is false. -->
         <attr name="supportsRtl" format="boolean" />
         <!-- Declare that this application requires access to restricted accounts of a certain
              type. The default value is null and restricted accounts won\'t be visible to this

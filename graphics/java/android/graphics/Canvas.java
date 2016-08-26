@@ -857,6 +857,15 @@ public class Canvas {
         nativeSetDrawFilter(mNativeCanvasWrapper, nativeFilter);
     }
 
+    /**
+     * Constant values used as parameters to {@code quickReject()} calls. These values
+     * specify how much space around the shape should be accounted for, depending on whether
+     * the shaped area is antialiased or not.
+     *
+     * @see #quickReject(float, float, float, float, EdgeType)
+     * @see #quickReject(Path, EdgeType)
+     * @see #quickReject(RectF, EdgeType)
+     */
     public enum EdgeType {
 
         /**
