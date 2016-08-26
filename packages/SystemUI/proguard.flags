@@ -36,3 +36,6 @@
 
 -keep class ** extends android.support.v14.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
+
+# Fling trail-drawaing library fix
+-dontwarn com.google.common.annotations.VisibleForTesting
