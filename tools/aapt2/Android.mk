@@ -127,7 +127,7 @@ hostStaticLibs := \
 	liblog \
 	libcutils \
 	libexpat \
-	libziparchive-host \
+	libziparchive \
 	libpng \
 	libbase \
 	libprotobuf-cpp-lite
