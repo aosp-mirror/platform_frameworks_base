@@ -597,11 +597,15 @@ class AppWindowToken extends WindowToken {
      * Notify that the app is now resumed, and it was not stopped before, perform a clean
      * up of the surfaces
      */
-    void notifyAppResumed(boolean wasStopped) {
-        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped + " " + this);
+    void notifyAppResumed(boolean wasStopped, boolean allowSavedSurface) {
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "notifyAppResumed: wasStopped=" + wasStopped
+                + " allowSavedSurface=" + allowSavedSurface + " " + this);
         mAppStopped = false;
         if (!wasStopped) {
             destroySurfaces(true /*cleanupOnResume*/);
+        }
+        if (!allowSavedSurface) {
+            destroySavedSurfaces();
         }
     }
 

@@ -745,6 +745,14 @@ final class ActivityRecord {
                 && intent.getType() == null;
     }
 
+    static boolean isMainIntent(Intent intent) {
+        return Intent.ACTION_MAIN.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_LAUNCHER)
+                && intent.getCategories().size() == 1
+                && intent.getData() == null
+                && intent.getType() == null;
+    }
+
     private boolean canLaunchHomeActivity(int uid, ActivityRecord sourceRecord) {
         if (uid == Process.myUid() || uid == 0) {
             // System process can launch home activity.

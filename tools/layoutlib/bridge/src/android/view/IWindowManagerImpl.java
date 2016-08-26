@@ -351,7 +351,8 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void notifyAppResumed(IBinder token, boolean wasStopped) throws RemoteException {
+    public void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface)
+            throws RemoteException {
         // TODO Auto-generated method stub
     }
 
