@@ -28,12 +28,19 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import com.android.systemui.R;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class NavigationBarInflaterView extends FrameLayout implements TunerService.Tunable {
+public class NavigationBarInflaterView extends FrameLayout
+        implements Tunable, PluginListener<NavBarButtonProvider> {
 
     private static final String TAG = "NavBarInflater";
 
@@ -56,6 +63,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String KEY_CODE_START = "(";
     public static final String KEY_IMAGE_DELIM = ":";
     public static final String KEY_CODE_END = ")";
+
+    private final List<NavBarButtonProvider> mPlugins = new ArrayList<>();
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
@@ -129,6 +138,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         TunerService.get(getContext()).addTunable(this, NAV_BAR_VIEWS);
+        PluginManager.getInstance(getContext()).addPluginListener(NavBarButtonProvider.ACTION, this,
+                NavBarButtonProvider.VERSION, true /* Allow multiple */);
     }
 
     @Override
@@ -240,8 +251,36 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             int indexInParent) {
         LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
         float size = extractSize(buttonSpec);
-        String button = extractButton(buttonSpec);
+        View v = createView(buttonSpec, parent, inflater, landscape);
+        if (v == null) return null;
+
+        if (size != 0) {
+            ViewGroup.LayoutParams params = v.getLayoutParams();
+            params.width = (int) (params.width * size);
+        }
+        parent.addView(v);
+        addToDispatchers(v, landscape);
+        View lastView = landscape ? mLastRot90 : mLastRot0;
+        if (lastView != null) {
+            v.setAccessibilityTraversalAfter(lastView.getId());
+        }
+        if (landscape) {
+            mLastRot90 = v;
+        } else {
+            mLastRot0 = v;
+        }
+        return v;
+    }
+
+    private View createView(String buttonSpec, ViewGroup parent, LayoutInflater inflater,
+            boolean landscape) {
         View v = null;
+        String button = extractButton(buttonSpec);
+        // Let plugins go first so they can override a standard view if they want.
+        for (NavBarButtonProvider provider : mPlugins) {
+            v = provider.createView(buttonSpec, parent);
+            if (v != null) return v;
+        }
         if (HOME.equals(button)) {
             v = inflater.inflate(R.layout.home, parent, false);
             if (landscape && isSw600Dp()) {
@@ -271,24 +310,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             if (uri != null) {
                 ((KeyButtonView) v).loadAsync(uri);
             }
-        } else {
-            return null;
-        }
-
-        if (size != 0) {
-            ViewGroup.LayoutParams params = v.getLayoutParams();
-            params.width = (int) (params.width * size);
-        }
-        parent.addView(v);
-        addToDispatchers(v, landscape);
-        View lastView = landscape ? mLastRot90 : mLastRot0;
-        if (lastView != null) {
-            v.setAccessibilityTraversalAfter(lastView.getId());
-        }
-        if (landscape) {
-            mLastRot90 = v;
-        } else {
-            mLastRot0 = v;
         }
         return v;
     }
@@ -373,5 +394,19 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         for (int i = 0; i < group.getChildCount(); i++) {
             ((ViewGroup) group.getChildAt(i)).removeAllViews();
         }
+    }
+
+    @Override
+    public void onPluginConnected(NavBarButtonProvider plugin) {
+        mPlugins.add(plugin);
+        clearViews();
+        inflateLayout(mCurrentLayout);
+    }
+
+    @Override
+    public void onPluginDisconnected(NavBarButtonProvider plugin) {
+        mPlugins.remove(plugin);
+        clearViews();
+        inflateLayout(mCurrentLayout);
     }
 }

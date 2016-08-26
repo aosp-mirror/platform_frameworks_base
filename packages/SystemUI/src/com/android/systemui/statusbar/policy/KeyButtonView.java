@@ -44,12 +44,12 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.ButtonDispatcher;
+import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-public class KeyButtonView extends ImageView implements ButtonDispatcher.ButtonInterface {
+public class KeyButtonView extends ImageView implements ButtonInterface {
 
     private int mContentDescriptionRes;
     private long mDownTime;

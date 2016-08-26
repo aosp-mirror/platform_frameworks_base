@@ -14,10 +14,10 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.DrawableRes;
-import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+
+import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 
 import java.util.ArrayList;
 
@@ -186,18 +186,4 @@ public class ButtonDispatcher {
         }
     }
 
-    /**
-     * Interface for button actions.
-     */
-    public interface ButtonInterface {
-        void setImageResource(@DrawableRes int resId);
-
-        void setImageDrawable(@Nullable Drawable drawable);
-
-        void abortCurrentGesture();
-
-        void setLandscape(boolean landscape);
-
-        void setCarMode(boolean carMode);
-    }
 }
