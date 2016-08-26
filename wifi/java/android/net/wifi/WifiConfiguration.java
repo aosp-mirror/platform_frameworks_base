@@ -1266,6 +1266,8 @@ public class WifiConfiguration implements Parcelable {
             }
             mTemporarilyDisabledTimestamp = source.mTemporarilyDisabledTimestamp;
             mNetworkSelectionBSSID = source.mNetworkSelectionBSSID;
+            setCandidate(source.getCandidate());
+            setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
             setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
             setHasEverConnected(source.getHasEverConnected());
