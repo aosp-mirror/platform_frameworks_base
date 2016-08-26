@@ -2266,6 +2266,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         pw.print(info.updatePeriodMillis);
         pw.print(" resizeMode=");
         pw.print(info.resizeMode);
+        pw.print(" widgetCategory=");
         pw.print(info.widgetCategory);
         pw.print(" autoAdvanceViewId=");
         pw.print(info.autoAdvanceViewId);
