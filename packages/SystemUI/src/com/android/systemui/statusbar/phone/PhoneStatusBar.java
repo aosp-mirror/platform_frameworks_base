@@ -1614,7 +1614,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         Entry entry = mNotificationData.get(key);
 
-        if (entry != null && mRemoteInputController.isRemoteInputActive(entry)) {
+        if (entry != null && mRemoteInputController.isRemoteInputActive(entry)
+                && (entry.row != null && !entry.row.isDismissed())) {
             mLatestRankingMap = ranking;
             mRemoteInputEntriesToRemoveOnCollapse.add(entry);
             return;
@@ -2539,6 +2540,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             mStatusBarWindowManager.setHeadsUpShowing(false);
                             mHeadsUpManager.setHeadsUpGoingAway(false);
                         }
+                        removeRemoteInputEntriesKeptUntilCollapsed();
                     }
                 });
             }
