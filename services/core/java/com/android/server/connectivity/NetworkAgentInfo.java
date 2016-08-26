@@ -411,14 +411,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     /**
      * Cancel lingering. Called by ConnectivityService when a request is added to this network.
+     * Returns true if the given request was lingering on this network, false otherwise.
      */
-    public void unlingerRequest(NetworkRequest request) {
+    public boolean unlingerRequest(NetworkRequest request) {
         LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
         if (timer != null) {
             if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + this.name());
             mLingerTimers.remove(timer);
             mLingerTimerForRequest.remove(request.requestId);
+            return true;
         }
+        return false;
     }
 
     public long getLingerExpiry() {

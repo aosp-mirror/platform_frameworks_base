@@ -19,6 +19,7 @@ package com.android.server.connectivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.widget.Toast;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -34,9 +35,9 @@ import static android.net.NetworkCapabilities.*;
 
 public class NetworkNotificationManager {
 
-    public static enum NotificationType { SIGN_IN, NO_INTERNET; };
+    public static enum NotificationType { SIGN_IN, NO_INTERNET, NETWORK_SWITCH };
 
-    private static final String NOTIFICATION_ID = "CaptivePortal.Notification";
+    private static final String NOTIFICATION_ID = "Connectivity.Notification";
 
     private static final String TAG = NetworkNotificationManager.class.getSimpleName();
     private static final boolean DBG = true;
@@ -90,9 +91,15 @@ public class NetworkNotificationManager {
      * @param id an identifier that uniquely identifies this notification.  This must match
      *         between show and hide calls.  We use the NetID value but for legacy callers
      *         we concatenate the range of types with the range of NetIDs.
+     * @param nai the network with which the notification is associated. For a SIGN_IN or
+     *         NO_INTERNET notification, this is the network we're connecting to. For a
+     *         NETWORK_SWITCH notification it's the network that we switched from. When this network
+     *         disconnects the notification is removed.
+     * @param switchToNai for a NETWORK_SWITCH notification, the network we are switching to. Null
+     *         in all other cases. Only used to determine the text of the notification.
      */
-    public void showNotification(int id, NotificationType notifyType,
-            NetworkAgentInfo nai, PendingIntent intent, boolean highPriority) {
+    public void showNotification(int id, NotificationType notifyType, NetworkAgentInfo nai,
+            NetworkAgentInfo switchToNai, PendingIntent intent, boolean highPriority) {
         int transportType;
         String extraInfo;
         if (nai != null) {
@@ -136,29 +143,42 @@ public class NetworkNotificationManager {
                     details = r.getString(R.string.network_available_sign_in_detailed, extraInfo);
                     break;
             }
+        } else if (notifyType == NotificationType.NETWORK_SWITCH) {
+            String fromTransport = getTransportName(transportType);
+            String toTransport = getTransportName(getFirstTransportType(switchToNai));
+            title = r.getString(R.string.network_switch_metered, toTransport);
+            details = r.getString(R.string.network_switch_metered_detail, toTransport,
+                    fromTransport);
         } else {
             Slog.wtf(TAG, "Unknown notification type " + notifyType + "on network transport "
                     + getTransportName(transportType));
             return;
         }
 
-        Notification notification = new Notification.Builder(mContext)
-                .setWhen(0)
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)
                 .setSmallIcon(icon)
                 .setAutoCancel(true)
                 .setTicker(title)
                 .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
                 .setContentTitle(title)
-                .setContentText(details)
                 .setContentIntent(intent)
                 .setLocalOnly(true)
                 .setPriority(highPriority ?
                         Notification.PRIORITY_HIGH :
                         Notification.PRIORITY_DEFAULT)
                 .setDefaults(highPriority ? Notification.DEFAULT_ALL : 0)
-                .setOnlyAlertOnce(true)
-                .build();
+                .setOnlyAlertOnce(true);
+
+        if (notifyType == NotificationType.NETWORK_SWITCH) {
+            builder.setStyle(new Notification.BigTextStyle().bigText(details));
+        } else {
+            builder.setContentText(details);
+        }
+
+        Notification notification = builder.build();
 
         try {
             mNotificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
@@ -185,9 +205,17 @@ public class NetworkNotificationManager {
         if (visible) {
             Intent intent = new Intent(action);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-            showNotification(id, NotificationType.SIGN_IN, null, pendingIntent, false);
+            showNotification(id, NotificationType.SIGN_IN, null, null, pendingIntent, false);
         } else {
             clearNotification(id);
         }
+    }
+
+    public void showToast(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
+        String fromTransport = getTransportName(getFirstTransportType(fromNai));
+        String toTransport = getTransportName(getFirstTransportType(toNai));
+        String text = mContext.getResources().getString(
+                R.string.network_switch_metered_toast, fromTransport, toTransport);
+        Toast.makeText(mContext, text, Toast.LENGTH_LONG).show();
     }
 }
