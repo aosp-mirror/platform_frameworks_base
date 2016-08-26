@@ -6311,6 +6311,12 @@ public final class Settings {
                 "system_navigation_keys_enabled";
 
         /**
+         * Holds comma separated list of ordering of QS tiles.
+         * @hide
+         */
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
          * Whether preloaded APKs have been installed for the user.
          * @hide
          */
@@ -6396,7 +6402,8 @@ public final class Settings {
             NIGHT_DISPLAY_ACTIVATED,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
-            SYSTEM_NAVIGATION_KEYS_ENABLED
+            SYSTEM_NAVIGATION_KEYS_ENABLED,
+            QS_TILES,
         };
 
         /**
