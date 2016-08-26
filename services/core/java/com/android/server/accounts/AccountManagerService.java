@@ -85,7 +85,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -99,8 +98,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
 import com.google.android.collect.Lists;
@@ -181,14 +180,7 @@ public class AccountManagerService
     private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
 
-    private final MessageHandler mMessageHandler;
-
-    /**
-     * Used to keep data read/write operations for logging purposes in a separate thread
-     * from main thread
-     */
-    private final LinkedList<Runnable> mLogRecordRunnables = new LinkedList<Runnable>();
-    private Thread mLogRecordThread;
+    private final MessageHandler mHandler;
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
@@ -369,7 +361,10 @@ public class AccountManagerService
         mPackageManager = packageManager;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
 
-        mMessageHandler = new MessageHandler(FgThread.get().getLooper());
+        ServiceThread serviceThread = new ServiceThread(TAG,
+                android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+        serviceThread.start();
+        mHandler = new MessageHandler(serviceThread.getLooper());
 
         mAuthenticatorCache = authenticatorCache;
         mAuthenticatorCache.setListener(this, null /* Handler */);
@@ -396,7 +391,7 @@ public class AccountManagerService
                      * and then rebuild the cache. All under the cache lock. But that change is too
                      * large at this point.
                      */
-                    Runnable r = new Runnable() {
+                    Runnable purgingRunnable = new Runnable() {
                         @Override
                         public void run() {
                             purgeOldGrantsAll();
@@ -416,7 +411,7 @@ public class AccountManagerService
                                         uidOfUninstalledApplication)));
                         }
                     };
-                    new Thread(r).start();
+                    mHandler.post(purgingRunnable);
                 }
 
             }
@@ -429,7 +424,7 @@ public class AccountManagerService
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context1, Intent intent) {
-                mMessageHandler.post(new Runnable() {
+                mHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         int uidOfInstalledApplication =
@@ -472,7 +467,7 @@ public class AccountManagerService
                 // Called on a handler, and running as the system
                 cancelAccountAccessRequestNotificationIfNeeded(uid, true);
             }
-        }.register(mContext, mMessageHandler.getLooper(), UserHandle.ALL, true);
+        }.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
 
         // Cancel account request notification if an app op was preventing the account access
         mAppOpsManager.startWatchingMode(AppOpsManager.OP_GET_ACCOUNTS, null,
@@ -1865,7 +1860,7 @@ public class AccountManagerService
             if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
                 if (isLocalUnlockedUser(user.id)) {
-                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
+                    mHandler.sendMessage(mHandler.obtainMessage(
                             MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                 }
             }
@@ -2330,7 +2325,7 @@ public class AccountManagerService
                     if (account.equals(key.first.first)
                             && AccountManager.ACCOUNT_ACCESS_TOKEN.equals(key.first.second)) {
                         final int uid = (Integer) key.second;
-                        mMessageHandler.post(() -> cancelAccountAccessRequestNotificationIfNeeded(
+                        mHandler.post(() -> cancelAccountAccessRequestNotificationIfNeeded(
                                 account, uid, false));
                     }
                 }
@@ -4594,7 +4589,7 @@ public class AccountManagerService
         }
 
         public void cancelTimeout() {
-            mMessageHandler.removeMessages(MESSAGE_TIMED_OUT, this);
+            mHandler.removeMessages(MESSAGE_TIMED_OUT, this);
         }
 
         @Override
@@ -4984,23 +4979,11 @@ public class AccountManagerService
             }
         }
 
-        mLogRecordRunnables.add(new LogRecordTask(action, tableName, accountId, userAccount,
-                callingUid, userAccount.debugDbInsertionPoint));
+        LogRecordTask logTask = new LogRecordTask(action, tableName, accountId, userAccount,
+                callingUid, userAccount.debugDbInsertionPoint);
         userAccount.debugDbInsertionPoint = (userAccount.debugDbInsertionPoint + 1)
                 % MAX_DEBUG_DB_SIZE;
-
-
-        if(mLogRecordThread == null || !mLogRecordThread.isAlive()) {
-            mLogRecordThread = new Thread(new Runnable() {
-                public void run() {
-                    while(mLogRecordRunnables.size() > 0) {
-                        mLogRecordRunnables.pollFirst().run();
-                    }
-                }
-            });
-            mLogRecordThread.start();
-        }
-
+        mHandler.post(logTask);
     }
 
     /*
