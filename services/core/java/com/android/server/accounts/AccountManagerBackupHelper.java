@@ -29,11 +29,14 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.PackageUtils;
+import android.util.Pair;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.accounts.AccountsDb.DeDatabaseHelper;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -58,14 +61,6 @@ public final class AccountManagerBackupHelper {
     private static final String ATTR_ACCOUNT_SHA_256 = "account-sha-256";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_DIGEST = "digest";
-
-    private static final String ACCOUNT_ACCESS_GRANTS = ""
-            + "SELECT " + AccountManagerService.ACCOUNTS_NAME + ", "
-            + AccountManagerService.GRANTS_GRANTEE_UID
-            + " FROM " + AccountManagerService.TABLE_ACCOUNTS
-            + ", " + AccountManagerService.TABLE_GRANTS
-            + " WHERE " + AccountManagerService.GRANTS_ACCOUNTS_ID
-            + "=" + AccountManagerService.ACCOUNTS_ID;
 
     private final Object mLock = new Object();
 
@@ -148,60 +143,48 @@ public final class AccountManagerBackupHelper {
                 .getUserAccounts(userId);
         synchronized (accounts.cacheLock) {
             SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-            try (
-                Cursor cursor = db.rawQuery(ACCOUNT_ACCESS_GRANTS, null);
-            ) {
-                if (cursor == null || !cursor.moveToFirst()) {
-                    return null;
-                }
-
-                final int nameColumnIdx = cursor.getColumnIndex(
-                        AccountManagerService.ACCOUNTS_NAME);
-                final int uidColumnIdx = cursor.getColumnIndex(
-                        AccountManagerService.GRANTS_GRANTEE_UID);
-
+            List<Pair<String, Integer>> allAccountGrants = DeDatabaseHelper.findAllAccountGrants(
+                    db);
+            if (allAccountGrants.isEmpty()) {
+                return null;
+            }
+            try {
                 ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-                try {
-                    final XmlSerializer serializer = new FastXmlSerializer();
-                    serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-                    serializer.startDocument(null, true);
-                    serializer.startTag(null, TAG_PERMISSIONS);
+                final XmlSerializer serializer = new FastXmlSerializer();
+                serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
+                serializer.startDocument(null, true);
+                serializer.startTag(null, TAG_PERMISSIONS);
 
-                    PackageManager packageManager = mAccountManagerService.mContext
-                            .getPackageManager();
+                PackageManager packageManager = mAccountManagerService.mContext.getPackageManager();
+                for (Pair<String, Integer> grant : allAccountGrants) {
+                    final String accountName = grant.first;
+                    final int uid = grant.second;
 
-                    do {
-                        final String accountName = cursor.getString(nameColumnIdx);
-                        final int uid = cursor.getInt(uidColumnIdx);
+                    final String[] packageNames = packageManager.getPackagesForUid(uid);
+                    if (packageNames == null) {
+                        continue;
+                    }
 
-                        final String[] packageNames = packageManager.getPackagesForUid(uid);
-                        if (packageNames == null) {
-                            continue;
+                    for (String packageName : packageNames) {
+                        String digest = PackageUtils.computePackageCertSha256Digest(
+                                packageManager, packageName, userId);
+                        if (digest != null) {
+                            serializer.startTag(null, TAG_PERMISSION);
+                            serializer.attribute(null, ATTR_ACCOUNT_SHA_256,
+                                    PackageUtils.computeSha256Digest(accountName.getBytes()));
+                            serializer.attribute(null, ATTR_PACKAGE, packageName);
+                            serializer.attribute(null, ATTR_DIGEST, digest);
+                            serializer.endTag(null, TAG_PERMISSION);
                         }
-
-                        for (String packageName : packageNames) {
-                            String digest = PackageUtils.computePackageCertSha256Digest(
-                                    packageManager, packageName, userId);
-                            if (digest != null) {
-                                serializer.startTag(null, TAG_PERMISSION);
-                                serializer.attribute(null, ATTR_ACCOUNT_SHA_256,
-                                        PackageUtils.computeSha256Digest(accountName.getBytes()));
-                                serializer.attribute(null, ATTR_PACKAGE, packageName);
-                                serializer.attribute(null, ATTR_DIGEST, digest);
-                                serializer.endTag(null, TAG_PERMISSION);
-                            }
-                        }
-                    } while (cursor.moveToNext());
-
-                    serializer.endTag(null, TAG_PERMISSIONS);
-                    serializer.endDocument();
-                    serializer.flush();
-                } catch (IOException e) {
-                    Log.e(TAG, "Error backing up account access grants", e);
-                    return null;
+                    }
                 }
-
+                serializer.endTag(null, TAG_PERMISSIONS);
+                serializer.endDocument();
+                serializer.flush();
                 return dataStream.toByteArray();
+            } catch (IOException e) {
+                Log.e(TAG, "Error backing up account access grants", e);
+                return null;
             }
         }
     }
