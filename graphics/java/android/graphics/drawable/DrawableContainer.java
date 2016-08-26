@@ -27,8 +27,8 @@ import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
@@ -601,8 +601,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      * during inflation.
      *
      * @param res the resources used to inflate density-dependent values
+     * @hide
      */
-    final void updateDensity(Resources res) {
+    protected final void updateDensity(Resources res) {
         mDrawableContainerState.updateDensity(res);
     }
 
@@ -711,7 +712,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean mHasTintList;
         boolean mHasTintMode;
 
-        DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
+        /**
+         * @hide
+         */
+        protected DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
             mSourceRes = res != null ? res : (orig != null ? orig.mSourceRes : null);
