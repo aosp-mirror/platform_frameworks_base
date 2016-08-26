@@ -25,6 +25,7 @@ import android.net.NetworkState;
 import android.net.RouteInfo;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
+import android.net.util.NetdService;
 import android.os.INetworkManagementService;
 import android.os.ServiceSpecificException;
 import android.os.RemoteException;
@@ -193,7 +194,7 @@ class IPv6TetheringInterfaceServices {
 
     private void configureLocalDns(
             HashSet<Inet6Address> deprecatedDnses, HashSet<Inet6Address> newDnses) {
-        INetd netd = getNetdServiceOrNull();
+        final INetd netd = NetdService.getInstance();
         if (netd == null) {
             if (newDnses != null) newDnses.clear();
             Log.e(TAG, "No netd service instance available; not setting local IPv6 addresses");
@@ -263,18 +264,6 @@ class IPv6TetheringInterfaceServices {
             localRoutes.add(new RouteInfo(ipp, null, mIfName));
         }
         return localRoutes;
-    }
-
-    private INetd getNetdServiceOrNull() {
-        if (mNMService != null) {
-            try {
-                return mNMService.getNetdService();
-            } catch (RemoteException ignored) {
-                // This blocks until netd can be reached, but it can return
-                // null during a netd crash.
-            }
-        }
-        return null;
     }
 
     // Given a prefix like 2001:db8::/64 return 2001:db8::1.

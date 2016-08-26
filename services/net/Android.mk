@@ -5,6 +5,10 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := services.net
 
 LOCAL_SRC_FILES += \
-    $(call all-java-files-under,java)
+    $(call all-java-files-under,java)  \
+    ../../../../system/netd/server/binder/android/net/INetd.aidl
+
+LOCAL_AIDL_INCLUDES += \
+    system/netd/server/binder
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
