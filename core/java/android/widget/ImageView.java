@@ -933,9 +933,8 @@ public class ImageView extends View {
             if (d.isStateful()) {
                 d.setState(getDrawableState());
             }
-            if (isAttachedToWindow()) {
-                d.setVisible(getWindowVisibility() == VISIBLE && isShown(), true);
-            }
+            d.setVisible(isAttachedToWindow() && getWindowVisibility() == VISIBLE && isShown(),
+                    true);
             d.setLevel(mLevel);
             mDrawableWidth = d.getIntrinsicWidth();
             mDrawableHeight = d.getIntrinsicHeight();
