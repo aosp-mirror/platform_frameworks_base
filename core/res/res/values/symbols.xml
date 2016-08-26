@@ -2216,6 +2216,7 @@
   <java-symbol type="bool" name="config_carrier_volte_provisioned" />
   <java-symbol type="bool" name="config_carrier_volte_tty_supported" />
   <java-symbol type="bool" name="config_device_vt_available" />
+  <java-symbol type="bool" name="config_device_respects_hold_carrier_config" />
   <java-symbol type="bool" name="config_carrier_vt_available" />
   <java-symbol type="bool" name="config_device_wfc_ims_available" />
   <java-symbol type="bool" name="config_carrier_wfc_ims_available" />
