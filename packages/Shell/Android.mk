@@ -12,6 +12,8 @@ LOCAL_PACKAGE_NAME := Shell
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 
+LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.shell.*
+
 include $(BUILD_PACKAGE)
 
 include $(LOCAL_PATH)/tests/Android.mk
