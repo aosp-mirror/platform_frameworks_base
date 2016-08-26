@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.NonNull;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
@@ -186,6 +187,10 @@ public class ScrollView extends FrameLayout {
         setFillViewport(a.getBoolean(R.styleable.ScrollView_fillViewport, false));
 
         a.recycle();
+
+        if (context.getResources().getConfiguration().uiMode == Configuration.UI_MODE_TYPE_WATCH) {
+            setRevealOnFocusHint(false);
+        }
     }
 
     @Override
@@ -1455,11 +1460,13 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (!mIsLayoutDirty) {
-            scrollToChild(focused);
-        } else {
-            // The child may not be laid out yet, we can't compute the scroll yet
-            mChildToScrollTo = focused;
+        if (focused.getRevealOnFocusHint()) {
+            if (!mIsLayoutDirty) {
+                scrollToChild(focused);
+            } else {
+                // The child may not be laid out yet, we can't compute the scroll yet
+                mChildToScrollTo = focused;
+            }
         }
         super.requestChildFocus(child, focused);
     }

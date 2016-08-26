@@ -2590,6 +2590,11 @@
          is installed. -->
     <bool name="config_permissionReviewRequired">false</bool>
 
+    <!-- Default value for android:focusableInTouchMode for some framework scrolling containers.
+         ListView/GridView are notably absent since this is their default anyway.
+         Set to true for watch devices. -->
+    <bool name="config_focusScrollContainersInTouchMode">false</bool>
+
     <string name="config_networkOverLimitComponent" translatable="false">com.android.systemui/com.android.systemui.net.NetworkOverLimitActivity</string>
     <string name="config_dataUsageSummaryComponent" translatable="false">com.android.settings/com.android.settings.Settings$DataUsageSummaryActivity</string>
 
