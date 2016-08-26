@@ -2761,8 +2761,10 @@ public abstract class Context {
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
-     *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of
-     * Wi-Fi connectivity.
+     *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of Wi-Fi
+     *  connectivity.  On releases before NYC, it should only be obtained from an application
+     *  context, and not from any other derived context to avoid memory leaks within the calling
+     *  process.
      *  <dt> {@link #WIFI_P2P_SERVICE} ("wifip2p")
      *  <dd> A {@link android.net.wifi.p2p.WifiP2pManager WifiP2pManager} for management of
      * Wi-Fi Direct connectivity.
