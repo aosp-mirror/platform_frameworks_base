@@ -179,6 +179,14 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
+    // TODO: Don't forget to switch to WC.detachChild
+    void detachChild(AppWindowToken wtoken) {
+        if (!removeAppToken(wtoken)) {
+            Slog.e(TAG, "detachChild: token=" + this + " not found.");
+        }
+        mStack.mExitingAppTokens.remove(wtoken);
+    }
+
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {

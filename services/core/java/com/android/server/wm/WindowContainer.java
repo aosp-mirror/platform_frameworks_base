@@ -67,17 +67,50 @@ class WindowContainer {
         mChildren.add(child);
     }
 
-    /** Removes this window container and its children */
+    /**
+     * Removes this window container and its children with no regard for what else might be going on
+     * in the system. For example, the container will be removed during animation if this method is
+     * called which isn't desirable. For most cases you want to call {@link #removeIfPossible()}
+     * which allows the system to defer removal until a suitable time.
+     */
     @CallSuper
-    void remove() {
+    void removeImmediately() {
         while (!mChildren.isEmpty()) {
-            final WindowContainer child = mChildren.removeLast();
-            child.remove();
+            final WindowContainer child = mChildren.peekLast();
+            child.removeImmediately();
+            // Need to do this after calling remove on the child because the child might try to
+            // remove/detach itself from its parent which will cause an exception if we remove
+            // it before calling remove on the child.
+            mChildren.remove(child);
         }
 
         if (mParent != null) {
-            mParent.mChildren.remove(this);
-            mParent = null;
+            mParent.detachChild(this);
+        }
+    }
+
+    /**
+     * Removes this window container and its children taking care not to remove them during a
+     * critical stage in the system. For example, some containers will not be removed during
+     * animation if this method is called.
+     */
+    // TODO: figure-out implementation that works best for this.
+    // E.g. when do we remove from parent list? maybe not...
+    void removeIfPossible() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.removeIfPossible();
+        }
+    }
+
+    /** Detaches the input child container from this container which is its parent. */
+    @CallSuper
+    void detachChild(WindowContainer child) {
+        if (mChildren.remove(child)) {
+            child.mParent = null;
+        } else {
+            throw new IllegalArgumentException("detachChild: container=" + child
+                    + " is not a child of container=" + this);
         }
     }
 

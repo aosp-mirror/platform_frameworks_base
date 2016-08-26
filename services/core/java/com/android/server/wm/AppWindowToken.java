@@ -75,6 +75,7 @@ class AppWindowToken extends WindowToken {
     final boolean voiceInteraction;
 
     Task mTask;
+    // TODO: Have a fillParent variable in WindowContainer to this?
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean layoutConfigChanges;
@@ -100,7 +101,7 @@ class AppWindowToken extends WindowToken {
     // These are to track the app's real drawing status if there were no saved surfaces.
     boolean allDrawnExcludingSaved;
     int numInterestingWindowsExcludingSaved;
-    int numDrawnWindowsExclusingSaved;
+    int numDrawnWindowsExcludingSaved;
 
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
@@ -133,6 +134,7 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
+    // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
 
     boolean mLaunchTaskBehind;
@@ -356,18 +358,12 @@ class AppWindowToken extends WindowToken {
         return StackId.canReceiveKeys(mTask.mStack.mStackId) || mAlwaysFocusable;
     }
 
-    void removeAppFromTaskLocked() {
+    @Override
+    void removeIfPossible() {
         mIsExiting = false;
         removeAllWindows();
-
-        // Use local variable because removeAppToken will null out mTask.
-        final Task task = mTask;
-        if (task != null) {
-            if (!task.removeAppToken(this)) {
-                Slog.e(TAG, "removeAppFromTaskLocked: token=" + this
-                        + " not found.");
-            }
-            task.mStack.mExitingAppTokens.remove(this);
+        if (mTask != null) {
+            mTask.detachChild(this);
         }
     }
 

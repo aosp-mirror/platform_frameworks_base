@@ -247,7 +247,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -1896,7 +1895,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Performs some centralized bookkeeping clean-up on the window that is being removed.
-     * NOTE: Should only be called from {@link WindowState#remove()}
+     * NOTE: Should only be called from {@link WindowState#removeImmediately()}
+     * TODO: Maybe better handled with a method {@link WindowContainer#detachChild} if we can
+     * figure-out a good way to have all parents of a WindowState doing the same thing without
+     * forgetting to add the wiring when a new parent of WindowState is added.
      */
     void postWindowRemoveCleanupLocked(WindowState win) {
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);
@@ -3756,7 +3758,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     // soon as their animations are complete
                     wtoken.mAppAnimator.clearAnimation();
                     wtoken.mAppAnimator.animating = false;
-                    wtoken.removeAppFromTaskLocked();
+                    wtoken.removeIfPossible();
                 }
 
                 wtoken.removed = true;
@@ -10449,7 +10451,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public void removeWindowToken(IBinder token, boolean removeWindows) {
             synchronized(mWindowMap) {
                 if (removeWindows) {
-                    WindowToken wtoken = mTokenMap.remove(token);
+                    final WindowToken wtoken = mTokenMap.remove(token);
                     if (wtoken != null) {
                         wtoken.removeAllWindows();
                     }
