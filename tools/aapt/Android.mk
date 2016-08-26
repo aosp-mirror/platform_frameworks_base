@@ -61,7 +61,7 @@ aaptHostStaticLibs := \
     liblog \
     libcutils \
     libexpat \
-    libziparchive-host \
+    libziparchive \
     libbase
 
 aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER_FROM_FILE)\"
