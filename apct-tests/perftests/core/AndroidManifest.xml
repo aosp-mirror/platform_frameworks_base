@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.core.perftests">
+    package="com.android.perftests.core">
 
     <application>
         <uses-library android:name="android.test.runner" />
@@ -8,6 +8,6 @@
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.core.perftests"/>
+        android:targetPackage="com.android.perftests.core"/>
 
 </manifest>

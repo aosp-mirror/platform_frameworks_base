@@ -27,7 +27,7 @@ import android.support.test.rule.ActivityTestRule;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.core.perftests.R;
+import com.android.perftests.core.R;
 
 import org.junit.Rule;
 import org.junit.Test;
