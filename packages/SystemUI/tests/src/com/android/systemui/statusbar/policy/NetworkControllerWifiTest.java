@@ -5,19 +5,26 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
+
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     // These match the constants in WifiManager and need to be kept up to date.
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
 
+    @Test
     public void testWifiIcon() {
         String testSsid = "Test SSID";
         setWifiEnabled(true);
@@ -36,6 +43,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
     }
 
+    @Test
     public void testQsWifiIcon() {
         String testSsid = "Test SSID";
 
@@ -58,6 +66,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
     }
 
+    @Test
     public void testQsDataDirection() {
         // Setup normal connection
         String testSsid = "Test SSID";
@@ -79,6 +88,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         verifyLastQsDataDirection(true, true);
     }
 
+    @Test
     public void testRoamingIconDuringWifi() {
         // Setup normal connection
         String testSsid = "Test SSID";

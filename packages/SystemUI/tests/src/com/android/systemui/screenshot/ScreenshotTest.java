@@ -19,30 +19,42 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.FileObserver;
-import android.test.ActivityInstrumentationTestCase2;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.KeyEvent;
-
+import com.android.systemui.screenshot.ScreenshotStubActivity;
 import java.io.File;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * Functional tests for the global screenshot feature.
  */
 @LargeTest
-public class ScreenshotTest extends ActivityInstrumentationTestCase2<ScreenshotStubActivity> {
+@RunWith(AndroidJUnit4.class)
+public class ScreenshotTest {
 
     private static final String LOG_TAG = "ScreenshotTest";
     private static final int SCREEN_WAIT_TIME_SEC = 5;
 
-    public ScreenshotTest() {
-        super(ScreenshotStubActivity.class);
-    }
+    public ScreenshotTest() {}
+
+    @Rule
+    public ActivityTestRule<ScreenshotStubActivity> mActivityRule =
+            new ActivityTestRule<>(ScreenshotStubActivity.class);
 
     /**
      * A simple test for screenshots that launches an Activity, injects the key event combo
      * to trigger the screenshot, and verifies the screenshot was taken successfully.
      */
+    @Test
     public void testScreenshot() throws Exception {
         if (true) {
             // Disable until this works again.
@@ -50,7 +62,7 @@ public class ScreenshotTest extends ActivityInstrumentationTestCase2<ScreenshotS
         }
         Log.d(LOG_TAG, "starting testScreenshot");
         // launch the activity.
-        ScreenshotStubActivity activity = getActivity();
+        ScreenshotStubActivity activity = mActivityRule.getActivity();
         assertNotNull(activity);
 
         File screenshotDir = getScreenshotDir();
@@ -105,20 +117,20 @@ public class ScreenshotTest extends ActivityInstrumentationTestCase2<ScreenshotS
      * Inject the key sequence to take a screenshot.
      */
     private void takeScreenshot() {
-        getInstrumentation().sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_POWER));
-        getInstrumentation().sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN,
-                KeyEvent.KEYCODE_VOLUME_DOWN));
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_POWER));
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_DOWN));
         // the volume down key event will cause the 'volume adjustment' UI to appear in the
         // foreground, and steal UI focus
         // unfortunately this means the next key event will get directed to the
         // 'volume adjustment' UI, instead of this test's activity
         // for this reason this test must be signed with platform certificate, to grant this test
         // permission to inject key events to another process
-        getInstrumentation().sendKeySync(new KeyEvent(KeyEvent.ACTION_UP,
-                KeyEvent.KEYCODE_VOLUME_DOWN));
-        getInstrumentation().sendKeySync(new KeyEvent(KeyEvent.ACTION_UP,
-                KeyEvent.KEYCODE_POWER));
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_VOLUME_DOWN));
+        InstrumentationRegistry.getInstrumentation()
+                .sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_POWER));
     }
 
     /**

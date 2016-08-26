@@ -31,15 +31,24 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Log;
-
+import com.android.systemui.SysuiTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
 @SmallTest
-public class TileLifecycleManagerTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class TileLifecycleManagerTests extends SysuiTestCase {
     public static final String TILE_UPDATE_BROADCAST = "com.android.systemui.tests.TILE_UPDATE";
     public static final String EXTRA_CALLBACK = "callback";
 
@@ -50,13 +59,12 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
     private final ArraySet<String> mCallbacks = new ArraySet<>();
     private boolean mBound;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        ComponentName component = new ComponentName(mContext, FakeTileService.class);
+        ComponentName component = new ComponentName(getContext(), FakeTileService.class);
         mStateManager = new TileLifecycleManager(mHandler, getContext(),
                 Mockito.mock(IQSService.class), new Tile(),
                 new Intent().setComponent(component),
@@ -65,9 +73,8 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         getContext().registerReceiver(mReceiver, new IntentFilter(TILE_UPDATE_BROADCAST));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         if (mBound) {
             unbindService();
         }
@@ -75,15 +82,18 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         getContext().unregisterReceiver(mReceiver);
     }
 
+    @Test
     public void testSync() {
         syncWithHandler();
     }
 
+    @Test
     public void testBind() {
         bindService();
         waitForCallback("onCreate");
     }
 
+    @Test
     public void testUnbind() {
         bindService();
         waitForCallback("onCreate");
@@ -91,6 +101,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         waitForCallback("onDestroy");
     }
 
+    @Test
     public void testTileServiceCallbacks() {
         bindService();
         waitForCallback("onCreate");
@@ -109,6 +120,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         unbindService();
     }
 
+    @Test
     public void testAddedBeforeBind() {
         mStateManager.onTileAdded();
 
@@ -117,6 +129,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         waitForCallback("onTileAdded");
     }
 
+    @Test
     public void testListeningBeforeBind() {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
@@ -127,6 +140,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         waitForCallback("onStartListening");
     }
 
+    @Test
     public void testClickBeforeBind() {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
@@ -139,6 +153,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         waitForCallback("onClick");
     }
 
+    @Test
     public void testListeningNotListeningBeforeBind() {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
@@ -151,6 +166,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         assertFalse(mCallbacks.contains("onStartListening"));
     }
 
+    @Test
     public void testNoClickOfNotListeningAnymore() {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
@@ -164,6 +180,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         assertFalse(mCallbacks.contains("onClick"));
     }
 
+    @Test
     public void testComponentEnabling() {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
@@ -180,6 +197,7 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         waitForCallback("onCreate");
     }
 
+    @Test
     public void testKillProcess() {
         mStateManager.onStartListening();
         bindService();

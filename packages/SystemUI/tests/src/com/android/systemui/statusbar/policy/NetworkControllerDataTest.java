@@ -2,14 +2,19 @@ package com.android.systemui.statusbar.policy;
 
 import android.net.NetworkCapabilities;
 import android.os.Looper;
+import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.settingslib.net.DataUsageController;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
+    @Test
     public void test3gDataIcon() {
         setupDefaultSignal();
 
@@ -17,6 +22,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_3G);
     }
 
+    @Test
     public void testRoamingDataIcon() {
         setupDefaultSignal();
         setGsmRoaming(true);
@@ -29,6 +35,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_R, false, false);
     }
 
+    @Test
     public void test2gDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -38,6 +45,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_G);
     }
 
+    @Test
     public void testCdmaDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -47,6 +55,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_1X);
     }
 
+    @Test
     public void testEdgeDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -56,6 +65,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_E);
     }
 
+    @Test
     public void testLteDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -65,6 +75,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_LTE);
     }
 
+    @Test
     public void testHspaDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -74,6 +85,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_H);
     }
 
+    @Test
     public void testWfcNoDataIcon() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -82,6 +94,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyDataIndicators(0, 0);
     }
 
+    @Test
     public void test4gDataIcon() {
         // Switch to showing 4g icon and re-initialize the NetworkController.
         mConfig.show4gForLte = true;
@@ -99,6 +112,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
+    @Test
     public void testDataDisabledIcon() {
         setupNetworkController();
         Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
@@ -110,6 +124,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_ICON_DATA_DISABLED);
     }
 
+    @Test
     public void testDataDisabledIcon_UserNotSetup() {
         setupNetworkController();
         Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
@@ -122,6 +137,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyDataIndicators(0, 0);
     }
 
+    @Test
     public void test4gDataIconConfigChange() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -138,6 +154,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
+    @Test
     public void testDataChangeWithoutConnectionState() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -153,6 +170,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_H);
     }
 
+    @Test
     public void testDataActivity() {
         setupDefaultSignal();
 

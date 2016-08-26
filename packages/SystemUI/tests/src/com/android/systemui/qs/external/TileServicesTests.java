@@ -15,30 +15,37 @@
  */
 package com.android.systemui.qs.external;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import android.content.ComponentName;
+import android.content.Context;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import java.util.ArrayList;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class TileServicesTests extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
     private TileServices mTileService;
     private ArrayList<TileServiceManager> mManagers;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         mManagers = new ArrayList<>();
         final NetworkController networkController = Mockito.mock(NetworkController.class);
         Mockito.when(networkController.getDataSaverController()).thenReturn(
@@ -47,9 +54,10 @@ public class TileServicesTests extends SysuiTestCase {
                 networkController, null,
                 Mockito.mock(HotspotController.class), null,
                 null, null, null, null, null, null, null, null);
-        mTileService = new TestTileServices(host, Looper.myLooper());
+        mTileService = new TestTileServices(host, Looper.getMainLooper());
     }
 
+    @Test
     public void testRecalculateBindAllowance() {
         // Add some fake tiles.
         for (int i = 0; i < NUM_FAKES; i++) {
@@ -72,6 +80,7 @@ public class TileServicesTests extends SysuiTestCase {
         }
     }
 
+    @Test
     public void testSetMemoryPressure() {
         testRecalculateBindAllowance();
         mTileService.setMemoryPressure(true);
@@ -85,6 +94,7 @@ public class TileServicesTests extends SysuiTestCase {
         }
     }
 
+    @Test
     public void testCalcFew() {
         for (int i = 0; i < TileServices.DEFAULT_MAX_BOUND - 1; i++) {
             mTileService.getTileWrapper(Mockito.mock(CustomTile.class));

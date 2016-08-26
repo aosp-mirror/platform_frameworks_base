@@ -15,17 +15,23 @@
  */
 package com.android.systemui;
 
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
 import android.test.AndroidTestCase;
+import org.junit.Before;
 
 /**
  * Base class that does System UI specific setup.
  */
-public class SysuiTestCase extends AndroidTestCase {
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        // Mockito stuff.
-        System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+public class SysuiTestCase {
+    protected Context mContext;
+
+    @Before
+    public void SysuiSetup() throws Exception {
+        mContext = InstrumentationRegistry.getTargetContext();
+    }
+
+    protected Context getContext() {
+        return mContext;
     }
 }

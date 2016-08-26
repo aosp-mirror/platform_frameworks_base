@@ -14,26 +14,32 @@
 
 package com.android.systemui.qs;
 
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
-import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.TouchAnimator.Listener;
+import com.android.systemui.SysuiTestCase;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.Test;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
+
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class TouchAnimatorTests extends SysuiTestCase {
 
     private Listener mTouchListener;
     private View mTestView;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mTestView = new View(getContext());
         mTouchListener = Mockito.mock(Listener.class);
     }
 
+    @Test
     public void testSetValueFloat() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .addFloat(mTestView, "x", 0, 50)
@@ -49,6 +55,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         assertEquals(50f, mTestView.getX());
     }
 
+    @Test
     public void testSetValueInt() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .addInt(mTestView, "top", 0, 50)
@@ -64,6 +71,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         assertEquals(50, mTestView.getTop());
     }
 
+    @Test
     public void testStartDelay() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .addFloat(mTestView, "x", 0, 50)
@@ -83,6 +91,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         assertEquals(50f, mTestView.getX());
     }
 
+    @Test
     public void testEndDelay() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .addFloat(mTestView, "x", 0, 50)
@@ -102,6 +111,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         assertEquals(50f, mTestView.getX());
     }
 
+    @Test
     public void testOnAnimationAtStartCallback() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .setListener(mTouchListener)
@@ -126,6 +136,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         verifyOnAnimationAtStart(3);
     }
 
+    @Test
     public void testOnAnimationAtEndCallback() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .setListener(mTouchListener)
@@ -150,6 +161,7 @@ public class TouchAnimatorTests extends SysuiTestCase {
         verifyOnAnimationAtEnd(3);
     }
 
+    @Test
     public void testOnAnimationStartedCallback() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .setListener(mTouchListener)

@@ -16,14 +16,21 @@
 
 package com.android.systemui.phone;
 
-import com.android.systemui.statusbar.phone.DozeParameters.IntInOutMatcher;
-
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import com.android.systemui.statusbar.phone.DozeParameters.IntInOutMatcher;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.fail;
 
 @SmallTest
-public class DozeParametersTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class DozeParametersTests {
 
+    @Test
     public void test_inOutMatcher_defaultIn() {
         IntInOutMatcher intInOutMatcher = new IntInOutMatcher("*");
 
@@ -32,6 +39,7 @@ public class DozeParametersTests extends AndroidTestCase {
         assertTrue(intInOutMatcher.isIn(0));
     }
 
+    @Test
     public void test_inOutMatcher_defaultOut() {
         IntInOutMatcher intInOutMatcher = new IntInOutMatcher("!*");
 
@@ -40,6 +48,7 @@ public class DozeParametersTests extends AndroidTestCase {
         assertFalse(intInOutMatcher.isIn(0));
     }
 
+    @Test
     public void test_inOutMatcher_someIn() {
         IntInOutMatcher intInOutMatcher = new IntInOutMatcher("1,2,3,!*");
 
@@ -51,6 +60,7 @@ public class DozeParametersTests extends AndroidTestCase {
         assertFalse(intInOutMatcher.isIn(4));
     }
 
+    @Test
     public void test_inOutMatcher_someOut() {
         IntInOutMatcher intInOutMatcher = new IntInOutMatcher("!1,!2,!3,*");
 
@@ -62,6 +72,7 @@ public class DozeParametersTests extends AndroidTestCase {
         assertTrue(intInOutMatcher.isIn(4));
     }
 
+    @Test
     public void test_inOutMatcher_mixed() {
         IntInOutMatcher intInOutMatcher = new IntInOutMatcher("!1,2,!3,*");
 
@@ -73,6 +84,7 @@ public class DozeParametersTests extends AndroidTestCase {
         assertTrue(intInOutMatcher.isIn(4));
     }
 
+    @Test
     public void test_inOutMatcher_failEmpty() {
         try {
             new IntInOutMatcher("");
@@ -82,6 +94,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failNull() {
         try {
             new IntInOutMatcher(null);
@@ -91,6 +104,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failEmptyClause() {
         try {
             new IntInOutMatcher("!1,*,");
@@ -100,6 +114,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failDuplicate() {
         try {
             new IntInOutMatcher("!1,*,!1");
@@ -109,6 +124,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failDuplicateDefault() {
         try {
             new IntInOutMatcher("!1,*,*");
@@ -118,6 +134,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failMalformedNot() {
         try {
             new IntInOutMatcher("!,*");
@@ -127,6 +144,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failText() {
         try {
             new IntInOutMatcher("!abc,*");
@@ -136,6 +154,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failContradiction() {
         try {
             new IntInOutMatcher("1,!1,*");
@@ -145,6 +164,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failContradictionDefault() {
         try {
             new IntInOutMatcher("1,*,!*");
@@ -154,6 +174,7 @@ public class DozeParametersTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void test_inOutMatcher_failMissingDefault() {
         try {
             new IntInOutMatcher("1");
