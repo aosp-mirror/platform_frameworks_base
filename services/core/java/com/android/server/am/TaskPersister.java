@@ -87,6 +87,8 @@ public class TaskPersister {
     private final RecentTasks mRecentTasks;
     private final SparseArray<SparseBooleanArray> mTaskIdsInFile = new SparseArray<>();
     private final File mTaskIdsDir;
+    // To lock file operations in TaskPersister
+    private final Object mIoLock = new Object();
 
     /**
      * Value determines write delay mode as follows: < 0 We are Flushing. No delays between writes
@@ -195,52 +197,52 @@ public class TaskPersister {
             return mTaskIdsInFile.get(userId).clone();
         }
         final SparseBooleanArray persistedTaskIds = new SparseBooleanArray();
-        BufferedReader reader = null;
-        String line;
-        try {
-            reader = new BufferedReader(new FileReader(getUserPersistedTaskIdsFile(userId)));
-            while ((line = reader.readLine()) != null) {
-                for (String taskIdString : line.split("\\s+")) {
-                    int id = Integer.parseInt(taskIdString);
-                    persistedTaskIds.put(id, true);
+        synchronized (mIoLock) {
+            BufferedReader reader = null;
+            String line;
+            try {
+                reader = new BufferedReader(new FileReader(getUserPersistedTaskIdsFile(userId)));
+                while ((line = reader.readLine()) != null) {
+                    for (String taskIdString : line.split("\\s+")) {
+                        int id = Integer.parseInt(taskIdString);
+                        persistedTaskIds.put(id, true);
+                    }
                 }
+            } catch (FileNotFoundException e) {
+                // File doesn't exist. Ignore.
+            } catch (Exception e) {
+                Slog.e(TAG, "Error while reading taskIds file for user " + userId, e);
+            } finally {
+                IoUtils.closeQuietly(reader);
             }
-        } catch (FileNotFoundException e) {
-            // File doesn't exist. Ignore.
-        } catch (Exception e) {
-            Slog.e(TAG, "Error while reading taskIds file for user " + userId, e);
-        } finally {
-            IoUtils.closeQuietly(reader);
         }
         mTaskIdsInFile.put(userId, persistedTaskIds);
         return persistedTaskIds.clone();
     }
 
+
     @VisibleForTesting
-    void maybeWritePersistedTaskIdsForUser(@NonNull SparseBooleanArray taskIds, int userId) {
+    void writePersistedTaskIdsForUser(@NonNull SparseBooleanArray taskIds, int userId) {
         if (userId < 0) {
             return;
         }
-        SparseBooleanArray persistedIdsInFile = mTaskIdsInFile.get(userId);
-        if (persistedIdsInFile != null && persistedIdsInFile.equals(taskIds)) {
-            return;
-        }
         final File persistedTaskIdsFile = getUserPersistedTaskIdsFile(userId);
-        BufferedWriter writer = null;
-        try {
-            writer = new BufferedWriter(new FileWriter(persistedTaskIdsFile));
-            for (int i = 0; i < taskIds.size(); i++) {
-                if (taskIds.valueAt(i)) {
-                    writer.write(String.valueOf(taskIds.keyAt(i)));
-                    writer.newLine();
+        synchronized (mIoLock) {
+            BufferedWriter writer = null;
+            try {
+                writer = new BufferedWriter(new FileWriter(persistedTaskIdsFile));
+                for (int i = 0; i < taskIds.size(); i++) {
+                    if (taskIds.valueAt(i)) {
+                        writer.write(String.valueOf(taskIds.keyAt(i)));
+                        writer.newLine();
+                    }
                 }
+            } catch (Exception e) {
+                Slog.e(TAG, "Error while writing taskIds file for user " + userId, e);
+            } finally {
+                IoUtils.closeQuietly(writer);
             }
-        } catch (Exception e) {
-            Slog.e(TAG, "Error while writing taskIds file for user " + userId, e);
-        } finally {
-            IoUtils.closeQuietly(writer);
         }
-        mTaskIdsInFile.put(userId, taskIds.clone());
     }
 
     void unloadUserDataFromMemory(int userId) {
@@ -543,16 +545,23 @@ public class TaskPersister {
     }
 
     private void writeTaskIdsFiles() {
-        int candidateUserIds[];
+        SparseArray<SparseBooleanArray> changedTaskIdsPerUser = new SparseArray<>();
         synchronized (mService) {
-            candidateUserIds = mRecentTasks.usersWithRecentsLoadedLocked();
-        }
-        SparseBooleanArray taskIdsToSave;
-        for (int userId : candidateUserIds) {
-            synchronized (mService) {
-                taskIdsToSave = mRecentTasks.mPersistedTaskIds.get(userId).clone();
+            for (int userId : mRecentTasks.usersWithRecentsLoadedLocked()) {
+                SparseBooleanArray taskIdsToSave = mRecentTasks.mPersistedTaskIds.get(userId);
+                SparseBooleanArray persistedIdsInFile = mTaskIdsInFile.get(userId);
+                if (persistedIdsInFile != null && persistedIdsInFile.equals(taskIdsToSave)) {
+                    continue;
+                } else {
+                    SparseBooleanArray taskIdsToSaveCopy = taskIdsToSave.clone();
+                    mTaskIdsInFile.put(userId, taskIdsToSaveCopy);
+                    changedTaskIdsPerUser.put(userId, taskIdsToSaveCopy);
+                }
             }
-            maybeWritePersistedTaskIdsForUser(taskIdsToSave, userId);
+        }
+        for (int i = 0; i < changedTaskIdsPerUser.size(); i++) {
+            writePersistedTaskIdsForUser(changedTaskIdsPerUser.valueAt(i),
+                    changedTaskIdsPerUser.keyAt(i));
         }
     }
 
