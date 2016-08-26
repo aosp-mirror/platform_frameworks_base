@@ -78,6 +78,8 @@ import java.util.List;
 public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    // Leave log for media key event always.
+    private static final boolean DEBUG_MEDIA_KEY_EVENT = DEBUG || true;
 
     private static final int WAKELOCK_TIMEOUT = 5000;
 
@@ -302,7 +304,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private void destroySessionLocked(MediaSessionRecord session) {
         if (DEBUG) {
-            Log.d(TAG, "Destroying session : " + session.toString());
+            Log.d(TAG, "Destroying " + session);
         }
         int userId = session.getUserId();
         UserRecord user = mUserRecords.get(userId);
@@ -408,7 +410,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     if (component != null) {
                         if (compName.equals(component)) {
                             if (DEBUG) {
-                                Log.d(TAG, "ok to get sessions: " + component +
+                                Log.d(TAG, "ok to get sessions. " + component +
                                         " is authorized notification listener");
                             }
                             return true;
@@ -417,7 +419,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
             if (DEBUG) {
-                Log.d(TAG, "not ok to get sessions, " + compName +
+                Log.d(TAG, "not ok to get sessions. " + compName +
                         " is not in list of ENABLED_NOTIFICATION_LISTENERS for user " + userId);
             }
         }
@@ -462,7 +464,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, userId, 0);
 
         if (DEBUG) {
-            Log.d(TAG, "Created session for package " + callerPackageName + " with tag " + tag);
+            Log.d(TAG, "Created session for " + callerPackageName + " with tag " + tag);
         }
         return session;
     }
@@ -881,16 +883,15 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags,
                 MediaSessionRecord session) {
-            if (DEBUG) {
-                String description = session == null ? null : session.toString();
-                Log.d(TAG, "Adjusting session " + description + " by " + direction + ". flags="
-                        + flags + ", suggestedStream=" + suggestedStream);
-
-            }
             boolean preferSuggestedStream = false;
             if (isValidLocalStreamType(suggestedStream)
                     && AudioSystem.isStreamActive(suggestedStream, 0)) {
                 preferSuggestedStream = true;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "Adjusting " + session + " by " + direction + ". flags="
+                        + flags + ", suggestedStream=" + suggestedStream
+                        + ", preferSuggestedStream=" + preferSuggestedStream);
             }
             if (session == null || preferSuggestedStream) {
                 if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
@@ -957,8 +958,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         private void dispatchMediaKeyEventLocked(KeyEvent keyEvent, boolean needWakeLock,
                 MediaSessionRecord session) {
             if (session != null) {
-                if (DEBUG) {
-                    Log.d(TAG, "Sending media key to " + session.toString());
+                if (DEBUG_MEDIA_KEY_EVENT) {
+                    Log.d(TAG, "Sending " + keyEvent + " to " + session);
                 }
                 if (needWakeLock) {
                     mKeyEventReceiver.aquireWakeLockLocked();
@@ -977,11 +978,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                             && user.mRestoredMediaButtonReceiver == null) {
                         continue;
                     }
-                    if (DEBUG) {
-                        Log.d(TAG, "Sending media key to last known PendingIntent "
-                                + user.mLastMediaButtonReceiver + " or restored Intent "
-                                + user.mRestoredMediaButtonReceiver);
-                    }
                     if (needWakeLock) {
                         mKeyEventReceiver.aquireWakeLockLocked();
                     }
@@ -990,10 +986,19 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
                     try {
                         if (user.mLastMediaButtonReceiver != null) {
+                            if (DEBUG_MEDIA_KEY_EVENT) {
+                                Log.d(TAG, "Sending " + keyEvent
+                                        + " to the last known pendingIntent "
+                                        + user.mLastMediaButtonReceiver);
+                            }
                             user.mLastMediaButtonReceiver.send(getContext(),
                                     needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
                                     mediaButtonIntent, mKeyEventReceiver, mHandler);
                         } else {
+                            if (DEBUG_MEDIA_KEY_EVENT) {
+                                Log.d(TAG, "Sending " + keyEvent + " to the restored intent "
+                                        + user.mRestoredMediaButtonReceiver);
+                            }
                             mediaButtonIntent.setComponent(user.mRestoredMediaButtonReceiver);
                             getContext().sendBroadcastAsUser(mediaButtonIntent,
                                     UserHandle.of(userId));
