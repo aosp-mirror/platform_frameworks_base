@@ -65,6 +65,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private static final int MAX_BIND_RETRIES = 5;
     private static final int BIND_RETRY_DELAY = 1000;
 
+    // Shared prefs that hold tile lifecycle info.
+    private static final String TILES = "tiles_prefs";
+
     private final Context mContext;
     private final Handler mHandler;
     private final Intent mIntent;
@@ -405,5 +408,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     public interface TileChangeListener {
         void onTileChanged(ComponentName tile);
+    }
+
+    public static boolean isTileAdded(Context context, ComponentName component) {
+        return context.getSharedPreferences(TILES, 0).getBoolean(component.flattenToString(), false);
+    }
+
+    public static void setTileAdded(Context context, ComponentName component, boolean added) {
+        context.getSharedPreferences(TILES, 0).edit().putBoolean(component.flattenToString(),
+                added).commit();
     }
 }
