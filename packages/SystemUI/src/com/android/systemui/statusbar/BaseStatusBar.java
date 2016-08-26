@@ -309,6 +309,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mUsersAllowingPrivateNotifications.clear();
             mUsersAllowingNotifications.clear();
             // ... and refresh all the notifications
+            updateLockscreenNotificationSetting();
             updateNotifications();
         }
     };
@@ -714,7 +715,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
-                mSettingsObserver,
+                mLockscreenSettingsObserver,
                 UserHandle.USER_ALL);
         if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
             mContext.getContentResolver().registerContentObserver(
