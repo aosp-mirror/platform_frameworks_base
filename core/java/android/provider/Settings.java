@@ -6466,7 +6466,10 @@ public final class Settings {
             NIGHT_DISPLAY_CUSTOM_END_TIME,
             NIGHT_DISPLAY_AUTO_MODE,
             NIGHT_DISPLAY_ACTIVATED,
-            SYNC_PARENT_SOUNDS
+            SYNC_PARENT_SOUNDS,
+            CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
+            CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
+            SYSTEM_NAVIGATION_KEYS_ENABLED
         };
 
         /**
