@@ -49,6 +49,8 @@ import java.util.concurrent.CountDownLatch;
  * This class provides the primary API for managing all aspects of Wi-Fi
  * connectivity. Get an instance of this class by calling
  * {@link android.content.Context#getSystemService(String) Context.getSystemService(Context.WIFI_SERVICE)}.
+ * On releases before NYC, it should only be obtained from an application context, and not from
+ * any other derived context to avoid memory leaks within the calling process.
 
  * It deals with several categories of items:
  * <ul>
