@@ -58,6 +58,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 # UI it doesn't own. This is necessary to allow screenshots to be taken
 LOCAL_CERTIFICATE := platform
 
+LOCAL_JACK_COVERAGE_INCLUDE_FILTER := com.android.systemui.*
+LOCAL_JACK_COVERAGE_EXCLUDE_FILTER := com.android.systemui.tests.*
+
 include frameworks/base/packages/SettingsLib/common.mk
 
 include $(BUILD_PACKAGE)
