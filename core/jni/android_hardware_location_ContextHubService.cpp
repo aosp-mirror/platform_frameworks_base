@@ -35,6 +35,7 @@
 #include "core_jni_helpers.h"
 
 static constexpr jint OS_APP_ID = -1;
+static constexpr jint INVALID_APP_ID = -2;
 static constexpr uint64_t ALL_APPS = UINT64_C(0xFFFFFFFFFFFFFFFF);
 
 static constexpr jint MIN_APP_ID = 1;
@@ -665,7 +666,7 @@ void closeUnloadTxn(bool success) {
     closeTxn();
 }
 
-void closeLoadTxn(bool success, jint *appInstanceHandle) {
+static bool closeLoadTxn(bool success, jint *appInstanceHandle) {
     void *txnData;
     hub_messages_e txnId;
 
@@ -679,13 +680,17 @@ void closeLoadTxn(bool success, jint *appInstanceHandle) {
             add_app_instance(&info->appInfo, info->hubHandle, info->instanceId, env);
         } else {
             ALOGW("Could not attach to JVM !");
+            success = false;
         }
         sendQueryForApps(info->appInfo.app_name.id);
     } else {
         ALOGW("Could not load the app successfully ! Unexpected failure");
+        *appInstanceHandle = INVALID_APP_ID;
+        success = false;
     }
 
     closeTxn();
+    return success;
 }
 
 static bool isValidOsStatus(const uint8_t *msg, size_t msgLen,
@@ -742,8 +747,27 @@ static int handle_os_message(uint32_t msgType, uint32_t hubHandle,
       case CONTEXT_HUB_UNLOAD_APP:
           if (isValidOsStatus(msg, msgLen, &rsp)) {
               if (msgType == CONTEXT_HUB_LOAD_APP) {
-                  jint appInstanceHandle;
-                  closeLoadTxn(rsp.result == 0, &appInstanceHandle);
+                  jint appInstanceHandle = INVALID_APP_ID;
+                  bool appRunningOnHub = (rsp.result == 0);
+                  if (!(closeLoadTxn(appRunningOnHub, &appInstanceHandle))) {
+                      if (appRunningOnHub) {
+                          // Now we're in an odd situation.  Our nanoapp
+                          // is up and running on the Context Hub.  However,
+                          // something went wrong in our Service code so that
+                          // we're not able to properly track this nanoapp
+                          // in our Service code.  If we tell the Java layer
+                          // things are good, it's a lie because the handle
+                          // we give them will fail when used with the Service.
+                          // If we tell the Java layer this failed, it's kind
+                          // of a lie as well, since this nanoapp is running.
+                          //
+                          // We leave a more robust fix for later, and for
+                          // now just tell the user things have failed.
+                          //
+                          // TODO(b/30835981): Make this situation better.
+                          rsp.result = -1;
+                      }
+                  }
                   passOnOsResponse(hubHandle, msgType, &rsp, (int8_t *)(&appInstanceHandle),
                                    sizeof(appInstanceHandle));
               } else if (msgType == CONTEXT_HUB_UNLOAD_APP) {
