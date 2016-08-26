@@ -4480,7 +4480,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void notifyAppResumed(IBinder token, boolean wasStopped) {
+    public void notifyAppResumed(IBinder token, boolean wasStopped, boolean allowSavedSurface) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "notifyAppResumed()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -4493,7 +4493,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + token);
                 return;
             }
-            wtoken.notifyAppResumed(wasStopped);
+            wtoken.notifyAppResumed(wasStopped, allowSavedSurface);
         }
     }
 
