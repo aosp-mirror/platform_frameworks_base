@@ -322,9 +322,16 @@ public class ContextHubService extends IContextHubService.Stub {
         appInfo.setNeededReadMemBytes(PRE_LOADED_APP_MEM_REQ);
         appInfo.setNeededWriteMemBytes(PRE_LOADED_APP_MEM_REQ);
 
+        String action;
+        if (mNanoAppHash.containsKey(appInstanceHandle)) {
+            action = "Updated";
+        } else {
+            action = "Added";
+        }
+
         mNanoAppHash.put(appInstanceHandle, appInfo);
-        Log.d(TAG, "Added app instance " + appInstanceHandle + " with id " + appId
-              + " version " + appVersion);
+        Log.d(TAG, action + " app instance " + appInstanceHandle + " with id "
+              + appId + " version " + appVersion);
 
         return 0;
     }
