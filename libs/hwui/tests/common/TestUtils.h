@@ -48,10 +48,10 @@ typedef DisplayListCanvas TestCanvas;
     EXPECT_TRUE(TestUtils::matricesAreApproxEqual(a, b))
 
 #define EXPECT_RECT_APPROX_EQ(a, b) \
-    EXPECT_TRUE(MathUtils::areEqual(a.left, b.left) \
-            && MathUtils::areEqual(a.top, b.top) \
-            && MathUtils::areEqual(a.right, b.right) \
-            && MathUtils::areEqual(a.bottom, b.bottom));
+    EXPECT_TRUE(MathUtils::areEqual((a).left, (b).left) \
+            && MathUtils::areEqual((a).top, (b).top) \
+            && MathUtils::areEqual((a).right, (b).right) \
+            && MathUtils::areEqual((a).bottom, (b).bottom));
 
 #define EXPECT_CLIP_RECT(expRect, clipStatePtr) \
         EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped"; \
