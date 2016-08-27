@@ -21,4 +21,6 @@
     <color name="app_permission_icon_tint">@android:color/black</color>
     <color name="immersive_cling_text_color">@color/primary_text_default_material_light</color>
     <color name="immersive_cling_button_text_color">@android:color/white</color>
+    <color name="notification_text_default_color">@android:color/notification_default_color</color>
+    <color name="sender_text_color">@android:color/black</color>
 </resources>

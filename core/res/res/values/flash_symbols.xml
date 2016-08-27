@@ -79,4 +79,9 @@
 
   <!-- Show battery percent only when battery is low -->
   <java-symbol type="integer" name="config_batteryPercentLowOnlyLevel" />
+
+  <!-- Notification icon/text dynamic tint -->
+  <java-symbol type="bool" name="config_allowNotificationIconTextTinting" />
+  <java-symbol type="color" name="notification_text_default_color" />
+  <java-symbol type="color" name="sender_text_color" />
 </resources>

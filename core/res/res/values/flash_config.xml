@@ -59,4 +59,7 @@
 
     <!-- Battery level for when "show battery percent only on low battery" is enabled -->
     <integer name="config_batteryPercentLowOnlyLevel">20</integer>
+
+    <!-- True if the notifications should dynamically tint the app icon and app title -->
+    <bool name="config_allowNotificationIconTextTinting">true</bool>
 </resources>
