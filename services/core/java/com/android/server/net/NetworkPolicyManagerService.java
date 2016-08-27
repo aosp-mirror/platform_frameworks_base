@@ -1809,7 +1809,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int i = 0; i < mUidPolicy.size(); i++) {
                 final int uid = mUidPolicy.keyAt(i);
                 final int uidPolicy = mUidPolicy.valueAt(i);
-                if (uidPolicy == policy) {
+                if ((policy == POLICY_NONE && uidPolicy == POLICY_NONE) ||
+                        (uidPolicy & policy) != 0) {
                     uids = appendInt(uids, uid);
                 }
             }

@@ -160,7 +160,6 @@ public class NetworkPolicyManagerServiceTest {
      */
     private String mNetpolicyXml;
 
-
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkStatsService mStatsService;
     private @Mock INetworkManagementService mNetworkManager;
@@ -348,6 +347,20 @@ public class NetworkPolicyManagerServiceTest {
         assertUidPolicy(UID_B, POLICY_REJECT_METERED_BACKGROUND);
         assertUidPolicy(UID_C, (POLICY_ALLOW_METERED_BACKGROUND | 2));
         assertUidPolicy(UID_D, POLICY_ALLOW_METERED_BACKGROUND);
+    }
+
+    @Test
+    @NetPolicyXml("uids-with-mixed-policies.xml")
+    public void testGetUidsWithPolicy() throws Exception {
+        assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_NONE),
+                UID_A);
+        assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND),
+                UID_B, UID_D);
+        assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_ALLOW_METERED_BACKGROUND),
+                UID_E, UID_F);
+        // Legacy (POLICY_ALLOW_BACKGROUND_BATTERY_SAVE)
+        assertContainsInAnyOrder(mService.getUidsWithPolicy(2),
+                UID_C, UID_D, UID_F);
     }
 
     // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
