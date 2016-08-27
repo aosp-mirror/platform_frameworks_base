@@ -637,7 +637,7 @@ class DisplayContent {
      */
     TaskStack getDockedStackVisibleForUserLocked() {
         final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
-        return (stack != null && stack.isVisibleForUserLocked()) ? stack : null;
+        return (stack != null && stack.isVisibleLocked(true /* ignoreKeyguard */)) ? stack : null;
     }
 
     /**

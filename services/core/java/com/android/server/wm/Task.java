@@ -677,19 +677,6 @@ class Task implements DimLayer.DimLayerUser {
         return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
     }
 
-    boolean isVisibleForUser() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken appToken = mAppTokens.get(i);
-            for (int j = appToken.allAppWindows.size() - 1; j >= 0; j--) {
-                WindowState window = appToken.allAppWindows.get(j);
-                if (!window.isHiddenFromUserLocked()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     boolean isVisible() {
         for (int i = mAppTokens.size() - 1; i >= 0; i--) {
             final AppWindowToken appToken = mAppTokens.get(i);
