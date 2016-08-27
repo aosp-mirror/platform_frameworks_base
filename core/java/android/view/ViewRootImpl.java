@@ -52,7 +52,6 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -1468,6 +1467,8 @@ public final class ViewRootImpl implements ViewParent,
         final int viewVisibility = getHostVisibility();
         final boolean viewVisibilityChanged = !mFirst
                 && (mViewVisibility != viewVisibility || mNewSurfaceNeeded);
+        final boolean viewUserVisibilityChanged = !mFirst &&
+                ((mViewVisibility == View.VISIBLE) != (viewVisibility == View.VISIBLE));
 
         WindowManager.LayoutParams params = null;
         if (mWindowAttributesChanged) {
@@ -1541,13 +1542,7 @@ public final class ViewRootImpl implements ViewParent,
         if (viewVisibilityChanged) {
             mAttachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
-
-            // Prior to N we didn't have dispatchVisibilityAggregated to give a more accurate
-            // view into when views are visible to the user or not. ImageView never dealt with
-            // telling its drawable about window visibility, among other things. Some apps cause
-            // an additional crossfade animation when windows become visible if they get this
-            // additional call, so only send it to new apps to avoid new visual jank.
-            if (host.getContext().getApplicationInfo().targetSdkVersion >= VERSION_CODES.N) {
+            if (viewUserVisibilityChanged) {
                 host.dispatchVisibilityAggregated(viewVisibility == View.VISIBLE);
             }
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
