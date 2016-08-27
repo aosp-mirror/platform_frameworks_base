@@ -66,7 +66,7 @@ public final class ShutdownThread extends Thread {
     private static final int MAX_BROADCAST_TIME = 10*1000;
     private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
     private static final int MAX_RADIO_WAIT_TIME = 12*1000;
-    private static final int MAX_UNCRYPT_WAIT_TIME = 15*60*1000;
+    private static final int MAX_UNCRYPT_WAIT_TIME = 30*60*1000;
     // constants for progress bar. the values are roughly estimated based on timeout.
     private static final int BROADCAST_STOP_PERCENT = 2;
     private static final int ACTIVITY_MANAGER_STOP_PERCENT = 4;
