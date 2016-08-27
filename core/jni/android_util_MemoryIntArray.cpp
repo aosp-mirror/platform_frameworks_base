@@ -61,6 +61,11 @@ static jlong android_util_MemoryIntArray_open(JNIEnv* env, jobject clazz, jint f
         return -1;
     }
 
+    if (!ashmem_valid(fd)) {
+        jniThrowIOException(env, errno);
+        return -1;
+    }
+
     int ashmemSize = ashmem_get_size_region(fd);
     if (ashmemSize <= 0) {
         jniThrowException(env, "java/io/IOException", "bad ashmem size");
@@ -98,6 +103,11 @@ static void android_util_MemoryIntArray_close(JNIEnv* env, jobject clazz, jint f
         return;
     }
 
+    if (!ashmem_valid(fd)) {
+        jniThrowIOException(env, errno);
+        return;
+    }
+
     int ashmemSize = ashmem_get_size_region(fd);
     if (ashmemSize <= 0) {
         jniThrowException(env, "java/io/IOException", "bad ashmem size");
@@ -128,6 +138,11 @@ static jint android_util_MemoryIntArray_get(JNIEnv* env, jobject clazz,
         return -1;
     }
 
+    if (!ashmem_valid(fd)) {
+        jniThrowIOException(env, errno);
+        return -1;
+    }
+
     if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
         jniThrowException(env, "java/io/IOException", "ashmem region was purged");
         return -1;
@@ -142,6 +157,11 @@ static void android_util_MemoryIntArray_set(JNIEnv* env, jobject clazz,
 {
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "bad file descriptor");
+        return;
+    }
+
+    if (!ashmem_valid(fd)) {
+        jniThrowIOException(env, errno);
         return;
     }
 
@@ -160,17 +180,13 @@ static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd
         return -1;
     }
 
-    // Use ASHMEM_GET_SIZE to find out if the fd refers to an ashmem region.
-    // ASHMEM_GET_SIZE should succeed for all ashmem regions, and the kernel
-    // should return ENOTTY for all other valid file descriptors
+    if (!ashmem_valid(fd)) {
+        jniThrowIOException(env, errno);
+        return -1;
+    }
+
     int ashmemSize = ashmem_get_size_region(fd);
     if (ashmemSize < 0) {
-        if (errno == ENOTTY) {
-            // ENOTTY means that the ioctl does not apply to this object,
-            // i.e., it is not an ashmem region.
-            return -1;
-        }
-        // Some other error, throw exception
         jniThrowIOException(env, errno);
         return -1;
     }
