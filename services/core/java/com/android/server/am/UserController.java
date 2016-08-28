@@ -32,6 +32,7 @@ import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
 import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL;
 import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.am.ActivityManagerService.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_COMPLETE_MSG;
 import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
 import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
@@ -259,6 +260,8 @@ final class UserController {
                 MetricsLogger.histogram(mInjector.getContext(), "framework_locked_boot_completed",
                     uptimeSeconds);
 
+                mHandler.sendMessage(mHandler.obtainMessage(REPORT_LOCKED_BOOT_COMPLETE_MSG,
+                        userId, 0));
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -1048,6 +1051,18 @@ final class UserController {
             try {
                 mUserSwitchObservers.getBroadcastItem(i).onUserSwitchComplete(userId);
             } catch (RemoteException e) {
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
+    }
+
+    void dispatchLockedBootComplete(int userId) {
+        final int observerCount = mUserSwitchObservers.beginBroadcast();
+        for (int i = 0; i < observerCount; i++) {
+            try {
+                mUserSwitchObservers.getBroadcastItem(i).onLockedBootComplete(userId);
+            } catch (RemoteException e) {
+                // Ignore
             }
         }
         mUserSwitchObservers.finishBroadcast();

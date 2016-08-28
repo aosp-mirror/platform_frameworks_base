@@ -23,4 +23,5 @@ oneway interface IUserSwitchObserver {
     void onUserSwitching(int newUserId, IRemoteCallback reply);
     void onUserSwitchComplete(int newUserId);
     void onForegroundProfileSwitch(int newProfileId);
+    void onLockedBootComplete(int newUserId);
 }
