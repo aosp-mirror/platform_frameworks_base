@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
@@ -43,12 +44,16 @@ public class KeyguardServiceDelegate {
     private static final int INTERACTIVE_STATE_AWAKE = 1;
     private static final int INTERACTIVE_STATE_GOING_TO_SLEEP = 2;
 
+    private final Object mWindowManagerLock;
     protected KeyguardServiceWrapper mKeyguardService;
     private final Context mContext;
     private final View mScrim; // shown if keyguard crashes
     private final Handler mScrimHandler;
     private final KeyguardState mKeyguardState = new KeyguardState();
     private DrawnListener mDrawnListenerWhenConnect;
+
+    @GuardedBy("mWindowManagerLock")
+    private boolean mHideScrimPending;
 
     private static final class KeyguardState {
         KeyguardState() {
@@ -92,10 +97,12 @@ public class KeyguardServiceDelegate {
         @Override
         public void onDrawn() throws RemoteException {
             if (DEBUG) Log.v(TAG, "**** SHOWN CALLED ****");
+            synchronized (mWindowManagerLock) {
+                mHideScrimPending = true;
+            }
             if (mDrawnListener != null) {
                 mDrawnListener.onDrawn();
             }
-            hideScrim();
         }
     };
 
@@ -116,7 +123,8 @@ public class KeyguardServiceDelegate {
         }
     };
 
-    public KeyguardServiceDelegate(Context context) {
+    public KeyguardServiceDelegate(Context context, Object windowManagerLock) {
+        mWindowManagerLock = windowManagerLock;
         mContext = context;
         mScrimHandler = UiThread.getHandler();
         mScrim = createScrim(context, mScrimHandler);
@@ -352,6 +360,16 @@ public class KeyguardServiceDelegate {
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
+        }
+    }
+
+    /**
+     * Called when all windows were fully drawn.
+     */
+    public void onDrawCompleteLw() {
+        if (mHideScrimPending) {
+            hideScrim();
+            mHideScrimPending = false;
         }
     }
 
