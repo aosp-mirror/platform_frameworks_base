@@ -98,7 +98,7 @@ public class RetailDemoModeServiceTest {
     private @Mock ActivityManagerInternal mAmi;
     private @Mock AudioManager mAudioManager;
     private @Mock LockPatternUtils mLockPatternUtils;
-    private PreloadAppsInstaller mPreloadAppsInstaller;
+    private MockPreloadAppsInstaller mPreloadAppsInstaller;
     private MockContentResolver mContentResolver;
     private MockContactsProvider mContactsProvider;
     private Configuration mConfiguration;
@@ -116,8 +116,7 @@ public class RetailDemoModeServiceTest {
         mContactsProvider = new MockContactsProvider(mContext);
         mContentResolver.addProvider(CallLog.AUTHORITY, mContactsProvider);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
-        mPreloadAppsInstaller = new PreloadAppsInstaller(Mockito.mock(Context.class),
-                Mockito.mock(IPackageManager.class), Mockito.mock(File.class));
+        mPreloadAppsInstaller = new MockPreloadAppsInstaller(mContext);
         mConfiguration = new Configuration();
         mTestPreloadsDir = new File(InstrumentationRegistry.getContext().getFilesDir(),
                 TEST_PRELOADS_DIR_NAME);
@@ -290,6 +289,16 @@ public class RetailDemoModeServiceTest {
 
         public boolean isCallLogDeleted() {
             return mCallLogDeleted;
+        }
+    }
+
+    private class MockPreloadAppsInstaller extends PreloadAppsInstaller {
+        MockPreloadAppsInstaller(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void installApps(int userId) {
         }
     }
 
