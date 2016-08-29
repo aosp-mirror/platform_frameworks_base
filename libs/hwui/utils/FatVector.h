@@ -53,7 +53,7 @@ public:
     typedef T value_type; // needed to implement std::allocator
     typedef T* pointer; // needed to implement std::allocator
 
-    InlineStdAllocator(Allocation& allocation)
+    explicit InlineStdAllocator(Allocation& allocation)
             : mAllocation(allocation) {}
     InlineStdAllocator(const InlineStdAllocator& other)
             : mAllocation(other.mAllocation) {}
@@ -93,7 +93,7 @@ public:
         this->reserve(SIZE);
     }
 
-    FatVector(size_t capacity) : FatVector() {
+    explicit FatVector(size_t capacity) : FatVector() {
         this->resize(capacity);
     }
 

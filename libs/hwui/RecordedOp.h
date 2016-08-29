@@ -509,7 +509,7 @@ struct LayerOp : RecordedOp {
             , mode(PaintUtils::getXfermodeDirect(paint))
             , colorFilter(paint ? paint->getColorFilter() : nullptr) {}
 
-    LayerOp(RenderNode& node)
+    explicit LayerOp(RenderNode& node)
             : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
             , layerHandle(node.getLayerHandle())
             , alpha(node.properties().layerProperties().alpha() / 255.0f)
