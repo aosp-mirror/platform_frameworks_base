@@ -162,6 +162,28 @@ public class ContextHubService extends IContextHubService.Stub {
         msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_LOAD_NANO_APP;
 
         long appId = app.getAppId();
+        // TODO(b/30808791): Remove this hack when the NanoApp API is fixed.
+        // Due to a bug in the NanoApp API, only the least significant four
+        // bytes of the app ID can be stored.  The most significant five
+        // bytes of a normal app ID are the "vendor", and thus the most
+        // significant of the bytes we have is the least significant byte
+        // of the vendor.  In the case that byte is the ASCII value for
+        // lower-case 'L', we assume the vendor is supposed to be "Googl"
+        // and fill in the four most significant bytes accordingly.
+        if ((appId >> 32) != 0) {
+            // We're unlikely to notice this warning, but at least
+            // we can avoid running our hack logic.
+            Log.w(TAG, "Code has not been updated since API fix.");
+        } else {
+            // Note: Lower-case 'L', not the number 1.
+            if (((appId >> 24) & 0xFF) == (long)'l') {
+                // Assume we're a Google nanoapp.
+                appId |= ((long)'G') << 56;
+                appId |= ((long)'o') << 48;
+                appId |= ((long)'o') << 40;
+                appId |= ((long)'g') << 32;
+            }
+        }
 
         msgHeader[HEADER_FIELD_LOAD_APP_ID_LO] = (int)(appId & 0xFFFFFFFF);
         msgHeader[HEADER_FIELD_LOAD_APP_ID_HI] = (int)((appId >> 32) & 0xFFFFFFFF);
