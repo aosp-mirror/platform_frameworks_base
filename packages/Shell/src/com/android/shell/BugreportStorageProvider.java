@@ -132,6 +132,7 @@ public class BugreportStorageProvider extends DocumentsProvider {
         if (!getFileForDocId(documentId).delete()) {
             throw new FileNotFoundException("Failed to delete: " + documentId);
         }
+        getContext().getContentResolver().notifyChange(getNotificationUri(), null);
     }
 
     // This is used by BugreportProgressService so that the notification uri shared by
