@@ -323,9 +323,8 @@ public final class SELinuxMMAC {
      */
     public static boolean isRestoreconNeeded(File file) {
         try {
-            final byte[] buf = new byte[20];
-            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, buf);
-            if ((len == 20) && Arrays.equals(SEAPP_CONTEXTS_HASH, buf)) {
+            final byte[] buf = Os.getxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH);
+            if ((buf.length == 20) && Arrays.equals(SEAPP_CONTEXTS_HASH, buf)) {
                 return false;
             }
         } catch (ErrnoException e) {
