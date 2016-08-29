@@ -404,7 +404,7 @@ class FileDescriptorTable {
       //
       // TODO(narayan): This will be an error in a future android release.
       // error = true;
-      ALOGW("Zygote opened %d new file descriptor(s).", open_fds.size());
+      ALOGW("Zygote opened %zd new file descriptor(s).", open_fds.size());
 
       // TODO(narayan): This code will be removed in a future android release.
       std::set<int>::const_iterator it;
