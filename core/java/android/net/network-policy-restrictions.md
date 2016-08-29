@@ -29,8 +29,8 @@ More specifically:
 | **DS**  |  *WL* |  ok  | blk   |  ok  |  ok   |
 | **ON**  | *!WL* | blk  | blk   | blk  | blk   |
 |         |  *BL* | blk  | blk   | blk  | blk   |
-| **DS**  |  *WL* | blk  |  ok   |  ok  |  ok   |
-| **OFF** | *!WL* | blk  |  ok   |  ok  |  ok   |
+| **DS**  |  *WL* | blk  | blk   |  ok  |  ok   |
+| **OFF** | *!WL* | blk  | blk   |  ok  |  ok   |
 |         |  *BL* | blk  | blk   | blk  | blk   |
 
 
