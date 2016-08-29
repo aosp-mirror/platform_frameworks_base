@@ -1658,6 +1658,9 @@ public final class Settings {
                                                     + cr.getPackageName() + " and user:"
                                                     + userHandle + " with index:" + index);
                                         }
+                                        if (mGenerationTracker != null) {
+                                            mGenerationTracker.destroy();
+                                        }
                                         mGenerationTracker = new GenerationTracker(array, index,
                                                 generation, () -> {
                                             synchronized (NameValueCache.this) {
