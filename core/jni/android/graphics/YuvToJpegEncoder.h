@@ -18,7 +18,7 @@ public:
      */
     static YuvToJpegEncoder* create(int pixelFormat, int* strides);
 
-    YuvToJpegEncoder(int* strides);
+    explicit YuvToJpegEncoder(int* strides);
 
     /** Encode YUV data to jpeg,  which is output to a stream.
      *
@@ -47,7 +47,7 @@ protected:
 
 class Yuv420SpToJpegEncoder : public YuvToJpegEncoder {
 public:
-    Yuv420SpToJpegEncoder(int* strides);
+    explicit Yuv420SpToJpegEncoder(int* strides);
     virtual ~Yuv420SpToJpegEncoder() {}
 
 private:
@@ -61,7 +61,7 @@ private:
 
 class Yuv422IToJpegEncoder : public YuvToJpegEncoder {
 public:
-    Yuv422IToJpegEncoder(int* strides);
+    explicit Yuv422IToJpegEncoder(int* strides);
     virtual ~Yuv422IToJpegEncoder() {}
 
 private:
