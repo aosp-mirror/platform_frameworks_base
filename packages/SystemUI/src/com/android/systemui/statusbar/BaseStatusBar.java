@@ -40,7 +40,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -963,18 +962,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected View bindVetoButtonClickListener(View row, final StatusBarNotification n) {
-        View vetoButton = row.findViewById(R.id.veto);
-        vetoButton.setOnClickListener(new View.OnClickListener() {
+    protected void bindDismissListener(final ExpandableNotificationRow row) {
+        row.setOnDismissListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Accessibility feedback
                 v.announceForAccessibility(
                         mContext.getString(R.string.accessibility_notification_dismissed));
-                performRemoveNotification(n, false /* removeView */);
+                performRemoveNotification(row.getStatusBarNotification(), false /* removeView */);
             }
         });
-        vetoButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        return vetoButton;
     }
 
     protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
@@ -1651,9 +1647,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         workAroundBadLayerDrawableOpacity(row);
-        View vetoButton = bindVetoButtonClickListener(row, sbn);
-        vetoButton.setContentDescription(mContext.getString(
-                R.string.accessibility_remove_notification));
+        bindDismissListener(row);
 
         // NB: the large icon is now handled entirely by the template
 
@@ -2412,10 +2406,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         updateHeadsUp(key, entry, shouldPeek, alertAgain);
         updateNotifications();
-
-        // Update the veto button accordingly (and as a result, whether this row is
-        // swipe-dismissable)
-        bindVetoButtonClickListener(entry.row, notification);
 
         if (!notification.isClearable()) {
             // The user may have performed a dismiss action on the notification, since it's
