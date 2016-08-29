@@ -37,7 +37,7 @@ class SoundPool;
 // for queued events
 class SoundPoolEvent {
 public:
-    SoundPoolEvent(int msg, int arg1=0, int arg2=0) :
+    explicit SoundPoolEvent(int msg, int arg1=0, int arg2=0) :
         mMsg(msg), mArg1(arg1), mArg2(arg2) {}
     int         mMsg;
     int         mArg1;
