@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -26,7 +27,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
@@ -54,6 +55,7 @@ public class FloatingActionMode extends ActionMode {
     private final Rect mScreenRect;
     private final View mOriginatingView;
     private final int mBottomAllowance;
+    private final Point mDisplaySize;
 
     private final Runnable mMovingOff = new Runnable() {
         public void run() {
@@ -103,6 +105,7 @@ public class FloatingActionMode extends ActionMode {
         // bottom view bound if necessary.
         mBottomAllowance = context.getResources()
                 .getDimensionPixelSize(R.dimen.content_rect_bottom_clip_allowance);
+        mDisplaySize = new Point();
     }
 
     public void setFloatingToolbar(FloatingToolbar floatingToolbar) {
@@ -210,9 +213,9 @@ public class FloatingActionMode extends ActionMode {
     }
 
     private boolean isContentRectWithinBounds() {
-        DisplayMetrics metrics = mContext.getApplicationContext()
-                .getResources().getDisplayMetrics();
-        mScreenRect.set(0, 0, metrics.widthPixels, metrics.heightPixels);
+        mContext.getSystemService(WindowManager.class)
+            .getDefaultDisplay().getRealSize(mDisplaySize);
+        mScreenRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
         return intersectsClosed(mContentRectOnScreen, mScreenRect)
             && intersectsClosed(mContentRectOnScreen, mViewRectOnScreen);
