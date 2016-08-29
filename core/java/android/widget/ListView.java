@@ -1939,72 +1939,73 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Obtain the view and add it to our list of children. The view can be made
-     * fresh, converted from an unused view, or used as is if it was in the
-     * recycle bin.
+     * Obtains the view and adds it to our list of children. The view can be
+     * made fresh, converted from an unused view, or used as is if it was in
+     * the recycle bin.
      *
-     * @param position Logical position in the list
-     * @param y Top or bottom edge of the view to add
-     * @param flow If flow is true, align top edge to y. If false, align bottom
-     *        edge to y.
-     * @param childrenLeft Left edge where children should be positioned
-     * @param selected Is this position selected?
-     * @return View that was added
+     * @param position logical position in the list
+     * @param y top or bottom edge of the view to add
+     * @param flow {@code true} to align top edge to y, {@code false} to align
+     *             bottom edge to y
+     * @param childrenLeft left edge where children should be positioned
+     * @param selected {@code true} if the position is selected, {@code false}
+     *                 otherwise
+     * @return the view that was added
      */
     private View makeAndAddView(int position, int y, boolean flow, int childrenLeft,
             boolean selected) {
-        View child;
-
-
         if (!mDataChanged) {
-            // Try to use an existing view for this position
-            child = mRecycler.getActiveView(position);
-            if (child != null) {
-                // Found it -- we're using an existing child
-                // This just needs to be positioned
-                setupChild(child, position, y, flow, childrenLeft, selected, true);
-
-                return child;
+            // Try to use an existing view for this position.
+            final View activeView = mRecycler.getActiveView(position);
+            if (activeView != null) {
+                // Found it. We're reusing an existing child, so it just needs
+                // to be positioned like a scrap view.
+                setupChild(activeView, position, y, flow, childrenLeft, selected, true);
+                return activeView;
             }
         }
 
-        // Make a new view for this position, or convert an unused view if possible
-        child = obtainView(position, mIsScrap);
+        // Make a new view for this position, or convert an unused view if
+        // possible.
+        final View child = obtainView(position, mIsScrap);
 
-        // This needs to be positioned and measured
+        // This needs to be positioned and measured.
         setupChild(child, position, y, flow, childrenLeft, selected, mIsScrap[0]);
 
         return child;
     }
 
     /**
-     * Add a view as a child and make sure it is measured (if necessary) and
+     * Adds a view as a child and make sure it is measured (if necessary) and
      * positioned properly.
      *
-     * @param child The view to add
-     * @param position The position of this child
-     * @param y The y position relative to which this view will be positioned
-     * @param flowDown If true, align top edge to y. If false, align bottom
-     *        edge to y.
-     * @param childrenLeft Left edge where children should be positioned
-     * @param selected Is this position selected?
-     * @param recycled Has this view been pulled from the recycle bin? If so it
-     *        does not need to be remeasured.
+     * @param child the view to add
+     * @param position the position of this child
+     * @param y the y position relative to which this view will be positioned
+     * @param flowDown {@code true} to align top edge to y, {@code false} to
+     *                 align bottom edge to y
+     * @param childrenLeft left edge where children should be positioned
+     * @param selected {@code true} if the position is selected, {@code false}
+     *                 otherwise
+     * @param isAttachedToWindow {@code true} if the view is already attached
+     *                           to the window, e.g. whether it was reused, or
+     *                           {@code false} otherwise
      */
     private void setupChild(View child, int position, int y, boolean flowDown, int childrenLeft,
-            boolean selected, boolean recycled) {
+            boolean selected, boolean isAttachedToWindow) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "setupListItem");
 
         final boolean isSelected = selected && shouldShowSelector();
         final boolean updateChildSelected = isSelected != child.isSelected();
         final int mode = mTouchMode;
-        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL &&
-                mMotionPosition == position;
+        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL
+                && mMotionPosition == position;
         final boolean updateChildPressed = isPressed != child.isPressed();
-        final boolean needToMeasure = !recycled || updateChildSelected || child.isLayoutRequested();
+        final boolean needToMeasure = !isAttachedToWindow || updateChildSelected
+                || child.isLayoutRequested();
 
-        // Respect layout params that are already in the view. Otherwise make some up...
-        // noinspection unchecked
+        // Respect layout params that are already in the view. Otherwise make
+        // some up...
         AbsListView.LayoutParams p = (AbsListView.LayoutParams) child.getLayoutParams();
         if (p == null) {
             p = (AbsListView.LayoutParams) generateDefaultLayoutParams();
@@ -2012,17 +2013,9 @@ public class ListView extends AbsListView {
         p.viewType = mAdapter.getItemViewType(position);
         p.isEnabled = mAdapter.isEnabled(position);
 
-        if ((recycled && !p.forceAdd) || (p.recycledHeaderFooter
-                && p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
-            attachViewToParent(child, flowDown ? -1 : 0, p);
-        } else {
-            p.forceAdd = false;
-            if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
-                p.recycledHeaderFooter = true;
-            }
-            addViewInLayout(child, flowDown ? -1 : 0, p, true);
-        }
-
+        // Set up view state before attaching the view, since we may need to
+        // rely on the jumpDrawablesToCurrentState() call that occurs as part
+        // of view attachment.
         if (updateChildSelected) {
             child.setSelected(isSelected);
         }
@@ -2038,6 +2031,25 @@ public class ListView extends AbsListView {
                     >= android.os.Build.VERSION_CODES.HONEYCOMB) {
                 child.setActivated(mCheckStates.get(position));
             }
+        }
+
+        if ((isAttachedToWindow && !p.forceAdd) || (p.recycledHeaderFooter
+                && p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER)) {
+            attachViewToParent(child, flowDown ? -1 : 0, p);
+
+            // If the view was previously attached for a different position,
+            // then manually jump the drawables.
+            if (isAttachedToWindow
+                    && (((AbsListView.LayoutParams) child.getLayoutParams()).scrappedFromPosition)
+                            != position) {
+                child.jumpDrawablesToCurrentState();
+            }
+        } else {
+            p.forceAdd = false;
+            if (p.viewType == AdapterView.ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                p.recycledHeaderFooter = true;
+            }
+            addViewInLayout(child, flowDown ? -1 : 0, p, true);
         }
 
         if (needToMeasure) {
@@ -2071,11 +2083,6 @@ public class ListView extends AbsListView {
 
         if (mCachingStarted && !child.isDrawingCacheEnabled()) {
             child.setDrawingCacheEnabled(true);
-        }
-
-        if (recycled && (((AbsListView.LayoutParams)child.getLayoutParams()).scrappedFromPosition)
-                != position) {
-            child.jumpDrawablesToCurrentState();
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
