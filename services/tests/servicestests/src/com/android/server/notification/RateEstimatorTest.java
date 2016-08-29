@@ -15,27 +15,34 @@
  */
 package com.android.server.notification;
 
-
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class RateEstimatorTest extends AndroidTestCase {
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class RateEstimatorTest {
     private long mTestStartTime;
     private RateEstimator mEstimator;
 
-    @Override
+    @Before
     public void setUp() {
         mTestStartTime = 1225731600000L;
         mEstimator = new RateEstimator();
     }
 
-    @SmallTest
+    @Test
     public void testRunningTimeBackwardDoesntExplodeUpdate() throws Exception {
         assertUpdateTime(mTestStartTime);
         assertUpdateTime(mTestStartTime - 1000L);
     }
 
-    @SmallTest
+    @Test
     public void testRunningTimeBackwardDoesntExplodeGet() throws Exception {
         assertUpdateTime(mTestStartTime);
         final float rate = mEstimator.getRate(mTestStartTime - 1000L);
@@ -43,13 +50,13 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertFalse(Float.isNaN(rate));
     }
 
-    @SmallTest
+    @Test
     public void testInstantaneousEventsDontExplodeUpdate() throws Exception {
         assertUpdateTime(mTestStartTime);
         assertUpdateTime(mTestStartTime);
     }
 
-    @SmallTest
+    @Test
     public void testInstantaneousEventsDontExplodeGet() throws Exception {
         assertUpdateTime(mTestStartTime);
         assertUpdateTime(mTestStartTime);
@@ -58,7 +65,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertFalse(Float.isNaN(rate));
     }
 
-    @SmallTest
+    @Test
     public void testInstantaneousBurstIsEstimatedUnderTwoPercent() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -67,7 +74,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertLessThan("Rate", rate, 20f);
     }
 
-    @SmallTest
+    @Test
     public void testCompactBurstIsEstimatedUnderTwoPercent() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -76,7 +83,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertLessThan("Rate", rate, 20f);
     }
 
-    @SmallTest
+    @Test
     public void testSustained1000HzBurstIsEstimatedOverNinetyPercent() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -85,7 +92,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertGreaterThan("Rate", rate, 900f);
     }
 
-    @SmallTest
+    @Test
     public void testSustained100HzBurstIsEstimatedOverNinetyPercent() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -95,7 +102,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertGreaterThan("Rate", rate, 90f);
     }
 
-    @SmallTest
+    @Test
     public void testRecoverQuicklyAfterSustainedBurst() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -104,7 +111,7 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertLessThan("Rate", rate, 2f);
     }
 
-    @SmallTest
+    @Test
     public void testEstimateShouldNotOvershoot() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -113,13 +120,13 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertLessThan("Rate", rate, 1000f);
     }
 
-    @SmallTest
+    @Test
     public void testGetRateWithoutUpdate() throws Exception {
         final float rate = mEstimator.getRate(mTestStartTime);
         assertLessThan("Rate", rate, 0.1f);
     }
 
-    @SmallTest
+    @Test
     public void testGetRateWithOneUpdate() throws Exception {
         assertUpdateTime(mTestStartTime);
         final float rate = mEstimator.getRate(mTestStartTime+1);

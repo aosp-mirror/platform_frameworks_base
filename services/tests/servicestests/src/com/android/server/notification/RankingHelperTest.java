@@ -15,18 +15,27 @@
  */
 package com.android.server.notification;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import android.app.Notification;
+import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.ArrayList;
 
-public class RankingHelperTest extends AndroidTestCase {
+import static org.junit.Assert.assertTrue;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class RankingHelperTest {
     @Mock NotificationUsageStats mUsageStats;
     @Mock RankingHandler handler;
 
@@ -42,7 +51,11 @@ public class RankingHelperTest extends AndroidTestCase {
     private NotificationRecord mRecordNoGroupSortA;
     private RankingHelper mHelper;
 
-    @Override
+    private Context getContext() {
+        return InstrumentationRegistry.getTargetContext();
+    }
+
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         UserHandle user = UserHandle.ALL;
@@ -91,7 +104,7 @@ public class RankingHelperTest extends AndroidTestCase {
                 "package", "package", 1, null, 0, 0, 0, mNotiNoGroupSortA, user));
     }
 
-    @SmallTest
+    @Test
     public void testFindAfterRankingWithASplitGroup() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(3);
         notificationList.add(mRecordGroupGSortA);
@@ -105,7 +118,7 @@ public class RankingHelperTest extends AndroidTestCase {
         assertTrue(mHelper.indexOf(notificationList, mRecordNoGroupSortA) >= 0);
     }
 
-    @SmallTest
+    @Test
     public void testSortShouldNotThrowWithPlainNotifications() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(2);
         notificationList.add(mRecordNoGroup);
@@ -113,7 +126,7 @@ public class RankingHelperTest extends AndroidTestCase {
         mHelper.sort(notificationList);
     }
 
-    @SmallTest
+    @Test
     public void testSortShouldNotThrowOneSorted() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(2);
         notificationList.add(mRecordNoGroup);
@@ -121,21 +134,21 @@ public class RankingHelperTest extends AndroidTestCase {
         mHelper.sort(notificationList);
     }
 
-    @SmallTest
+    @Test
     public void testSortShouldNotThrowOneNotification() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(1);
         notificationList.add(mRecordNoGroup);
         mHelper.sort(notificationList);
     }
 
-    @SmallTest
+    @Test
     public void testSortShouldNotThrowOneSortKey() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>(1);
         notificationList.add(mRecordGroupGSortB);
         mHelper.sort(notificationList);
     }
 
-    @SmallTest
+    @Test
     public void testSortShouldNotThrowOnEmptyList() throws Exception {
         ArrayList<NotificationRecord> notificationList = new ArrayList<NotificationRecord>();
         mHelper.sort(notificationList);
