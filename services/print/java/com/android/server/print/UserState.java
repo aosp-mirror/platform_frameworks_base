@@ -434,12 +434,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
     }
 
     public void createPrinterDiscoverySession(@NonNull IPrinterDiscoveryObserver observer) {
+        mSpooler.clearCustomPrinterIconCache();
+
         synchronized (mLock) {
             throwIfDestroyedLocked();
 
             if (mPrinterDiscoverySession == null) {
-                mSpooler.clearCustomPrinterIconCache();
-
                 // If we do not have a session, tell all service to create one.
                 mPrinterDiscoverySession = new PrinterDiscoverySessionMediator(mContext) {
                     @Override
@@ -731,6 +731,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
     @Override
     public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon) {
+        mSpooler.onCustomPrinterIconLoaded(printerId, icon);
+
         synchronized (mLock) {
             throwIfDestroyedLocked();
 
@@ -738,7 +740,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             if (mPrinterDiscoverySession == null) {
                 return;
             }
-            mSpooler.onCustomPrinterIconLoaded(printerId, icon);
             mPrinterDiscoverySession.onCustomPrinterIconLoadedLocked(printerId);
         }
     }
@@ -979,18 +980,21 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
      * Prune persistent state if a print service was uninstalled
      */
     public void prunePrintServices() {
+        ArrayList<ComponentName> installedComponents;
+
         synchronized (mLock) {
-            ArrayList<ComponentName> installedComponents = getInstalledComponents();
+            installedComponents = getInstalledComponents();
 
             // Remove unnecessary entries from persistent state "disabled services"
             boolean disabledServicesUninstalled = mDisabledServices.retainAll(installedComponents);
             if (disabledServicesUninstalled) {
                 writeDisabledPrintServicesLocked(mDisabledServices);
             }
-
-            // Remove unnecessary entries from persistent state "approved services"
-            mSpooler.pruneApprovedPrintServices(installedComponents);
         }
+
+        // Remove unnecessary entries from persistent state "approved services"
+        mSpooler.pruneApprovedPrintServices(installedComponents);
+
     }
 
     private void onConfigurationChangedLocked() {
