@@ -17,23 +17,31 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.os.Bundle;
-import android.test.AndroidTestCase;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableString;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ValidateNotificationPeopleTest extends AndroidTestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    @SmallTest
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class ValidateNotificationPeopleTest {
+
+    @Test
     public void testNoExtra() throws Exception {
         Bundle bundle = new Bundle();
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertNull("lack of extra should return null", result);
     }
 
-    @SmallTest
+    @Test
     public void testSingleString() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
@@ -42,7 +50,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("string should be in result[0]", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testSingleCharArray() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
@@ -51,7 +59,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("char[] should be in result[0]", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testSingleCharSequence() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
@@ -60,7 +68,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("charSequence should be in result[0]", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testStringArraySingle() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foobar" };
@@ -69,7 +77,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("wrapped string should be in result[0]", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testStringArrayMultiple() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", "bar", "baz" };
@@ -78,7 +86,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("testStringArrayMultiple", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testStringArrayNulls() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", null, "baz" };
@@ -87,7 +95,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("testStringArrayNulls", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceArrayMultiple() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", "bar", "baz" };
@@ -100,7 +108,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("testCharSequenceArrayMultiple", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testMixedCharSequenceArrayList() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", "bar", "baz" };
@@ -117,7 +125,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("testMixedCharSequenceArrayList", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testStringArrayList() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", null, "baz" };
@@ -130,7 +138,7 @@ public class ValidateNotificationPeopleTest extends AndroidTestCase {
         assertStringArrayEquals("testStringArrayList", expected, result);
     }
 
-    @SmallTest
+    @Test
     public void testCharSequenceArrayList() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", "bar", "baz" };

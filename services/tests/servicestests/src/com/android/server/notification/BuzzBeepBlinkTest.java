@@ -15,10 +15,14 @@
  */
 package com.android.server.notification;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -28,7 +32,8 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.mockito.Mock;
@@ -45,7 +50,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class BuzzBeepBlinkTest extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class BuzzBeepBlinkTest {
 
     @Mock AudioManager mAudioManager;
     @Mock Vibrator mVibrator;
@@ -62,7 +69,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
     private int mScore = 10;
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
 
-    @Override
+    @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
@@ -209,7 +216,11 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verify(mVibrator, never()).cancel();
     }
 
-    @SmallTest
+    private Context getContext() {
+        return InstrumentationRegistry.getTargetContext();
+    }
+
+    @Test
     public void testBeep() throws Exception {
         NotificationRecord r = getBeepyNotification();
 
@@ -223,7 +234,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
     // Tests
     //
 
-    @SmallTest
+    @Test
     public void testBeepInsistently() throws Exception {
         NotificationRecord r = getInsistentBeepyNotification();
 
@@ -232,7 +243,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyBeep();
     }
 
-    @SmallTest
+    @Test
     public void testNoInterruptionForMin() throws Exception {
         NotificationRecord r = getBeepyNotification();
         r.setImportance(Ranking.IMPORTANCE_MIN, "foo");
@@ -243,7 +254,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testNoInterruptionForIntercepted() throws Exception {
         NotificationRecord r = getBeepyNotification();
         r.setIntercepted(true);
@@ -254,7 +265,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testBeepTwice() throws Exception {
         NotificationRecord r = getBeepyNotification();
 
@@ -268,7 +279,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyBeepLooped();
     }
 
-    @SmallTest
+    @Test
     public void testHonorAlertOnlyOnceForBeep() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getBeepyOnceNotification();
@@ -283,7 +294,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverBeep();
     }
 
-    @SmallTest
+    @Test
     public void testNoisyUpdateDoesNotCancelAudio() throws Exception {
         NotificationRecord r = getBeepyNotification();
 
@@ -294,7 +305,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testNoisyOnceUpdateDoesNotCancelAudio() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getBeepyOnceNotification();
@@ -306,7 +317,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testQuietUpdateDoesNotCancelAudioFromOther() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getQuietNotification();
@@ -323,7 +334,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testQuietInterloperDoesNotCancelAudio() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord other = getQuietOtherNotification();
@@ -337,7 +348,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testQuietUpdateCancelsAudio() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getQuietNotification();
@@ -352,7 +363,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testQuietOnceUpdateCancelsAudio() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getQuietOnceNotification();
@@ -367,7 +378,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyStopAudio();
     }
 
-    @SmallTest
+    @Test
     public void testDemoteSoundToVibrate() throws Exception {
         NotificationRecord r = getBeepyNotification();
 
@@ -381,7 +392,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testDemotInsistenteSoundToVibrate() throws Exception {
         NotificationRecord r = getInsistentBeepyNotification();
 
@@ -394,7 +405,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyVibrateLooped();
     }
 
-    @SmallTest
+    @Test
     public void testVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
 
@@ -404,7 +415,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testInsistenteVibrate() throws Exception {
         NotificationRecord r = getInsistentBuzzyNotification();
 
@@ -412,7 +423,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyVibrateLooped();
     }
 
-    @SmallTest
+    @Test
     public void testVibratTwice() throws Exception {
         NotificationRecord r = getBuzzyNotification();
 
@@ -426,7 +437,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testHonorAlertOnlyOnceForBuzz() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getBuzzyOnceNotification();
@@ -441,7 +452,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testNoisyUpdateDoesNotCancelVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
 
@@ -452,7 +463,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testNoisyOnceUpdateDoesNotCancelVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getBuzzyOnceNotification();
@@ -464,7 +475,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testQuietUpdateDoesNotCancelVibrateFromOther() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getQuietNotification();
@@ -481,7 +492,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testQuietInterloperDoesNotCancelVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord other = getQuietOtherNotification();
@@ -495,7 +506,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyNeverStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testQuietUpdateCancelsVibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getQuietNotification();
@@ -509,7 +520,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testQuietOnceUpdateCancelsvibrate() throws Exception {
         NotificationRecord r = getBuzzyNotification();
         NotificationRecord s = getQuietOnceNotification();
@@ -524,7 +535,7 @@ public class BuzzBeepBlinkTest extends AndroidTestCase {
         verifyStopVibrate();
     }
 
-    @SmallTest
+    @Test
     public void testQuietUpdateCancelsDemotedVibrate() throws Exception {
         NotificationRecord r = getBeepyNotification();
         NotificationRecord s = getQuietNotification();
