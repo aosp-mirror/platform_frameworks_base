@@ -96,6 +96,8 @@ public class Surface implements Parcelable {
 
     private HwuiContext mHwuiContext;
 
+    private boolean mIsSingleBuffered;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SCALING_MODE_FREEZE, SCALING_MODE_SCALE_TO_WINDOW,
@@ -158,7 +160,7 @@ public class Surface implements Parcelable {
         if (surfaceTexture == null) {
             throw new IllegalArgumentException("surfaceTexture must not be null");
         }
-
+        mIsSingleBuffered = surfaceTexture.isSingleBuffered();
         synchronized (mLock) {
             mName = surfaceTexture.toString();
             setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
@@ -458,6 +460,7 @@ public class Surface implements Parcelable {
             // the reference count on mNativeObject.  Either way, it is
             // not necessary to call nativeRelease() here.
             mName = source.readString();
+            mIsSingleBuffered = source.readInt() != 0;
             setNativeObjectLocked(nativeReadFromParcel(mNativeObject, source));
         }
     }
@@ -469,6 +472,7 @@ public class Surface implements Parcelable {
         }
         synchronized (mLock) {
             dest.writeString(mName);
+            dest.writeInt(mIsSingleBuffered ? 1 : 0);
             nativeWriteToParcel(mNativeObject, dest);
         }
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
@@ -528,6 +532,14 @@ public class Surface implements Parcelable {
                 throw new IllegalArgumentException("Invalid scaling mode: " + scalingMode);
             }
         }
+    }
+
+    /**
+     * Returns whether or not this Surface is backed by a single-buffered SurfaceTexture
+     * @hide
+     */
+    public boolean isSingleBuffered() {
+        return mIsSingleBuffered;
     }
 
     /**
