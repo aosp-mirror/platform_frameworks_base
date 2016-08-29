@@ -1049,7 +1049,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return r;
         }
 
-        // Return to the home stack.
+        // Look in other non-focused and non-home stacks.
         final ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
