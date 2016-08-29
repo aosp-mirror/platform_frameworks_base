@@ -218,15 +218,32 @@ public class TextureView extends View {
     /** @hide */
     @Override
     protected void onDetachedFromWindowInternal() {
-        destroySurface();
+        destroyHardwareLayer();
+        releaseSurfaceTexture();
         super.onDetachedFromWindowInternal();
     }
 
-    private void destroySurface() {
+    /**
+     * @hide
+     */
+    @Override
+    protected void destroyHardwareResources() {
+        destroyHardwareLayer();
+    }
+
+    private void destroyHardwareLayer() {
         if (mLayer != null) {
             mLayer.detachSurfaceTexture();
+            mLayer.destroy();
+            mLayer = null;
+            mMatrixChanged = true;
+        }
+    }
 
+    private void releaseSurfaceTexture() {
+        if (mSurface != null) {
             boolean shouldRelease = true;
+
             if (mListener != null) {
                 shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
             }
@@ -235,14 +252,10 @@ public class TextureView extends View {
                 nDestroyNativeWindow();
             }
 
-            mLayer.destroy();
-            if (shouldRelease) mSurface.release();
+            if (shouldRelease) {
+                mSurface.release();
+            }
             mSurface = null;
-            mLayer = null;
-
-            // Make sure if/when new layer gets re-created, transform matrix will
-            // be re-applied.
-            mMatrixChanged = true;
             mHadSurface = true;
         }
     }
@@ -355,17 +368,6 @@ public class TextureView extends View {
         }
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected void destroyHardwareResources() {
-        super.destroyHardwareResources();
-        destroySurface();
-        invalidateParentCaches();
-        invalidate(true);
-    }
-
     HardwareLayer getHardwareLayer() {
         if (mLayer == null) {
             if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
@@ -373,17 +375,17 @@ public class TextureView extends View {
             }
 
             mLayer = mAttachInfo.mHardwareRenderer.createTextureLayer();
-            if (!mUpdateSurface) {
+            boolean createNewSurface = (mSurface == null);
+            if (createNewSurface) {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = new SurfaceTexture(false);
-                mLayer.setSurfaceTexture(mSurface);
+                nCreateNativeWindow(mSurface);
             }
+            mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
-            nCreateNativeWindow(mSurface);
-
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
 
-            if (mListener != null && !mUpdateSurface) {
+            if (mListener != null && createNewSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
             mLayer.setLayerPaint(mLayerPaint);
@@ -742,9 +744,11 @@ public class TextureView extends View {
                     "released SurfaceTexture");
         }
         if (mSurface != null) {
+            nDestroyNativeWindow();
             mSurface.release();
         }
         mSurface = surfaceTexture;
+        nCreateNativeWindow(mSurface);
 
         /*
          * If the view is visible and we already made a layer, update the
