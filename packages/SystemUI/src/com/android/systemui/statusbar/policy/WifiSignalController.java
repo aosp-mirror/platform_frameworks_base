@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
@@ -49,7 +50,7 @@ public class WifiSignalController extends
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mWifiTracker = new WifiStatusTracker(mWifiManager);
         mHasMobileData = hasMobileData;
-        Handler handler = new WifiHandler();
+        Handler handler = new WifiHandler(Looper.getMainLooper());
         mWifiChannel = new AsyncChannel();
         Messenger wifiMessenger = mWifiManager.getWifiServiceMessenger();
         if (wifiMessenger != null) {
@@ -121,6 +122,10 @@ public class WifiSignalController extends
      * Handler to receive the data activity on wifi.
      */
     private class WifiHandler extends Handler {
+        WifiHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

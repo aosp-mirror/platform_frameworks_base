@@ -42,6 +42,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v17-leanback
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-test \
     mockito-target \
     SystemUI-proto-tags
 

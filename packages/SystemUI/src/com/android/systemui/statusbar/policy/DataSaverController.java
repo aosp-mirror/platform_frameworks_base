@@ -18,13 +18,14 @@ import android.content.Context;
 import android.net.INetworkPolicyListener;
 import android.net.NetworkPolicyManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 
 import java.util.ArrayList;
 
 public class DataSaverController {
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final NetworkPolicyManager mPolicyManager;
 

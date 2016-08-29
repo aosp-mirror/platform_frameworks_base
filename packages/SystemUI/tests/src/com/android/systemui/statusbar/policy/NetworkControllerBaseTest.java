@@ -30,11 +30,13 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionDefaults;
+import com.android.systemui.SysuiTestCase;
+import org.junit.After;
+import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -43,6 +45,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -73,10 +76,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     private NetworkCapabilities mNetCapabilities;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
@@ -136,7 +137,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
       when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
       NetworkControllerImpl networkControllerNoMobile
               = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
-                        mConfig, Looper.getMainLooper(), mCallbackHandler,
+                        mConfig, mContext.getMainLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
                         mock(DataUsageController.class), mMockSubDefaults);
 
@@ -146,14 +147,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         mNetworkController.dump(null, pw, null);
         pw.flush();
         Log.d(TAG, sw.toString());
-        super.tearDown();
     }
 
     // 2 Bars 3G GSM.

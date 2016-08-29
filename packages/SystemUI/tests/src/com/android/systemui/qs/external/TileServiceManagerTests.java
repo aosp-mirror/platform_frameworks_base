@@ -18,12 +18,22 @@ package com.android.systemui.qs.external;
 import android.content.ComponentName;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.SysuiTestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class TileServiceManagerTests extends SysuiTestCase {
 
     private TileServices mTileServices;
@@ -32,9 +42,8 @@ public class TileServiceManagerTests extends SysuiTestCase {
     private Handler mHandler;
     private TileServiceManager mTileServiceManager;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
@@ -48,12 +57,12 @@ public class TileServiceManagerTests extends SysuiTestCase {
         mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mTileLifecycle);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         mThread.quit();
     }
 
+    @Test
     public void testSetBindRequested() {
         // Request binding.
         mTileServiceManager.setBindRequested(true);
@@ -72,12 +81,14 @@ public class TileServiceManagerTests extends SysuiTestCase {
         assertEquals(Integer.MIN_VALUE, mTileServiceManager.getBindPriority());
     }
 
+    @Test
     public void testPendingClickPriority() {
         Mockito.when(mTileLifecycle.hasPendingClick()).thenReturn(true);
         mTileServiceManager.calculateBindPriority(0);
         assertEquals(Integer.MAX_VALUE, mTileServiceManager.getBindPriority());
     }
 
+    @Test
     public void testBind() {
         // Trigger binding requested and allowed.
         mTileServiceManager.setBindRequested(true);
