@@ -1402,6 +1402,9 @@ public final class DisplayManagerService extends SystemService {
                 throw new IllegalArgumentException("width, height, and densityDpi must be "
                         + "greater than 0");
             }
+            if (surface.isSingleBuffered()) {
+                throw new IllegalArgumentException("Surface can't be single-buffered");
+            }
 
             if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
                 flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
