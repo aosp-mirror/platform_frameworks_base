@@ -29,8 +29,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -750,6 +750,14 @@ public class StateMachine {
         /** The destination state when transitionTo has been invoked */
         private State mDestState;
 
+        /**
+         * Indicates if a transition is in progress
+         *
+         * This will be true for all calls of State.exit and all calls of State.enter except for the
+         * last enter call for the current destination state.
+         */
+        private boolean mTransitionInProgress = false;
+
         /** The list of deferred messages */
         private ArrayList<Message> mDeferredMessages = new ArrayList<Message>();
 
@@ -862,6 +870,8 @@ public class StateMachine {
                      * invoke the exit methods then the enter methods.
                      */
                     StateInfo commonStateInfo = setupTempStateStackWithStatesToEnter(destState);
+                    // flag is cleared in invokeEnterMethods before entering the target state
+                    mTransitionInProgress = true;
                     invokeExitMethods(commonStateInfo);
                     int stateStackEnteringIndex = moveTempStateStackToStateStack();
                     invokeEnterMethods(stateStackEnteringIndex);
@@ -1017,10 +1027,15 @@ public class StateMachine {
          */
         private final void invokeEnterMethods(int stateStackEnteringIndex) {
             for (int i = stateStackEnteringIndex; i <= mStateStackTopIndex; i++) {
+                if (stateStackEnteringIndex == mStateStackTopIndex) {
+                    // Last enter state for transition
+                    mTransitionInProgress = false;
+                }
                 if (mDbg) mSm.log("invokeEnterMethods: " + mStateStack[i].state.getName());
                 mStateStack[i].state.enter();
                 mStateStack[i].active = true;
             }
+            mTransitionInProgress = false; // ensure flag set to false if no methods called
         }
 
         /**
@@ -1196,6 +1211,10 @@ public class StateMachine {
 
         /** @see StateMachine#transitionTo(IState) */
         private final void transitionTo(IState destState) {
+            if (mTransitionInProgress) {
+                Log.wtf(mSm.mName, "transitionTo called while transition already in progress to " +
+                        mDestState + ", new target state=" + destState);
+            }
             mDestState = (State) destState;
             if (mDbg) mSm.log("transitionTo: destState=" + mDestState.getName());
         }
@@ -1305,7 +1324,7 @@ public class StateMachine {
      * @param state the state to add
      * @param parent the parent of state
      */
-    protected final void addState(State state, State parent) {
+    public final void addState(State state, State parent) {
         mSmHandler.addState(state, parent);
     }
 
@@ -1313,7 +1332,7 @@ public class StateMachine {
      * Add a new state to the state machine, parent will be null
      * @param state to add
      */
-    protected final void addState(State state) {
+    public final void addState(State state) {
         mSmHandler.addState(state, null);
     }
 
@@ -1323,14 +1342,14 @@ public class StateMachine {
      *
      * @param initialState is the state which will receive the first message.
      */
-    protected final void setInitialState(State initialState) {
+    public final void setInitialState(State initialState) {
         mSmHandler.setInitialState(initialState);
     }
 
     /**
      * @return current message
      */
-    protected final Message getCurrentMessage() {
+    public final Message getCurrentMessage() {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return null;
@@ -1340,7 +1359,7 @@ public class StateMachine {
     /**
      * @return current state
      */
-    protected final IState getCurrentState() {
+    public final IState getCurrentState() {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return null;
@@ -1361,7 +1380,7 @@ public class StateMachine {
      *
      * @param destState will be the state that receives the next message.
      */
-    protected final void transitionTo(IState destState) {
+    public final void transitionTo(IState destState) {
         mSmHandler.transitionTo(destState);
     }
 
@@ -1372,7 +1391,7 @@ public class StateMachine {
      * for all subsequent messages haltedProcessMessage
      * will be called.
      */
-    protected final void transitionToHaltingState() {
+    public final void transitionToHaltingState() {
         mSmHandler.transitionTo(mSmHandler.mHaltingState);
     }
 
@@ -1385,7 +1404,7 @@ public class StateMachine {
      *
      * @param msg is deferred until the next transition.
      */
-    protected final void deferMessage(Message msg) {
+    public final void deferMessage(Message msg) {
         mSmHandler.deferMessage(msg);
     }
 
@@ -1496,7 +1515,7 @@ public class StateMachine {
      *
      * @param string
      */
-    protected void addLogRec(String string) {
+    public void addLogRec(String string) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1642,7 +1661,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what) {
+    public void sendMessage(int what) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1655,7 +1674,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, Object obj) {
+    public void sendMessage(int what, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1668,7 +1687,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1) {
+    public void sendMessage(int what, int arg1) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1681,7 +1700,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1, int arg2) {
+    public void sendMessage(int what, int arg1, int arg2) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1694,7 +1713,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1, int arg2, Object obj) {
+    public void sendMessage(int what, int arg1, int arg2, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1707,7 +1726,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(Message msg) {
+    public void sendMessage(Message msg) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1720,7 +1739,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, long delayMillis) {
+    public void sendMessageDelayed(int what, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1733,7 +1752,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
+    public void sendMessageDelayed(int what, Object obj, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1746,7 +1765,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, long delayMillis) {
+    public void sendMessageDelayed(int what, int arg1, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1759,7 +1778,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, int arg2, long delayMillis) {
+    public void sendMessageDelayed(int what, int arg1, int arg2, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1772,7 +1791,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
+    public void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
             long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1786,7 +1805,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(Message msg, long delayMillis) {
+    public void sendMessageDelayed(Message msg, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1947,7 +1966,7 @@ public class StateMachine {
     /**
      * Quit the state machine after all currently queued up messages are processed.
      */
-    protected final void quit() {
+    public final void quit() {
         // mSmHandler can be null if the state machine is already stopped.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1958,7 +1977,7 @@ public class StateMachine {
     /**
      * Quit the state machine immediately all currently queued messages will be discarded.
      */
-    protected final void quitNow() {
+    public final void quitNow() {
         // mSmHandler can be null if the state machine is already stopped.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
