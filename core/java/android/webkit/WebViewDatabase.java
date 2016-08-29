@@ -44,7 +44,7 @@ public abstract class WebViewDatabase {
      *
      * @return true if there are any saved username/password pairs
      * @see WebView#savePassword
-     * @see #clearUsernamePassworda
+     * @see #clearUsernamePassword
      * @deprecated Saving passwords in WebView will not be supported in future versions.
      */
     @Deprecated
@@ -72,7 +72,16 @@ public abstract class WebViewDatabase {
     public abstract boolean hasHttpAuthUsernamePassword();
 
     /**
-     * Clears any saved credentials for HTTP authentication.
+     * Clears any saved credentials for HTTP authentication. This method only clears the username
+     * and password stored in WebViewDatabase instance. The username and password are not read from
+     * the {@link WebViewDatabase} during {@link WebViewClient#onReceivedHttpAuthRequest}. It is up
+     * to the app to do this or not.
+     * <p>
+     * The username and password used for http authentication might be cached in the network stack
+     * itself, and are not cleared when this method is called.  WebView does not provide a special
+     * mechanism to clear HTTP authentication for implementing client logout. The client logout
+     * mechanism should be implemented by the Web site designer (such as server sending a HTTP 401
+     * for invalidating credentials).
      *
      * @see WebView#getHttpAuthUsernamePassword
      * @see WebView#setHttpAuthUsernamePassword
