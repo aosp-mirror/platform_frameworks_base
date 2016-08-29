@@ -214,7 +214,7 @@ private:
         virtual ~SpriteImpl();
 
     public:
-        SpriteImpl(const sp<SpriteController> controller);
+        explicit SpriteImpl(const sp<SpriteController> controller);
 
         virtual void setIcon(const SpriteIcon& icon);
         virtual void setVisible(bool visible);
