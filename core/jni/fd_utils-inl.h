@@ -45,7 +45,8 @@ static const char* kPathWhitelist[] = {
   "/sys/kernel/debug/tracing/trace_marker",
   "/system/framework/framework-res.apk",
   "/dev/urandom",
-  "/dev/ion"
+  "/dev/ion",
+  "/dev/dri/renderD129", // Fixes b/31172436
 };
 
 static const char* kFdPath = "/proc/self/fd";
