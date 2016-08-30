@@ -45,56 +45,54 @@ bool TableMerger::mergeOverlay(const Source& src, ResourceTable* table,
 }
 
 /**
- * Ignore packages with an ID that is not our desired package ID or 0x0, or if the name
- * is not equal to the package we are compiling.
- */
-static bool shouldIgnorePackage(IAaptContext* context, ResourceTablePackage* package) {
-    const Maybe<ResourceId>& id = package->id;
-    const std::string& packageName = package->name;
-    return (id && id.value() != 0x0 && id.value() != context->getPackageId())
-            || (!packageName.empty() && packageName != context->getCompilationPackage());
-}
-
-/**
  * This will merge packages with the same package name (or no package name).
  */
 bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
                             io::IFileCollection* collection,
                             bool overlay, bool allowNew) {
+    const uint8_t desiredPackageId = mContext->getPackageId();
+
     bool error = false;
     for (auto& package : table->packages) {
-        // Warn of packages with an unrelated ID or name.
-        if (shouldIgnorePackage(mContext, package.get())) {
+        // Warn of packages with an unrelated ID.
+        const Maybe<ResourceId>& id = package->id;
+        if (id && id.value() != 0x0 && id.value() != desiredPackageId) {
             mContext->getDiagnostics()->warn(DiagMessage(src)
                                              << "ignoring package " << package->name);
             continue;
         }
 
-        FileMergeCallback callback;
-        if (collection) {
-            callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
-                           FileReference* newFile, FileReference* oldFile) -> bool {
-                // The old file's path points inside the APK, so we can use it as is.
-                io::IFile* f = collection->findFile(*oldFile->path);
-                if (!f) {
-                    mContext->getDiagnostics()->error(DiagMessage(src) << "file '"
-                                                      << *oldFile->path
-                                                      << "' not found");
-                    return false;
-                }
+        // Only merge an empty package or the package we're building.
+        // Other packages may exist, which likely contain attribute definitions.
+        // This is because at compile time it is unknown if the attributes are simply
+        // uses of the attribute or definitions.
+        if (package->name.empty() || mContext->getCompilationPackage() == package->name) {
+            FileMergeCallback callback;
+            if (collection) {
+                callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                               FileReference* newFile, FileReference* oldFile) -> bool {
+                    // The old file's path points inside the APK, so we can use it as is.
+                    io::IFile* f = collection->findFile(*oldFile->path);
+                    if (!f) {
+                        mContext->getDiagnostics()->error(DiagMessage(src) << "file '"
+                                                          << *oldFile->path
+                                                          << "' not found");
+                        return false;
+                    }
 
-                newFile->file = f;
-                return true;
-            };
+                    newFile->file = f;
+                    return true;
+                };
+            }
+
+            // Merge here. Once the entries are merged and mangled, any references to
+            // them are still valid. This is because un-mangled references are
+            // mangled, then looked up at resolution time.
+            // Also, when linking, we convert references with no package name to use
+            // the compilation package name.
+            error |= !doMerge(src, table, package.get(), false /* mangle */, overlay, allowNew,
+                              callback);
         }
-
-        // Merge here. Once the entries are merged and mangled, any references to
-        // them are still valid. This is because un-mangled references are
-        // mangled, then looked up at resolution time.
-        // Also, when linking, we convert references with no package name to use
-        // the compilation package name.
-        error |= !doMerge(src, table, package.get(), false /* mangle */, overlay, allowNew,
-                          callback);
     }
     return !error;
 }
