@@ -279,6 +279,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     private static final int REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY = 200;
 
+    /**
+     * Never let the alpha become zero for surfaces that draw with SRC - otherwise the RenderNode
+     * won't draw anything and uninitialized memory will show through
+     * if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in
+     * libhwui.
+     */
+    private static final float SRC_MIN_ALPHA = 0.002f;
+
     static {
         boolean onlyCoreApps;
         boolean freeformWindowManagement;
@@ -2209,17 +2217,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
                 if (allowEnterAnimation) {
-                    mBackdrop.animate().alpha(1f).withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mStatusBarWindowManager.setBackdropShowing(true);
-                        }
-                    });
+                    mBackdrop.setAlpha(SRC_MIN_ALPHA);
+                    mBackdrop.animate().alpha(1f);
                 } else {
                     mBackdrop.animate().cancel();
                     mBackdrop.setAlpha(1f);
-                    mStatusBarWindowManager.setBackdropShowing(true);
                 }
+                mStatusBarWindowManager.setBackdropShowing(true);
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
@@ -2282,11 +2286,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 } else {
                     mStatusBarWindowManager.setBackdropShowing(false);
                     mBackdrop.animate()
-                            // Never let the alpha become zero - otherwise the RenderNode
-                            // won't draw anything and uninitialized memory will show through
-                            // if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in
-                            // libhwui.
-                            .alpha(0.002f)
+                            .alpha(SRC_MIN_ALPHA)
                             .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
                             .setDuration(300)
                             .setStartDelay(0)
@@ -2301,7 +2301,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             });
                     if (mKeyguardFadingAway) {
                         mBackdrop.animate()
-
                                 // Make it disappear faster, as the focus should be on the activity
                                 // behind.
                                 .setDuration(mKeyguardFadingAwayDuration / 2)
@@ -4117,6 +4116,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .setDuration(FADE_KEYGUARD_DURATION_PULSING)
                 .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR)
                 .start();
+    }
+
+    /**
+     * Plays the animation when an activity that was occluding Keyguard goes away.
+     */
+    public void animateKeyguardUnoccluding() {
+        mScrimController.animateKeyguardUnoccluding(500);
+        mNotificationPanel.setExpandedFraction(0f);
+        animateExpandNotificationsPanel();
     }
 
     /**

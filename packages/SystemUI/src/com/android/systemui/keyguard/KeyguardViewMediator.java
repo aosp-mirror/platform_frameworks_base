@@ -1114,11 +1114,11 @@ public class KeyguardViewMediator extends SystemUI {
     /**
      * Notify us when the keyguard is occluded by another window
      */
-    public void setOccluded(boolean isOccluded) {
+    public void setOccluded(boolean isOccluded, boolean animate) {
         Trace.beginSection("KeyguardViewMediator#setOccluded");
         if (DEBUG) Log.d(TAG, "setOccluded " + isOccluded);
         mHandler.removeMessages(SET_OCCLUDED);
-        Message msg = mHandler.obtainMessage(SET_OCCLUDED, (isOccluded ? 1 : 0), 0);
+        Message msg = mHandler.obtainMessage(SET_OCCLUDED, isOccluded ? 1 : 0, animate ? 1 : 0);
         mHandler.sendMessage(msg);
         Trace.endSection();
     }
@@ -1126,7 +1126,7 @@ public class KeyguardViewMediator extends SystemUI {
     /**
      * Handles SET_OCCLUDED message sent by setOccluded()
      */
-    private void handleSetOccluded(boolean isOccluded) {
+    private void handleSetOccluded(boolean isOccluded, boolean animate) {
         Trace.beginSection("KeyguardViewMediator#handleSetOccluded");
         synchronized (KeyguardViewMediator.this) {
             if (mHiding && isOccluded) {
@@ -1137,7 +1137,7 @@ public class KeyguardViewMediator extends SystemUI {
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
-                mStatusBarKeyguardViewManager.setOccluded(isOccluded);
+                mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate);
                 updateActivityLockScreenState();
                 adjustStatusBarLocked();
             }
@@ -1468,7 +1468,7 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
                 case SET_OCCLUDED:
                     Trace.beginSection("KeyguardViewMediator#handleMessage SET_OCCLUDED");
-                    handleSetOccluded(msg.arg1 != 0);
+                    handleSetOccluded(msg.arg1 != 0, msg.arg2 != 0);
                     Trace.endSection();
                     break;
                 case KEYGUARD_TIMEOUT:
