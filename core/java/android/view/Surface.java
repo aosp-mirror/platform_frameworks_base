@@ -459,6 +459,8 @@ public class Surface implements Parcelable {
             // create a new native Surface and return it after reducing
             // the reference count on mNativeObject.  Either way, it is
             // not necessary to call nativeRelease() here.
+            // NOTE: This must be kept synchronized with the native parceling code
+            // in frameworks/native/libs/Surface.cpp
             mName = source.readString();
             mIsSingleBuffered = source.readInt() != 0;
             setNativeObjectLocked(nativeReadFromParcel(mNativeObject, source));
@@ -471,6 +473,8 @@ public class Surface implements Parcelable {
             throw new IllegalArgumentException("dest must not be null");
         }
         synchronized (mLock) {
+            // NOTE: This must be kept synchronized with the native parceling code
+            // in frameworks/native/libs/Surface.cpp
             dest.writeString(mName);
             dest.writeInt(mIsSingleBuffered ? 1 : 0);
             nativeWriteToParcel(mNativeObject, dest);
