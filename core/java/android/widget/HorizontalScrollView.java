@@ -129,6 +129,8 @@ public class HorizontalScrollView extends FrameLayout {
     private int mOverscrollDistance;
     private int mOverflingDistance;
 
+    private float mScrollFactor;
+
     /**
      * ID of the active pointer. This is used to retain consistency during
      * drags/flings if multiple pointers are used.
@@ -222,6 +224,7 @@ public class HorizontalScrollView extends FrameLayout {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
+        mScrollFactor = configuration.getScaledScrollFactor();
     }
 
     @Override
@@ -724,30 +727,35 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
-                    if (!mIsBeingDragged) {
-                        final float hscroll;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_SCROLL: {
+                if (!mIsBeingDragged) {
+                    final float axisValue;
+                    if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
                         if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
-                            hscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                            axisValue = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         } else {
-                            hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+                            axisValue = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
                         }
-                        if (hscroll != 0) {
-                            final int delta = (int) (hscroll * getHorizontalScrollFactor());
-                            final int range = getScrollRange();
-                            int oldScrollX = mScrollX;
-                            int newScrollX = oldScrollX + delta;
-                            if (newScrollX < 0) {
-                                newScrollX = 0;
-                            } else if (newScrollX > range) {
-                                newScrollX = range;
-                            }
-                            if (newScrollX != oldScrollX) {
-                                super.scrollTo(newScrollX, mScrollY);
-                                return true;
-                            }
+                    } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+                        axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    } else {
+                        axisValue = 0;
+                    }
+
+                    final int delta = Math.round(axisValue * mScrollFactor);
+                    if (delta != 0) {
+                        final int range = getScrollRange();
+                        int oldScrollX = mScrollX;
+                        int newScrollX = oldScrollX + delta;
+                        if (newScrollX < 0) {
+                            newScrollX = 0;
+                        } else if (newScrollX > range) {
+                            newScrollX = range;
+                        }
+                        if (newScrollX != oldScrollX) {
+                            super.scrollTo(newScrollX, mScrollY);
+                            return true;
                         }
                     }
                 }
