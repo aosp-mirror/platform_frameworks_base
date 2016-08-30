@@ -1219,6 +1219,8 @@ redirects:
   to: /studio/intro/index.html?utm_medium=android-studio
 - from: /r/studio-ui/menu-start.html
   to: /training/index.html?utm_medium=android-studio
+- from: /r/studio-ui/run-with-work-profile.html
+  to: /studio/run/index.html#ir-work-profile?utm_medium=android-studio
 
 # Redirects from (removed) N Preview documentation
 - from: /preview/features/afw.html
