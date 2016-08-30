@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.accounts.Account;
+import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -44,6 +45,8 @@ import android.test.mock.MockContext;
 import android.test.mock.MockPackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+
+import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -74,6 +77,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         SQLiteDatabase.deleteDatabase(new File(mAms.getCeDatabaseName(UserHandle.USER_SYSTEM)));
         SQLiteDatabase.deleteDatabase(new File(mAms.getDeDatabaseName(UserHandle.USER_SYSTEM)));
         SQLiteDatabase.deleteDatabase(new File(mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM)));
+        LocalServices.removeServiceForTest(AccountManagerInternal.class);
         super.tearDown();
     }
 
@@ -289,6 +293,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     private AccountManagerService createAccountManagerService(Context mockContext,
             Context realContext) {
+        LocalServices.removeServiceForTest(AccountManagerInternal.class);
         return new MyAccountManagerService(mockContext,
                 new MyMockPackageManager(), new MockAccountAuthenticatorCache(), realContext);
     }
@@ -426,6 +431,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public int checkSignatures(final int uid1, final int uid2) {
             return PackageManager.SIGNATURE_MATCH;
+        }
+
+        @Override
+        public void addOnPermissionsChangeListener(
+                OnPermissionsChangedListener listener) {
         }
     }
 
