@@ -86,7 +86,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final String TILES_SETTING = "sysui_qs_tiles";
+    public static final String TILES_SETTING = Secure.QS_TILES;
 
     private final Context mContext;
     private final PhoneStatusBar mStatusBar;
@@ -407,19 +407,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
                         new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
-                lifecycleManager.flushMessagesAndUnbind();
-            }
-        }
-        for (int i = 0; i < NA; i++) {
-            String tileSpec = newTiles.get(i);
-            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
-            if (!previousTiles.contains(tileSpec)) {
-                ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
-                Intent intent = new Intent().setComponent(component);
-                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(component), intent,
-                        new UserHandle(ActivityManager.getCurrentUser()));
-                lifecycleManager.onTileAdded();
+                TileLifecycleManager.setTileAdded(mContext, component, false);
                 lifecycleManager.flushMessagesAndUnbind();
             }
         }
