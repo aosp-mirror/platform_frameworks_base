@@ -31,6 +31,7 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
@@ -42,7 +43,7 @@ import static android.view.WindowManager.DOCKED_TOP;
  * Class to detect gestures on the navigation bar.
  */
 public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
-        implements TunerService.Tunable {
+        implements TunerService.Tunable, GestureHelper {
 
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
     /**
