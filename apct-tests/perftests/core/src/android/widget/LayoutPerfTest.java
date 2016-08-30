@@ -78,29 +78,31 @@ public class LayoutPerfTest {
 
     @Test
     @UiThreadTest
-    public void testLayoutPerf() {
-        assertTrue("We should be running on the main thread",
-                Looper.getMainLooper().getThread() == Thread.currentThread());
-        assertTrue("We should be running on the main thread",
-                Looper.myLooper() == Looper.getMainLooper());
+    public void testLayoutPerf() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            assertTrue("We should be running on the main thread",
+                    Looper.getMainLooper().getThread() == Thread.currentThread());
+            assertTrue("We should be running on the main thread",
+                    Looper.myLooper() == Looper.getMainLooper());
 
-        Activity activity = mActivityRule.getActivity();
-        activity.setContentView(mLayoutId);
+            Activity activity = mActivityRule.getActivity();
+            activity.setContentView(mLayoutId);
 
-        ViewGroup viewGroup = (ViewGroup) activity.findViewById(mViewId);
+            ViewGroup viewGroup = (ViewGroup) activity.findViewById(mViewId);
 
-        List<View> allNodes = gatherViewTree(viewGroup);
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            List<View> allNodes = gatherViewTree(viewGroup);
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
-        int length = mMeasureSpecs.length;
-        while (state.keepRunning()) {
-            for (int i = 0; i < length; i++) {
-                // The overhead of this call is ignorable, like within 1% difference.
-                requestLayoutForAllNodes(allNodes);
+            int length = mMeasureSpecs.length;
+            while (state.keepRunning()) {
+                for (int i = 0; i < length; i++) {
+                    // The overhead of this call is ignorable, like within 1% difference.
+                    requestLayoutForAllNodes(allNodes);
 
-                viewGroup.measure(mMeasureSpecs[i % length], mMeasureSpecs[i % length]);
-                viewGroup.layout(0, 0, viewGroup.getMeasuredWidth(), viewGroup.getMeasuredHeight());
+                    viewGroup.measure(mMeasureSpecs[i % length], mMeasureSpecs[i % length]);
+                    viewGroup.layout(0, 0, viewGroup.getMeasuredWidth(), viewGroup.getMeasuredHeight());
+                }
             }
-        }
+        });
     }
 }
