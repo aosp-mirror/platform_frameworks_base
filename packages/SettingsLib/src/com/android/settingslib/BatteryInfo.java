@@ -86,7 +86,7 @@ public class BatteryInfo {
         parse(mStats, remainingTimeUs, parserList);
         final Context context = view.getContext();
         String timeString = context.getString(R.string.charge_length_format,
-                Formatter.formatShortElapsedTime(context, timePeriod));
+                Formatter.formatShortElapsedTime(context, Math.abs(timePeriod)));
         String remaining = "";
         if (remainingTimeUs != 0) {
             remaining = context.getString(R.string.remaining_length_format,
