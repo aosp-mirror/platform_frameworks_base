@@ -6400,9 +6400,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             mWindowManagerDrawComplete = true;
-            if (mKeyguardDelegate != null) {
-                mKeyguardDelegate.onDrawCompleteLw();
-            }
         }
 
         finishScreenTurningOn();
@@ -6872,8 +6869,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void systemReady() {
-        mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
-                mWindowManagerFuncs.getWindowManagerLock());
+        mKeyguardDelegate = new KeyguardServiceDelegate(mContext);
         mKeyguardDelegate.onSystemReady();
 
         readCameraLensCoverState();
