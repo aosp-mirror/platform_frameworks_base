@@ -17,15 +17,14 @@
 package com.android.server.connectivity;
 
 import android.app.PendingIntent;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.Uri;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkCapabilities;
+import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -33,6 +32,8 @@ import android.util.SparseBooleanArray;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.MessageUtils;
 import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
@@ -52,19 +53,30 @@ public class LingerMonitor {
     private static final boolean VDBG = false;
     private static final String TAG = LingerMonitor.class.getSimpleName();
 
-    private static final HashMap<String, Integer> sTransportNames = makeTransportToNameMap();
-    private static final Intent CELLULAR_SETTINGS = new Intent().setComponent(new ComponentName(
+    public static final int DEFAULT_NOTIFICATION_DAILY_LIMIT = 3;
+    public static final long DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS = DateUtils.MINUTE_IN_MILLIS;
+
+    private static final HashMap<String, Integer> TRANSPORT_NAMES = makeTransportToNameMap();
+    @VisibleForTesting
+    public static final Intent CELLULAR_SETTINGS = new Intent().setComponent(new ComponentName(
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
-    private static final int NOTIFY_TYPE_NONE = 0;
-    private static final int NOTIFY_TYPE_NOTIFICATION = 1;
-    private static final int NOTIFY_TYPE_TOAST = 2;
+    @VisibleForTesting
+    public static final int NOTIFY_TYPE_NONE         = 0;
+    public static final int NOTIFY_TYPE_NOTIFICATION = 1;
+    public static final int NOTIFY_TYPE_TOAST        = 2;
 
     private static SparseArray<String> sNotifyTypeNames = MessageUtils.findMessageNames(
             new Class[] { LingerMonitor.class }, new String[]{ "NOTIFY_TYPE_" });
 
     private final Context mContext;
     private final NetworkNotificationManager mNotifier;
+    private final int mDailyLimit;
+    private final long mRateLimitMillis;
+
+    private long mFirstNotificationMillis;
+    private long mLastNotificationMillis;
+    private int mNotificationCounter;
 
     /** Current notifications. Maps the netId we switched away from to the netId we switched to. */
     private final SparseIntArray mNotifications = new SparseIntArray();
@@ -72,9 +84,12 @@ public class LingerMonitor {
     /** Whether we ever notified that we switched away from a particular network. */
     private final SparseBooleanArray mEverNotified = new SparseBooleanArray();
 
-    public LingerMonitor(Context context, NetworkNotificationManager notifier) {
+    public LingerMonitor(Context context, NetworkNotificationManager notifier,
+            int dailyLimit, long rateLimitMillis) {
         mContext = context;
         mNotifier = notifier;
+        mDailyLimit = dailyLimit;
+        mRateLimitMillis = rateLimitMillis;
     }
 
     private static HashMap<String, Integer> makeTransportToNameMap() {
@@ -106,10 +121,11 @@ public class LingerMonitor {
         return mEverNotified.get(nai.network.netId, false);
     }
 
-    private boolean isNotificationEnabled(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
+    @VisibleForTesting
+    public boolean isNotificationEnabled(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
         // TODO: Evaluate moving to CarrierConfigManager.
-        String[] notifySwitches = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_networkNotifySwitches);
+        String[] notifySwitches =
+                mContext.getResources().getStringArray(R.array.config_networkNotifySwitches);
 
         if (VDBG) {
             Log.d(TAG, "Notify on network switches: " + Arrays.toString(notifySwitches));
@@ -122,8 +138,8 @@ public class LingerMonitor {
                 Log.e(TAG, "Invalid network switch notification configuration: " + notifySwitch);
                 continue;
             }
-            int fromTransport = sTransportNames.get("TRANSPORT_" + transports[0]);
-            int toTransport = sTransportNames.get("TRANSPORT_" + transports[1]);
+            int fromTransport = TRANSPORT_NAMES.get("TRANSPORT_" + transports[0]);
+            int toTransport = TRANSPORT_NAMES.get("TRANSPORT_" + transports[1]);
             if (hasTransport(fromNai, fromTransport) && hasTransport(toNai, toTransport)) {
                 return true;
             }
@@ -133,12 +149,14 @@ public class LingerMonitor {
     }
 
     private void showNotification(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                mContext, 0, CELLULAR_SETTINGS, PendingIntent.FLAG_CANCEL_CURRENT, null,
-                UserHandle.CURRENT);
-
         mNotifier.showNotification(fromNai.network.netId, NotificationType.NETWORK_SWITCH,
-                fromNai, toNai, pendingIntent, true);
+                fromNai, toNai, createNotificationIntent(), true);
+    }
+
+    @VisibleForTesting
+    protected PendingIntent createNotificationIntent() {
+        return PendingIntent.getActivityAsUser(mContext, 0, CELLULAR_SETTINGS,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 
     // Removes any notification that was put up as a result of switching to nai.
@@ -153,41 +171,37 @@ public class LingerMonitor {
 
     // Notify the user of a network switch using a notification or a toast.
     private void notify(NetworkAgentInfo fromNai, NetworkAgentInfo toNai, boolean forceToast) {
-        boolean notify = false;
-        int notifyType = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_networkNotifySwitchType);
-
+        int notifyType =
+                mContext.getResources().getInteger(R.integer.config_networkNotifySwitchType);
         if (notifyType == NOTIFY_TYPE_NOTIFICATION && forceToast) {
             notifyType = NOTIFY_TYPE_TOAST;
-        }
-
-        switch (notifyType) {
-            case NOTIFY_TYPE_NONE:
-                break;
-            case NOTIFY_TYPE_NOTIFICATION:
-                showNotification(fromNai, toNai);
-                notify = true;
-                break;
-            case NOTIFY_TYPE_TOAST:
-                mNotifier.showToast(fromNai, toNai);
-                notify = true;
-                break;
-            default:
-                Log.e(TAG, "Unknown notify type " + notifyType);
         }
 
         if (VDBG) {
             Log.d(TAG, "Notify type: " + sNotifyTypeNames.get(notifyType, "" + notifyType));
         }
 
-        if (notify) {
-            if (DBG) {
-                Log.d(TAG, "Notifying switch from=" + fromNai.name() + " to=" + toNai.name() +
-                        " type=" + sNotifyTypeNames.get(notifyType, "unknown(" + notifyType + ")"));
-            }
-            mNotifications.put(fromNai.network.netId, toNai.network.netId);
-            mEverNotified.put(fromNai.network.netId, true);
+        switch (notifyType) {
+            case NOTIFY_TYPE_NONE:
+                return;
+            case NOTIFY_TYPE_NOTIFICATION:
+                showNotification(fromNai, toNai);
+                break;
+            case NOTIFY_TYPE_TOAST:
+                mNotifier.showToast(fromNai, toNai);
+                break;
+            default:
+                Log.e(TAG, "Unknown notify type " + notifyType);
+                return;
         }
+
+        if (DBG) {
+            Log.d(TAG, "Notifying switch from=" + fromNai.name() + " to=" + toNai.name() +
+                    " type=" + sNotifyTypeNames.get(notifyType, "unknown(" + notifyType + ")"));
+        }
+
+        mNotifications.put(fromNai.network.netId, toNai.network.netId);
+        mEverNotified.put(fromNai.network.netId, true);
     }
 
     // The default network changed from fromNai to toNai due to a change in score.
@@ -248,9 +262,12 @@ public class LingerMonitor {
         // unvalidated.
         if (fromNai.lastValidated) return;
 
-        if (isNotificationEnabled(fromNai, toNai)) {
-            notify(fromNai, toNai, forceToast);
-        }
+        if (!isNotificationEnabled(fromNai, toNai)) return;
+
+        final long now = SystemClock.elapsedRealtime();
+        if (isRateLimited(now) || isAboveDailyLimit(now)) return;
+
+        notify(fromNai, toNai, forceToast);
     }
 
     public void noteDisconnect(NetworkAgentInfo nai) {
@@ -258,5 +275,30 @@ public class LingerMonitor {
         mEverNotified.delete(nai.network.netId);
         maybeStopNotifying(nai);
         // No need to cancel notifications on nai: NetworkMonitor does that on disconnect.
+    }
+
+    private boolean isRateLimited(long now) {
+        final long millisSinceLast = now - mLastNotificationMillis;
+        if (millisSinceLast < mRateLimitMillis) {
+            return true;
+        }
+        mLastNotificationMillis = now;
+        return false;
+    }
+
+    private boolean isAboveDailyLimit(long now) {
+        if (mFirstNotificationMillis == 0) {
+            mFirstNotificationMillis = now;
+        }
+        final long millisSinceFirst = now - mFirstNotificationMillis;
+        if (millisSinceFirst > DateUtils.DAY_IN_MILLIS) {
+            mNotificationCounter = 0;
+            mFirstNotificationMillis = 0;
+        }
+        if (mNotificationCounter >= mDailyLimit) {
+            return true;
+        }
+        mNotificationCounter++;
+        return false;
     }
 }
