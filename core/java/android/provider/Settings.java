@@ -6386,6 +6386,12 @@ public final class Settings {
                 "automatic_storage_manager_downloads_days_to_retain";
 
         /**
+         * Holds comma separated list of ordering of QS tiles.
+         * @hide
+         */
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
          * Whether preloaded APKs have been installed for the user.
          * @hide
          */
@@ -6472,7 +6478,8 @@ public final class Settings {
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
-            SYSTEM_NAVIGATION_KEYS_ENABLED
+            SYSTEM_NAVIGATION_KEYS_ENABLED,
+            QS_TILES,
         };
 
         /**
