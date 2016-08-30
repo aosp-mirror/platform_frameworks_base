@@ -188,7 +188,7 @@ public class KeyguardServiceDelegate {
                 mKeyguardService.onBootCompleted();
             }
             if (mKeyguardState.occluded) {
-                mKeyguardService.setOccluded(mKeyguardState.occluded);
+                mKeyguardService.setOccluded(mKeyguardState.occluded, false /* animate */);
             }
         }
 
@@ -240,10 +240,10 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void setOccluded(boolean isOccluded) {
+    public void setOccluded(boolean isOccluded, boolean animate) {
         if (mKeyguardService != null) {
-            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
-            mKeyguardService.setOccluded(isOccluded);
+            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
+            mKeyguardService.setOccluded(isOccluded, animate);
         }
         mKeyguardState.occluded = isOccluded;
     }

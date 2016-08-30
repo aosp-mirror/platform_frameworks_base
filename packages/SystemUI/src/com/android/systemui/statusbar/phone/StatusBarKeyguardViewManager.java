@@ -242,7 +242,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mStatusBarWindowManager.isShowingWallpaper();
     }
 
-    public void setOccluded(boolean occluded) {
+    public void setOccluded(boolean occluded, boolean animate) {
         if (occluded && !mOccluded && mShowing) {
             if (mPhoneStatusBar.isInLaunchTransition()) {
                 mOccluded = true;
@@ -258,9 +258,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
         mOccluded = occluded;
-        mPhoneStatusBar.updateMediaMetaData(false, false);
+        mPhoneStatusBar.updateMediaMetaData(false, animate && !occluded);
         mStatusBarWindowManager.setKeyguardOccluded(occluded);
         reset();
+        if (animate && !occluded) {
+            mPhoneStatusBar.animateKeyguardUnoccluding();
+        }
     }
 
     public boolean isOccluded() {
