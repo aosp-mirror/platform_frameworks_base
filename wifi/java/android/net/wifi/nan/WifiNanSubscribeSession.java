@@ -16,15 +16,22 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.NonNull;
+import android.util.Log;
+
 /**
- * A representation of a NAN subscribe session. Created when
- * {@link WifiNanManager#subscribe(SubscribeData, SubscribeSettings, WifiNanSessionListener, int)}
- * is executed. The object can be used to stop and re-start (re-configure) the
- * subscribe session.
+ * A class representing a NAN subscribe session. Created when
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} is called and a
+ * discovery session is created and returned in
+ * {@link WifiNanSessionCallback#onSubscribeStarted(WifiNanSubscribeSession)}. See baseline
+ * functionality of all discovery sessions in {@link WifiNanSession}. This object allows updating
+ * an existing/running subscribe discovery session using {@link #updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanSubscribeSession extends WifiNanSession {
+    private static final String TAG = "WifiNanSubscribeSession";
+
     /**
      * {@hide}
      */
@@ -33,15 +40,33 @@ public class WifiNanSubscribeSession extends WifiNanSession {
     }
 
     /**
-     * Restart/re-configure the subscribe session. Note that the
-     * {@link WifiNanSessionListener} is not replaced - the same listener used at
-     * creation is still used.
+     * Re-configure the currently active subscribe session. The
+     * {@link WifiNanSessionCallback} is not replaced - the same listener used
+     * at creation is still used. The results of the configuration are returned using
+     * {@link WifiNanSessionCallback}:
+     * <ul>
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigSuccess()}: configuration update
+     *     succeeded.
+     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)}: configuration update
+     *     failed. The subscribe discovery session is still running using its previous
+     *     configuration (i.e. update failure does not terminate the session).
+     * </ul>
      *
-     * @param subscribeData The data ({@link SubscribeData}) to subscribe.
-     * @param subscribeSettings The settings ({@link SubscribeSettings}) of the
-     *            subscribe session.
+     * @param subscribeConfig The new discovery subscribe session configuration
+     *                        ({@link SubscribeConfig}).
      */
-    public void subscribe(SubscribeData subscribeData, SubscribeSettings subscribeSettings) {
-        mManager.subscribe(mSessionId, subscribeData, subscribeSettings);
+    public void updateSubscribe(@NonNull SubscribeConfig subscribeConfig) {
+        if (mTerminated) {
+            Log.w(TAG, "updateSubscribe: called on terminated session");
+            return;
+        } else {
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "updateSubscribe: called post GC on WifiNanManager");
+                return;
+            }
+
+            mgr.updateSubscribe(mSessionId, subscribeConfig);
+        }
     }
 }

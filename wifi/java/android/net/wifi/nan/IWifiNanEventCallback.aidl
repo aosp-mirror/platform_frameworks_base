@@ -16,4 +16,21 @@
 
 package android.net.wifi.nan;
 
-parcelable SubscribeData;
+import android.net.wifi.nan.ConfigRequest;
+import android.net.wifi.RttManager;
+
+/**
+ * Callback interface that WifiNanManager implements
+ *
+ * {@hide}
+ */
+oneway interface IWifiNanEventCallback
+{
+    void onConnectSuccess();
+    void onConnectFail(int reason);
+    void onIdentityChanged(in byte[] mac);
+
+    void onRangingSuccess(int rangingId, in RttManager.ParcelableRttResults results);
+    void onRangingFailure(int rangingId, int reason, in String description);
+    void onRangingAborted(int rangingId);
+}

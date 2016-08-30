@@ -806,7 +806,7 @@ public class WifiConfiguration implements Parcelable {
          * Quality network selection status String (for debug purpose). Use Quality network
          * selection status value as index to extec the corresponding debug string
          */
-        private static final String[] QUALITY_NETWORK_SELECTION_STATUS = {
+        public static final String[] QUALITY_NETWORK_SELECTION_STATUS = {
                 "NETWORK_SELECTION_ENABLED",
                 "NETWORK_SELECTION_TEMPORARY_DISABLED",
                 "NETWORK_SELECTION_PERMANENTLY_DISABLED"};
@@ -817,6 +817,7 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int NETWORK_SELECTION_ENABLE = 0;
         /**
+         * @deprecated it is not used any more.
          * This network is disabled because higher layer (>2) network is bad
          */
         public static final int DISABLED_BAD_LINK = 1;
@@ -837,40 +838,51 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final int DISABLED_DNS_FAILURE = 5;
         /**
+         * This network is disabled because we started WPS
+         */
+        public static final int DISABLED_WPS_START = 6;
+        /**
          * This network is disabled because EAP-TLS failure
          */
-        public static final int DISABLED_TLS_VERSION_MISMATCH = 6;
+        public static final int DISABLED_TLS_VERSION_MISMATCH = 7;
         /**
-         * This network is disabled due to WifiManager disable it explicitly
+         * This network is disabled due to absence of user credentials
          */
-        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 7;
+        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 8;
         /**
          * This network is disabled because no Internet connected and user do not want
          */
-        public static final int DISABLED_NO_INTERNET = 8;
+        public static final int DISABLED_NO_INTERNET = 9;
         /**
          * This network is disabled due to WifiManager disable it explicitly
          */
-        public static final int DISABLED_BY_WIFI_MANAGER = 9;
+        public static final int DISABLED_BY_WIFI_MANAGER = 10;
+        /**
+         * This network is disabled due to user switching
+         */
+        public static final int DISABLED_DUE_TO_USER_SWITCH = 11;
         /**
          * This Maximum disable reason value
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 10;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 12;
 
         /**
          * Quality network selection disable reason String (for debug purpose)
          */
-        private static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
+        public static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
                 "NETWORK_SELECTION_ENABLE",
-                "NETWORK_SELECTION_DISABLED_BAD_LINK",
+                "NETWORK_SELECTION_DISABLED_BAD_LINK", // deprecated
                 "NETWORK_SELECTION_DISABLED_ASSOCIATION_REJECTION ",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DHCP_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DNS_FAILURE",
+                "NETWORK_SELECTION_DISABLED_WPS_START",
                 "NETWORK_SELECTION_DISABLED_TLS_VERSION",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_CREDENTIALS",
                 "NETWORK_SELECTION_DISABLED_NO_INTERNET",
-                "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER"};
+                "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER",
+                "NETWORK_SELECTION_DISABLED_BY_USER_SWITCH"
+        };
 
         /**
          * Invalid time stamp for network selection disable
@@ -1054,7 +1066,7 @@ public class WifiConfiguration implements Parcelable {
             return mHasEverConnected;
         }
 
-        private NetworkSelectionStatus() {
+        public NetworkSelectionStatus() {
             // previously stored configs will not have this parameter, so we default to false.
             mHasEverConnected = false;
         };
@@ -1254,6 +1266,8 @@ public class WifiConfiguration implements Parcelable {
             }
             mTemporarilyDisabledTimestamp = source.mTemporarilyDisabledTimestamp;
             mNetworkSelectionBSSID = source.mNetworkSelectionBSSID;
+            setCandidate(source.getCandidate());
+            setCandidateScore(source.getCandidateScore());
             setConnectChoice(source.getConnectChoice());
             setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
             setHasEverConnected(source.getHasEverConnected());
@@ -1302,7 +1316,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * network selection related member
      */
-    private final NetworkSelectionStatus mNetworkSelectionStatus = new NetworkSelectionStatus();
+    private NetworkSelectionStatus mNetworkSelectionStatus = new NetworkSelectionStatus();
 
     /**
      * @hide
@@ -1311,6 +1325,15 @@ public class WifiConfiguration implements Parcelable {
     public NetworkSelectionStatus getNetworkSelectionStatus() {
         return mNetworkSelectionStatus;
     }
+
+    /**
+     * Set the network selection status
+     * @hide
+     */
+    public void setNetworkSelectionStatus(NetworkSelectionStatus status) {
+        mNetworkSelectionStatus = status;
+    }
+
     /**
      * @hide
      * Linked Configurations: represent the set of Wificonfigurations that are equivalent

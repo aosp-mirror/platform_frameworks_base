@@ -66,19 +66,28 @@ public class WifiP2pDevice implements Parcelable {
 
     /* Device Capability bitmap */
     private static final int DEVICE_CAPAB_SERVICE_DISCOVERY         = 1;
+    @SuppressWarnings("unused")
     private static final int DEVICE_CAPAB_CLIENT_DISCOVERABILITY    = 1<<1;
+    @SuppressWarnings("unused")
     private static final int DEVICE_CAPAB_CONCURRENT_OPER           = 1<<2;
+    @SuppressWarnings("unused")
     private static final int DEVICE_CAPAB_INFRA_MANAGED             = 1<<3;
+    @SuppressWarnings("unused")
     private static final int DEVICE_CAPAB_DEVICE_LIMIT              = 1<<4;
     private static final int DEVICE_CAPAB_INVITATION_PROCEDURE      = 1<<5;
 
     /* Group Capability bitmap */
     private static final int GROUP_CAPAB_GROUP_OWNER                = 1;
+    @SuppressWarnings("unused")
     private static final int GROUP_CAPAB_PERSISTENT_GROUP           = 1<<1;
     private static final int GROUP_CAPAB_GROUP_LIMIT                = 1<<2;
+    @SuppressWarnings("unused")
     private static final int GROUP_CAPAB_INTRA_BSS_DIST             = 1<<3;
+    @SuppressWarnings("unused")
     private static final int GROUP_CAPAB_CROSS_CONN                 = 1<<4;
+    @SuppressWarnings("unused")
     private static final int GROUP_CAPAB_PERSISTENT_RECONN          = 1<<5;
+    @SuppressWarnings("unused")
     private static final int GROUP_CAPAB_GROUP_FORMATION            = 1<<6;
 
     /**
@@ -305,6 +314,7 @@ public class WifiP2pDevice implements Parcelable {
         return other.deviceAddress.equals(deviceAddress);
     }
 
+    @Override
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
         sbuf.append("Device: ").append(deviceName);
@@ -320,6 +330,7 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -340,6 +351,7 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(deviceName);
         dest.writeString(deviceAddress);
@@ -360,6 +372,7 @@ public class WifiP2pDevice implements Parcelable {
     /** Implement the Parcelable interface */
     public static final Creator<WifiP2pDevice> CREATOR =
         new Creator<WifiP2pDevice>() {
+            @Override
             public WifiP2pDevice createFromParcel(Parcel in) {
                 WifiP2pDevice device = new WifiP2pDevice();
                 device.deviceName = in.readString();
@@ -376,6 +389,7 @@ public class WifiP2pDevice implements Parcelable {
                 return device;
             }
 
+            @Override
             public WifiP2pDevice[] newArray(int size) {
                 return new WifiP2pDevice[size];
             }
