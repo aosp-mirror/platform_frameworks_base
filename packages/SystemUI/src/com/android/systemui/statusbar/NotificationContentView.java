@@ -205,7 +205,7 @@ public class NotificationContentView extends FrameLayout {
                     && MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED) {
                 singleLineWidthSpec = MeasureSpec.makeMeasureSpec(
                         width - mSingleLineWidthIndention + mSingleLineView.getPaddingEnd(),
-                        MeasureSpec.AT_MOST);
+                        MeasureSpec.EXACTLY);
             }
             mSingleLineView.measure(singleLineWidthSpec,
                     MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST));
