@@ -89,7 +89,7 @@ interface IWifiManager
 
     WifiInfo getConnectionInfo();
 
-    boolean setWifiEnabled(boolean enable);
+    boolean setWifiEnabled(String packageName, boolean enable);
 
     int getWifiEnabledState();
 
@@ -169,5 +169,11 @@ interface IWifiManager
     void factoryReset();
 
     Network getCurrentNetwork();
+
+    byte[] retrieveBackupData();
+
+    void restoreBackupData(in byte[] data);
+
+    void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 }
 

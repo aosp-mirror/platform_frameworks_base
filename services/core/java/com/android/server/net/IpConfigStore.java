@@ -27,6 +27,7 @@ import android.net.StaticIpConfiguration;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.net.DelayedDiskWrite;
 
 import java.io.BufferedInputStream;
@@ -34,7 +35,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 
@@ -67,7 +70,8 @@ public class IpConfigStore {
         this(new DelayedDiskWrite());
     }
 
-    private boolean writeConfig(DataOutputStream out, int configKey,
+    @VisibleForTesting
+    public static boolean writeConfig(DataOutputStream out, int configKey,
                                 IpConfiguration config) throws IOException {
         boolean written = false;
 
@@ -171,12 +175,25 @@ public class IpConfigStore {
         });
     }
 
-    public SparseArray<IpConfiguration> readIpAndProxyConfigurations(String filePath) {
-        SparseArray<IpConfiguration> networks = new SparseArray<IpConfiguration>();
+    public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(String filePath) {
+        BufferedInputStream bufferedInputStream;
+        try {
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(filePath));
+        } catch (FileNotFoundException e) {
+            // Return an empty array here because callers expect an empty array when the file is
+            // not present.
+            loge("Error opening configuration file: " + e);
+            return new SparseArray<>();
+        }
+        return readIpAndProxyConfigurations(bufferedInputStream);
+    }
 
+    public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(
+            InputStream inputStream) {
+        SparseArray<IpConfiguration> networks = new SparseArray<IpConfiguration>();
         DataInputStream in = null;
         try {
-            in = new DataInputStream(new BufferedInputStream(new FileInputStream(filePath)));
+            in = new DataInputStream(inputStream);
 
             int version = in.readInt();
             if (version != 2 && version != 1) {
@@ -327,11 +344,11 @@ public class IpConfigStore {
         return networks;
     }
 
-    protected void loge(String s) {
+    protected static void loge(String s) {
         Log.e(TAG, s);
     }
 
-    protected void log(String s) {
+    protected static void log(String s) {
         Log.d(TAG, s);
     }
 }
