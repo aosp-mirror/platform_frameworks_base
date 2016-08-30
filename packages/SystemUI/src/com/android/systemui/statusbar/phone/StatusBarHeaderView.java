@@ -18,7 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.PowerManager;
+import android.os.SystemClock;
+import android.provider.Settings;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -52,8 +59,12 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  * The view to manage the header area in the expanded status bar.
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
-        BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback {
+        View.OnLongClickListener, BatteryController.BatteryStateChangeCallback,
+        NextAlarmController.NextAlarmChangeCallback {
 
+    private static final int STATUS_BAR_POWER_MENU_OFF = 0;
+    private static final int STATUS_BAR_POWER_MENU_DEFAULT = 1;
+    private static final int STATUS_BAR_POWER_MENU_INVERTED = 2;
     private boolean mExpanded;
     private boolean mListening;
 
@@ -77,6 +88,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private TextView mEmergencyCallsOnly;
     private TextView mBatteryLevel;
     private TextView mAlarmStatus;
+    private ImageView mStatusBarPowerMenu;
 
     private boolean mShowEmergencyCallsOnly;
     private boolean mAlarmShowing;
@@ -120,8 +132,32 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private float mCurrentT;
     private boolean mShowingDetail;
 
+    private boolean mShowBatteryPercent;
+    private int mStatusBarPowerMenuStyle;
+
+    private ContentObserver mContentObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange, Uri uri) {
+            loadShowBatteryTextSetting();
+            loadShowStatusBarPowerMenuSettings();
+        }
+    };
+
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        loadShowBatteryTextSetting();
+        loadShowStatusBarPowerMenuSettings();
+    }
+
+    private void loadShowBatteryTextSetting() {
+        ContentResolver resolver = getContext().getContentResolver();
+        mShowBatteryPercent = 0 != Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT, 0);
+    }
+
+    private void loadShowStatusBarPowerMenuSettings() {
+        ContentResolver resolver = getContext().getContentResolver();
+        mStatusBarPowerMenuStyle = Settings.System.getInt(resolver,
+                Settings.System.STATUS_BAR_POWER_MENU, 0);
     }
 
     @Override
@@ -147,6 +183,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
         mEmergencyCallsOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
+        mStatusBarPowerMenu = (ImageView) findViewById(R.id.status_bar_power_menu);
+        mStatusBarPowerMenu.setOnClickListener(this);
+        mStatusBarPowerMenu.setLongClickable(true);
+        mStatusBarPowerMenu.setOnLongClickListener(this);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
         mSignalCluster = findViewById(R.id.signal_cluster);
@@ -328,7 +368,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateSignalClusterDetachment();
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility((mExpanded || mShowBatteryPercent) ? View.VISIBLE : View.GONE);
+        mStatusBarPowerMenu.setVisibility(mExpanded && (mStatusBarPowerMenuStyle != STATUS_BAR_POWER_MENU_OFF) ? View.VISIBLE : View.GONE);
     }
 
     private void updateSignalClusterDetachment() {
@@ -501,6 +542,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             if (showIntent != null && showIntent.isActivity()) {
                 mActivityStarter.startActivity(showIntent.getIntent(), true /* dismissShade */);
             }
+        } else if (v == mStatusBarPowerMenu) {
+            statusBarPowerMenuAction();
         }
     }
 
@@ -512,6 +555,21 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private void startBatteryActivity() {
         mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY),
                 true /* dismissShade */);
+    }
+
+    private void triggerPowerMenuDialog() {
+        Intent intent = new Intent(Intent.ACTION_POWER_MENU);
+        mContext.sendBroadcast(intent); /* broadcast action */
+        mActivityStarter.startActivity(intent,
+                true /* dismissShade */);
+    }
+
+    private void statusBarPowerMenuAction() {
+        if (mStatusBarPowerMenuStyle == STATUS_BAR_POWER_MENU_DEFAULT) {
+            goToSleep();
+        } else if (mStatusBarPowerMenuStyle == STATUS_BAR_POWER_MENU_INVERTED) {
+            triggerPowerMenuDialog();
+        }
     }
 
     public void setQSPanel(QSPanel qsp) {
@@ -555,6 +613,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         target.avatarScale = mMultiUserAvatar.getScaleX();
         target.avatarX = mMultiUserSwitch.getLeft() + mMultiUserAvatar.getLeft();
         target.avatarY = mMultiUserSwitch.getTop() + mMultiUserAvatar.getTop();
+        target.statusBarPowerMenuY = mClock.getTop();
         if (getLayoutDirection() == LAYOUT_DIRECTION_LTR) {
             target.batteryX = mSystemIconsSuperContainer.getLeft()
                     + mSystemIconsContainer.getRight();
@@ -593,6 +652,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mTime.setScaleY(values.timeScale);
         mClock.setY(values.clockY - mClock.getHeight());
         mDateGroup.setY(values.dateY);
+        mStatusBarPowerMenu.setY(values.statusBarPowerMenuY);
         mAlarmStatus.setY(values.dateY - mAlarmStatus.getPaddingTop());
         mMultiUserAvatar.setScaleX(values.avatarScale);
         mMultiUserAvatar.setScaleY(values.avatarScale);
@@ -631,6 +691,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         applyAlpha(mDateExpanded, values.dateExpandedAlpha);
         applyAlpha(mBatteryLevel, values.batteryLevelAlpha);
         applyAlpha(mSettingsButton, values.settingsAlpha);
+        applyAlpha(mStatusBarPowerMenu, values.settingsAlpha);
         applyAlpha(mSignalCluster, values.signalClusterAlpha);
         if (!mExpanded) {
             mTime.setScaleX(1f);
@@ -662,6 +723,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         float settingsTranslation;
         float signalClusterAlpha;
         float settingsRotation;
+        float statusBarPowerMenuY;
 
         public void interpoloate(LayoutValues v1, LayoutValues v2, float t) {
             timeScale = v1.timeScale * (1 - t) + v2.timeScale * t;
@@ -673,6 +735,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             batteryX = v1.batteryX * (1 - t) + v2.batteryX * t;
             batteryY = v1.batteryY * (1 - t) + v2.batteryY * t;
             settingsTranslation = v1.settingsTranslation * (1 - t) + v2.settingsTranslation * t;
+            statusBarPowerMenuY = v1.statusBarPowerMenuY * (1 - t) + v2.statusBarPowerMenuY * t;
 
             float t1 = Math.max(0, t - 0.5f) * 2;
             settingsRotation = v1.settingsRotation * (1 - t1) + v2.settingsRotation * t1;
@@ -745,6 +808,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             final boolean showingDetail = detail != null;
             transition(mClock, !showingDetail);
             transition(mDateGroup, !showingDetail);
+            transition(mStatusBarPowerMenu, !showingDetail);
             if (mAlarmShowing) {
                 transition(mAlarmStatus, !showingDetail);
             }
@@ -791,4 +855,42 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                     .start();
         }
     };
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ContentResolver resolver = getContext().getContentResolver();
+        // status bar battery percent text
+        resolver.registerContentObserver(Settings.System.getUriFor(
+           "status_bar_show_battery_percent"), false, mContentObserver);
+        // status bar power menu
+        resolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.STATUS_BAR_POWER_MENU), false, mContentObserver);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mBatteryController != null) {
+            mBatteryController.removeStateChangedCallback(this);
+        }
+    }
+
+    private void goToSleep() {
+        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                pm.goToSleep(SystemClock.uptimeMillis());
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mStatusBarPowerMenu) {
+            if (mStatusBarPowerMenuStyle == STATUS_BAR_POWER_MENU_DEFAULT) {
+                triggerPowerMenuDialog();
+            } else if (mStatusBarPowerMenuStyle == STATUS_BAR_POWER_MENU_INVERTED) {
+                goToSleep();
+            }
+        }
+        return false;
+    }
 }

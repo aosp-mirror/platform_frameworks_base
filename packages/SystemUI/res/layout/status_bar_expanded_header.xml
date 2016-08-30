@@ -128,6 +128,19 @@
         android:id="@+id/clock"
         />
 
+    <ImageView
+        android:id="@+id/status_bar_power_menu"
+        android:background="@drawable/ripple_drawable"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"
+        android:layout_marginEnd="16dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_lock_power_off_alpha"
+        android:scaleType="centerInside" />
+
     <Button android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

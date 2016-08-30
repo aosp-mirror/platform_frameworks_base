@@ -2269,6 +2269,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
+
+            loadBooleanSetting(stmt, Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT,
+                    R.bool.def_status_bar_show_battery_percent);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2536,6 +2539,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Global.SET_INSTALL_LOCATION, 0);
             loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
                     PackageHelper.APP_INSTALL_AUTO);
+
+            // volume adjust sound
+            loadIntegerSetting(stmt, Settings.System.VOLUME_KEY_ADJUST_SOUND,
+                    R.integer.volume_key_adjust_sound);
 
             // Set default cdma emergency tone
             loadSetting(stmt, Settings.Global.EMERGENCY_TONE, 0);
