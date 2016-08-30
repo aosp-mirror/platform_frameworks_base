@@ -1151,6 +1151,17 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    /** @return true if there's any shortcuts that are not manifest shortcuts. */
+    public boolean hasNonManifestShortcuts() {
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (!si.isDeclaredInManifest()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
