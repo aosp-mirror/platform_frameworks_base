@@ -1393,6 +1393,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return IAudioService.Stub.asInterface(ServiceManager.getService(Context.AUDIO_SERVICE));
         }
 
+        boolean isBuildDebuggable() {
+            return Build.IS_DEBUGGABLE;
+        }
+
         LockPatternUtils newLockPatternUtils() {
             return new LockPatternUtils(mContext);
         }
@@ -8999,6 +9003,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
     }
 
+    private void enforceCallerSystemUserHandle() {
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
+        if (userId != UserHandle.USER_SYSTEM) {
+            throw new SecurityException("Caller has to be in user 0");
+        }
+    }
+
     @Override
     public boolean isUninstallInQueue(final String packageName) {
         enforceCanManageDeviceAdmin();
@@ -9163,17 +9175,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void forceUpdateUserSetupComplete() {
         enforceCanManageProfileAndDeviceOwners();
-        List<UserInfo> users = mUserManager.getUsers(true);
-        final int N = users.size();
-        for (int i = 0; i < N; i++) {
-            int userHandle = users.get(i).id;
-            boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
-                    Settings.Secure.USER_SETUP_COMPLETE, 0, userHandle) != 0;
-            DevicePolicyData policy = getUserData(userHandle);
-            policy.mUserSetupComplete = isUserCompleted;
-            synchronized (this) {
-                saveSettingsLocked(userHandle);
-            }
+        enforceCallerSystemUserHandle();
+        // no effect if it's called from user build
+        if (!mInjector.isBuildDebuggable()) {
+            return;
+        }
+        final int userId = UserHandle.USER_SYSTEM;
+        boolean isUserCompleted = mInjector.settingsSecureGetIntForUser(
+                Settings.Secure.USER_SETUP_COMPLETE, 0, userId) != 0;
+        DevicePolicyData policy = getUserData(userId);
+        policy.mUserSetupComplete = isUserCompleted;
+        synchronized (this) {
+            saveSettingsLocked(userId);
         }
     }
 

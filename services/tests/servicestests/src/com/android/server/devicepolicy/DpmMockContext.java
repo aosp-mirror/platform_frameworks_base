@@ -132,6 +132,10 @@ public class DpmMockContext extends MockContext {
         }
     }
 
+    public static class BuildMock {
+        public boolean isDebuggable = true;
+    }
+
     public static class PowerManagerForMock {
         public WakeLock newWakeLock(int levelAndFlags, String tag) {
             return null;
@@ -271,6 +275,8 @@ public class DpmMockContext extends MockContext {
     public final List<String> callerPermissions = new ArrayList<>();
 
     private final ArrayList<UserInfo> mUserInfos = new ArrayList<>();
+
+    public final BuildMock buildMock = new BuildMock();
 
     public DpmMockContext(Context context, File dataDir) {
         realTestContext = context;
