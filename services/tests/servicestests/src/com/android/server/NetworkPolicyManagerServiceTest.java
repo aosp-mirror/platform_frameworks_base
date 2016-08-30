@@ -52,9 +52,11 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
@@ -64,9 +66,11 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
@@ -84,12 +88,14 @@ import android.os.INetworkManagementService;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.util.TrustedTime;
 
+import com.android.server.BroadcastInterceptingContext.FutureIntent;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.net.NetworkPolicyManagerService;
 
@@ -136,6 +142,7 @@ import java.util.stream.Collectors;
  * Tests for {@link NetworkPolicyManagerService}.
  */
 @RunWith(AndroidJUnit4.class)
+@MediumTest
 public class NetworkPolicyManagerServiceTest {
     private static final String TAG = "NetworkPolicyManagerServiceTest";
 
@@ -167,6 +174,7 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock IConnectivityManager mConnManager;
     private @Mock INotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
+    private @Mock IPackageManager mIpm;
 
     private IUidObserver mUidObserver;
     private INetworkManagementEventObserver mNetworkObserver;
@@ -240,7 +248,7 @@ public class NetworkPolicyManagerServiceTest {
         }).when(mActivityManager).registerUidObserver(any(), anyInt());
 
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
-                mNetworkManager, mTime, mPolicyDir, true);
+                mNetworkManager, mIpm, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
         mService.bindNotificationManager(mNotifManager);
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
@@ -275,7 +283,7 @@ public class NetworkPolicyManagerServiceTest {
         mService.systemReady();
 
         // catch INetworkManagementEventObserver during systemReady()
-        ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
+        final ArgumentCaptor<INetworkManagementEventObserver> networkObserver =
               ArgumentCaptor.forClass(INetworkManagementEventObserver.class);
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
@@ -292,6 +300,191 @@ public class NetworkPolicyManagerServiceTest {
     public void unregisterLocalServices() throws Exception {
         // Registered by NetworkPolicyManagerService's constructor.
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+    }
+
+    @Test
+    public void testTurnRestrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOff(); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        setRestrictBackground(true);
+        assertRestrictBackgroundChangedReceived(futureIntent, null);
+    }
+
+    @Test
+    @NetPolicyXml("restrict-background-on.xml")
+    public void testTurnRestrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOn(); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        setRestrictBackground(false);
+        assertRestrictBackgroundChangedReceived(futureIntent, null);
+    }
+
+    /**
+     * Adds whitelist when restrict background is on - app should receive an intent.
+     */
+    @Test
+    @NetPolicyXml("restrict-background-on.xml")
+    public void testAddRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn(); // Sanity check.
+        addRestrictBackgroundWhitelist(true);
+    }
+
+    /**
+     * Adds whitelist when restrict background is off - app should not receive an intent.
+     */
+    @Test
+    public void testAddRestrictBackgroundWhitelist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff(); // Sanity check.
+        addRestrictBackgroundWhitelist(false);
+    }
+
+    private void addRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
+        assertWhitelistUids(); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        mPolicyListener.expect().onRestrictBackgroundWhitelistChanged(anyInt(), anyBoolean());
+
+        mService.addRestrictBackgroundWhitelistedUid(UID_A);
+
+        assertWhitelistUids(UID_A);
+        mPolicyListener.waitAndVerify().onRestrictBackgroundWhitelistChanged(APP_ID_A, true);
+        mPolicyListener.verifyNotCalled().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
+        if (expectIntent) {
+            assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
+        } else {
+            futureIntent.assertNotReceived();
+        }
+    }
+
+    /**
+     * Removes whitelist when restrict background is on - app should receive an intent.
+     */
+    @Test
+    @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
+    public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn(); // Sanity check.
+        removeRestrictBackgroundWhitelist(true);
+    }
+
+    /**
+     * Removes whitelist when restrict background is off - app should not receive an intent.
+     */
+    @Test
+    @NetPolicyXml("uidA-whitelisted-restrict-background-off.xml")
+    public void testRemoveRestrictBackgroundWhitelist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff(); // Sanity check.
+        removeRestrictBackgroundWhitelist(false);
+    }
+
+    private void removeRestrictBackgroundWhitelist(boolean expectIntent) throws Exception {
+        assertWhitelistUids(UID_A); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        mPolicyListener.expect().onRestrictBackgroundWhitelistChanged(anyInt(), anyBoolean());
+
+        mService.removeRestrictBackgroundWhitelistedUid(UID_A);
+
+        assertWhitelistUids();
+        mPolicyListener.waitAndVerify().onRestrictBackgroundWhitelistChanged(APP_ID_A, false);
+        mPolicyListener.verifyNotCalled().onRestrictBackgroundBlacklistChanged(APP_ID_A, false);
+        if (expectIntent) {
+            assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
+        } else {
+            futureIntent.assertNotReceived();
+        }
+    }
+
+    /**
+     * Adds blacklist when restrict background is on - app should receive an intent.
+     */
+    @Test
+    @NetPolicyXml("restrict-background-on.xml")
+    public void testAddRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn(); // Sanity check.
+        addRestrictBackgroundBlacklist(true);
+    }
+
+    /**
+     * Adds blacklist when restrict background is off - app should receive an intent.
+     */
+    @Test
+    public void testAddRestrictBackgroundBlacklist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff(); // Sanity check.
+        addRestrictBackgroundBlacklist(true);
+    }
+
+    private void addRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
+        assertUidPolicy(UID_A, POLICY_NONE); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
+
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+
+        assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
+        mPolicyListener.verifyNotCalled().onRestrictBackgroundWhitelistChanged(APP_ID_A, true);
+        if (expectIntent) {
+            assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
+        } else {
+            futureIntent.assertNotReceived();
+        }
+    }
+
+    /**
+     * Removes blacklist when restrict background is on - app should receive an intent.
+     */
+    @Test
+    @NetPolicyXml("uidA-blacklisted-restrict-background-on.xml")
+    public void testRemoveRestrictBackgroundBlacklist_restrictBackgroundOn() throws Exception {
+        assertRestrictBackgroundOn(); // Sanity check.
+        removeRestrictBackgroundBlacklist(true);
+    }
+
+    /**
+     * Removes blacklist when restrict background is off - app should receive an intent.
+     */
+    @Test
+    @NetPolicyXml("uidA-blacklisted-restrict-background-off.xml")
+    public void testRemoveRestrictBackgroundBlacklist_restrictBackgroundOff() throws Exception {
+        assertRestrictBackgroundOff(); // Sanity check.
+        removeRestrictBackgroundBlacklist(true);
+    }
+
+    private void removeRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
+        assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND); // Sanity check.
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
+
+        mService.setUidPolicy(UID_A, POLICY_NONE);
+
+        assertUidPolicy(UID_A, POLICY_NONE);
+        mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, false);
+        mPolicyListener.verifyNotCalled().onRestrictBackgroundWhitelistChanged(APP_ID_A, false);
+        if (expectIntent) {
+            assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
+        } else {
+            futureIntent.assertNotReceived();
+        }
+    }
+
+    @NetPolicyXml("uidA-blacklisted-restrict-background-off.xml")
+    public void testBlacklistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
+        // Sanity checks.
+        assertRestrictBackgroundOn();
+        assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        setRestrictBackground(true);
+        futureIntent.assertNotReceived();
+    }
+
+    @NetPolicyXml("uidA-whitelisted-restrict-background-off.xml")
+    public void testWhitelistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
+        // Sanity checks.
+        assertRestrictBackgroundOff();
+        assertWhitelistUids(UID_A);
+
+        final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
+        setRestrictBackground(true);
+        futureIntent.assertNotReceived();
     }
 
     @Test
@@ -771,6 +964,11 @@ public class NetworkPolicyManagerServiceTest {
         return futureAnswer;
     }
 
+    private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
+        when(mIpm.checkUidPermission(Manifest.permission.INTERNET, uid)).thenReturn(
+                hasIt ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
+    }
+
     private void verifySetInterfaceQuota(String iface, long quotaBytes) throws Exception {
         verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(iface, quotaBytes);
     }
@@ -857,6 +1055,27 @@ public class NetworkPolicyManagerServiceTest {
         assertContainsInAnyOrder(mService.getRestrictBackgroundWhitelistedUids(), uids);
     }
 
+    private void assertRestrictBackgroundOn() throws Exception {
+        assertTrue("restrictBackground should be set", mService.getRestrictBackground());
+    }
+
+    private void assertRestrictBackgroundOff() throws Exception {
+        assertFalse("restrictBackground should not be set", mService.getRestrictBackground());
+    }
+
+    private FutureIntent newRestrictBackgroundChangedFuture() {
+        return mServiceContext
+                .nextBroadcastIntent(ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED);
+    }
+
+    private void assertRestrictBackgroundChangedReceived(Future<Intent> future,
+            String expectedPackage) throws Exception {
+        final String action = ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED;
+        final Intent intent = future.get(5, TimeUnit.SECONDS);
+        assertNotNull("Didn't get a " + action + "intent in 5 seconds");
+        assertEquals("Wrong package on " + action + " intent", expectedPackage, intent.getPackage());
+    }
+
     // TODO: replace by Truth, Hamcrest, or a similar tool.
     private void assertContainsInAnyOrder(int[] actual, int...expected) {
         final StringBuilder errors = new StringBuilder();
@@ -894,6 +1113,16 @@ public class NetworkPolicyManagerServiceTest {
 
     private void incrementCurrentTime(long duration) {
         mElapsedRealtime += duration;
+    }
+
+    private FutureIntent mRestrictBackgroundChanged;
+
+    private void setRestrictBackground(boolean flag) throws Exception {
+        // Must set expectation, otherwise NMPS will reset value to previous one.
+        when(mNetworkManager.setDataSaverModeEnabled(flag)).thenReturn(true);
+        mService.setRestrictBackground(flag);
+        // Sanity check.
+        assertEquals("restrictBackground not set", flag, mService.getRestrictBackground());
     }
 
     /**
@@ -950,6 +1179,11 @@ public class NetworkPolicyManagerServiceTest {
             }
             return verify(listener, atLeastOnce());
         }
+
+        INetworkPolicyListener verifyNotCalled() {
+            return verify(listener, never());
+        }
+
     }
 
     private void setNetpolicyXml(Context context) throws Exception {

@@ -412,7 +412,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkStatsService networkStats, INetworkManagementService networkManagement) {
         this(context, activityManager, networkStats, networkManagement,
-                NtpTrustedTime.getInstance(context), getSystemDir(), false);
+                AppGlobals.getPackageManager(), NtpTrustedTime.getInstance(context), getSystemDir(),
+                false);
     }
 
     private static File getSystemDir() {
@@ -421,7 +422,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkStatsService networkStats, INetworkManagementService networkManagement,
-            TrustedTime time, File systemDir, boolean suppressDefaultPolicy) {
+            IPackageManager pm, TrustedTime time, File systemDir, boolean suppressDefaultPolicy) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
@@ -430,7 +431,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Context.DEVICE_IDLE_CONTROLLER));
         mTime = checkNotNull(time, "missing TrustedTime");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mIPm = AppGlobals.getPackageManager();
+        mIPm = pm;
 
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();

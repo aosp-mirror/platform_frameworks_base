@@ -44,7 +44,17 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     private final List<BroadcastInterceptor> mInterceptors = Lists.newArrayList();
 
-    public class BroadcastInterceptor extends AbstractFuture<Intent> {
+    abstract class FutureIntent extends AbstractFuture<Intent> {
+        public void assertNotReceived()
+                throws InterruptedException, ExecutionException {
+            assertNotReceived(5, TimeUnit.SECONDS);
+        }
+
+        public abstract void assertNotReceived(long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException;
+    }
+
+    public class BroadcastInterceptor extends FutureIntent {
         private final BroadcastReceiver mReceiver;
         private final IntentFilter mFilter;
 
@@ -76,17 +86,32 @@ public class BroadcastInterceptingContext extends ContextWrapper {
                 throw new RuntimeException(e);
             }
         }
+
+        @Override
+        public void assertNotReceived()
+            throws InterruptedException, ExecutionException {
+            assertNotReceived(5, TimeUnit.SECONDS);
+        }
+
+        public void assertNotReceived(long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException {
+            try {
+                final Intent intent = get(timeout, unit);
+                throw new AssertionError("Received intent: " + intent);
+            } catch (TimeoutException e) {
+            }
+        }
     }
 
     public BroadcastInterceptingContext(Context base) {
         super(base);
     }
 
-    public Future<Intent> nextBroadcastIntent(String action) {
+    public FutureIntent nextBroadcastIntent(String action) {
         return nextBroadcastIntent(new IntentFilter(action));
     }
 
-    public Future<Intent> nextBroadcastIntent(IntentFilter filter) {
+    public FutureIntent nextBroadcastIntent(IntentFilter filter) {
         final BroadcastInterceptor interceptor = new BroadcastInterceptor(null, filter);
         synchronized (mInterceptors) {
             mInterceptors.add(interceptor);
