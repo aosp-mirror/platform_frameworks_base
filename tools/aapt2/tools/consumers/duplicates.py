@@ -37,7 +37,7 @@ class DuplicateRemover:
         output_lines = []
         current_line = ""
         for definition in duplicates:
-            print "{0}: removing duplicate resource '{3}'".format( xml_path, definition.name)
+            print "{0}: removing duplicate resource '{1}'".format(xml_path, definition.name)
 
             if last_line_no < definition.start[0]:
                 # The next definition is on a new line, so write what we have
