@@ -15933,6 +15933,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + e.getMessage());
             return false;
         }
+        try {
+            // update shared libraries for the newly re-installed system package
+            updateSharedLibrariesLPw(newPkg, null);
+        } catch (PackageManagerException e) {
+            Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
+        }
 
         prepareAppDataAfterInstallLIF(newPkg);
 
