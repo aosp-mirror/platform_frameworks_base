@@ -111,6 +111,18 @@ class TelephonyIcons {
               R.drawable.stat_sys_data_fully_connected_h }
     };
 
+    //HPSPA+
+    static final int[][] DATA_HP = {
+            { R.drawable.stat_sys_data_connected_hp,
+              R.drawable.stat_sys_data_connected_hp,
+              R.drawable.stat_sys_data_connected_hp,
+              R.drawable.stat_sys_data_connected_hp },
+            { R.drawable.stat_sys_data_fully_connected_hp,
+              R.drawable.stat_sys_data_fully_connected_hp,
+              R.drawable.stat_sys_data_fully_connected_hp,
+              R.drawable.stat_sys_data_fully_connected_hp }
+    };
+
     //CDMA
     // Use 3G icons for EVDO data and 1x icons for 1XRTT data
     static final int[][] DATA_1X = {

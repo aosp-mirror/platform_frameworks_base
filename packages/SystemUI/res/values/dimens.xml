@@ -99,31 +99,31 @@
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->
-    <dimen name="self_expand_velocity">2000dp</dimen>
+    <dimen name="self_expand_velocity">3000dp</dimen>
     <!-- Initial velocity of the shade when collapsing on its own -->
-    <dimen name="self_collapse_velocity">2000dp</dimen>
+    <dimen name="self_collapse_velocity">3000dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as expand requests -->
     <dimen name="fling_expand_min_velocity">100dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as collapse requests -->
     <dimen name="fling_collapse_min_velocity">100dp</dimen>
     <!-- Cap on contribution of x dimension of gesture to overall velocity -->
-    <dimen name="fling_gesture_max_x_velocity">200dp</dimen>
+    <dimen name="fling_gesture_max_x_velocity">300dp</dimen>
     <!-- Cap on overall resulting fling speed (s^-1) -->
-    <dimen name="fling_gesture_max_output_velocity">3000dp</dimen>
+    <dimen name="fling_gesture_max_output_velocity">4000dp</dimen>
 
     <!-- Minimum distance a fling must travel (anti-jitter) -->
-    <dimen name="fling_gesture_min_dist">20dp</dimen>
+    <dimen name="fling_gesture_min_dist">30dp</dimen>
 
     <!-- Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
          collapse request -->
-    <item type="dimen" name="collapse_min_display_fraction">10%</item>
+    <item type="dimen" name="collapse_min_display_fraction">15%</item>
     <!-- Minimum fraction of the display a gesture must travel to qualify as an expand request -->
     <item type="dimen" name="expand_min_display_fraction">50%</item>
 
     <!-- Initial acceleration of an expand animation after fling -->
-    <dimen name="expand_accel">2000dp</dimen>
+    <dimen name="expand_accel">2500dp</dimen>
     <!-- Initial acceleration of an collapse animation after fling -->
-    <dimen name="collapse_accel">2000dp</dimen>
+    <dimen name="collapse_accel">2500dp</dimen>
 
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>

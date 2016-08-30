@@ -409,13 +409,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         // setup our unique device name
-        if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
+        String hostname = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.DEVICE_HOSTNAME);
+        if (TextUtils.isEmpty(hostname) && TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
             String id = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             if (id != null && id.length() > 0) {
                 String name = new String("android-").concat(id);
                 SystemProperties.set("net.hostname", name);
             }
+        } else {
+            SystemProperties.set("net.hostname", hostname);
         }
 
         // read our default dns server ip
