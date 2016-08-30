@@ -839,6 +839,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         );
 
         assertFalse(dpm.isAdminActiveAsUser(admin1, UserHandle.USER_SYSTEM));
+
+        // ACTION_DEVICE_OWNER_CHANGED should be sent twice, once for setting the device owner
+        // and once for clearing it.
+        verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
         // TODO Check other calls.
     }
 
