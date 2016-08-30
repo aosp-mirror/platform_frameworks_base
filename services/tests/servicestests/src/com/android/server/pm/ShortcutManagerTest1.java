@@ -5359,6 +5359,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     /**
      * It's the case with preintalled apps -- when applyRestore() is called, the system
      * apps are already installed, so manifest shortcuts need to be re-published.
+     *
+     * Also, when a restore target app is already installed, and
+     * - if it has allowBackup=true, we'll restore normally, so all existing shortcuts will be
+     * replaced. (but manifest shortcuts will be re-published anyway.)  We log a warning on
+     * logcat.
+     * - if it has allowBackup=false, we don't touch any of the existing shortcuts.
      */
     public void testBackupAndRestore_appAlreadyInstalledWhenRestored() {
         // Pre-backup.  Same as testBackupAndRestore_manifestRePublished().
@@ -5390,6 +5396,19 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mService.mPackageMonitor.onReceive(mServiceContext,
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
 
+        // Set up shortcuts for package 3, which won't be backed up / restored.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_3, ShortcutActivity.class.getName()),
+                R.xml.shortcut_1);
+        updatePackageVersion(CALLING_PACKAGE_3, 1);
+        mService.mPackageMonitor.onReceive(mServiceContext,
+                genPackageAddIntent(CALLING_PACKAGE_3, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertTrue(getManager().setDynamicShortcuts(list(
+                    makeShortcut("s1"))));
+        });
+
         // Make sure the manifest shortcuts have been published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerShortcuts())
@@ -5413,6 +5432,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .selectByIds("ms2")
                     .areAllNotManifest()
                     .areAllDisabled();
+        });
+
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "ms1");
         });
 
         // Backup and *without restarting the service, just call applyRestore()*.
@@ -5453,6 +5477,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .selectByIds("s1", "s2")
                     .areAllNotDynamic()
             ;
+        });
+
+        // Package 3 still has the same shortcuts.
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("s1", "ms1");
         });
     }
 
