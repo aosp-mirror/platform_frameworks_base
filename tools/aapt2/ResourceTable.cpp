@@ -201,8 +201,7 @@ std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
 }
 
 /**
- * The default handler for collisions. A return value of -1 means keep the
- * existing value, 0 means fail, and +1 means take the incoming value.
+ * The default handler for collisions.
  *
  * Typically, a weak value will be overridden by a strong value. An existing weak
  * value will not be overridden by an incoming weak value.
@@ -219,45 +218,34 @@ std::vector<ResourceConfigValue*> ResourceEntry::findValuesIf(
  *
  * A DECL will override a USE without error. Two DECLs must match in their format for there to be
  * no error.
- *
- * Styleables: Styleables are not actual resources, but they are treated as such during the
- * compilation phase. Styleables are allowed to override each other, and their definitions merge
- * and accumulate. If both values are Styleables, we just merge them into the existing value.
  */
-int ResourceTable::resolveValueCollision(Value* existing, Value* incoming) {
-    if (Styleable* existingStyleable = valueCast<Styleable>(existing)) {
-        if (Styleable* incomingStyleable = valueCast<Styleable>(incoming)) {
-            // Styleables get merged.
-            existingStyleable->mergeWith(incomingStyleable);
-            return -1;
-        }
-    }
-
+ResourceTable::CollisionResult ResourceTable::resolveValueCollision(
+        Value* existing, Value* incoming) {
     Attribute* existingAttr = valueCast<Attribute>(existing);
     Attribute* incomingAttr = valueCast<Attribute>(incoming);
     if (!incomingAttr) {
         if (incoming->isWeak()) {
             // We're trying to add a weak resource but a resource
             // already exists. Keep the existing.
-            return -1;
+            return CollisionResult::kKeepOriginal;
         } else if (existing->isWeak()) {
             // Override the weak resource with the new strong resource.
-            return 1;
+            return CollisionResult::kTakeNew;
         }
         // The existing and incoming values are strong, this is an error
         // if the values are not both attributes.
-        return 0;
+        return CollisionResult::kConflict;
     }
 
     if (!existingAttr) {
         if (existing->isWeak()) {
             // The existing value is not an attribute and it is weak,
             // so take the incoming attribute value.
-            return 1;
+            return CollisionResult::kTakeNew;
         }
         // The existing value is not an attribute and it is strong,
         // so the incoming attribute value is an error.
-        return 0;
+        return CollisionResult::kConflict;
     }
 
     assert(incomingAttr && existingAttr);
@@ -272,20 +260,20 @@ int ResourceTable::resolveValueCollision(Value* existing, Value* incoming) {
         // The two attributes are both DECLs, but they are plain attributes
         // with the same formats.
         // Keep the strongest one.
-        return existingAttr->isWeak() ? 1 : -1;
+        return existingAttr->isWeak() ? CollisionResult::kTakeNew : CollisionResult::kKeepOriginal;
     }
 
     if (existingAttr->isWeak() && existingAttr->typeMask == android::ResTable_map::TYPE_ANY) {
         // Any incoming attribute is better than this.
-        return 1;
+        return CollisionResult::kTakeNew;
     }
 
     if (incomingAttr->isWeak() && incomingAttr->typeMask == android::ResTable_map::TYPE_ANY) {
         // The incoming attribute may be a USE instead of a DECL.
         // Keep the existing attribute.
-        return -1;
+        return CollisionResult::kKeepOriginal;
     }
-    return 0;
+    return CollisionResult::kConflict;
 }
 
 static constexpr const char* kValidNameChars = "._-";
@@ -367,7 +355,7 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
                                     const StringPiece& product,
                                     std::unique_ptr<Value> value,
                                     const char* validChars,
-                                    const std::function<int(Value*,Value*)>& conflictResolver,
+                                    const CollisionResolverFunc& conflictResolver,
                                     IDiagnostics* diag) {
     assert(value && "value can't be nullptr");
     assert(diag && "diagnostics can't be nullptr");
@@ -431,17 +419,22 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
         configValue->value = std::move(value);
 
     } else {
-        int collisionResult = conflictResolver(configValue->value.get(), value.get());
-        if (collisionResult > 0) {
+        switch (conflictResolver(configValue->value.get(), value.get())) {
+        case CollisionResult::kTakeNew:
             // Take the incoming value.
             configValue->value = std::move(value);
-        } else if (collisionResult == 0) {
+            break;
+
+        case CollisionResult::kConflict:
             diag->error(DiagMessage(value->getSource())
-                        << "duplicate value for resource '" << name << "' "
-                        << "with config '" << config << "'");
+                                    << "duplicate value for resource '" << name << "' "
+                                    << "with config '" << config << "'");
             diag->error(DiagMessage(configValue->value->getSource())
-                        << "resource previously defined here");
+                                    << "resource previously defined here");
             return false;
+
+        case CollisionResult::kKeepOriginal:
+            break;
         }
     }
 

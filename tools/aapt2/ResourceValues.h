@@ -172,6 +172,7 @@ struct Reference : public BaseItem<Reference> {
     Reference();
     explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
     explicit Reference(const ResourceId& i, Type type = Type::kResource);
+    explicit Reference(const ResourceNameRef& n, const ResourceId& i);
 
     bool equals(const Value* value) const override;
     bool flatten(android::Res_value* outValue) const override;

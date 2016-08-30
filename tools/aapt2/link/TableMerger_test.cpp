@@ -274,4 +274,43 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
     ASSERT_FALSE(merger.mergeOverlay({}, tableB.get()));
 }
 
+TEST_F(TableMergerTest, OverlaidStyleablesShouldBeMerged) {
+    std::unique_ptr<ResourceTable> tableA = test::ResourceTableBuilder()
+            .setPackageId("com.app.a", 0x7f)
+            .addValue("com.app.a:styleable/Foo", test::StyleableBuilder()
+                    .addItem("com.app.a:attr/bar")
+                    .addItem("com.app.a:attr/foo", ResourceId(0x01010000))
+                    .build())
+            .build();
+
+    std::unique_ptr<ResourceTable> tableB = test::ResourceTableBuilder()
+            .setPackageId("com.app.a", 0x7f)
+            .addValue("com.app.a:styleable/Foo", test::StyleableBuilder()
+                    .addItem("com.app.a:attr/bat")
+                    .addItem("com.app.a:attr/foo")
+                    .build())
+            .build();
+
+    ResourceTable finalTable;
+    TableMergerOptions options;
+    options.autoAddOverlay = true;
+    TableMerger merger(mContext.get(), &finalTable, options);
+
+    ASSERT_TRUE(merger.merge({}, tableA.get()));
+    ASSERT_TRUE(merger.mergeOverlay({}, tableB.get()));
+
+    Debug::printTable(&finalTable, {});
+
+    Styleable* styleable = test::getValue<Styleable>(&finalTable, "com.app.a:styleable/Foo");
+    ASSERT_NE(nullptr, styleable);
+
+    std::vector<Reference> expectedRefs = {
+            Reference(test::parseNameOrDie("com.app.a:attr/bar")),
+            Reference(test::parseNameOrDie("com.app.a:attr/bat")),
+            Reference(test::parseNameOrDie("com.app.a:attr/foo"), ResourceId(0x01010000)),
+    };
+
+    EXPECT_EQ(expectedRefs, styleable->entries);
+}
+
 } // namespace aapt
