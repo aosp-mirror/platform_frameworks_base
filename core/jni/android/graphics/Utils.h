@@ -28,7 +28,7 @@ namespace android {
 
 class AssetStreamAdaptor : public SkStreamRewindable {
 public:
-    AssetStreamAdaptor(Asset*);
+    explicit AssetStreamAdaptor(Asset*);
 
     virtual bool rewind();
     virtual size_t read(void* buffer, size_t size);
@@ -53,7 +53,7 @@ SkMemoryStream* CopyAssetToStream(Asset*);
  */
 class AutoFDSeek {
 public:
-    AutoFDSeek(int fd) : fFD(fd) {
+    explicit AutoFDSeek(int fd) : fFD(fd) {
         fCurr = ::lseek(fd, 0, SEEK_CUR);
     }
     ~AutoFDSeek() {

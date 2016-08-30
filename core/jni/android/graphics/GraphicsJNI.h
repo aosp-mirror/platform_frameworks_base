@@ -127,7 +127,7 @@ public:
  */
 class JavaPixelAllocator : public SkBRDAllocator {
 public:
-    JavaPixelAllocator(JNIEnv* env);
+    explicit JavaPixelAllocator(JNIEnv* env);
     ~JavaPixelAllocator();
 
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
@@ -215,7 +215,7 @@ private:
 
 class AshmemPixelAllocator : public SkBitmap::Allocator {
 public:
-    AshmemPixelAllocator(JNIEnv* env);
+    explicit AshmemPixelAllocator(JNIEnv* env);
     ~AshmemPixelAllocator();
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
     android::Bitmap* getStorageObjAndReset() {
