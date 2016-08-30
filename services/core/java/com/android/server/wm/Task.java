@@ -38,6 +38,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.animation.Animation;
 
 import com.android.server.EventLogTags;
 
@@ -763,6 +764,15 @@ class Task implements DimLayer.DimLayerUser {
     @Override
     public DisplayInfo getDisplayInfo() {
         return mStack.getDisplayContent().getDisplayInfo();
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     */
+    void overridePlayingAppAnimations(Animation a) {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            mAppTokens.get(i).overridePlayingAppAnimations(a);
+        }
     }
 
     @Override

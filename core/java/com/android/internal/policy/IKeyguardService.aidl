@@ -28,8 +28,9 @@ oneway interface IKeyguardService {
      * FLAG_SHOW_ON_LOCK_SCREEN.
      *
      * @param isOccluded Whether the Keyguard is occluded by another window.
+     * @param animate Whether to play an animation for the state change.
      */
-    void setOccluded(boolean isOccluded);
+    void setOccluded(boolean isOccluded, boolean animate);
 
     void addStateMonitorCallback(IKeyguardStateCallback callback);
     void verifyUnlock(IKeyguardExitCallback callback);
