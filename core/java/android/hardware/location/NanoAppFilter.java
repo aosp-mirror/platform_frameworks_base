@@ -43,7 +43,8 @@ public class NanoAppFilter {
     private long mAppIdVendorMask;
 
     // Id of the context hub this instance is expected on
-    private int mContextHubId;
+    // TODO: Provide an API which will let us change this HubId.
+    private int mContextHubId = HUB_ANY;
 
     /**
      * Flag indicating any version. With this flag set, all versions shall match provided version.
