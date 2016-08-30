@@ -838,7 +838,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeepaliveTracker = new KeepaliveTracker(mHandler);
         mNotifier = new NetworkNotificationManager(mContext, mTelephonyManager,
                 mContext.getSystemService(NotificationManager.class));
-        mLingerMonitor = new LingerMonitor(mContext, mNotifier);
+
+        final int dailyLimit = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
+                LingerMonitor.DEFAULT_NOTIFICATION_DAILY_LIMIT);
+        final long rateLimit = Settings.Global.getLong(mContext.getContentResolver(),
+                Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
+                LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
+        mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {

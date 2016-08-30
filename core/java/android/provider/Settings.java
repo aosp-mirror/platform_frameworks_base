@@ -7414,27 +7414,41 @@ public final class Settings {
         public static final String WEBVIEW_DATA_REDUCTION_PROXY_KEY =
                 "webview_data_reduction_proxy_key";
 
-        /**
-         * Whether or not the WebView fallback mechanism should be enabled.
-         * 0=disabled, 1=enabled.
-         * @hide
-         */
-        public static final String WEBVIEW_FALLBACK_LOGIC_ENABLED =
-                "webview_fallback_logic_enabled";
+       /**
+        * Whether or not the WebView fallback mechanism should be enabled.
+        * 0=disabled, 1=enabled.
+        * @hide
+        */
+       public static final String WEBVIEW_FALLBACK_LOGIC_ENABLED =
+               "webview_fallback_logic_enabled";
 
-        /**
-         * Name of the package used as WebView provider (if unset the provider is instead determined
-         * by the system).
-         * @hide
-         */
-        public static final String WEBVIEW_PROVIDER = "webview_provider";
+       /**
+        * Name of the package used as WebView provider (if unset the provider is instead determined
+        * by the system).
+        * @hide
+        */
+       public static final String WEBVIEW_PROVIDER = "webview_provider";
 
-        /**
-         * Developer setting to enable WebView multiprocess rendering.
-         * @hide
-         */
-        @SystemApi
-        public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
+       /**
+        * Developer setting to enable WebView multiprocess rendering.
+        * @hide
+        */
+       @SystemApi
+       public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
+
+       /**
+        * The maximum number of notifications shown in 24 hours when switching networks.
+        * @hide
+        */
+       public static final String NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT =
+              "network_switch_notification_daily_limit";
+
+       /**
+        * The minimum time in milliseconds between notifications when switching networks.
+        * @hide
+        */
+       public static final String NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS =
+              "network_switch_notification_rate_limit_millis";
 
        /**
         * Whether Wifi display is enabled/disabled
