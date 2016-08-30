@@ -465,6 +465,7 @@ public class NetworkPolicyManagerServiceTest {
         }
     }
 
+    @Test
     @NetPolicyXml("uidA-blacklisted-restrict-background-off.xml")
     public void testBlacklistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
@@ -476,6 +477,7 @@ public class NetworkPolicyManagerServiceTest {
         futureIntent.assertNotReceived();
     }
 
+    @Test
     @NetPolicyXml("uidA-whitelisted-restrict-background-off.xml")
     public void testWhitelistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
