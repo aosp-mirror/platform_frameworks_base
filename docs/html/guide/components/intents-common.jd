@@ -2155,7 +2155,7 @@ that are available.</p>
 <p><b>Example intent:</b></p>
 <pre>
 public void openWifiSettings() {
-    Intent intent = new Intent(Intent.ACTION_WIFI_SETTINGS);
+    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
     }
