@@ -96,7 +96,7 @@ public:
 
 class FontRenderer {
 public:
-    FontRenderer(const uint8_t* gammaTable);
+    explicit FontRenderer(const uint8_t* gammaTable);
     ~FontRenderer();
 
     void flushLargeCaches(std::vector<CacheTexture*>& cacheTextures);

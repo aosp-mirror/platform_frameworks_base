@@ -30,7 +30,7 @@ class ANDROID_API Paint : public SkPaint {
 public:
     Paint();
     Paint(const Paint& paint);
-    Paint(const SkPaint& paint);
+    Paint(const SkPaint& paint);  // NOLINT(implicit)
     ~Paint();
 
     Paint& operator=(const Paint& other);

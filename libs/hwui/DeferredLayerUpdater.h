@@ -35,7 +35,7 @@ class DeferredLayerUpdater : public VirtualLightRefBase {
 public:
     // Note that DeferredLayerUpdater assumes it is taking ownership of the layer
     // and will not call incrementRef on it as a result.
-    ANDROID_API DeferredLayerUpdater(Layer* layer);
+    ANDROID_API explicit DeferredLayerUpdater(Layer* layer);
     ANDROID_API ~DeferredLayerUpdater();
 
     ANDROID_API bool setSize(int width, int height) {

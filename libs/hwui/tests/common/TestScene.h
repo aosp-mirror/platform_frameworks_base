@@ -55,7 +55,7 @@ public:
 
     class Registrar {
     public:
-        Registrar(const TestScene::Info& info) {
+        explicit Registrar(const TestScene::Info& info) {
             TestScene::registerScene(info);
         }
     private:
