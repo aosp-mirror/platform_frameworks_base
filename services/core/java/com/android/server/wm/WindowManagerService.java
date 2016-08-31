@@ -247,6 +247,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -4199,6 +4200,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             bounds.setEmpty();
         }
+    }
+
+    @Override
+    public void overridePlayingAppAnimationsLw(Animation a) {
+        getDefaultDisplayContentLocked().overridePlayingAppAnimationsLw(a);
     }
 
     /**

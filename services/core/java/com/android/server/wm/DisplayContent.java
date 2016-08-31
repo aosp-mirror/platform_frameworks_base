@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -668,5 +669,14 @@ class DisplayContent {
         }
 
         return touchedWin;
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}.
+     */
+    void overridePlayingAppAnimationsLw(Animation a) {
+        for (int i = mStacks.size() - 1; i >= 0; i--) {
+            mStacks.get(i).overridePlayingAppAnimations(a);
+        }
     }
 }

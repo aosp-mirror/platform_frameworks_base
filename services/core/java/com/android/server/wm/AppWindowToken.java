@@ -35,6 +35,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.logWithStack;
@@ -55,6 +56,7 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -993,6 +995,18 @@ class AppWindowToken extends WindowToken {
         for (int i = 0; i < mSurfaceViewBackgrounds.size(); i++) {
             WindowSurfaceController.SurfaceControlWithBackground sc = mSurfaceViewBackgrounds.get(i);
             sc.updateBackgroundVisibility(sc != bottom);
+        }
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     */
+    void overridePlayingAppAnimations(Animation a) {
+        if (mAppAnimator.isAnimating()) {
+            final WindowState win = findMainWindow();
+            final int width = win.mContainingFrame.width();
+            final int height = win.mContainingFrame.height();
+            mAppAnimator.setAnimation(a, width, height, false, STACK_CLIP_NONE);
         }
     }
 

@@ -44,6 +44,7 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.animation.Animation;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
@@ -1304,5 +1305,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     public boolean getBoundsAnimating() {
         return mBoundsAnimating;
+    }
+
+    /**
+     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
+     */
+    void overridePlayingAppAnimations(Animation a) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            mTasks.get(i).overridePlayingAppAnimations(a);
+        }
     }
 }

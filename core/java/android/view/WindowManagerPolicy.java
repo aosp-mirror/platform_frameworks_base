@@ -507,6 +507,11 @@ public interface WindowManagerPolicy {
          * Retrieves the {@param outBounds} from the stack with id {@param stackId}.
          */
         void getStackBounds(int stackId, Rect outBounds);
+
+        /**
+         * Overrides all currently playing app animations with {@param a}.
+         */
+        void overridePlayingAppAnimationsLw(Animation a);
     }
 
     public interface PointerEventListener {
