@@ -90,7 +90,7 @@ class ANDROID_API Node {
 public:
     class Properties {
     public:
-        Properties(Node* node) : mNode(node) {}
+        explicit Properties(Node* node) : mNode(node) {}
         inline void onPropertyChanged() {
             mNode->onPropertyChanged(this);
         }
@@ -132,7 +132,7 @@ public:
 
     class PathProperties : public Properties {
     public:
-        PathProperties(Node* node) : Properties(node) {}
+        explicit PathProperties(Node* node) : Properties(node) {}
         void syncProperties(const PathProperties& prop) {
             mData = prop.mData;
             onPropertyChanged();
@@ -218,7 +218,7 @@ public:
             float strokeMiterLimit = 4;
             int fillType = 0; /* non-zero or kWinding_FillType in Skia */
         };
-        FullPathProperties(Node* mNode) : Properties(mNode), mTrimDirty(false) {}
+        explicit FullPathProperties(Node* mNode) : Properties(mNode), mTrimDirty(false) {}
         ~FullPathProperties() {
             SkSafeUnref(fillGradient);
             SkSafeUnref(strokeGradient);
@@ -409,7 +409,7 @@ class ANDROID_API Group: public Node {
 public:
     class GroupProperties : public Properties {
     public:
-        GroupProperties(Node* mNode) : Properties(mNode) {}
+        explicit GroupProperties(Node* mNode) : Properties(mNode) {}
         struct PrimitiveFields {
             float rotate = 0;
             float pivotX = 0;
@@ -539,7 +539,7 @@ private:
 
 class ANDROID_API Tree : public VirtualLightRefBase {
 public:
-    Tree(Group* rootNode) : mRootNode(rootNode) {
+    explicit Tree(Group* rootNode) : mRootNode(rootNode) {
         mRootNode->setPropertyChangedListener(&mPropertyChangedListener);
     }
 
@@ -576,7 +576,7 @@ public:
 
     class TreeProperties {
     public:
-        TreeProperties(Tree* tree) : mTree(tree) {}
+        explicit TreeProperties(Tree* tree) : mTree(tree) {}
         // Properties that can only be modified by UI thread, therefore sync should
         // only go from UI to RT
         struct NonAnimatableProperties {
