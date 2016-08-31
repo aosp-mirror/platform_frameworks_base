@@ -26,8 +26,8 @@
 #include <JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <hidl/IServiceManager.h>
+#include <hidl/Status.h>
 #include <hwbinder/ProcessState.h>
-#include <hwbinder/Status.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include "core_jni_helpers.h"
