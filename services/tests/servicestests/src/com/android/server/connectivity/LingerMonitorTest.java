@@ -24,6 +24,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMisc;
+import android.text.format.DateUtils;
 import com.android.internal.R;
 import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkNotificationManager;
@@ -40,10 +41,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 
 public class LingerMonitorTest extends TestCase {
     static final String CELLULAR = "CELLULAR";
     static final String WIFI     = "WIFI";
+
+    static final long LOW_RATE_LIMIT = DateUtils.MINUTE_IN_MILLIS;
+    static final long HIGH_RATE_LIMIT = 0;
+
+    static final int LOW_DAILY_LIMIT = 2;
+    static final int HIGH_DAILY_LIMIT = 1000;
 
     LingerMonitor mMonitor;
 
@@ -59,7 +67,7 @@ public class LingerMonitorTest extends TestCase {
         when(mCtx.getPackageName()).thenReturn("com.android.server.connectivity");
         when(mConnService.createNetworkMonitor(any(), any(), any(), any())).thenReturn(null);
 
-        mMonitor = new TestableLingerMonitor(mCtx, mNotifier);
+        mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, HIGH_RATE_LIMIT);
     }
 
     public void testTransitions() {
@@ -129,8 +137,78 @@ public class LingerMonitorTest extends TestCase {
         mMonitor.noteLingerDefaultNetwork(to, from);
         verify(mNotifier, times(1)).clearNotification(100);
 
+        reset(mNotifier);
         mMonitor.noteLingerDefaultNetwork(from, to);
-        verifyToast(from, to);
+        verifyNoNotifications();
+    }
+
+    public void testMultipleNotifications() {
+        setNotificationSwitch(transition(WIFI, CELLULAR));
+        setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
+        NetworkAgentInfo wifi1 = wifiNai(100);
+        NetworkAgentInfo wifi2 = wifiNai(101);
+        NetworkAgentInfo cell = cellNai(102);
+
+        mMonitor.noteLingerDefaultNetwork(wifi1, cell);
+        verifyNotification(wifi1, cell);
+
+        mMonitor.noteLingerDefaultNetwork(cell, wifi2);
+        verify(mNotifier, times(1)).clearNotification(100);
+
+        reset(mNotifier);
+        mMonitor.noteLingerDefaultNetwork(wifi2, cell);
+        verifyNotification(wifi2, cell);
+    }
+
+    public void testRateLimiting() throws InterruptedException {
+        mMonitor = new TestableLingerMonitor(mCtx, mNotifier, HIGH_DAILY_LIMIT, LOW_RATE_LIMIT);
+
+        setNotificationSwitch(transition(WIFI, CELLULAR));
+        setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
+        NetworkAgentInfo wifi1 = wifiNai(100);
+        NetworkAgentInfo wifi2 = wifiNai(101);
+        NetworkAgentInfo wifi3 = wifiNai(102);
+        NetworkAgentInfo cell = cellNai(103);
+
+        mMonitor.noteLingerDefaultNetwork(wifi1, cell);
+        verifyNotification(wifi1, cell);
+        reset(mNotifier);
+
+        Thread.sleep(50);
+        mMonitor.noteLingerDefaultNetwork(cell, wifi2);
+        mMonitor.noteLingerDefaultNetwork(wifi2, cell);
+        verifyNoNotifications();
+
+        Thread.sleep(50);
+        mMonitor.noteLingerDefaultNetwork(cell, wifi3);
+        mMonitor.noteLingerDefaultNetwork(wifi3, cell);
+        verifyNoNotifications();
+    }
+
+    public void testDailyLimiting() throws InterruptedException {
+        mMonitor = new TestableLingerMonitor(mCtx, mNotifier, LOW_DAILY_LIMIT, HIGH_RATE_LIMIT);
+
+        setNotificationSwitch(transition(WIFI, CELLULAR));
+        setNotificationType(LingerMonitor.NOTIFY_TYPE_NOTIFICATION);
+        NetworkAgentInfo wifi1 = wifiNai(100);
+        NetworkAgentInfo wifi2 = wifiNai(101);
+        NetworkAgentInfo wifi3 = wifiNai(102);
+        NetworkAgentInfo cell = cellNai(103);
+
+        mMonitor.noteLingerDefaultNetwork(wifi1, cell);
+        verifyNotification(wifi1, cell);
+        reset(mNotifier);
+
+        Thread.sleep(50);
+        mMonitor.noteLingerDefaultNetwork(cell, wifi2);
+        mMonitor.noteLingerDefaultNetwork(wifi2, cell);
+        verifyNotification(wifi2, cell);
+        reset(mNotifier);
+
+        Thread.sleep(50);
+        mMonitor.noteLingerDefaultNetwork(cell, wifi3);
+        mMonitor.noteLingerDefaultNetwork(wifi3, cell);
+        verifyNoNotifications();
     }
 
     public void testUniqueNotification() {
@@ -149,12 +227,23 @@ public class LingerMonitorTest extends TestCase {
         verifyNotification(from, to);
     }
 
-    public void testIgnoreUnvalidatedNetworks() {
+    public void testIgnoreNeverValidatedNetworks() {
         setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
         setNotificationSwitch(transition(WIFI, CELLULAR));
         NetworkAgentInfo from = wifiNai(100);
         NetworkAgentInfo to = cellNai(101);
         from.everValidated = false;
+
+        mMonitor.noteLingerDefaultNetwork(from, to);
+        verifyNoNotifications();
+    }
+
+    public void testIgnoreCurrentlyValidatedNetworks() {
+        setNotificationType(LingerMonitor.NOTIFY_TYPE_TOAST);
+        setNotificationSwitch(transition(WIFI, CELLULAR));
+        NetworkAgentInfo from = wifiNai(100);
+        NetworkAgentInfo to = cellNai(101);
+        from.lastValidated = true;
 
         mMonitor.noteLingerDefaultNetwork(from, to);
         verifyNoNotifications();
@@ -215,7 +304,6 @@ public class LingerMonitorTest extends TestCase {
     void verifyNoNotifications() {
         verifyNoToast();
         verifyNoNotification();
-        verify(mNotifier, never()).clearNotification(anyInt());
     }
 
     void verifyToast(NetworkAgentInfo from, NetworkAgentInfo to) {
@@ -251,8 +339,8 @@ public class LingerMonitorTest extends TestCase {
     }
 
     public static class TestableLingerMonitor extends LingerMonitor {
-        public TestableLingerMonitor(Context c, NetworkNotificationManager n) {
-            super(c, n);
+        public TestableLingerMonitor(Context c, NetworkNotificationManager n, int l, long r) {
+            super(c, n, l, r);
         }
         @Override protected PendingIntent createNotificationIntent() {
             return null;
