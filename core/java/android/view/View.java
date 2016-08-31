@@ -10391,7 +10391,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                  ancestors or by window visibility
      * @return true if this view is visible to the user, not counting clipping or overlapping
      */
-    @Visibility boolean dispatchVisibilityAggregated(boolean isVisible) {
+    boolean dispatchVisibilityAggregated(boolean isVisible) {
         final boolean thisVisible = getVisibility() == VISIBLE;
         // If we're not visible but something is telling us we are, ignore it.
         if (thisVisible || !isVisible) {
@@ -15534,7 +15534,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (vis != GONE) {
             onWindowVisibilityChanged(vis);
             if (isShown()) {
-                // Calling onVisibilityChanged directly here since the subtree will also
+                // Calling onVisibilityAggregated directly here since the subtree will also
                 // receive dispatchAttachedToWindow and this same call
                 onVisibilityAggregated(vis == VISIBLE);
             }
