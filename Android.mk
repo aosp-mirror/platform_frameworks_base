@@ -894,7 +894,7 @@ sample_groups := -samplegroup Admin \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=6.0
+framework_docs_SDK_VERSION:=7.0
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
@@ -903,7 +903,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.preview.version 5 \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.preview 1
+		-hdf sdk.preview 0
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
@@ -1098,12 +1098,12 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-hdf android.whichdoc offline \
 		-referenceonly
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
 
 include $(BUILD_DROIDDOC)
 
 static_doc_index_redirect := $(out_dir)/index.html
-$(static_doc_index_redirect): $(LOCAL_PATH)/docs/docs-preview-index.html
+$(static_doc_index_redirect): $(LOCAL_PATH)/docs/docs-documentation-redirect.html
 	$(copy-file-to-target)
 
 $(full_target): $(static_doc_index_redirect)
