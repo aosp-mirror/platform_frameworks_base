@@ -25,22 +25,32 @@
 #include <grp.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 #include <cutils/log.h>
 #include "JNIHelp.h"
 #include "ScopedPrimitiveArray.h"
 
-// Whitelist of open paths that the zygote is allowed to keep open
-// that will be recreated across forks. In addition to files here,
-// all files ending with ".jar" under /system/framework" are
-// whitelisted. See FileDescriptorInfo::IsWhitelisted for the
-// canonical definition.
+// Whitelist of open paths that the zygote is allowed to keep open.
+//
+// In addition to the paths listed here, all files ending with
+// ".jar" under /system/framework" are whitelisted. See
+// FileDescriptorInfo::IsWhitelisted for the canonical definition.
+//
+// If the whitelisted path is associated with a regular file or a
+// character device, the file is reopened after a fork with the same
+// offset and mode. If the whilelisted  path is associated with a
+// AF_UNIX socket, the socket will refer to /dev/null after each
+// fork, and all operations on it will fail.
 static const char* kPathWhitelist[] = {
   "/dev/null",
   "/dev/pmsg0",
+  "/dev/socket/zygote",
+  "/dev/socket/zygote_secondary",
   "/system/etc/event-log-tags",
   "/sys/kernel/debug/tracing/trace_marker",
   "/system/framework/framework-res.apk",
@@ -66,9 +76,17 @@ class FileDescriptorInfo {
       return NULL;
     }
 
-    // Ignore (don't reopen or fail on) socket fds for now.
     if (S_ISSOCK(f_stat.st_mode)) {
-      ALOGW("Unsupported socket FD: %d, ignoring.", fd);
+      std::string socket_name;
+      if (!GetSocketName(fd, &socket_name)) {
+        return NULL;
+      }
+
+      if (!IsWhitelisted(socket_name)) {
+        ALOGE("Socket name not whitelisted : %s (fd=%d)", socket_name.c_str(), fd);
+        return NULL;
+      }
+
       return new FileDescriptorInfo(fd);
     }
 
@@ -147,10 +165,9 @@ class FileDescriptorInfo {
     return f_stat.st_ino == stat.st_ino && f_stat.st_dev == stat.st_dev;
   }
 
-  bool Reopen() const {
-    // Always skip over socket FDs for now.
+  bool ReopenOrDetach() const {
     if (is_sock) {
-      return true;
+      return DetachSocket();
     }
 
     // NOTE: This might happen if the file was unlinked after being opened.
@@ -187,9 +204,7 @@ class FileDescriptorInfo {
       return false;
     }
 
-    if (close(new_fd) == -1) {
-      ALOGW("Failed close(%d) : %s", new_fd, strerror(errno));
-    }
+    close(new_fd);
 
     return true;
   }
@@ -262,6 +277,74 @@ class FileDescriptorInfo {
     if (len == -1) return false;
 
     result->assign(buf, len);
+    return true;
+  }
+
+  // Returns the locally-bound name of the socket |fd|. Returns true
+  // iff. all of the following hold :
+  //
+  // - the socket's sa_family is AF_UNIX.
+  // - the length of the path is greater than zero (i.e, not an unnamed socket).
+  // - the first byte of the path isn't zero (i.e, not a socket with an abstract
+  //   address).
+  static bool GetSocketName(const int fd, std::string* result) {
+    sockaddr_storage ss;
+    sockaddr* addr = reinterpret_cast<sockaddr*>(&ss);
+    socklen_t addr_len = sizeof(ss);
+
+    if (TEMP_FAILURE_RETRY(getsockname(fd, addr, &addr_len)) == -1) {
+      ALOGE("Failed getsockname(%d) : %s", fd, strerror(errno));
+      return false;
+    }
+
+    if (addr->sa_family != AF_UNIX) {
+      ALOGE("Unsupported socket (fd=%d) with family %d", fd, addr->sa_family);
+      return false;
+    }
+
+    const sockaddr_un* unix_addr = reinterpret_cast<const sockaddr_un*>(&ss);
+
+    size_t path_len = addr_len - offsetof(struct sockaddr_un, sun_path);
+    // This is an unnamed local socket, we do not accept it.
+    if (path_len == 0) {
+      ALOGE("Unsupported AF_UNIX socket (fd=%d) with empty path.", fd);
+      return false;
+    }
+
+    // This is a local socket with an abstract address, we do not accept it.
+    if (unix_addr->sun_path[0] == '\0') {
+      ALOGE("Unsupported AF_UNIX socket (fd=%d) with abstract address.", fd);
+      return false;
+    }
+
+    // If we're here, sun_path must refer to a null terminated filesystem
+    // pathname (man 7 unix). Remove the terminator before assigning it to an
+    // std::string.
+    if (unix_addr->sun_path[path_len - 1] ==  '\0') {
+      --path_len;
+    }
+
+    result->assign(unix_addr->sun_path, path_len);
+    return true;
+  }
+
+  bool DetachSocket() const {
+    const int dev_null_fd = open("/dev/null", O_RDWR);
+    if (dev_null_fd < 0) {
+      ALOGE("Failed to open /dev/null : %s", strerror(errno));
+      return false;
+    }
+
+    if (dup2(dev_null_fd, fd) == -1) {
+      ALOGE("Failed dup2 on socket descriptor %d : %s", fd, strerror(errno));
+      return false;
+    }
+
+    if (close(dev_null_fd) == -1) {
+      ALOGE("Failed close(%d) : %s", dev_null_fd, strerror(errno));
+      return false;
+    }
+
     return true;
   }
 
@@ -338,12 +421,13 @@ class FileDescriptorTable {
   }
 
   // Reopens all file descriptors that are contained in the table. Returns true
-  // if all descriptors were re-opened, and false if an error occurred.
-  bool Reopen() {
+  // if all descriptors were successfully re-opened or detached, and false if an
+  // error occurred.
+  bool ReopenOrDetach() {
     std::unordered_map<int, FileDescriptorInfo*>::const_iterator it;
     for (it = open_fd_map_.begin(); it != open_fd_map_.end(); ++it) {
       const FileDescriptorInfo* info = it->second;
-      if (info == NULL || !info->Reopen()) {
+      if (info == NULL || !info->ReopenOrDetach()) {
         return false;
       }
     }
@@ -374,7 +458,7 @@ class FileDescriptorTable {
         //
         // TODO(narayan): This will be an error in a future android release.
         // error = true;
-        ALOGW("Zygote closed file descriptor %d.", it->first);
+        // ALOGW("Zygote closed file descriptor %d.", it->first);
         open_fd_map_.erase(it);
       } else {
         // The entry from the file descriptor table is still open. Restat
@@ -405,7 +489,7 @@ class FileDescriptorTable {
       //
       // TODO(narayan): This will be an error in a future android release.
       // error = true;
-      ALOGW("Zygote opened %zd new file descriptor(s).", open_fds.size());
+      // ALOGW("Zygote opened %zd new file descriptor(s).", open_fds.size());
 
       // TODO(narayan): This code will be removed in a future android release.
       std::set<int>::const_iterator it;
