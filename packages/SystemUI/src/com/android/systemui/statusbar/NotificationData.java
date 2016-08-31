@@ -380,7 +380,7 @@ public class NotificationData {
             return true;
         }
 
-        if (mEnvironment.onSecureLockScreen() &&
+        if (mEnvironment.isSecurelyLocked(sbn.getUserId()) &&
                 (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
                         || mEnvironment.shouldHideNotifications(sbn.getUserId())
                         || mEnvironment.shouldHideNotifications(sbn.getKey()))) {
@@ -463,7 +463,7 @@ public class NotificationData {
      * Provides access to keyguard state and user settings dependent data.
      */
     public interface Environment {
-        public boolean onSecureLockScreen();
+        public boolean isSecurelyLocked(int userId);
         public boolean shouldHideNotifications(int userid);
         public boolean shouldHideNotifications(String key);
         public boolean isDeviceProvisioned();

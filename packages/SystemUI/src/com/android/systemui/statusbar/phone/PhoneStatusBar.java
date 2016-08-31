@@ -37,6 +37,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -1716,18 +1717,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         for (int i=0; i<N; i++) {
             Entry ent = activeNotifications.get(i);
             int vis = ent.notification.getNotification().visibility;
+            int userId = ent.notification.getUserId();
 
             // Display public version of the notification if we need to redact.
-            final boolean hideSensitive =
-                    !userAllowsPrivateNotificationsInPublic(ent.notification.getUserId());
+            boolean deviceSensitive = (isLockscreenPublicMode(mCurrentUserId)
+                    && !userAllowsPrivateNotificationsInPublic(mCurrentUserId));
+            boolean userSensitive = deviceSensitive || (isLockscreenPublicMode(userId)
+                    && !userAllowsPrivateNotificationsInPublic(userId));
             boolean sensitiveNote = vis == Notification.VISIBILITY_PRIVATE;
             boolean sensitivePackage = packageHasVisibilityOverride(ent.notification.getKey());
-            boolean sensitive = (sensitiveNote && hideSensitive) || sensitivePackage;
-            boolean showingPublic = sensitive && isLockscreenPublicMode();
+            boolean sensitive = (sensitiveNote && userSensitive) || sensitivePackage;
+            boolean showingPublic = sensitive && isLockscreenPublicMode(userId);
             if (showingPublic) {
                 updatePublicContentView(ent, ent.notification);
             }
-            ent.row.setSensitive(sensitive, hideSensitive);
+            ent.row.setSensitive(sensitive, deviceSensitive);
             if (ent.autoRedacted && ent.legacy) {
                 // TODO: Also fade this? Or, maybe easier (and better), provide a dark redacted form
                 // for legacy auto redacted notifications.
@@ -4275,17 +4279,23 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updatePublicMode() {
-        boolean isPublic = false;
-        if (mStatusBarKeyguardViewManager.isShowing()) {
-            for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
-                UserInfo userInfo = mCurrentProfiles.valueAt(i);
-                if (mStatusBarKeyguardViewManager.isSecure(userInfo.id)) {
-                    isPublic = true;
-                    break;
+        final boolean showingKeyguard = mStatusBarKeyguardViewManager.isShowing();
+        final boolean devicePublic = showingKeyguard
+                && mStatusBarKeyguardViewManager.isSecure(mCurrentUserId);
+
+        // Look for public mode users. Users are considered public in either case of:
+        //   - device keyguard is shown in secure mode;
+        //   - profile is locked with a work challenge.
+        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
+            final int userId = mCurrentProfiles.valueAt(i).id;
+            boolean isProfilePublic = devicePublic;
+            if (!devicePublic && userId != mCurrentUserId) {
+                if (mStatusBarKeyguardViewManager.isSecure(userId)) {
+                    isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
                 }
             }
+            setLockscreenPublicMode(isProfilePublic, userId);
         }
-        setLockscreenPublicMode(isPublic);
     }
 
     protected void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
@@ -4342,7 +4352,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void updateStackScrollerState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        mStackScroller.setHideSensitive(isLockscreenPublicMode(), goingToFullShade);
+        boolean publicMode = isAnyProfilePublicMode();
+        mStackScroller.setHideSensitive(publicMode, goingToFullShade);
         mStackScroller.setDimmed(onKeyguard, fromShadeLocked /* animate */);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
@@ -4591,6 +4602,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * @param expandView The view to expand after going to the shade.
      */
     public void goToLockedShade(View expandView) {
+        int userId = mCurrentUserId;
         ExpandableNotificationRow row = null;
         if (expandView instanceof ExpandableNotificationRow) {
             row = (ExpandableNotificationRow) expandView;
@@ -4598,10 +4610,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
             row.setGroupExpansionChanging(true);
+            if (row.getStatusBarNotification() != null) {
+                userId = row.getStatusBarNotification().getUserId();
+            }
         }
         boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
                 || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();
-        if (isLockscreenPublicMode() && fullShadeNeedsBouncer) {
+        if (isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
             mDraggedDownRow = row;
@@ -4646,10 +4661,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mPendingWorkRemoteInputView = clicked;
     }
 
+    private boolean isAnyProfilePublicMode() {
+        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
+            if (isLockscreenPublicMode(mCurrentProfiles.valueAt(i).id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
-    protected void onWorkChallengeUnlocked() {
-        if (mPendingWorkRemoteInputView != null) {
-            final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
+    protected void onWorkChallengeChanged() {
+        updatePublicMode();
+        updateNotifications();
+        if (mPendingWorkRemoteInputView != null && !isAnyProfilePublicMode()) {
             // Expand notification panel and the notification row, then click on remote input view
             final Runnable clickPendingViewRunnable = new Runnable() {
                 @Override

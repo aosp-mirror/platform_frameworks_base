@@ -494,6 +494,8 @@
 
     <protected-broadcast android:name="com.android.server.retaildemo.ACTION_RESET_DEMO" />
 
+    <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
