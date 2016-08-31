@@ -1214,13 +1214,31 @@ redirects:
 - from: /r/studio-ui/sdk-manager.html
   to: /studio/intro/update.html?utm_medium=android-studio#sdk-manager
 - from: /r/studio-ui/newjclass.html
-  to: /studio/write/index.html?utm_medium=android-studio
+  to: /studio/write/create-java-class.html?utm_medium=android-studio
 - from: /r/studio-ui/menu-help.html
   to: /studio/intro/index.html?utm_medium=android-studio
 - from: /r/studio-ui/menu-start.html
   to: /training/index.html?utm_medium=android-studio
 - from: /r/studio-ui/run-with-work-profile.html
   to: /studio/run/index.html#ir-work-profile?utm_medium=android-studio
+- from: /r/studio-ui/gpu-debugger.html
+  to: /studio/profile/am-gpu.html?utm_medium=android-studio
+- from: /r/studio-ui/theme-editor.html
+  to: /studio/write/theme-editor.html?utm_medium=android-studio
+- from: /r/studio-ui/translations-editor.html
+  to: /studio/write/translations-editor.html?utm_medium=android-studio
+- from: /r/studio-ui/debug.html
+  to: /studio/debug/index.html?utm_medium=android-studio
+- from: /r/studio-ui/run.html
+  to: /studio/run/index.html?utm_medium=android-studio
+- from: /r/studio-ui/layout-editor.html
+  to: /studio/write/layout-editor.html?utm_medium=android-studio
+- from: /r/studio-ui/project-window.html
+  to: /studio/projects/index.html?utm_medium=android-studio
+- from: /r/studio-ui/lint-inspection-results.html
+  to: /studio/write/lint.html?utm_medium=android-studio
+- from: /r/studio-ui/gradle-console.html
+  to: /studio/run/index.html#gradle-console?utm_medium=android-studio
 
 # Redirects from (removed) N Preview documentation
 - from: /preview/features/afw.html
