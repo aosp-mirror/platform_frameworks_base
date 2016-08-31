@@ -49,8 +49,8 @@ import com.android.settingslib.R;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class AccessPoint implements Comparable<AccessPoint> {
@@ -95,6 +95,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static final String KEY_PSKTYPE = "key_psktype";
     private static final String KEY_SCANRESULTCACHE = "key_scanresultcache";
     private static final String KEY_CONFIG = "key_config";
+    private static final AtomicInteger sLastId = new AtomicInteger(0);
 
     /**
      * These values are matched in string arrays -- changes must be kept in sync
@@ -127,9 +128,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private WifiInfo mInfo;
     private NetworkInfo mNetworkInfo;
-    private AccessPointListener mAccessPointListener;
+    AccessPointListener mAccessPointListener;
 
     private Object mTag;
+
+    // used to co-relate internal vs returned accesspoint.
+    int mId;
 
     public AccessPoint(Context context, Bundle savedState) {
         mContext = context;
@@ -161,16 +165,46 @@ public class AccessPoint implements Comparable<AccessPoint> {
         update(mConfig, mInfo, mNetworkInfo);
         mRssi = getRssi();
         mSeen = getSeen();
+        mId = sLastId.incrementAndGet();
     }
 
     AccessPoint(Context context, ScanResult result) {
         mContext = context;
         initWithScanResult(result);
+        mId = sLastId.incrementAndGet();
     }
 
     AccessPoint(Context context, WifiConfiguration config) {
         mContext = context;
         loadConfig(config);
+        mId = sLastId.incrementAndGet();
+    }
+
+    AccessPoint(Context context, AccessPoint other) {
+        mContext = context;
+        copyFrom(other);
+    }
+
+    /**
+     * Copy accesspoint information. NOTE: We do not copy tag information because that is never
+     * set on the internal copy.
+     * @param that
+     */
+    void copyFrom(AccessPoint that) {
+        that.evictOldScanResults();
+        this.ssid = that.ssid;
+        this.bssid = that.bssid;
+        this.security = that.security;
+        this.networkId = that.networkId;
+        this.pskType = that.pskType;
+        this.mConfig = that.mConfig; //TODO: Watch out, this object is mutated.
+        this.mRssi = that.mRssi;
+        this.mSeen = that.mSeen;
+        this.mInfo = that.mInfo;
+        this.mNetworkInfo = that.mNetworkInfo;
+        this.mScanResultCache.clear();
+        this.mScanResultCache.putAll(that.mScanResultCache);
+        this.mId = that.mId;
     }
 
     @Override

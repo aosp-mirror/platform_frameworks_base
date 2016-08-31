@@ -29,10 +29,13 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -62,30 +65,59 @@ public class WifiTracker {
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
     private static final int WIFI_RESCAN_INTERVAL_MS = 10 * 1000;
+    private static final int NUM_SCANS_TO_CONFIRM_AP_LOSS = 3;
 
     private final Context mContext;
     private final WifiManager mWifiManager;
     private final IntentFilter mFilter;
     private final ConnectivityManager mConnectivityManager;
     private final NetworkRequest mNetworkRequest;
-    private WifiTrackerNetworkCallback mNetworkCallback;
-
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
     private final WifiListener mListener;
     private final boolean mIncludeSaved;
     private final boolean mIncludeScans;
     private final boolean mIncludePasspoints;
-
     private final MainHandler mMainHandler;
     private final WorkHandler mWorkHandler;
 
+    private WifiTrackerNetworkCallback mNetworkCallback;
+
     private boolean mSavedNetworksExist;
     private boolean mRegistered;
-    private ArrayList<AccessPoint> mAccessPoints = new ArrayList<>();
-    private HashMap<String, Integer> mSeenBssids = new HashMap<>();
-    private HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
+
+    /** Updated using main handler. Clone of this collection is returned
+     * from {@link #getAccessPoints()}
+     */
+    private final List<AccessPoint> mAccessPoints = new ArrayList<>();
+
+    /**
+     * Protects APs contained in {@link #mInternalAccessPoints} from being modified concurrently
+     * while its being read. Usage contract:
+     *
+     * 1. MainHandler opens the condition after copying the states thereby
+     *    allowing WorkerHandler to mutate the contents.
+     * 2. WorkerHandler after mutating the contents, sends a message to MainHandler to copy the
+     *    states and closes the condition.
+     *
+     * This is better than synchronizing on a variable because it prevents MainHandler from
+     * unnecessarily blocking/waiting to acquire lock for copying states. When MainHandler is about
+     * to access {@link #mInternalAccessPoints}, it is assumed that it has exclusively lock on the
+     * contents.
+     */
+    private final ConditionVariable mInternalAccessPointsWriteLock = new ConditionVariable(true);
+
+    /** Guarded by mInternalAccessPointsWriteLock, updated using worker handler.
+     * Never exposed outside this class.
+     */
+    private final List<AccessPoint> mInternalAccessPoints = new ArrayList<>();
+
+    //visible to both worker and main thread. Guarded by #mInternalAccessPoints
+    private final AccessPointListenerAdapter mAccessPointListenerAdapter
+            = new AccessPointListenerAdapter();
+
+    private final HashMap<String, Integer> mSeenBssids = new HashMap<>();
+    private final HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
     private Integer mScanId = 0;
-    private static final int NUM_SCANS_TO_CONFIRM_AP_LOSS = 3;
 
     private NetworkInfo mLastNetworkInfo;
     private WifiInfo mLastInfo;
@@ -231,12 +263,11 @@ public class WifiTracker {
     }
 
     /**
-     * Gets the current list of access points.
+     * Gets the current list of access points. Should be called from main thread, otherwise
+     * expect inconsistencies
      */
     public List<AccessPoint> getAccessPoints() {
-        synchronized (mAccessPoints) {
-            return new ArrayList<>(mAccessPoints);
-        }
+        return new ArrayList<>(mAccessPoints);
     }
 
     public WifiManager getManager() {
@@ -316,8 +347,17 @@ public class WifiTracker {
     }
 
     private void updateAccessPoints() {
+        // Wait until main worker is done copying the states. This is done to prevent propagation
+        // of accesspoint states while the update is in progress.
+        long before = System.currentTimeMillis();
+        mInternalAccessPointsWriteLock.block();
+        if (DBG) {
+            Log.d(TAG, "Acquired AP lock on WorkerHandler. Time to wait = "
+                    + (System.currentTimeMillis() - before) + " ms.");
+        }
+
         // Swap the current access points into a cached list.
-        List<AccessPoint> cachedAccessPoints = getAccessPoints();
+        List<AccessPoint> cachedAccessPoints = new ArrayList<>(mInternalAccessPoints);
         ArrayList<AccessPoint> accessPoints = new ArrayList<>();
 
         // Clear out the configs so we don't think something is saved when it isn't.
@@ -325,7 +365,7 @@ public class WifiTracker {
             accessPoint.clearConfig();
         }
 
-        /** Lookup table to more quickly update AccessPoints by only considering objects with the
+        /* Lookup table to more quickly update AccessPoints by only considering objects with the
          * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
         Multimap<String, AccessPoint> apMap = new Multimap<String, AccessPoint>();
         WifiConfiguration connectionConfig = null;
@@ -406,8 +446,8 @@ public class WifiTracker {
                     if (mLastInfo != null && mLastInfo.getBSSID() != null
                             && mLastInfo.getBSSID().equals(result.BSSID)
                             && connectionConfig != null && connectionConfig.isPasspoint()) {
-                        /* This network is connected via this passpoint config */
-                        /* SSID match is not going to work for it; so update explicitly */
+                    /* This network is connected via this passpoint config */
+                    /* SSID match is not going to work for it; so update explicitly */
                         accessPoint.update(connectionConfig);
                     }
 
@@ -422,12 +462,14 @@ public class WifiTracker {
 
         // Log accesspoints that were deleted
         if (DBG) Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
-        for (AccessPoint prevAccessPoint : mAccessPoints) {
-            if (prevAccessPoint.getSsid() == null) continue;
+        for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
+            if (prevAccessPoint.getSsid() == null)
+                continue;
             String prevSsid = prevAccessPoint.getSsidStr();
             boolean found = false;
             for (AccessPoint newAccessPoint : accessPoints) {
-                if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid().equals(prevSsid)) {
+                if (newAccessPoint.getSsid() != null && newAccessPoint.getSsid()
+                        .equals(prevSsid)) {
                     found = true;
                     break;
                 }
@@ -435,10 +477,11 @@ public class WifiTracker {
             if (!found)
                 if (DBG) Log.d(TAG, "Did not find " + prevSsid + " in this scan");
         }
-        if (DBG)  Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
+        if (DBG) Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
 
-        mAccessPoints = accessPoints;
-        mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
+        mInternalAccessPoints.clear();
+        mInternalAccessPoints.addAll(accessPoints);
+        mMainHandler.scheduleAPCopyingAndCloseWriteLock();
     }
 
     private AccessPoint getCachedOrCreate(ScanResult result, List<AccessPoint> cache) {
@@ -462,7 +505,9 @@ public class WifiTracker {
                 return ret;
             }
         }
-        return new AccessPoint(mContext, config);
+        AccessPoint accessPoint = new AccessPoint(mContext, config);
+        accessPoint.setListener(mAccessPointListenerAdapter);
+        return accessPoint;
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
@@ -489,17 +534,24 @@ public class WifiTracker {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId());
         }
 
+        // Lock required to prevent accidental copying of AccessPoint states while the modification
+        // is in progress. see #copyAndNotifyListeners
+        long before = System.currentTimeMillis();
+        mInternalAccessPointsWriteLock.block();
+        if (DBG) {
+            Log.d(TAG, "Acquired AP lock on WorkerHandler for updating NetworkInfo. Wait time = " +
+                    (System.currentTimeMillis() - before) + "ms.");
+        }
+
         boolean reorder = false;
-        for (int i = mAccessPoints.size() - 1; i >= 0; --i) {
-            if (mAccessPoints.get(i).update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
+        for (int i = mInternalAccessPoints.size() - 1; i >= 0; --i) {
+            if (mInternalAccessPoints.get(i).update(connectionConfig, mLastInfo, mLastNetworkInfo)) {
                 reorder = true;
             }
         }
         if (reorder) {
-            synchronized (mAccessPoints) {
-                Collections.sort(mAccessPoints);
-            }
-            mMainHandler.sendEmptyMessage(MainHandler.MSG_ACCESS_POINT_CHANGED);
+            Collections.sort(mInternalAccessPoints);
+            mMainHandler.scheduleAPCopyingAndCloseWriteLock();
         }
     }
 
@@ -512,6 +564,7 @@ public class WifiTracker {
         WifiTracker tracker = new WifiTracker(context,
                 null, null, includeSaved, includeScans, includePasspoints);
         tracker.forceUpdate();
+        tracker.copyAndNotifyListeners(false /*notifyListeners*/);
         return tracker.getAccessPoints();
     }
 
@@ -576,6 +629,7 @@ public class WifiTracker {
                     mListener.onWifiStateChanged(msg.arg1);
                     break;
                 case MSG_ACCESS_POINT_CHANGED:
+                    copyAndNotifyListeners(true /*notifyListeners*/);
                     mListener.onAccessPointsChanged();
                     break;
                 case MSG_RESUME_SCANNING:
@@ -589,6 +643,12 @@ public class WifiTracker {
                     }
                     break;
             }
+        }
+
+        void scheduleAPCopyingAndCloseWriteLock() {
+            //prevent worker thread from modifying mInternalAccessPoints
+            mInternalAccessPointsWriteLock.close();
+            sendEmptyMessage(MSG_ACCESS_POINT_CHANGED);
         }
     }
 
@@ -724,5 +784,95 @@ public class WifiTracker {
          * getAccessPoints should be called to get the latest information.
          */
         void onAccessPointsChanged();
+    }
+
+    /**
+     * Helps capture notifications that were generated during AccessPoint modification. Used later
+     * on by {@link #copyAndNotifyListeners(boolean)} to send notifications.
+     */
+    private static class AccessPointListenerAdapter implements AccessPoint.AccessPointListener {
+        static final int AP_CHANGED = 1;
+        static final int LEVEL_CHANGED = 2;
+
+        final SparseIntArray mPendingNotifications = new SparseIntArray();
+
+        @Override
+        public void onAccessPointChanged(AccessPoint accessPoint) {
+            int type = mPendingNotifications.get(accessPoint.mId);
+            mPendingNotifications.put(accessPoint.mId, type | AP_CHANGED);
+        }
+
+        @Override
+        public void onLevelChanged(AccessPoint accessPoint) {
+            int type = mPendingNotifications.get(accessPoint.mId);
+            mPendingNotifications.put(accessPoint.mId, type | LEVEL_CHANGED);
+        }
+    }
+
+    /**
+     * Responsible for copying access points from {@link #mInternalAccessPoints} and notifying
+     * accesspoint listeners. Mutation of the accesspoints returned is done on the main thread.
+     *
+     * @param notifyListeners if true, accesspoint listeners are notified, otherwise notifications
+     *                        dropped.
+     */
+    private void copyAndNotifyListeners(boolean notifyListeners) {
+        // Need to watch out for memory allocations on main thread.
+        SparseArray<AccessPoint> oldAccessPoints = new SparseArray<>();
+        SparseIntArray notificationMap = null;
+        List<AccessPoint> updatedAccessPoints = new ArrayList<>();
+
+        for (AccessPoint accessPoint : mAccessPoints) {
+            oldAccessPoints.put(accessPoint.mId, accessPoint);
+        }
+
+        //synchronize to prevent modification of "mInternalAccessPoints" by worker thread.
+        long before = System.currentTimeMillis();
+        try {
+            if (DBG) {
+                Log.d(TAG, "Starting to copy AP items on the MainHandler");
+            }
+            if (notifyListeners) {
+                notificationMap = mAccessPointListenerAdapter.mPendingNotifications.clone();
+            }
+
+            mAccessPointListenerAdapter.mPendingNotifications.clear();
+            for (AccessPoint internalAccessPoint : mInternalAccessPoints) {
+                AccessPoint accessPoint = oldAccessPoints.get(internalAccessPoint.mId);
+                if (accessPoint == null) {
+                    accessPoint = new AccessPoint(mContext, internalAccessPoint);
+                } else {
+                    accessPoint.copyFrom(internalAccessPoint);
+                }
+                updatedAccessPoints.add(accessPoint);
+            }
+        } finally {
+            mInternalAccessPointsWriteLock.open();
+            if (DBG) {
+                Log.d(TAG, "Opened AP Write lock on the MainHandler. Time to copy = " +
+                        (System.currentTimeMillis() - before) + " ms.");
+            }
+        }
+
+        mAccessPoints.clear();
+        mAccessPoints.addAll(updatedAccessPoints);
+
+        if (notificationMap != null && notificationMap.size() > 0) {
+            for (AccessPoint accessPoint : updatedAccessPoints) {
+                int notificationType = notificationMap.get(accessPoint.mId);
+                AccessPoint.AccessPointListener listener = accessPoint.mAccessPointListener;
+                if (notificationType == 0 || listener == null) {
+                    continue;
+                }
+
+                if ((notificationType & AccessPointListenerAdapter.AP_CHANGED) != 0) {
+                    listener.onAccessPointChanged(accessPoint);
+                }
+
+                if ((notificationType & AccessPointListenerAdapter.LEVEL_CHANGED) != 0) {
+                    listener.onLevelChanged(accessPoint);
+                }
+            }
+        }
     }
 }
