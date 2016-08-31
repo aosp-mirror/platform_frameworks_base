@@ -492,8 +492,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Aktivér bevægelsen Stryg opad for at dele skærmen"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktivér bevægelse for at dele skærmen ved at stryge opad fra knappen Oversigt"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
