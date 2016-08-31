@@ -876,6 +876,11 @@ public class CarrierConfigManager {
 
     /**
      * Flag indicating whether the carrier supports the Hold command while in an IMS call.
+     * <p>
+     * The device configuration value {@code config_device_respects_hold_carrier_config} ultimately
+     * controls whether this carrier configuration option is used.  Where
+     * {@code config_device_respects_hold_carrier_config} is false, the value of the
+     * {@link #KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL} carrier configuration option is ignored.
      * @hide
      */
     public static final String KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL = "allow_hold_in_ims_call";
