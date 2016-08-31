@@ -604,6 +604,9 @@ class ActivityStarter {
         // If we launched the activity from a no display activity that was launched from the home
         // screen, we also need to start recents to un-minimize the docked stack, since the
         // noDisplay activity will be finished shortly after.
+        // Note that some apps have trampoline activities without noDisplay being set. In that case,
+        // we have another heuristic in DockedStackDividerController.notifyAppTransitionStarting
+        // that tries to detect that case.
         // TODO: We should prevent noDisplay activities from affecting task/stack ordering and
         // visibility instead of using this flag.
         final boolean noDisplayActivityOverHome = sourceRecord != null

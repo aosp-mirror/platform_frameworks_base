@@ -38,6 +38,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
@@ -492,8 +493,31 @@ public class DockedStackDividerController implements DimLayerUser {
         checkMinimizeChanged(false /* animate */);
     }
 
-    void notifyAppTransitionStarting() {
+    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps) {
+        final boolean wasMinimized = mMinimizedDock;
         checkMinimizeChanged(true /* animate */);
+
+        // We were minimized, and now we are still minimized, but somebody is trying to launch an
+        // app in docked stack, better show recent apps so we actually get unminimized! This catches
+        // any case that was missed in ActivityStarter.postStartActivityUncheckedProcessing because
+        // we couldn't retrace the launch of the app in the docked stack to the launch from
+        // homescreen.
+        if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)) {
+            mService.showRecentApps(true /* fromHome */);
+        }
+    }
+
+    /**
+     * @return true if {@param apps} contains an activity in the docked stack, false otherwise.
+     */
+    private boolean containsAppInDockedStack(ArraySet<AppWindowToken> apps) {
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = apps.valueAt(i);
+            if (token.mTask != null && token.mTask.mStack.mStackId == DOCKED_STACK_ID) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isMinimizedDock() {

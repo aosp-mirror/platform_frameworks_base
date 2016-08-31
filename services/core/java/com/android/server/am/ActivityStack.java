@@ -1598,11 +1598,6 @@ final class ActivityStack {
             return STACK_INVISIBLE;
         }
 
-        final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
-        if (isLockscreenShown && !StackId.isAllowedOverLockscreen(mStackId)) {
-            return STACK_INVISIBLE;
-        }
-
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
         final int focusedStackId = focusedStack.mStackId;
 
