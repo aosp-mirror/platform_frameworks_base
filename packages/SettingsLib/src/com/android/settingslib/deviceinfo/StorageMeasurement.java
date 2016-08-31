@@ -79,6 +79,7 @@ public class StorageMeasurement {
     public static class MeasurementDetails {
         public long totalSize;
         public long availSize;
+        private long accountedSize;
 
         /**
          * Total apps disk usage per profiles of the current user.
@@ -126,6 +127,17 @@ public class StorageMeasurement {
          * internal storage. Key is {@link UserHandle}.
          */
         public SparseLongArray usersSize = new SparseLongArray();
+
+        /**
+         * Gets the total disk usage that is not accounted for.
+         *
+         * <p>
+         * Typically used by device-specific processes that the Framework has no control over.
+         */
+        public long getUnaccountedSize() {
+            final long usedSize = totalSize - availSize;
+            return usedSize - accountedSize;
+        }
     }
 
     public interface MeasurementReceiver {
@@ -219,34 +231,43 @@ public class StorageMeasurement {
         }
 
         private void addStatsLocked(PackageStats stats) {
-            if (mIsPrivate) {
-                long codeSize = stats.codeSize;
-                long dataSize = stats.dataSize;
-                long cacheSize = stats.cacheSize;
-                if (Environment.isExternalStorageEmulated()) {
-                    // Include emulated storage when measuring internal. OBB is
-                    // shared on emulated storage, so treat as code.
-                    codeSize += stats.externalCodeSize + stats.externalObbSize;
-                    dataSize += stats.externalDataSize + stats.externalMediaSize;
-                    cacheSize += stats.externalCacheSize;
+            synchronized (mDetails) {
+                long accountedAppSize = 0;
+                long accountedCacheSize = 0;
+                if (mIsPrivate) {
+                    long codeSize = stats.codeSize;
+                    long dataSize = stats.dataSize;
+                    long cacheSize = stats.cacheSize;
+                    if (Environment.isExternalStorageEmulated()) {
+                        // Include emulated storage when measuring internal. OBB is
+                        // shared on emulated storage, so treat as code.
+                        codeSize += stats.externalCodeSize + stats.externalObbSize;
+                        dataSize += stats.externalDataSize + stats.externalMediaSize;
+                        cacheSize += stats.externalCacheSize;
+                    }
+                    accountedAppSize += dataSize;
+                    // Count code and data for current user's profiles (keys prepared in constructor)
+                    if (addValueIfKeyExists(mDetails.appsSize, stats.userHandle,
+                            codeSize + dataSize)) {
+                        // Code is only counted once for the current user
+                        accountedAppSize += codeSize;
+                    }
+                    // User summary only includes data (code is only counted once
+                    // for the current user)
+                    addValue(mDetails.usersSize, stats.userHandle, dataSize);
+
+                    // Include cache for all users
+                    accountedCacheSize = cacheSize;
+
+                } else {
+                    // Physical storage; only count external sizes
+                    addValue(mDetails.appsSize, mCurrentUser,
+                            stats.externalCodeSize + stats.externalDataSize
+                            + stats.externalMediaSize + stats.externalObbSize);
+                    accountedCacheSize = stats.externalCacheSize;
                 }
-
-                // Count code and data for current user's profiles (keys prepared in constructor)
-                addValueIfKeyExists(mDetails.appsSize, stats.userHandle, codeSize + dataSize);
-
-                // User summary only includes data (code is only counted once
-                // for the current user)
-                addValue(mDetails.usersSize, stats.userHandle, dataSize);
-
-                // Include cache for all users
-                mDetails.cacheSize += cacheSize;
-
-            } else {
-                // Physical storage; only count external sizes
-                addValue(mDetails.appsSize, mCurrentUser,
-                        stats.externalCodeSize + stats.externalDataSize
-                        + stats.externalMediaSize + stats.externalObbSize);
-                mDetails.cacheSize += stats.externalCacheSize;
+                mDetails.cacheSize += accountedCacheSize;
+                mDetails.accountedSize += accountedAppSize + accountedCacheSize;
             }
         }
     }
@@ -375,11 +396,14 @@ public class StorageMeasurement {
                 for (String type : sMeasureMediaTypes) {
                     final File path = new File(basePath, type);
                     final long size = getDirectorySize(imcs, path);
+                    details.accountedSize += size;
                     mediaMap.put(type, size);
                 }
 
                 // Measure misc files not counted under media
-                addValue(details.miscSize, userId, measureMisc(imcs, basePath));
+                final long miscSize = measureMisc(imcs, basePath);
+                details.accountedSize += miscSize;
+                addValue(details.miscSize, userId, miscSize);
             }
 
             if (mSharedVolume.getType() == VolumeInfo.TYPE_EMULATED) {
@@ -388,6 +412,9 @@ public class StorageMeasurement {
                 for (UserInfo user : users) {
                     final File userPath = mSharedVolume.getPathForUser(user.id);
                     final long size = getDirectorySize(imcs, userPath);
+                    if (user.id != UserHandle.USER_SYSTEM) {
+                        details.accountedSize += size;
+                    }
                     addValue(details.usersSize, user.id, size);
                 }
             }
@@ -468,10 +495,12 @@ public class StorageMeasurement {
         array.put(key, array.get(key) + value);
     }
 
-    private static void addValueIfKeyExists(SparseLongArray array, int key, long value) {
+    private static boolean addValueIfKeyExists(SparseLongArray array, int key, long value) {
         final int index = array.indexOfKey(key);
         if (index >= 0) {
             array.put(key, array.valueAt(index) + value);
+            return true;
         }
+        return false;
     }
 }
