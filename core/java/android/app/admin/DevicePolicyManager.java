@@ -878,7 +878,7 @@ public class DevicePolicyManager {
             = "android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED";
 
     /**
-     * Broadcast action: sent when the device owner is set or changed.
+     * Broadcast action: sent when the device owner is set, changed or cleared.
      *
      * This broadcast is sent only to the primary user.
      * @see #ACTION_PROVISION_MANAGED_DEVICE

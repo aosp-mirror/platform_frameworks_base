@@ -5883,6 +5883,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try {
                 clearDeviceOwnerLocked(admin, deviceOwnerUserId);
                 removeActiveAdminLocked(deviceOwnerComponent, deviceOwnerUserId);
+                Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
+                mContext.sendBroadcastAsUser(intent, UserHandle.of(deviceOwnerUserId));
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
