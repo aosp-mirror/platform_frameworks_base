@@ -3041,9 +3041,8 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private static int getSerialNumber(File file) throws IOException {
         try {
-            final byte[] buf = new byte[256];
-            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SERIAL, buf);
-            final String serial = new String(buf, 0, len);
+            final byte[] buf = Os.getxattr(file.getAbsolutePath(), XATTR_SERIAL);
+            final String serial = new String(buf);
             try {
                 return Integer.parseInt(serial);
             } catch (NumberFormatException e) {
