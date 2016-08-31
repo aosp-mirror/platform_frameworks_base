@@ -157,7 +157,7 @@ public:
     typedef T value_type; // needed to implement std::allocator
     typedef T* pointer; // needed to implement std::allocator
 
-    LinearStdAllocator(LinearAllocator& allocator)
+    explicit LinearStdAllocator(LinearAllocator& allocator)
             : linearAllocator(allocator) {}
     LinearStdAllocator(const LinearStdAllocator& other)
             : linearAllocator(other.linearAllocator) {}
@@ -170,7 +170,7 @@ public:
     };
     // enable allocators to be constructed from other templated types
     template <class U>
-    LinearStdAllocator(const LinearStdAllocator<U>& other)
+    LinearStdAllocator(const LinearStdAllocator<U>& other)  // NOLINT(implicit)
             : linearAllocator(other.linearAllocator) {}
 
     T* allocate(size_t num, const void* = 0) {
@@ -195,7 +195,7 @@ bool operator!= (const LinearStdAllocator<T1>&, const LinearStdAllocator<T2>&) {
 template <class T>
 class LsaVector : public std::vector<T, LinearStdAllocator<T>> {
 public:
-    LsaVector(const LinearStdAllocator<T>& allocator)
+    explicit LsaVector(const LinearStdAllocator<T>& allocator)
             : std::vector<T, LinearStdAllocator<T>>(allocator) {}
 };
 
