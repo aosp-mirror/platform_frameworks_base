@@ -55,6 +55,7 @@
 #include "ScopedLocalRef.h"
 #include "ScopedPrimitiveArray.h"
 #include "ScopedUtfChars.h"
+#include "fd_utils-inl.h"
 
 #include "nativebridge/native_bridge.h"
 
@@ -455,6 +456,9 @@ static void SetForkLoad(bool boost) {
 }
 #endif
 
+// The list of open zygote file descriptors.
+static FileDescriptorTable* gOpenFdTable = NULL;
+
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
                                      jint debug_flags, jobjectArray javaRlimits,
@@ -469,6 +473,18 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   SetForkLoad(true);
 #endif
 
+  // If this is the first fork for this zygote, create the open FD table.
+  // If it isn't, we just need to check whether the list of open files has
+  // changed (and it shouldn't in the normal case).
+  if (gOpenFdTable == NULL) {
+    gOpenFdTable = FileDescriptorTable::Create();
+    if (gOpenFdTable == NULL) {
+      RuntimeAbort(env, __LINE__, "Unable to construct file descriptor table.");
+    }
+  } else if (!gOpenFdTable->Restat()) {
+    RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
+  }
+
   ResetNicePriority(env);
 
   pid_t pid = fork();
@@ -479,6 +495,12 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
+
+    // Re-open all remaining open file descriptors so that they aren't shared
+    // with the zygote across a fork.
+    if (!gOpenFdTable->Reopen()) {
+      RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
+    }
 
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
