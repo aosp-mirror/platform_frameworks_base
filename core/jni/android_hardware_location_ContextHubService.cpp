@@ -26,6 +26,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+// TOOD: On master, alphabetize these and move <mutex> into this
+//     grouping.
+#include <chrono>
 #include <unordered_map>
 #include <queue>
 
@@ -50,6 +54,10 @@ static constexpr size_t HEADER_FIELD_APP_INSTANCE = 3;
 static constexpr size_t HEADER_FIELD_LOAD_APP_ID_LO = MSG_HEADER_SIZE;
 static constexpr size_t HEADER_FIELD_LOAD_APP_ID_HI = MSG_HEADER_SIZE + 1;
 static constexpr size_t MSG_HEADER_SIZE_LOAD_APP = MSG_HEADER_SIZE + 2;
+
+// Monotonically increasing clock we use to determine if we can cancel
+// a transaction.
+using std::chrono::steady_clock;
 
 namespace android {
 
@@ -107,6 +115,17 @@ struct app_instance_info_s {
     struct hub_app_info appInfo; // returned from the HAL
 };
 
+
+// If a transaction takes longer than this, we'll allow it to be
+// canceled by a new transaction.  Note we do _not_ automatically
+// cancel a transaction after this much time.  We can have a
+// legal transaction which takes longer than this amount of time,
+// as long as no other new transactions are attempted after this
+// time has expired.
+// TODO(b/31105001): Establish a clean timing approach for all
+// of our HAL interactions.
+constexpr auto kMinTransactionCancelTime = std::chrono::seconds(29);
+
 /*
  * TODO(ashutoshj): From original code review:
  *
@@ -148,6 +167,7 @@ struct txnManager_s {
     std::mutex m;                 // mutex for manager
     hub_messages_e txnIdentifier; // What are we doing
     void *txnData;                // Details
+    steady_clock::time_point firstTimeTxnCanBeCanceled;
 };
 
 struct contextHubServiceDb_s {
@@ -177,25 +197,40 @@ static int addTxn(hub_messages_e txnIdentifier, void *txnData) {
     std::lock_guard<std::mutex>lock(mgr->m);
 
     mgr->txnPending = true;
+    mgr->firstTimeTxnCanBeCanceled = steady_clock::now() +
+        kMinTransactionCancelTime;
     mgr->txnData = txnData;
     mgr->txnIdentifier = txnIdentifier;
 
     return 0;
 }
 
-static int closeTxn() {
+// Only call this if you hold the db.txnManager.m lock.
+static void closeTxnUnlocked() {
     txnManager_s *mgr = &db.txnManager;
-    std::lock_guard<std::mutex>lock(mgr->m);
     mgr->txnPending = false;
     free(mgr->txnData);
     mgr->txnData = nullptr;
+}
 
+static int closeTxn() {
+    std::lock_guard<std::mutex>lock(db.txnManager.m);
+    closeTxnUnlocked();
     return 0;
 }
 
+// If a transaction has been pending for longer than
+// kMinTransactionCancelTime, this call will "cancel" that
+// transaction and return that there are none pending.
 static bool isTxnPending() {
     txnManager_s *mgr = &db.txnManager;
     std::lock_guard<std::mutex>lock(mgr->m);
+    if (mgr->txnPending) {
+        if (steady_clock::now() >= mgr->firstTimeTxnCanBeCanceled) {
+            ALOGW("Transaction canceled");
+            closeTxnUnlocked();
+        }
+    }
     return mgr->txnPending;
 }
 
