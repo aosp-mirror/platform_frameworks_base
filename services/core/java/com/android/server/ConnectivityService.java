@@ -4721,9 +4721,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (VDBG) log("   accepting network in place of " + currentNetwork.name());
                         currentNetwork.removeRequest(nri.request.requestId);
                         currentNetwork.lingerRequest(nri.request, now, mLingerDelayMs);
-                        if (isDefaultRequest(nri)) {
-                            mLingerMonitor.noteLingerDefaultNetwork(currentNetwork, newNetwork);
-                        }
                         affectedNetworks.add(currentNetwork);
                     } else {
                         if (VDBG) log("   accepting network in place of null");
@@ -4744,6 +4741,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (isDefaultRequest(nri)) {
                         isNewDefault = true;
                         oldDefaultNetwork = currentNetwork;
+                        if (currentNetwork != null) {
+                            mLingerMonitor.noteLingerDefaultNetwork(currentNetwork, newNetwork);
+                        }
                     }
                 }
             } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {

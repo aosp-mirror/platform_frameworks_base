@@ -242,6 +242,12 @@ public class LingerMonitor {
             return;
         }
 
+        // Only show the notification if we switched away because a network became unvalidated, not
+        // because its score changed.
+        // TODO: instead of just skipping notification, keep a note of it, and show it if it becomes
+        // unvalidated.
+        if (fromNai.lastValidated) return;
+
         if (isNotificationEnabled(fromNai, toNai)) {
             notify(fromNai, toNai, forceToast);
         }
