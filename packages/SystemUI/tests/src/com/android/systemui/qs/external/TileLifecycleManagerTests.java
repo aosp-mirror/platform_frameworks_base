@@ -15,13 +15,24 @@
  */
 package com.android.systemui.qs.external;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
+import android.content.pm.ServiceInfo;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -31,6 +42,7 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
+import android.service.quicksettings.TileService;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
@@ -41,10 +53,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -57,10 +65,13 @@ public class TileLifecycleManagerTests extends SysuiTestCase {
     private TileLifecycleManager mStateManager;
     private final Object mBroadcastLock = new Object();
     private final ArraySet<String> mCallbacks = new ArraySet<>();
+    private final PackageManagerAdapter mMockPackageManagerAdapter =
+            Mockito.mock(PackageManagerAdapter.class);
     private boolean mBound;
 
     @Before
     public void setUp() throws Exception {
+        setPackageEnabled(true);
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
@@ -68,7 +79,8 @@ public class TileLifecycleManagerTests extends SysuiTestCase {
         mStateManager = new TileLifecycleManager(mHandler, getContext(),
                 Mockito.mock(IQSService.class), new Tile(),
                 new Intent().setComponent(component),
-                new UserHandle(UserHandle.myUserId()));
+                new UserHandle(UserHandle.myUserId()),
+                mMockPackageManagerAdapter);
         mCallbacks.clear();
         getContext().registerReceiver(mReceiver, new IntentFilter(TILE_UPDATE_BROADCAST));
     }
@@ -80,6 +92,22 @@ public class TileLifecycleManagerTests extends SysuiTestCase {
         }
         mThread.quit();
         getContext().unregisterReceiver(mReceiver);
+    }
+
+    private void setPackageEnabled(boolean enabled) throws Exception {
+        ServiceInfo defaultServiceInfo = null;
+        if (enabled) {
+            defaultServiceInfo = new ServiceInfo();
+            defaultServiceInfo.metaData = new Bundle();
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, true);
+        }
+        when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), anyInt()))
+                .thenReturn(defaultServiceInfo);
+        when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt()))
+                .thenReturn(defaultServiceInfo);
+        PackageInfo defaultPackageInfo = new PackageInfo();
+        when(mMockPackageManagerAdapter.getPackageInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(defaultPackageInfo);
     }
 
     @Test
@@ -181,19 +209,22 @@ public class TileLifecycleManagerTests extends SysuiTestCase {
     }
 
     @Test
-    public void testComponentEnabling() {
+    public void testComponentEnabling() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
 
-        PackageManager pm = getContext().getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(getContext(), FakeTileService.class),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-
+        setPackageEnabled(false);
         bindService();
+        // Package not available, should be listening for package changes.
         assertTrue(mStateManager.mReceiverRegistered);
 
-        pm.setComponentEnabledSetting(new ComponentName(getContext(), FakeTileService.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        // Package is re-enabled.
+        setPackageEnabled(true);
+        mStateManager.onReceive(
+                mContext,
+                new Intent(
+                        Intent.ACTION_PACKAGE_CHANGED,
+                        Uri.fromParts("package", getContext().getPackageName(), null)));
         waitForCallback("onCreate");
     }
 
