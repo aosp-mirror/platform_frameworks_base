@@ -246,6 +246,9 @@ public class AssistManager {
     }
 
     private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
+        if(mView == null) {
+            onConfigurationChanged();
+        }
         replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
                 isService);
     }
