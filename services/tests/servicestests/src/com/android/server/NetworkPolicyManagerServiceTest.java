@@ -466,7 +466,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("uidA-blacklisted-restrict-background-off.xml")
+    @NetPolicyXml("uidA-blacklisted-restrict-background-on.xml")
     public void testBlacklistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
         assertRestrictBackgroundOn();
@@ -478,10 +478,10 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @NetPolicyXml("uidA-whitelisted-restrict-background-off.xml")
+    @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
     public void testWhitelistedAppIsNotNotifiedWhenRestrictBackgroundIsOn() throws Exception {
         // Sanity checks.
-        assertRestrictBackgroundOff();
+        assertRestrictBackgroundOn();
         assertWhitelistUids(UID_A);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
