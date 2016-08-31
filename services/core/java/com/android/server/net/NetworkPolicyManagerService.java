@@ -513,12 +513,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 app = pm.getApplicationInfoAsUser(pkg, PackageManager.MATCH_SYSTEM_ONLY, userId);
             } catch (PackageManager.NameNotFoundException e) {
-                // Should not happen
-                Slog.wtf(TAG, "No ApplicationInfo for package " + pkg);
+                if (LOGD) Slog.d(TAG, "No ApplicationInfo for package " + pkg);
+                // Ignore it - some apps on allow-in-data-usage-save are optional.
                 continue;
             }
             if (!app.isPrivilegedApp()) {
-                Slog.wtf(TAG, "pm.getApplicationInfoAsUser() returned non-privileged app: " + pkg);
+                Slog.e(TAG, "addDefaultRestrictBackgroundWhitelistUidsUL(): "
+                        + "skipping non-privileged app  " + pkg);
                 continue;
             }
             final int uid = UserHandle.getUid(userId, app.uid);
@@ -528,8 +529,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + "background whitelist. Revoked status: "
                         + mRestrictBackgroundWhitelistRevokedUids.get(uid));
             if (!mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
-                Slog.i(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
-                        + userId + ") to restrict background whitelist");
+                if (LOGD)
+                    Slog.d(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
+                            + userId + ") to restrict background whitelist");
                 mRestrictBackgroundWhitelistUids.append(uid, true);
                 changed = true;
             }
