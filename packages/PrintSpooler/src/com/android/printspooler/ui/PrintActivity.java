@@ -1359,8 +1359,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Page range
         mPageRangeTitle = (TextView) findViewById(R.id.page_range_title);
         mPageRangeEditText = (EditText) findViewById(R.id.page_range_edittext);
-        mPageRangeEditText.setVisibility(View.INVISIBLE);
-        mPageRangeTitle.setVisibility(View.INVISIBLE);
+        mPageRangeEditText.setVisibility(View.GONE);
+        mPageRangeTitle.setVisibility(View.GONE);
         mPageRangeEditText.setOnFocusChangeListener(mSelectAllOnFocusListener);
         mPageRangeEditText.addTextChangedListener(new RangeTextWatcher());
 
@@ -1881,8 +1881,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                         }
                     } else {
                         mPageRangeEditText.setEnabled(false);
-                        mPageRangeEditText.setVisibility(View.INVISIBLE);
-                        mPageRangeTitle.setVisibility(View.INVISIBLE);
+                        mPageRangeEditText.setVisibility(View.GONE);
+                        mPageRangeTitle.setVisibility(View.GONE);
                     }
                 }
             } else {
@@ -1892,8 +1892,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
                 mRangeOptionsSpinner.setEnabled(false);
                 mPageRangeEditText.setEnabled(false);
-                mPageRangeEditText.setVisibility(View.INVISIBLE);
-                mPageRangeTitle.setVisibility(View.INVISIBLE);
+                mPageRangeEditText.setVisibility(View.GONE);
+                mPageRangeTitle.setVisibility(View.GONE);
             }
         }
 
