@@ -95,6 +95,7 @@ public class TileServiceManager {
         if (!TileLifecycleManager.isTileAdded(context, component)) {
             TileLifecycleManager.setTileAdded(context, component, true);
             mStateManager.onTileAdded();
+            mStateManager.flushMessagesAndUnbind();
         }
     }
 
