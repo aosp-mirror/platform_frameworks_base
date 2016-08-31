@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.util.Log;
+import dalvik.system.CloseGuard;
 
 import java.nio.ByteBuffer;
 
@@ -48,6 +49,11 @@ public class UsbRequest {
     // for client use
     private Object mClientData;
 
+    // Prevent the connection from being finalized
+    private UsbDeviceConnection mConnection;
+
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
     public UsbRequest() {
     }
 
@@ -60,25 +66,35 @@ public class UsbRequest {
      */
     public boolean initialize(UsbDeviceConnection connection, UsbEndpoint endpoint) {
         mEndpoint = endpoint;
-        return native_init(connection, endpoint.getAddress(), endpoint.getAttributes(),
-                endpoint.getMaxPacketSize(), endpoint.getInterval());
+        mConnection = connection;
+
+        boolean wasInitialized = native_init(connection, endpoint.getAddress(),
+                endpoint.getAttributes(), endpoint.getMaxPacketSize(), endpoint.getInterval());
+
+        if (wasInitialized) {
+            mCloseGuard.open("close");
+        }
+
+        return wasInitialized;
     }
 
     /**
      * Releases all resources related to this request.
      */
     public void close() {
-        mEndpoint = null;
-        native_close();
+        if (mNativeContext != 0) {
+            mEndpoint = null;
+            mConnection = null;
+            native_close();
+            mCloseGuard.close();
+        }
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mEndpoint != null) {
-                Log.v(TAG, "endpoint still open in finalize(): " + this);
-                close();
-            }
+            mCloseGuard.warnIfOpen();
+            close();
         } finally {
             super.finalize();
         }

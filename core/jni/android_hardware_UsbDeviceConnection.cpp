@@ -235,7 +235,7 @@ android_hardware_UsbDeviceConnection_get_serial(JNIEnv *env, jobject thiz)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
     if (!device) {
-        ALOGE("device is closed in native_request_wait");
+        ALOGE("device is closed in native_get_serial");
         return NULL;
     }
     char* serial = usb_device_get_serial(device);

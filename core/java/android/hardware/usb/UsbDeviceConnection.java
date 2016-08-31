@@ -18,6 +18,7 @@ package android.hardware.usb;
 
 import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
+import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
 
@@ -35,6 +36,8 @@ public class UsbDeviceConnection {
     // used by the JNI code
     private long mNativeContext;
 
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
     /**
      * UsbDevice should only be instantiated by UsbService implementation
      * @hide
@@ -44,7 +47,13 @@ public class UsbDeviceConnection {
     }
 
     /* package */ boolean open(String name, ParcelFileDescriptor pfd) {
-        return native_open(name, pfd.getFileDescriptor());
+        boolean wasOpened = native_open(name, pfd.getFileDescriptor());
+
+        if (wasOpened) {
+            mCloseGuard.open("close");
+        }
+
+        return wasOpened;
     }
 
     /**
@@ -54,7 +63,10 @@ public class UsbDeviceConnection {
      * to retrieve a new instance to reestablish communication with the device.
      */
     public void close() {
-        native_close();
+        if (mNativeContext != 0) {
+            native_close();
+            mCloseGuard.close();
+        }
     }
 
     /**
@@ -259,6 +271,16 @@ public class UsbDeviceConnection {
         final int bufferLength = (buffer != null ? buffer.length : 0);
         if (start < 0 || start + length > bufferLength) {
             throw new IllegalArgumentException("Buffer start or length out of bounds.");
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            mCloseGuard.warnIfOpen();
+            close();
+        } finally {
+            super.finalize();
         }
     }
 
