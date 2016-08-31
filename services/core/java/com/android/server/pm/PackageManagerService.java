@@ -197,6 +197,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
@@ -365,6 +366,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** REMOVE. According to Svet, this was only used to reset permissions during development. */
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
+    // STOPSHIP; b/30256615
     private static final boolean DISABLE_EPHEMERAL_APPS = !Build.IS_DEBUGGABLE;
 
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -4785,11 +4787,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false, false, false, userId);
     }
 
+    private boolean isEphemeralDisabled() {
+        // ephemeral apps have been disabled across the board
+        if (DISABLE_EPHEMERAL_APPS) {
+            return true;
+        }
+        // system isn't up yet; can't read settings, so, assume no ephemeral apps
+        if (!mSystemReady) {
+            return true;
+        }
+        return Secure.getInt(mContext.getContentResolver(), Secure.WEB_ACTION_ENABLED, 1) == 0;
+    }
+
     private boolean isEphemeralAllowed(
             Intent intent, List<ResolveInfo> resolvedActivities, int userId,
             boolean skipPackageCheck) {
         // Short circuit and return early if possible.
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return false;
         }
         final int callingUser = UserHandle.getCallingUserId();
@@ -6258,7 +6272,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<EphemeralApplicationInfo> getEphemeralApplications(int userId) {
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return null;
         }
 
@@ -6282,7 +6296,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isEphemeral");
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return false;
         }
 
@@ -6300,7 +6314,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public byte[] getEphemeralApplicationCookie(String packageName, int userId) {
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return null;
         }
 
@@ -6318,7 +6332,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean setEphemeralApplicationCookie(String packageName, byte[] cookie, int userId) {
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return true;
         }
 
@@ -6336,7 +6350,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public Bitmap getEphemeralApplicationIcon(String packageName, int userId) {
-        if (DISABLE_EPHEMERAL_APPS) {
+        if (isEphemeralDisabled()) {
             return null;
         }
 
