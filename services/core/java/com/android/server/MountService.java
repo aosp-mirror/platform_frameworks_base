@@ -1056,6 +1056,10 @@ class MountService extends IMountService.Stub
                         || mForceAdoptable) {
                     flags |= DiskInfo.FLAG_ADOPTABLE;
                 }
+                // Adoptable storage isn't currently supported on FBE devices
+                if (StorageManager.isFileEncryptedNativeOnly()) {
+                    flags &= ~DiskInfo.FLAG_ADOPTABLE;
+                }
                 mDisks.put(id, new DiskInfo(id, flags));
                 break;
             }
@@ -1985,6 +1989,11 @@ class MountService extends IMountService.Stub
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
+            if (StorageManager.isFileEncryptedNativeOnly()) {
+                throw new IllegalStateException(
+                        "Adoptable storage not available on device with native FBE");
+            }
+
             synchronized (mLock) {
                 mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
 
