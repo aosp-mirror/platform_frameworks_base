@@ -27,7 +27,7 @@ namespace filterfw {
 class NativeFrame {
   public:
     // Create an empty native frame.
-    NativeFrame(int size);
+    explicit NativeFrame(int size);
 
     ~NativeFrame();
 
