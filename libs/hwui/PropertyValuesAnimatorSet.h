@@ -73,7 +73,7 @@ private:
 
 class PropertyAnimatorSetListener : public AnimationListener {
 public:
-    PropertyAnimatorSetListener(PropertyValuesAnimatorSet* set) : mSet(set) {}
+    explicit PropertyAnimatorSetListener(PropertyValuesAnimatorSet* set) : mSet(set) {}
     virtual void onAnimationFinished(BaseRenderNodeAnimator* animator) override;
 
 private:
