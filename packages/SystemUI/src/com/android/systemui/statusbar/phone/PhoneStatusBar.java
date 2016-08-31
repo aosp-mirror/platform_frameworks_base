@@ -4654,44 +4654,47 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             final Runnable clickPendingViewRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (mPendingWorkRemoteInputView != null) {
-                        final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
-                        ViewParent p = pendingWorkRemoteInputView.getParent();
-                        while (p != null) {
-                            if (p instanceof ExpandableNotificationRow) {
-                                final ExpandableNotificationRow row = (ExpandableNotificationRow) p;
-                                ViewParent viewParent = row.getParent();
-                                if (viewParent instanceof NotificationStackScrollLayout) {
-                                    final NotificationStackScrollLayout scrollLayout =
-                                            (NotificationStackScrollLayout) viewParent;
-                                    row.makeActionsVisibile();
-                                    row.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            final Runnable finishScrollingCallback = new Runnable()
-                                            {
-                                                @Override
-                                                public void run() {
-                                                    mPendingWorkRemoteInputView.callOnClick();
-                                                    mPendingWorkRemoteInputView = null;
-                                                    scrollLayout.setFinishScrollingCallback(null);
-                                                }
-                                            };
-                                            if (scrollLayout.scrollTo(row)) {
-                                                // It scrolls! So call it when it's finished.
-                                                scrollLayout.setFinishScrollingCallback(
-                                                        finishScrollingCallback);
-                                            } else {
-                                                // It does not scroll, so call it now!
-                                                finishScrollingCallback.run();
-                                            }
-                                        }
-                                    });
-                                }
-                                break;
-                            }
-                            p = p.getParent();
+                    final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
+                    if (pendingWorkRemoteInputView == null) {
+                        return;
+                    }
+
+                    // Climb up the hierarchy until we get to the container for this row.
+                    ViewParent p = pendingWorkRemoteInputView.getParent();
+                    while (!(p instanceof ExpandableNotificationRow)) {
+                        if (p == null) {
+                            return;
                         }
+                        p = p.getParent();
+                    }
+
+                    final ExpandableNotificationRow row = (ExpandableNotificationRow) p;
+                    ViewParent viewParent = row.getParent();
+                    if (viewParent instanceof NotificationStackScrollLayout) {
+                        final NotificationStackScrollLayout scrollLayout =
+                                (NotificationStackScrollLayout) viewParent;
+                        row.makeActionsVisibile();
+                        row.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                final Runnable finishScrollingCallback = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mPendingWorkRemoteInputView.callOnClick();
+                                        mPendingWorkRemoteInputView = null;
+                                        scrollLayout.setFinishScrollingCallback(null);
+                                    }
+                                };
+                                if (scrollLayout.scrollTo(row)) {
+                                    // It scrolls! So call it when it's finished.
+                                    scrollLayout.setFinishScrollingCallback(
+                                            finishScrollingCallback);
+                                } else {
+                                    // It does not scroll, so call it now!
+                                    finishScrollingCallback.run();
+                                }
+                            }
+                        });
                     }
                 }
             };
