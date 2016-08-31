@@ -380,6 +380,12 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     private Exception mLastWtfStacktrace;
 
+    static class InvalidFileFormatException extends Exception {
+        public InvalidFileFormatException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     public ShortcutService(Context context) {
         this(context, BackgroundThread.get().getLooper(), /*onyForPackgeManagerApis*/ false);
     }
@@ -961,7 +967,7 @@ public class ShortcutService extends IShortcutService.Stub {
         try {
             final ShortcutUser ret = loadUserInternal(userId, in, /* forBackup= */ false);
             return ret;
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException | InvalidFileFormatException e) {
             Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
             return null;
         } finally {
@@ -970,7 +976,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private ShortcutUser loadUserInternal(@UserIdInt int userId, InputStream is,
-            boolean fromBackup) throws XmlPullParserException, IOException {
+            boolean fromBackup) throws XmlPullParserException, IOException,
+            InvalidFileFormatException {
 
         final BufferedInputStream bis = new BufferedInputStream(is);
 
@@ -3170,15 +3177,16 @@ public class ShortcutService extends IShortcutService.Stub {
                 wtf("Can't restore: user " + userId + " is locked or not running");
                 return;
             }
-            final ShortcutUser user;
+            // Actually do restore.
+            final ShortcutUser restored;
             final ByteArrayInputStream is = new ByteArrayInputStream(payload);
             try {
-                user = loadUserInternal(userId, is, /* fromBackup */ true);
-            } catch (XmlPullParserException | IOException e) {
+                restored = loadUserInternal(userId, is, /* fromBackup */ true);
+            } catch (XmlPullParserException | IOException | InvalidFileFormatException e) {
                 Slog.w(TAG, "Restoration failed.", e);
                 return;
             }
-            mUsers.put(userId, user);
+            getUserShortcutsLocked(userId).mergeRestoredFile(restored);
 
             // Rescan all packages to re-publish manifest shortcuts and do other checks.
             rescanUpdatedPackagesLocked(userId,

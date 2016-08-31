@@ -40,7 +40,7 @@ abstract class ShortcutPackageItem {
 
     private final ShortcutPackageInfo mPackageInfo;
 
-    protected final ShortcutUser mShortcutUser;
+    protected ShortcutUser mShortcutUser;
 
     protected ShortcutPackageItem(@NonNull ShortcutUser shortcutUser,
             int packageUserId, @NonNull String packageName,
@@ -49,6 +49,13 @@ abstract class ShortcutPackageItem {
         mPackageUserId = packageUserId;
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
         mPackageInfo = Preconditions.checkNotNull(packageInfo);
+    }
+
+    /**
+     * Change the parent {@link ShortcutUser}.  Need it in the restore code.
+     */
+    public void replaceUser(ShortcutUser user) {
+        mShortcutUser = user;
     }
 
     public ShortcutUser getUser() {
