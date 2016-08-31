@@ -512,10 +512,11 @@ You can find your unsigned <code>.apk</code> in the
 
 <li>Next, locate the <code>aapt</code> tool, if it is not already in your PATH.
 If you are using SDK Tools r8 or higher, you can find <code>aapt</code> in the
-<code>&lt;<em>SDK</em>&gt;/platform-tools/</code> directory.
+<code>&lt;<em>SDK</em>&gt;/build-tools/&lt;<em>tools version number</em>&gt;</code>
+directory.
 <p class="note"><strong>Note:</strong> You must use the version of
-<code>aapt</code> that is provided for the latest Platform-Tools component available. If
-you do not have the latest Platform-Tools component, download it using the <a
+<code>aapt</code> that is provided for the latest Build-Tools component available. If
+you do not have the latest Build-Tools component, download it using the <a
 href="{@docRoot}studio/intro/update.html">Android SDK Manager</a>.
 </p></li>
 <li>Run <code>aapt</code> using this syntax: </li>
