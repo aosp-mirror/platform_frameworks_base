@@ -1181,7 +1181,7 @@ public class StaticLayout extends Layout {
      */
     @Override
     public int getHyphen(int line) {
-        return mLines[mColumns * line + HYPHEN] & 0xff;
+        return mLines[mColumns * line + HYPHEN] & HYPHEN_MASK;
     }
 
     /**
@@ -1295,6 +1295,7 @@ public class StaticLayout extends Layout {
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
+    private static final int HYPHEN_MASK = 0xFF;
 
     private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
 

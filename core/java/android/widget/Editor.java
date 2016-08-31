@@ -70,6 +70,7 @@ import android.text.style.SuggestionRangeSpan;
 import android.text.style.SuggestionSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
@@ -1696,6 +1697,17 @@ public class Editor {
             final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
             final int indexFirstChangedBlock = dynamicLayout.getIndexFirstChangedBlock();
 
+            final ArraySet<Integer> blockSet = dynamicLayout.getBlocksAlwaysNeedToBeRedrawn();
+            if (blockSet != null) {
+                for (int i = 0; i < blockSet.size(); i++) {
+                    final int blockIndex = dynamicLayout.getBlockIndex(blockSet.valueAt(i));
+                    if (blockIndex != DynamicLayout.INVALID_BLOCK_INDEX
+                            && mTextRenderNodes[blockIndex] != null) {
+                        mTextRenderNodes[blockIndex].needsToBeShifted = true;
+                    }
+                }
+            }
+
             int startBlock = Arrays.binarySearch(blockEndLines, 0, numberOfBlocks, firstLine);
             if (startBlock < 0) {
                 startBlock = -(startBlock + 1);
@@ -1723,6 +1735,20 @@ public class Editor {
                 if (blockEndLines[i] >= lastLine) {
                     lastIndex = Math.max(indexFirstChangedBlock, i + 1);
                     break;
+                }
+            }
+            if (blockSet != null) {
+                for (int i = 0; i < blockSet.size(); i++) {
+                    final int block = blockSet.valueAt(i);
+                    final int blockIndex = dynamicLayout.getBlockIndex(block);
+                    if (blockIndex == DynamicLayout.INVALID_BLOCK_INDEX
+                            || mTextRenderNodes[blockIndex] == null
+                            || mTextRenderNodes[blockIndex].needsToBeShifted) {
+                        startIndexToFindAvailableRenderNode = drawHardwareAcceleratedInner(canvas,
+                                layout, highlight, highlightPaint, cursorOffsetVertical,
+                                blockEndLines, blockIndices, block, numberOfBlocks,
+                                startIndexToFindAvailableRenderNode);
+                    }
                 }
             }
 
