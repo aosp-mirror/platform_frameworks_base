@@ -3234,6 +3234,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets the text color for all the states (normal, selected,
      * focused) to be this color.
      *
+     * @param color A color value in the form 0xAARRGGBB.
+     * Do not pass a resource ID. To get a color value from a resource ID, call
+     * {@link android.support.v4.content.ContextCompat#getColor(Context, int) getColor}.
+     *
      * @see #setTextColor(ColorStateList)
      * @see #getTextColors()
      *
