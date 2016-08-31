@@ -108,7 +108,7 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
         }
         if (stillScheduled) {
             Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2, mObj);
-            mHandler.handleMessage(msg);
+            mHandler.dispatchMessage(msg);
             msg.recycle();
         }
     }
