@@ -228,6 +228,7 @@ public class TextureView extends View {
      */
     @Override
     protected void destroyHardwareResources() {
+        super.destroyHardwareResources();
         destroyHardwareLayer();
     }
 
