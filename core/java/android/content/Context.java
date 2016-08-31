@@ -2740,6 +2740,7 @@ public abstract class Context {
             //@hide: SOUND_TRIGGER_SERVICE,
             SHORTCUT_SERVICE,
             //@hide: CONTEXTHUB_SERVICE,
+            SYSTEM_HEALTH_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
