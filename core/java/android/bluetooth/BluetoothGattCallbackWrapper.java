@@ -83,11 +83,6 @@ public class BluetoothGattCallbackWrapper extends IBluetoothGattCallback.Stub {
     }
 
     @Override
-    public void onMultiAdvertiseCallback(int status, boolean isStart,
-            AdvertiseSettings advertiseSettings) throws RemoteException {
-    }
-
-    @Override
     public void onConfigureMTU(String address, int mtu, int status) throws RemoteException {
     }
 
