@@ -180,7 +180,8 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo.FLAG_MANAGED_PROFILE
             | UserInfo.FLAG_EPHEMERAL
             | UserInfo.FLAG_RESTRICTED
-            | UserInfo.FLAG_GUEST;
+            | UserInfo.FLAG_GUEST
+            | UserInfo.FLAG_DEMO;
 
     private static final int MIN_USER_ID = 10;
     // We need to keep process uid within Integer.MAX_VALUE.
