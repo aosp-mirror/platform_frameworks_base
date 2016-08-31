@@ -623,15 +623,16 @@ class WindowToken {
             }
 
             // Now stick it in. For apps over wallpaper keep the wallpaper at the bottommost
-            // layer. For keyguard over wallpaper put the wallpaper under the keyguard unless
-            // the keyguard is still animating in.
+            // layer. For keyguard over wallpaper put the wallpaper under the lowest window that
+            // is currently on screen, i.e. not hidden by policy.
             int insertionIndex = 0;
             if (visible && wallpaperTarget != null) {
                 final int type = wallpaperTarget.mAttrs.type;
                 final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
                 if (((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM)
                         && !mService.isKeyguardAnimatingIn()) {
-                    insertionIndex = windowList.indexOf(wallpaperTarget);
+                    insertionIndex = Math.min(windows.indexOf(wallpaperTarget),
+                            findLowestWindowOnScreen(windows));
                 }
             }
             if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
@@ -644,6 +645,21 @@ class WindowToken {
         }
 
         return changed;
+    }
+
+    /**
+     * @return The index in {@param windows} of the lowest window that is currently on screen and
+     *         not hidden by the policy.
+     */
+    private int findLowestWindowOnScreen(WindowList windows) {
+        final int size = windows.size();
+        for (int index = 0; index < size; index++) {
+            final WindowState win = windows.get(index);
+            if (win.isOnScreen()) {
+                return index;
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {

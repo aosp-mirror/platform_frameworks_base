@@ -63,9 +63,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void setOccluded(boolean isOccluded) {
+    public void setOccluded(boolean isOccluded, boolean animate) {
         try {
-            mService.setOccluded(isOccluded);
+            mService.setOccluded(isOccluded, animate);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

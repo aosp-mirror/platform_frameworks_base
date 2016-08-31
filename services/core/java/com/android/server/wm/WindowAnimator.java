@@ -234,14 +234,12 @@ public class WindowAnimator {
         boolean allowWhenLocked = false;
         // Show IME over the keyguard if the target allows it
         allowWhenLocked |= (win.mIsImWindow || imeTarget == win) && showImeOverKeyguard;
-        // Show SHOW_WHEN_LOCKED windows that turn on the screen
-        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.mTurnOnScreen;
+        // Show SHOW_WHEN_LOCKED windows
+        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
 
         if (appShowWhenLocked != null) {
             allowWhenLocked |= appShowWhenLocked == win.mAppToken
-                    // Show all SHOW_WHEN_LOCKED windows if some apps are shown over lockscreen
-                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                    // Show error dialogs over apps that dismiss keyguard.
+                    // Show error dialogs over apps that are shown on lockscreen
                     || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
 
