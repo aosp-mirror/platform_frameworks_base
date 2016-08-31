@@ -38,7 +38,7 @@ class GLFrame : public GLBufferHandle {
     // Create an empty GL frame in the specified GL environment. Note, that the GLFrame does NOT
     // take ownership. The caller must make sure the GLEnv stays valid as long as the GLFrame is
     // alive.
-    GLFrame(GLEnv* gl_env);
+    explicit GLFrame(GLEnv* gl_env);
 
     // Deallocate a GL frame.
     ~GLFrame();
