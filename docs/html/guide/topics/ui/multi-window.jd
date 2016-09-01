@@ -169,7 +169,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   A root activity's attribute settings apply to all activities
   within its task stack. For example, if the root activity has
   <code>android:resizeableActivity</code> set to true, then all activities
-  in the task stack are resizeable.
+  in the task stack are resizable.
 </p>
 
 <p class="note">
@@ -599,7 +599,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   If you disabled multi-window support by setting
-  <code>android:resizableActivity="false"</code>, you should launch your app on
+  <code>android:resizeableActivity="false"</code>, you should launch your app on
   a device running Android 7.0 or higher and attempt to put the app in
   freeform and split-screen modes. Verify that when you do so, the app remains
   in full-screen mode.
