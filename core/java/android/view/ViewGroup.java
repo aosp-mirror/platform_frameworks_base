@@ -45,6 +45,7 @@ import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -3142,6 +3143,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         " does not fully implement ViewParent", e);
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    public void notifySubtreeAccessibilityStateChangedIfNeeded() {
+        if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
+            return;
+        }
+        // If something important for a11y is happening in this subtree, make sure it's dispatched
+        // from a view that is important for a11y so it doesn't get lost.
+        if ((getImportantForAccessibility() != IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
+                && !isImportantForAccessibility() && (getChildCount() > 0)) {
+            ViewParent a11yParent = getParentForAccessibility();
+            if (a11yParent instanceof View) {
+                ((View) a11yParent).notifySubtreeAccessibilityStateChangedIfNeeded();
+                return;
+            }
+        }
+        super.notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     @Override
