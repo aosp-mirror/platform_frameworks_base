@@ -155,6 +155,9 @@ public class WifiEnterpriseConfig implements Parcelable {
         for (String key : source.mFields.keySet()) {
             mFields.put(key, source.mFields.get(key));
         }
+        mCaCerts = source.mCaCerts;
+        mClientPrivateKey = source.mClientPrivateKey;
+        mClientCertificate = source.mClientCertificate;
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
     }
