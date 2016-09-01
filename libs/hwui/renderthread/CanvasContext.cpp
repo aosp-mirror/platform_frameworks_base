@@ -633,6 +633,9 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     prepareTree(info, frameInfo, systemTime(CLOCK_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
         draw();
+    } else {
+        // wait on fences so tasks don't overlap next frame
+        waitOnFences();
     }
 }
 
