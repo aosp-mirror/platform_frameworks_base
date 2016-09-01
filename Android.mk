@@ -492,6 +492,12 @@ LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/android/Manifest.java \
 			$(framework_res_source_path)/com/android/internal/R.java
 
+# Make sure that R.java and Manifest.java are built before we build
+# the source for this library.
+framework_res_R_stamp := \
+	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
+LOCAL_ADDITIONAL_DEPENDENCIES := $(framework_res_R_stamp)
+
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart core-lambda-stubs conscrypt okhttp core-junit bouncycastle ext
 LOCAL_STATIC_JAVA_LIBRARIES := framework-protos
@@ -508,15 +514,8 @@ LOCAL_EMMA_INSTRUMENT := true
 endif
 
 include $(BUILD_JAVA_LIBRARY)
+
 framework_module := $(LOCAL_INSTALLED_MODULE)
-
-# Make sure that R.java and Manifest.java are built before we build
-# the source for this library.
-framework_res_R_stamp := \
-	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
-$(full_classes_compiled_jar): $(framework_res_R_stamp)
-$(built_dex_intermediate): $(framework_res_R_stamp)
-
 $(framework_module): | $(dir $(framework_module))framework-res.apk
 
 framework_built := $(call java-lib-deps,framework)
