@@ -327,7 +327,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public static final int PROPERTY_SHOW_CALLBACK_NUMBER = 1<<0;
+    public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1<<0;
 
     /**
      * Whether the call is a generic conference, where we do not know the precise state of
@@ -655,8 +655,8 @@ public abstract class Connection extends Conferenceable {
             builder.append("Properties:");
         }
 
-        if (can(properties, PROPERTY_SHOW_CALLBACK_NUMBER)) {
-            builder.append(isLong ? " PROPERTY_SHOW_CALLBACK_NUMBER" : " clbk");
+        if (can(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
+            builder.append(isLong ? " PROPERTY_EMERGENCY_CALLBACK_MODE" : " ecbm");
         }
 
         if (can(properties, PROPERTY_HIGH_DEF_AUDIO)) {
