@@ -26,7 +26,7 @@ namespace android {
 
 class NativeInputApplicationHandle : public InputApplicationHandle {
 public:
-    NativeInputApplicationHandle(jweak objWeak);
+    explicit NativeInputApplicationHandle(jweak objWeak);
     virtual ~NativeInputApplicationHandle();
 
     jobject getInputApplicationHandleObjLocalRef(JNIEnv* env);
