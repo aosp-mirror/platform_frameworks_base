@@ -180,6 +180,7 @@ static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd
         return -1;
     }
 
+<<<<<<< HEAD
     if (!ashmem_valid(fd)) {
         jniThrowIOException(env, errno);
         return -1;
@@ -187,6 +188,11 @@ static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd
 
     int ashmemSize = ashmem_get_size_region(fd);
     if (ashmemSize < 0) {
+=======
+    int ashmemSize = ashmem_get_size_region(fd);
+    if (ashmemSize < 0) {
+        // Some other error, throw exception
+>>>>>>> a2c1196dc25bfefe094c5d1757f8e2fd22500222
         jniThrowIOException(env, errno);
         return -1;
     }

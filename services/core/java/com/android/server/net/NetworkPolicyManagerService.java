@@ -282,7 +282,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
-    private static final int MSG_RULES_CHANGED = 1;
+Mem    private static final int MSG_RULES_CHANGED = 1;
     private static final int MSG_METERED_IFACES_CHANGED = 2;
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
