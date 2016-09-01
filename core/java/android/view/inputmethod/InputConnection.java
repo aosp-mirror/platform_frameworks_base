@@ -43,12 +43,14 @@ import android.view.KeyEvent;
  *     in {@link android.os.Build.VERSION_CODES#HONEYCOMB}.</li>
  *     <li>{@link #requestCursorUpdates(int)}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#LOLLIPOP}.</li>
- *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}}, which
+ *     <li>{@link #deleteSurroundingTextInCodePoints(int, int)}, which
  *     was introduced in {@link android.os.Build.VERSION_CODES#N}.</li>
- *     <li>{@link #getHandler()}}, which was introduced in
+ *     <li>{@link #getHandler()}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#N}.</li>
- *     <li>{@link #closeConnection()}}, which was introduced in
+ *     <li>{@link #closeConnection()}, which was introduced in
  *     {@link android.os.Build.VERSION_CODES#N}.</li>
+ *     <li>{@link #commitContent(InputContentInfo, int, Bundle)}, which was
+ *     introduced in {@link android.os.Build.VERSION_CODES#N_MR1}.</li>
  * </ul>
  *
  * <h3>Implementing an IME or an editor</h3>
