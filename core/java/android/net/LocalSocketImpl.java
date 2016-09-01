@@ -516,13 +516,11 @@ class LocalSocketImpl
                     Os.setsockoptLinger(fd, OsConstants.SOL_SOCKET, OsConstants.SO_LINGER, linger);
                     break;
                 case SocketOptions.SO_TIMEOUT:
-                    /*
-                     * SO_TIMEOUT from the core library gets converted to
-                     * SO_SNDTIMEO, but the option is supposed to set both
-                     * send and receive timeouts. Note: The incoming timeout
-                     * value is in milliseconds.
-                     */
+                    // The option must set both send and receive timeouts.
+                    // Note: The incoming timeout value is in milliseconds.
                     StructTimeval timeval = StructTimeval.fromMillis(intValue);
+                    Os.setsockoptTimeval(fd, OsConstants.SOL_SOCKET, OsConstants.SO_RCVTIMEO,
+                            timeval);
                     Os.setsockoptTimeval(fd, OsConstants.SOL_SOCKET, OsConstants.SO_SNDTIMEO,
                             timeval);
                     break;
