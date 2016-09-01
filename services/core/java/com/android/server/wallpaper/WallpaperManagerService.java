@@ -352,9 +352,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         (cropHint.right > options.outWidth ? options.outWidth - cropHint.right : 0),
                         (cropHint.bottom > options.outHeight ? options.outHeight - cropHint.bottom : 0));
 
+                // If the crop hint was larger than the image we just overshot. Patch things up.
+                if (cropHint.left < 0) {
+                    cropHint.left = 0;
+                }
+                if (cropHint.top < 0) {
+                    cropHint.top = 0;
+                }
+
                 // Don't bother cropping if what we're left with is identity
                 needCrop = (options.outHeight > cropHint.height()
-                        && options.outWidth > cropHint.width());
+                        || options.outWidth > cropHint.width());
             }
 
             // scale if the crop height winds up not matching the recommended metrics
