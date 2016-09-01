@@ -215,7 +215,7 @@
     <string name="global_action_lock" msgid="2844945191792119712">"স্ক্রীণ লক"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"পাওয়ার বন্ধ করুন"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ত্রুটির প্রতিবেদন"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির প্রতিবেদন করুন"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির অভিযোগ করুন"</string>
     <string name="bugreport_message" msgid="398447048750350456">"এটি একটি ই-মেল বার্তা পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; দয়া করে ধৈর্য রাখুন৷"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ইন্টারেক্টিভ প্রতিবেদন"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"বেশিরভাগ পরিস্থিতিতে এটিকে ব্যবহার করুন৷ এটি আপনাকে প্রতিবেদনের কাজ কতটা হয়েছে তার উপর নজর রাখতে দেয়, সমস্যাটির সম্পর্কে আরো অনেক কিছু লিখতে দেয় এবং স্ক্রীনশটগুলি নিতে দেয়৷ এটি হয়ত প্রতিবেদন করতে খুব বেশি সময় নেয় এমনকি কম-ব্যবহৃত বিভাগগুলি সরিয়ে দিতে পারে৷"</string>
@@ -1007,7 +1007,7 @@
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> সাড়া দিচ্ছে না"</string>
     <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> প্রক্রিয়া সাড়া দিচ্ছে না"</string>
     <string name="force_close" msgid="8346072094521265605">"ঠিক আছে"</string>
-    <string name="report" msgid="4060218260984795706">"প্রতিবেদন করুন"</string>
+    <string name="report" msgid="4060218260984795706">"অভিযোগ করুন"</string>
     <string name="wait" msgid="7147118217226317732">"অপেক্ষা করুন"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"পৃষ্ঠাটি কোনো পতিক্রিয়া করছে না৷\n\nআপনি কি এটিকে বন্ধ করতে চান?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"অ্যাপ্লিকেশানকে পুনঃনির্দেশিত করা হয়েছে"</string>
@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ওয়াই-ফাই -তে কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"বিকল্পগুলির জন্য আলতো চাপুন"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> এ পাল্টানো হয়েছে"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"যখন <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> এর কোনো ইন্টারনেট অ্যাক্সেস থাকে না তখন ডিভাইস <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ব্যবহার করে৷ চার্জ লাগতে পারে৷"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> থেকে <xliff:g id="NEW_NETWORK">%2$s</xliff:g> এ পাল্টানো হয়েছে"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"সেলুলার ডেটা"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"ইথারনেট"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"এই নেটওয়ার্কের প্রকার অজানা"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ওয়াই-ফাই এর সাথে সংযোগ করা যায়নি"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" একটি দুর্বল ইন্টারনেট সংযোগ রয়েছে৷"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"সংযোগের অনুমতি দেবেন?"</string>

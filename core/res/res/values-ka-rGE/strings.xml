@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi-ს არ აქვს ინტერნეტზე წვდომა"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"შეეხეთ ვარიანტების სანახავად"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ახლა გამოიყენება <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"თუ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ინტერნეტთან კავშირს დაკარგავს, მოწყობილობის მიერ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> იქნება გამოყენებული, რამაც შეიძლება დამატებითი ხარჯები გამოიწვიოს"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"ახლა გამოიყენება <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> (გამოიყენებოდა <xliff:g id="NEW_NETWORK">%2$s</xliff:g>)"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"მობილური ინტერნეტი"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"უცნობი ტიპის ქსელი"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-თან დაკავშირება ვერ მოხერხდა"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" აქვს ცუდი ინტერნეტ კავშირი."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"გსურთ კავშირის დაშვება?"</string>

@@ -1101,6 +1101,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Rețeaua Wi-Fi nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"date mobile"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un tip de rețea necunoscut"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nu se poate conecta la Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" are o conexiune la internet slabă."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Permiteți conectarea?"</string>

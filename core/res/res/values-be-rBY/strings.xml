@@ -1126,6 +1126,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"У Wi-Fi няма доступу да Інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Прылада выкарыстоўвае <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца дадатковая плата."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"сотавая перадача даных"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невядомы тып сеткі"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" дрэннае падключэнне да Інтэрнэту."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дазволіць падключэнне?"</string>
