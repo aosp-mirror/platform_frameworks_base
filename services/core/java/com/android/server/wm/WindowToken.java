@@ -631,8 +631,8 @@ class WindowToken {
                 final int privateFlags = wallpaperTarget.mAttrs.privateFlags;
                 if (((privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 || type == TYPE_KEYGUARD_SCRIM)
                         && !mService.isKeyguardAnimatingIn()) {
-                    insertionIndex = Math.min(windows.indexOf(wallpaperTarget),
-                            findLowestWindowOnScreen(windows));
+                    insertionIndex = Math.min(windowList.indexOf(wallpaperTarget),
+                            findLowestWindowOnScreen(windowList));
                 }
             }
             if (DEBUG_WALLPAPER_LIGHT || DEBUG_WINDOW_MOVEMENT
@@ -651,10 +651,10 @@ class WindowToken {
      * @return The index in {@param windows} of the lowest window that is currently on screen and
      *         not hidden by the policy.
      */
-    private int findLowestWindowOnScreen(WindowList windows) {
-        final int size = windows.size();
+    private int findLowestWindowOnScreen(WindowList windowList) {
+        final int size = windowList.size();
         for (int index = 0; index < size; index++) {
-            final WindowState win = windows.get(index);
+            final WindowState win = windowList.get(index);
             if (win.isOnScreen()) {
                 return index;
             }
