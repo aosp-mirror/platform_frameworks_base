@@ -495,8 +495,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikaži sekunde na statusnoj traci. Može skratiti trajanje baterije."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Preuredi \"Brze postavke\""</string>
     <string name="show_brightness" msgid="6613930842805942519">"Prikaži osvjetljenje u opciji \"Brze postavke\""</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Omogućiti potez za podjelu ekrana prevlačenjem prema gore"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Uključite pokrete prstima da biste ušli u podijeljeni ekran tako što ćete od dugmeta Pregled prevući prstom prema gore"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentalno"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želiti li uključiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Da povežete tastaturu sa tabletom, prvo morate uključiti Bluetooth."</string>

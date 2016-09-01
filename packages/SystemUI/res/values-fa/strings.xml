@@ -491,8 +491,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ثانیه‌های ساعت را در نوار وضعیت نشان می‌دهد. ممکن است بر ماندگاری باتری تأثیر بگذارد."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ترتیب مجدد در تنظیمات سریع"</string>
     <string name="show_brightness" msgid="6613930842805942519">"نمایش روشنایی در تنظیمات سریع"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"فعال کردن تقسیم صفحه با اشاره بالا کشیدن"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"اشاره ورود به تقسیم صفحه با بالا کشیدن صفحه از دکمه نمای کلی را فعال می‌کند"</string>
     <string name="experimental" msgid="6198182315536726162">"آزمایشی"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"بلوتوث روشن شود؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"برای مرتبط کردن صفحه‌کلید با رایانه لوحی، ابتدا باید بلوتوث را روشن کنید."</string>

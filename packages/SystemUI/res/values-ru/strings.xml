@@ -497,8 +497,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Показывать в строке состояния время с точностью до секунды (заряд батареи может расходоваться быстрее)."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Изменить порядок Быстрых настроек"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Добавить яркость в Быстрые настройки"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Разделять экран пролистыванием вверх"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Включить разделение экрана пролистыванием вверх с кнопки \"Обзор\""</string>
     <string name="experimental" msgid="6198182315536726162">"Экспериментальная функция"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Подключение по Bluetooth"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Чтобы подключить клавиатуру к планшету, включите Bluetooth."</string>

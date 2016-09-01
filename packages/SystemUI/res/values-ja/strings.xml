@@ -493,8 +493,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ステータスバーに時計の秒を表示します。電池使用量に影響する可能性があります。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"クイック設定を並べ替え"</string>
     <string name="show_brightness" msgid="6613930842805942519">"クイック設定に明るさ調整バーを表示する"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"上にスワイプして分割画面に切り替える操作を有効にする"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"[概要] ボタンから上にスワイプして分割画面に切り替える操作を有効にします"</string>
     <string name="experimental" msgid="6198182315536726162">"試験運用版"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"BluetoothをONにしますか？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"タブレットでキーボードに接続するには、最初にBluetoothをONにする必要があります。"</string>

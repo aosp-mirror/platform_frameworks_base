@@ -491,8 +491,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Klokseconden op de statusbalk weergeven. Kan van invloed zijn op de accuduur."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Snelle instellingen opnieuw indelen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Helderheid weergeven in Snelle instellingen"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Omhoog vegen voor gesplitst scherm inschakelen"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Gebaar inschakelen om gesplitst scherm te openen door vanaf de knop Overzicht omhoog te vegen"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimenteel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth inschakelen?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>

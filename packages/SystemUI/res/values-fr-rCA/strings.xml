@@ -493,8 +493,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afficher les secondes sur l\'horloge dans la barre d\'état. Cela peut réduire l\'autonomie de la pile."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Réorganiser les paramètres rapides"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Afficher la luminosité dans les paramètres rapides"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Activer le geste d\'écran partagé en balayant vers le haut"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Activer le geste permettant d\'utiliser l\'écran partagé en balayant l\'écran vers le haut à partir du bouton « Aperçu »"</string>
     <string name="experimental" msgid="6198182315536726162">"Fonctions expérimentales"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activer Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pour connecter votre clavier à votre tablette, vous devez d\'abord activer la connectivité Bluetooth."</string>

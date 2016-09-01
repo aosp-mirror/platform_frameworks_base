@@ -493,8 +493,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Uhrsekunden in der Statusleiste anzeigen. Kann sich auf die Akkulaufzeit auswirken."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Schnelleinstellungen neu anordnen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Helligkeit in den Schnelleinstellungen anzeigen"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Teilen des Bildschirms durch Wischen nach oben aktivieren"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktiviert die Bewegung zum Teilen des Bildschirms, bei der von der Schaltfläche \"Übersicht\" nach oben gewischt wird"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentell"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth aktivieren?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Zum Verbinden von Tastatur und Tablet muss Bluetooth aktiviert sein."</string>
