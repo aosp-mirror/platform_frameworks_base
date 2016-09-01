@@ -129,6 +129,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     }
 
     public void setBindService(boolean bind) {
+        if (mBound && mUnbindImmediate) {
+            // If we are already bound and expecting to unbind, this means we should stay bound
+            // because something else wants to hold the connection open.
+            mUnbindImmediate = false;
+            return;
+        }
         mBound = bind;
         if (bind) {
             if (mBindTryCount == MAX_BIND_RETRIES) {
