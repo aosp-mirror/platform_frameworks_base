@@ -492,8 +492,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Sýna sekúndur á klukku í stöðustikunni. Getur haft áhrif á endingu rafhlöðu."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Endurraða flýtistillingum"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Sýna birtustig í flýtistillingum"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Virkja skjáskiptingu með því að strjúka upp"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Virkja skjáskiptingarbendingu með því að strjúka upp frá yfirlitshnappi"</string>
     <string name="experimental" msgid="6198182315536726162">"Tilraunastillingar"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Kveikja á Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Til að geta tengt lyklaborðið við spjaldtölvuna þarftu fyrst að kveikja á Bluetooth."</string>
