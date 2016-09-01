@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi-യിൽ ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> എന്നതിലേക്ക് മാറി"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിന് ഇന്റർനെറ്റ് ആക്സസ്സ് ഇല്ലാത്തപ്പോൾ ഉപകരണം <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ഉപയോഗിക്കുന്നു. നിരക്കുകൾ ബാധകമായേക്കാം."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> നെറ്റ്‌വർക്കിൽ നിന്ന് <xliff:g id="NEW_NETWORK">%2$s</xliff:g> നെറ്റ്‌വർക്കിലേക്ക് മാറി"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"സെല്ലുലാർ ഡാറ്റ"</item>
+    <item msgid="75483255295529161">"വൈഫൈ"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"ഇതര്‍നെറ്റ്"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"തിരിച്ചറിയാനാകാത്ത ഒരു നെറ്റ്‌വർക്ക് തരം"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-ലേക്ക് കണക്‌റ്റുചെയ്യാൻ കഴിഞ്ഞില്ല"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" മോശം ഇന്റർനെറ്റ് കണക്ഷനാണുള്ളത്."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"കണക്ഷൻ അനുവദിക്കണോ?"</string>
