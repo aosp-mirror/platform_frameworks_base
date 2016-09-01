@@ -3122,8 +3122,6 @@
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
 
-    <string name="candidates_style"><u>candidates</u></string>
-
     <!-- External media notification strings -->
     <skip />
 
