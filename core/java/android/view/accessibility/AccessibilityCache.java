@@ -23,14 +23,18 @@ import android.util.LongArray;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Cache for AccessibilityWindowInfos and AccessibilityNodeInfos.
  * It is updated when windows change or nodes change.
+ * @hide
  */
-final class AccessibilityCache {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public final class AccessibilityCache {
 
     private static final String LOG_TAG = "AccessibilityCache";
 
@@ -39,6 +43,8 @@ final class AccessibilityCache {
     private static final boolean CHECK_INTEGRITY = "eng".equals(Build.TYPE);
 
     private final Object mLock = new Object();
+
+    private final AccessibilityNodeRefresher mAccessibilityNodeRefresher;
 
     private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
     private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
@@ -53,6 +59,10 @@ final class AccessibilityCache {
 
     private final SparseArray<AccessibilityWindowInfo> mTempWindowArray =
             new SparseArray<>();
+
+    public AccessibilityCache(AccessibilityNodeRefresher nodeRefresher) {
+        mAccessibilityNodeRefresher = nodeRefresher;
+    }
 
     public void setWindows(List<AccessibilityWindowInfo> windows) {
         synchronized (mLock) {
@@ -170,7 +180,7 @@ final class AccessibilityCache {
             return;
         }
         // The node changed so we will just refresh it right now.
-        if (cachedInfo.refresh(true)) {
+        if (mAccessibilityNodeRefresher.refreshNode(cachedInfo, true)) {
             return;
         }
         // Weird, we could not refresh. Just evict the entire sub-tree.
@@ -285,10 +295,12 @@ final class AccessibilityCache {
 
                 // Also be careful if the parent has changed since the new
                 // parent may be a predecessor of the old parent which will
-                // add cyclse to the cache.
+                // add cycles to the cache.
                 final long oldParentId = oldInfo.getParentNodeId();
                 if (info.getParentNodeId() != oldParentId) {
                     clearSubTreeLocked(windowId, oldParentId);
+                } else {
+                    oldInfo.recycle();
                 }
            }
 
@@ -296,6 +308,12 @@ final class AccessibilityCache {
             // will wipe the data of the cached info.
             AccessibilityNodeInfo clone = AccessibilityNodeInfo.obtain(info);
             nodes.put(sourceId, clone);
+            if (clone.isAccessibilityFocused()) {
+                mAccessibilityFocus = sourceId;
+            }
+            if (clone.isFocused()) {
+                mInputFocus = sourceId;
+            }
         }
     }
 
@@ -383,6 +401,7 @@ final class AccessibilityCache {
             final long childNodeId = current.getChildId(i);
             clearSubTreeRecursiveLocked(nodes, childNodeId);
         }
+        current.recycle();
     }
 
     /**
@@ -503,6 +522,13 @@ final class AccessibilityCache {
                     }
                 }
             }
+        }
+    }
+
+    // Layer of indirection included to break dependency chain for testing
+    public static class AccessibilityNodeRefresher {
+        public boolean refreshNode(AccessibilityNodeInfo info, boolean bypassCache) {
+            return info.refresh(bypassCache);
         }
     }
 }

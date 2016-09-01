@@ -104,7 +104,7 @@ public final class AccessibilityInteractionClient
         new SparseArray<>();
 
     private static final AccessibilityCache sAccessibilityCache =
-        new AccessibilityCache();
+        new AccessibilityCache(new AccessibilityCache.AccessibilityNodeRefresher());
 
     /**
      * @return The client for the current thread.
@@ -293,6 +293,9 @@ public final class AccessibilityInteractionClient
                             interactionId);
                     finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
                     if (infos != null && !infos.isEmpty()) {
+                        for (int i = 1; i < infos.size(); i++) {
+                            infos.get(i).recycle();
+                        }
                         return infos.get(0);
                     }
                 }

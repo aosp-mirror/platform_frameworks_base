@@ -23,6 +23,8 @@ import android.os.Parcelable;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * This class represents a state snapshot of a window for accessibility
  * purposes. The screen content contains one or more windows where some
@@ -81,6 +83,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private static final int MAX_POOL_SIZE = 10;
     private static final SynchronizedPool<AccessibilityWindowInfo> sPool =
             new SynchronizedPool<AccessibilityWindowInfo>(MAX_POOL_SIZE);
+    private static final AtomicInteger sNumInstancesInUse = new AtomicInteger();
 
     // Data.
     private int mType = UNDEFINED;
@@ -400,6 +403,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         if (info == null) {
             info = new AccessibilityWindowInfo();
         }
+        sNumInstancesInUse.incrementAndGet();
         return info;
     }
 
@@ -437,6 +441,15 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     /**
+     * @return The number of instances of this class that have been obtained but not recycled.
+     *
+     * @hide
+     */
+    public static int getNumInstancesInUse() {
+        return sNumInstancesInUse.get();
+    }
+
+    /**
      * Return an instance back to be reused.
      * <p>
      * <strong>Note:</strong> You must not touch the object after calling this function.
@@ -447,6 +460,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     public void recycle() {
         clear();
         sPool.release(this);
+        sNumInstancesInUse.decrementAndGet();
     }
 
     @Override
