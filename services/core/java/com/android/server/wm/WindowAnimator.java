@@ -236,9 +236,6 @@ public class WindowAnimator {
         allowWhenLocked |= (win.mIsImWindow || imeTarget == win) && showImeOverKeyguard;
         // Show SHOW_WHEN_LOCKED windows
         allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
-        // Show windows that are attached to SHOW_WHEN_LOCKED windows
-        allowWhenLocked |= win.mAttachedWindow != null
-                && (win.mAttachedWindow.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
 
         if (appShowWhenLocked != null) {
             allowWhenLocked |= appShowWhenLocked == win.mAppToken
