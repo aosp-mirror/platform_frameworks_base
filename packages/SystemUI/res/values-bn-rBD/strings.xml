@@ -491,8 +491,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"উপরের দিকে সোয়াইপ করে বিভক্ত-স্ক্রীনে প্রবেশ করার অঙ্গভঙ্গি সক্ষম করুন"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"\'এক নজরে\' বোতাম থেকে উপরের দিকে সোয়াইপ করে, বিভক্ত-স্ক্রীনে প্রবেশ করতে অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ব্লুটুথ চালু করবেন?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে ব্লুটুথ চালু করতে হবে।"</string>

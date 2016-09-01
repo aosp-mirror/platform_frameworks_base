@@ -491,8 +491,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"තත්ත්ව තීරුවෙහි ඔරලෝසු තත්පර පෙන්වන්න. බැටරි ආයු කාලයට බලපෑමට හැකිය."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ඉක්මන් සැකසීම් යළි පිළිවෙළට සකසන්න"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ඉක්මන් සැකසීම්වල දීප්තිය පෙන්වන්න"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"බෙදුම්-තිරය ඉහළට-ස්වයිප් කිරීමේ අභිනය සබල කරන්න"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"දළ විශ්ලේෂණ බොත්තම හරහා ඉහළට ස්වයිප් කිරීමෙන් බෙදුම් තිරයට ඇතුළු වීමට ඉඟිය සබල කිරීම"</string>
     <string name="experimental" msgid="6198182315536726162">"පරීක්ෂණාත්මක"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"බ්ලූටූත් ක්‍රියාත්මක කරන්නද?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ඔබේ යතුරු පුවරුව ඔබේ ටැබ්ලට් පරිගණකයට සම්බන්ධ කිරීමට, ඔබ පළමුව බ්ලූටූත් ක්‍රියාත්මක කළ යුතුය."</string>

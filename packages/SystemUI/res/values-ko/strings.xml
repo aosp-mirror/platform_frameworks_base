@@ -493,8 +493,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"빠른 설정 재정렬"</string>
     <string name="show_brightness" msgid="6613930842805942519">"빠른 설정에서 밝기 표시"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"화면 분할 위로 스와이프 동작 사용"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"최근 사용 버튼에서 위로 스와이프하기 동작으로 창 분할 모드를 사용 설정합니다."</string>
     <string name="experimental" msgid="6198182315536726162">"베타"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>

@@ -495,8 +495,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Pokaż sekundy na zegarku na pasku stanu. Może mieć wpływ na czas pracy baterii."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Uporządkuj Szybkie ustawienia"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Pokaż jasność w Szybkich ustawieniach"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Włącz dzielenie ekranu gestem przesunięcia w górę"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Włącz dzielenie ekranu po wykonaniu gestu przesunięcia palcem w górę od przycisku Przegląd"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperymentalne"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>

@@ -491,8 +491,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ipakita ang mga segundo ng orasan sa status bar. Maaaring makaapekto sa tagal ng baterya."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ayusing Muli ang Mga Mabilisang Setting"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ipakita ang liwanag sa Mga Mabilisang Setting"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"I-enable ang pag-swipe pataas na galaw para sa split-screen"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"I-enable ang gesture upang makapasok sa split-screen sa pamamagitan ng pagsa-swipe pataas mula sa button ng Pangkalahatang-ideya"</string>
     <string name="experimental" msgid="6198182315536726162">"Pang-eksperimento"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"I-on ang Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Upang ikonekta ang iyong keyboard sa iyong tablet, kailangan mo munang i-on ang Bluetooth."</string>
