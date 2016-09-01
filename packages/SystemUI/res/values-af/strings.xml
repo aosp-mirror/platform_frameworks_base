@@ -492,8 +492,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Wys horlosiesekondes op die statusbalk. Sal batterylewe dalk beïnvloed."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Herrangskik Kitsinstellings"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Wys helderheid in Kitsinstellings"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Aktiveer die verdeling van die skerm deur op te swiep"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktiveer gebaar om skerm te verdeel deur van die Oorsig-knoppie af op te swiep"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimenteel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Skakel Bluetooth aan?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Jy moet Bluetooth aanskakel om jou sleutelbord aan jou tablet te koppel."</string>

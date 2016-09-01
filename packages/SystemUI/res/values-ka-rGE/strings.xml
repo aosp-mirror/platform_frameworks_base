@@ -492,8 +492,6 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"საათის წამების ჩვენება სტატუსის ზოლში. შეიძლება გავლენა იქონიოს ბატარეაზე."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"სწრაფი პარამეტრების გადაწყობა"</string>
     <string name="show_brightness" msgid="6613930842805942519">"სიკაშკაშის ჩვენება სწრაფ პარამეტრებში"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"ზემოთ გადაფურცვლისას ეკრანის გაყოფის ჟესტის ჩართვა"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"მიმოხილვის ღილაკიდან ზემოთ გადაფურცვლისას ეკრანის გაყოფის რეჟიმზე გადასვლის ჟესტის ჩართვა"</string>
     <string name="experimental" msgid="6198182315536726162">"ექსპერიმენტული"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"გსურთ Bluetooth-ის ჩართვა?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"კლავიატურის ტაბლეტთან დასაკავშირებლად, ჯერ უნდა ჩართოთ Bluetooth."</string>
