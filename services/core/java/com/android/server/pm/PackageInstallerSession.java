@@ -44,6 +44,7 @@ import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.Signature;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.FileUtils;
@@ -271,9 +272,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         } else {
             mPermissionsAccepted = false;
         }
-        final int uid = mPm.getPackageUid(PackageManagerService.DEFAULT_CONTAINER_PACKAGE,
-                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
-        defaultContainerGid = UserHandle.getSharedAppGid(uid);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int uid = mPm.getPackageUid(PackageManagerService.DEFAULT_CONTAINER_PACKAGE,
+                    PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
+            defaultContainerGid = UserHandle.getSharedAppGid(uid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     public SessionInfo generateInfo() {
