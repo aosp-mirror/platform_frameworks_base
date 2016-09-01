@@ -384,9 +384,12 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     // Set the alpha type for the decode.
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
-    const SkImageInfo decodeInfo = codec->getInfo().makeWH(size.width(), size.height())
-                                                   .makeColorType(decodeColorType)
-                                                   .makeAlphaType(alphaType);
+    // Enable legacy behavior to avoid any gamma correction.  Android's assets are
+    // adjusted to expect a non-gamma correct premultiply.
+    sk_sp<SkColorSpace> colorSpace = nullptr;
+    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
+                                                     alphaType, colorSpace);
+
     SkImageInfo bitmapInfo = decodeInfo;
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
