@@ -35,6 +35,10 @@ import java.io.IOException;
  * Instances of this class are created by {@link MidiManager#openDevice}.
  */
 public final class MidiDevice implements Closeable {
+    static {
+        System.loadLibrary("media_jni");
+    }
+
     private static final String TAG = "MidiDevice";
 
     private final MidiDeviceInfo mDeviceInfo;
@@ -43,6 +47,7 @@ public final class MidiDevice implements Closeable {
     private final IBinder mClientToken;
     private final IBinder mDeviceToken;
     private boolean mIsDeviceClosed;
+    private boolean mIsMirroredToNative;
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -209,10 +214,45 @@ public final class MidiDevice implements Closeable {
         }
     }
 
+    /**
+     * Makes Midi Device available to the Native API
+     * @hide
+     */
+    public void mirrorToNative() throws IOException {
+        if (mIsDeviceClosed || mIsMirroredToNative) {
+            return;
+        }
+
+        int result = mirrorToNative(mDeviceServer.asBinder(), mDeviceInfo.getId());
+        if (result != 0) {
+            throw new IOException("Failed mirroring to native: " + result);
+        }
+
+        mIsMirroredToNative = true;
+    }
+
+    /**
+     * Makes Midi Device no longer available to the Native API
+     * @hide
+     */
+    public void removeFromNative() throws IOException {
+        if (!mIsMirroredToNative) {
+            return;
+        }
+
+        int result = removeFromNative(mDeviceInfo.getId());
+        if (result != 0) {
+            throw new IOException("Failed removing from native: " + result);
+        }
+
+        mIsMirroredToNative = false;
+    }
+
     @Override
     public void close() throws IOException {
         synchronized (mGuard) {
             if (!mIsDeviceClosed) {
+                removeFromNative();
                 mGuard.close();
                 mIsDeviceClosed = true;
                 try {
@@ -238,4 +278,7 @@ public final class MidiDevice implements Closeable {
     public String toString() {
         return ("MidiDevice: " + mDeviceInfo.toString());
     }
+
+    private native int mirrorToNative(IBinder deviceServerBinder, int uid);
+    private native int removeFromNative(int uid);
 }
