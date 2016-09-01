@@ -2735,10 +2735,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 UserHandle.USER_SYSTEM);
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
-        } else {
-            Log.e(TAG, "There should probably be exactly one verifier; found " + matches);
+        } else if (matches.size() == 0) {
+            Log.e(TAG, "There should probably be a verifier, but, none were found");
             return null;
         }
+        throw new RuntimeException("There must be exactly one verifier; found " + matches);
     }
 
     private @NonNull String getRequiredSharedLibraryLPr(String libraryName) {
