@@ -38,8 +38,6 @@ oneway interface IBluetoothGattCallback {
     void onDescriptorWrite(in String address, in int status, in int handle);
     void onNotify(in String address, in int handle, in byte[] value);
     void onReadRemoteRssi(in String address, in int rssi, in int status);
-    void onMultiAdvertiseCallback(in int status, boolean isStart,
-                                  in AdvertiseSettings advertiseSettings);
     void onScanManagerErrorCallback(in int errorCode);
     void onConfigureMTU(in String address, in int mtu, in int status);
     void onFoundOrLost(in boolean onFound, in ScanResult scanResult);
