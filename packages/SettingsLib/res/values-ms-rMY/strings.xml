@@ -341,4 +341,5 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Terbesar"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Tersuai (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Bantuan &amp; maklum balas"</string>
+    <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
 </resources>
