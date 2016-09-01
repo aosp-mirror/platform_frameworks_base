@@ -137,7 +137,7 @@ public class SyncStorageEngine extends Handler {
     private static final boolean SYNC_ENABLED_DEFAULT = false;
 
     // the version of the accounts xml file format
-    private static final int ACCOUNTS_VERSION = 2;
+    private static final int ACCOUNTS_VERSION = 3;
 
     private static HashMap<String, String> sAuthorityRenames;
     private static PeriodicSyncAddedListener mPeriodicSyncAddedListener;
@@ -407,6 +407,8 @@ public class SyncStorageEngine extends Handler {
 
     private OnSyncRequestListener mSyncRequestListener;
     private OnAuthorityRemovedListener mAuthorityRemovedListener;
+
+    private boolean mGrantSyncAdaptersAccountAccess;
 
     private SyncStorageEngine(Context context, File dataDir) {
         mContext = context;
@@ -1410,6 +1412,10 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
+    public boolean shouldGrantSyncAdaptersAccountAccess() {
+        return mGrantSyncAdaptersAccountAccess;
+    }
+
     /**
      * public for testing
      */
@@ -1464,6 +1470,11 @@ public class SyncStorageEngine extends Handler {
                 } catch (NumberFormatException e) {
                     version = 0;
                 }
+
+                if (version < 3) {
+                    mGrantSyncAdaptersAccountAccess = true;
+                }
+
                 String nextIdString = parser.getAttributeValue(null, XML_ATTR_NEXT_AUTHORITY_ID);
                 try {
                     int id = (nextIdString == null) ? 0 : Integer.parseInt(nextIdString);
