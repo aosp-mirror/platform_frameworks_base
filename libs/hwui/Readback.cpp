@@ -32,7 +32,8 @@ namespace android {
 namespace uirenderer {
 
 static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
-        Texture& sourceTexture, Matrix4& texTransform, SkBitmap* bitmap) {
+        Texture& sourceTexture, Matrix4& texTransform, const Rect& srcRect,
+        SkBitmap* bitmap) {
     int destWidth = bitmap->width();
     int destHeight = bitmap->height();
     if (destWidth > caches.maxTextureSize
@@ -100,11 +101,19 @@ static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
         renderState.blend().syncEnabled();
         renderState.stencil().disable();
 
+        Matrix4 croppedTexTransform(texTransform);
+        if (!srcRect.isEmpty()) {
+            croppedTexTransform.loadTranslate(srcRect.left / sourceTexture.width(),
+                    srcRect.top / sourceTexture.height(), 0);
+            croppedTexTransform.scale(srcRect.getWidth() / sourceTexture.width(),
+                    srcRect.getHeight() / sourceTexture.height(), 1);
+            croppedTexTransform.multiply(texTransform);
+        }
         Glop glop;
         GlopBuilder(renderState, caches, &glop)
                 .setRoundRectClipState(nullptr)
                 .setMeshTexturedUnitQuad(nullptr)
-                .setFillExternalTexture(sourceTexture, texTransform)
+                .setFillExternalTexture(sourceTexture, croppedTexTransform)
                 .setTransform(Matrix4::identity(), TransformFlags::None)
                 .setModelViewMapUnitToRect(Rect(destWidth, destHeight))
                 .build();
@@ -126,7 +135,8 @@ static CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
 }
 
 CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
-        Surface& surface, SkBitmap* bitmap) {
+        Surface& surface, const Rect& srcRect, SkBitmap* bitmap) {
+    ATRACE_CALL();
     renderThread.eglManager().initialize();
 
     Caches& caches = Caches::getInstance();
@@ -190,7 +200,7 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
             sourceBuffer->getWidth(), sourceBuffer->getHeight(), 0 /* total lie */);
 
     CopyResult copyResult = copyTextureInto(caches, renderThread.renderState(),
-            sourceTexture, texTransform, bitmap);
+            sourceTexture, texTransform, srcRect, bitmap);
     sourceTexture.deleteTexture();
     // All we're flushing & finishing is the deletion of the texture since
     // copyTextureInto already did a major flush & finish as an implicit
@@ -202,8 +212,9 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
 
 CopyResult Readback::copyTextureLayerInto(renderthread::RenderThread& renderThread,
         Layer& layer, SkBitmap* bitmap) {
+    ATRACE_CALL();
     return copyTextureInto(Caches::getInstance(), renderThread.renderState(),
-            layer.getTexture(), layer.getTexTransform(), bitmap);
+            layer.getTexture(), layer.getTexTransform(), Rect(), bitmap);
 }
 
 } // namespace uirenderer
