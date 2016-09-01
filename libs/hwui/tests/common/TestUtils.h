@@ -91,7 +91,7 @@ public:
     public:
         SignalingDtor()
                 : mSignal(nullptr) {}
-        SignalingDtor(int* signal)
+        explicit SignalingDtor(int* signal)
                 : mSignal(signal) {}
         void setSignal(int* signal) {
             mSignal = signal;
@@ -213,7 +213,7 @@ public:
 
     class TestTask : public renderthread::RenderTask {
     public:
-        TestTask(RtCallback rtCallback)
+        explicit TestTask(RtCallback rtCallback)
                 : rtCallback(rtCallback) {}
         virtual ~TestTask() {}
         virtual void run() override;

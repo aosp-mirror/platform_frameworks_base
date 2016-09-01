@@ -52,7 +52,7 @@ public:
     static void onFrameCompleted();
 
 protected:
-    GpuMemoryTracker(GpuObjectType type) : mType(type) {
+    explicit GpuMemoryTracker(GpuObjectType type) : mType(type) {
         ASSERT_GPU_THREAD();
         startTrackingObject();
     }

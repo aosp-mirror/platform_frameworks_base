@@ -126,7 +126,7 @@ private:
                 : width(OffscreenBuffer::computeIdealDimension(layerWidth))
                 , height(OffscreenBuffer::computeIdealDimension(layerHeight)) {}
 
-        Entry(OffscreenBuffer* layer)
+        explicit Entry(OffscreenBuffer* layer)
                 : layer(layer)
                 , width(layer->texture.width())
                 , height(layer->texture.height()) {
