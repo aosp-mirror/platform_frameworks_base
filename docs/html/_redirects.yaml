@@ -1221,7 +1221,7 @@ redirects:
   to: /training/index.html?utm_medium=android-studio
 - from: /r/studio-ui/run-with-work-profile.html
   to: /studio/run/index.html#ir-work-profile?utm_medium=android-studio
-- from: /r/studio-ui/gpu-debugger.html
+- from: /r/studio-ui/am-gpu-debugger.html
   to: /studio/profile/am-gpu.html?utm_medium=android-studio
 - from: /r/studio-ui/theme-editor.html
   to: /studio/write/theme-editor.html?utm_medium=android-studio
