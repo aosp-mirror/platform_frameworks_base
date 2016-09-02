@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -119,7 +118,7 @@ public class AppWindowAnimator {
             int stackClip) {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting animation in " + mAppToken
                 + ": " + anim + " wxh=" + width + "x" + height
-                + " isVisible=" + mAppToken.isVisible());
+                + " hasContentToDisplay=" + mAppToken.hasContentToDisplay());
         animation = anim;
         animating = false;
         if (!anim.isInitialized()) {
@@ -141,7 +140,7 @@ public class AppWindowAnimator {
         }
         // Start out animation gone if window is gone, or visible if window is visible.
         transformation.clear();
-        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
+        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
         hasTransformation = true;
         mStackClip = stackClip;
 
@@ -164,11 +163,11 @@ public class AppWindowAnimator {
 
     public void setDummyAnimation() {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting dummy animation in " + mAppToken
-                + " isVisible=" + mAppToken.isVisible());
+                + " hasContentToDisplay=" + mAppToken.hasContentToDisplay());
         animation = sDummyAnimation;
         hasTransformation = true;
         transformation.clear();
-        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
+        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
     }
 
     void setNullAnimation() {

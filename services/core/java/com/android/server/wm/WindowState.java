@@ -1181,10 +1181,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
     }
 
-    // TODO: Sigh...another is visible method...tried to consolidate with other isVisible methods
-    // below, but failed. Need to figure-out a good way to handle this long term...
     @Override
-    boolean isVisible() {
+    boolean hasContentToDisplay() {
         // If we're animating with a saved surface, we're already visible.
         // Return true so that the alpha doesn't get cleared.
         if (!mAppFreezing && isDrawnLw()
@@ -1193,6 +1191,17 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return true;
         }
 
+        return super.hasContentToDisplay();
+    }
+
+    @Override
+    boolean isVisible() {
+        if ((mAppToken == null || !mAppToken.hiddenRequested) && isVisibleUnchecked()) {
+            // Is this window visible?  It is not visible if there is no surface, or we are in the
+            // process of running an exit animation that will remove the surface, or its app token
+            // has been hidden.
+            return true;
+        }
         return super.isVisible();
     }
 
@@ -1206,13 +1215,9 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
-    /**
-     * Is this window visible?  It is not visible if there is no surface, or we are in the process
-     * of running an exit animation that will remove the surface, or its app token has been hidden.
-     */
     @Override
     public boolean isVisibleLw() {
-        return (mAppToken == null || !mAppToken.hiddenRequested) && isVisibleUnchecked();
+        return isVisible();
     }
 
     /**
@@ -1238,7 +1243,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * Is this window visible, ignoring its app token? It is not visible if there is no surface,
      * or we are in the process of running an exit animation that will remove the surface.
      */
-    public boolean isWinVisibleLw() {
+    // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
+    boolean isWinVisibleLw() {
         return (mAppToken == null || !mAppToken.hiddenRequested || mAppToken.mAppAnimator.animating)
                 && isVisibleUnchecked();
     }
@@ -1287,7 +1293,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * Like isOnScreen(), but ignores any force hiding of the window due
      * to the keyguard.
      */
-    boolean isOnScreenIgnoringKeyguard() {
+    private boolean isOnScreenIgnoringKeyguard() {
         if (!mHasSurface || mDestroying) {
             return false;
         }

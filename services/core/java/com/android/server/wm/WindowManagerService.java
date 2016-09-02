@@ -10039,7 +10039,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setWillReplaceWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
             final AppWindowToken appWindowToken = findAppWindowToken(token);
-            if (appWindowToken == null || !appWindowToken.isVisible()) {
+            if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
                 return;
@@ -10063,7 +10063,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
         synchronized (mWindowMap) {
             final AppWindowToken appWindowToken = findAppWindowToken(token);
-            if (appWindowToken == null || !appWindowToken.isVisible()) {
+            if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
                 return;
