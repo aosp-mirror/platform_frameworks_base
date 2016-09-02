@@ -168,6 +168,8 @@ public:
 
     ANDROID_API int64_t getFrameNumber();
 
+    void waitOnFences();
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -177,8 +179,6 @@ private:
     void setSurface(Surface* window);
 
     void freePrefetchedLayers(TreeObserver* observer);
-
-    void waitOnFences();
 
     bool isSwapChainStuffed();
 
