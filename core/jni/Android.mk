@@ -80,6 +80,10 @@ LOCAL_SRC_FILES:= \
     android_text_AndroidBidi.cpp \
     android_text_StaticLayout.cpp \
     android_os_Debug.cpp \
+    android_os_HwBinder.cpp \
+    android_os_HwBlob.cpp \
+    android_os_HwParcel.cpp \
+    android_os_HwRemoteBinder.cpp \
     android_os_MemoryFile.cpp \
     android_os_MessageQueue.cpp \
     android_os_Parcel.cpp \
@@ -177,7 +181,8 @@ LOCAL_SRC_FILES:= \
     com_android_internal_os_PathClassLoaderFactory.cpp \
     com_android_internal_os_Zygote.cpp \
     com_android_internal_util_VirtualRefBasePtr.cpp \
-    com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp
+    com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp \
+    hwbinder/EphemeralStorage.cpp \
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
@@ -260,6 +265,8 @@ LOCAL_SHARED_LIBRARIES := \
     libradio_metadata \
     libnativeloader \
     libmemunreachable \
+    libhidl \
+    libhwbinder \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
