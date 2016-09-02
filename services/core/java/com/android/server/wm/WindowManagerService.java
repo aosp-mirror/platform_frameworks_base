@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -201,6 +202,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
@@ -1869,6 +1871,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean reportNewConfig = false;
         WindowState attachedWindow = null;
         long origId;
+        final int callingUid = Binder.getCallingUid();
         final int type = attrs.type;
 
         synchronized(mWindowMap) {
@@ -1916,6 +1919,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean addToken = false;
             WindowToken token = mTokenMap.get(attrs.token);
             AppWindowToken atoken = null;
+            boolean addToastWindowRequiresToken = false;
+
             if (token == null) {
                 if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
                     Slog.w(TAG_WM, "Attempted to add application window with unknown token "
@@ -1951,6 +1956,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG_WM, "Attempted to add Accessibility overlay window with unknown token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
+                if (type == TYPE_TOAST) {
+                    // Apps targeting SDK above N MR1 cannot arbitrary add toast windows.
+                    if (doesAddToastWindowRequireToken(attrs.packageName, callingUid,
+                            attachedWindow)) {
+                        Slog.w(TAG_WM, "Attempted to add a toast window with unknown token "
+                                + attrs.token + ".  Aborting.");
+                        return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                    }
                 }
                 token = new WindowToken(this, attrs.token, -1, false);
                 addToken = true;
@@ -2001,6 +2015,15 @@ public class WindowManagerService extends IWindowManager.Stub
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
+            } else if (type == TYPE_TOAST) {
+                // Apps targeting SDK above N MR1 cannot arbitrary add toast windows.
+                addToastWindowRequiresToken = doesAddToastWindowRequireToken(attrs.packageName,
+                        callingUid, attachedWindow);
+                if (addToastWindowRequiresToken && token.windowType != TYPE_TOAST) {
+                    Slog.w(TAG_WM, "Attempted to add a toast window with bad token "
+                            + attrs.token + ".  Aborting.");
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
             } else if (type == TYPE_QS_DIALOG) {
                 if (token.windowType != TYPE_QS_DIALOG) {
                     Slog.w(TAG_WM, "Attempted to add QS dialog window with bad token "
@@ -2043,6 +2066,36 @@ public class WindowManagerService extends IWindowManager.Stub
                     && (attrs.inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) == 0);
             if  (openInputChannels) {
                 win.openInputChannel(outInputChannel);
+            }
+
+            // If adding a toast requires a token for this app we always schedule hiding
+            // toast windows to make sure they don't stick around longer then necessary.
+            // We hide instead of remove such windows as apps aren't prepared to handle
+            // windows being removed under them.
+            //
+            // If the app is older it can add toasts without a token and hence overlay
+            // other apps. To be maximally compatible with these apps we will hide the
+            // window after the toast timeout only if the focused window is from another
+            // UID, otherwise we allow unlimited duration. When a UID looses focus we
+            // schedule hiding all of its toast windows.
+            if (type == TYPE_TOAST) {
+                if (!getDefaultDisplayContentLocked().canAddToastWindowForUid(callingUid)) {
+                    Slog.w(TAG_WM, "Adding more than one toast window for UID at a time.");
+                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
+                }
+                // Make sure this happens before we moved focus as one can make the
+                // toast focusable to force it not being hidden after the timeout.
+                // Focusable toasts are always timed out to prevent a focused app to
+                // show a focusable toasts while it has focus which will be kept on
+                // the screen after the activity goes away.
+                if (addToastWindowRequiresToken
+                        || (attrs.flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0
+                        || mCurrentFocus == null
+                        || mCurrentFocus.mOwnerUid != callingUid) {
+                    mH.sendMessageDelayed(
+                            mH.obtainMessage(H.WINDOW_HIDE_TIMEOUT, win),
+                            win.mAttrs.hideTimeoutMilliseconds);
+                }
             }
 
             // From now on, no exceptions or errors allowed!
@@ -2183,11 +2236,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
                 reportNewConfig = true;
             }
-            if (attrs.removeTimeoutMilliseconds > 0) {
-                mH.sendMessageDelayed(
-                        mH.obtainMessage(H.WINDOW_REMOVE_TIMEOUT, win),
-                        attrs.removeTimeoutMilliseconds);
-            }
         }
 
         if (reportNewConfig) {
@@ -2197,6 +2245,32 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,
+            WindowState attachedWindow) {
+        // Try using the target SDK of the root window
+        if (attachedWindow != null) {
+            return attachedWindow.mAppToken != null
+                    && attachedWindow.mAppToken.targetSdk > Build.VERSION_CODES.N_MR1;
+        } else {
+            // Otherwise, look at the package
+            try {
+                ApplicationInfo appInfo = mContext.getPackageManager()
+                        .getApplicationInfoAsUser(packageName, 0,
+                                UserHandle.getUserId(callingUid));
+                if (appInfo.uid != callingUid) {
+                    throw new SecurityException("Package " + packageName + " not in UID "
+                            + callingUid);
+                }
+                if (appInfo.targetSdkVersion > Build.VERSION_CODES.N_MR1) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                /* ignore */
+            }
+        }
+        return false;
     }
 
     /**
@@ -8165,7 +8239,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_APP_TRANSITION_FINISHED = 49;
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
         public static final int UPDATE_ANIMATION_SCALE = 51;
-        public static final int WINDOW_REMOVE_TIMEOUT = 52;
+        public static final int WINDOW_HIDE_TIMEOUT = 52;
         public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
         public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
 
@@ -8785,7 +8859,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAmInternal.notifyStartingWindowDrawn();
                 }
                 break;
-                case WINDOW_REMOVE_TIMEOUT: {
+                case WINDOW_HIDE_TIMEOUT: {
                     final WindowState window = (WindowState) msg.obj;
                     synchronized(mWindowMap) {
                         // TODO: This is all about fixing b/21693547
@@ -8796,8 +8870,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         // running under debugger) to crash (b/29105388). The windows will
                         // eventually be removed when the client process finishes.
                         // The best we can do for now is remove the FLAG_KEEP_SCREEN_ON
-                        // and prevent the symptoms of b/21693547.
+                        // and prevent the symptoms of b/21693547. Since apps don't
+                        // support windows being removed under them we hide the window
+                        // and it will be removed when the app dies.
                         window.mAttrs.flags &= ~FLAG_KEEP_SCREEN_ON;
+                        window.hidePermanentlyLw();
                         window.setDisplayLayoutNeeded();
                         mWindowPlacerLocked.performSurfacePlacement();
                     }
@@ -9832,6 +9909,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             adjustForImeIfNeeded(displayContent);
+
+            // We may need to schedule some toast windows to be removed. The
+            // toasts for an app that does not have input focus are removed
+            // within a timeout to prevent apps to redress other apps' UI.
+            oldFocus.getDisplayContent().scheduleToastWindowsTimeoutIfNeededLocked(
+                    oldFocus, newFocus);
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             return true;
