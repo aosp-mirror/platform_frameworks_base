@@ -34,7 +34,7 @@ import static junit.framework.Assert.assertTrue;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TileServiceManagerTests extends SysuiTestCase {
+public class TileServiceManagerTest extends SysuiTestCase {
 
     private TileServices mTileServices;
     private TileLifecycleManager mTileLifecycle;
@@ -52,7 +52,7 @@ public class TileServiceManagerTests extends SysuiTestCase {
         mTileLifecycle = Mockito.mock(TileLifecycleManager.class);
         Mockito.when(mTileLifecycle.isActiveTile()).thenReturn(false);
         ComponentName componentName = new ComponentName(mContext,
-                TileServiceManagerTests.class);
+                TileServiceManagerTest.class);
         Mockito.when(mTileLifecycle.getComponent()).thenReturn(componentName);
         mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mTileLifecycle);
     }

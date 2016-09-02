@@ -28,7 +28,7 @@ import static junit.framework.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TouchAnimatorTests extends SysuiTestCase {
+public class TouchAnimatorTest extends SysuiTestCase {
 
     private Listener mTouchListener;
     private View mTestView;

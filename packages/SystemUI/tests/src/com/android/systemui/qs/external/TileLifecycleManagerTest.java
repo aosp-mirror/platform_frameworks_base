@@ -56,7 +56,7 @@ import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TileLifecycleManagerTests extends SysuiTestCase {
+public class TileLifecycleManagerTest extends SysuiTestCase {
     public static final String TILE_UPDATE_BROADCAST = "com.android.systemui.tests.TILE_UPDATE";
     public static final String EXTRA_CALLBACK = "callback";
 

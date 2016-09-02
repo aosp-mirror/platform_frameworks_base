@@ -38,7 +38,7 @@ import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TileServicesTests extends SysuiTestCase {
+public class TileServicesTest extends SysuiTestCase {
     private static int NUM_FAKES = TileServices.DEFAULT_MAX_BOUND * 2;
 
     private TileServices mTileService;
