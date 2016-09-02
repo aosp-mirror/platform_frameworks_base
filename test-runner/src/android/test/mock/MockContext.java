@@ -759,6 +759,10 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide **/
+    @Override
+    public File getPreloadsFileCache() { throw new UnsupportedOperationException(); }
+
     @Override
     public Context createDeviceProtectedStorageContext() {
         throw new UnsupportedOperationException();

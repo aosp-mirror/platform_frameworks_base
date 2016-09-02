@@ -638,6 +638,15 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Nullable
+    @Override
+    public File getPreloadsFileCache() {
+        return Environment.getDataPreloadsFileCacheDirectory(getPackageName());
+    }
+
     @Override
     public File getFileStreamPath(String name) {
         return makeFilename(getFilesDir(), name);

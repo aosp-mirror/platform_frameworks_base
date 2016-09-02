@@ -1412,6 +1412,12 @@ public class BridgeContext extends Context {
     }
 
     @Override
+    public File getPreloadsFileCache() {
+        // pass
+        return null;
+    }
+
+    @Override
     public ContentResolver getContentResolver() {
         if (mContentResolver == null) {
             mContentResolver = new BridgeContentResolver(this);
