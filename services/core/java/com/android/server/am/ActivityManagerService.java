@@ -21610,6 +21610,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             currentUserId = mUserController.getCurrentUserIdLocked();
             targetUserInfo = mUserController.getUserInfo(targetUserId);
+            if (targetUserId == currentUserId) {
+                Slog.i(TAG, "user #" + targetUserId + " is already the current user");
+                return true;
+            }
             if (targetUserInfo == null) {
                 Slog.w(TAG, "No user info for user #" + targetUserId);
                 return false;
