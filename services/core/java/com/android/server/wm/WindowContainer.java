@@ -91,4 +91,87 @@ class WindowContainer {
         }
         return false;
     }
+
+    void setWaitingForDrawnIfResizingChanged() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.setWaitingForDrawnIfResizingChanged();
+        }
+    }
+
+    void onResize() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.onResize();
+        }
+    }
+
+    void onMovedByResize() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.onMovedByResize();
+        }
+    }
+
+    void resetDragResizingChangeReported() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.resetDragResizingChangeReported();
+        }
+    }
+
+    boolean detachFromDisplay() {
+        boolean didSomething = false;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            didSomething |= wc.detachFromDisplay();
+        }
+        return didSomething;
+    }
+
+    void forceWindowsScaleableInTransaction(boolean force) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.forceWindowsScaleableInTransaction(force);
+        }
+    }
+
+    boolean isAnimating() {
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowContainer wc = mChildren.get(j);
+            if (wc.isAnimating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void sendAppVisibilityToClients() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.sendAppVisibilityToClients();
+        }
+    }
+
+    void setVisibleBeforeClientHidden() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.setVisibleBeforeClientHidden();
+        }
+    }
+
+    boolean isVisible() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            if (wc.isVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns the top child container or this container if there are no children. */
+    WindowContainer getTop() {
+        return mChildren.isEmpty() ? this : mChildren.peekLast();
+    }
 }

@@ -126,7 +126,6 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
-import com.android.server.wm.TaskGroup;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
@@ -161,8 +160,6 @@ final class ActivityStack {
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
-
-    private static final boolean VALIDATE_TOKENS = false;
 
     // Ticks during which we check progress while waiting for an app to launch.
     static final int LAUNCH_TICK = 500;
@@ -240,11 +237,6 @@ final class ActivityStack {
      * running) activities.  It contains #TaskRecord objects.
      */
     private final ArrayList<TaskRecord> mTaskHistory = new ArrayList<>();
-
-    /**
-     * Used for validating app tokens with window manager.
-     */
-    final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<>();
 
     /**
      * List of running activities, sorted by recent usage.
@@ -898,9 +890,6 @@ final class ActivityStack {
             } else {
                 ++i;
             }
-        }
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
         }
     }
 
@@ -2763,9 +2752,6 @@ final class ActivityStack {
                         task.addActivityToTop(r);
                         r.putInHistory();
                         addConfigOverride(r, task);
-                        if (VALIDATE_TOKENS) {
-                            validateAppTokensLocked();
-                        }
                         ActivityOptions.abort(options);
                         return;
                     }
@@ -2867,33 +2853,7 @@ final class ActivityStack {
             // because there is nothing for it to animate on top of.
             addConfigOverride(r, task);
             ActivityOptions.abort(options);
-            options = null;
         }
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
-    }
-
-    final void validateAppTokensLocked() {
-        mValidateAppTokens.clear();
-        mValidateAppTokens.ensureCapacity(numActivities());
-        final int numTasks = mTaskHistory.size();
-        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            if (activities.isEmpty()) {
-                continue;
-            }
-            TaskGroup group = new TaskGroup();
-            group.taskId = task.taskId;
-            mValidateAppTokens.add(group);
-            final int numActivities = activities.size();
-            for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                group.tokens.add(r.appToken);
-            }
-        }
-        mWindowManager.validateAppTokens(mStackId, mValidateAppTokens);
     }
 
     /**
@@ -3005,10 +2965,6 @@ final class ActivityStack {
                 }
 
                 mWindowManager.moveTaskToBottom(targetTask.taskId);
-                if (VALIDATE_TOKENS) {
-                    validateAppTokensLocked();
-                }
-
                 replyChainEnd = -1;
             } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
                 // If the activity should just be removed -- either
@@ -3146,9 +3102,6 @@ final class ActivityStack {
                         setAppTask(p, task);
                     }
                     mWindowManager.moveTaskToTop(taskId);
-                    if (VALIDATE_TOKENS) {
-                        validateAppTokensLocked();
-                    }
 
                     // Now we've moved it in to place...  but what if this is
                     // a singleTop activity and we have put it on top of another
@@ -3897,9 +3850,6 @@ final class ActivityStack {
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + r);
         r.app = null;
         mWindowManager.removeAppToken(r.appToken);
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
         final TaskRecord task = r.task;
         if (task != null && task.removeActivity(r)) {
             if (DEBUG_STACK) Slog.i(TAG_STACK,
@@ -4395,10 +4345,6 @@ final class ActivityStack {
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
-
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
     }
 
     /**
@@ -4512,10 +4458,6 @@ final class ActivityStack {
 
         mWindowManager.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
         mWindowManager.moveTaskToBottom(taskId);
-
-        if (VALIDATE_TOKENS) {
-            validateAppTokensLocked();
-        }
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (prevIsHome || (task == tr && canGoHome) || (numTasks <= 1 && isOnHomeDisplay())) {

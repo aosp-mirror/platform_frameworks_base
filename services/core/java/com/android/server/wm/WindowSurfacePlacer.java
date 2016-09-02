@@ -1352,7 +1352,7 @@ class WindowSurfacePlacer {
                 }
 
                 final boolean drawnBeforeRestoring = wtoken.allDrawn;
-                wtoken.restoreSavedSurfaces();
+                wtoken.restoreSavedSurfaceForInterestingWindows();
 
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;

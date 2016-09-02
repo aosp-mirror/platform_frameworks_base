@@ -597,10 +597,9 @@ class WindowStateAnimator {
 
     WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
-        if (w.hasSavedSurface()) {
+        if (w.restoreSavedSurface()) {
             if (DEBUG_ANIM) Slog.i(TAG,
                     "createSurface: " + this + ": called when we had a saved surface");
-            w.restoreSavedSurface();
             return mSurfaceController;
         }
 

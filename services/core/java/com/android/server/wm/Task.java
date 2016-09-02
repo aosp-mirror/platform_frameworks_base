@@ -17,18 +17,14 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_TASK;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import android.app.ActivityManager.StackId;
 import android.content.pm.ActivityInfo;
@@ -44,7 +40,6 @@ import android.view.SurfaceControl;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 class Task implements DimLayer.DimLayerUser {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
@@ -309,9 +304,9 @@ class Task implements DimLayer.DimLayerUser {
             return false;
         }
         if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
-            resizeWindows();
+            onResize();
         } else {
-            moveWindows();
+            onMovedByResize();
         }
         return true;
     }
@@ -474,14 +469,14 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void resetDragResizingChangeReported() {
+    private void resetDragResizingChangeReported() {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
             mAppTokens.get(activityNdx).resetDragResizingChangeReported();
         }
     }
 
     boolean isDragResizing() {
-        return mDragResizing || (mStack != null && mStack.isDragResizing());
+        return mDragResizing;
     }
 
     int getDragResizeMode() {
@@ -498,10 +493,12 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void detachDisplay() {
+    boolean detachFromDisplay() {
+        boolean didSomething = false;
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).detachDisplay();
+            didSomething |= mAppTokens.get(i).detachFromDisplay();
         }
+        return didSomething;
     }
 
     void updateDisplayInfo(final DisplayContent displayContent) {
@@ -539,15 +536,15 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void resizeWindows() {
+    private void onResize() {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).resizeWindows();
+            mAppTokens.get(activityNdx).onResize();
         }
     }
 
-    void moveWindows() {
+    private void onMovedByResize() {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).moveWindows();
+            mAppTokens.get(i).onMovedByResize();
         }
     }
 
@@ -614,10 +611,6 @@ class Task implements DimLayer.DimLayerUser {
             }
         }
         return null;
-    }
-
-    AppWindowToken getTopAppToken() {
-        return mAppTokens.size() > 0 ? mAppTokens.get(mAppTokens.size() - 1) : null;
     }
 
     @Override

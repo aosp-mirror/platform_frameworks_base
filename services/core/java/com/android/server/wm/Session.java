@@ -202,7 +202,7 @@ final class Session extends IWindowSession.Stub
 
     @Override
     public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
-        mService.setReplacingWindows(appToken, childrenOnly);
+        mService.setWillReplaceWindows(appToken, childrenOnly);
     }
 
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
