@@ -560,7 +560,7 @@ class WindowSurfacePlacer {
 
         // Remove all deferred displays stacks, tasks, and activities.
         for (int displayNdx = mService.mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
-            mService.mDisplayContents.valueAt(displayNdx).checkForDeferredActions();
+            mService.mDisplayContents.valueAt(displayNdx).onCompleteDeferredRemoval();
         }
 
         if (updateInputWindowsNeeded) {
@@ -606,8 +606,6 @@ class WindowSurfacePlacer {
             final int displayId = displayContent.getDisplayId();
             final int dw = displayInfo.logicalWidth;
             final int dh = displayInfo.logicalHeight;
-            final int innerDw = displayInfo.appWidth;
-            final int innerDh = displayInfo.appHeight;
             final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
 
             // Reset for each display.
@@ -868,7 +866,7 @@ class WindowSurfacePlacer {
                     mPreferredModeId,
                     true /* inTraversal, must call performTraversalInTrans... below */);
 
-            mService.getDisplayContentLocked(displayId).stopDimmingIfNeeded();
+            displayContent.stopDimmingIfNeeded();
 
             if (updateAllDrawn) {
                 updateAllDrawnLocked(displayContent);

@@ -64,7 +64,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             case MotionEvent.ACTION_HOVER_MOVE: {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
-                final Task task = mDisplayContent.findTaskForControlPoint(x, y);
+                final Task task = mDisplayContent.findTaskForResizePoint(x, y);
                 int iconType = TYPE_NOT_SPECIFIED;
                 if (task != null) {
                     task.getDimBounds(mTmpRect);

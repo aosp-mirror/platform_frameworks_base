@@ -6699,7 +6699,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
         int taskId = -1;
         synchronized (mWindowMap) {
-            final Task task = displayContent.findTaskForControlPoint(x, y);
+            final Task task = displayContent.findTaskForResizePoint(x, y);
             if (task != null) {
                 if (!startPositioningLocked(
                         task.getTopVisibleAppMainWindow(), true /*resize*/, x, y)) {

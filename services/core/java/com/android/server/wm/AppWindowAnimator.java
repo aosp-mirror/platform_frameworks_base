@@ -383,8 +383,8 @@ public class AppWindowAnimator {
             return false;
         }
 
-        mAnimator.setAppLayoutChanges(this, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                "AppWindowToken", displayId);
+        mAppToken.setAppLayoutChanges(
+                WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM, "AppWindowToken", displayId);
 
         clearAnimation();
         animating = false;
@@ -397,8 +397,7 @@ public class AppWindowAnimator {
             mService.moveInputMethodWindowsIfNeededLocked(true);
         }
 
-        if (DEBUG_ANIM) Slog.v(TAG,
-                "Animation done in " + mAppToken
+        if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + mAppToken
                 + ": reportedVisible=" + mAppToken.reportedVisible);
 
         transformation.clear();

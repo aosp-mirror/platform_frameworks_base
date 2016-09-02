@@ -161,6 +161,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return null;
     }
 
+    boolean hasMultipleTaskWithHomeTaskNotTop() {
+        return mTasks.size() > 1 && !mTasks.get(mTasks.size() - 1).isHomeTask();
+    }
+
+    boolean topTaskIsOnTopLauncher() {
+        return mTasks.get(mTasks.size() - 1).isOnTopLauncher();
+    }
+
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.

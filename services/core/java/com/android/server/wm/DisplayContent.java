@@ -331,7 +331,7 @@ class DisplayContent {
      * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
-    Task findTaskForControlPoint(int x, int y) {
+    Task findTaskForResizePoint(int x, int y) {
         final int delta = mService.dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             TaskStack stack = mStacks.get(stackNdx);
@@ -498,7 +498,7 @@ class DisplayContent {
         return false;
     }
 
-    void checkForDeferredActions() {
+    void onCompleteDeferredRemoval() {
         boolean animating = false;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mStacks.get(stackNdx);
