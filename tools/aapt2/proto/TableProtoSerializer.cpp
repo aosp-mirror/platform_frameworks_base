@@ -22,6 +22,10 @@
 #include "proto/ProtoSerialize.h"
 #include "util/BigBuffer.h"
 
+using google::protobuf::io::CodedOutputStream;
+using google::protobuf::io::CodedInputStream;
+using google::protobuf::io::ZeroCopyOutputStream;
+
 namespace aapt {
 
 namespace {
@@ -210,7 +214,7 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
     });
     table->stringPool.prune();
 
-    std::unique_ptr<pb::ResourceTable> pbTable = util::make_unique<pb::ResourceTable>();
+    auto pbTable = util::make_unique<pb::ResourceTable>();
     serializeStringPoolToPb(table->stringPool, pbTable->mutable_string_pool());
 
     StringPool sourcePool, symbolPool;
@@ -274,7 +278,7 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
 }
 
 std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(const ResourceFile& file) {
-    std::unique_ptr<pb::CompiledFile> pbFile = util::make_unique<pb::CompiledFile>();
+    auto pbFile = util::make_unique<pb::CompiledFile>();
     pbFile->set_resource_name(file.name.toString());
     pbFile->set_source_path(file.source.path);
     serializeConfig(file.config, pbFile->mutable_config());
@@ -287,36 +291,112 @@ std::unique_ptr<pb::CompiledFile> serializeCompiledFileToPb(const ResourceFile& 
     return pbFile;
 }
 
-CompiledFileOutputStream::CompiledFileOutputStream(google::protobuf::io::ZeroCopyOutputStream* out,
-                                                   pb::CompiledFile* pbFile) :
-        mOut(out), mPbFile(pbFile) {
+CompiledFileOutputStream::CompiledFileOutputStream(ZeroCopyOutputStream* out) : mOut(out) {
 }
 
-bool CompiledFileOutputStream::ensureFileWritten() {
-    if (mPbFile) {
-        const uint64_t pbSize = mPbFile->ByteSize();
-        mOut.WriteLittleEndian64(pbSize);
-        mPbFile->SerializeWithCachedSizes(&mOut);
-        const size_t padding = 4 - (pbSize & 0x03);
-        if (padding > 0) {
-            uint32_t zero = 0u;
-            mOut.WriteRaw(&zero, padding);
-        }
-        mPbFile = nullptr;
+void CompiledFileOutputStream::ensureAlignedWrite() {
+    const int padding = mOut.ByteCount() % 4;
+    if (padding > 0) {
+        uint32_t zero = 0u;
+        mOut.WriteRaw(&zero, padding);
     }
-    return !mOut.HadError();
 }
 
-bool CompiledFileOutputStream::Write(const void* data, int size) {
-    if (!ensureFileWritten()) {
+void CompiledFileOutputStream::WriteLittleEndian32(uint32_t val) {
+    ensureAlignedWrite();
+    mOut.WriteLittleEndian32(val);
+}
+
+void CompiledFileOutputStream::WriteCompiledFile(const pb::CompiledFile* compiledFile) {
+    ensureAlignedWrite();
+    mOut.WriteLittleEndian64(static_cast<uint64_t>(compiledFile->ByteSize()));
+    compiledFile->SerializeWithCachedSizes(&mOut);
+}
+
+void CompiledFileOutputStream::WriteData(const BigBuffer* buffer) {
+    ensureAlignedWrite();
+    mOut.WriteLittleEndian64(static_cast<uint64_t>(buffer->size()));
+    for (const BigBuffer::Block& block : *buffer) {
+        mOut.WriteRaw(block.buffer.get(), block.size);
+    }
+}
+
+void CompiledFileOutputStream::WriteData(const void* data, size_t len) {
+    ensureAlignedWrite();
+    mOut.WriteLittleEndian64(static_cast<uint64_t>(len));
+    mOut.WriteRaw(data, len);
+}
+
+bool CompiledFileOutputStream::HadError() {
+    return mOut.HadError();
+}
+
+CompiledFileInputStream::CompiledFileInputStream(const void* data, size_t size) :
+        mIn(static_cast<const uint8_t*>(data), size) {
+}
+
+void CompiledFileInputStream::ensureAlignedRead() {
+    const int padding = mIn.CurrentPosition() % 4;
+    if (padding > 0) {
+        // Reads are always 4 byte aligned.
+        mIn.Skip(padding);
+    }
+}
+
+bool CompiledFileInputStream::ReadLittleEndian32(uint32_t* outVal) {
+    ensureAlignedRead();
+    return mIn.ReadLittleEndian32(outVal);
+}
+
+bool CompiledFileInputStream::ReadCompiledFile(pb::CompiledFile* outVal) {
+    ensureAlignedRead();
+
+    uint64_t pbSize = 0u;
+    if (!mIn.ReadLittleEndian64(&pbSize)) {
         return false;
     }
-    mOut.WriteRaw(data, size);
-    return !mOut.HadError();
+
+    CodedInputStream::Limit l = mIn.PushLimit(static_cast<int>(pbSize));
+
+    // Check that we haven't tried to read past the end.
+    if (static_cast<uint64_t>(mIn.BytesUntilLimit()) != pbSize) {
+        mIn.PopLimit(l);
+        mIn.PushLimit(0);
+        return false;
+    }
+
+    if (!outVal->ParsePartialFromCodedStream(&mIn)) {
+        mIn.PopLimit(l);
+        mIn.PushLimit(0);
+        return false;
+    }
+
+    mIn.PopLimit(l);
+    return true;
 }
 
-bool CompiledFileOutputStream::Finish() {
-    return ensureFileWritten();
+bool CompiledFileInputStream::ReadDataMetaData(uint64_t* outOffset, uint64_t* outLen) {
+    ensureAlignedRead();
+
+    uint64_t pbSize = 0u;
+    if (!mIn.ReadLittleEndian64(&pbSize)) {
+        return false;
+    }
+
+    // Check that we aren't trying to read past the end.
+    if (pbSize > static_cast<uint64_t>(mIn.BytesUntilLimit())) {
+        mIn.PushLimit(0);
+        return false;
+    }
+
+    uint64_t offset = static_cast<uint64_t>(mIn.CurrentPosition());
+    if (!mIn.Skip(pbSize)) {
+        return false;
+    }
+
+    *outOffset = offset;
+    *outLen = pbSize;
+    return true;
 }
 
 } // namespace aapt

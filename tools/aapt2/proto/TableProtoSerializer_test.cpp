@@ -18,6 +18,8 @@
 #include "proto/ProtoSerialize.h"
 #include "test/Test.h"
 
+using namespace google::protobuf::io;
+
 namespace aapt {
 
 TEST(TableProtoSerializer, SerializeSinglePackage) {
@@ -115,33 +117,66 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
     f.source.path = "res/layout-hdpi-v9/main.xml";
     f.exportedSymbols.push_back(SourcedResourceName{ test::parseNameOrDie("id/unchecked"), 23u });
 
-    const std::string expectedData = "1234";
-
-    std::unique_ptr<pb::CompiledFile> pbFile = serializeCompiledFileToPb(f);
+    const std::string expectedData1 = "123";
+    const std::string expectedData2 = "1234";
 
     std::string outputStr;
     {
-        google::protobuf::io::StringOutputStream outStream(&outputStr);
-        CompiledFileOutputStream outFileStream(&outStream, pbFile.get());
+        std::unique_ptr<pb::CompiledFile> pbFile1 = serializeCompiledFileToPb(f);
 
-        ASSERT_TRUE(outFileStream.Write(expectedData.data(), expectedData.size()));
-        ASSERT_TRUE(outFileStream.Finish());
+        f.name.entry = "__" + f.name.entry + "$0";
+        std::unique_ptr<pb::CompiledFile> pbFile2 = serializeCompiledFileToPb(f);
+
+        StringOutputStream outStream(&outputStr);
+        CompiledFileOutputStream outFileStream(&outStream);
+        outFileStream.WriteLittleEndian32(2);
+        outFileStream.WriteCompiledFile(pbFile1.get());
+        outFileStream.WriteData(expectedData1.data(), expectedData1.size());
+        outFileStream.WriteCompiledFile(pbFile2.get());
+        outFileStream.WriteData(expectedData2.data(), expectedData2.size());
+        ASSERT_FALSE(outFileStream.HadError());
     }
 
     CompiledFileInputStream inFileStream(outputStr.data(), outputStr.size());
-    const pb::CompiledFile* newPbFile = inFileStream.CompiledFile();
-    ASSERT_NE(nullptr, newPbFile);
+    uint32_t numFiles = 0;
+    ASSERT_TRUE(inFileStream.ReadLittleEndian32(&numFiles));
+    ASSERT_EQ(2u, numFiles);
 
-    std::unique_ptr<ResourceFile> file = deserializeCompiledFileFromPb(*newPbFile, Source("test"),
+    // Read the first compiled file.
+
+    pb::CompiledFile newPbFile;
+    ASSERT_TRUE(inFileStream.ReadCompiledFile(&newPbFile));
+
+    std::unique_ptr<ResourceFile> file = deserializeCompiledFileFromPb(newPbFile, Source("test"),
                                                                        context->getDiagnostics());
     ASSERT_NE(nullptr, file);
 
-    std::string actualData((const char*)inFileStream.data(), inFileStream.size());
-    EXPECT_EQ(expectedData, actualData);
-    EXPECT_EQ(0u, reinterpret_cast<uintptr_t>(inFileStream.data()) & 0x03);
+    uint64_t offset, len;
+    ASSERT_TRUE(inFileStream.ReadDataMetaData(&offset, &len));
+
+    std::string actualData(outputStr.data() + offset, len);
+    EXPECT_EQ(expectedData1, actualData);
+
+    // Expect the data to be aligned.
+    EXPECT_EQ(0u, offset & 0x03);
 
     ASSERT_EQ(1u, file->exportedSymbols.size());
     EXPECT_EQ(test::parseNameOrDie("id/unchecked"), file->exportedSymbols[0].name);
+
+    // Read the second compiled file.
+
+    ASSERT_TRUE(inFileStream.ReadCompiledFile(&newPbFile));
+
+    file = deserializeCompiledFileFromPb(newPbFile, Source("test"), context->getDiagnostics());
+    ASSERT_NE(nullptr, file);
+
+    ASSERT_TRUE(inFileStream.ReadDataMetaData(&offset, &len));
+
+    actualData = std::string(outputStr.data() + offset, len);
+    EXPECT_EQ(expectedData2, actualData);
+
+    // Expect the data to be aligned.
+    EXPECT_EQ(0u, offset & 0x03);
 }
 
 TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
@@ -152,19 +187,27 @@ TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
 
     std::string outputStr;
     {
-        google::protobuf::io::StringOutputStream outStream(&outputStr);
-        CompiledFileOutputStream outFileStream(&outStream, pbFile.get());
-
-        ASSERT_TRUE(outFileStream.Write(expectedData.data(), expectedData.size()));
-        ASSERT_TRUE(outFileStream.Finish());
+        StringOutputStream outStream(&outputStr);
+        CompiledFileOutputStream outFileStream(&outStream);
+        outFileStream.WriteLittleEndian32(1);
+        outFileStream.WriteCompiledFile(pbFile.get());
+        outFileStream.WriteData(expectedData.data(), expectedData.size());
+        ASSERT_FALSE(outFileStream.HadError());
     }
 
-    outputStr[0] = 0xff;
+    outputStr[4] = 0xff;
 
     CompiledFileInputStream inFileStream(outputStr.data(), outputStr.size());
-    EXPECT_EQ(nullptr, inFileStream.CompiledFile());
-    EXPECT_EQ(nullptr, inFileStream.data());
-    EXPECT_EQ(0u, inFileStream.size());
+
+    uint32_t numFiles = 0;
+    EXPECT_TRUE(inFileStream.ReadLittleEndian32(&numFiles));
+    EXPECT_EQ(1u, numFiles);
+
+    pb::CompiledFile newPbFile;
+    EXPECT_FALSE(inFileStream.ReadCompiledFile(&newPbFile));
+
+    uint64_t offset, len;
+    EXPECT_FALSE(inFileStream.ReadDataMetaData(&offset, &len));
 }
 
 } // namespace aapt

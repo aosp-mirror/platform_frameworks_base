@@ -19,7 +19,10 @@
 
 #include "Source.h"
 #include "io/Data.h"
+#include "util/Util.h"
 
+#include <android-base/macros.h>
+#include <list>
 #include <memory>
 #include <vector>
 
@@ -50,6 +53,37 @@ public:
      * a ZIP archive from the path to the containing ZIP archive.
      */
     virtual const Source& getSource() const = 0;
+
+    IFile* createFileSegment(size_t offset, size_t len);
+
+private:
+    // Any segments created from this IFile need to be owned by this IFile, so keep them
+    // in a list. This will never be read, so we prefer better insertion performance
+    // than cache locality, hence the list.
+    std::list<std::unique_ptr<IFile>> mSegments;
+};
+
+/**
+ * An IFile that wraps an underlying IFile but limits it to a subsection of that file.
+ */
+class FileSegment : public IFile {
+public:
+    explicit FileSegment(IFile* file, size_t offset, size_t len) :
+            mFile(file), mOffset(offset), mLen(len) {
+    }
+
+    std::unique_ptr<IData> openAsData() override;
+
+    const Source& getSource() const override {
+        return mFile->getSource();
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(FileSegment);
+
+    IFile* mFile;
+    size_t mOffset;
+    size_t mLen;
 };
 
 class IFileCollectionIterator {

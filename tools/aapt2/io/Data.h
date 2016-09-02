@@ -17,9 +17,9 @@
 #ifndef AAPT_IO_DATA_H
 #define AAPT_IO_DATA_H
 
-#include <utils/FileMap.h>
-
+#include <android-base/macros.h>
 #include <memory>
+#include <utils/FileMap.h>
 
 namespace aapt {
 namespace io {
@@ -33,6 +33,28 @@ public:
 
     virtual const void* data() const = 0;
     virtual size_t size() const = 0;
+};
+
+class DataSegment : public IData {
+public:
+    explicit DataSegment(std::unique_ptr<IData> data, size_t offset, size_t len) :
+            mData(std::move(data)), mOffset(offset), mLen(len) {
+    }
+
+    const void* data() const override {
+        return static_cast<const uint8_t*>(mData->data()) + mOffset;
+    }
+
+    size_t size() const override {
+        return mLen;
+    }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(DataSegment);
+
+    std::unique_ptr<IData> mData;
+    size_t mOffset;
+    size_t mLen;
 };
 
 /**

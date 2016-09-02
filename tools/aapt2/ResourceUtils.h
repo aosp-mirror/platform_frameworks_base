@@ -111,6 +111,14 @@ Maybe<int> parseSdkVersion(const StringPiece& str);
 Maybe<Reference> parseStyleParentReference(const StringPiece& str, std::string* outError);
 
 /*
+ * Returns a Reference if the string `str` was parsed as a valid XML attribute name.
+ * The valid format for an XML attribute name is:
+ *
+ * package:entry
+ */
+Maybe<Reference> parseXmlAttributeName(const StringPiece& str);
+
+/*
  * Returns a Reference object if the string was parsed as a resource or attribute reference,
  * ( @[+][package:]type/name | ?[package:]type/name ) setting outCreate to true if
  * the '+' was present in the string.

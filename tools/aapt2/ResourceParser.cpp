@@ -925,35 +925,6 @@ Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(xml::XmlPullParser*
             Reference(ResourceNameRef({}, ResourceType::kId, maybeName.value())), val.data };
 }
 
-static Maybe<Reference> parseXmlAttributeName(StringPiece str) {
-    str = util::trimWhitespace(str);
-    const char* start = str.data();
-    const char* const end = start + str.size();
-    const char* p = start;
-
-    Reference ref;
-    if (p != end && *p == '*') {
-        ref.privateReference = true;
-        start++;
-        p++;
-    }
-
-    StringPiece package;
-    StringPiece name;
-    while (p != end) {
-        if (*p == ':') {
-            package = StringPiece(start, p - start);
-            name = StringPiece(p + 1, end - (p + 1));
-            break;
-        }
-        p++;
-    }
-
-    ref.name = ResourceName(package.toString(), ResourceType::kAttr,
-                        name.empty() ? str.toString() : name.toString());
-    return Maybe<Reference>(std::move(ref));
-}
-
 bool ResourceParser::parseStyleItem(xml::XmlPullParser* parser, Style* style) {
     const Source source = mSource.withLine(parser->getLineNumber());
 
@@ -963,7 +934,7 @@ bool ResourceParser::parseStyleItem(xml::XmlPullParser* parser, Style* style) {
         return false;
     }
 
-    Maybe<Reference> maybeKey = parseXmlAttributeName(maybeName.value());
+    Maybe<Reference> maybeKey = ResourceUtils::parseXmlAttributeName(maybeName.value());
     if (!maybeKey) {
         mDiag->error(DiagMessage(source) << "invalid attribute name '" << maybeName.value() << "'");
         return false;
@@ -1226,7 +1197,7 @@ bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser,
 
             // If this is a declaration, the package name may be in the name. Separate these out.
             // Eg. <attr name="android:text" />
-            Maybe<Reference> maybeRef = parseXmlAttributeName(maybeName.value());
+            Maybe<Reference> maybeRef = ResourceUtils::parseXmlAttributeName(maybeName.value());
             if (!maybeRef) {
                 mDiag->error(DiagMessage(itemSource) << "<attr> tag has invalid name '"
                              << maybeName.value() << "'");

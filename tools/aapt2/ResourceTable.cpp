@@ -327,7 +327,7 @@ bool ResourceTable::addFileReferenceImpl(const ResourceNameRef& name,
     fileRef->setSource(source);
     fileRef->file = file;
     return addResourceImpl(name, ResourceId{}, config, StringPiece{}, std::move(fileRef),
-                           kValidNameChars, resolveValueCollision, diag);
+                           validChars, resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,

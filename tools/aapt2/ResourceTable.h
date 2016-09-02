@@ -290,14 +290,6 @@ public:
 private:
     ResourceTablePackage* findOrCreatePackage(const StringPiece& name);
 
-    bool addFileReferenceImpl(const ResourceNameRef& name,
-                              const ConfigDescription& config,
-                              const Source& source,
-                              const StringPiece& path,
-                              io::IFile* file,
-                              const char* validChars,
-                              IDiagnostics* diag);
-
     bool addResourceImpl(const ResourceNameRef& name,
                          const ResourceId& resId,
                          const ConfigDescription& config,
@@ -306,6 +298,14 @@ private:
                          const char* validChars,
                          const CollisionResolverFunc& conflictResolver,
                          IDiagnostics* diag);
+
+    bool addFileReferenceImpl(const ResourceNameRef& name,
+                              const ConfigDescription& config,
+                              const Source& source,
+                              const StringPiece& path,
+                              io::IFile* file,
+                              const char* validChars,
+                              IDiagnostics* diag);
 
     bool setSymbolStateImpl(const ResourceNameRef& name,
                             const ResourceId& resId,

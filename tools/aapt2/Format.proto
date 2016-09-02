@@ -34,7 +34,7 @@ message CompiledFile {
 		optional string resource_name = 1;
 		optional uint32 line_no = 2;
 	}
-	
+
 	optional string resource_name = 1;
 	optional ConfigDescription config = 2;
 	optional string source_path = 3;

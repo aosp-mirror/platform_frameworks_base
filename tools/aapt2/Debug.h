@@ -19,6 +19,7 @@
 
 #include "Resource.h"
 #include "ResourceTable.h"
+#include "xml/XmlDom.h"
 
 // Include for printf-like debugging.
 #include <iostream>
@@ -34,6 +35,7 @@ struct Debug {
     static void printStyleGraph(ResourceTable* table,
                                 const ResourceName& targetStyle);
     static void dumpHex(const void* data, size_t len);
+    static void dumpXml(xml::XmlResource* doc);
 };
 
 } // namespace aapt

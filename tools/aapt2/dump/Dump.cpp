@@ -37,6 +37,7 @@ void dumpCompiledFile(const pb::CompiledFile& pbFile, const void* data, size_t l
     std::unique_ptr<ResourceFile> file = deserializeCompiledFileFromPb(pbFile, source,
                                                                        context->getDiagnostics());
     if (!file) {
+        context->getDiagnostics()->warn(DiagMessage() << "failed to read compiled file");
         return;
     }
 
@@ -112,9 +113,27 @@ void tryDumpFile(IAaptContext* context, const std::string& filePath) {
         if (!table) {
             // Try as a compiled file.
             CompiledFileInputStream input(fileMap->getDataPtr(), fileMap->getDataLength());
-            if (const pb::CompiledFile* pbFile = input.CompiledFile()) {
-               dumpCompiledFile(*pbFile, input.data(), input.size(), Source(filePath), context);
-               return;
+
+            uint32_t numFiles = 0;
+            if (!input.ReadLittleEndian32(&numFiles)) {
+                return;
+            }
+
+            for (uint32_t i = 0; i < numFiles; i++) {
+                pb::CompiledFile compiledFile;
+                if (!input.ReadCompiledFile(&compiledFile)) {
+                    context->getDiagnostics()->warn(DiagMessage() << "failed to read compiled file");
+                    return;
+                }
+
+                uint64_t offset, len;
+                if (!input.ReadDataMetaData(&offset, &len)) {
+                    context->getDiagnostics()->warn(DiagMessage() << "failed to read meta data");
+                    return;
+                }
+
+                const void* data = static_cast<const uint8_t*>(fileMap->getDataPtr()) + offset;
+                dumpCompiledFile(compiledFile, data, len, Source(filePath), context);
             }
         }
     }
