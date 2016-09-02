@@ -39,12 +39,14 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
 
@@ -150,8 +152,10 @@ final class TaskRecord {
     ComponentName realActivity; // The actual activity component that started the task.
     boolean realActivitySuspended; // True if the actual activity component that started the
                                    // task is suspended.
-    long firstActiveTime;   // First time this task was active.
-    long lastActiveTime;    // Last time this task was active, including sleep.
+    long firstActiveTime;   // First time this task was active, relative to boot time. This can be
+                            // negative if this task was last used prior to boot.
+    long lastActiveTime;    // Last time this task was active, relative to boot time. This can be
+                            // negative if this task was last used prior to boot.
     boolean inRecents;      // Actually in the recents list?
     boolean isAvailable;    // Is the activity available to be launched?
     boolean rootWasReset;   // True if the intent at the root of the task had
@@ -377,14 +381,14 @@ final class TaskRecord {
     }
 
     void touchActiveTime() {
-        lastActiveTime = System.currentTimeMillis();
+        lastActiveTime = SystemClock.elapsedRealtime();
         if (firstActiveTime == 0) {
             firstActiveTime = lastActiveTime;
         }
     }
 
     long getInactiveDuration() {
-        return System.currentTimeMillis() - lastActiveTime;
+        return SystemClock.elapsedRealtime() - lastActiveTime;
     }
 
     /** Sets the original intent, and the calling uid and package. */
@@ -455,8 +459,9 @@ final class TaskRecord {
             rootWasReset = true;
         }
         userId = UserHandle.getUserId(info.applicationInfo.uid);
-        mUserSetupComplete = Settings.Secure.getIntForUser(mService.mContext.getContentResolver(),
-                USER_SETUP_COMPLETE, 0, userId) != 0;
+        mUserSetupComplete = mService != null &&
+                Settings.Secure.getIntForUser(mService.mContext.getContentResolver(),
+                        USER_SETUP_COMPLETE, 0, userId) != 0;
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
@@ -1168,7 +1173,9 @@ final class TaskRecord {
         if (lastTaskDescription != null) {
             lastTaskDescription.saveToXml(out);
         }
-        mLastThumbnailInfo.saveToXml(out);
+        if (mLastThumbnailInfo != null) {
+            mLastThumbnailInfo.saveToXml(out);
+        }
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
         out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
@@ -1190,9 +1197,11 @@ final class TaskRecord {
             out.endTag(null, TAG_AFFINITYINTENT);
         }
 
-        out.startTag(null, TAG_INTENT);
-        intent.saveToXml(out);
-        out.endTag(null, TAG_INTENT);
+        if (intent != null) {
+            out.startTag(null, TAG_INTENT);
+            intent.saveToXml(out);
+            out.endTag(null, TAG_INTENT);
+        }
 
         final ArrayList<ActivityRecord> activities = mActivities;
         final int numActivities = activities.size();
@@ -1211,8 +1220,9 @@ final class TaskRecord {
         }
     }
 
-    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
-            throws IOException, XmlPullParserException {
+    static TaskRecord restoreFromXml(XmlPullParser in, ActivityManagerService service,
+            ActivityStackSupervisor stackSupervisor, long lastPersistUptime)
+                    throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;
         ArrayList<ActivityRecord> activities = new ArrayList<>();
@@ -1325,6 +1335,31 @@ final class TaskRecord {
             }
         }
 
+        if (lastPersistUptime > 0) {
+            if (TaskPersister.DEBUG) {
+                Slog.d(TaskPersister.TAG, "TaskRecord: Adjust firstActiveTime=" + firstActiveTime +
+                        " lastPersistUptime=" + lastPersistUptime);
+                Slog.d(TaskPersister.TAG, "TaskRecord: Migrate lastActiveTime=" + lastActiveTime +
+                        " lastActiveTime=" + lastPersistUptime);
+            }
+            // The first and last task active times are relative to the last boot time, so offset
+            // them to be prior to the current boot time
+            firstActiveTime = -lastPersistUptime + firstActiveTime;
+            lastActiveTime = -lastPersistUptime + lastActiveTime;
+        } else {
+            // The first/last active times are still absolute clock times, so offset them to be
+            // relative to the current boot time
+            long currentTime = System.currentTimeMillis();
+            if (TaskPersister.DEBUG) {
+                Slog.d(TaskPersister.TAG, "TaskRecord: Migrate firstActiveTime=" + firstActiveTime +
+                                " currentTime=" + currentTime);
+                Slog.d(TaskPersister.TAG, "TaskRecord: Migrate lastActiveTime=" + lastActiveTime +
+                                " currentTime=" + currentTime);
+            }
+            firstActiveTime = -Math.max(0, currentTime - firstActiveTime);
+            lastActiveTime = -Math.max(0, currentTime - lastActiveTime);
+        }
+
         int event;
         while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
                 (event != XmlPullParser.END_TAG || in.getDepth() >= outerDepth)) {
@@ -1374,7 +1409,7 @@ final class TaskRecord {
                     + ": effectiveUid=" + effectiveUid);
         }
 
-        final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
+        final TaskRecord task = new TaskRecord(service, taskId, intent,
                 affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
@@ -1777,7 +1812,7 @@ final class TaskRecord {
         pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
                 pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
                 pw.print(" isResizeable=" + isResizeable());
-                pw.print(" firstActiveTime=" + lastActiveTime);
+                pw.print(" firstActiveTime=" + firstActiveTime);
                 pw.print(" lastActiveTime=" + lastActiveTime);
                 pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
