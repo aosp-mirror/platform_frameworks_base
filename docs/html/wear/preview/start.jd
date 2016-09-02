@@ -29,7 +29,7 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <p>
       If you want an environment for basic compatibility
-      testing of your app, you can use your current APK and a
+      testing, you can use your current APK and a
       supported watch or an emulator. You don't necessarily need to update your
       full development environment to do basic testing. To simply test your
       app's compatibility with a preview system image, see <a href=
@@ -48,10 +48,8 @@ page.image=images/cards/card-n-sdk_2x.png
     </h2>
 
     <p>
-      1. For compatibility with the <a href="{@docRoot}preview/overview.html">N
-      Developer Preview</a>, follow the <a href=
-      "{@docRoot}preview/setup-sdk.html">setup instructions</a> for installing
-      the latest version of Android Studio.
+      1. For compatibility with Android 7.0, install the latest version of
+      <a href="https://developer.android.com/studio/index.html">Android Studio</a>.
     </p>
 
     <p>
@@ -63,7 +61,7 @@ page.image=images/cards/card-n-sdk_2x.png
     <ul>
       <li>Under the <strong>SDK Platforms tab</strong>:
         <ul>
-          <li>Android N Preview
+          <li>Android 7.0 (Nougat)
           </li>
         </ul>
       </li>
@@ -107,10 +105,10 @@ page.image=images/cards/card-n-sdk_2x.png
 
       <tr>
         <td>
-          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-2-docs.zip">wearable-support-preview-2-docs.zip</a>
+          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-3-docs.zip">wearable-support-preview-3-docs.zip</a>
         </td>
-        <td>MD5: afb770c9c5c0431bbcbdde186f1eae06<br>
-            SHA-1: 81d681e61cee01f222ea82e83297d23c4e55b8f3
+        <td>MD5: 22bae00e473e39e320aae8ea09a001a5<br>
+            SHA-1: 474502cc7092bcf0bd671441b8654aa8d6c155ed
         </td>
       </tr>
     </table>
@@ -163,7 +161,7 @@ page.image=images/cards/card-n-sdk_2x.png
       following, which requires that your the Google Repository <a href=
       "#install_android_studio_and_the_latest_packages">is the latest
       version</a>:
-      <code>compile 'com.google.android.support:wearable:2.0.0-alpha2'</code>
+      <code>compile 'com.google.android.support:wearable:2.0.0-alpha3'</code>
         </li>
       </ul>
       </li>
@@ -190,12 +188,12 @@ page.image=images/cards/card-n-sdk_2x.png
       </li>
 
       <li>Optionally, select the <strong>Phone and Tablet</strong> option. If
-      you plan to use N Preview APIs in a phone app, then the Minimum SDK
-      option list, select <strong>API N: Android 6.x (N Preview)</strong>.
+      you plan to use Android 7.0 APIs in a phone app, then the Minimum SDK
+      option list, select <strong>API 24: Android 7.0 (Nougat)</strong>.
       </li>
 
       <li>Select the <strong>Wear</strong> option, and in the Minimum SDK
-      option list, select the latest available (<strong>N Preview</strong>)
+      option list, select the latest available (<strong>API Nougat</strong>)
       option. Click <strong>Next</strong> until you exit the Create New Project
       wizard.
       </li>
@@ -215,7 +213,7 @@ page.image=images/cards/card-n-sdk_2x.png
       following, which requires that your the Google Repository <a href=
       "#install_android_studio_and_the_latest_packages">is the latest
       version</a>:
-      <code>compile 'com.google.android.support:wearable:2.0.0-alpha2'</code>
+      <code>compile 'com.google.android.support:wearable:2.0.0-alpha3'</code>
         </li>
       </ul>
       </li>

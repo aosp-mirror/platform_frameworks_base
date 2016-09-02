@@ -13,15 +13,16 @@ page.image=images/cards/card-n-apis_2x.png
           <ol>
             <li><a href="#complications">Complications</a></li>
             <li><a href="#drawers">Navigation and Action Drawers</a></li>
+            <li><a href="#wrv">Curved Layout</a></li>
           </ol>
         </li>
 
         <li><a href="#notify">Notifications and Input</a>
           <ol>
-            <li><a href="#expanded">Expanded Notification</a></li>
-            <li><a href="#messaging">Messaging Style Notification</a></li>
+            <li><a href="#expanded">Expanded Notifications</a></li>
+            <li><a href="#messaging">Messaging Style Notifications</a></li>
+            <li><a href="#inline-action">Inline Action</a></li>
             <li><a href="#smart-replies">Smart Reply</a></li>
-            <li><a href="#content-action">Notification Content Action</a>
             <li><a href="#remote-input">Remote Input</a></li>
             <li><a href="#bridging">Bridging Mode</a></li>
             <li><a href="#imf">Input Method Framework</a></li>
@@ -40,308 +41,447 @@ page.image=images/cards/card-n-apis_2x.png
 </div>
 </div>
 
+    <p>
+      Wear 2.0 is still in active development, but you can try it as part of
+      the Wear 2.0 Developer Preview. The sections below highlight some of the
+      new features for developers.
+    </p>
 
+    <h2 id="ui">
+      User Interface Improvements
+    </h2>
 
-<p>
-  The Android Wear Preview API is still in active development, but you can try
-  it now as part of the Wear 2.0 Developer Preview. The sections below
-  highlight some of the new features for Android Wear developers.
-</p>
+    <p>
+      The preview introduces powerful additions to the user interface, opening
+      up exciting possibilities to developers.
+    </p>
 
+    <h3 id="complications">
+      Complications
+    </h3>
 
-<h2 id="ui">User Interface Improvements</h2>
+    <img src="{@docRoot}wear/preview/images/complications-main-image.png"
+    height="320" style="float:right;margin:10px 0 0 40px">
+    <p>
+      A <a href=
+      "https://en.wikipedia.org/wiki/Complication_(horology)">complication</a>
+      is a feature of a watch face that displays more than hours and minutes,
+      such as a battery indicator or a step counter. The Complications API thus
+      helps watch face developers create visual features and the data
+      connections they require.
+    </p>
 
-<p>
-  The preview introduces powerful additions to the user interface, opening up
-  exciting possibilities to developers. A complication
-  is any feature in a watch face that displays more than hours and
-  minutes. With the Complications API, watch faces can display extra information
-  and separate apps can expose complication data. The navigation and action
-  drawers provide users with new ways to interact with apps.
-</p>
+    <p>
+      Watch faces that use this API can display extra information without
+      needing code for getting the underlying data. Data providers can supply
+      data to any watch face using the API.
+    </p>
 
+    <p>
+      For information about this API, see <a href=
+      "{@docRoot}wear/preview/features/complications.html">Watch Face
+      Complications</a>.
+    </p>
 
-<h3 id="complications">Complications</h3>
-<img src="{@docRoot}wear/preview/images/complications-main-image.png"
-  height="320" style="float:right;margin:10px 0 0 40px" />
+    <h3 id="drawers">
+      Navigation and Action Drawers
+    </h3>
 
-<p>
-  A <a href=
-  "https://en.wikipedia.org/wiki/Complication_(horology)">complication</a> is a
-  feature of a watch face that displays more than hours and minutes, such as a
-  battery indicator or a step counter. The Complications API thus helps watch face
-  developers create visual features and the data connections they
-  require.
-</p>
+    <p>
+      Wear 2.0 introduces two new widgets, navigation drawer and action drawer.
+      These widgets give your users new ways to interact with your app. The
+      navigation drawer appears at the top of the screen and allows users to
+      navigate between app views. The action drawer appears at the bottom of
+      the screen and allows users to choose from a list of actions associated
+      with the current usage context. These drawers are accessible to users
+      when they edge swipe from the top or bottom of the screen; they peek when
+      users scroll in an opposite direction.
+    </p>
 
-<p>
-  Watch faces that use this API can display extra information without needing
-  code for getting the underlying data. Data providers can supply data to any
-  watch face using the API.
-</p>
+    <div class="cols">
+      <div class="col-2of6">
+        <img src="{@docRoot}wear/preview/images/nav_drawer.gif" height="240"
+        alt="" style="padding:.5em">
+      </div>
 
-<p>For information about this API,
-see <a href="{@docRoot}wear/preview/features/complications.html">
- Watch Face Complications</a>.
-</p>
+      <div class="col-2of6">
+        <img src="{@docRoot}wear/preview/images/action_drawer.gif" height="240"
+        alt="" style="padding:.5em;">
+      </div>
+    </div>
 
-<h3 id="drawers">Navigation and Action drawers</h3>
+    <p>
+      To learn how to add these widgets to your app, see <a href=
+      "{@docRoot}wear/preview/features/ui-nav-actions.html">Wear Navigation and
+      Actions</a>.
+    </p>
 
-<p>Wear 2.0 introduces two new widgets, navigation drawer and action drawer. These
- widgets give your users new ways to interact with your app. The navigation drawer
-  appears at the top of the screen and allows users to navigate between app views.
-   The  action drawer appears at the bottom of the screen and allows users to choose
-    from a list of actions associated with the current usage context.  These drawers
-     are accessible to users when they edge swipe from the top or bottom of the
-     screen; they peek when users scroll in an opposite direction.
-</p>
+    <h3 id="wrv">
+      Curved Layout
+    </h3>
 
-<div class="cols">
-  <div class="col-2of6">
-    <img src="{@docRoot}wear/preview/images/nav_drawer.gif"
-      height="240" alt="" style="padding:.5em">
-  </div>
-  <div class="col-2of6">
-    <img src="{@docRoot}wear/preview/images/action_drawer.gif"
-      height="240" alt="" style="padding:.5em;">
-  </div>
-</div>
+    <p>
+      Wear 2.0 introduces the <code>WearableRecyclerView</code> class for
+      displaying and manipulating a vertical list of items,
+      optimized for round displays.
+    </p>
 
-<p>
-  To learn how to add these widgets to your app, see
-  <a href="{@docRoot}wear/preview/features/ui-nav-actions.html">
-  Wear Navigation and Actions</a>.
-</p>
+    <p>
+      The key features include the following:
+    </p>
 
+    <ul>
+      <li>A curved layout on round devices
+      </li>
 
-<h2 id="notify">Notifications and Input</h2>
+      <li>A circular scrolling gesture, which can be toggled on and off
+      </li>
+    </ul>
 
-<p>In Wear 2.0, we’ve redesigned the key experiences on the watch to be even more
- intuitive and provide users new ways to respond to messages. Some of the highlights
-  are below; for a complete list of changes, see
-  <a href="{@docRoot}wear/preview/features/notifications.html">Notification Changes in Wear 2.0</a>.
+    <p>
+      To learn how to create a curved layout optimized for round devices, see
+      <a href=
+      "https://developer.android.com/wear/preview/features/wearable-recycler-view.html">
+      Curved Layout</a>.
+    </p>
 
+    <h2 id="notify">
+      Notifications and Input
+    </h2>
 
-<img src="{@docRoot}wear/preview/images/expanded_diagram.png" height="340"
-  style="float:left;margin:10px 20px 0 0" />
-<h3 id="expanded">Expanded notifications</h3>
+    <p>
+      In Wear 2.0, we’ve redesigned the key experiences on the watch to be even
+      more intuitive and provide users new ways to respond to messages. Some of
+      the highlights are below; for a complete list of changes, see <a href=
+      "{@docRoot}wear/preview/features/notifications.html">Notification Changes
+      in Wear 2.0</a>. <img src=
+      "{@docRoot}wear/preview/images/expanded_diagram.png" height="340" style=
+      "float:left;margin:10px 20px 0 0">
+    </p>
 
-<p>
-  When a user taps on a notification that is bridged from the phone to the
-  watch or that lacks a
-  <a href="{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContentIntent(android.app.PendingIntent)">
-  {@code contentIntent}</a>, the user will be taken to the expanded view of
-  that notification. When you <a href=
-  "{@docRoot}training/wearables/notifications/pages.html">specify additional
-  content pages</a> and actions for a notification, those are available to the
-  user within the expanded notification. Each expanded notification follows
-  <a href="https://google.com/design/spec-wear">Material Design for Android
-  Wear</a>, so the user gets an app-like experience.
-</p>
+    <h3 id="expanded">
+      Expanded Notifications
+    </h3>
 
+    <p>
+      When a user taps on a notification that is bridged from the phone to the
+      watch or that lacks a <a href=
+      "{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContentIntent(android.app.PendingIntent)">
+      {@code contentIntent}</a>, the user will be taken to the expanded view of
+      that notification. When you <a href=
+      "{@docRoot}training/wearables/notifications/pages.html">specify
+      additional content pages</a> and actions for a notification, those are
+      available to the user within the expanded notification. Each expanded
+      notification follows <a href=
+      "https://google.com/design/spec-wear">Material Design for Android
+      Wear</a>, so the user gets an app-like experience.
+    </p>
 
-<h3 id="messaging">Messaging Style notification</h3>
-<p> If you have a chat messaging app, your notifications should use
-{@code Notification.MessagingStyle}, which is new in Android 6.0. Wear 2.0 uses
-the chat messages included in a
-<a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
- notification
-(see {@code addMessage()}) to provide a rich chat app-like experience in the
-expanded notification.
-</p>
+    <h3 id="messaging">
+      Messaging Style Notifications
+    </h3>
 
+    <p>
+      If you have a chat messaging app, your notifications should use {@code
+      Notification.MessagingStyle}, which is new in Android 6.0. Wear 2.0 uses
+      the chat messages included in a <a href=
+      "{@docRoot}preview/features/notification-updates.html#style">{@code
+      MessagingStyle}</a> notification (see {@code addMessage()}) to provide a
+      rich chat, app-like experience in the expanded notification.
+    </p>
 
-<h3 id="smart-replies">Smart Reply</h3>
+    <h3 id="inline-action">
+      Inline Action
+    </h3>
 
-<p>Android Wear 2.0 introduces support for Smart Reply in
-<a href="{@docRoot}wear/preview/features/notifications.html#messaging">{@code MessagingStyle}</a>
- notifications. Smart Reply provides the user with contextually relevant,
- touchable choices in the expanded notification and in
- <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>.
-</p>
+    <p>
+      Wear 2.0 enables you to add an inline action within the notification
+      stream so that users can quickly take an action on a notification.
+      Examples of good use cases for an inline action within a notification stream
+      include replying to a text message, stopping a fitness activity, or
+      archiving an email message.
+    </p>
 
-<p>By enabling Smart Reply for your {@code MessagingStyle} notifications, you provide
-users a fast (single tap), discreet (no speaking aloud), and reliable way to respond
- to chat messages they receive.
- </p>
+    <p>
+      To learn how to add an inline action to your notification stream, see
+      <a href=
+      "https://developer.android.com/wear/preview/features/notifications.html#inline">
+      Inline Action</a>.
+    </p>
 
+    <h3 id="smart-replies">
+      Smart Reply
+    </h3>
 
-<img src="{@docRoot}wear/preview/images/remoteinput.png" height="350"
-  style="float:right;margin:10px 0 0 40px" />
+    <p>
+      Android Wear 2.0 introduces support for Smart Reply in <a href=
+      "{@docRoot}wear/preview/features/notifications.html#messaging">{@code
+      MessagingStyle}</a> notifications. Smart Reply provides the user with
+      contextually relevant, touchable choices in the expanded notification and
+      in <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code
+      RemoteInput}</a>.
+    </p>
 
-<h3 id="remote-input">Remote Input</h3>
+    <p>
+      By enabling Smart Reply for your {@code MessagingStyle} notifications,
+      you provide users a fast (single tap), discreet (no speaking aloud), and
+      reliable way to respond to chat messages they receive.
+    </p>
 
-<p>Wear 2.0 users can choose between various input options from
-<a href="{@docRoot}reference/android/app/RemoteInput.html">Remote Input</a>.
- These options include:
-</p>
-<ul>
-<li>Dictation</li>
-<li>Emoji</li>
-<li>Canned responses</li>
-<li>Smart Reply</i>
-<li>Default IME </i>
-</ul>
+    <img src="{@docRoot}wear/preview/images/remoteinput.png" height="350"
+    style="float:right;margin:10px 0 0 40px">
 
-<p>
-For messaging notifications with Smart Reply, the system-generated Smart Reply
- appears within <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>
-  above the developer-provided list of canned responses.
-  You can also use the
-  <a href="{@docRoot}reference/android/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">setChoices()</a>
-   method in the {@code RemoteInput} API to enable users to select from a list
-   of canned responses.
-</p>
+    <h3 id="remote-input">
+      Remote Input
+    </h3>
 
-<h3 id="bridging"> Bridging Mode </h3>
-<p>By default, notifications are
-<a href="{@docRoot}training/wearables/notifications/index.html">
-bridged</a> (shared) from an app on a companion phone
-to the watch. Since a phone app and a standalone watch app may be sources of the
- same notifications, the Android Wear 2.0 Preview includes a Bridging mode feature.
-  Developers can begin planning to change the behavior of notifications with the
-  following:
-</p>
+    <p>
+      Wear 2.0 users can choose between various input options from <a href=
+      "{@docRoot}reference/android/app/RemoteInput.html">Remote Input</a>.
+      These options include:
+    </p>
 
-<ul>
-<li>Specifying in the standalone app's Android manifest file that notifications from
- the corresponding phone app should not be bridged to the watch. </li>
-<li>Setting a dismissal ID so notification dismissals (by users) are synced across
-devices.</li>
-</ul>
+    <ul>
+      <li>Dictation
+      </li>
 
-<p>For an example of how to use this feature, see <a href="{@docRoot}wear/preview/features/bridger.html">
-Bridging Mode for Notifications</a>.</p>
+      <li>Emoji
+      </li>
 
-<h3 id="imf">Input Method Framework</h3>
+      <li>Canned responses
+      </li>
 
-<p>Wear 2.0 extends the Android input method framework (IMF) to Android Wear.
-This allows users to enter text on Wear using the system default IME or third party
- IMEs.  The Wear IME lets the user enter text via gesture typing as well as tapping
-  individual keys. The IMF APIs used for Wear devices are the same as other form
-  factors, though usage is slightly different due to limited screen real estate.
-</p>
+      <li>Smart Reply
+      </li>
 
-<p>Wear provides user settings on the watch that let the user:</p>
-<ul>
-<li>Enable multiple IMEs from the list of installed IMEs.</li>
-<li>Set a single default IME from the list of enabled IMEs.</li>
-<li>Change languages for various IMEs.</li>
-</ul>
+      <li>Default IME
+      </li>
+    </ul>
 
-<p>To learn how to create an IME for Wear, see <a href="{@docRoot}wear/preview/features/ime.html">
-Input Method Framework</a>.
-</p>
+    <p>
+      For messaging notifications with Smart Reply, the system-generated Smart
+      Reply appears within <a href=
+      "{@docRoot}reference/android/app/RemoteInput.html">{@code
+      RemoteInput}</a> above the developer-provided list of canned responses.
+      You can also use the <a href=
+      "{@docRoot}reference/android/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">
+      setChoices()</a> method in the {@code RemoteInput} API to enable users to
+      select from a list of canned responses.
+    </p>
 
-<h3 id="wrist-gestures">Wrist Gestures</h3>
+    <h3 id="bridging">
+      Bridging Mode
+    </h3>
 
-<p>
-  Wrist gestures can enable quick, one-handed interactions with your app
-  when use of a touch screen is inconvenient. The following
-  <a href="https://support.google.com/androidwear/answer/6312406">wrist gestures</a>
-  are available for use by apps:
-</p>
+    <p>
+      By default, notifications are <a href=
+      "{@docRoot}training/wearables/notifications/index.html">bridged</a>
+      (shared) from an app on a companion phone to the watch. Since a phone app
+      and a standalone watch app may be sources of the same notifications, the
+      Android Wear 2.0 Preview includes a Bridging mode feature.
+    </p>
 
-<ul>
-  <li>Flick wrist out</li>
-  <li>Flick wrist in</li>
-</ul>
+    <p>
+      For information about this feature, see <a href=
+      "{@docRoot}wear/preview/features/bridger.html">Bridging Mode for
+      Notifications</a>.
+    </p>
 
-<p>For more information, see
-<a href="{@docRoot}wear/preview/features/gestures.html">
- Wrist Gestures</a>.
-</p>
+    <h3 id="imf">
+      Input Method Framework
+    </h3>
 
-<h2 id="stand-alone">Standalone Devices</h2>
+    <p>
+      Wear 2.0 extends the Android input method framework (IMF) to Android
+      Wear. This allows users to enter text on Wear using the system default
+      IME or third party IMEs. The Wear IME lets the user enter text via
+      gesture typing as well as tapping individual keys. The IMF APIs used for
+      Wear devices are the same as other form factors, though usage is slightly
+      different due to limited screen real estate.
+    </p>
 
-<p>Standalone watches will enable Android Wear apps to work independently of phone
- apps. This means your app can continue to offer full functionality even if the
- paired phone is far away or turned off. </p>
+    <p>
+      Wear provides user settings on the watch that let the user:
+    </p>
 
-<h3 id="wear-apk">Wear-Specific APKs</h3>
+    <ul>
+      <li>Enable multiple IMEs from the list of installed IMEs.
+      </li>
 
-<p>For delivery to a watch, an Android Wear app is currently embedded in its corresponding
-phone app. This delivery method can result in an increased download size for users,
- regardless of whether they have an Android Wear device.
-</p>
+      <li>Set a single default IME from the list of enabled IMEs.
+      </li>
 
-<p>With standalone devices, the
-<a href ="{@docRoot}google/play/publishing/multiple-apks.html">Multi-APK</a>
- delivery method will be used. Developers will have the ability to release Android
-  Wear apps independently of the corresponding phone apps. Please stay tuned for
-   more information about this change.
-</p>
+      <li>Change languages for various IMEs.
+      </li>
+    </ul>
 
-<h3 id="network">Network Access</h3>
+    <p>
+      To learn how to create an IME for Wear, see <a href=
+      "{@docRoot}wear/preview/features/ime.html">Input Method Framework</a>.
+    </p>
 
-<p>Since Android Wear apps will work independently of phone apps, Android Wear's
- network access will no longer require the
- <a href="{@docRoot}training/wearables/data-layer/index.html">
- Wearable Data Layer API</a>. Android Wear apps will have the ability to make
- their own network requests. Additionally, they will be able to directly use
- Google Cloud Messaging.
-</p>
+    <h3 id="wrist-gestures">
+      Wrist Gestures
+    </h3>
 
-<p>No APIs for network access or GCM are specific to Android Wear; refer to the
-existing documentation about
-<a href="{@docRoot}training/basics/network-ops/connecting.html">
-Connecting to the Network</a> and
-<a href="https://developers.google.com/cloud-messaging/">Cloud Messaging</a>.
-</p>
+    <p>
+      Wrist gestures can enable quick, one-handed interactions with your app
+      when use of a touch screen is inconvenient. The following <a href=
+      "https://support.google.com/androidwear/answer/6312406">wrist
+      gestures</a> are available for use by apps:
+    </p>
 
-<p>We recommend using the following libraries:</p>
-<ul>
-<li><a href="{@docRoot}reference/android/app/job/JobScheduler.html">
-JobScheduler</a> for asynchronous jobs, including polling at regular intervals
-</li>
-<li>Multi-networking APIs if you need to connect to specific network types; see
-the <a href="{@docRoot}about/versions/android-5.0.html#Wireless">
-Multiple Network Connections</a>
-</li>
-</ul>
+    <ul>
+      <li>Flick wrist out
+      </li>
 
-<p>You will still be able to use the
-<a href="{@docRoot}training/wearables/data-layer/index.html">
- Wearable Data Layer API</a> to communicate with a phone app.
- However, use of this API to connect to a network will be discouraged.
- </p>
+      <li>Flick wrist in
+      </li>
+    </ul>
 
+    <p>
+      For more information, see <a href=
+      "{@docRoot}wear/preview/features/gestures.html">Wrist Gestures</a>.
+    </p>
 
-<h3 id="auth">Authentication</h3>
+    <h2 id="stand-alone">
+      Standalone Devices
+    </h2>
 
-<p>Since Android Wear apps will work independently of phone apps, Android Wear's
- authentication capabilities will be more powerful; apps will have new ways to
- authenticate.</p>
+    <p>
+      Standalone watches enable Android Wear apps to work independently of
+      phone apps. This means your app can continue to offer full functionality
+      even if the paired phone is far away or turned off.
+    </p>
 
-<h4>Users can enter a username and password on a watch</h4>
+    <h3 id="wear-apk">
+      Wear-Specific APKs
+    </h3>
 
-<p>Google Keyboard will be standard on Android Wear, allowing for direct text
-entry. This feature will work as expected with standard
-<a href="{@docRoot}reference/android/widget/EditText.html">EditText widgets</a>.
-For passwords, the {@code textPassword} attribute will be used.</p>
+    <p>
+      For delivery to a watch, an Android Wear app is currently embedded in its
+      corresponding phone app. This delivery method can result in an increased
+      download size for users, regardless of whether they have an Android Wear
+      device.
+    </p>
 
-<h4>Utilizing Account Manager</h4>
+    <p>
+      For information about planning and building your standalone app
+      for Wear 2.0, see <a href=
+      "https://developer.android.com/wear/preview/features/standalone-apps.html">
+      Standalone Apps</a>.
+    </p>
 
-<p>Android Wear will include the
-<a href="{@docRoot}reference/android/accounts/AccountManager.html">
-AccountManager</a>, which will be accessible for syncing and storing account
-data, as it is on an Android phone.</p>
+    <p>
+      For information about distributing your app, see <a href=
+      "https://developer.android.com/wear/preview/features/app-distribution.html">
+      App Distribution</a>.
+    </p>
 
-<h4>Authentication tokens can be passed over the Wearable Data Layer</h4>
+    <h3 id="network">
+      Network Access
+    </h3>
 
-<p>For Android-paired watches (only), a phone securely
-transfers authentication credentials to a watch app via the
-<a href="{@docRoot}training/wearables/data-layer/index.html">
-Wearable Data Layer API</a>. The credentials can be transferred as
-messages or data items.</p>
+    <p>
+      Since Android Wear apps will work independently of phone apps, Android
+      Wear's network access will no longer require the <a href=
+      "{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer
+      API</a>. Android Wear apps will have the ability to make their own
+      network requests. Additionally, they will be able to directly use Google
+      Cloud Messaging. For more information, see
+      <a href=
+      "https://developer.android.com/wear/preview/features/standalone-apps.html#network_access">
+      Network Access and Cloud Messaging</a>.
+    </p>
 
-<p>If your watch app needs to determine if your phone app is installed, you can
-advertise a capability on the phone app and retrieve the capability on the
-watch. For more information, see the following sections of
-<a href="{@docRoot}training/wearables/data-layer/messages.html">
-Sending and Receiving Messages</a>:</p>
+    <p>
+      No APIs for network access or GCM are specific to Android Wear; refer to
+      the existing documentation about <a href=
+      "{@docRoot}training/basics/network-ops/connecting.html">Connecting to the
+      Network</a> and <a href=
+      "https://developers.google.com/cloud-messaging/">Cloud Messaging</a>.
+    </p>
 
-<ul>
-  <li>Advertise Capabilities</li>
-  <li>Retrieve the Nodes with the Required Capabilities</li>
-</ul>
+    <p>
+      We recommend using the following libraries:
+    </p>
+
+    <ul>
+      <li>
+        <a href=
+        "{@docRoot}reference/android/app/job/JobScheduler.html">JobScheduler</a>
+        for asynchronous jobs, including polling at regular intervals
+      </li>
+
+      <li>Multi-networking APIs, to connect to specific network
+      types; see <a href=
+      "{@docRoot}about/versions/android-5.0.html#Wireless">Multiple Network
+      Connections</a>
+      </li>
+    </ul>
+
+    <p>
+      The <a href=
+      "{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer
+      API</a> is available to communicate with a phone app.
+      However, use of this API to connect to a network will be discouraged.
+    </p>
+
+    <h3 id="auth">
+      Authentication
+    </h3>
+
+    <p>
+      Since Android Wear apps will work independently of phone apps, Android
+      Wear's authentication capabilities will be more powerful; apps will have
+      new ways to authenticate.
+    </p>
+
+    <h4>
+      Users can enter a username and password on a watch
+    </h4>
+
+    <p>
+      Google Keyboard will be standard on Android Wear, allowing for direct
+      text entry. This feature will work as expected with standard <a href=
+      "{@docRoot}reference/android/widget/EditText.html">EditText widgets</a>.
+      For passwords, the {@code textPassword} attribute will be used.
+    </p>
+
+    <h4>
+      Utilizing Account Manager
+    </h4>
+
+    <p>
+      Android Wear will include the <a href=
+      "{@docRoot}reference/android/accounts/AccountManager.html">AccountManager</a>,
+      which will be accessible for syncing and storing account data, as it is
+      on an Android phone.
+    </p>
+
+    <h4>
+      Authentication tokens can be passed over the Wearable Data Layer
+    </h4>
+
+    <p>
+      For Android-paired watches (only), a phone securely transfers
+      authentication credentials to a watch app via the <a href=
+      "{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer
+      API</a>. The credentials can be transferred as messages or data items.
+    </p>
+
+    <p>
+      If your watch app needs to determine if your phone app is installed, you
+      can advertise a capability on the phone app and retrieve the capability
+      on the watch. For more information, see the following sections of
+      <a href="{@docRoot}training/wearables/data-layer/messages.html">Sending
+      and Receiving Messages</a>:
+    </p>
+
+    <ul>
+      <li>Advertise Capabilities
+      </li>
+
+      <li>Retrieve the Nodes with the Required Capabilities
+      </li>
+    </ul>
