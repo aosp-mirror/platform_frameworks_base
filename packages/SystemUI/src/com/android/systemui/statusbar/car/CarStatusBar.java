@@ -148,7 +148,7 @@ public class CarStatusBar extends PhoneStatusBar implements
         mController = new CarNavigationBarController(context, mCarNavigationBar,
                 this /* ActivityStarter*/);
         mNavigationBarView = mCarNavigationBar;
-
+        mCarNavigationBar.getBarTransitions().setAlwaysOpaque(true);
     }
 
     @Override
