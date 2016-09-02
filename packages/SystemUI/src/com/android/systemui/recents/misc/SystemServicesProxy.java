@@ -60,6 +60,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -75,6 +76,7 @@ import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.R;
@@ -199,6 +201,9 @@ public class SystemServicesProxy {
      */
     private List<TaskStackListener> mTaskStackListeners = new ArrayList<>();
 
+    /** Test constructor */
+    @VisibleForTesting public SystemServicesProxy() {}
+
     /** Private constructor */
     private SystemServicesProxy(Context context) {
         mAccm = AccessibilityManager.getInstance(context);
@@ -300,7 +305,7 @@ public class SystemServicesProxy {
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
-                rti.firstActiveTime = rti.lastActiveTime = i;
+                rti.firstActiveTime = rti.lastActiveTime = SystemClock.elapsedRealtime();
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
                         Bitmap.createBitmap(mDummyIcon), null,
