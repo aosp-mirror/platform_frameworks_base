@@ -158,6 +158,8 @@ public:
 
     ANDROID_API int64_t getFrameNumber();
 
+    void waitOnFences();
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
             IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -170,8 +172,6 @@ private:
     void setSurface(Surface* window);
 
     void freePrefetchedLayers(TreeObserver* observer);
-
-    void waitOnFences();
 
     bool isSwapChainStuffed();
 
