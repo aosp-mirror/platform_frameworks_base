@@ -742,6 +742,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             // Legacy apps in permission review mode trigger a user prompt
             if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 Intent intent = new Intent(intentAction);
+                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 try {
