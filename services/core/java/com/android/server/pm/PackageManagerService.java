@@ -538,6 +538,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
 
+    @GuardedBy("mPackages")
+    private boolean mDexOptDialogShown;
+
     /** The location for ASEC container files on internal storage. */
     final String mAsecInternalPath;
 
@@ -7150,7 +7153,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
                 if (doTrim) {
-                    if (!isFirstBoot()) {
+                    final boolean dexOptDialogShown;
+                    synchronized (mPackages) {
+                        dexOptDialogShown = mDexOptDialogShown;
+                    }
+                    if (!isFirstBoot() && dexOptDialogShown) {
                         try {
                             ActivityManagerNative.getDefault().showBootMessage(
                                     mContext.getResources().getString(
@@ -7243,6 +7250,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             mContext.getResources().getString(R.string.android_upgrading_apk,
                                     numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
+                }
+                synchronized (mPackages) {
+                    mDexOptDialogShown = true;
                 }
             }
 
