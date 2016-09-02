@@ -503,6 +503,10 @@ void CanvasContext::destroyHardwareResources(TreeObserver* observer) {
         for (const sp<RenderNode>& node : mRenderNodes) {
             node->destroyHardwareResources(observer);
         }
+        Caches& caches = Caches::getInstance();
+        // Make sure to release all the textures we were owning as there won't
+        // be another draw
+        caches.textureCache.resetMarkInUse(this);
         mRenderPipeline->onDestroyHardwareResources();
     }
 }
