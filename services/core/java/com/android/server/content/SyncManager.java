@@ -645,6 +645,37 @@ public class SyncManager {
                 mContext.startService(startServiceIntent);
             }
         });
+
+        // Sync adapters were able to access the synced account without the accounts
+        // permission which circumvents our permission model. Therefore, we require
+        // sync adapters that don't have access to the account to get user consent.
+        // This can be noisy, therefore we will white-list sync adapters installed
+        // before we started checking for account access because they already know
+        // the account (they run before) which is the genie is out of the bottle.
+        whiteListExistingSyncAdaptersIfNeeded();
+    }
+
+    private void whiteListExistingSyncAdaptersIfNeeded() {
+        if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
+            return;
+        }
+        List<UserInfo> users = mUserManager.getUsers(true);
+        final int userCount = users.size();
+        for (int i = 0; i < userCount; i++) {
+            UserHandle userHandle = users.get(i).getUserHandle();
+            final int userId = userHandle.getIdentifier();
+            for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> service
+                    : mSyncAdapters.getAllServices(userId)) {
+                String packageName = service.componentName.getPackageName();
+                for (Account account : mAccountManager.getAccountsByTypeAsUser(
+                        service.type.accountType, userHandle)) {
+                    if (!canAccessAccount(account, packageName, userId)) {
+                        mAccountManager.updateAppPermission(account,
+                                AccountManager.ACCOUNT_ACCESS_TOKEN, service.uid, true);
+                    }
+                }
+            }
+        }
     }
 
     private boolean isDeviceProvisioned() {
