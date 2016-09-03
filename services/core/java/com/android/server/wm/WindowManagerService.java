@@ -1629,7 +1629,7 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (type == TYPE_TOAST) {
                 // Apps targeting SDK above N MR1 cannot arbitrary add toast windows.
                 addToastWindowRequiresToken = doesAddToastWindowRequireToken(attrs.packageName,
-                        callingUid, attachedWindow);
+                        callingUid, parentWindow);
                 if (addToastWindowRequiresToken && token.windowType != TYPE_TOAST) {
                     Slog.w(TAG_WM, "Attempted to add a toast window with bad token "
                             + attrs.token + ".  Aborting.");
