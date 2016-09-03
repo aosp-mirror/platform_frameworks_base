@@ -497,6 +497,7 @@ public class NetworkPolicyManagerServiceTest {
         futureIntent.assertNotReceived();
     }
 
+    @Test
     @NetPolicyXml("uidA-whitelisted-restrict-background-on.xml")
     public void testWhitelistedAppIsNotifiedWhenBlacklisted() throws Exception {
         // Sanity checks.
