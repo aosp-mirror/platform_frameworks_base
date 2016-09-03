@@ -8833,8 +8833,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // We may need to schedule some toast windows to be removed. The
             // toasts for an app that does not have input focus are removed
             // within a timeout to prevent apps to redress other apps' UI.
-            oldFocus.getDisplayContent().scheduleToastWindowsTimeoutIfNeededLocked(
-                    oldFocus, newFocus);
+            getDefaultDisplayContentLocked().scheduleToastWindowsTimeoutIfNeededLocked(
+                        oldFocus, newFocus);
 
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             return true;
