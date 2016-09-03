@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.app.ActivityManager;
+import android.support.test.runner.AndroidJUnit4;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -29,6 +30,15 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+
 
 /**
  * Mock task loader that does not actually load any tasks.
@@ -75,24 +85,16 @@ class MockRecentsTaskNonLoader extends RecentsTaskLoader {
  * - add test to ensure excluded tasks are loaded at the front of the list
  * - add test to ensure the last visible task active time is migrated from absolute to uptime
  */
+@RunWith(AndroidJUnit4.class)
 public class RecentsTaskLoadPlanTest extends SysuiTestCase {
     private static final String TAG = "RecentsTaskLoadPlanTest";
 
     private MockRecentsTaskNonLoader mDummyLoader = new MockRecentsTaskNonLoader();
     private SystemServicesProxy mDummySsp = new SystemServicesProxy();
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testEmptyRecents() {
-        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(getTestContext(), mDummySsp);
+        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(mContext, mDummySsp);
         ArrayList<ActivityManager.RecentTaskInfo> tasks = new ArrayList<>();
         loadPlan.setInternals(tasks, 0 /* current */, 0 /* lastVisibleTaskActive */);
         loadPlan.preloadPlan(mDummyLoader, 0 /* runningTaskId */,
@@ -100,8 +102,9 @@ public class RecentsTaskLoadPlanTest extends SysuiTestCase {
         assertFalse("Expected task to be empty", loadPlan.getTaskStack().getStackTaskCount() > 0);
     }
 
+    @Test
     public void testLessThanEqualMinTasks() {
-        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(getTestContext(), mDummySsp);
+        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(mContext, mDummySsp);
         ArrayList<ActivityManager.RecentTaskInfo> tasks = new ArrayList<>();
         int minTasks = 3;
 
@@ -177,8 +180,9 @@ public class RecentsTaskLoadPlanTest extends SysuiTestCase {
         assertTasksNotInStack(loadPlan.getTaskStack(), 0, 1, 2);
     }
 
+    @Test
     public void testMoreThanMinTasks() {
-        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(getTestContext(), mDummySsp);
+        RecentsTaskLoadPlan loadPlan = new RecentsTaskLoadPlan(mContext, mDummySsp);
         ArrayList<ActivityManager.RecentTaskInfo> tasks = new ArrayList<>();
         int minTasks = 3;
 
