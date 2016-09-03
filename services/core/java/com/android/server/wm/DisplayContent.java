@@ -22,6 +22,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -677,6 +678,41 @@ class DisplayContent {
     void overridePlayingAppAnimationsLw(Animation a) {
         for (int i = mStacks.size() - 1; i >= 0; i--) {
             mStacks.get(i).overridePlayingAppAnimations(a);
+        }
+    }
+
+    boolean canAddToastWindowForUid(int uid) {
+        // We allow one toast window per UID being shown at a time.
+        WindowList windows = getWindowList();
+        final int windowCount = windows.size();
+        for (int i = 0; i < windowCount; i++) {
+            WindowState window = windows.get(i);
+            if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == uid
+                    && !window.mPermanentlyHidden && !window.mAnimatingExit) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void scheduleToastWindowsTimeoutIfNeededLocked(WindowState oldFocus,
+                                                   WindowState newFocus) {
+        if (oldFocus == null || (newFocus != null && newFocus.mOwnerUid == oldFocus.mOwnerUid)) {
+            return;
+        }
+        final int lostFocusUid = oldFocus.mOwnerUid;
+        WindowList windows = getWindowList();
+        final int windowCount = windows.size();
+        for (int i = 0; i < windowCount; i++) {
+            WindowState window = windows.get(i);
+            if (window.mAttrs.type == TYPE_TOAST && window.mOwnerUid == lostFocusUid) {
+                if (!mService.mH.hasMessages(WindowManagerService.H.WINDOW_HIDE_TIMEOUT, window)) {
+                    mService.mH.sendMessageDelayed(
+                            mService.mH.obtainMessage(
+                                    WindowManagerService.H.WINDOW_HIDE_TIMEOUT, window),
+                            window.mAttrs.hideTimeoutMilliseconds);
+                }
+            }
         }
     }
 }

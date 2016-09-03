@@ -190,6 +190,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
+    boolean mPermanentlyHidden; // the window should never be shown again
     boolean mAppFreezing;
     boolean mHidden;    // Used to determine if to show child windows.
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -2249,6 +2250,11 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             // Being hidden due to app op request.
             return false;
         }
+        if (mPermanentlyHidden) {
+            // Permanently hidden until the app exists as apps aren't prepared
+            // to handle their windows being removed from under them.
+            return false;
+        }
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             // Already showing.
             return false;
@@ -2333,6 +2339,13 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             } else {
                 hideLw(true, true);
             }
+        }
+    }
+
+    public void hidePermanentlyLw() {
+        if (!mPermanentlyHidden) {
+            mPermanentlyHidden = true;
+            hideLw(true, true);
         }
     }
 
@@ -3175,7 +3188,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             pw.println(Integer.toHexString(mSystemUiVisibility));
         }
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || !mAppOpVisibility
-                || isParentWindowHidden()) {
+                || isParentWindowHidden()|| mPermanentlyHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
                     pw.print(" mPolicyVisibilityAfterAnim=");
@@ -3183,6 +3196,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                     pw.print(" mAppOpVisibility=");
                     pw.print(mAppOpVisibility);
                     pw.print(" parentHidden="); pw.println(isParentWindowHidden());
+                    pw.print(" mPermanentlyHidden="); pw.println(mPermanentlyHidden);
         }
         if (!mRelayoutCalled || mLayoutNeeded) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.print(mRelayoutCalled);
