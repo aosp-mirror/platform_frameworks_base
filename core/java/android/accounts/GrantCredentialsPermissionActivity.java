@@ -108,7 +108,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             }
         };
 
-        if (!AccountManager.ACCOUNT_ACCESS_TOKEN.equals(mAuthTokenType)) {
+        if (!AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE.equals(mAuthTokenType)) {
             AccountManager.get(this).getAuthTokenLabel(mAccount.type,
                     mAuthTokenType, callback, null);
         }
