@@ -23,6 +23,7 @@ import android.content.pm.Signature;
 import android.os.Bundle;
 import android.util.Base64;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.MediumTest;
 
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
@@ -39,7 +40,12 @@ import org.mockito.ArgumentMatcher;
 
 /**
  * Tests for WebViewUpdateService
+ runtest --path frameworks/base/services/tests/servicestests/ \
+     -c com.android.server.webkit.WebViewUpdateServiceTest
  */
+// Use MediumTest instead of SmallTest as the implementation of WebViewUpdateService
+// is intended to work on several threads and uses at least one sleep/wait-statement.
+@MediumTest
 public class WebViewUpdateServiceTest extends AndroidTestCase {
     private final static String TAG = WebViewUpdateServiceTest.class.getSimpleName();
 
