@@ -48,7 +48,6 @@
 // fork, and all operations on it will fail.
 static const char* kPathWhitelist[] = {
   "/dev/null",
-  "/dev/pmsg0",
   "/dev/socket/zygote",
   "/dev/socket/zygote_secondary",
   "/system/etc/event-log-tags",
