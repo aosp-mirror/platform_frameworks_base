@@ -176,11 +176,21 @@ public class Editor {
     InputMethodState mInputMethodState;
 
     private static class TextRenderNode {
+        // Render node has 3 recording states:
+        // 1. Recorded operations are valid.
+        // #needsRecord() returns false, but needsToBeShifted is false.
+        // 2. Recorded operations are not valid, but just the position needed to be updated.
+        // #needsRecord() returns false, but needsToBeShifted is true.
+        // 3. Recorded operations are not valid. Need to record operations. #needsRecord() returns
+        // true.
         RenderNode renderNode;
         boolean isDirty;
+        // Becomes true when recorded operations can be reused, but the position has to be updated.
+        boolean needsToBeShifted;
         public TextRenderNode(String name) {
-            isDirty = true;
             renderNode = RenderNode.create(name, null);
+            isDirty = true;
+            needsToBeShifted = true;
         }
         boolean needsRecord() {
             return isDirty || !renderNode.isValid();
@@ -1686,83 +1696,111 @@ public class Editor {
             final int numberOfBlocks = dynamicLayout.getNumberOfBlocks();
             final int indexFirstChangedBlock = dynamicLayout.getIndexFirstChangedBlock();
 
-            int endOfPreviousBlock = -1;
-            int searchStartIndex = 0;
-            for (int i = 0; i < numberOfBlocks; i++) {
-                int blockEndLine = blockEndLines[i];
-                int blockIndex = blockIndices[i];
+            int startBlock = Arrays.binarySearch(blockEndLines, 0, numberOfBlocks, firstLine);
+            if (startBlock < 0) {
+                startBlock = -(startBlock + 1);
+            }
+            startBlock = Math.min(indexFirstChangedBlock, startBlock);
 
-                final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
-                if (blockIsInvalid) {
-                    blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
-                            searchStartIndex);
-                    // Note how dynamic layout's internal block indices get updated from Editor
-                    blockIndices[i] = blockIndex;
-                    if (mTextRenderNodes[blockIndex] != null) {
-                        mTextRenderNodes[blockIndex].isDirty = true;
-                    }
-                    searchStartIndex = blockIndex + 1;
+            int startIndexToFindAvailableRenderNode = 0;
+            int lastIndex = numberOfBlocks;
+
+            for (int i = startBlock; i < numberOfBlocks; i++) {
+                final int blockIndex = blockIndices[i];
+                if (i >= indexFirstChangedBlock
+                        && blockIndex != DynamicLayout.INVALID_BLOCK_INDEX
+                        && mTextRenderNodes[blockIndex] != null) {
+                    mTextRenderNodes[blockIndex].needsToBeShifted = true;
                 }
-
-                if (mTextRenderNodes[blockIndex] == null) {
-                    mTextRenderNodes[blockIndex] =
-                            new TextRenderNode("Text " + blockIndex);
+                if (blockEndLines[i] < firstLine) {
+                    // Blocks in [indexFirstChangedBlock, firstLine) are not redrawn here. They will
+                    // be redrawn after they get scrolled into drawing range.
+                    continue;
                 }
-
-                final boolean blockDisplayListIsInvalid =
-                        mTextRenderNodes[blockIndex].needsRecord();
-                RenderNode blockDisplayList = mTextRenderNodes[blockIndex].renderNode;
-                if (i >= indexFirstChangedBlock || blockDisplayListIsInvalid) {
-                    final int blockBeginLine = endOfPreviousBlock + 1;
-                    final int top = layout.getLineTop(blockBeginLine);
-                    final int bottom = layout.getLineBottom(blockEndLine);
-                    int left = 0;
-                    int right = mTextView.getWidth();
-                    if (mTextView.getHorizontallyScrolling()) {
-                        float min = Float.MAX_VALUE;
-                        float max = Float.MIN_VALUE;
-                        for (int line = blockBeginLine; line <= blockEndLine; line++) {
-                            min = Math.min(min, layout.getLineLeft(line));
-                            max = Math.max(max, layout.getLineRight(line));
-                        }
-                        left = (int) min;
-                        right = (int) (max + 0.5f);
-                    }
-
-                    // Rebuild display list if it is invalid
-                    if (blockDisplayListIsInvalid) {
-                        final DisplayListCanvas displayListCanvas = blockDisplayList.start(
-                                right - left, bottom - top);
-                        try {
-                            // drawText is always relative to TextView's origin, this translation
-                            // brings this range of text back to the top left corner of the viewport
-                            displayListCanvas.translate(-left, -top);
-                            layout.drawText(displayListCanvas, blockBeginLine, blockEndLine);
-                            mTextRenderNodes[blockIndex].isDirty = false;
-                            // No need to untranslate, previous context is popped after
-                            // drawDisplayList
-                        } finally {
-                            blockDisplayList.end(displayListCanvas);
-                            // Same as drawDisplayList below, handled by our TextView's parent
-                            blockDisplayList.setClipToBounds(false);
-                        }
-                    }
-
-                    // Valid disply list whose index is >= indexFirstChangedBlock
-                    // only needs to update its drawing location.
-                    blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
+                startIndexToFindAvailableRenderNode = drawHardwareAcceleratedInner(canvas, layout,
+                        highlight, highlightPaint, cursorOffsetVertical, blockEndLines,
+                        blockIndices, i, numberOfBlocks, startIndexToFindAvailableRenderNode);
+                if (blockEndLines[i] >= lastLine) {
+                    lastIndex = Math.max(indexFirstChangedBlock, i + 1);
+                    break;
                 }
-
-                ((DisplayListCanvas) canvas).drawRenderNode(blockDisplayList);
-
-                endOfPreviousBlock = blockEndLine;
             }
 
-            dynamicLayout.setIndexFirstChangedBlock(numberOfBlocks);
+            dynamicLayout.setIndexFirstChangedBlock(lastIndex);
         } else {
             // Boring layout is used for empty and hint text
             layout.drawText(canvas, firstLine, lastLine);
         }
+    }
+
+    private int drawHardwareAcceleratedInner(Canvas canvas, Layout layout, Path highlight,
+            Paint highlightPaint, int cursorOffsetVertical, int[] blockEndLines,
+            int[] blockIndices, int blockInfoIndex, int numberOfBlocks,
+            int startIndexToFindAvailableRenderNode) {
+        final int blockEndLine = blockEndLines[blockInfoIndex];
+        int blockIndex = blockIndices[blockInfoIndex];
+
+        final boolean blockIsInvalid = blockIndex == DynamicLayout.INVALID_BLOCK_INDEX;
+        if (blockIsInvalid) {
+            blockIndex = getAvailableDisplayListIndex(blockIndices, numberOfBlocks,
+                    startIndexToFindAvailableRenderNode);
+            // Note how dynamic layout's internal block indices get updated from Editor
+            blockIndices[blockInfoIndex] = blockIndex;
+            if (mTextRenderNodes[blockIndex] != null) {
+                mTextRenderNodes[blockIndex].isDirty = true;
+            }
+            startIndexToFindAvailableRenderNode = blockIndex + 1;
+        }
+
+        if (mTextRenderNodes[blockIndex] == null) {
+            mTextRenderNodes[blockIndex] = new TextRenderNode("Text " + blockIndex);
+        }
+
+        final boolean blockDisplayListIsInvalid = mTextRenderNodes[blockIndex].needsRecord();
+        RenderNode blockDisplayList = mTextRenderNodes[blockIndex].renderNode;
+        if (mTextRenderNodes[blockIndex].needsToBeShifted || blockDisplayListIsInvalid) {
+            final int blockBeginLine = blockInfoIndex == 0 ?
+                    0 : blockEndLines[blockInfoIndex - 1] + 1;
+            final int top = layout.getLineTop(blockBeginLine);
+            final int bottom = layout.getLineBottom(blockEndLine);
+            int left = 0;
+            int right = mTextView.getWidth();
+            if (mTextView.getHorizontallyScrolling()) {
+                float min = Float.MAX_VALUE;
+                float max = Float.MIN_VALUE;
+                for (int line = blockBeginLine; line <= blockEndLine; line++) {
+                    min = Math.min(min, layout.getLineLeft(line));
+                    max = Math.max(max, layout.getLineRight(line));
+                }
+                left = (int) min;
+                right = (int) (max + 0.5f);
+            }
+
+            // Rebuild display list if it is invalid
+            if (blockDisplayListIsInvalid) {
+                final DisplayListCanvas displayListCanvas = blockDisplayList.start(
+                        right - left, bottom - top);
+                try {
+                    // drawText is always relative to TextView's origin, this translation
+                    // brings this range of text back to the top left corner of the viewport
+                    displayListCanvas.translate(-left, -top);
+                    layout.drawText(displayListCanvas, blockBeginLine, blockEndLine);
+                    mTextRenderNodes[blockIndex].isDirty = false;
+                    // No need to untranslate, previous context is popped after
+                    // drawDisplayList
+                } finally {
+                    blockDisplayList.end(displayListCanvas);
+                    // Same as drawDisplayList below, handled by our TextView's parent
+                    blockDisplayList.setClipToBounds(false);
+                }
+            }
+
+            // Valid display list only needs to update its drawing location.
+            blockDisplayList.setLeftTopRightBottom(left, top, right, bottom);
+            mTextRenderNodes[blockIndex].needsToBeShifted = false;
+        }
+        ((DisplayListCanvas) canvas).drawRenderNode(blockDisplayList);
+        return startIndexToFindAvailableRenderNode;
     }
 
     private int getAvailableDisplayListIndex(int[] blockIndices, int numberOfBlocks,
