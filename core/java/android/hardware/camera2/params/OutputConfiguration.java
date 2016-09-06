@@ -229,7 +229,6 @@ public final class OutputConfiguration implements Parcelable {
      * @param klass a non-{@code null} {@link Class} object reference that indicates the source of
      *            this surface. Only {@link android.view.SurfaceHolder SurfaceHolder.class} and
      *            {@link android.graphics.SurfaceTexture SurfaceTexture.class} are supported.
-     * @hide
      */
     public <T> OutputConfiguration(@NonNull Size surfaceSize, @NonNull Class<T> klass) {
         checkNotNull(klass, "surfaceSize must not be null");
@@ -283,7 +282,6 @@ public final class OutputConfiguration implements Parcelable {
      * @throws IllegalArgumentException if the Surface is invalid.
      * @throws IllegalStateException if a Surface was already set to this deferred
      *         OutputConfiguration.
-     * @hide
      */
     public void setDeferredSurface(@NonNull Surface surface) {
         checkNotNull(surface, "Surface must not be null");
