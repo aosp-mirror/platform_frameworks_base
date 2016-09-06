@@ -287,10 +287,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_LIMIT_REACHED = 5;
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
-    private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
-    private static final int MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED = 12;
+    private static final int MSG_POLICIES_CHANGED = 13;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1769,26 +1768,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void setUidPolicyUncheckedUL(int uid, int oldPolicy, int policy, boolean persist) {
         setUidPolicyUncheckedUL(uid, policy, persist);
 
-        final boolean wasBlacklisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
-        final boolean isBlacklisted = policy == POLICY_REJECT_METERED_BACKGROUND;
-        final boolean wasWhitelisted = oldPolicy == POLICY_ALLOW_METERED_BACKGROUND;
-        final boolean isWhitelisted = policy == POLICY_ALLOW_METERED_BACKGROUND;
         final boolean notifyApp;
         if (!isUidValidForWhitelistRules(uid)) {
             notifyApp = false;
         } else {
+            final boolean wasBlacklisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
+            final boolean isBlacklisted = policy == POLICY_REJECT_METERED_BACKGROUND;
+            final boolean wasWhitelisted = oldPolicy == POLICY_ALLOW_METERED_BACKGROUND;
+            final boolean isWhitelisted = policy == POLICY_ALLOW_METERED_BACKGROUND;
             final boolean wasBlocked = wasBlacklisted || (mRestrictBackground && !wasWhitelisted);
             final boolean isBlocked = isBlacklisted || (mRestrictBackground && !isWhitelisted);
             notifyApp = wasBlocked != isBlocked;
         }
-        if (isBlacklisted != wasBlacklisted) {
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED, uid,
-                    isBlacklisted ? 1 : 0, Boolean.valueOf(notifyApp)).sendToTarget();
-        }
-        if (isWhitelisted != wasWhitelisted) {
-            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid,
-                    isWhitelisted ? 1 : 0, Boolean.valueOf(notifyApp)).sendToTarget();
-        }
+        mHandler.obtainMessage(MSG_POLICIES_CHANGED, uid, policy, Boolean.valueOf(notifyApp))
+                .sendToTarget();
     }
 
     private void setUidPolicyUncheckedUL(int uid, int policy, boolean persist) {
@@ -3077,21 +3070,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void dispatchRestrictBackgroundWhitelistChanged(INetworkPolicyListener listener,
-            int uid, boolean whitelisted) {
+    private void dispatchUidPoliciesChanged(INetworkPolicyListener listener, int uid,
+            int uidPolicies) {
         if (listener != null) {
             try {
-                listener.onRestrictBackgroundWhitelistChanged(uid, whitelisted);
-            } catch (RemoteException ignored) {
-            }
-        }
-    }
-
-    private void dispatchRestrictBackgroundBlacklistChanged(INetworkPolicyListener listener,
-            int uid, boolean blacklisted) {
-        if (listener != null) {
-            try {
-                listener.onRestrictBackgroundBlacklistChanged(uid, blacklisted);
+                listener.onUidPoliciesChanged(uid, uidPolicies);
             } catch (RemoteException ignored) {
             }
         }
@@ -3159,37 +3142,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
                     return true;
                 }
-                case MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED: {
+                case MSG_POLICIES_CHANGED: {
                     final int uid = msg.arg1;
-                    final boolean whitelisted = msg.arg2 == 1;
+                    final int policy = msg.arg2;
                     final Boolean notifyApp = (Boolean) msg.obj;
                     // First notify internal listeners...
-                    dispatchRestrictBackgroundWhitelistChanged(mConnectivityListener, uid,
-                            whitelisted);
+                    dispatchUidPoliciesChanged(mConnectivityListener, uid, policy);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        dispatchRestrictBackgroundWhitelistChanged(listener, uid, whitelisted);
-                    }
-                    mListeners.finishBroadcast();
-                    // ...then apps listening to ACTION_RESTRICT_BACKGROUND_CHANGED
-                    if (notifyApp.booleanValue()) {
-                        broadcastRestrictBackgroundChanged(uid, notifyApp);
-                    }
-                    return true;
-                }
-                case MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED: {
-                    final int uid = msg.arg1;
-                    final boolean blacklisted = msg.arg2 == 1;
-                    final Boolean notifyApp = (Boolean) msg.obj;
-                    // First notify internal listeners...
-                    dispatchRestrictBackgroundBlacklistChanged(mConnectivityListener, uid,
-                            blacklisted);
-                    final int length = mListeners.beginBroadcast();
-                    for (int i = 0; i < length; i++) {
-                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        dispatchRestrictBackgroundBlacklistChanged(listener, uid,
-                                blacklisted);
+                        dispatchUidPoliciesChanged(listener, uid, policy);
                     }
                     mListeners.finishBroadcast();
                     // ...then apps listening to ACTION_RESTRICT_BACKGROUND_CHANGED
