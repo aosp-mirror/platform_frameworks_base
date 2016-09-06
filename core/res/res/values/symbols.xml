@@ -1460,6 +1460,7 @@
   <java-symbol type="anim" name="dock_top_exit" />
   <java-symbol type="anim" name="dock_bottom_enter" />
   <java-symbol type="anim" name="dock_bottom_exit" />
+  <java-symbol type="anim" name="dock_bottom_exit_keyguard" />
   <java-symbol type="anim" name="dock_left_enter" />
   <java-symbol type="anim" name="dock_left_exit" />
   <java-symbol type="anim" name="dock_right_enter" />
