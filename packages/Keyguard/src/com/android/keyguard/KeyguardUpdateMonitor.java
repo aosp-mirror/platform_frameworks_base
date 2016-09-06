@@ -34,9 +34,12 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.fingerprint.FingerprintManager;
@@ -159,6 +162,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
+    private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
+            "com.android.settings", "com.android.settings.FallbackHome");
+
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
@@ -177,7 +183,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mGoingToSleep;
     private boolean mBouncer;
     private boolean mBootCompleted;
-    private boolean mUserUnlocked;
+    private boolean mNeedsSlowUnlockTransition;
     private boolean mHasLockscreenWallpaper;
 
     // Device provisioning state
@@ -572,8 +578,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 && !hasFingerprintUnlockTimedOut(sCurrentUser);
     }
 
-    public boolean isUserUnlocked() {
-        return mUserUnlocked;
+    public boolean needsSlowUnlockTransition() {
+        return mNeedsSlowUnlockTransition;
     }
 
     public StrongAuthTracker getStrongAuthTracker() {
@@ -1438,7 +1444,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private void handleKeyguardReset() {
         if (DEBUG) Log.d(TAG, "handleKeyguardReset");
         updateFingerprintListeningState();
-        mUserUnlocked = mUserManager.isUserUnlocked(getCurrentUser());
+        mNeedsSlowUnlockTransition = resolveNeedsSlowUnlockTransition();
+    }
+
+    private boolean resolveNeedsSlowUnlockTransition() {
+        if (mUserManager.isUserUnlocked(getCurrentUser())) {
+            return false;
+        }
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(homeIntent,
+                0 /* flags */);
+        return FALLBACK_HOME_COMPONENT.equals(resolveInfo.getComponentInfo().getComponentName());
     }
 
     /**
