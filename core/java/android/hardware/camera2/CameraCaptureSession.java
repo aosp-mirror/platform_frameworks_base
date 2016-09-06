@@ -764,13 +764,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     }
 
     /**
-     * Temporary for migrating to Callback naming
-     * @hide
-     */
-    public static abstract class StateListener extends StateCallback {
-    }
-
-    /**
      * <p>A callback object for tracking the progress of a {@link CaptureRequest} submitted to the
      * camera device.</p>
      *
@@ -835,16 +828,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          */
         public void onCaptureStarted(@NonNull CameraCaptureSession session,
                 @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-            // Temporary trampoline for API change transition
-            onCaptureStarted(session, request, timestamp);
-        }
-
-        /**
-         * Temporary for API change transition
-         * @hide
-         */
-        public void onCaptureStarted(CameraCaptureSession session,
-                CaptureRequest request, long timestamp) {
             // default empty implementation
         }
 
@@ -1062,13 +1045,6 @@ public abstract class CameraCaptureSession implements AutoCloseable {
                 @NonNull CaptureRequest request, @NonNull Surface target, long frameNumber) {
             // default empty implementation
         }
-    }
-
-    /**
-     * Temporary for migrating to Callback naming
-     * @hide
-     */
-    public static abstract class CaptureListener extends CaptureCallback {
     }
 
 }
