@@ -46,6 +46,8 @@ class OtaDexoptShellCommand extends ShellCommand {
                     return runOtaDone();
                 case "step":
                     return runOtaStep();
+                case "next":
+                    return runOtaNext();
                 case "progress":
                     return runOtaProgress();
                 default:
@@ -83,6 +85,11 @@ class OtaDexoptShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runOtaNext() throws RemoteException {
+        getOutPrintWriter().println(mInterface.nextDexoptCommand());
+        return 0;
+    }
+
     private int runOtaProgress() throws RemoteException {
         final float progress = mInterface.getProgress();
         final PrintWriter pw = getOutPrintWriter();
@@ -103,6 +110,8 @@ class OtaDexoptShellCommand extends ShellCommand {
         pw.println("    Replies whether the OTA is complete or not.");
         pw.println("  step");
         pw.println("    OTA dexopt the next package.");
+        pw.println("  next");
+        pw.println("    Get parameters for OTA dexopt of the next package.");
         pw.println("  cleanup");
         pw.println("    Clean up internal states. Ends an OTA session.");
     }
