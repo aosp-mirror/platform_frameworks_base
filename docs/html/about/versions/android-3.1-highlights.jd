@@ -4,31 +4,31 @@ page.title=Honeycomb MR1
 
 
 <style type="text/css">
-#jd-content {
+#body-content {
   max-width:1200px;
 }
-#jd-content div.screenshot {
+#body-content div.screenshot {
   float:left;
   clear:left;
   padding:15px 30px 15px 0;
 }
-#jd-content div.video {
+#body-content div.video {
   float:right;
   padding:0 60px 40px;
 }
-#jd-content table.columns {
+#body-content table.columns {
   margin:0 0 1em 0;
 }
-#jd-content table.columns td {
+#body-content table.columns td {
   padding:0;
 }
-#jd-content table.columns td+td {
+#body-content table.columns td+td {
   padding:0 2em;
 }
-#jd-content table.columns td img {
+#body-content table.columns td img {
   margin:0;
 }
-#jd-content table.columns td+td>*:first-child {
+#body-content table.columns td+td>*:first-child {
   margin-top:-2em;
 }
 .green {
