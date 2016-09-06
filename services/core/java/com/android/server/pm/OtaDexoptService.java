@@ -50,6 +50,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private final static String TAG = "OTADexopt";
     private final static boolean DEBUG_DEXOPT = true;
 
+    // The synthetic library dependencies denoting "no checks."
+    private final static String[] NO_LIBRARIES = new String[] { "&" };
+
     private final Context mContext;
     private final PackageManagerService mPackageManagerService;
 
@@ -202,7 +205,13 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
-        optimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+        String[] libraryDependencies = pkg.usesLibraryFiles;
+        if (pkg.isSystemApp()) {
+            // For system apps, we want to avoid classpaths checks.
+            libraryDependencies = NO_LIBRARIES;
+        }
+
+        optimizer.performDexOpt(pkg, libraryDependencies,
                 null /* ISAs */, false /* checkProfiles */,
                 getCompilerFilterForReason(compilationReason),
                 null /* CompilerStats.PackageStats */);
