@@ -101,7 +101,7 @@ function toggleDiv(link) {
 .toggleable.closed .toggleme {
   display:none;
 }
-#jd-content .toggle-img {
+#body-content .toggle-img {
   margin:0;
 }
 </style>

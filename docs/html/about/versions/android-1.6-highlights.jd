@@ -6,8 +6,8 @@ sdk.date=September 2009
 
 
 <style type="text/css">
-#jd-content div.screenshot,
-#jd-content div.video {
+#body-content div.screenshot,
+#body-content div.video {
   float:right;
   clear:right;
   padding:15px 70px;
@@ -15,11 +15,11 @@ sdk.date=September 2009
   font-weight:bold;
   line-height:1.7em;
 }
-#jd-content div.video {
+#body-content div.video {
   padding-top:0;
   margin-top:-15px;
 }
-#jd-content div.screenshot img {
+#body-content div.screenshot img {
   margin:0;
 }
 </style>

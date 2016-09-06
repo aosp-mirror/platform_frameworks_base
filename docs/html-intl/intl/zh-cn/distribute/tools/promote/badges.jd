@@ -35,7 +35,7 @@ div.button-row input {
   vertical-align: middle;
   margin: 0 5px 0 0;
 }
-#jd-content div.button-row img {
+#body-content div.button-row img {
   margin: 0;
   vertical-align: middle;
 }
