@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.phone;
+package com.android.systemui.statusbar.phone;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -28,7 +28,7 @@ import static junit.framework.Assert.fail;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DozeParametersTests {
+public class DozeParametersTest {
 
     @Test
     public void test_inOutMatcher_defaultIn() {
