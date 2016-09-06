@@ -16,11 +16,20 @@
 
 package com.android.server.wm;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link WindowContainer}.
@@ -30,14 +39,17 @@ import java.util.LinkedList;
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowContainerTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest
-public class WindowContainerTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class WindowContainerTests {
 
+    @Test
     public void testCreation() throws Exception {
         final TestWindowContainer w = new TestWindowContainerBuilder().setLayer(0).build();
         assertNull("window must have no parent", w.getParentWindow());
         assertEquals("window must have no children", 0, w.getChildrenCount());
     }
 
+    @Test
     public void testAdd() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -69,6 +81,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertEquals(layer2, root.getChildAt(6));
     }
 
+    @Test
     public void testHasChild() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -96,8 +109,9 @@ public class WindowContainerTests extends AndroidTestCase {
         assertTrue(child2.hasChild(child21));
         assertFalse(child2.hasChild(child11));
         assertFalse(child2.hasChild(child12));
-   }
+    }
 
+    @Test
     public void testRemoveImmediately() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -132,6 +146,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertEquals(0, root.getChildrenCount());
     }
 
+    @Test
     public void testDetachFromDisplay() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -150,6 +165,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertFalse(child21.detachFromDisplay());
     }
 
+    @Test
     public void testIsAnimating() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -168,6 +184,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertFalse(child21.isAnimating());
     }
 
+    @Test
     public void testIsVisible() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -186,6 +203,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertFalse(child21.isVisible());
     }
 
+    @Test
     public void testDetachChild() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();

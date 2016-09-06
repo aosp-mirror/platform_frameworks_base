@@ -16,9 +16,14 @@
 
 package com.android.server.wm;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import android.content.Context;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.view.IWindow;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
@@ -27,6 +32,10 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link WindowState} class.
@@ -36,25 +45,26 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowStateTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest
-public class WindowStateTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class WindowStateTests {
 
     private static WindowManagerService sWm = null;
     private WindowToken mWindowToken;
     private final WindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
     private final IWindow mIWindow = new TestIWindow();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        final Context context = getContext();
-//        final InputManagerService im = new InputManagerService(context);
+        final Context context = InstrumentationRegistry.getTargetContext();
         if (sWm == null) {
             // We only want to do this once for the test process as we don't want WM to try to
             // register a bunch of local services again.
-            sWm = WindowManagerService.main(context, /*im*/ null, true, false, false, mPolicy);
+            sWm = WindowManagerService.main(context, null, true, false, false, mPolicy);
         }
         mWindowToken = new WindowToken(sWm, null, 0, false);
     }
 
+    @Test
     public void testIsParentWindowHidden() throws Exception {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
@@ -71,6 +81,7 @@ public class WindowStateTests extends AndroidTestCase {
         assertTrue(child2.isParentWindowHidden());
     }
 
+    @Test
     public void testIsChildWindow() throws Exception {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
@@ -83,6 +94,7 @@ public class WindowStateTests extends AndroidTestCase {
         assertFalse(randomWindow.isChildWindow());
     }
 
+    @Test
     public void testHasChild() throws Exception {
         final WindowState win1 = createWindow(null, TYPE_APPLICATION);
         final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW);
@@ -103,6 +115,7 @@ public class WindowStateTests extends AndroidTestCase {
         assertFalse(win2.hasChild(randomWindow));
     }
 
+    @Test
     public void testGetBottomChild() throws Exception {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
         assertNull(parentWindow.getBottomChild());
@@ -126,6 +139,7 @@ public class WindowStateTests extends AndroidTestCase {
         assertEquals(child4, parentWindow.getBottomChild());
     }
 
+    @Test
     public void testGetParentWindow() throws Exception {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION);
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW);
@@ -136,6 +150,7 @@ public class WindowStateTests extends AndroidTestCase {
         assertEquals(parentWindow, child2.getParentWindow());
     }
 
+    @Test
     public void testGetTopParentWindow() throws Exception {
         final WindowState root = createWindow(null, TYPE_APPLICATION);
         final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW);
