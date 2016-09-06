@@ -1407,8 +1407,10 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public boolean isEnterprise() {
-        return allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
-            allowedKeyManagement.get(KeyMgmt.IEEE8021X);
+        return (allowedKeyManagement.get(KeyMgmt.WPA_EAP)
+                || allowedKeyManagement.get(KeyMgmt.IEEE8021X))
+                && enterpriseConfig != null
+                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
 
     @Override
