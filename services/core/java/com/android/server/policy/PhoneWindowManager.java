@@ -2902,7 +2902,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
                 if (transit == TRANSIT_EXIT
                         || transit == TRANSIT_HIDE) {
-                    return R.anim.dock_bottom_exit;
+                    if (isKeyguardShowingAndNotOccluded()) {
+                        return R.anim.dock_bottom_exit_keyguard;
+                    } else {
+                        return R.anim.dock_bottom_exit;
+                    }
                 } else if (transit == TRANSIT_ENTER
                         || transit == TRANSIT_SHOW) {
                     return R.anim.dock_bottom_enter;
