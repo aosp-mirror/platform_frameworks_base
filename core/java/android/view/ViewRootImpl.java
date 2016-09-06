@@ -2167,7 +2167,12 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (changedVisibility || regainedFocus) {
-            host.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            // Toasts are presented as notifications - don't present them as windows as well
+            boolean isToast = (mWindowAttributes == null) ? false
+                    : (mWindowAttributes.type == WindowManager.LayoutParams.TYPE_TOAST);
+            if (!isToast) {
+                host.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            }
         }
 
         mFirst = false;
