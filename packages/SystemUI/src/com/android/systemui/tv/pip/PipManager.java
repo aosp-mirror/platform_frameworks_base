@@ -78,6 +78,18 @@ public class PipManager {
         sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
                 "com.google.android.leanbacklauncher",
                 "com.google.android.leanbacklauncher.settings.HomeScreenSettingsActivity"));
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.google.android.apps.mediashell",
+                "com.google.android.apps.mediashell.settings.CastSettingsActivity"));
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.google.android.katniss",
+                "com.google.android.katniss.setting.SpeechSettingsActivity"));
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.google.android.katniss",
+                "com.google.android.katniss.setting.SearchSettingsActivity"));
+        sSettingsPackageAndClassNamePairList.add(new Pair<String, String>(
+                "com.google.android.gsf.notouch",
+                "com.google.android.gsf.notouch.UsageDiagnosticsSettingActivity"));
     }
 
     /**
