@@ -5,16 +5,6 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 
 @jd:body
 
-<script>
-  $(document).ready(function() {
-    if (useUpdatedTemplates) {
-      $("#useUpdatedTemplates").css("display","block");
-    } else {
-      $("#useOldTemplates").css("display","block");
-    }
-  })
-</script>
-
 <section class="dac-expand dac-hero" style="background-color:#b2dfdb;">
   <div class="wrap" style="max-width:1000px;margin-top:0">
     <div class="col-7of16 col-push-8of16">
@@ -44,7 +34,7 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
   </div>
 </section>
 
-<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+<div class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
     <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
       <i class="dac-sprite dac-arrow-down-gray"></i>
@@ -71,28 +61,6 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
     </ul>
   </div><!-- end .wrap -->
 </div><!-- end .dac-actions -->
-
-<div id="useOldTemplates" style="display:none" class="actions-bar dac-expand dac-invert">
-  <div class="wrap dac-offset-parent">
-    <a class="dac-fab dac-scroll-button" data-scroll-button="" href="#build-apps">
-      <i class="dac-sprite dac-arrow-down-gray"></i>
-    </a>
-    <div class="actions">
-      <div><a href="{@docRoot}sdk/index.html">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Get the SDK
-      </a></div>
-      <div><a href="{@docRoot}samples/index.html">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Browse Samples
-      </a></div>
-      <div><a href="{@docRoot}distribute/stories/index.html">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Watch Stories
-      </a></div>
-    </div><!-- end .actions -->
-  </div><!-- end .wrap -->
-</div>
 
 <section class="dac-section dac-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>
