@@ -187,7 +187,17 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean mEnforceSizeCompat;
     int mViewVisibility;
     int mSystemUiVisibility;
+    /**
+     * The visibility of the window based on policy like {@link WindowManagerPolicy}.
+     * Normally set by calling {@link #showLw} and {@link #hideLw}.
+     */
     boolean mPolicyVisibility = true;
+    /**
+     * What {@link #mPolicyVisibility} should be set to after a transition animation.
+     * For example, {@link #mPolicyVisibility} might true during an exit animation to hide it and
+     * then set to the value of {@link #mPolicyVisibilityAfterAnim} which is false after the exit
+     * animation is done.
+     */
     boolean mPolicyVisibilityAfterAnim = true;
     boolean mAppOpVisibility = true;
     boolean mPermanentlyHidden; // the window should never be shown again
@@ -1405,8 +1415,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     @Override
     public boolean isDrawnLw() {
         return mHasSurface && !mDestroying &&
-                (mWinAnimator.mDrawState == READY_TO_SHOW
-                || mWinAnimator.mDrawState == HAS_DRAWN);
+                (mWinAnimator.mDrawState == READY_TO_SHOW || mWinAnimator.mDrawState == HAS_DRAWN);
     }
 
     /**
@@ -1595,12 +1604,12 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     void onWindowReplacementTimeout() {
         if (mWillReplaceWindow) {
             // Since the window already timed out, remove it immediately now.
-            // Use WindowState#remove() instead of WindowState#removeIfPossible(), as the latter
+            // Use WindowState#removeImmediately() instead of WindowState#removeIfPossible(), as the latter
             // delays removal on certain conditions, which will leave the stale window in the
             // stack and marked mWillReplaceWindow=false, so the window will never be removed.
             //
             // Also removes child windows.
-            remove();
+            removeImmediately();
         } else {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final WindowState c = (WindowState) mChildren.get(i);
@@ -1619,12 +1628,13 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     }
 
     @Override
-    void remove() {
-        super.remove();
+    void removeImmediately() {
+        super.removeImmediately();
 
         if (mRemoved) {
             // Nothing to do.
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "WS.remove: " + this + " Already removed...");
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                    "WS.removeImmediately: " + this + " Already removed...");
             return;
         }
 
@@ -1661,15 +1671,13 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mService.postWindowRemoveCleanupLocked(this);
     }
 
+    @Override
     void removeIfPossible() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
-            c.removeIfPossible(false /*keepVisibleDeadWindow*/);
-        }
+        super.removeIfPossible();
         removeIfPossible(false /*keepVisibleDeadWindow*/);
     }
 
-    void removeIfPossible(boolean keepVisibleDeadWindow) {
+    private void removeIfPossible(boolean keepVisibleDeadWindow) {
         mWindowRemovalAllowed = true;
         if (DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "removeIfPossible: " + this + " callers=" + Debug.getCallers(5));
@@ -1794,7 +1802,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             }
         }
 
-        remove();
+        removeImmediately();
         // Removing a visible window will effect the computed orientation
         // So just update orientation if needed.
         if (wasVisible && mService.updateOrientationFromAppTokensLocked(false)) {
@@ -2011,7 +2019,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mReplacingRemoveRequested = false;
         mReplacementWindow = null;
         if (mAnimatingExit || !mAnimateReplacingWindow) {
-            remove();
+            removeImmediately();
         }
     }
 
@@ -2580,7 +2588,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                     destroyOrSaveSurface();
                 }
                 if (mRemoveOnExit) {
-                    remove();
+                    removeImmediately();
                 }
                 if (cleanupOnResume) {
                     requestUpdateWallpaperIfNeeded();

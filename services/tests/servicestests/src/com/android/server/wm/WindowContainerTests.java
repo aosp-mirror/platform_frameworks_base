@@ -98,7 +98,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertFalse(child2.hasChild(child12));
    }
 
-    public void testRemove() throws Exception {
+    public void testRemoveImmediately() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
 
@@ -108,13 +108,16 @@ public class WindowContainerTests extends AndroidTestCase {
         final TestWindowContainer child12 = child1.addChildWindow();
         final TestWindowContainer child21 = child2.addChildWindow();
 
-        child12.remove();
+        assertNotNull(child12.getParentWindow());
+        child12.removeImmediately();
         assertNull(child12.getParentWindow());
         assertEquals(1, child1.getChildrenCount());
         assertFalse(child1.hasChild(child12));
         assertFalse(root.hasChild(child12));
 
-        child2.remove();
+        assertTrue(root.hasChild(child2));
+        assertNotNull(child2.getParentWindow());
+        child2.removeImmediately();
         assertNull(child2.getParentWindow());
         assertNull(child21.getParentWindow());
         assertEquals(0, child2.getChildrenCount());
@@ -125,7 +128,7 @@ public class WindowContainerTests extends AndroidTestCase {
         assertTrue(root.hasChild(child1));
         assertTrue(root.hasChild(child11));
 
-        root.remove();
+        root.removeImmediately();
         assertEquals(0, root.getChildrenCount());
     }
 
@@ -183,6 +186,32 @@ public class WindowContainerTests extends AndroidTestCase {
         assertFalse(child21.isVisible());
     }
 
+    public void testDetachChild() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child21 = child2.addChildWindow();
+
+        assertTrue(root.hasChild(child2));
+        assertTrue(root.hasChild(child21));
+        root.detachChild(child2);
+        assertFalse(root.hasChild(child2));
+        assertFalse(root.hasChild(child21));
+        assertNull(child2.getParentWindow());
+
+        boolean gotException = false;
+        assertTrue(root.hasChild(child11));
+        try {
+            // Can only detach our direct children.
+            root.detachChild(child11);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private class TestWindowContainer extends WindowContainer {
         private final int mLayer;
@@ -190,6 +219,8 @@ public class WindowContainerTests extends AndroidTestCase {
         private final boolean mCanDetach;
         private boolean mIsAnimating;
         private boolean mIsVisible;
+        private int mRemoveIfPossibleCount;
+        private int mRemoveImmediatelyCount;
 
         /**
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
@@ -251,6 +282,18 @@ public class WindowContainerTests extends AndroidTestCase {
         @Override
         boolean isVisible() {
             return mIsVisible || super.isVisible();
+        }
+
+        @Override
+        void removeImmediately() {
+            super.removeImmediately();
+            mRemoveImmediatelyCount++;
+        }
+
+        @Override
+        void removeIfPossible() {
+            super.removeIfPossible();
+            mRemoveIfPossibleCount++;
         }
     }
 

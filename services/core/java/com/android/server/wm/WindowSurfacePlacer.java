@@ -215,7 +215,7 @@ class WindowSurfacePlacer {
             while (!mService.mForceRemoves.isEmpty()) {
                 final WindowState ws = mService.mForceRemoves.remove(0);
                 Slog.i(TAG, "Force removing: " + ws);
-                ws.remove();
+                ws.removeImmediately();
             }
             Slog.w(TAG, "Due to memory failure, waiting a bit for next layout");
             Object tmp = new Object();
@@ -461,7 +461,7 @@ class WindowSurfacePlacer {
                     token.mAppAnimator.animating = false;
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "performLayout: App token exiting now removed" + token);
-                    token.removeAppFromTaskLocked();
+                    token.removeIfPossible();
                 }
             }
         }
@@ -545,7 +545,7 @@ class WindowSurfacePlacer {
             DisplayContentList displayList = new DisplayContentList();
             for (i = 0; i < N; i++) {
                 final WindowState w = mService.mPendingRemoveTmp[i];
-                w.remove();
+                w.removeImmediately();
                 final DisplayContent displayContent = w.getDisplayContent();
                 if (displayContent != null && !displayList.contains(displayContent)) {
                     displayList.add(displayContent);
@@ -797,7 +797,7 @@ class WindowSurfacePlacer {
                         atoken.lastTransactionSequence = mService.mTransactionSequence;
                         atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
                         atoken.numInterestingWindowsExcludingSaved = 0;
-                        atoken.numDrawnWindowsExclusingSaved = 0;
+                        atoken.numDrawnWindowsExcludingSaved = 0;
                         atoken.startingDisplayed = false;
                     }
                     if (!atoken.allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
@@ -840,7 +840,7 @@ class WindowSurfacePlacer {
                         if (w != atoken.startingWindow && w.isInteresting()) {
                             atoken.numInterestingWindowsExcludingSaved++;
                             if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
-                                atoken.numDrawnWindowsExclusingSaved++;
+                                atoken.numDrawnWindowsExcludingSaved++;
                                 if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
                                     Slog.v(TAG, "tokenMayBeDrawnExcludingSaved: " + atoken
                                             + " w=" + w + " numInteresting="
@@ -1550,11 +1550,11 @@ class WindowSurfacePlacer {
                     if (!wtoken.allDrawnExcludingSaved) {
                         int numInteresting = wtoken.numInterestingWindowsExcludingSaved;
                         if (numInteresting > 0
-                                && wtoken.numDrawnWindowsExclusingSaved >= numInteresting) {
+                                && wtoken.numDrawnWindowsExcludingSaved >= numInteresting) {
                             if (DEBUG_VISIBILITY)
                                 Slog.v(TAG, "allDrawnExcludingSaved: " + wtoken
                                     + " interesting=" + numInteresting
-                                    + " drawn=" + wtoken.numDrawnWindowsExclusingSaved);
+                                    + " drawn=" + wtoken.numDrawnWindowsExcludingSaved);
                             wtoken.allDrawnExcludingSaved = true;
                             displayContent.layoutNeeded = true;
                             if (wtoken.isAnimatingInvisibleWithSavedSurface()
