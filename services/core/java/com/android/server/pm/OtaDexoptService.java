@@ -54,6 +54,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
     // TODO: Evaluate the need for WeakReferences here.
     private List<PackageParser.Package> mDexoptPackages;
+    private int completeSize;
 
     public OtaDexoptService(Context context, PackageManagerService packageManagerService) {
         this.mContext = context;
@@ -91,6 +92,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             mDexoptPackages = PackageManagerServiceUtils.getPackagesForDexopt(
                     mPackageManagerService.mPackages.values(), mPackageManagerService);
         }
+        completeSize = mDexoptPackages.size();
     }
 
     @Override
@@ -108,6 +110,14 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         return mDexoptPackages.isEmpty();
+    }
+
+    @Override
+    public synchronized float getProgress() throws RemoteException {
+        if (completeSize == 0) {
+            return 1f;
+        }
+        return (completeSize - mDexoptPackages.size()) / ((float)completeSize);
     }
 
     @Override
