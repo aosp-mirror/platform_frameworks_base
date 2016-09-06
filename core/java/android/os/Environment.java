@@ -286,6 +286,11 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getReferenceProfile(String packageName) {
+        return buildPath(getDataDirectory(), "misc", "profiles", "ref", packageName);
+    }
+
+    /** {@hide} */
     public static File getDataProfilesDePackageDirectory(int userId, String packageName) {
         return buildPath(getDataProfilesDeDirectory(userId), packageName);
     }
