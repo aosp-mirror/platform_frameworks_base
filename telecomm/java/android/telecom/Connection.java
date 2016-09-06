@@ -733,7 +733,6 @@ public abstract class Connection extends Conferenceable {
      * {@link android.telecom.InCallService.VideoCall}.
      */
     public static abstract class VideoProvider {
-
         /**
          * Video is not being received (no protocol pause was issued).
          * @see #handleCallSessionEvent(int)
@@ -817,6 +816,14 @@ public abstract class Connection extends Conferenceable {
         private static final int MSG_REQUEST_CONNECTION_DATA_USAGE = 10;
         private static final int MSG_SET_PAUSE_IMAGE = 11;
         private static final int MSG_REMOVE_VIDEO_CALLBACK = 12;
+
+        private static final String SESSION_EVENT_RX_PAUSE_STR = "RX_PAUSE";
+        private static final String SESSION_EVENT_RX_RESUME_STR = "RX_RESUME";
+        private static final String SESSION_EVENT_TX_START_STR = "TX_START";
+        private static final String SESSION_EVENT_TX_STOP_STR = "TX_STOP";
+        private static final String SESSION_EVENT_CAMERA_FAILURE_STR = "CAMERA_FAIL";
+        private static final String SESSION_EVENT_CAMERA_READY_STR = "CAMERA_READY";
+        private static final String SESSION_EVENT_UNKNOWN_STR = "UNKNOWN";
 
         private VideoProvider.VideoProviderHandler mMessageHandler;
         private final VideoProvider.VideoProviderBinder mBinder;
@@ -1326,6 +1333,32 @@ public abstract class Connection extends Conferenceable {
                         Log.w(this, "changeVideoQuality callback failed", ignored);
                     }
                 }
+            }
+        }
+
+        /**
+         * Returns a string representation of a call session event.
+         *
+         * @param event A call session event passed to {@link #handleCallSessionEvent(int)}.
+         * @return String representation of the call session event.
+         * @hide
+         */
+        public static String sessionEventToString(int event) {
+            switch (event) {
+                case SESSION_EVENT_CAMERA_FAILURE:
+                    return SESSION_EVENT_CAMERA_FAILURE_STR;
+                case SESSION_EVENT_CAMERA_READY:
+                    return SESSION_EVENT_CAMERA_READY_STR;
+                case SESSION_EVENT_RX_PAUSE:
+                    return SESSION_EVENT_RX_PAUSE_STR;
+                case SESSION_EVENT_RX_RESUME:
+                    return SESSION_EVENT_RX_RESUME_STR;
+                case SESSION_EVENT_TX_START:
+                    return SESSION_EVENT_TX_START_STR;
+                case SESSION_EVENT_TX_STOP:
+                    return SESSION_EVENT_TX_STOP_STR;
+                default:
+                    return SESSION_EVENT_UNKNOWN_STR + " " + event;
             }
         }
     }
