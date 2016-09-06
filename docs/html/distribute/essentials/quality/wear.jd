@@ -42,6 +42,13 @@ page.image=/distribute/images/gp-wear-quality.png
   understand the basic implementation requirements for a Wear app.
 </p>
 
+<p>
+  This document helps you assess basic aspects of quality in your Wear app through a
+  compact set of functional and user interface quality criteria.
+   Make sure to check out the <a href="https://developer.android.com/wear/preview/index.html">Wear 2.0 preview</a>
+  documentation to get ready for the next version of Android Wear.
+</p>
+
 <p class="caution">
   <strong>Important:</strong> To ensure a great user experience, apps for wearables must meet
   specific requirements for usability. Only apps that meet the following quality criteria will
@@ -50,8 +57,8 @@ page.image=/distribute/images/gp-wear-quality.png
 </p>
 
 <p class="note">
- <strong>Note:</strong> For information about how to publish your Wear apps in Google Play, see <a
- href="{@docRoot}distribute/googleplay/wear.html">Distributing to Android Wear</a>.
+  <strong>Note:</strong> For information about how to publish your Wear apps in Google Play, see <a
+  href="{@docRoot}distribute/googleplay/wear.html">Distributing to Android Wear</a>.
 </p>
 
 <div class="headerLine">
@@ -67,6 +74,19 @@ page.image=/distribute/images/gp-wear-quality.png
   functional behavior.
 </p>
 
+<p class="caution">
+  <strong>Important:</strong> To learn about how Wear 2.0 platform changes may affect
+   your apps, see the <a href="https://developer.android.com/wear/preview/index.html">Wear 2.0 preview</a>
+   documentation.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The symbol &#10008; is used in the table below to indicate
+  quality criteria that are not required for the corresponding Wear version.
+</p>
+
+<p class="table-caption"><strong>Table 1</strong>. Functional criteria.
+</p>
 
 <table>
 <tr>
@@ -78,6 +98,12 @@ page.image=/distribute/images/gp-wear-quality.png
   </th>
   <th>
     Description
+  </th>
+  <th>
+    Wear 1.0
+  </th>
+  <th>
+    Wear 2.0
   </th>
 </tr>
 
@@ -96,6 +122,12 @@ page.image=/distribute/images/gp-wear-quality.png
       (<a href="{@docRoot}training/building-wearables.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
 </tr>
 
 <tr>
@@ -107,6 +139,12 @@ page.image=/distribute/images/gp-wear-quality.png
       App has Wear functionality that is visible to the user.
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
 </tr>
 
 <tr>
@@ -117,6 +155,12 @@ page.image=/distribute/images/gp-wear-quality.png
     <p style="margin-bottom:.5em;">
       Wear functionality works as expected or as described in the app's Google Play Store listing.
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
   </td>
 </tr>
 
@@ -135,6 +179,12 @@ page.image=/distribute/images/gp-wear-quality.png
       (<a href="{@docRoot}training/wearables/apps/packaging.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -152,6 +202,12 @@ page.image=/distribute/images/gp-wear-quality.png
       (<a href="{@docRoot}training/wearables/notifications/index.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -164,6 +220,12 @@ page.image=/distribute/images/gp-wear-quality.png
       (<a href="{@docRoot}training/wearables/notifications/voice-input.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -175,6 +237,12 @@ page.image=/distribute/images/gp-wear-quality.png
       Similar notifications are grouped together in a stack.
       (<a href="{@docRoot}training/wearables/notifications/stacks.html">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
   </td>
 </tr>
 
@@ -193,6 +261,12 @@ page.image=/distribute/images/gp-wear-quality.png
       (<a href="{@docRoot}training/wearables/ui/exit.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -205,6 +279,12 @@ page.image=/distribute/images/gp-wear-quality.png
       long-press-to-dismiss gesture in that activity.
       (<a href="{@docRoot}training/wearables/ui/exit.html">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
   </td>
 </tr>
 
@@ -221,6 +301,12 @@ page.image=/distribute/images/gp-wear-quality.png
       Apps that include watch faces use the official Watch Face API.
       (<a href="{@docRoot}training/wearables/watch-faces/index.html">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
   </td>
 </tr>
 
@@ -245,8 +331,15 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
 <p>
   These criteria ensure that your app follows critical design and interaction patterns to provide a
   consistent, intuitive, and enjoyable user experience on wearables.
+
+</p>
+<p clase="note">
+  <strong>Note:</strong> The symbol &#10008; is used in the table below to indicate
+  quality criteria that are not required for the corresponding Wear version.
 </p>
 
+<p class="table-caption"><strong>Table 2</strong>. Visual criteria.
+</p>
 <table>
 
 <tr>
@@ -258,6 +351,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   </th>
   <th>
     Description
+  </th>
+  <th>
+    Wear 1.0
+  </th>
+  <th>
+    Wear 2.0
   </th>
 </tr>
 
@@ -277,6 +376,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}training/wearables/ui/layouts.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
 </tr>
 
 <tr>
@@ -292,6 +397,13 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}training/wearables/ui/layouts.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
+
 </tr>
 
 <tr>
@@ -303,6 +415,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       App text is large and glanceable with a suggested minimum size of 16sp.
       (<a href="{@docRoot}design/wear/style.html#Typography">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
   </td>
 </tr>
 
@@ -320,6 +438,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -336,6 +460,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}design/wear/patterns.html#Countdown">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
 </tr>
 
 <tr>
@@ -350,6 +480,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}design/wear/style.html#Assets">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -363,6 +499,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}training/wearables/notifications/creating.html#ActionButtons">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
+  </td>
 </tr>
 
 <tr>
@@ -375,6 +517,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       (<a href="{@docRoot}design/wear/style.html#Branding">Learn how</a>)
     </p>
   </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
+  </td>
 </tr>
 
 <tr>
@@ -386,6 +534,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       Notification photo backgrounds have a resolution of at least 400x400.
       (<a href="{@docRoot}training/wearables/notifications/creating.html#AddWearableFeatures">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10008;
   </td>
 </tr>
 
@@ -402,6 +556,12 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
       App includes at least one Wear screenshot in its Play Store Listing.
       (<a href="https://support.google.com/googleplay/android-developer/answer/1078870?hl=en">Learn how</a>)
     </p>
+  </td>
+  <td>
+    &#10004;
+  </td>
+  <td>
+    &#10004;
   </td>
 </tr>
 
