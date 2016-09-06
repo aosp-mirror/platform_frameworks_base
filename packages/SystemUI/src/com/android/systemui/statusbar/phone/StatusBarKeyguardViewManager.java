@@ -294,7 +294,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
 
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isUserUnlocked()) {
+        if (KeyguardUpdateMonitor.getInstance(mContext).needsSlowUnlockTransition()) {
             fadeoutDuration = KEYGUARD_DISMISS_DURATION_LOCKED;
         }
         long uptimeMillis = SystemClock.uptimeMillis();
