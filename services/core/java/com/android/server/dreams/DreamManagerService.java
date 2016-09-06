@@ -370,12 +370,10 @@ public final class DreamManagerService extends SystemService {
         mCurrentDreamCanDoze = canDoze;
         mCurrentDreamUserId = userId;
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mController.startDream(newToken, name, isTest, canDoze, userId);
-            }
-        });
+        PowerManager.WakeLock wakeLock = mPowerManager
+                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
+        mHandler.post(wakeLock.wrap(
+                () -> mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock)));
     }
 
     private void stopDreamLocked(final boolean immediate) {
