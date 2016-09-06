@@ -922,7 +922,7 @@ class MountService extends IMountService.Stub
 
         // Record user as started so newly mounted volumes kick off events
         // correctly, then synthesize events for any already-mounted volumes.
-        synchronized (mVolumes) {
+        synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 if (vol.isVisibleForRead(userId) && vol.isMountedReadable()) {
@@ -945,7 +945,7 @@ class MountService extends IMountService.Stub
         } catch (NativeDaemonConnectorException ignored) {
         }
 
-        synchronized (mVolumes) {
+        synchronized (mLock) {
             mSystemUnlockedUsers = ArrayUtils.removeInt(mSystemUnlockedUsers, userId);
         }
     }
