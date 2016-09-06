@@ -133,13 +133,7 @@ interface IWifiManager
 
     void setWifiApConfiguration(in WifiConfiguration wifiConfig);
 
-    void addToBlacklist(String bssid);
-
-    void clearBlacklist();
-
     Messenger getWifiServiceMessenger();
-
-    String getConfigFile();
 
     void enableTdls(String remoteIPAddress, boolean enable);
 
