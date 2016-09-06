@@ -7,16 +7,6 @@ header.hide=1
 footer.hide=1
 @jd:body
 
-<script>
-  $(document).ready(function() {
-    if (useUpdatedTemplates) {
-      $("#useUpdatedTemplates").css("display","block");
-    } else {
-      $("#useOldTemplates").css("display","block");
-    }
-  })
-</script>
-
 <section class="dac-expand dac-hero dac-light" style="background-color:#FFFFFF">
   <div class="wrap" style="max-width:1100px;margin-top:0">
     <div class="cols dac-hero-content" style="padding-bottom:1em;">
@@ -55,7 +45,7 @@ footer.hide=1
   </div>
 </section>
 
-<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+<div class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
     <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
       <i class="dac-sprite dac-arrow-down-gray"></i>
@@ -76,22 +66,6 @@ footer.hide=1
     </ul>
   </div><!-- end .wrap -->
 </div><!-- end .dac-actions -->
-
-<div id="useOldTemplates" style="display:none;color:black" class="actions-bar dac-expand dac-invert">
-  <div class="wrap dac-offset-parent">
-
-    <div class="actions">
-      <div><a href="{@docRoot}wear/preview/bug">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Report an issue
-      </a></div>
-      <div><a href="http://g.co/androidweardev">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        Join developer community
-      </a></div>
-    </div><!-- end .actions -->
-  </div><!-- end .wrap -->
-</div>
 
 <section class="dac-section dac-light"><div class="wrap">
   <h1 class="dac-section-title">Resources</h1>

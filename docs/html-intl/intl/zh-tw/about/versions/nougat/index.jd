@@ -7,16 +7,6 @@ header.hide=1
 footer.hide=1
 @jd:body
 
-<script>
-  $(document).ready(function() {
-    if (useUpdatedTemplates) {
-      $("#useUpdatedTemplates").css("display","block");
-    } else {
-      $("#useOldTemplates").css("display","block");
-    }
-  })
-</script>
-
 <section class="dac-expand dac-hero dac-light">
   <div class="wrap" style="max-width:1100px;margin-top:0">
   <a href="{@docRoot}about/versions/nougat/android-7.0.html">
@@ -55,7 +45,7 @@ footer.hide=1
 </section>
 
 
-<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+<div class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
     <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
       <i class="dac-sprite dac-arrow-down-gray"></i>
@@ -76,26 +66,6 @@ footer.hide=1
     </ul>
   </div><!-- end .wrap -->
 </div><!-- end .dac-actions -->
-
-<div id="useOldTemplates" style="display:none;color:black" class="actions-bar dac-expand dac-invert">
-  <div class="wrap dac-offset-parent">
-
-    <div class="actions">
-      <div><a href="https://developer.android.com/preview/bug">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        回報問題</a>
-</div>
-      <div><a href="{@docRoot}preview/support.html">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        查看版本資訊</a>
-</div>
-      <div><a href="{@docRoot}preview/dev-community">
-        <span class="dac-sprite dac-auto-chevron-large"></span>
-        加入開發人員社群</a>
-</div>
-    </div><!-- end .actions -->
-  </div><!-- end .wrap -->
-</div>
 
 <section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
   <h2 class="norule">Latest</h2>
