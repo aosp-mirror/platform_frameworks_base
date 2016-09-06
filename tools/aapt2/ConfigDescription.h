@@ -59,14 +59,50 @@ struct ConfigDescription : public android::ResTable_config {
     ConfigDescription& operator=(const ConfigDescription& o);
     ConfigDescription& operator=(ConfigDescription&& o);
 
+    ConfigDescription copyWithoutSdkVersion() const;
+
+    /**
+     * A configuration X dominates another configuration Y, if X has at least the
+     * precedence of Y and X is strictly more general than Y: for any type defined
+     * by X, the same type is defined by Y with a value equal to or, in the case
+     * of ranges, more specific than that of X.
+     *
+     * For example, the configuration 'en-w800dp' dominates 'en-rGB-w1024dp'. It
+     * does not dominate 'fr', 'en-w720dp', or 'mcc001-en-w800dp'.
+     */
+    bool dominates(const ConfigDescription& o) const;
+
+    /**
+     * Returns true if this configuration defines a more important configuration
+     * parameter than o. For example, "en" has higher precedence than "v23",
+     * whereas "en" has the same precedence as "en-v23".
+     */
+    bool hasHigherPrecedenceThan(const ConfigDescription& o) const;
+
+    /**
+     * A configuration conflicts with another configuration if both
+     * configurations define an incompatible configuration parameter. An
+     * incompatible configuration parameter is a non-range, non-density parameter
+     * that is defined in both configurations as a different, non-default value.
+     */
+    bool conflictsWith(const ConfigDescription& o) const;
+
+    /**
+     * A configuration is compatible with another configuration if both
+     * configurations can match a common concrete device configuration and are
+     * unrelated by domination. For example, land-v11 conflicts with port-v21
+     * but is compatible with v21 (both land-v11 and v21 would match en-land-v23).
+     */
+    bool isCompatibleWith(const ConfigDescription& o) const;
+
+    bool matchWithDensity(const ConfigDescription& o) const;
+
     bool operator<(const ConfigDescription& o) const;
     bool operator<=(const ConfigDescription& o) const;
     bool operator==(const ConfigDescription& o) const;
     bool operator!=(const ConfigDescription& o) const;
     bool operator>=(const ConfigDescription& o) const;
     bool operator>(const ConfigDescription& o) const;
-
-    ConfigDescription copyWithoutSdkVersion() const;
 };
 
 inline ConfigDescription::ConfigDescription() {
@@ -101,6 +137,10 @@ inline ConfigDescription& ConfigDescription::operator=(const ConfigDescription& 
 inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) {
     *this = o;
     return *this;
+}
+
+inline bool ConfigDescription::matchWithDensity(const ConfigDescription& o) const {
+    return match(o) && (density == 0 || density == o.density);
 }
 
 inline bool ConfigDescription::operator<(const ConfigDescription& o) const {

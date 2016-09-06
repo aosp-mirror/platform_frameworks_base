@@ -40,6 +40,7 @@ sources := \
 	link/ProductFilter.cpp \
 	link/PrivateAttributeMover.cpp \
 	link/ReferenceLinker.cpp \
+	link/ResourceDeduper.cpp \
 	link/TableMerger.cpp \
 	link/VersionCollapser.cpp \
 	link/XmlNamespaceRemover.cpp \
@@ -56,6 +57,7 @@ sources := \
 	util/Util.cpp \
 	ConfigDescription.cpp \
 	Debug.cpp \
+	DominatorTree.cpp \
 	Flags.cpp \
 	java/AnnotationProcessor.cpp \
 	java/ClassDefinition.cpp \
@@ -93,6 +95,7 @@ testSources := \
 	link/PrivateAttributeMover_test.cpp \
 	link/ProductFilter_test.cpp \
 	link/ReferenceLinker_test.cpp \
+	link/ResourceDeduper_test.cpp \
 	link/TableMerger_test.cpp \
 	link/VersionCollapser_test.cpp \
 	link/XmlNamespaceRemover_test.cpp \
@@ -106,6 +109,7 @@ testSources := \
 	util/StringPiece_test.cpp \
 	util/Util_test.cpp \
 	ConfigDescription_test.cpp \
+	DominatorTree_test.cpp \
 	java/AnnotationProcessor_test.cpp \
 	java/JavaClassGenerator_test.cpp \
 	java/ManifestClassGenerator_test.cpp \
