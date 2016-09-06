@@ -176,6 +176,16 @@ class PackageDexOptimizer {
             isProfileGuidedFilter = false;
         }
 
+        // Disable profile guided compilation for vmSafeMode.
+        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE)
+                != 0;
+        final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE)
+                != 0;
+        if (vmSafeMode) {
+            targetCompilerFilter = getNonProfileGuidedCompilerFilter(targetCompilerFilter);
+            isProfileGuidedFilter = false;
+        }
+
         // If we're asked to take profile updates into account, check now.
         boolean newProfile = false;
         if (checkProfiles && isProfileGuidedFilter) {
@@ -186,9 +196,6 @@ class PackageDexOptimizer {
                 Slog.w(TAG, "Failed to merge profiles", e);
             }
         }
-
-        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
-        final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
         boolean performedDexOpt = false;
         boolean successfulDexOpt = true;
