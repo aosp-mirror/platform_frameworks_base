@@ -4,16 +4,6 @@ page.metaDescription=Android developers, their apps, and their successes with An
 
 @jd:body
 
-<script>
-  $(document).ready(function() {
-    if (useUpdatedTemplates) {
-      $("#useUpdatedTemplates").css("display","block");
-    } else {
-      $("#useOldTemplates").css("display","block");
-    }
-  })
-</script>
-
 <p>Android developers, their apps, and their successes with Android and Google Play.</p>
 
 <section class="dac-section dac-small" id="latest-apps"><div class="wrap">
