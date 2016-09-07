@@ -446,8 +446,8 @@ class FileDescriptorTable {
     //
     // (a) they continue to be open.
     // (b) they refer to the same file.
-    std::unordered_map<int, FileDescriptorInfo*>::iterator it;
-    for (it = open_fd_map_.begin(); it != open_fd_map_.end(); ++it) {
+    std::unordered_map<int, FileDescriptorInfo*>::iterator it = open_fd_map_.begin();
+    while (it != open_fd_map_.end()) {
       std::set<int>::const_iterator element = open_fds.find(it->first);
       if (element == open_fds.end()) {
         // The entry from the file descriptor table is no longer in the list
@@ -457,11 +457,10 @@ class FileDescriptorTable {
         // TODO(narayan): This will be an error in a future android release.
         // error = true;
         // ALOGW("Zygote closed file descriptor %d.", it->first);
-        open_fd_map_.erase(it);
+        it = open_fd_map_.erase(it);
       } else {
         // The entry from the file descriptor table is still open. Restat
         // it and check whether it refers to the same file.
-        open_fds.erase(element);
         const bool same_file = it->second->Restat();
         if (!same_file) {
           // The file descriptor refers to a different description. We must
@@ -473,11 +472,20 @@ class FileDescriptorTable {
             // We flag an error and remove it from the list of files we're
             // tracking.
             error = true;
-            open_fd_map_.erase(it);
+            it = open_fd_map_.erase(it);
+          } else {
+            // Successfully restatted the file, move on to the next open FD.
+            ++it;
           }
         } else {
-          // It's the same file. Nothing to do here.
+          // It's the same file. Nothing to do here. Move on to the next open
+          // FD.
+          ++it;
         }
+
+        // Finally, remove the FD from the set of open_fds. We do this last because
+        // |element| will not remain valid after a call to erase.
+        open_fds.erase(element);
       }
     }
 
