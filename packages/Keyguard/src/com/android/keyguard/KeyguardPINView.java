@@ -142,8 +142,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 mDisappearYTranslation, mDisappearAnimationUtils.getInterpolator());
         DisappearAnimationUtils disappearAnimationUtils = mKeyguardUpdateMonitor
                 .needsSlowUnlockTransition()
-                        ? mDisappearAnimationUtils
-                        : mDisappearAnimationUtilsLocked;
+                        ? mDisappearAnimationUtilsLocked
+                        : mDisappearAnimationUtils;
         disappearAnimationUtils.startAnimation2d(mViews,
                 new Runnable() {
                     @Override
