@@ -721,9 +721,9 @@ static const JNINativeMethod gMethods[] = {
 int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
     gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
-            "updateWindowPositionRT", "(JIIII)V");
+            "updateWindowPosition_renderWorker", "(JIIII)V");
     gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "windowPositionLostRT", "(J)V");
+            "windowPositionLost_uiRtSync", "(J)V");
     clazz = FindClassOrDie(env, "android/view/RenderNode");
     gOnRenderNodeDetached = GetMethodIDOrDie(env, clazz,
             "onRenderNodeDetached", "()V");
