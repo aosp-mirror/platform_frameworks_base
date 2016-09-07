@@ -403,6 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ອຸ​ປະ​ກອນ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ໂປຣ​ໄຟລ໌​ອາດ​ຖືກ​ເຝົ້າ​ຕິດ​ຕາມ​ຢູ່"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"​ເຄືອ​ຂ່າຍ​ອາດ​ມີ​ການ​ເຝົ້າ​ຕິດ​ຕາມ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ອຸ​ປະ​ກອນ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ການ​ຕິດ​ຕາມ​ໂປຣ​ໄຟລ໌"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ການກວດ​ສອບ​ຕິດ​ຕາມ​ເຄືອ​ຂ່າຍ"</string>
@@ -415,6 +416,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ ລວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊທ໌."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ລວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊທ໌."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ຮວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊໄດ້."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານຖືກຄວບຄຸມໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ມັນຖືກເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍບ່ອນເຮັດວຽກຂອງທ່ານ ລວມທັງອີເມວ,​ ແອັບ ແລະເວັບໄຊທ໌.\n\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຜູ້ບໍລິຫານຂອງທ່ານ."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍບ່ອນເຮັດວຽກຂອງທ່ານ ລວມທັງອີເມວ, ແອັບ ແລະເວັບໄຊທ໌.\n\nທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຖືກ​ຄຸ້ມ​ຄອງ​ໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nຜູ້​ຄວບ​ຄຸມຂອງ​ທ່ານ​ສາ​ມາດ​ຕິດ​ຕາມ​ກວດ​ກາ ​ແລະ​ການ​ຄຸ້ມ​ຄອງ​ການຕັ້ງ​ຄ່າ, ແອັບ​ການ​ເຂົ້າ​ຫາ​ບໍ​ລິ​ສັດ, ຂໍ້​ມູນ​ທີ່​ກ່ຽວ​ຂ້ອງ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ຂໍ້​ມູນທີ່​ຕັ້ງ​ຂອງອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ.\n\nທ່ານ​ເຊື່ອມ​ຕໍ່​ກັບ <xliff:g id="APPLICATION">%2$s</xliff:g> ແລ້ວ, ເຊິ່ງ​ສາ​ມາດ​ຕິດ​ຕາມການ​ເຄື່ອນ​ໄຫວ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ, ລວມ​ທັງ​ອີ​ເມວ, ແອັບ, ແລະ​ເວັບ​ໄຊ​ທ໌.\n\nສຳ​ລັບ​ຂໍ້​ມູນ​ເພີ່ມ​ເຕີມ, ຕິດ​ຕໍ່​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ."</string>
