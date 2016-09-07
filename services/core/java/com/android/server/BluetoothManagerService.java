@@ -293,7 +293,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private final boolean isBluetoothPersistedStateOn() {
         return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, 0) != BLUETOOTH_OFF;
+                Settings.Global.BLUETOOTH_ON, BLUETOOTH_ON_BLUETOOTH) != BLUETOOTH_OFF;
     }
 
     /**
@@ -301,7 +301,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private final boolean isBluetoothPersistedStateOnBluetooth() {
         return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, 0) == BLUETOOTH_ON_BLUETOOTH;
+                Settings.Global.BLUETOOTH_ON, BLUETOOTH_ON_BLUETOOTH) == BLUETOOTH_ON_BLUETOOTH;
     }
 
     /**
