@@ -53,6 +53,7 @@ import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1368,6 +1369,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         TelephonyManager getTelephonyManager() {
             return TelephonyManager.from(mContext);
+        }
+
+        TrustManager getTrustManager() {
+            return (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
         }
 
         IWindowManager getIWindowManager() {
@@ -4196,6 +4201,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mInjector.powerManagerGoToSleep(SystemClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
                     mInjector.getIWindowManager().lockNow(null);
+                } else {
+                    mInjector.getTrustManager().setDeviceLockedForUser(userToLock, true);
                 }
             } catch (RemoteException e) {
             } finally {
