@@ -89,12 +89,14 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
@@ -157,13 +159,6 @@ public class AccountManagerService
         }
 
         @Override
-        public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemReady();
-            }
-        }
-
-        @Override
         public void onUnlockUser(int userHandle) {
             mService.onUnlockUser(userHandle);
         }
@@ -176,13 +171,13 @@ public class AccountManagerService
 
     private static final int MAX_DEBUG_DB_SIZE = 64;
 
-    private final Context mContext;
+    final Context mContext;
 
     private final PackageManager mPackageManager;
     private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
 
-    private final MessageHandler mHandler;
+    final MessageHandler mHandler;
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
@@ -190,9 +185,9 @@ public class AccountManagerService
 
     private final IAccountAuthenticatorCache mAuthenticatorCache;
 
-    private static final String TABLE_ACCOUNTS = "accounts";
-    private static final String ACCOUNTS_ID = "_id";
-    private static final String ACCOUNTS_NAME = "name";
+    static final String TABLE_ACCOUNTS = "accounts";
+    static final String ACCOUNTS_ID = "_id";
+    static final String ACCOUNTS_NAME = "name";
     private static final String ACCOUNTS_TYPE = "type";
     private static final String ACCOUNTS_TYPE_COUNT = "count(type)";
     private static final String ACCOUNTS_PASSWORD = "password";
@@ -206,10 +201,10 @@ public class AccountManagerService
     private static final String AUTHTOKENS_TYPE = "type";
     private static final String AUTHTOKENS_AUTHTOKEN = "authtoken";
 
-    private static final String TABLE_GRANTS = "grants";
-    private static final String GRANTS_ACCOUNTS_ID = "accounts_id";
+    static final String TABLE_GRANTS = "grants";
+    static final String GRANTS_ACCOUNTS_ID = "accounts_id";
     private static final String GRANTS_AUTH_TOKEN_TYPE = "auth_token_type";
-    private static final String GRANTS_GRANTEE_UID = "uid";
+    static final String GRANTS_GRANTEE_UID = "uid";
 
     private static final String TABLE_EXTRAS = "extras";
     private static final String EXTRAS_ID = "_id";
@@ -278,15 +273,15 @@ public class AccountManagerService
 
     static class UserAccounts {
         private final int userId;
-        private final DeDatabaseHelper openHelper;
+        final DeDatabaseHelper openHelper;
         private final HashMap<Pair<Pair<Account, String>, Integer>, Integer>
                 credentialsPermissionNotificationIds =
                 new HashMap<Pair<Pair<Account, String>, Integer>, Integer>();
         private final HashMap<Account, Integer> signinRequiredNotificationIds =
                 new HashMap<Account, Integer>();
-        private final Object cacheLock = new Object();
+        final Object cacheLock = new Object();
         /** protected by the {@link #cacheLock} */
-        private final HashMap<String, Account[]> accountCache =
+        final HashMap<String, Account[]> accountCache =
                 new LinkedHashMap<>();
         /** protected by the {@link #cacheLock} */
         private final Map<Account, Map<String, String>> userDataCache = new HashMap<>();
@@ -1058,9 +1053,6 @@ public class AccountManagerService
             }
             throw e;
         }
-    }
-
-    public void systemReady() {
     }
 
     private UserManager getUserManager() {
@@ -4830,7 +4822,7 @@ public class AccountManagerService
         }
     }
 
-    private class MessageHandler extends Handler {
+    class MessageHandler extends Handler {
         MessageHandler(Looper looper) {
             super(looper);
         }
@@ -5943,7 +5935,7 @@ public class AccountManagerService
      * which is in the system. This means we don't need to protect it with permissions.
      * @hide
      */
-    private void grantAppPermission(Account account, String authTokenType, int uid) {
+    void grantAppPermission(Account account, String authTokenType, int uid) {
         if (account == null || authTokenType == null) {
             Log.e(TAG, "grantAppPermission: called with invalid arguments", new Exception());
             return;
@@ -6688,6 +6680,11 @@ public class AccountManagerService
     }
 
     private final class AccountManagerInternalImpl extends AccountManagerInternal {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private AccountManagerBackupHelper mBackupHelper;
+
         @Override
         public void requestAccountAccess(@NonNull Account account, @NonNull String packageName,
                 @IntRange(from = 0) int userId, @NonNull RemoteCallback callback) {
@@ -6741,6 +6738,28 @@ public class AccountManagerService
         @Override
         public boolean hasAccountAccess(@NonNull Account account, @IntRange(from = 0) int uid) {
             return AccountManagerService.this.hasAccountAccess(account, null, uid);
+        }
+
+        @Override
+        public byte[] backupAccountAccessPermissions(int userId) {
+            synchronized (mLock) {
+                if (mBackupHelper == null) {
+                    mBackupHelper = new AccountManagerBackupHelper(
+                            AccountManagerService.this, this);
+                }
+                return mBackupHelper.backupAccountAccessPermissions(userId);
+            }
+        }
+
+        @Override
+        public void restoreAccountAccessPermissions(byte[] data, int userId) {
+            synchronized (mLock) {
+                if (mBackupHelper == null) {
+                    mBackupHelper = new AccountManagerBackupHelper(
+                            AccountManagerService.this, this);
+                }
+                mBackupHelper.restoreAccountAccessPermissions(data, userId);
+            }
         }
     }
 }
