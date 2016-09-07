@@ -1076,9 +1076,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ਦੀ ਕੋਈ ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> \'ਤੇ ਬਦਲੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
-    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਬਦਲੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2952042958050315394">"ਸੈਲਿਊਲਰ ਡੈਟਾ"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
