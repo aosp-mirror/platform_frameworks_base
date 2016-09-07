@@ -81,6 +81,7 @@ LOCAL_SRC_FILES:= \
     android_text_StaticLayout.cpp \
     android_os_Debug.cpp \
     android_os_HwBinder.cpp \
+    android_os_HwBlob.cpp \
     android_os_HwParcel.cpp \
     android_os_HwRemoteBinder.cpp \
     android_os_MemoryFile.cpp \

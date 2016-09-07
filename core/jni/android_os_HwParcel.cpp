@@ -21,6 +21,7 @@
 #include "android_os_HwParcel.h"
 
 #include "android_os_HwBinder.h"
+#include "android_os_HwBlob.h"
 #include "android_os_HwRemoteBinder.h"
 
 #include <JNIHelp.h>
@@ -71,6 +72,7 @@ void signalExceptionForError(JNIEnv *env, status_t err) {
             break;
         }
 
+        case -ERANGE:
         case BAD_INDEX:
         {
             jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
@@ -200,8 +202,10 @@ void JHwParcel::setParcel(hardware::Parcel *parcel, bool assumeOwnership) {
 jobject JHwParcel::NewObject(JNIEnv *env) {
     ScopedLocalRef<jclass> clazz(env, FindClassOrDie(env, CLASS_PATH));
 
-    return env->NewObject(
-            clazz.get(), gFields.constructID, false /* allocate */);
+    jmethodID constructID =
+        GetMethodIDOrDie(env, clazz.get(), "<init>", "(Z)V");
+
+    return env->NewObject(clazz.get(), constructID, false /* allocate */);
 }
 
 void JHwParcel::setTransactCallback(
@@ -547,9 +551,10 @@ static void JHwParcel_native_writeBoolVector(
 
     sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
 
-    hidl_vec<bool> *vec =
-        (hidl_vec<bool> *)impl->getStorage()->allocTemporaryStorage(
-                sizeof(hidl_vec<bool>));
+    void *vecPtr =
+        impl->getStorage()->allocTemporaryStorage(sizeof(hidl_vec<bool>));
+
+    hidl_vec<bool> *vec = new (vecPtr) hidl_vec<bool>;
 
     jsize len = env->GetArrayLength(valObj);
 
@@ -917,9 +922,10 @@ static void JHwParcel_native_writeStringVector(
 
     sp<JHwParcel> impl = JHwParcel::GetNativeContext(env, thiz);
 
-    string_vec *vec =
-        (string_vec *)impl->getStorage()->allocTemporaryStorage(
-                sizeof(string_vec));
+    void *vecPtr =
+        impl->getStorage()->allocTemporaryStorage(sizeof(string_vec));
+
+    string_vec *vec = new (vecPtr) string_vec;
 
     hidl_string *strings = impl->getStorage()->allocStringArray(len);
     vec->setToExternal(strings, len);
@@ -970,6 +976,57 @@ static jobject JHwParcel_native_readStrongBinder(JNIEnv *env, jobject thiz) {
     }
 
     return JHwRemoteBinder::NewObject(env, binder);
+}
+
+static jobject JHwParcel_native_readBuffer(JNIEnv *env, jobject thiz) {
+    hardware::Parcel *parcel =
+        JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    size_t handle;
+    const void *ptr = parcel->readBuffer(&handle);
+
+    if (ptr == nullptr) {
+        jniThrowException(env, "java/util/NoSuchElementException", NULL);
+        return nullptr;
+    }
+
+    return JHwBlob::NewObject(env, ptr, handle);
+}
+
+static jobject JHwParcel_native_readEmbeddedBuffer(
+        JNIEnv *env, jobject thiz, jlong parentHandle, jlong offset) {
+    hardware::Parcel *parcel =
+        JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    size_t childHandle;
+
+    const void *ptr =
+        parcel->readEmbeddedBuffer(&childHandle, parentHandle, offset);
+
+    if (ptr == nullptr) {
+        jniThrowException(env, "java/util/NoSuchElementException", NULL);
+        return 0;
+    }
+
+    return JHwBlob::NewObject(env, ptr, childHandle);
+}
+
+static void JHwParcel_native_writeBuffer(
+        JNIEnv *env, jobject thiz, jobject blobObj) {
+    if (blobObj == nullptr) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        return;
+    }
+
+    hardware::Parcel *parcel =
+        JHwParcel::GetNativeContext(env, thiz)->getParcel();
+
+    sp<JHwBlob> blob = JHwBlob::GetNativeContext(env, blobObj);
+    status_t err = blob->writeToParcel(parcel);
+
+    if (err != OK) {
+        signalExceptionForError(env, err);
+    }
 }
 
 static JNINativeMethod gMethods[] = {
@@ -1062,6 +1119,15 @@ static JNINativeMethod gMethods[] = {
         (void *)JHwParcel_native_releaseTemporaryStorage },
 
     { "send", "()V", (void *)JHwParcel_native_send },
+
+    { "readBuffer", "()L" PACKAGE_PATH "/HwBlob;",
+        (void *)JHwParcel_native_readBuffer },
+
+    { "readEmbeddedBuffer", "(JJ)L" PACKAGE_PATH "/HwBlob;",
+        (void *)JHwParcel_native_readEmbeddedBuffer },
+
+    { "writeBuffer", "(L" PACKAGE_PATH "/HwBlob;)V",
+        (void *)JHwParcel_native_writeBuffer },
 };
 
 namespace android {
