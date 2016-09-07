@@ -1078,7 +1078,7 @@
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> वर स्विच केले"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेट प्रवेश नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरतो. शुल्क लागू शकतील."</string>
-    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> पासून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> पर्यंत स्विच केले"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> वरून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> वर स्विच केले"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2952042958050315394">"मोबाइल डेटा"</item>
     <item msgid="75483255295529161">"वाय-फाय"</item>
@@ -1243,8 +1243,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> शी कनेक्ट केले. नेटवर्क व्यवस्थापित करण्यासाठी टॅप करा."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN कनेक्ट करणे नेहमी-चालू…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN कनेक्ट केलेले नेहमी-चालू"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"VPN त्रुटी नेहमी-चालू"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"कॉन्फिगर करण्यासाठी टॅप करा"</string>
+    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"फाईल निवडा"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"फाईल निवडली नाही"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>

@@ -1076,9 +1076,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ਦੀ ਕੋਈ ਇੰਟਰਨੈਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> \'ਤੇ ਬਦਲੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
-    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਬਦਲੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2952042958050315394">"ਸੈਲਿਊਲਰ ਡੈਟਾ"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
@@ -1243,8 +1243,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ। ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ਸੰਰੂਪਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"ਫਾਈਲ ਚੁਣੋ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ਕੋਈ ਫਾਈਲ ਨਹੀਂ ਚੁਣੀ ਗਈ"</string>
     <string name="reset" msgid="2448168080964209908">"ਰੀਸੈੱਟ ਕਰੋ"</string>

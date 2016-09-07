@@ -1243,8 +1243,11 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>에 연결되어 있습니다. 네트워크를 관리하려면 누르세요."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"연결 유지 VPN에 연결하는 중…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"연결 유지 VPN에 연결됨"</string>
+    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
+    <skip />
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"연결 유지 VPN 오류"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"설정하려면 탭하세요."</string>
+    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
