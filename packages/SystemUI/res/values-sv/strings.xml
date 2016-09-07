@@ -403,6 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Enheten kan övervakas"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Det kan hända att profilen övervakas"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Nätverket kan vara övervakat"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Nätverket kan vara övervakat"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Enhetsövervakning"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Profilövervakning"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Nätverksövervakning"</string>
@@ -415,6 +416,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan bevaka aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g>, som kan bevaka din privata aktivitet på nätverket, inklusive e-post, appar och webbplatser."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Du är ansluten till <xliff:g id="APPLICATION">%1$s</xliff:g> som kan övervaka din privata aktivitet på nätverket, inklusive e-postmeddelanden, appar och webbplatser."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nKontakta administratören för mer information."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Jobbprofilen hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Den är ansluten till <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, som kan hantera aktivitet på arbetsplatsens nätverk, inklusive e-post, appar och webbplatser.\n\nDu är även ansluten till <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, som kan hantera privat aktivitet på nätverket."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Enheten hanteras av <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratören kan bevaka och hantera inställningar, företagsåtkomst, appar, data som är kopplad till enheten och enhetens platsuppgifter.\n\nDu är ansluten till <xliff:g id="APPLICATION">%2$s</xliff:g>, som kan övervaka aktivitet på nätverket, inklusive e-post. appar och webbplatser .\n\nKontakta administratören för mer information."</string>

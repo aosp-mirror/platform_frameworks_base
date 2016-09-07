@@ -405,6 +405,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"端末が監視されている可能性があります"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ネットワークが監視されている可能性があります"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ネットワークが監視されている可能性があります"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"端末の監視"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"プロファイルの監視"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ネットワーク監視"</string>
@@ -417,6 +418,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"<xliff:g id="APPLICATION">%1$s</xliff:g>に接続しています。このアプリはあなたのネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g>に接続しています。このアプリはあなたの個人のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」に接続しています。このアプリはあなたの個人のネットワーク アクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION">%2$s</xliff:g>に接続しています。このアプリはあなたの仕事のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"この仕事用プロファイルは<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理され、<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>に接続しています。このアプリはあなたの仕事のネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>にも接続しているため、個人のネットワークアクティビティも監視できます。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"この端末は<xliff:g id="ORGANIZATION">%1$s</xliff:g>によって管理されています。\n\n管理者は設定、コーポレートアクセス、アプリ、端末に関連付けられたデータ、端末の位置情報を監視、管理できます。\n\n<xliff:g id="APPLICATION">%2$s</xliff:g>に接続しているため、このアプリもネットワークアクティビティ（メール、アプリ、ウェブサイトなど）を監視できます。\n\n詳しくは管理者にお問い合わせください。"</string>

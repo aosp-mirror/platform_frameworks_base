@@ -403,6 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"O dispositivo pode ser monitorizado"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"O perfil pode ser monitorizado"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"A rede pode ser monitorizada"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"A rede pode ser monitorizada"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorização de dispositivos"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorização de perfis"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorização da rede"</string>
@@ -415,6 +416,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Está ligado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorizar a atividade da rede, incluindo emails, aplicações e Websites."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Está ligado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorizar a atividade da rede pessoal, incluindo emails, aplicações e Websites."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Está ligado ao <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorizar a atividade da rede pessoal, incluindo emails, aplicações e Websites."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"O seu perfil de trabalho é gerido por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Está ligado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode monitorizar a atividade da rede de trabalho, incluindo emails, aplicações e Websites.\n\nPara obter mais informações, contacte o administrador."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"O seu perfil de trabalho é gerido por <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Está ligado a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, que pode monitorizar a atividade da rede de trabalho, incluindo emails, aplicações e Websites.\n\nTambém está ligado a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, que pode monitorizar a atividade da rede pessoal."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"O seu dispositivo é gerido por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO seu administrador pode monitorizar e gerir as definições, o acesso empresarial, as aplicações, os dados associados ao dispositivo e as informações de localização do dispositivo.\n\nEstá ligado a <xliff:g id="APPLICATION">%2$s</xliff:g>, que pode monitorizar a atividade da rede, incluindo emails, aplicações e Websites.\n\nPara obter mais informações, contacte o administrador."</string>

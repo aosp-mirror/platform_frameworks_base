@@ -403,6 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ઉપકરણ મૉનિટર કરી શકાય છે"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"પ્રોફાઇલ મૉનિટર કરી શકાય છે"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"નેટવર્ક મૉનિટર કરી શકાય છે"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"નેટવર્ક મૉનિટર કરવામાં આવી શકે છે"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ઉપકરણ નિરીક્ષણ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"પ્રોફાઇલ નિરીક્ષણ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"નેટવર્ક મૉનિટરિંગ"</string>
@@ -415,6 +416,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"તમે <xliff:g id="APPLICATION">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"તમારી કાર્ય પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. તે <xliff:g id="APPLICATION">%2$s</xliff:g> સાથે કનેક્ટ થયેલ છે, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી કાર્ય નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"તમારી કાર્ય પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. તે <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ થયેલ છે, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી કાર્ય નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ થયેલ છો, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"તમારું ઉપકરણ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે.\n\nતમારા વ્યવસ્થાપક, સેટિંગ્સ, કોર્પોરેટ ઍક્સેસ, ઍપ્લિકેશનો, તમારા ઉપકરણ સાથે સંકળાયેલ ડેટા અને તમારા ઉપકરણની સ્થાન માહિતીને મૉનિટર કરી અને સંચાલિત કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION">%2$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>

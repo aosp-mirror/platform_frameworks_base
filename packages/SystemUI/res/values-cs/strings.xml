@@ -409,6 +409,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Zařízení může být sledováno"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil může být monitorován"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Síť může být sledována"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Síť může být monitorována"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Sledování zařízení"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitoring profilu"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Sledování sítě"</string>
@@ -421,6 +422,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Jste připojeni k aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Toto zařízení spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministrátor může sledovat a spravovat nastavení, firemní přístup, aplikace, data přidružená k tomuto zařízení a informace o jeho poloze.\n\nJste připojeni k aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nO další informace požádejte svého administrátora."</string>

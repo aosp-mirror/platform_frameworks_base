@@ -405,6 +405,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Il dispositivo potrebbe essere monitorato"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Il profilo potrebbe essere monitorato"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"La rete potrebbe essere monitorata"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"La rete potrebbe essere monitorata"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitoraggio del dispositivo"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitoraggio del profilo"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitoraggio rete"</string>
@@ -417,6 +418,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi email, app e siti web."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sei connesso a <xliff:g id="APPLICATION">%1$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale, inclusi email, app e siti web."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi email, app e siti web.\n\nPer ulteriori informazioni, contatta il tuo amministratore."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>. È connesso a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi email, app e siti web.\n\nSei connesso anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Il tuo dispositivo è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nL\'amministratore può monitorare e gestire impostazioni, accesso aziendale, app e dati associati al dispositivo, incluse le informazioni sulla posizione del dispositivo.\n\nSei connesso a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete, inclusi email, app e siti web.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>

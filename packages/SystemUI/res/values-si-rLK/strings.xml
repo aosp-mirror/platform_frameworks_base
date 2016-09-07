@@ -403,6 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ඇතැම් විට උපාංගය නිරීක්ෂණය විය හැක"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ඇතැම් විට පැතිකඩ නිරීක්ෂණය කරන ලදි"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"උපාංගය නිරීක්ෂණය"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"පැතිකඩ නිරීක්ෂණය කිරීම"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ජාල නිරීක්ෂණය"</string>
@@ -415,6 +416,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION">%1$s</xliff:g> වෙත ඔබ සම්බන්ධ වී ඇත."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ පෞද්ගලික ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION">%1$s</xliff:g> වෙත ඔබ සම්බන්ධ වී ඇත."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ පෞද්ගලික ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION">%1$s</xliff:g> වෙත ඔබ සම්බන්ධ වී ඇත."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"ඔබේ කාර්යාල පැතිකඩ කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> විසිනි. එය ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ කාර්යාල ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION">%2$s</xliff:g> වෙත ඔබ සම්බන්ධ වී ඇත.\n\nවැඩිදුර විස්තර සඳහා, ඔබේ පරිපාලක අමතන්න."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"ඔබේ කාර්යාල පැතිකඩ කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> විසිනි. එය ඊ-තැපැල්, යෙදුම් සහ වෙබ් අඩවි ඇතුළු ඔබේ කාර්යාල ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, වෙත ඔබ සම්බන්ධ වී ඇත.\n\nඔබ ඔබේ පෞද්ගලික ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කළ හැකි, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> වෙතද සම්බන්ධ වී ඇත."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ඔබේ උපාංගය කළමනාකරණය කරන්නේ <xliff:g id="ORGANIZATION">%1$s</xliff:g> විසිනි.\n\nඔබේ පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගය තිබෙන ස්ථානයේ තොරතුරු නිරීක්ෂණය කිරීමට සහ කළමනාකරණය කිරීමට හැකිය.\n\nඔබ ඊ-තැපැල්, යෙදුම්, සහ වෙබ් අඩවි ඇතුළු ඔබේ ජාල ක්‍රියාකාරකම් නිරීක්ෂණය කිරීමට හැකි <xliff:g id="APPLICATION">%2$s</xliff:g>, වෙතද සම්බන්ධව ඇත.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
