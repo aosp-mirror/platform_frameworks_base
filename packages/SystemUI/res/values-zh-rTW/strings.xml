@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"裝置可能會受到監控"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"設定檔可能會受到監控"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"網路可能會受到監控"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"網路可能會受到監控"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"裝置監控"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"設定檔監控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"網路監控"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"由於您已連線至 <xliff:g id="APPLICATION">%1$s</xliff:g>，您的網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"由於您已連線至 <xliff:g id="APPLICATION">%1$s</xliff:g>，您的個人網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"由於你已連結至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，你的個人網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"您的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION">%2$s</xliff:g>，您的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n詳情請洽您的管理員。"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"您的 Work 設定檔是由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。由於設定檔已連線至 <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，您的工作網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n同時由於您也連線至<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，您的個人網路活動也會受到這個應用程式監控。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"您的裝置由下列機構管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n您的管理員可以監控及管理與裝置相關的設定、企業網路存取權、應用程式和資料，以及裝置的位置資訊。\n\n由於您的裝置已連線至 <xliff:g id="APPLICATION">%2$s</xliff:g>，您的網路活動也會受到這個應用程式監控，包括收發電子郵件、使用應用程式和瀏覽網站。\n\n如需詳細資訊，請洽您的管理員。"</string>

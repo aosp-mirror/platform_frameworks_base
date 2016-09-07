@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ਡੀਵਾਈਸ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ਨੈੱਟਵਰਕ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਨੈੱਟਵਰਕ ਦੀ ਨਿਗਰਾਨੀ ਹੋ ਰਹੀ ਹੋਵੇ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ਡੀਵਾਈਸ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ਨੈੱਟਵਰਕ ਨਿਰੀਖਣ ਕਰ ਰਿਹਾ ਹੈ"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ਤੁਸੀਂ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲਾਂ, ਐਪਾਂ, ਅਤੇ ਵੈੱਬਸਾਈਟਾਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਸਰਗਰਮੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਇਹ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫ਼ਾਈਲ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਇਹ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੈ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈਬਸਫ਼ਿਆਂ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ।\n\nਤੁਸੀਂ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ਨਾਲ ਵੀ ਕਨੈਕਟ ਹੋ, ਜੋ ਤੁਹਾਡੀ ਨਿੱਜੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦਾ ਨਿਰੀਖਣ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"ਤੁਹਾਡੀ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ਦੁਆਰਾ ਵਿਵਸਥਿਤ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।\n\nਪ੍ਰਬੰਧਕ ਸੈਟਿੰਗਾਂ, ਕਾਰਪੋਰੇਟ ਪਹੁੰਚ, ਐਪਸ, ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਨਾਲ ਸੰਬੰਧਿਤ ਡੈਟਾ ਅਤੇ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਦੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਦਾ ਨਿਰੀਖਣ ਅਤੇ ਉਸਨੂੰ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦਾ ਹੈ।\n\nਤੁਸੀਂ ਇੱਕ <xliff:g id="APPLICATION">%2$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋ, ਜੋ ਈਮੇਲ, ਐਪਸ ਅਤੇ ਵੈੱਬਪੰਨੇ ਸਮੇਤ ਤੁਹਾਡੀ ਨੈੱਟਵਰਕ ਗਤੀਵਿਧੀ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ।\n\nਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, ਆਪਣੇ ਪ੍ਰਬੰਧਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>

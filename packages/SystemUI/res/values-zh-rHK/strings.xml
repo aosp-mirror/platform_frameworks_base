@@ -406,6 +406,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"裝置可能會受到監控"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能受到監控"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"網絡可能會受到監控"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"網絡可能會受到監控"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"裝置監控"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"個人檔案監控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"網絡監控"</string>
@@ -418,6 +419,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"您已連結至<xliff:g id="APPLICATION">%1$s</xliff:g> ，它能夠監控您的網絡活動，包括電郵、應用程式和網站。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"您已連結至<xliff:g id="APPLICATION">%1$s</xliff:g>，它能夠監控您的個人網絡活動，包括電郵、應用程式和網站。"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"您已連接至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，此應用程式可以監控您的個人網絡活動，包括電郵、應用程式及網站。"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。它已連結至<xliff:g id="APPLICATION">%2$s</xliff:g>，能夠監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n如需進一步資訊，請聯絡您的管理員。"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"您的工作設定檔由<xliff:g id="ORGANIZATION">%1$s</xliff:g>管理。它已連結至<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，能夠監控您的工作網絡活動，包括電郵、應用程式和網站。\n\n此外，您亦連結至<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，因此它亦能夠監控您的個人網絡活動。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"您的裝置由 <xliff:g id="ORGANIZATION">%1$s</xliff:g> 管理。\n\n您的管理員可以監控及管理您裝置的設定、企業存取、應用程式、資料及位置資訊。\n\n此外，您的裝置連至 <xliff:g id="APPLICATION">%2$s</xliff:g>，它能監控您的網絡活動，包括電郵、應用程式及網站。\n\n如需更多資訊，請聯絡您的管理員。"</string>
