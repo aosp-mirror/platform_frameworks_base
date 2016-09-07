@@ -31,129 +31,71 @@ next.link=running-app.html
 <ol>
   <li>In Android Studio, create a new project:
     <ul>
-      <li>If you don't have a project opened, in the <strong>Welcome</strong> screen, click <strong>
-        New Project</strong>.</li>
-      <li>If you have a project opened, from the <strong>File</strong> menu, select <strong>New
-        Project</strong>. The <em>Create New Project</em> screen appears.</li>
+      <li>If you don't have a project opened, in the <strong>Welcome to Android Studio</strong> window, click <strong>
+        Start a new Android Studio project</strong>.</li>
+      <li>If you have a project opened, select <strong>File > New Project</strong>.</li>
     </ul>
   </li>
-  <li>Fill out the fields on the screen. For <strong>Application Name</strong>
-    use "My First App". For <strong>Company Domain</strong>, use "example.com".
-    For the other fields, use the default values and click <strong>Next</strong>
-    <p>Here's a brief explanation of each field:</p>
+  <li>In the <b>New Project</b> screen, enter the following values:</p>
     <ul>
-      <li><strong>Application Name</strong> is the app name that appears to users.</li>
-      <li><strong>Company domain</strong> provides a qualifier that will be appended to the package
-        name; Android Studio will remember this qualifier for each new project you create.</li>
-      <li><strong>Package name</strong> is the fully qualified name for the project (following the
-        same rules as those for naming packages in the Java programming language). Your package name
-        must be unique across all packages installed on the Android system. You can <strong>
-        Edit</strong> this value independently from the application name or the company
-        domain.</li>
-      <li><strong>Project location</strong> is the directory on your system that holds the project
-        files.</li>
+      <li><strong>Application Name</strong>: "My First App" </li>
+      <li><strong>Company Domain</strong>: "example.com"</li>
     </ul>
+    <p>Android Studio fills in the package name and project location for you,
+    but you can edit these if you'd like.
   </li>
-  <li>Under <strong>Target Android Devices</strong>, accept the default values
-    and click <strong>Next</strong>.
-    <p>The Minimum Required SDK is the earliest version of Android that your app supports,
-      indicated using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">
+  <li>Click <b>Next</b>.</li>
+  <li>In the <b>Target Android Devices</b> screen, keep the default values and
+    click <b>Next</b>.
+    <p>The <b>Minimum Required SDK</b> is the earliest version of Android that your app supports,
+      which is indicated by the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">
       API level</a>. To support as many devices as possible, you should set this to the lowest
       version available that allows your app to provide its core feature set. If any feature of your
-      app is possible only on newer versions of Android and it's not critical to the app's core
-      feature set, you can enable the feature only when running on the versions that support it (as
-      discussed in <a href="{@docRoot}training/basics/supporting-devices/platforms.html">
+      app is possible only on newer versions of Android and it's not critical to the core
+      feature set, enable that feature only when running on the versions that support it (see
+      <a href="{@docRoot}training/basics/supporting-devices/platforms.html">
       Supporting Different Platform Versions</a>).</p>
     </li>
 
-  <li>Under <strong>Add an Activity to Mobile</strong>, select <strong>Empty
+  <li>In the <strong>Add an Activity to Mobile</strong> screen, select <strong>Empty
     Activity</strong> and click <strong>Next</strong>.
   </li>
 
-  <div class="sidebox-wrapper">
-    <div class="sidebox">
-      <h3>Activities</h3>
-      <p>An activity is one of the distinguishing features of the Android framework. Activities
-        provide the user with access to your app, and there may be many activities. An application
-        will usually have a main activity for when the user launches the application, another
-        activity for when she selects some content to view, for example, and other activities for
-        when she performs other tasks within the app. See <a href="{@docRoot}guide/components/activities.html">
-        Activities</a> for more information.</p>
-    </div>
-  </div>
-
-  <li>Under <strong>Customize the Activity</strong>, accept the default values
+  <li>In the <strong>Customize the Activity</strong> screen, keep the default values
     and click <strong>Finish</strong>.
 </ol>
 
-<p>Your Android project is now a basic "Hello World" app that contains some default files. Take a
-moment to review the most important of these:</p>
+<p>After some processing, Android Studio opens and displays a "Hello World" app
+with default files. You will add functionality to some of
+these files in the following lessons.</p>
+
+<p>Now take a moment to review the most important files. First, be sure that
+the <b>Project</b> window is open (select <b>View > Tool Windows > Project</b>)
+and the <b>Android</b> view is selected from the drop-down list at the top.
+You can then see the following files:</p>
 
 <dl>
-  <dt><code>app/src/main/java/com.example.myfirstapp/MainActivity.java</code></dt>
+  <dt><b>app > java > com.example.myfirstapp > MainActivity.java</b></dt>
   <dd>This file appears in Android Studio after the New Project wizard finishes.
     It contains the class definition for the activity you created earlier. When you build
     and run the app, the {@link android.app.Activity} starts and loads the
     layout file that says "Hello World!"</dd>
 
-  <dt><code>app/src/main/res/layout/activity_main.xml</code></dt>
+  <dt><b>app > res > layout > activity_main.xml</b></dt>
   <dd>This XML file defines the layout of the activity. It contains a {@code TextView}
     element with the text "Hello world!".</dd>
 
-  <dt><code>app/src/main/AndroidManifest.xml</code></dt>
+  <dt><b>app > manifests > AndroidManifest.xml</b></dt>
   <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
     the fundamental characteristics of the app and defines each of its components. You'll revisit
     this file as you follow these lessons and add more components to your app.</dd>
-  <dt><code>app/build.gradle</code></dt>
+
+  <dt><b>Gradle Scripts > build.gradle</b></dt>
   <dd>Android Studio uses Gradle to compile and build your app. There is a <code>build.gradle</code>
     file for each module of your project, as well as a <code>build.gradle</code> file for the entire
-    project. Usually, you're only interested in the <code>build.gradle</code> file for the module,
-    in this case the <code>app</code> or application module. This is where your app's build dependencies
-    are set, including the <code>defaultConfig</code> settings:
-    <ul>
-      <li><code>compiledSdkVersion</code> is the platform version against which you will compile
-        your app. By default, this is set to the latest version of Android available in your SDK.
-        By default, this is set to the latest version of Android SDK installed on your
-        development machine.
-        You can still build your app to support older versions, but setting this to the latest
-        version allows you to enable new features and optimize your app for a great user experience
-        on the latest devices.</li>
-      <li><code>applicationId</code> is the fully qualified package name for your application that
-        you specified in the New Project wizard.</li>
-      <li><code>minSdkVersion</code> is the Minimum SDK version you specified during the New Project
-        wizard. This is the earliest version of the Android SDK that your app supports.</li>
-      <li><code>targetSdkVersion</code> indicates the highest version of Android with which you have
-        tested your application. As new versions of Android become available, you should
-        test your app on the new version and update this value to match the latest API level and
-        thereby take advantage of new platform features. For more information, read
-        <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
-          Platform Versions</a>.</li>
-    </ul>
-    <p>See <a href="{@docRoot}studio/build/index.html">Building Your Project with Gradle</a>
-    for more information about Gradle.</p></dd>
-</dl>
-
-<p>Note also the <code>/res</code> subdirectories that contain the
-<a href="{@docRoot}guide/topics/resources/overview.html">resources</a> for your application:</p>
-<dl>
-  <dt><code>drawable<em>-&lt;density&gt;</em>/</code></dt>
-    <dd>Directories for <a href="{@docRoot}guide/topics/resources/drawable-resource.html">
-    drawable resources</a>, other than launcher icons, designed
-    for various <a href="{@docRoot}training/multiscreen/screendensities.html">densities</a>.
-</dd>
-  <dt><code>layout/</code></dt>
-    <dd>Directory for files that define your app's user interface like {@code activity_main.xml},
-      discussed above, which describes a basic layout for the {@code MainActivity}
-      class.</dd>
-  <dt><code>menu/</code></dt>
-    <dd>Directory for files that define your app's menu items.</dd>
-  <dt><code>mipmap/</code></dt>
-    <dd>Launcher icons reside in the {@code mipmap/} folder rather than the
-    {@code drawable/} folders. This folder contains the {@code ic_launcher.png} image
-    that appears when you run the default app.</dd>
-  <dt><code>values/</code></dt>
-    <dd>Directory for other XML files that contain a collection of resources, such as
-      string and color definitions.</dd>
+    project. Usually, you're only interested in the <code>build.gradle</code> file for the module.
+    in this case the <code>app</code> or application module. For more information about this file,
+    see <a href="{@docRoot}studio/build/index.html">Building Your Project with Gradle</a>.</dd>
 </dl>
 
 <p>
