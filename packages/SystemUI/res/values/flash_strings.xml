@@ -99,4 +99,8 @@
     <string name="screenshot_abort_title">No screenshot taken</string>
     <string name="screenshot_abort_text">Operation aborted</string>
 
+    <!-- Notification which notifies user flashlight is enabled -->
+    <string name="quick_settings_tile_flashlight_not_title">Flashlight is on</string>
+    <string name="quick_settings_tile_flashlight_not_summary">Tap to turn off</string>
+
 </resources>
