@@ -1616,41 +1616,6 @@ public class WifiManager {
     }
 
     /**
-     * Add a bssid to the supplicant blacklist
-     *
-     * This API is used by WifiWatchdogService
-     *
-     * @return {@code true} if the operation succeeds else {@code false}
-     * @hide
-     */
-    public boolean addToBlacklist(String bssid) {
-        try {
-            mService.addToBlacklist(bssid);
-            return true;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Clear the supplicant blacklist
-     *
-     * This API is used by WifiWatchdogService
-     *
-     * @return {@code true} if the operation succeeds else {@code false}
-     * @hide
-     */
-    public boolean clearBlacklist() {
-        try {
-            mService.clearBlacklist();
-            return true;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-
-    /**
      * Enable/Disable TDLS on a specific local route.
      *
      * <p>
@@ -2146,18 +2111,6 @@ public class WifiManager {
         }
     }
 
-
-    /**
-     * Returns the file in which IP and proxy configuration data is stored
-     * @hide
-     */
-    public String getConfigFile() {
-        try {
-            return mService.getConfigFile();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
 
     /**
      * Allows an application to keep the Wi-Fi radio awake.
