@@ -20,7 +20,6 @@
 #include "utils/misc.h"
 
 namespace android {
-int register_android_server_ActivityManagerService(JNIEnv* env);
 int register_android_server_AlarmManagerService(JNIEnv* env);
 int register_android_server_AssetAtlasService(JNIEnv* env);
 int register_android_server_BatteryStatsService(JNIEnv* env);
@@ -61,7 +60,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     }
     ALOG_ASSERT(env, "Could not retrieve the env!");
 
-    register_android_server_ActivityManagerService(env);
     register_android_server_PowerManagerService(env);
     register_android_server_SerialService(env);
     register_android_server_InputApplicationHandle(env);
@@ -87,7 +85,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_PersistentDataBlockService(env);
     register_android_server_Watchdog(env);
     register_android_server_HardwarePropertiesManagerService(env);
-
 
     return JNI_VERSION_1_4;
 }
