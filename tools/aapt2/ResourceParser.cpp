@@ -152,7 +152,7 @@ bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser, std::string* 
                 break;
             }
 
-            spanStack.back().lastChar = builder.str().size() - 1;
+            spanStack.back().lastChar = builder.utf16Len() - 1;
             outStyleString->spans.push_back(spanStack.back());
             spanStack.pop_back();
 
@@ -185,12 +185,12 @@ bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser, std::string* 
                 spanName += attrIter->value;
             }
 
-            if (builder.str().size() > std::numeric_limits<uint32_t>::max()) {
+            if (builder.utf16Len() > std::numeric_limits<uint32_t>::max()) {
                 mDiag->error(DiagMessage(mSource.withLine(parser->getLineNumber()))
                              << "style string '" << builder.str() << "' is too long");
                 error = true;
             } else {
-                spanStack.push_back(Span{ spanName, static_cast<uint32_t>(builder.str().size()) });
+                spanStack.push_back(Span{ spanName, static_cast<uint32_t>(builder.utf16Len()) });
             }
 
         } else if (event == xml::XmlPullParser::Event::kComment) {

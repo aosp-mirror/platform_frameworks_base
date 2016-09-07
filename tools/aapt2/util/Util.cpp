@@ -314,6 +314,9 @@ StringBuilder& StringBuilder::append(const StringPiece& str) {
         return *this;
     }
 
+    // Where the new data will be appended to.
+    size_t newDataIndex = mStr.size();
+
     const char* const end = str.end();
     const char* start = str.begin();
     const char* current = start;
@@ -422,6 +425,16 @@ StringBuilder& StringBuilder::append(const StringPiece& str) {
         current++;
     }
     mStr.append(start, end - start);
+
+    // Accumulate the added string's UTF-16 length.
+    ssize_t len = utf8_to_utf16_length(
+            reinterpret_cast<const uint8_t*>(mStr.data()) + newDataIndex,
+            mStr.size() - newDataIndex);
+    if (len < 0) {
+        mError = "invalid unicode code point";
+        return *this;
+    }
+    mUtf16Len += len;
     return *this;
 }
 
@@ -434,11 +447,8 @@ std::u16string utf8ToUtf16(const StringPiece& utf8) {
 
     std::u16string utf16;
     utf16.resize(utf16Length);
-    utf8_to_utf16(
-            reinterpret_cast<const uint8_t*>(utf8.data()),
-            utf8.length(),
-            &*utf16.begin(),
-            (size_t) utf16Length + 1);
+    utf8_to_utf16(reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length(),
+                  &*utf16.begin(), utf16Length + 1);
     return utf16;
 }
 
