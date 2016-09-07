@@ -21705,6 +21705,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mUserController.getCurrentUser();
     }
 
+    String getStartedUserState(int userId) {
+        synchronized (this) {
+            final UserState userState = mUserController.getStartedUserStateLocked(userId);
+            return UserState.stateToString(userState.state);
+        }
+    }
+
     @Override
     public boolean isUserRunning(int userId, int flags) {
         if (!mUserController.isSameProfileGroup(userId, UserHandle.getCallingUserId())

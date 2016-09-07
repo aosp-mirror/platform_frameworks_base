@@ -106,6 +106,8 @@ class ActivityManagerShellCommand extends ShellCommand {
                     return runLenientBackgroundCheck(pw);
                 case "get-uid-state":
                     return getUidState(pw);
+                case "get-started-user-state":
+                    return getStartedUserState(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -458,6 +460,18 @@ class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int getStartedUserState(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.DUMP,
+                "getStartedUserState()");
+        final int userId = Integer.parseInt(getNextArgRequired());
+        try {
+            pw.println(mInternal.getStartedUserState(userId));
+        } catch (NullPointerException e) {
+            pw.println("User is not started: " + userId);
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -534,6 +548,8 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    Optionally controls lenient background check mode, returns current mode.");
             pw.println("  get-uid-state <UID>");
             pw.println("    Gets the process state of an app given its <UID>.");
+            pw.println("  get-started-user-state <USER_ID>");
+            pw.println("    Gets the current state of the given started user.");
             pw.println();
             Intent.printIntentArgsHelp(pw, "");
         }

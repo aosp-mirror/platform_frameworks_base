@@ -124,7 +124,12 @@ public class RetailDemoModeService extends SystemService {
     @GuardedBy("mActivityLock")
     long mLastUserActivityTime;
 
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private boolean mSafeBootRestrictionInitialState;
+    private int mPackageVerifierEnableInitialState;
+
+    private IntentReceiver mBroadcastReceiver = null;
+
+    private final class IntentReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mDeviceInDemoMode) {
@@ -150,6 +155,9 @@ public class RetailDemoModeService extends SystemService {
 
         @Override
         public void handleMessage(Message msg) {
+            if (!mDeviceInDemoMode) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_TURN_SCREEN_ON:
                     if (mInjector.isWakeLockHeld()) {
@@ -219,7 +227,7 @@ public class RetailDemoModeService extends SystemService {
             if (mDeviceDemoModeUri.equals(uri)) {
                 mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
                 if (mDeviceInDemoMode) {
-                    putDeviceInDemoMode();
+                    startDemoMode();
                 } else {
                     mInjector.systemPropertiesSet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "0");
                     if (mInjector.isWakeLockHeld()) {
@@ -238,6 +246,7 @@ public class RetailDemoModeService extends SystemService {
                         }
                     }
                 });
+                stopDemoMode();
             }
         }
 
@@ -376,10 +385,20 @@ public class RetailDemoModeService extends SystemService {
     }
 
     private void registerBroadcastReceiver() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(ACTION_RESET_DEMO);
-        getContext().registerReceiver(mBroadcastReceiver, filter);
+        if (mBroadcastReceiver == null) {
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            filter.addAction(ACTION_RESET_DEMO);
+            mBroadcastReceiver = new IntentReceiver();
+            getContext().registerReceiver(mBroadcastReceiver, filter);
+        }
+    }
+
+    private void unregisterBroadcastReceiver() {
+        if (mBroadcastReceiver != null) {
+            getContext().unregisterReceiver(mBroadcastReceiver);
+            mBroadcastReceiver = null;
+        }
     }
 
     private String[] getCameraIdsWithFlash() {
@@ -407,9 +426,33 @@ public class RetailDemoModeService extends SystemService {
         }
     }
 
-    private void putDeviceInDemoMode() {
+    private void startDemoMode() {
+        mPreloadAppsInstaller = mInjector.getPreloadAppsInstaller();
+        mInjector.initializeWakeLock();
+        if (mCameraIdsWithFlash == null) {
+            mCameraIdsWithFlash = getCameraIdsWithFlash();
+        }
+        registerBroadcastReceiver();
+
         mInjector.systemPropertiesSet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, "1");
         mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+
+        mSafeBootRestrictionInitialState = mInjector.getUserManager().hasUserRestriction(
+                UserManager.DISALLOW_SAFE_BOOT, UserHandle.SYSTEM);
+        mPackageVerifierEnableInitialState = Settings.Global.getInt(mInjector.getContentResolver(),
+                Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+    }
+
+    private void stopDemoMode() {
+        mPreloadAppsInstaller = null;
+        mCameraIdsWithFlash = null;
+        mInjector.destroyWakeLock();
+        unregisterBroadcastReceiver();
+
+        mInjector.getUserManager().setUserRestriction(UserManager.DISALLOW_SAFE_BOOT,
+                mSafeBootRestrictionInitialState, UserHandle.SYSTEM);
+        Settings.Global.putInt(mInjector.getContentResolver(),
+                Settings.Global.PACKAGE_VERIFIER_ENABLE, mPackageVerifierEnableInitialState);
     }
 
     @Override
@@ -421,25 +464,21 @@ public class RetailDemoModeService extends SystemService {
                 false);
         mHandlerThread.start();
         mHandler = new MainHandler(mHandlerThread.getLooper());
-        publishLocalService(RetailDemoModeServiceInternal.class, mLocalService);
+        mInjector.publishLocalService(this, mLocalService);
     }
 
     @Override
     public void onBootPhase(int bootPhase) {
         switch (bootPhase) {
             case PHASE_THIRD_PARTY_APPS_CAN_START:
-                mPreloadAppsInstaller = mInjector.getPreloadAppsInstaller();
-                mInjector.initializeWakeLock();
-                mCameraIdsWithFlash = getCameraIdsWithFlash();
                 SettingsObserver settingsObserver = new SettingsObserver(mHandler);
                 settingsObserver.register();
                 settingsObserver.refreshTimeoutConstants();
-                registerBroadcastReceiver();
                 break;
             case PHASE_BOOT_COMPLETED:
                 if (UserManager.isDeviceInDemoMode(getContext())) {
                     mDeviceInDemoMode = true;
-                    putDeviceInDemoMode();
+                    startDemoMode();
                 }
                 break;
         }
@@ -526,6 +565,7 @@ public class RetailDemoModeService extends SystemService {
         private WifiManager mWifiManager;
         private Configuration mSystemUserConfiguration;
         private PendingIntent mResetDemoPendingIntent;
+        private PreloadAppsInstaller mPreloadAppsInstaller;
 
         Injector(Context context) {
             mContext = context;
@@ -609,7 +649,10 @@ public class RetailDemoModeService extends SystemService {
         }
 
         PreloadAppsInstaller getPreloadAppsInstaller() {
-            return new PreloadAppsInstaller(getContext());
+            if (mPreloadAppsInstaller == null) {
+                mPreloadAppsInstaller = new PreloadAppsInstaller(getContext());
+            }
+            return mPreloadAppsInstaller;
         }
 
         void systemPropertiesSet(String key, String value) {
@@ -628,8 +671,14 @@ public class RetailDemoModeService extends SystemService {
         }
 
         void initializeWakeLock() {
-            mWakeLock = getPowerManager().newWakeLock(
-                    PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+            if (mWakeLock == null) {
+                mWakeLock = getPowerManager().newWakeLock(
+                        PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+            }
+        }
+
+        void destroyWakeLock() {
+            mWakeLock = null;
         }
 
         boolean isWakeLockHeld() {
@@ -687,6 +736,11 @@ public class RetailDemoModeService extends SystemService {
 
         File getDataPreloadsDirectory() {
             return Environment.getDataPreloadsDirectory();
+        }
+
+        void publishLocalService(RetailDemoModeService service,
+                RetailDemoModeServiceInternal localService) {
+            service.publishLocalService(RetailDemoModeServiceInternal.class, localService);
         }
     }
 }

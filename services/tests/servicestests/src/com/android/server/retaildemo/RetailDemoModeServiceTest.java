@@ -63,7 +63,6 @@ import android.util.ArrayMap;
 
 import com.android.internal.util.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.retaildemo.RetailDemoModeService.Injector;
 
@@ -76,7 +75,6 @@ import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
@@ -137,9 +135,6 @@ public class RetailDemoModeServiceTest {
 
     @After
     public void tearDown() {
-        // Remove the RetailDemoModeServiceInternal from LocalServices which would've been
-        // added during initialization of RetailDemoModeService in setUp().
-        LocalServices.removeServiceForTest(RetailDemoModeServiceInternal.class);
         FileUtils.deleteContentsAndDir(mTestPreloadsDir);
     }
 
@@ -147,22 +142,21 @@ public class RetailDemoModeServiceTest {
     public void testDemoUserSetup() throws Exception {
         mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
 
+        mLatch = new CountDownLatch(1);
+        final UserInfo userInfo = new UserInfo();
+        userInfo.id = TEST_DEMO_USER;
+        when(mUm.createUser(anyString(), anyInt())).thenReturn(userInfo);
+
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        assertEquals(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED + " property not set",
+                "1", mInjector.systemPropertiesGet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED));
+
         final ArgumentCaptor<IntentFilter> intentFilter =
                 ArgumentCaptor.forClass(IntentFilter.class);
         verify(mContext).registerReceiver(any(BroadcastReceiver.class), intentFilter.capture());
         assertTrue("Not registered for " + Intent.ACTION_SCREEN_OFF,
                 intentFilter.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
 
-        mLatch = new CountDownLatch(1);
-
-        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-        assertEquals(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED + " property not set",
-                "1", mInjector.systemPropertiesGet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED));
-
-        final UserInfo userInfo = new UserInfo();
-        userInfo.id = TEST_DEMO_USER;
-        when(mUm.createUser(anyString(), anyInt())).thenReturn(userInfo);
-        mInjector.setDemoUserId(TEST_DEMO_USER);
         setCameraPackage(TEST_CAMERA_PKG);
         // Wait for the setup to complete.
         mLatch.await(SETUP_COMPLETE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -199,7 +193,36 @@ public class RetailDemoModeServiceTest {
     }
 
     @Test
-    public void testSettingsObserver() throws Exception {
+    public void testSettingsObserver_disableDemoMode() throws Exception {
+        final RetailDemoModeService.SettingsObserver observer =
+                mService.new SettingsObserver(new Handler(Looper.getMainLooper()));
+        final Uri deviceDemoModeUri = Settings.Global.getUriFor(Settings.Global.DEVICE_DEMO_MODE);
+        when(mUm.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT, UserHandle.SYSTEM))
+                .thenReturn(false);
+        Settings.Global.putInt(mContentResolver, Settings.Global.PACKAGE_VERIFIER_ENABLE, 1);
+        // Settings.Global.DEVICE_DEMO_MODE has been set to 1 initially.
+        observer.onChange(false, deviceDemoModeUri);
+        final ArgumentCaptor<BroadcastReceiver> receiver =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        verify(mContext).registerReceiver(receiver.capture(), any(IntentFilter.class));
+
+        Settings.Global.putInt(mContentResolver, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+        new File(mTestPreloadsDir, "dir1").mkdirs();
+        new File(mTestPreloadsDir, "file1").createNewFile();
+        Settings.Global.putInt(mContentResolver, Settings.Global.DEVICE_DEMO_MODE, 0);
+        observer.onChange(false, deviceDemoModeUri);
+        verify(mContext).unregisterReceiver(receiver.getValue());
+        verify(mUm).setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, false, UserHandle.SYSTEM);
+        assertEquals("Package verifier enable value has not been reset", 1,
+                Settings.Global.getInt(mContentResolver, Settings.Global.PACKAGE_VERIFIER_ENABLE));
+        Thread.sleep(20); // Wait for the deletion to complete.
+        // verify that the preloaded directory is emptied.
+        assertEquals("Preloads directory is not emptied",
+                0, mTestPreloadsDir.list().length);
+    }
+
+    @Test
+    public void testSettingsObserver_enableDemoMode() throws Exception {
         final RetailDemoModeService.SettingsObserver observer =
                 mService.new SettingsObserver(new Handler(Looper.getMainLooper()));
         final Uri deviceDemoModeUri = Settings.Global.getUriFor(Settings.Global.DEVICE_DEMO_MODE);
@@ -208,14 +231,11 @@ public class RetailDemoModeServiceTest {
         assertEquals(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED + " property not set",
                 "1", mInjector.systemPropertiesGet(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED));
 
-        new File(mTestPreloadsDir, "dir1").mkdirs();
-        new File(mTestPreloadsDir, "file1").createNewFile();
-        Settings.Global.putInt(mContentResolver, Settings.Global.DEVICE_DEMO_MODE, 0);
-        observer.onChange(false, deviceDemoModeUri);
-        Thread.sleep(20); // Wait for the deletion to complete.
-        // verify that the preloaded directory is emptied.
-        assertEquals("Preloads directory is not emptied",
-                0, mTestPreloadsDir.list().length);
+        final ArgumentCaptor<IntentFilter> intentFilter =
+                ArgumentCaptor.forClass(IntentFilter.class);
+        verify(mContext).registerReceiver(any(BroadcastReceiver.class), intentFilter.capture());
+        assertTrue("Not registered for " + Intent.ACTION_SCREEN_OFF,
+                intentFilter.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
     }
 
     @Test
@@ -308,7 +328,6 @@ public class RetailDemoModeServiceTest {
 
     private class TestInjector extends Injector {
         private ArrayMap<String, String> mSystemProperties = new ArrayMap<>();
-        private int mDemoUserId = UserHandle.USER_NULL;
 
         TestInjector() {
             super(mContext);
@@ -385,6 +404,10 @@ public class RetailDemoModeServiceTest {
         }
 
         @Override
+        void destroyWakeLock() {
+        }
+
+        @Override
         boolean isWakeLockHeld() {
             return false;
         }
@@ -425,12 +448,13 @@ public class RetailDemoModeServiceTest {
             return mTestPreloadsDir;
         }
 
-        String systemPropertiesGet(String key) {
-            return mSystemProperties.get(key);
+        @Override
+        void publishLocalService(RetailDemoModeService service,
+                RetailDemoModeServiceInternal localService) {
         }
 
-        void setDemoUserId(int userId) {
-            mDemoUserId = userId;
+        String systemPropertiesGet(String key) {
+            return mSystemProperties.get(key);
         }
     }
 }
