@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"उपकरण अनुगमन हुन सक्छ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाइल अनुगमन हुन सक्छ"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"सञ्जाल अनुगमित हुन सक्छ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कको अनुगमन गरिने सम्भावना छ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"उपकरण अनुगमन"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाइल अनुगमन गर्दै"</string>
     <string name="monitoring_title" msgid="169206259253048106">"सञ्जाल अनुगमन"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँका नेटवर्क गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तपाईँ <xliff:g id="APPLICATION">%1$s</xliff:g> सँग जडित हुनुहुन्छ जसले इ-मेल, अनुप्रयोगहरू र वेबसाइट लगायतका तपाईँको निजी नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तपाईं <xliff:g id="APPLICATION">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायतको तपाईंको  व्यक्तिगत नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि, आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"तपाईँको कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थापन गरिन्छ। यो <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> सँग जोडिएको छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधि अनुगमन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> सँग पनि जडित हुनुहुन्छ, जसले तपाईँको व्यक्तिगत नेटवर्क गतिविधि अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"तपाईँको उपकरण <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारा व्यवस्थित गरिन्छ।\n\nतपाईँको प्रशासकले तपाईँको यन्त्र र त्यसको स्थान जानकारीमार्फत सेटिङहरू,  कर्पोरेट पहुँच, अनुप्रयोगहरू, तपाईँको यन्त्रसँग सम्बद्ध डेटा  र तपाईँको यन्त्रको स्थान जानकारीको अनुगमन र व्यवस्थापन गर्न सक्छ।\n\nतपाईँ <xliff:g id="APPLICATION">%2$s</xliff:g> सँग जडित हुनुहुन्छ जसले इमेल, अनुप्रयोगहरू, र वेबसाइटहरू लगायतका तपाईँका नेटवर्क गतिविधिका अनुगमन गर्न सक्छ।\n\nथप जानकारीको लागि तपाईको प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>

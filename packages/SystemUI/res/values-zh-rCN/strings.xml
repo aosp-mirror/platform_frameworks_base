@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"设备可能会受到监控"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"资料可能会受到监控"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"网络可能会受到监控"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"网络可能会受到监控"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"设备监测"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"资料监控"</string>
     <string name="monitoring_title" msgid="169206259253048106">"网络监控"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"您已连接到<xliff:g id="APPLICATION">%1$s</xliff:g>，该应用可以监控您的网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"您已连接到<xliff:g id="APPLICATION">%1$s</xliff:g>，该应用可以监控您的个人网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"您已连接到<xliff:g id="APPLICATION">%1$s</xliff:g>，该应用可以监控您的个人网络活动，包括收发电子邮件、使用应用和浏览网站。"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"您的工作资料由以下单位管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。您已连接到<xliff:g id="APPLICATION">%2$s</xliff:g>，该应用可以监控您的工作网络活动，包括收发电子邮件、使用应用和浏览网站。\n\n若要了解详情，请与您单位的管理员联系。"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"您的工作资料由以下单位管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。您已连接到<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>，该应用可以监控您的工作网络活动，包括收发电子邮件、使用应用和浏览网站。\n\n此外，您还连接到了<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>，该应用可以监控您的个人网络活动。"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"您的设备由以下单位管理：<xliff:g id="ORGANIZATION">%1$s</xliff:g>。\n\n您单位的管理员可以监控和管理与此设备相关的设置、企业权限、应用、数据以及设备位置信息。\n\n您已连接到<xliff:g id="APPLICATION">%2$s</xliff:g>，该应用可以监控您的网络活动，包括收发电子邮件、使用应用和浏览网站。\n\n若要了解详情，请与您单位的管理员联系。"</string>
