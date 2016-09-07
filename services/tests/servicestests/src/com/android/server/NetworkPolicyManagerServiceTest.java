@@ -344,14 +344,14 @@ public class NetworkPolicyManagerServiceTest {
         assertUidPolicy(UID_A, POLICY_NONE);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
-        mPolicyListener.expect().onRestrictBackgroundWhitelistChanged(anyInt(), anyBoolean());
+        mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
         mService.setUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
 
         assertWhitelistUids(UID_A);
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
-        mPolicyListener.waitAndVerify().onRestrictBackgroundWhitelistChanged(APP_ID_A, true);
-        mPolicyListener.verifyNotCalled().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
+        mPolicyListener.waitAndVerify()
+                .onUidPoliciesChanged(APP_ID_A, POLICY_ALLOW_METERED_BACKGROUND);
         if (expectIntent) {
             assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
         } else {
@@ -385,14 +385,13 @@ public class NetworkPolicyManagerServiceTest {
         assertUidPolicy(UID_A, POLICY_ALLOW_METERED_BACKGROUND);
 
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
-        mPolicyListener.expect().onRestrictBackgroundWhitelistChanged(anyInt(), anyBoolean());
+        mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
         mService.setUidPolicy(UID_A, POLICY_NONE);
 
         assertWhitelistUids();
         assertUidPolicy(UID_A, POLICY_NONE);
-        mPolicyListener.waitAndVerify().onRestrictBackgroundWhitelistChanged(APP_ID_A, false);
-        mPolicyListener.verifyNotCalled().onRestrictBackgroundBlacklistChanged(APP_ID_A, false);
+        mPolicyListener.waitAndVerify().onUidPoliciesChanged(APP_ID_A, POLICY_NONE);
         if (expectIntent) {
             assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
         } else {
@@ -422,13 +421,13 @@ public class NetworkPolicyManagerServiceTest {
     private void addRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
         assertUidPolicy(UID_A, POLICY_NONE); // Sanity check.
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
-        mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
+        mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
 
         assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
-        mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
-        mPolicyListener.verifyNotCalled().onRestrictBackgroundWhitelistChanged(APP_ID_A, true);
+        mPolicyListener.waitAndVerify()
+                .onUidPoliciesChanged(APP_ID_A, POLICY_REJECT_METERED_BACKGROUND);
         if (expectIntent) {
             assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
         } else {
@@ -459,13 +458,13 @@ public class NetworkPolicyManagerServiceTest {
     private void removeRestrictBackgroundBlacklist(boolean expectIntent) throws Exception {
         assertUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND); // Sanity check.
         final FutureIntent futureIntent = newRestrictBackgroundChangedFuture();
-        mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
+        mPolicyListener.expect().onUidPoliciesChanged(anyInt(), anyInt());
 
         mService.setUidPolicy(UID_A, POLICY_NONE);
 
         assertUidPolicy(UID_A, POLICY_NONE);
-        mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, false);
-        mPolicyListener.verifyNotCalled().onRestrictBackgroundWhitelistChanged(APP_ID_A, false);
+        mPolicyListener.waitAndVerify()
+                .onUidPoliciesChanged(APP_ID_A, POLICY_NONE);
         if (expectIntent) {
             assertRestrictBackgroundChangedReceived(futureIntent, PKG_NAME_A);
         } else {
@@ -578,21 +577,10 @@ public class NetworkPolicyManagerServiceTest {
                 UID_C, UID_D, UID_F);
     }
 
-    // NOTE: testPolicyChangeTriggersListener() and testUidForeground() are too superficial, they
+    // NOTE: testPolicyChangeTriggersListener() is too superficial, they
     // don't check for side-effects (like calls to NetworkManagementService) neither cover all
     // different modes (Data Saver, Battery Saver, Doze, App idle, etc...).
     // These scenarios are extensively tested on CTS' HostsideRestrictBackgroundNetworkTests.
-
-    @Test
-    public void testPolicyChangeTriggersListener() throws Exception {
-        mPolicyListener.expect().onRestrictBackgroundBlacklistChanged(anyInt(), anyBoolean());
-
-        mService.setUidPolicy(APP_ID_A, POLICY_NONE);
-        mService.setUidPolicy(APP_ID_A, POLICY_REJECT_METERED_BACKGROUND);
-
-        mPolicyListener.waitAndVerify().onRestrictBackgroundBlacklistChanged(APP_ID_A, true);
-    }
-
     @Test
     public void testUidForeground() throws Exception {
         // push all uids into background

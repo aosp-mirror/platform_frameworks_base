@@ -74,7 +74,7 @@ public class DataSaverController {
 
     private final INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
         @Override
-        public void onUidRulesChanged(int i, int i1) throws RemoteException {
+        public void onUidRulesChanged(int uid, int uidRules) throws RemoteException {
         }
 
         @Override
@@ -92,10 +92,7 @@ public class DataSaverController {
         }
 
         @Override
-        public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
-        }
-        @Override
-        public void onRestrictBackgroundBlacklistChanged(int uid, boolean blacklisted) {
+        public void onUidPoliciesChanged(int uid, int uidPolicies) throws RemoteException {
         }
     };
 
