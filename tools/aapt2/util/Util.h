@@ -163,10 +163,16 @@ public:
     StringBuilder& append(const StringPiece& str);
     const std::string& str() const;
     const std::string& error() const;
+
+    // When building StyledStrings, we need UTF-16 indices into the string,
+    // which is what the Java layer expects when dealing with java String.charAt().
+    size_t utf16Len() const;
+
     operator bool() const;
 
 private:
     std::string mStr;
+    size_t mUtf16Len = 0;
     bool mQuote = false;
     bool mTrailingSpace = false;
     bool mLastCharWasEscape = false;
@@ -179,6 +185,10 @@ inline const std::string& StringBuilder::str() const {
 
 inline const std::string& StringBuilder::error() const {
     return mError;
+}
+
+inline size_t StringBuilder::utf16Len() const {
+    return mUtf16Len;
 }
 
 inline StringBuilder::operator bool() const {

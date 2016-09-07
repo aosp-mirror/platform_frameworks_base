@@ -90,6 +90,40 @@ TEST_F(ResourceParserTest, ParseFormattedString) {
     ASSERT_TRUE(testParse(input));
 }
 
+TEST_F(ResourceParserTest, ParseStyledString) {
+    // Use a surrogate pair unicode point so that we can verify that the span indices
+    // use UTF-16 length and not UTF-18 length.
+    std::string input = "<string name=\"foo\">This is my aunt\u2019s <b>string</b></string>";
+    ASSERT_TRUE(testParse(input));
+
+    StyledString* str = test::getValue<StyledString>(&mTable, "string/foo");
+    ASSERT_NE(nullptr, str);
+
+    const std::string expectedStr = "This is my aunt\u2019s string";
+    EXPECT_EQ(expectedStr, *str->value->str);
+    EXPECT_EQ(1u, str->value->spans.size());
+
+    EXPECT_EQ(std::string("b"), *str->value->spans[0].name);
+    EXPECT_EQ(17u, str->value->spans[0].firstChar);
+    EXPECT_EQ(23u, str->value->spans[0].lastChar);
+}
+
+TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
+    std::string input = "<string name=\"foo\">  This is what  I think  </string>";
+    ASSERT_TRUE(testParse(input));
+
+    String* str = test::getValue<String>(&mTable, "string/foo");
+    ASSERT_NE(nullptr, str);
+    EXPECT_EQ(std::string("This is what I think"), *str->value);
+
+    input = "<string name=\"foo2\">\"  This is what  I think  \"</string>";
+    ASSERT_TRUE(testParse(input));
+
+    str = test::getValue<String>(&mTable, "string/foo2");
+    ASSERT_NE(nullptr, str);
+    EXPECT_EQ(std::string("  This is what  I think  "), *str->value);
+}
+
 TEST_F(ResourceParserTest, IgnoreXliffTags) {
     std::string input = "<string name=\"foo\" \n"
                         "        xmlns:xliff=\"urn:oasis:names:tc:xliff:document:1.2\">\n"
