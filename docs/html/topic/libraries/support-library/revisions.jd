@@ -174,6 +174,14 @@ APK size, we recommend that you just list the specific modules your app needs.
     behavior similar to {@link android.support.v4.view.ViewPager}.
   </li>
 
+  <li>The Custom Tabs library now allows clients to request the standard
+  browser UI, rather than custom tabs UI, by calling <a href=
+  "/reference/android/support/customtabs/CustomTabsIntent.html#setAlwaysUseBrowserUI(android.content.Intent)">
+    <code>CustomTabsIntent.setAlwaysUseBrowserUI()</code></a>. This behavior is
+    useful in cases where the browser defaults to custom tabs UI but the user
+    has expressed a preference for the standard browser UI.
+  </li>
+
 </ul>
 
 <h3 id="24-2-0-behavior">Behavior changes</h3>
