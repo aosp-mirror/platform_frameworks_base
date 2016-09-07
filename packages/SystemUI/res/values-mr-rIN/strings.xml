@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"डिव्हाइसचे परीक्षण केले जाऊ शकते"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"डिव्हाइस परीक्षण"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"प्रोफाईल परीक्षण"</string>
     <string name="monitoring_title" msgid="169206259253048106">"नेटवर्क परीक्षण"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"आपण <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"आपले कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले आहे. ते <xliff:g id="APPLICATION">%2$s</xliff:g> शी कनेक्ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो.\n\nअधिक माहितीसाठी, आपल्‍या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"आपले कार्य प्रोफाईल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले आहे. ते <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nआपण <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शी देखील कनेक्‍ट केले आहे, जे आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"आपले डिव्हाइस <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले आहे.\n\nआपला प्रशासक आपल्या डिव्हाइसशी संबद्ध सेटिंग्ज, कॉर्पोरेट प्रवेश, अ‍ॅप्स, डेटा आणि आपल्या डिव्हाइसच्या स्थान माहितीचे परीक्षण करू शकतो आणि व्‍यवस्थापित करू शकतो.\n\nआपण <xliff:g id="APPLICATION">%2$s</xliff:g> शी कनेक्ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>

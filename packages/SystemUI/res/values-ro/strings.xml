@@ -408,6 +408,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Dispozitivul poate fi monitorizat"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilul poate fi monitorizat"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Rețeaua poate fi monitorizată"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Este posibil ca rețeaua să fie monitorizată"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Monitorizarea dispozitivului"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Monitorizarea profilului"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Monitorizarea rețelei"</string>
@@ -420,6 +421,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Sunteți conectat(ă) la <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sunteți conectat(ă) la <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua personală, inclusiv e-mailurile, aplicațiile și site-urile."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"V-ați conectat la aplicația <xliff:g id="APPLICATION">%1$s</xliff:g>, care vă poate monitoriza activitatea personală în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Este conectat la <xliff:g id="APPLICATION">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Profilul de serviciu este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Este conectat la <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua de serviciu, inclusiv e-mailurile, aplicațiile și site-urile.\n\nDe asemenea, sunteți conectat(ă) la <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, care vă poate monitoriza activitatea în rețeaua personală."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Dispozitivul este gestionat de <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nAdministratorul poate monitoriza și gestiona setările, accesul la rețeaua companiei, aplicațiile, datele asociate cu dispozitivul și informațiile privind locația dispozitivului.\n\nSunteți conectat(ă) la <xliff:g id="APPLICATION">%2$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile.\n\nPentru mai multe informații, contactați administratorul."</string>

@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ممکن است دستگاه کنترل شود"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"شاید نمایه کنترل شود"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ممکن است شبکه کنترل شود"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ممکن است شبکه کنترل شود"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"کنترل دستگاه"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"کنترل نمایه"</string>
     <string name="monitoring_title" msgid="169206259253048106">"کنترل شبکه"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شما از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"نمایه کاری‌تان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این به <xliff:g id="APPLICATION">%2$s</xliff:g> وصل است که فعالیت شبکه کاری‌تان از جمله رایانامه، برنامه و وب‌سایت‌ها را کنترل می‌کند.\n\nبرای دریافت اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این به <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> متصل است که می‌تواند فعالیت شبکه کاری‌تان از جمله رایانامه، برنامه و وب‌سایت‌ها را کنترل کند.\n\nشما همچنین به <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> متصل هستید که می‌تواند فعالیت شبکه شخصی‌تان را کنترل کند."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"دستگاهتان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرستتان می‌تواند تنظیمات، دسترسی شرکت، برنامه‌ها، داده‌های مرتبط با دستگاهتان و اطلاعات مکان دستگاهتان را کنترل و مدیریت کند.\n\nشما به <xliff:g id="APPLICATION">%2$s</xliff:g> وصل هستید که می‌تواند فعالیت شبکه شما را کنترل کند، از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها.\n\nبرای دریافت اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
