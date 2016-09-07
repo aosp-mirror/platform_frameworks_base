@@ -1,5 +1,10 @@
 # Android Asset Packaging Tool 2.0 (AAPT2) release notes
 
+## Version 2.2
+### `aapt2 compile ...`
+- Added support for inline complex XML resources. See
+  https://developer.android.com/guide/topics/resources/complex-xml-resources.html
+
 ## Version 2.1
 ### `aapt2 link ...`
 - Configuration Split APK support: supports splitting resources that match a set of
