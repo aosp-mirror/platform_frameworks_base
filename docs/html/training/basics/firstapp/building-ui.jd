@@ -71,17 +71,17 @@ android.view.View} objects.</p>
 <h2 id="LinearLayout">Create a Linear Layout</h2>
 
 <ol>
-  <li>From the <code>res/layout/</code> directory, open the
-    <code>activity_main.xml</code> file.
+  <li>In Android Studio's <b>Project</b> window, open <b>app > res >
+    layout > activity_main.xml</b>.
     <p>This XML file defines the layout of your activity. It contains the
       default "Hello World" text view.</p>
   </li>
   <li>When you open a layout file, you’re first shown the design editor in the
     <a href="/studio/write/layout-editor.html">Layout Editor</a>. For this lesson,
-    you work directly with the XML, so click the <b>Text</b> tab to switch to
-    the text editor.
+    you work directly with the XML, so click the <b>Text</b> tab at the bottom
+    of the window to switch to the text editor.
   </li>
-  <li>Replace the contents of the file with the following XML:
+  <li>Delete everything and insert the following XML:
     <pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -138,6 +138,9 @@ href="{@docRoot}guide/topics/ui/declaring-layout.html">Layout</a> guide.</p>
 &lt;/LinearLayout&gt;
 </pre>
 
+<p>Don't worry about the error that appears for
+<code>&#64;string/edit_message</code>; you'll fix that soon.</p>
+
 <p>Here is a description of the attributes in the
   {@link android.widget.EditText &lt;EditText>} you added:</p>
 
@@ -157,7 +160,7 @@ XML. It is followed by the resource type ({@code id} in this case), a slash, the
   <p>A resource object is a unique integer name that's associated with an app resource,
 such as a bitmap, layout file, or string.</p>
   <p>Every resource has a
-corresponding resource object defined in your project's {@code gen/R.java} file. You can use the
+corresponding resource object defined in your project's {@code R.java} file. You can use the
 object names in the {@code R} class to refer to your resources, such as when you need to specify a
 string value for the <a
 href="{@docRoot}reference/android/widget/TextView.html#attr_android:hint">{@code android:hint}</a>
@@ -174,7 +177,7 @@ href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resou
 <p>The plus sign (<code>+</code>) before the resource type is needed only when you're defining a
 resource ID for the first time. When you compile the app,
 the SDK tools use the ID name to create a new resource ID in
-your project's {@code gen/R.java} file that refers to the {@link
+your project's {@code R.java} file that refers to the {@link
 android.widget.EditText} element. With the resource ID declared once this way,
 other references to the ID do not
 need the plus sign. Using the plus sign is necessary only when specifying a new resource ID and not
@@ -211,10 +214,10 @@ the same name does not cause collisions.</p>
 <h2 id="Strings">Add String Resources</h2>
 
 <p>By default, your Android project includes a string resource file at
-<code>res/values/strings.xml</code>. Here, you'll add two new strings.</p>
+<b>res > values > strings.xml</b>. Here, you'll add two new strings.</p>
 
 <ol>
-<li>From the <code>res/values/</code> directory, open <code>strings.xml</code>.</li>
+<li>From the <b>Project</b> window, open <b>res > values > strings.xml</b>.</li>
 <li>Add two strings so that your file looks like this:
 <pre>&lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
@@ -340,15 +343,12 @@ android.widget.LinearLayout}.</p>
 
 <h2>Run Your App</h2>
 
-<p>This layout is applied by the default {@link android.app.Activity} class
-that the SDK tools generated when you created the project.</p>
-
-<p>To run the app and see the results,
-  click <strong>Run 'app'</strong>
+<p>To see how the app now looks on your device or emulator,
+  click <strong>Run</strong>
     <img src="{@docRoot}images/tools/as-run.png"
     style="vertical-align:baseline;margin:0; max-height:1em" /> in the
     toolbar.</p>
 
-<p>Continue to the <a href="starting-activity.html">next
-lesson</a> to learn how to respond to button presses, read content
-from the text field, start another activity, and more.</p>
+<p>To add app behaviors such as responding to a button and starting
+another activity, continue to the <a href="starting-activity.html">next
+lesson</a>.</p>

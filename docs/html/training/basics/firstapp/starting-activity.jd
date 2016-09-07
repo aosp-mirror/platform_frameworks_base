@@ -38,7 +38,7 @@ starts a new activity when the user clicks the Send button.</p>
 <h2 id="RespondToButton">Respond to the Send Button</h2>
 
 <ol>
-  <li>In the file <code>res/layout/activity_main.xml</code>, add the
+  <li>In the file <b>res > layout > activity_main.xml</b>, add the
     <a href="{@docRoot}reference/android/view/View.html#attr_android:onClick">{@code android:onClick}</a>
     attribute to the {@link android.widget.Button &lt;Button&gt;} element as
     shown below:
@@ -52,7 +52,7 @@ starts a new activity when the user clicks the Send button.</p>
       method in your activity whenever a user clicks on the button.</p>
   </li>
 
-  <li>In the file <code>java/com.example.myfirstapp/MainActivity.java</code>,
+  <li>In the file <b>java > com.example.myfirstapp > MainActivity.java</b>,
     add the <code>sendMessage()</code> method stub as shown below:
 
     <pre>public class MainActivity extends AppCompatActivity {
@@ -85,7 +85,9 @@ starts a new activity when the user clicks the Send button.</p>
 <p>Next, you’ll fill in this method to read the contents of the text field and deliver that text to
 another activity.</p>
 
+
 <h2 id="BuildIntent">Build an Intent</h2>
+
 <p>An {@link android.content.Intent} is an object that provides runtime binding
   between separate components (such as two activities). The
   {@link android.content.Intent} represents an app’s "intent to do something."
@@ -113,13 +115,22 @@ another activity.</p>
     }
 }</pre>
 
-<p class="note"><strong>Note: </strong>Android Studio will display
-  <code>Cannot resolve symbol</code> errors because the code references classes
-  like {@link android.content.Intent} and {@link android.widget.EditText}
-  that have not been imported. To import these classes, you can either 1)
-  use Android Studio's "import class" functionality by pressing Alt + Enter
-  (Option + Return on Mac) or 2) manually add import statements at the top of
-  the file.</p>
+<p>Android Studio will display <b>Cannot
+resolve symbol</b> errors because this code references classes that are not
+imported. You can solve some of these with Android Studio's "import class"
+functionality by pressing Alt + Enter (or Option + Return on Mac).
+Your imports should end up as the following:</p>
+<pre>
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+</pre>
+
+<p>An error remains for <code>DisplayMessageActivity</code>, but that's okay;
+you'll fix that in the next section.
+
 
 <p>There’s a lot going on in <code>sendMessage()</code>, so let’s explain
   what's going on.</p>
@@ -150,6 +161,7 @@ another activity.</p>
   method starts an instance of the <code>DisplayMessageActivity</code> specified
   by the {@link android.content.Intent}. Now you need to create the class.</p>
 
+
 <h2 id="CreateActivity">Create the Second Activity</h2>
 
 <ol>
@@ -169,7 +181,8 @@ another activity.</p>
   <li>Creates the corresponding layout file <code>activity_display_message.xml</code>
     </li>
   <li>Adds the required
-    <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/activity-element.html"
+    ><code>&lt;activity&gt;</code></a>
     element in <code>AndroidManifest.xml</code>.
 </ul>
 
@@ -199,7 +212,16 @@ protected void onCreate(Bundle savedInstanceState) {
    layout.addView(textView);
 }</pre>
   </li>
-  <li>Press Alt + Enter (option + return on Mac) to import missing classes.</li>
+  <li>Press Alt + Enter (or Option + Return on Mac) to import missing classes.
+  Your imports should end up as the following:
+<pre>
+import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.TextView;
+</pre>
+</li>
 </ol>
 
 <p>There’s a lot going on here, so let’s explain:</p>
