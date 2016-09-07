@@ -4535,15 +4535,6 @@ final class ActivityStack {
             return true;
         }
 
-        // TODO: We could probably make the condition below just check that the activity state is
-        // stopped, but also checking the sleep state for now to reduce change impact late in
-        // development cycle.
-        if (mService.isSleepingOrShuttingDownLocked() && r.state == ActivityState.STOPPED) {
-            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                    "Skipping config check (stopped while sleeping): " + r);
-            return true;
-        }
-
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                 "Ensuring correct configuration: " + r);
 

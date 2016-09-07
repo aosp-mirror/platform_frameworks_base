@@ -3730,6 +3730,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void activityRelaunchedLocked(IBinder token) {
         mWindowManager.notifyAppRelaunchingFinished(token);
+        if (mService.isSleepingOrShuttingDownLocked()) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r != null) {
+                r.setSleeping(true, true);
+            }
+        }
     }
 
     void activityRelaunchingLocked(ActivityRecord r) {

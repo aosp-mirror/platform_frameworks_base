@@ -1315,8 +1315,12 @@ final class ActivityRecord {
                 state == ActivityState.RESUMED;
     }
 
-    public void setSleeping(boolean _sleeping) {
-        if (sleeping == _sleeping) {
+    void setSleeping(boolean _sleeping) {
+        setSleeping(_sleeping, false);
+    }
+
+    void setSleeping(boolean _sleeping, boolean force) {
+        if (!force && sleeping == _sleeping) {
             return;
         }
         if (app != null && app.thread != null) {
