@@ -2212,6 +2212,21 @@
     <!-- Sprint need a 70 ms delay for 3way call -->
     <integer name="config_cdma_3waycall_flash_delay">0</integer>
 
+    <!-- If there is no preload VM number in the sim card, carriers such as
+         Verizon require to load a default vm number from the configurantion.
+         Define config_default_vm_number for this purpose. And there are two
+         optional formats for this configuration as below:
+         (1)<item>voicemail number</item>
+         (2)<item>voicemail number;gid</item>
+         The logic to pick up the correct voicemail number:
+         (1) If the config_default_vm_number array has no gid special item, the last one will be
+         picked
+         (2) If the config_default_vm_number array has gid special item and  it matches the current
+         sim's gid, it will be picked.
+         (3) If the config_default_vm_number array has gid special item but it doesn't match the
+         current sim's gid, the last one without gid will be picked -->
+    <string-array translatable="false" name="config_default_vm_number" />
+
     <!--SIM does not save, but the voice mail number to be changed. -->
     <bool name="editable_voicemailnumber">false</bool>
 
