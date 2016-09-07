@@ -44,6 +44,7 @@ public class HwParcel {
     }
 
     public native final void writeInterfaceToken(String interfaceName);
+    public native final void writeBool(boolean val);
     public native final void writeInt8(byte val);
     public native final void writeInt16(short val);
     public native final void writeInt32(int val);
@@ -52,6 +53,8 @@ public class HwParcel {
     public native final void writeDouble(double val);
     public native final void writeString(String val);
 
+    public native final void writeBoolArray(int size, boolean[] val);
+    public native final void writeBoolVector(boolean[] val);
     public native final void writeInt8Array(int size, byte[] val);
     public native final void writeInt8Vector(byte[] val);
     public native final void writeInt16Array(int size, short[] val);
@@ -70,6 +73,7 @@ public class HwParcel {
     public native final void writeStrongBinder(IHwBinder binder);
 
     public native final void enforceInterface(String interfaceName);
+    public native final boolean readBool();
     public native final byte readInt8();
     public native final short readInt16();
     public native final int readInt32();
@@ -78,6 +82,8 @@ public class HwParcel {
     public native final double readDouble();
     public native final String readString();
 
+    public native final boolean[] readBoolArray(int size);
+    public native final boolean[] readBoolVector();
     public native final byte[] readInt8Array(int size);
     public native final byte[] readInt8Vector();
     public native final short[] readInt16Array(int size);
