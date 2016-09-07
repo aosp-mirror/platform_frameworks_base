@@ -202,7 +202,7 @@ public class CalculatorInstrumentationTest
     <li><a href="{@docRoot}reference/android/support/test/filters/SdkSuppress.html">{@code @SdkSupress}</a>:
     Suppresses the test from running on a lower Android API level than the given level. For
     example, to suppress tests on all API levels lower than 18 from running, use the annotation
-    {@code @SDKSupress(minSdkVersion=18)}.
+    {@code @SdkSuppress(minSdkVersion=18)}.
     </li>
 
     <li>{@link android.test.suitebuilder.annotation.SmallTest &#64;SmallTest},
