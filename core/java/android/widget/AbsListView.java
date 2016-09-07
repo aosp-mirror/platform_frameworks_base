@@ -7613,15 +7613,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final int position = mTargetPos;
                 final int lastPos = firstPos + childCount - 1;
 
-                int viewTravelCount = 0;
+                // Account for the visible "portion" of the first / last child when we estimate
+                // how many screens we should travel to reach our target
+                final View firstChild = getChildAt(0);
+                final int firstChildHeight = firstChild.getHeight();
+                final View lastChild = getChildAt(childCount - 1);
+                final int lastChildHeight = lastChild.getHeight();
+                final float firstPositionVisiblePart = (firstChildHeight == 0.0f) ? 1.0f
+                        : (float) (firstChildHeight + firstChild.getTop()) / firstChildHeight;
+                final float lastPositionVisiblePart = (lastChildHeight == 0.0f) ? 1.0f
+                        : (float) (lastChildHeight + getHeight() - lastChild.getBottom())
+                                / lastChildHeight;
+
+                float viewTravelCount = 0;
                 if (position < firstPos) {
-                    viewTravelCount = firstPos - position + 1;
+                    viewTravelCount = firstPos - position + (1.0f - firstPositionVisiblePart) + 1;
                 } else if (position > lastPos) {
-                    viewTravelCount = position - lastPos;
+                    viewTravelCount = position - lastPos + (1.0f - lastPositionVisiblePart);
                 }
 
                 // Estimate how many screens we should travel
-                final float screenTravelCount = (float) viewTravelCount / childCount;
+                final float screenTravelCount = viewTravelCount / childCount;
 
                 final float modifier = Math.min(Math.abs(screenTravelCount), 1.f);
                 if (position < firstPos) {
