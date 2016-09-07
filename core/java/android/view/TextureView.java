@@ -719,7 +719,7 @@ public class TextureView extends View {
     /**
      * Set the {@link SurfaceTexture} for this view to use. If a {@link
      * SurfaceTexture} is already being used by this view, it is immediately
-     * released and not be usable any more.  The {@link
+     * released and not usable any more.  The {@link
      * SurfaceTextureListener#onSurfaceTextureDestroyed} callback is <b>not</b>
      * called for the previous {@link SurfaceTexture}.  Similarly, the {@link
      * SurfaceTextureListener#onSurfaceTextureAvailable} callback is <b>not</b>
