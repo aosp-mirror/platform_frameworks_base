@@ -437,27 +437,6 @@ void SetThreadName(const char* thread_name) {
   }
 }
 
-#ifdef ENABLE_SCHED_BOOST
-static void SetForkLoad(bool boost) {
-  // set scheduler knob to boost forked processes
-  pid_t currentPid = getpid();
-  // fits at most "/proc/XXXXXXX/sched_init_task_load\0"
-  char schedPath[35];
-  snprintf(schedPath, sizeof(schedPath), "/proc/%u/sched_init_task_load", currentPid);
-  int schedBoostFile = open(schedPath, O_WRONLY);
-  if (schedBoostFile < 0) {
-    ALOGW("Unable to set zygote scheduler boost");
-    return;
-  }
-  if (boost) {
-    write(schedBoostFile, "100\0", 4);
-  } else {
-    write(schedBoostFile, "0\0", 2);
-  }
-  close(schedBoostFile);
-}
-#endif
-
 // The list of open zygote file descriptors.
 static FileDescriptorTable* gOpenFdTable = NULL;
 
@@ -470,10 +449,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      bool is_system_server, jintArray fdsToClose,
                                      jstring instructionSet, jstring dataDir) {
   SetSigChldHandler();
-
-#ifdef ENABLE_SCHED_BOOST
-  SetForkLoad(true);
-#endif
 
   sigset_t sigchld;
   sigemptyset(&sigchld);
@@ -654,11 +629,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     }
   } else if (pid > 0) {
     // the parent process
-
-#ifdef ENABLE_SCHED_BOOST
-    // unset scheduler knob
-    SetForkLoad(false);
-#endif
 
     // We blocked SIGCHLD prior to a fork, we unblock it here.
     if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
