@@ -29,6 +29,7 @@ import static org.xmlpull.v1.XmlPullParser.TEXT;
 
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -2948,19 +2949,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceShell("forceRemoveActiveAdmin");
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            final ApplicationInfo ai;
-            try {
-                ai = mIPackageManager.getApplicationInfo(adminReceiver.getPackageName(),
-                        0, userHandle);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
-            }
-            if (ai == null) {
-                throw new IllegalStateException("Couldn't find package to remove admin "
-                        + adminReceiver.getPackageName() + " " + userHandle);
-            }
-            if ((ai.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
-                throw new SecurityException("Attempt to remove non-test admin " + adminReceiver
+            if (!isPackageTestOnly(adminReceiver.getPackageName(), userHandle)) {
+                throw new SecurityException("Attempt to remove non-test admin "
                         + adminReceiver + " " + userHandle);
             }
             // If admin is a device or profile owner tidy that up first.
@@ -2976,9 +2966,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             // Remove the admin skipping sending the broadcast.
             removeAdminArtifacts(adminReceiver, userHandle);
+            Slog.i(LOG_TAG, "Admin " + adminReceiver + " removed from user " + userHandle);
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+    }
+
+    private boolean isPackageTestOnly(String packageName, int userHandle) {
+        final ApplicationInfo ai;
+        try {
+            ai = mIPackageManager.getApplicationInfo(packageName,
+                    (PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE), userHandle);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
+        if (ai == null) {
+            throw new IllegalStateException("Couldn't find package to remove admin "
+                    + packageName + " " + userHandle);
+        }
+        return (ai.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
     }
 
     private void enforceShell(String method) {
@@ -4519,7 +4526,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * not installed and therefore not available.
      *
      * @throws SecurityException if the caller is not a profile or device owner.
-     * @throws UnsupportedException if the package does not support being set as always-on.
+     * @throws UnsupportedOperationException if the package does not support being set as always-on.
      */
     @Override
     public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown)
@@ -5733,7 +5740,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " for device owner");
         }
         synchronized (this) {
-            enforceCanSetDeviceOwnerLocked(userId);
+            enforceCanSetDeviceOwnerLocked(admin, userId);
             if (getActiveAdminUncheckedLocked(admin, userId) == null
                     || getUserData(userId).mRemovingAdmins.contains(admin)) {
                 throw new IllegalArgumentException("Not active admin: " + admin);
@@ -5765,6 +5772,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+            Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
             return true;
         }
     }
@@ -5888,6 +5896,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+            Slog.i(LOG_TAG, "Device owner removed: " + deviceOwnerComponent);
         }
     }
 
@@ -5925,7 +5934,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " not installed for userId:" + userHandle);
         }
         synchronized (this) {
-            enforceCanSetProfileOwnerLocked(userHandle);
+            enforceCanSetProfileOwnerLocked(who, userHandle);
 
             if (getActiveAdminUncheckedLocked(who, userHandle) == null
                     || getUserData(userHandle).mRemovingAdmins.contains(who)) {
@@ -5934,6 +5943,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
+            Slog.i(LOG_TAG, "Profile owner set: " + who + " on user " + userHandle);
             return true;
         }
     }
@@ -5958,6 +5968,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
+            Slog.i(LOG_TAG, "Profile owner " + who + " removed from user " + userId);
         }
     }
 
@@ -6240,9 +6251,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The profile owner can only be set before the user setup phase has completed,
      * except for:
      * - SYSTEM_UID
-     * - adb if there are not accounts.
+     * - adb if there are no accounts. (But see {@link #hasIncompatibleAccounts})
      */
-    private void enforceCanSetProfileOwnerLocked(int userHandle) {
+    private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle) {
         UserInfo info = getUserInfo(userHandle);
         if (info == null) {
             // User doesn't exist.
@@ -6262,8 +6273,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         int callingUid = mInjector.binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
-            if (hasUserSetupCompleted(userHandle) &&
-                    AccountManager.get(mContext).getAccountsAsUser(userHandle).length > 0) {
+            if (hasUserSetupCompleted(userHandle)
+                    && hasIncompatibleAccounts(userHandle, owner)) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -6280,14 +6291,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
      * permission.
      */
-    private void enforceCanSetDeviceOwnerLocked(int userId) {
+    private void enforceCanSetDeviceOwnerLocked(@Nullable ComponentName owner, int userId) {
         int callingUid = mInjector.binderGetCallingUid();
         boolean isAdb = callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
         if (!isAdb) {
             enforceCanManageProfileAndDeviceOwners();
         }
 
-        final int code = checkSetDeviceOwnerPreCondition(userId, isAdb);
+        final int code = checkSetDeviceOwnerPreCondition(owner, userId, isAdb);
         switch (code) {
             case CODE_OK:
                 return;
@@ -8556,7 +8567,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * except for adb command if no accounts or additional users are present on the device.
      */
     private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreCondition(
-            int deviceOwnerUserId, boolean isAdb) {
+            @Nullable ComponentName owner, int deviceOwnerUserId, boolean isAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
         }
@@ -8573,7 +8584,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (mUserManager.getUserCount() > 1) {
                         return CODE_NONSYSTEM_USER_EXISTS;
                     }
-                    if (AccountManager.get(mContext).getAccounts().length > 0) {
+                    if (hasIncompatibleAccounts(UserHandle.USER_SYSTEM, owner)) {
                         return CODE_ACCOUNTS_NOT_EMPTY;
                     }
                 } else {
@@ -8599,7 +8610,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isDeviceOwnerProvisioningAllowed(int deviceOwnerUserId) {
-        return CODE_OK == checkSetDeviceOwnerPreCondition(deviceOwnerUserId, /* isAdb */ false);
+        return CODE_OK == checkSetDeviceOwnerPreCondition(
+                /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false);
     }
 
     private boolean hasFeatureManagedUsers() {
@@ -9142,6 +9154,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);
+
+            Slog.i(LOG_TAG, "Device admin " + adminReceiver + " removed from user " + userHandle);
         }
         // The removed admin might have disabled camera, so update user
         // restrictions.
@@ -9231,6 +9245,83 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed requesting backup service state.", e);
             }
+        }
+    }
+
+    /**
+     * Return true if a given user has any accounts that'll prevent installing a device or profile
+     * owner {@code owner}.
+     * - If the user has no accounts, then return false.
+     * - Otherwise, if the owner is unknown (== null), or is not test-only, then return true.
+     * - Otherwise, if there's any account that does not have ..._ALLOWED, or does have
+     *   ..._DISALLOWED, return true.
+     * - Otherwise return false.
+     */
+    private boolean hasIncompatibleAccounts(int userId, @Nullable ComponentName owner) {
+        final long token = mInjector.binderClearCallingIdentity();
+        try {
+            final AccountManager am = AccountManager.get(mContext);
+            final Account accounts[] = am.getAccountsAsUser(userId);
+            if (accounts.length == 0) {
+                return false;
+            }
+            final String[] feature_allow =
+                    { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED };
+            final String[] feature_disallow =
+                    { DevicePolicyManager.ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED };
+
+            // Even if we find incompatible accounts along the way, we still check all accounts
+            // for logging.
+            boolean compatible = true;
+            for (Account account : accounts) {
+                if (hasAccountFeatures(am, account, feature_disallow)) {
+                    Log.e(LOG_TAG, account + " has " + feature_disallow[0]);
+                    compatible = false;
+                }
+                if (!hasAccountFeatures(am, account, feature_allow)) {
+                    Log.e(LOG_TAG, account + " doesn't have " + feature_allow[0]);
+                    compatible = false;
+                }
+            }
+            if (compatible) {
+                Log.w(LOG_TAG, "All accounts are compatible");
+            } else {
+                Log.e(LOG_TAG, "Found incompatible accounts");
+            }
+
+            // Then check if the owner is test-only.
+            String log;
+            if (owner == null) {
+                // Owner is unknown.  Suppose it's not test-only
+                compatible = false;
+                log = "Only test-only device/profile owner can be installed with accounts";
+            } else if (isPackageTestOnly(owner.getPackageName(), userId)) {
+                if (compatible) {
+                    log = "Installing test-only owner " + owner;
+                } else {
+                    log = "Can't install test-only owner " + owner + " with incompatible accounts";
+                }
+            } else {
+                compatible = false;
+                log = "Can't install non test-only owner " + owner + " with accounts";
+            }
+            if (compatible) {
+                Log.w(LOG_TAG, log);
+            } else {
+                Log.e(LOG_TAG, log);
+            }
+            return !compatible;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(token);
+        }
+    }
+
+    private boolean hasAccountFeatures(AccountManager am, Account account, String[] features) {
+        try {
+            return am.hasFeatures(account, features, null, null).getResult();
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "Failed to get account feature", e);
+            return false;
         }
     }
 }

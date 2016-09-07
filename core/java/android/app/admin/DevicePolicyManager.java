@@ -1270,6 +1270,33 @@ public class DevicePolicyManager {
     public static final int PASSWORD_QUALITY_MANAGED = 0x80000;
 
     /**
+     * @hide
+     *
+     * adb shell dpm set-{device,profile}-owner will normally not allow installing an owner to
+     * a user with accounts.  {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED}
+     * and {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED} are the account features
+     * used by authenticator to exempt their accounts from this:
+     *
+     * <ul>
+     *     <li>Non-test-only DO/PO still can't be installed when there are accounts.
+     *     <p>In order to make an apk test-only, add android:testOnly="true" to the
+     *     &lt;application&gt; tag in the manifest.
+     *
+     *     <li>Test-only DO/PO can be installed even when there are accounts, as long as all the
+     *     accounts have the {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED} feature.
+     *     Some authenticators claim to have any features, so to detect it, we also check
+     *     {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED} and disallow installing
+     *     if any of the accounts have it.
+     * </ul>
+     */
+    public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED =
+            "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
+
+    /** @hide See {@link #ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED} */
+    public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED =
+            "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
+
+    /**
      * Called by an application that is administering the device to set the password restrictions it
      * is imposing. After setting this, the user will not be able to enter a new password that is
      * not at least as restrictive as what has been set. Note that the current password will remain
