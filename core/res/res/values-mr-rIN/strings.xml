@@ -1078,7 +1078,7 @@
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> वर स्विच केले"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेट प्रवेश नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरतो. शुल्क लागू शकतील."</string>
-    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> पासून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> पर्यंत स्विच केले"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> वरून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> वर स्विच केले"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2952042958050315394">"मोबाइल डेटा"</item>
     <item msgid="75483255295529161">"वाय-फाय"</item>
