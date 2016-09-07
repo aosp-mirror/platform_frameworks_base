@@ -406,6 +406,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Uređaj se možda nadzire"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil se možda nadzire"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Mreža se možda nadzire"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Mreža se možda nadzire"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Nadzor uređaja"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Nadzor profila"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Nadzor mreže"</string>
@@ -418,6 +419,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"Povezani ste s aplikacijom <xliff:g id="APPLICATION">%1$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"Povezani ste s aplikacijom <xliff:g id="APPLICATION">%1$s</xliff:g> koja može nadzirati vašu osobnu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Povezani ste s aplikacijom <xliff:g id="APPLICATION">%1$s</xliff:g> koja može nadzirati vašu osobnu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije."</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"Vašim poslovnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je s aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g> koja može nadzirati vašu poslovnu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije.\n\nObratite se svojem administratoru za više informacija."</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Vašim poslovnim profilom upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Povezan je s aplikacijom <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> koja može nadzirati vašu poslovnu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije.\n\nPovezani ste i s aplikacijom <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> koja može nadzirati vašu osobnu aktivnost na mreži."</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Vašim uređajem upravlja <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nVaš administrator može nadzirati postavke, poslovni pristup, aplikacije, podatke povezane s uređajem i podatke o lokaciji uređaja te upravljati njima.\n\nPovezani ste s aplikacijom <xliff:g id="APPLICATION">%2$s</xliff:g> koja može nadzirati vašu aktivnost na mreži, uključujući e-poštu, aplikacije i web-lokacije.\n\nObratite se svojem administratoru za više informacija."</string>

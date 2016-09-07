@@ -404,6 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ডিভাইসটি নিরীক্ষণ করা হতে পারে"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"প্রোফাইল পর্যবেক্ষণ করা হতে পারে"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"নেটওয়ার্ক নিরীক্ষণ করা হতে পারে"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"নেটওয়ার্ক নিরীক্ষণ করা হতে পারে"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ডিভাইস নিরীক্ষণ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"প্রোফাইল দেখরেখ করা"</string>
     <string name="monitoring_title" msgid="169206259253048106">"নেটওয়ার্ক নিরীক্ষণ"</string>
@@ -416,6 +417,7 @@
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="6259179342284742878">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> -এ সংযুক্ত হয়েছেন, যা ইমেল, অ্যাপ্লিকেশান এবং ওয়েবসাইটগুলি সমেত আপনার নেটওয়ার্ক কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> -এ সংযুক্ত হয়েছেন, যা ইমেল, অ্যাপ্লিকেশান এবং ওয়েবসাইটগুলি সমেত আপনার ব্যক্তিগত নেটওয়ার্ক কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> এর সাথে সংযুক্ত হয়েছেন, যা ইমেল, অ্যাপ এবং ওয়েবসাইটগুলি সহ আপনার ব্যক্তিগত নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করবে৷"</string>
     <string name="monitoring_description_app_work" msgid="1754325860918060897">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷ এটি <xliff:g id="APPLICATION">%2$s</xliff:g> -এ সংযুক্ত রয়েছে যা আপনার ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার কাজের নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
     <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কাজের প্রোফাইল পরিচালনা করে৷ এটি <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> -এ সংযুক্ত রয়েছে যা আপনার ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার কাজের নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nএছাড়াও আপনি <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন যা আপনার ব্যক্তিগত নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷"</string>
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার ডিভাইস পরিচালনা করে৷\n\nআপনার প্রশাসক আপনার ডিভাইসের সাথে সম্পর্কিত সেটিংস, কর্পোরেট অ্যাক্সেস, অ্যাপ্লিকেশান ডেটা এবং ডিভাইসের অবস্থান সম্পর্কিত তথ্য নিরীক্ষণ ও পরিচালনা করতে পারেন৷\n\nআপনি <xliff:g id="APPLICATION">%2$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন যা ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার নেটওয়ার্কের কার্যকলাপ নিরীক্ষণ করতে পারে৷\n\nআরো তথ্যের জন্য, আপনার প্রশাসকের সাথে যোগাযোগ করুন৷"</string>
