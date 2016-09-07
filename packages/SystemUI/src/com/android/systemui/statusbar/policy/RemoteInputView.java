@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -85,6 +86,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private int mRevealCx;
     private int mRevealCy;
     private int mRevealR;
+
+    private boolean mResetting;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -281,6 +284,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     private void reset() {
+        mResetting = true;
+
         mEditText.getText().clear();
         mEditText.setEnabled(true);
         mSendButton.setVisibility(VISIBLE);
@@ -288,6 +293,19 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeSpinning(mEntry.key);
         updateSendButton();
         onDefocus(false /* animate */);
+
+        mResetting = false;
+    }
+
+    @Override
+    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        if (mResetting && child == mEditText) {
+            // Suppress text events if it happens during resetting. Ideally this would be
+            // suppressed by the text view not being shown, but that doesn't work here because it
+            // needs to stay visible for the animation.
+            return false;
+        }
+        return super.onRequestSendAccessibilityEvent(child, event);
     }
 
     private void updateSendButton() {
