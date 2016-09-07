@@ -692,7 +692,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte SIM kartu."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta chybí nebo je nečitelná. Vložte SIM kartu."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Nepoužitelná karta SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Nepoužitelná SIM karta."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaše SIM karta byla natrvalo zablokována.\n Požádejte svého poskytovatele bezdrátových služeb o další SIM kartu."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Předchozí skladba"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Další skladba"</string>
