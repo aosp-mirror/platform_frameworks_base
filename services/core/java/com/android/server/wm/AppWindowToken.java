@@ -359,6 +359,15 @@ class AppWindowToken extends WindowToken {
     }
 
     @Override
+    boolean isVisible() {
+        if (hidden) {
+            // TODO: Should this be checking hiddenRequested instead of hidden?
+            return false;
+        }
+        return super.isVisible();
+    }
+
+    @Override
     void removeIfPossible() {
         mIsExiting = false;
         removeAllWindows();

@@ -43,7 +43,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.animation.Animation;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
@@ -898,7 +897,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     void beginImeAdjustAnimation() {
         for (int j = mTasks.size() - 1; j >= 0; j--) {
             final Task task = mTasks.get(j);
-            if (task.isVisible()) {
+            if (task.hasContentToDisplay()) {
                 task.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
                 task.setWaitingForDrawnIfResizingChanged();
             }
@@ -1201,10 +1200,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         for (int i = mTasks.size() - 1; i >= 0; i--) {
             final Task task = mTasks.get(i);
-            for (int j = task.mAppTokens.size() - 1; j >= 0; j--) {
-                if (!task.mAppTokens.get(j).hidden) {
-                    return true;
-                }
+            if (task.isVisible()) {
+                return true;
             }
         }
 

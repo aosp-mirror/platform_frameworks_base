@@ -193,6 +193,33 @@ class WindowContainer {
         }
     }
 
+    /**
+     * Returns true if the container or one of its children as some content it can display or wants
+     * to display (e.g. app views or saved surface).
+     *
+     * NOTE: While this method will return true if the there is some content to display, it doesn't
+     * mean the container is visible. Use {@link #isVisible()} to determine if the container is
+     * visible.
+     */
+    boolean hasContentToDisplay() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            if (wc.hasContentToDisplay()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the container or one of its children is considered visible from the
+     * WindowManager perspective which usually means valid surface and some other internal state
+     * are true.
+     *
+     * NOTE: While this method will return true if the surface is visible, it doesn't mean the
+     * client has actually displayed any content. Use {@link #hasContentToDisplay()} to determine if
+     * the container has any content to display.
+     */
     boolean isVisible() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
