@@ -40,7 +40,9 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
+import com.android.systemui.LatencyTracker;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
@@ -187,6 +189,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 public boolean onPreDraw() {
                     mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
                     EventBus.getDefault().post(new RecentsDrawnEvent());
+                    if (LatencyTracker.isEnabled(getApplicationContext())) {
+                        DejankUtils.postAfterTraversal(() -> LatencyTracker.getInstance(
+                                getApplicationContext()).onActionEnd(
+                                LatencyTracker.ACTION_TOGGLE_RECENTS));
+                    }
                     return true;
                 }
             };

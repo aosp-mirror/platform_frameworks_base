@@ -33,6 +33,7 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.InputQueue;
@@ -225,6 +226,10 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getActionMasked() == MotionEvent.ACTION_DOWN
+                && mNotificationPanel.getExpandedHeight() == 0f) {
+            mNotificationPanel.startExpandLatencyTracking();
+        }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
         if (mBrightnessMirror != null && mBrightnessMirror.getVisibility() == VISIBLE) {
             // Disallow new pointers while the brightness mirror is visible. This is so that you
