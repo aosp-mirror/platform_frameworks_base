@@ -239,9 +239,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>If a prior CameraCaptureSession already exists when this method is called, the previous
      * session will no longer be able to accept new capture requests and will be closed. Any
      * in-progress capture requests made on the prior session will be completed before it's closed.
-     * {@link CameraCaptureSession.StateListener#onConfigured} for the new session may be invoked
-     * before {@link CameraCaptureSession.StateListener#onClosed} is invoked for the prior
-     * session. Once the new session is {@link CameraCaptureSession.StateListener#onConfigured
+     * {@link CameraCaptureSession.StateCallback#onConfigured} for the new session may be invoked
+     * before {@link CameraCaptureSession.StateCallback#onClosed} is invoked for the prior
+     * session. Once the new session is {@link CameraCaptureSession.StateCallback#onConfigured
      * configured}, it is able to start capturing its own requests. To minimize the transition time,
      * the {@link CameraCaptureSession#abortCaptures} call can be used to discard the remaining
      * requests for the prior capture session before a new one is created. Note that once the new
@@ -265,7 +265,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * but the camera device won't meet the frame rate guarantees as described in
      * {@link StreamConfigurationMap#getOutputMinFrameDuration}. Or third, if the output set
      * cannot be used at all, session creation will fail entirely, with
-     * {@link CameraCaptureSession.StateListener#onConfigureFailed} being invoked.</p>
+     * {@link CameraCaptureSession.StateCallback#onConfigureFailed} being invoked.</p>
      *
      * <p>For the type column, {@code PRIV} refers to any target whose available sizes are found
      * using {@link StreamConfigurationMap#getOutputSizes(Class)} with no direct application-visible
@@ -981,13 +981,6 @@ public abstract class CameraDevice implements AutoCloseable {
          */
         public abstract void onError(@NonNull CameraDevice camera,
                 @ErrorCode int error); // Must implement
-    }
-
-    /**
-     * Temporary for migrating to Callback naming
-     * @hide
-     */
-    public static abstract class StateListener extends StateCallback {
     }
 
     /**
