@@ -17,8 +17,11 @@
 package android.text;
 
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.text.style.ReplacementSpan;
 import android.text.style.UpdateLayout;
 import android.text.style.WrapTogetherSpan;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -300,7 +303,6 @@ public class DynamicLayout extends Layout
                 .setHyphenationFrequency(mHyphenationFrequency);
         reflowed.generate(b, false, true);
         int n = reflowed.getLineCount();
-
         // If the new layout has a blank line at the end, but it is not
         // the very end of the buffer, then we already have a line that
         // starts there, so disregard the blank line.
@@ -345,9 +347,10 @@ public class DynamicLayout extends Layout
         Directions[] objects = new Directions[1];
 
         for (int i = 0; i < n; i++) {
-            ints[START] = reflowed.getLineStart(i) |
-                          (reflowed.getParagraphDirection(i) << DIR_SHIFT) |
-                          (reflowed.getLineContainsTab(i) ? TAB_MASK : 0);
+            final int start = reflowed.getLineStart(i);
+            ints[START] = start;
+            ints[DIR] |= reflowed.getParagraphDirection(i) << DIR_SHIFT;
+            ints[TAB] |= reflowed.getLineContainsTab(i) ? TAB_MASK : 0;
 
             int top = reflowed.getLineTop(i) + startv;
             if (i > 0)
@@ -361,7 +364,11 @@ public class DynamicLayout extends Layout
             ints[DESCENT] = desc;
             objects[0] = reflowed.getLineDirections(i);
 
-            ints[HYPHEN] = reflowed.getHyphen(i);
+            final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
+            ints[HYPHEN] = reflowed.getHyphen(i) & HYPHEN_MASK;
+            ints[MAY_PROTRUDE_FROM_TOP_OR_BOTTOM] |=
+                    contentMayProtrudeFromLineTopOrBottom(text, start, end) ?
+                            MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK : 0;
 
             if (mEllipsize) {
                 ints[ELLIPSIS_START] = reflowed.getEllipsisStart(i);
@@ -379,6 +386,21 @@ public class DynamicLayout extends Layout
             sStaticLayout = reflowed;
             sBuilder = b;
         }
+    }
+
+    private boolean contentMayProtrudeFromLineTopOrBottom(CharSequence text, int start, int end) {
+        if (text instanceof Spanned) {
+            final Spanned spanned = (Spanned) text;
+            if (spanned.getSpans(start, end, ReplacementSpan.class).length > 0) {
+                return true;
+            }
+        }
+        // Spans other than ReplacementSpan can be ignored because line top and bottom are
+        // disjunction of all tops and bottoms, although it's not optimal.
+        final Paint paint = getPaint();
+        paint.getTextBounds(text, start, end, mTempRect);
+        final Paint.FontMetricsInt fm = paint.getFontMetricsInt();
+        return mTempRect.top < fm.top || mTempRect.bottom > fm.bottom;
     }
 
     /**
@@ -409,17 +431,41 @@ public class DynamicLayout extends Layout
     }
 
     /**
+     * @hide
+     */
+    public ArraySet<Integer> getBlocksAlwaysNeedToBeRedrawn() {
+        return mBlocksAlwaysNeedToBeRedrawn;
+    }
+
+    private void updateAlwaysNeedsToBeRedrawn(int blockIndex) {
+        int startLine = blockIndex == 0 ? 0 : (mBlockEndLines[blockIndex - 1] + 1);
+        int endLine = mBlockEndLines[blockIndex];
+        for (int i = startLine; i <= endLine; i++) {
+            if (getContentMayProtrudeFromTopOrBottom(i)) {
+                if (mBlocksAlwaysNeedToBeRedrawn == null) {
+                    mBlocksAlwaysNeedToBeRedrawn = new ArraySet<>();
+                }
+                mBlocksAlwaysNeedToBeRedrawn.add(blockIndex);
+                return;
+            }
+        }
+        if (mBlocksAlwaysNeedToBeRedrawn != null) {
+            mBlocksAlwaysNeedToBeRedrawn.remove(blockIndex);
+        }
+    }
+
+    /**
      * Create a new block, ending at the specified character offset.
      * A block will actually be created only if has at least one line, i.e. this offset is
      * not on the end line of the previous block.
      */
     private void addBlockAtOffset(int offset) {
         final int line = getLineForOffset(offset);
-
         if (mBlockEndLines == null) {
             // Initial creation of the array, no test on previous block ending line
             mBlockEndLines = ArrayUtils.newUnpaddedIntArray(1);
             mBlockEndLines[mNumberOfBlocks] = line;
+            updateAlwaysNeedsToBeRedrawn(mNumberOfBlocks);
             mNumberOfBlocks++;
             return;
         }
@@ -427,6 +473,7 @@ public class DynamicLayout extends Layout
         final int previousBlockEndLine = mBlockEndLines[mNumberOfBlocks - 1];
         if (line > previousBlockEndLine) {
             mBlockEndLines = GrowingArrayUtils.append(mBlockEndLines, mNumberOfBlocks, line);
+            updateAlwaysNeedsToBeRedrawn(mNumberOfBlocks);
             mNumberOfBlocks++;
         }
     }
@@ -506,11 +553,23 @@ public class DynamicLayout extends Layout
                     blockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
             mBlockEndLines = blockEndLines;
             mBlockIndices = blockIndices;
-        } else {
+        } else if (numAddedBlocks + numRemovedBlocks != 0) {
             System.arraycopy(mBlockEndLines, lastBlock + 1,
                     mBlockEndLines, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
             System.arraycopy(mBlockIndices, lastBlock + 1,
                     mBlockIndices, firstBlock + numAddedBlocks, mNumberOfBlocks - lastBlock - 1);
+        }
+
+        if (numAddedBlocks + numRemovedBlocks != 0 && mBlocksAlwaysNeedToBeRedrawn != null) {
+            final ArraySet<Integer> set = new ArraySet<>();
+            for (int i = 0; i < mBlocksAlwaysNeedToBeRedrawn.size(); i++) {
+                Integer block = mBlocksAlwaysNeedToBeRedrawn.valueAt(i);
+                if (block > firstBlock) {
+                    block += numAddedBlocks - numRemovedBlocks;
+                }
+                set.add(block);
+            }
+            mBlocksAlwaysNeedToBeRedrawn = set;
         }
 
         mNumberOfBlocks = newNumberOfBlocks;
@@ -531,18 +590,21 @@ public class DynamicLayout extends Layout
         int blockIndex = firstBlock;
         if (createBlockBefore) {
             mBlockEndLines[blockIndex] = startLine - 1;
+            updateAlwaysNeedsToBeRedrawn(blockIndex);
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
             blockIndex++;
         }
 
         if (createBlock) {
             mBlockEndLines[blockIndex] = startLine + newLineCount - 1;
+            updateAlwaysNeedsToBeRedrawn(blockIndex);
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
             blockIndex++;
         }
 
         if (createBlockAfter) {
             mBlockEndLines[blockIndex] = lastBlockEndLine + deltaLines;
+            updateAlwaysNeedsToBeRedrawn(blockIndex);
             mBlockIndices[blockIndex] = INVALID_BLOCK_INDEX;
         }
     }
@@ -572,6 +634,21 @@ public class DynamicLayout extends Layout
      */
     public int[] getBlockIndices() {
         return mBlockIndices;
+    }
+
+    /**
+     * @hide
+     */
+    public int getBlockIndex(int index) {
+        return mBlockIndices[index];
+    }
+
+    /**
+     * @hide
+     * @param index
+     */
+    public void setBlockIndex(int index, int blockIndex) {
+        mBlockIndices[index] = blockIndex;
     }
 
     /**
@@ -645,7 +722,12 @@ public class DynamicLayout extends Layout
      */
     @Override
     public int getHyphen(int line) {
-        return mInts.getValue(line, HYPHEN);
+        return mInts.getValue(line, HYPHEN) & HYPHEN_MASK;
+    }
+
+    private boolean getContentMayProtrudeFromTopOrBottom(int line) {
+        return (mInts.getValue(line, MAY_PROTRUDE_FROM_TOP_OR_BOTTOM)
+                & MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK) != 0;
     }
 
     @Override
@@ -741,6 +823,8 @@ public class DynamicLayout extends Layout
     // The indices of this block's display list in TextView's internal display list array or
     // INVALID_BLOCK_INDEX if this block has been invalidated during an edition
     private int[] mBlockIndices;
+    // Set of blocks that always need to be redrawn.
+    private ArraySet<Integer> mBlocksAlwaysNeedToBeRedrawn;
     // Number of items actually currently being used in the above 2 arrays
     private int mNumberOfBlocks;
     // The first index of the blocks whose locations are changed
@@ -748,17 +832,22 @@ public class DynamicLayout extends Layout
 
     private int mTopPadding, mBottomPadding;
 
+    private Rect mTempRect = new Rect();
+
     private static StaticLayout sStaticLayout = null;
     private static StaticLayout.Builder sBuilder = null;
 
     private static final Object[] sLock = new Object[0];
 
+    // START, DIR, and TAB share the same entry.
     private static final int START = 0;
     private static final int DIR = START;
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
+    // HYPHEN and MAY_PROTRUDE_FROM_TOP_OR_BOTTOM share the same entry.
     private static final int HYPHEN = 3;
+    private static final int MAY_PROTRUDE_FROM_TOP_OR_BOTTOM = HYPHEN;
     private static final int COLUMNS_NORMAL = 4;
 
     private static final int ELLIPSIS_START = 4;
@@ -768,6 +857,8 @@ public class DynamicLayout extends Layout
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
+    private static final int HYPHEN_MASK = 0xFF;
+    private static final int MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK = 0x100;
 
     private static final int ELLIPSIS_UNDEFINED = 0x80000000;
 }

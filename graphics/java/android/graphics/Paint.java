@@ -2397,13 +2397,12 @@ public class Paint {
      * Note: just like Canvas.drawText, this will respect the Align setting in
      * the paint.
      *
-     * @param text     The text to retrieve the path from
-     * @param index    The index of the first character in text
-     * @param count    The number of characterss starting with index
-     * @param x        The x coordinate of the text's origin
-     * @param y        The y coordinate of the text's origin
-     * @param path     The path to receive the data describing the text. Must
-     *                 be allocated by the caller.
+     * @param text the text to retrieve the path from
+     * @param index the index of the first character in text
+     * @param count the number of characters starting with index
+     * @param x the x coordinate of the text's origin
+     * @param y the y coordinate of the text's origin
+     * @param path the path to receive the data describing the text. Must be allocated by the caller
      */
     public void getTextPath(char[] text, int index, int count,
                             float x, float y, Path path) {
@@ -2419,13 +2418,12 @@ public class Paint {
      * Note: just like Canvas.drawText, this will respect the Align setting
      * in the paint.
      *
-     * @param text  The text to retrieve the path from
-     * @param start The first character in the text
-     * @param end   1 past the last charcter in the text
-     * @param x     The x coordinate of the text's origin
-     * @param y     The y coordinate of the text's origin
-     * @param path  The path to receive the data describing the text. Must
-     *              be allocated by the caller.
+     * @param text the text to retrieve the path from
+     * @param start the first character in the text
+     * @param end 1 past the last character in the text
+     * @param x the x coordinate of the text's origin
+     * @param y the y coordinate of the text's origin
+     * @param path the path to receive the data describing the text. Must be allocated by the caller
      */
     public void getTextPath(String text, int start, int end,
                             float x, float y, Path path) {
@@ -2440,11 +2438,10 @@ public class Paint {
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
-     * @param text  String to measure and return its bounds
-     * @param start Index of the first char in the string to measure
-     * @param end   1 past the last char in the string measure
-     * @param bounds Returns the unioned bounds of all the text. Must be
-     *               allocated by the caller.
+     * @param text string to measure and return its bounds
+     * @param start index of the first char in the string to measure
+     * @param end 1 past the last char in the string to measure
+     * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
      */
     public void getTextBounds(String text, int start, int end, Rect bounds) {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
@@ -2460,11 +2457,33 @@ public class Paint {
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
-     * @param text  Array of chars to measure and return their unioned bounds
-     * @param index Index of the first char in the array to measure
-     * @param count The number of chars, beginning at index, to measure
-     * @param bounds Returns the unioned bounds of all the text. Must be
-     *               allocated by the caller.
+     * @param text text to measure and return its bounds
+     * @param start index of the first char in the text to measure
+     * @param end 1 past the last char in the text to measure
+     * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
+     * @hide
+     */
+    public void getTextBounds(CharSequence text, int start, int end, Rect bounds) {
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (bounds == null) {
+            throw new NullPointerException("need bounds Rect");
+        }
+        char[] buf = TemporaryBuffer.obtain(end - start);
+        TextUtils.getChars(text, start, end, buf, 0);
+        getTextBounds(buf, 0, end - start, bounds);
+        TemporaryBuffer.recycle(buf);
+    }
+
+    /**
+     * Return in bounds (allocated by the caller) the smallest rectangle that
+     * encloses all of the characters, with an implied origin at (0,0).
+     *
+     * @param text  array of chars to measure and return their unioned bounds
+     * @param index index of the first char in the array to measure
+     * @param count the number of chars, beginning at index, to measure
+     * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
      */
     public void getTextBounds(char[] text, int index, int count, Rect bounds) {
         if ((index | count) < 0 || index + count > text.length) {
