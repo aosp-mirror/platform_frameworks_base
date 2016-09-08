@@ -715,6 +715,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mUidRulesFirstLock) {
                 updatePowerSaveWhitelistUL();
                 updateRulesForRestrictPowerUL();
+                updateRulesForAppIdleUL();
             }
         }
     };
@@ -2731,6 +2732,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void updateRulesForGlobalChangeAL(boolean restrictedNetworksChanged) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForGlobalChangeAL");
         try {
+            updateRulesForAppIdleUL();
             updateRulesForRestrictPowerUL();
             updateRulesForRestrictBackgroundUL();
 
@@ -2744,11 +2746,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    // TODO: rename / document to make it clear these are global (not app-specific) rules
     private void updateRulesForRestrictPowerUL() {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForRestrictPowerUL");
         try {
             updateRulesForDeviceIdleUL();
-            updateRulesForAppIdleUL();
             updateRulesForPowerSaveUL();
             updateRulesForAllAppsUL(TYPE_RESTRICT_POWER);
         } finally {
