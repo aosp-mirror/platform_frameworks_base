@@ -21,6 +21,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
@@ -9192,7 +9193,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setForcedDisplayDensity(int displayId, int density) {
+    public void setForcedDisplayDensityForUser(int displayId, int density, int userId) {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -9202,16 +9203,20 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
+
+        final int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "setForcedDisplayDensityForUser",
+                null);
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = getDisplayContentLocked(displayId);
-                if (displayContent != null) {
+                if (displayContent != null && mCurrentUserId == targetUserId) {
                     setForcedDisplayDensityLocked(displayContent, density);
-                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                            Settings.Secure.DISPLAY_DENSITY_FORCED,
-                            Integer.toString(density), mCurrentUserId);
                 }
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.DISPLAY_DENSITY_FORCED,
+                        Integer.toString(density), targetUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -9219,7 +9224,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void clearForcedDisplayDensity(int displayId) {
+    public void clearForcedDisplayDensityForUser(int displayId, int userId) {
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -9229,16 +9234,20 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId != Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("Can only set the default display");
         }
+
+        final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "clearForcedDisplayDensityForUser",
+                null);
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = getDisplayContentLocked(displayId);
-                if (displayContent != null) {
+                if (displayContent != null && mCurrentUserId == callingUserId) {
                     setForcedDisplayDensityLocked(displayContent,
                             displayContent.mInitialDisplayDensity);
-                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                            Settings.Secure.DISPLAY_DENSITY_FORCED, "", mCurrentUserId);
                 }
+                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                        Settings.Secure.DISPLAY_DENSITY_FORCED, "", callingUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
