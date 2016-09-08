@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
@@ -207,39 +208,41 @@ public class DisplayDensityUtils {
 
     /**
      * Asynchronously applies display density changes to the specified display.
+     * <p>
+     * The change will be applied to the user specified by the value of
+     * {@link UserHandle#myUserId()} at the time the method is called.
      *
      * @param displayId the identifier of the display to modify
      */
     public static void clearForcedDisplayDensity(final int displayId) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-                    wm.clearForcedDisplayDensity(displayId);
-                } catch (RemoteException exc) {
-                    Log.w(LOG_TAG, "Unable to clear forced display density setting");
-                }
+        final int userId = UserHandle.myUserId();
+        AsyncTask.execute(() -> {
+            try {
+                final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                wm.clearForcedDisplayDensityForUser(displayId, userId);
+            } catch (RemoteException exc) {
+                Log.w(LOG_TAG, "Unable to clear forced display density setting");
             }
         });
     }
 
     /**
      * Asynchronously applies display density changes to the specified display.
+     * <p>
+     * The change will be applied to the user specified by the value of
+     * {@link UserHandle#myUserId()} at the time the method is called.
      *
      * @param displayId the identifier of the display to modify
      * @param density the density to force for the specified display
      */
     public static void setForcedDisplayDensity(final int displayId, final int density) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-                    wm.setForcedDisplayDensity(displayId, density);
-                } catch (RemoteException exc) {
-                    Log.w(LOG_TAG, "Unable to save forced display density setting");
-                }
+        final int userId = UserHandle.myUserId();
+        AsyncTask.execute(() -> {
+            try {
+                final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                wm.setForcedDisplayDensityForUser(displayId, density, userId);
+            } catch (RemoteException exc) {
+                Log.w(LOG_TAG, "Unable to save forced display density setting");
             }
         });
     }
