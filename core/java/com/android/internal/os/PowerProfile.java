@@ -307,7 +307,7 @@ public class PowerProfile {
     private static final String POWER_CPU_CLUSTER_SPEED_PREFIX = "cpu.speeds.cluster";
     private static final String POWER_CPU_CLUSTER_ACTIVE_PREFIX = "cpu.active.cluster";
 
-    @SuppressWarnings("deprecated")
+    @SuppressWarnings("deprecation")
     private void initCpuClusters() {
         // Figure out how many CPU clusters we're dealing with
         final Object obj = sPowerMap.get(POWER_CPU_CLUSTER_CORE_COUNT);
