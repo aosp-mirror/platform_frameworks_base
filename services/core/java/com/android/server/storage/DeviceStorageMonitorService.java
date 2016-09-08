@@ -87,6 +87,11 @@ public class DeviceStorageMonitorService extends SystemService {
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
 
+    // com.android.internal.R.string.low_internal_storage_view_text_no_boot
+    // hard codes 250MB in the message as the storage space required for the
+    // boot image.
+    private static final long BOOT_IMAGE_STORAGE_REQUIREMENT = 250 * 1024 * 1024;
+
     private long mFreeMem;  // on /data
     private long mFreeMemAfterLastCacheClear;  // on /data
     private long mLastReportedFreeMem;
@@ -290,9 +295,10 @@ public class DeviceStorageMonitorService extends SystemService {
                     mLowMemFlag = false;
                 }
             }
-            if (!mLowMemFlag && !mIsBootImageOnDisk) {
+            if (!mLowMemFlag && !mIsBootImageOnDisk && mFreeMem < BOOT_IMAGE_STORAGE_REQUIREMENT) {
                 Slog.i(TAG, "No boot image on disk due to lack of space. Sending notification");
                 sendNotification();
+                mLowMemFlag = true;
             }
             if (mFreeMem < mMemFullThreshold) {
                 if (!mMemFullFlag) {
@@ -383,7 +389,7 @@ public class DeviceStorageMonitorService extends SystemService {
 
         @Override
         public boolean isMemoryLow() {
-            return mLowMemFlag || !mIsBootImageOnDisk;
+            return mLowMemFlag;
         }
 
         @Override
