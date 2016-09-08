@@ -1,6 +1,8 @@
 # For information about this file's format, see
 # https://developers.google.com/internal/publishing/redirects
 redirects:
+- from: /guide/topics/fundamentals/fragments.html
+  to: /guide/components/fragments.html
 - from: /about/versions/index.html
   to: /about/index.html
 - from: /about/versions/api-levels.html
