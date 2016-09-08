@@ -1165,7 +1165,8 @@ static jint nativeSendMessage(JNIEnv *env, jobject instance, jintArray header_,
     if (retVal != 0) {
         ALOGD("Send Message failure - %d", retVal);
         if (msgType == CONTEXT_HUB_LOAD_APP) {
-            closeLoadTxn(false, nullptr);
+            jint ignored;
+            closeLoadTxn(false, &ignored);
         } else if (msgType == CONTEXT_HUB_UNLOAD_APP) {
             closeUnloadTxn(false);
         }
