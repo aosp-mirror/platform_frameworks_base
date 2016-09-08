@@ -19,3 +19,6 @@ LOCAL_JAR_EXCLUDE_FILES := none
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
+
+# For the test package.
+include $(call all-makefiles-under, $(LOCAL_PATH))
