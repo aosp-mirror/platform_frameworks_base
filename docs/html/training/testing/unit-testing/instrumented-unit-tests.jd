@@ -292,23 +292,21 @@ from the command line. Test results provide test logs and include the details
 of any app failures.</p>
 
 <p>
-  Before you can start using Firebase Test Lab, you need to:
+  Before you can start using Firebase Test Lab, you need to do the following
+unless you already have a Google account and a Firebase project with the Blaze
+billing plan enabled:
 </p>
 
 <ol>
-  <li>
-    <a href="https://console.developers.google.com/freetrial">Create a
-    Google Cloud Platform account</a> to use with active billing.
-  </li>
-
-  <li>
-    <a href="https://support.google.com/cloud/answer/6251787">Create a Google
-    Cloud project</a> for your app.
-  </li>
-
-  <li>
-    <a href="https://support.google.com/cloud/answer/6288653">Set up an active
-    billing account</a> and associate it with the project you just created.
+  <li><a href="https://accounts.google.com/">Create a Google account</a>,
+  if you don't have one already.</li>
+  <li>In the <a href="https://console.firebase.google.com/">Firebase
+  console</a>, click <b>Create New Project</b>.</li>
+  <li>In the Firebase console, click <b>Upgrade</b>, and then click <b>Select
+Plan</b> in the <b>Blaze</b> plan column.
+    <p class="note"><b>Note</b>: To learn about billing,
+see <a href="https://firebase.google.com/docs/test-lab/overview#billing">Test
+Lab billing</a>.</p>
   </li>
 </ol>
 
@@ -318,10 +316,10 @@ Configure a test matrix and run a test
 </h4>
 
 <p>
-  Android Studio provides integrated tools that allow you to configure how you
- want to deploy your tests to Firebase Test Lab. After you have created a Google
-  Cloud project with active billing, you can create a test configuration and
-  run your tests:
+Android Studio provides integrated tools that allow you to configure how you
+want to deploy your tests to Firebase Test Lab. After you have created a
+Firebase project with Blaze plan billing, you can create a test configuration
+and run your tests:
 </p>
 
 <ol>
@@ -329,7 +327,8 @@ Configure a test matrix and run a test
   the main menu.
   </li>
 
-  <li>Click <strong>Add New Configuration (+)</strong> and select
+  <li>Click <strong>Add New Configuration</strong> <img
+src="/studio/images/buttons/ic_plus.png" alt="" class="inline-icon"/> and select
   <strong>Android Tests</strong>.
   </li>
 
@@ -340,7 +339,7 @@ Configure a test matrix and run a test
       </li>
 
       <li>From the <em>Target</em> drop-down menu under <em>Deployment Target
-      Options</em>, select <strong>Cloud Test Lab Device Matrix</strong>.
+      Options</em>, select <strong>Firebase Test Lab Device Matrix</strong>.
       </li>
 
       <li>If you are not logged in, click <strong>Connect to Google Cloud
@@ -348,9 +347,9 @@ Configure a test matrix and run a test
       </li>
 
       <li>Next to <em>Cloud Project</em>, click the <img src=
-      "{@docRoot}images/tools/as-wrench.png" alt="wrench and nut" style=
-      "vertical-align:bottom;margin:0;"> button and select your Google Cloud
-      Platform project from the list.
+      "{@docRoot}images/tools/as-wrench.png" alt="" class="inline-icon"/>
+      button and select your Firebase
+      project from the list.
       </li>
     </ol>
   </li>
@@ -359,7 +358,7 @@ Configure a test matrix and run a test
     <ol type="a">
       <li>Next to the <em>Matrix Configuration</em> drop-down list, click <strong>
         Open Dialog</strong> <img src="{@docRoot}images/tools/as-launchavdm.png"
-        alt="ellipses button" style="vertical-align:bottom;margin:0;">.
+        alt="" class="inline-icon">.
       </li>
 
       <li>Click <strong>Add New Configuration (+)</strong>.
@@ -385,8 +384,7 @@ Configure a test matrix and run a test
   </li>
 
   <li>Run your tests by clicking <strong>Run</strong> <img src=
-  "{@docRoot}images/tools/as-run.png" alt="" style=
-  "vertical-align:bottom;margin:0;">.
+  "{@docRoot}images/tools/as-run.png" alt="" class="inline-icon"/>.
   </li>
 </ol>
 
@@ -404,7 +402,7 @@ Configure a test matrix and run a test
   When Firebase Test Lab completes running your tests, the <em>Run</em> window
   will open to show the results, as shown in figure 2. You may need to click
   <strong>Show Passed</strong> <img src="{@docRoot}images/tools/as-ok.png" alt=
-  "" style="vertical-align:bottom;margin:0;"> to see all your executed tests.
+  "" class="inline-icon"/> to see all your executed tests.
 </p>
 
 <img src="{@docRoot}images/training/ctl-test-results.png" alt="">
@@ -416,15 +414,7 @@ Configure a test matrix and run a test
 
 <p>
   You can also analyze your tests on the web by following the link displayed at
-  the beginning of the test execution log in the <em>Run</em> window, as shown
-  in figure 3.
-</p>
-
-<img src="{@docRoot}images/training/ctl-exec-log.png" alt="">
-
-<p class="img-caption">
-  <strong>Figure 3.</strong> Click the link to view detailed test results on
-  the web.
+  the beginning of the test execution log in the <em>Run</em> window.
 </p>
 
 <p>
