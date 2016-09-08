@@ -74,6 +74,13 @@ private:
         GLuint  name;
     };
 
+    struct Font {
+        FileMap* map;
+        Texture texture;
+        int char_width;
+        int char_height;
+    };
+
     struct Animation {
         struct Frame {
             String8 name;
@@ -90,8 +97,12 @@ private:
         struct Part {
             int count;  // The number of times this part should repeat, 0 for infinite
             int pause;  // The number of frames to pause for at the end of this part
-            int clockPosY;  // The y position of the clock, in pixels, from the bottom of the
-                            // display (the clock is centred horizontally). -1 to disable the clock
+            int clockPosX;  // The x position of the clock, in pixels. Positive values offset from
+                            // the left of the screen, negative values offset from the right.
+            int clockPosY;  // The y position of the clock, in pixels. Positive values offset from
+                            // the bottom of the screen, negative values offset from the top.
+                            // If either of the above are INT_MIN the clock is disabled, if INT_MAX
+                            // the clock is centred on that axis.
             String8 path;
             String8 trimData;
             SortedVector<Frame> frames;
@@ -108,13 +119,17 @@ private:
         String8 audioConf;
         String8 fileName;
         ZipFileRO* zip;
+        Font clockFont;
     };
 
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
-    status_t initTexture(const Animation::Frame& frame);
+    status_t initTexture(FileMap* map, int* width, int* height);
+    status_t initFont(Font* font, const char* fallback);
     bool android();
     bool movie();
-    void drawTime(const Texture& clockTex, const int yPos);
+    void drawText(const char* str, const Font& font, bool bold, int* x, int* y);
+    void drawClock(const Font& font, const int xPos, const int yPos);
+    bool validClock(const Animation::Part& part);
     Animation* loadAnimation(const String8&);
     bool playAnimation(const Animation&);
     void releaseAnimation(Animation*) const;
@@ -127,7 +142,6 @@ private:
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
     Texture     mAndroid[2];
-    Texture     mClock;
     int         mWidth;
     int         mHeight;
     bool        mUseNpotTextures = false;
