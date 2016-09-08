@@ -17,6 +17,7 @@
 #pragma once
 
 #include "renderthread/RenderThread.h"
+#include "Rect.h"
 
 #include <SkBitmap.h>
 #include <gui/Surface.h>
@@ -42,7 +43,7 @@ public:
      * Copies the surface's most recently queued buffer into the provided bitmap.
      */
     static CopyResult copySurfaceInto(renderthread::RenderThread& renderThread,
-            Surface& surface, SkBitmap* bitmap);
+            Surface& surface, const Rect& srcRect, SkBitmap* bitmap);
 
     /**
      * Copies the TextureLayer's texture content (thus, the currently rendering buffer) into the

@@ -617,17 +617,19 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
     post(task);
 }
 
-CREATE_BRIDGE3(copySurfaceInto, RenderThread* thread,
-        Surface* surface, SkBitmap* bitmap) {
+CREATE_BRIDGE4(copySurfaceInto, RenderThread* thread,
+        Surface* surface, Rect srcRect, SkBitmap* bitmap) {
     return (void*) Readback::copySurfaceInto(*args->thread,
-            *args->surface, args->bitmap);
+            *args->surface, args->srcRect, args->bitmap);
 }
 
-int RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
+int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top,
+        int right, int bottom,  SkBitmap* bitmap) {
     SETUP_TASK(copySurfaceInto);
     args->bitmap = bitmap;
     args->surface = surface.get();
     args->thread = &RenderThread::getInstance();
+    args->srcRect.set(left, top, right, bottom);
     return static_cast<int>(
             reinterpret_cast<intptr_t>( staticPostAndWait(task) ));
 }

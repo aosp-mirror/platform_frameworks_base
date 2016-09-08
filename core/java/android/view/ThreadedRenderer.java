@@ -883,8 +883,14 @@ public final class ThreadedRenderer {
         nSerializeDisplayListTree(mNativeProxy);
     }
 
-    public static int copySurfaceInto(Surface surface, Bitmap bitmap) {
-        return nCopySurfaceInto(surface, bitmap);
+    public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
+        if (srcRect == null) {
+            // Empty rect means entire surface
+            return nCopySurfaceInto(surface, 0, 0, 0, 0, bitmap);
+        } else {
+            return nCopySurfaceInto(surface, srcRect.left, srcRect.top,
+                    srcRect.right, srcRect.bottom, bitmap);
+        }
     }
 
     @Override
@@ -1036,5 +1042,6 @@ public final class ThreadedRenderer {
     private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
 
-    private static native int nCopySurfaceInto(Surface surface, Bitmap bitmap);
+    private static native int nCopySurfaceInto(Surface surface,
+            int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
 }
