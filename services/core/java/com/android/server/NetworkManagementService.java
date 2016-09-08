@@ -77,6 +77,7 @@ import android.os.ServiceSpecificException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
@@ -1699,6 +1700,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return;
             }
 
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "inetd bandwidth");
             try {
                 mConnector.execute("bandwidth", suffix + chain, uid);
                 if (enable) {
@@ -1708,6 +1710,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 }
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
             }
         }
     }
@@ -1730,6 +1734,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 Log.w(TAG, "setDataSaverMode(): already " + mDataSaverMode);
                 return true;
             }
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "bandwidthEnableDataSaver");
             try {
                 final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
                 if (changed) {
@@ -1741,6 +1746,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             } catch (RemoteException e) {
                 Log.w(TAG, "setDataSaverMode(" + enable + "): netd command failed", e);
                 return false;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
             }
         }
     }

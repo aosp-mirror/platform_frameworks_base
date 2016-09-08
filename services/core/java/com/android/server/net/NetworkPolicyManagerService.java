@@ -2049,25 +2049,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void setRestrictBackground(boolean restrictBackground) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        final long token = Binder.clearCallingIdentity();
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setRestrictBackground");
         try {
-            maybeRefreshTrustedTime();
-            synchronized (mUidRulesFirstLock) {
-                if (restrictBackground == mRestrictBackground) {
-                    // Ideally, UI should never allow this scenario...
-                    Slog.w(TAG, "setRestrictBackground: already " + restrictBackground);
-                    return;
+            mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                maybeRefreshTrustedTime();
+                synchronized (mUidRulesFirstLock) {
+                    if (restrictBackground == mRestrictBackground) {
+                        // Ideally, UI should never allow this scenario...
+                        Slog.w(TAG, "setRestrictBackground: already " + restrictBackground);
+                        return;
+                    }
+                    setRestrictBackgroundUL(restrictBackground);
                 }
-                setRestrictBackgroundUL(restrictBackground);
+
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
 
+            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, restrictBackground ? 1 : 0, 0)
+                    .sendToTarget();
         } finally {
-            Binder.restoreCallingIdentity(token);
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
-
-        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, restrictBackground ? 1 : 0, 0)
-                .sendToTarget();
     }
 
     private void setRestrictBackgroundUL(boolean restrictBackground) {
