@@ -137,7 +137,7 @@ public class UsbDeviceManager {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     @GuardedBy("mLock")
-    private UsbSettingsManager mCurrentSettings;
+    private UsbUserSettingsManager mCurrentUserSettings;
     private NotificationManager mNotificationManager;
     private final boolean mHasUsbAccessory;
     private boolean mUseUsbNotification;
@@ -150,6 +150,7 @@ public class UsbDeviceManager {
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
     private final UsbAlsaManager mUsbAlsaManager;
+    private final UsbSettingsManager mSettingsManager;
     private Intent mBroadcastedIntent;
 
     private class AdbSettingsObserver extends ContentObserver {
@@ -192,9 +193,11 @@ public class UsbDeviceManager {
         }
     };
 
-    public UsbDeviceManager(Context context, UsbAlsaManager alsaManager) {
+    public UsbDeviceManager(Context context, UsbAlsaManager alsaManager,
+            UsbSettingsManager settingsManager) {
         mContext = context;
         mUsbAlsaManager = alsaManager;
+        mSettingsManager = settingsManager;
         mContentResolver = context.getContentResolver();
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
@@ -218,9 +221,9 @@ public class UsbDeviceManager {
                 new IntentFilter(UsbManager.ACTION_USB_PORT_CHANGED));
     }
 
-    private UsbSettingsManager getCurrentSettings() {
+    private UsbUserSettingsManager getCurrentUserSettings() {
         synchronized (mLock) {
-            return mCurrentSettings;
+            return mCurrentUserSettings;
         }
     }
 
@@ -255,10 +258,10 @@ public class UsbDeviceManager {
         mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
     }
 
-    public void setCurrentUser(int userId, UsbSettingsManager settings) {
+    public void setCurrentUser(int newCurrentUserId, UsbUserSettingsManager settings) {
         synchronized (mLock) {
-            mCurrentSettings = settings;
-            mHandler.obtainMessage(MSG_USER_SWITCHED, userId, 0).sendToTarget();
+            mCurrentUserSettings = settings;
+            mHandler.obtainMessage(MSG_USER_SWITCHED, newCurrentUserId, 0).sendToTarget();
         }
     }
 
@@ -571,7 +574,7 @@ public class UsbDeviceManager {
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
-                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
+                        getCurrentUserSettings().accessoryAttached(mCurrentAccessory);
                     } // else handle in boot completed
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
@@ -584,7 +587,7 @@ public class UsbDeviceManager {
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
-                        getCurrentSettings().accessoryDetached(mCurrentAccessory);
+                        mSettingsManager.usbAccessoryRemoved(mCurrentAccessory);
                     }
                     mCurrentAccessory = null;
                     mAccessoryStrings = null;
@@ -764,7 +767,7 @@ public class UsbDeviceManager {
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
                     if (mCurrentAccessory != null) {
-                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
+                        getCurrentUserSettings().accessoryAttached(mCurrentAccessory);
                     }
                     if (mDebuggingManager != null) {
                         mDebuggingManager.setAdbEnabled(mAdbEnabled);
@@ -947,7 +950,7 @@ public class UsbDeviceManager {
     }
 
     /* opens the currently attached USB accessory */
-    public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
+    public ParcelFileDescriptor openAccessory(UsbAccessory accessory, UsbUserSettingsManager settings) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -958,7 +961,7 @@ public class UsbDeviceManager {
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        getCurrentSettings().checkPermission(accessory);
+        settings.checkPermission(accessory);
         return nativeOpenAccessory();
     }
 

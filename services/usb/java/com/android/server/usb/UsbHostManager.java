@@ -32,8 +32,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -62,18 +60,21 @@ public class UsbHostManager {
     private ArrayList<UsbEndpoint> mNewEndpoints;
 
     private final UsbAlsaManager mUsbAlsaManager;
+    private final UsbSettingsManager mSettingsManager;
 
     @GuardedBy("mLock")
-    private UsbSettingsManager mCurrentSettings;
+    private UsbUserSettingsManager mCurrentUserSettings;
 
     @GuardedBy("mLock")
     private ComponentName mUsbDeviceConnectionHandler;
 
-    public UsbHostManager(Context context, UsbAlsaManager alsaManager) {
+    public UsbHostManager(Context context, UsbAlsaManager alsaManager,
+            UsbSettingsManager settingsManager) {
         mContext = context;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
         mUsbAlsaManager = alsaManager;
+        mSettingsManager = settingsManager;
         String deviceConnectionHandler = context.getResources().getString(
                 com.android.internal.R.string.config_UsbDeviceConnectionHandling_component);
         if (!TextUtils.isEmpty(deviceConnectionHandler)) {
@@ -82,15 +83,15 @@ public class UsbHostManager {
         }
     }
 
-    public void setCurrentSettings(UsbSettingsManager settings) {
+    public void setCurrentUserSettings(UsbUserSettingsManager settings) {
         synchronized (mLock) {
-            mCurrentSettings = settings;
+            mCurrentUserSettings = settings;
         }
     }
 
-    private UsbSettingsManager getCurrentSettings() {
+    private UsbUserSettingsManager getCurrentUserSettings() {
         synchronized (mLock) {
-            return mCurrentSettings;
+            return mCurrentUserSettings;
         }
     }
 
@@ -247,11 +248,14 @@ public class UsbHostManager {
                                 new UsbConfiguration[mNewConfigurations.size()]));
                 mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
                 Slog.d(TAG, "Added device " + mNewDevice);
+
+                // It is fine to call this only for the current user as all broadcasts are sent to
+                // all profiles of the user and the dialogs should only show once.
                 ComponentName usbDeviceConnectionHandler = getUsbDeviceConnectionHandler();
                 if (usbDeviceConnectionHandler == null) {
-                    getCurrentSettings().deviceAttached(mNewDevice);
+                    getCurrentUserSettings().deviceAttached(mNewDevice);
                 } else {
-                    getCurrentSettings().deviceAttachedForFixedHandler(mNewDevice,
+                    getCurrentUserSettings().deviceAttachedForFixedHandler(mNewDevice,
                             usbDeviceConnectionHandler);
                 }
                 mUsbAlsaManager.usbDeviceAdded(mNewDevice);
@@ -273,7 +277,8 @@ public class UsbHostManager {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
                 mUsbAlsaManager.usbDeviceRemoved(device);
-                getCurrentSettings().deviceDetached(device);
+                mSettingsManager.usbDeviceRemoved(device);
+                getCurrentUserSettings().usbDeviceRemoved(device);
             }
         }
     }
@@ -301,7 +306,7 @@ public class UsbHostManager {
     }
 
     /* Opens the specified USB device */
-    public ParcelFileDescriptor openDevice(String deviceName) {
+    public ParcelFileDescriptor openDevice(String deviceName, UsbUserSettingsManager settings) {
         synchronized (mLock) {
             if (isBlackListed(deviceName)) {
                 throw new SecurityException("USB device is on a restricted bus");
@@ -312,7 +317,7 @@ public class UsbHostManager {
                 throw new IllegalArgumentException(
                         "device " + deviceName + " does not exist or is restricted");
             }
-            getCurrentSettings().checkPermission(device);
+            settings.checkPermission(device);
             return nativeOpenDevice(deviceName);
         }
     }
