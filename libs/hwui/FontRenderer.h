@@ -23,6 +23,7 @@
 #include "font/Font.h"
 
 #include <utils/LruCache.h>
+#include <utils/String8.h>
 #include <utils/StrongPointer.h>
 
 #include <SkPaint.h>
@@ -132,7 +133,8 @@ public:
         mLinearFiltering = linearFiltering;
     }
 
-    uint32_t getCacheSize(GLenum format) const;
+    uint32_t getSize() const;
+    void dumpMemoryUsage(String8& log) const;
 
 private:
     friend class Font;
@@ -174,6 +176,10 @@ private:
     void setTextureDirty() {
         mUploadTexture = true;
     }
+
+    const std::vector<CacheTexture*>& cacheTexturesForFormat(GLenum format) const;
+    uint32_t getCacheSize(GLenum format) const;
+    uint32_t getFreeCacheSize(GLenum format) const;
 
     uint32_t mSmallCacheWidth;
     uint32_t mSmallCacheHeight;
