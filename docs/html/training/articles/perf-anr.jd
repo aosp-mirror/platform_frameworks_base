@@ -14,6 +14,14 @@ page.article=true
   <li><a href="#Reinforcing">Reinforcing Responsiveness</a></li>
 </ol>
 
+<h2>You should also read</h2>
+<ul>
+  <li><a href="/topic/performance/background-optimization.html">Background Optimizations</a>
+  <li><a href="/topic/performance/scheduling.html">Intelligent Job-Scheduling</a>
+  <li><a href="/training/monitoring-device-state/manifest-receivers.html">Manipulating Broadcast Receivers On Demand</a>
+  <li><a href="/guide/components/intents-filters.html">Intents and Intent Filters</a>
+</ul>
+
 </div>
 </div>
 
@@ -164,6 +172,16 @@ tasks via worker threads, your
 application should start an {@link android.app.IntentService} if a
 potentially long running action needs to be taken in response to an intent
 broadcast.</p>
+
+<p>
+  Another common issue with {@link android.content.BroadcastReceiver} objects
+  occurs when they execute too frequently. Frequent background execution can
+  reduce the amount of memory available to other apps.
+  For more information about how to enable and disable
+  {@link android.content.BroadcastReceiver} objects efficiently, see
+  <a href="/training/monitoring-device-state/manifest-receivers.html">Manipulating
+    Broadcast Receivers on Demand</a>.
+</p>
 
 <p class="note"><strong>Tip:</strong>
 You can use {@link android.os.StrictMode} to help find potentially
