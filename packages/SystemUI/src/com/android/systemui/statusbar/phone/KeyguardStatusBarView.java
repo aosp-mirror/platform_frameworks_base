@@ -308,6 +308,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         super.setVisibility(visibility);
         if (visibility != View.VISIBLE) {
             mSystemIconsSuperContainer.animate().cancel();
+            mSystemIconsSuperContainer.setTranslationX(0);
             mMultiUserSwitch.animate().cancel();
             mMultiUserSwitch.setAlpha(1f);
         } else {
