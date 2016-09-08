@@ -580,37 +580,46 @@ public final class UiAutomation {
         command.run();
 
         // Acquire the lock and wait for the event.
-        synchronized (mLock) {
-            try {
-                // Wait for the event.
-                final long startTimeMillis = SystemClock.uptimeMillis();
-                while (true) {
-                    // Drain the event queue
-                    while (!mEventQueue.isEmpty()) {
-                        AccessibilityEvent event = mEventQueue.remove(0);
-                        // Ignore events from previous interactions.
-                        if (event.getEventTime() < executionStartTimeMillis) {
-                            continue;
-                        }
-                        if (filter.accept(event)) {
-                            return event;
-                        }
-                        event.recycle();
+        try {
+            // Wait for the event.
+            final long startTimeMillis = SystemClock.uptimeMillis();
+            while (true) {
+                List<AccessibilityEvent> localEvents = new ArrayList<>();
+                synchronized (mLock) {
+                    localEvents.addAll(mEventQueue);
+                    mEventQueue.clear();
+                }
+                // Drain the event queue
+                while (!localEvents.isEmpty()) {
+                    AccessibilityEvent event = localEvents.remove(0);
+                    // Ignore events from previous interactions.
+                    if (event.getEventTime() < executionStartTimeMillis) {
+                        continue;
                     }
-                    // Check if timed out and if not wait.
-                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
-                    if (remainingTimeMillis <= 0) {
-                        throw new TimeoutException("Expected event not received within: "
-                                + timeoutMillis + " ms.");
+                    if (filter.accept(event)) {
+                        return event;
                     }
-                    try {
-                        mLock.wait(remainingTimeMillis);
-                    } catch (InterruptedException ie) {
-                        /* ignore */
+                    event.recycle();
+                }
+                // Check if timed out and if not wait.
+                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
+                if (remainingTimeMillis <= 0) {
+                    throw new TimeoutException("Expected event not received within: "
+                            + timeoutMillis + " ms.");
+                }
+                synchronized (mLock) {
+                    if (mEventQueue.isEmpty()) {
+                        try {
+                            mLock.wait(remainingTimeMillis);
+                        } catch (InterruptedException ie) {
+                            /* ignore */
+                        }
                     }
                 }
-            } finally {
+            }
+        } finally {
+            synchronized (mLock) {
                 mWaitingForEventDelivery = false;
                 mEventQueue.clear();
                 mLock.notifyAll();
