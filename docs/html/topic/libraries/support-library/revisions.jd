@@ -197,7 +197,16 @@ APK size, we recommend that you just list the specific modules your app needs.
   <li>{@link android.support.design.widget.Snackbar} now draws behind the
   navigation bar if the status bar is translucent.
   </li>
+
 </ul>
+
+<h4>MediaRouter library</h4>
+
+<p>
+  Bluetooth devices are no longer listed as media routes. Routing audio to
+  Bluetooth devices is now solely controlled at the Android system level.
+</p>
+
 
 <h3 id="24-2-0-deprecations">Deprecations</h3>
 
