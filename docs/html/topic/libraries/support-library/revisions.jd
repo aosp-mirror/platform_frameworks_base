@@ -2912,8 +2912,6 @@ if (animator instanceof SimpleItemAnimator) {
         <ul>
           <li>Added {@link android.support.v7.widget.GridLayout} to provide support for the
             {@link android.widget.GridLayout} layout object.</li>
-          <li>Added {@link android.support.v7.widget.Space} which can be used to create blank areas
-            within a {@link android.support.v7.widget.GridLayout} layout object.</li>
         </ul>
     </dl>
   </div>
