@@ -212,6 +212,7 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.MathUtils;
+import android.util.Pair;
 import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -11278,6 +11279,19 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final class EphemeralIntentResolver
             extends IntentResolver<EphemeralResolveIntentInfo, EphemeralResolveInfo> {
+        /**
+         * The result that has the highest defined order. Ordering applies on a
+         * per-package basis. Mapping is from package name to Pair of order and
+         * EphemeralResolveInfo.
+         * <p>
+         * NOTE: This is implemented as a field variable for convenience and efficiency.
+         * By having a field variable, we're able to track filter ordering as soon as
+         * a non-zero order is defined. Otherwise, multiple loops across the result set
+         * would be needed to apply ordering. If the intent resolver becomes re-entrant,
+         * this needs to be contained entirely within {@link #filterResults()}.
+         */
+        final ArrayMap<String, Pair<Integer, EphemeralResolveInfo>> mOrderResult = new ArrayMap<>();
+
         @Override
         protected EphemeralResolveIntentInfo[] newArray(int size) {
             return new EphemeralResolveIntentInfo[size];
@@ -11294,7 +11308,51 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
-            return info.getEphemeralResolveInfo();
+            final String packageName = info.getEphemeralResolveInfo().getPackageName();
+            final Integer order = info.getOrder();
+            final Pair<Integer, EphemeralResolveInfo> lastOrderResult =
+                    mOrderResult.get(packageName);
+            // ordering is enabled and this item's order isn't high enough
+            if (lastOrderResult != null && lastOrderResult.first >= order) {
+                return null;
+            }
+            final EphemeralResolveInfo res = info.getEphemeralResolveInfo();
+            if (order > 0) {
+                // non-zero order, enable ordering
+                mOrderResult.put(packageName, new Pair<>(order, res));
+            }
+            return res;
+        }
+
+        @Override
+        protected void filterResults(List<EphemeralResolveInfo> results) {
+            // only do work if ordering is enabled [most of the time it won't be]
+            if (mOrderResult.size() == 0) {
+                return;
+            }
+            int resultSize = results.size();
+            for (int i = 0; i < resultSize; i++) {
+                final EphemeralResolveInfo info = results.get(i);
+                final String packageName = info.getPackageName();
+                final Pair<Integer, EphemeralResolveInfo> savedInfo = mOrderResult.get(packageName);
+                if (savedInfo == null) {
+                    // package doesn't having ordering
+                    continue;
+                }
+                if (savedInfo.second == info) {
+                    // circled back to the highest ordered item; remove from order list
+                    mOrderResult.remove(savedInfo);
+                    if (mOrderResult.size() == 0) {
+                        // no more ordered items
+                        break;
+                    }
+                    continue;
+                }
+                // item has a worse order, remove it from the result list
+                results.remove(i);
+                resultSize--;
+                i--;
+            }
         }
     }
 
