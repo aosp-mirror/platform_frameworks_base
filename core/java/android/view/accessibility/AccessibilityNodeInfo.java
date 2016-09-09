@@ -2233,7 +2233,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setText(CharSequence text) {
         enforceNotSealed();
-        mText = text;
+        mText = (text == null) ? null : text.subSequence(0, text.length());
     }
 
     /**
@@ -2250,7 +2250,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setError(CharSequence error) {
         enforceNotSealed();
-        mError = error;
+        mError = (error == null) ? null : error.subSequence(0, error.length());
     }
 
     /**
@@ -2285,7 +2285,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setContentDescription(CharSequence contentDescription) {
         enforceNotSealed();
-        mContentDescription = contentDescription;
+        mContentDescription = (contentDescription == null) ? null
+                : contentDescription.subSequence(0, contentDescription.length());
     }
 
     /**
