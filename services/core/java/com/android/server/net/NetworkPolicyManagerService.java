@@ -163,7 +163,6 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -366,7 +365,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final AppOpsManager mAppOps;
 
-    private final MyPackageMonitor mPackageMonitor;
     private final IPackageManager mIPm;
 
 
@@ -410,8 +408,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
 
         mAppOps = context.getSystemService(AppOpsManager.class);
-
-        mPackageMonitor = new MyPackageMonitor();
 
         // Expose private service for system components to use.
         LocalServices.addService(NetworkPolicyManagerInternal.class,
@@ -539,8 +535,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-
-        mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
 
         synchronized (mRulesLock) {
             updatePowerSaveWhitelistLocked();
@@ -731,6 +725,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
             synchronized (mRulesLock) {
                 mUidPolicy.delete(uid);
+                removeRestrictBackgroundWhitelistedUidLocked(uid, true, true);
                 updateRestrictionRulesForUidLocked(uid);
                 writePolicyLocked();
             }
@@ -3475,18 +3470,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // Remove app's "restrict background data" flag
             for (int uid : getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND)) {
                 setUidPolicy(uid, POLICY_NONE);
-            }
-        }
-    }
-
-    private class MyPackageMonitor extends PackageMonitor {
-
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            if (LOGV) Slog.v(TAG, "onPackageRemoved: " + packageName + " ->" + uid);
-            synchronized (mRulesLock) {
-                removeRestrictBackgroundWhitelistedUidLocked(uid, true, true);
-                updateRestrictionRulesForUidLocked(uid);
             }
         }
     }
