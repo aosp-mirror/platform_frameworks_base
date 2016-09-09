@@ -16,9 +16,17 @@
 
 package android.accounts;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.ArraySet;
+import android.util.Log;
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.Set;
 
 /**
  * Value type that represents an Account in the {@link AccountManager}. This object is
@@ -26,8 +34,14 @@ import android.text.TextUtils;
  * suitable for use as the key of a {@link java.util.Map}
  */
 public class Account implements Parcelable {
+    private static final String TAG = "Account";
+
+    @GuardedBy("sAccessedAccounts")
+    private static final Set<Account> sAccessedAccounts = new ArraySet<>();
+
     public final String name;
     public final String type;
+    private final @Nullable IAccountAccessTracker mAccessTracker;
 
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -44,6 +58,20 @@ public class Account implements Parcelable {
     }
 
     public Account(String name, String type) {
+        this(name, type, null);
+    }
+
+    /**
+     * @hide
+     */
+    public Account(@NonNull Account other, @Nullable IAccountAccessTracker accessTracker) {
+        this(other.name, other.type, accessTracker);
+    }
+
+    /**
+     * @hide
+     */
+    public Account(String name, String type, IAccountAccessTracker accessTracker) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("the name must not be empty: " + name);
         }
@@ -52,11 +80,29 @@ public class Account implements Parcelable {
         }
         this.name = name;
         this.type = type;
+        this.mAccessTracker = accessTracker;
     }
 
     public Account(Parcel in) {
         this.name = in.readString();
         this.type = in.readString();
+        this.mAccessTracker = IAccountAccessTracker.Stub.asInterface(in.readStrongBinder());
+        if (mAccessTracker != null) {
+            synchronized (sAccessedAccounts) {
+                if (sAccessedAccounts.add(this)) {
+                    try {
+                        mAccessTracker.onAccountAccessed();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error noting account access", e);
+                    }
+                }
+            }
+        }
+    }
+
+    /** @hide */
+    public IAccountAccessTracker getAccessTracker() {
+        return mAccessTracker;
     }
 
     public int describeContents() {
@@ -66,6 +112,7 @@ public class Account implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(type);
+        dest.writeStrongInterface(mAccessTracker);
     }
 
     public static final Creator<Account> CREATOR = new Creator<Account>() {
