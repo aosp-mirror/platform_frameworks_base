@@ -33,7 +33,7 @@ next.link=manifest-receivers.html
 <p>Some of the most common uses for repeating alarms and background services is to schedule regular
 updates of application data from Internet resources, cache data, or execute long running downloads.
 But if you aren't connected to the Internet, or the connection is too slow to complete your
-download, why both waking the device to schedule the update at all?</p>
+download, why bother waking the device to schedule the update at all?</p>
 
 <p>You can use the {@link android.net.ConnectivityManager} to check that you're actually
 connected to the Internet, and if so, what type of connection is in place.</p>
