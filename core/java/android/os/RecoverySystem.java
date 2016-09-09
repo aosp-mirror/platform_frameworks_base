@@ -724,6 +724,7 @@ public class RecoverySystem {
             String line = null;
             int bytesWrittenInMiB = -1, bytesStashedInMiB = -1;
             int timeTotal = -1;
+            int uncryptTime = -1;
             int sourceVersion = -1;
             while ((line = in.readLine()) != null) {
                 // Here is an example of lines in last_install:
@@ -759,6 +760,8 @@ public class RecoverySystem {
 
                 if (line.startsWith("time")) {
                     timeTotal = scaled;
+                } else if (line.startsWith("uncrypt_time")) {
+                    uncryptTime = scaled;
                 } else if (line.startsWith("source_build")) {
                     sourceVersion = scaled;
                 } else if (line.startsWith("bytes_written")) {
@@ -773,6 +776,9 @@ public class RecoverySystem {
             // Don't report data to tron if corresponding entry isn't found in last_install.
             if (timeTotal != -1) {
                 MetricsLogger.histogram(context, "ota_time_total", timeTotal);
+            }
+            if (uncryptTime != -1) {
+                MetricsLogger.histogram(context, "ota_uncrypt_time", uncryptTime);
             }
             if (sourceVersion != -1) {
                 MetricsLogger.histogram(context, "ota_source_version", sourceVersion);
