@@ -46,17 +46,12 @@ import static org.junit.Assert.assertNull;
 public class AppWindowTokenTests {
 
     private static WindowManagerService sWm = null;
-    private final WindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
     private final IWindow mIWindow = new TestIWindow();
 
     @Before
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
-        if (sWm == null) {
-            // We only want to do this once for the test process as we don't want WM to try to
-            // register a bunch of local services again.
-            sWm = WindowManagerService.main(context, null, true, false, false, mPolicy);
-        }
+        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
     }
 
     @Test

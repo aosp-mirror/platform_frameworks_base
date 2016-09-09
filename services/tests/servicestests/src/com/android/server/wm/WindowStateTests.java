@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.os.Binder;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -50,18 +51,13 @@ public class WindowStateTests {
 
     private static WindowManagerService sWm = null;
     private WindowToken mWindowToken;
-    private final WindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
     private final IWindow mIWindow = new TestIWindow();
 
     @Before
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
-        if (sWm == null) {
-            // We only want to do this once for the test process as we don't want WM to try to
-            // register a bunch of local services again.
-            sWm = WindowManagerService.main(context, null, true, false, false, mPolicy);
-        }
-        mWindowToken = new WindowToken(sWm, null, 0, false);
+        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        mWindowToken = new WindowToken(sWm, new Binder(), 0, false);
     }
 
     @Test

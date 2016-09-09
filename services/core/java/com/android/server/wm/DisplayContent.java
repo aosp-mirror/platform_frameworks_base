@@ -17,13 +17,18 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
@@ -199,6 +204,50 @@ class DisplayContent {
             }
         }
         return null;
+    }
+
+    int getOrientation() {
+        // TODO: Most of the logic here can be removed once this class is converted to use
+        // WindowContainer which has an abstract implementation of getOrientation that
+        // should cover this.
+        if (mService.isStackVisibleLocked(DOCKED_STACK_ID)
+                || mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
+            // Apps and their containers are not allowed to specify an orientation while the docked
+            // or freeform stack is visible...except for the home stack/task if the docked stack is
+            // minimized and it actually set something.
+            if (mHomeStack.isVisible() && mDividerControllerLocked.isMinimizedDock()) {
+                final int orientation = mHomeStack.getOrientation();
+                if (orientation != SCREEN_ORIENTATION_UNSET) {
+                    return orientation;
+                }
+            }
+            return SCREEN_ORIENTATION_UNSPECIFIED;
+        }
+
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            if (!stack.isVisible()) {
+                continue;
+            }
+
+            final int orientation = stack.getOrientation();
+
+            if (orientation == SCREEN_ORIENTATION_BEHIND) {
+                continue;
+            }
+
+            if (orientation != SCREEN_ORIENTATION_UNSET) {
+                if (stack.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                    return orientation;
+                }
+            }
+        }
+
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                "No app is requesting an orientation, return " + mService.mLastOrientation);
+        // The next app has not been requested to be visible, so we keep the current orientation
+        // to prevent freezing/unfreezing the display too early.
+        return mService.mLastOrientation;
     }
 
     void updateDisplayInfo() {

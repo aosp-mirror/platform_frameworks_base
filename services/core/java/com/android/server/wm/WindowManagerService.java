@@ -2839,10 +2839,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-            atoken.appFullscreen = fullscreen;
+            atoken.setFillsParent(fullscreen);
             atoken.showForAllUsers = showForAllUsers;
             atoken.targetSdk = targetSdkVersion;
-            atoken.requestedOrientation = requestedOrientation;
+            atoken.setOrientation(requestedOrientation);
             atoken.layoutConfigChanges = (configChanges &
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
             atoken.mLaunchTaskBehind = launchTaskBehind;
@@ -2947,7 +2947,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
                         null : winShowWhenLocked.mAppToken;
                 if (appShowWhenLocked != null) {
-                    int req = appShowWhenLocked.requestedOrientation;
+                    int req = appShowWhenLocked.getOrientation();
                     if (req == SCREEN_ORIENTATION_BEHIND) {
                         req = mLastKeyguardForcedOrientation;
                     }
@@ -2962,91 +2962,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Top system windows are not requesting an orientation. Start searching from apps.
-        return getAppSpecifiedOrientation();
-    }
-
-    private int getAppSpecifiedOrientation() {
-        int lastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
-        boolean findingBehind = false;
-        boolean lastFullscreen = false;
-        DisplayContent displayContent = getDefaultDisplayContentLocked();
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        final boolean inMultiWindow = isStackVisibleLocked(DOCKED_STACK_ID)
-                || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID);
-        final boolean dockMinimized =
-                getDefaultDisplayContentLocked().mDividerControllerLocked.isMinimizedDock();
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            final int firstToken = tokens.size() - 1;
-            for (int tokenNdx = firstToken; tokenNdx >= 0; --tokenNdx) {
-                final AppWindowToken atoken = tokens.get(tokenNdx);
-
-                if (DEBUG_APP_ORIENTATION) Slog.v(TAG_WM, "Checking app orientation: " + atoken);
-
-                // if we're about to tear down this window and not seek for
-                // the behind activity, don't use it for orientation
-                if (!findingBehind && !atoken.hidden && atoken.hiddenRequested) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                            "Skipping " + atoken + " -- going to hide");
-                    continue;
-                }
-
-                if (tokenNdx == firstToken) {
-                    // If we have hit a new Task, and the bottom of the previous group didn't
-                    // explicitly say to use the orientation behind it, and the last app was
-                    // full screen, then we'll stick with the user's orientation.
-                    if (lastOrientation != SCREEN_ORIENTATION_BEHIND && lastFullscreen) {
-                        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Done at " + atoken
-                                + " -- end of group, return " + lastOrientation);
-                        return lastOrientation;
-                    }
-                }
-
-                // We ignore any hidden applications on the top.
-                if (atoken.hiddenRequested) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                            "Skipping " + atoken + " -- hidden on top");
-                    continue;
-                }
-
-                // No app except the home app may specify the screen orientation in multi-window,
-                // and only if the docked stack is minimized to avoid weirdness when home task
-                // temporarily gets moved to the front.
-                if (inMultiWindow && (!atoken.mTask.isHomeTask() || !dockMinimized)) {
-                    continue;
-                }
-
-                if (tokenNdx == 0) {
-                    // Last token in this task.
-                    lastOrientation = atoken.requestedOrientation;
-                }
-
-                int or = atoken.requestedOrientation;
-                // If this application is fullscreen, and didn't explicitly say
-                // to use the orientation behind it, then just take whatever
-                // orientation it has and ignores whatever is under it.
-                lastFullscreen = atoken.appFullscreen;
-                if (lastFullscreen && or != SCREEN_ORIENTATION_BEHIND) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                            "Done at " + atoken + " -- full screen, return " + or);
-                    return or;
-                }
-                // If this application has requested an explicit orientation, then use it.
-                if (or != SCREEN_ORIENTATION_UNSPECIFIED && or != SCREEN_ORIENTATION_BEHIND) {
-                    if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                            "Done at " + atoken + " -- explicitly set, return " + or);
-                    return or;
-                }
-                findingBehind |= (or == SCREEN_ORIENTATION_BEHIND);
-            }
-        }
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                "No app is requesting an orientation, return " + mLastOrientation);
-        // The next app has not been requested to be visible, so we keep the current orientation
-        // to prevent freezing/unfreezing the display too early unless we are in multi-window, in
-        // which we don't let the app customize the orientation unless it was the home task that
-        // is handled above.
-        return inMultiWindow ? SCREEN_ORIENTATION_UNSPECIFIED : mLastOrientation;
+        return getDefaultDisplayContentLocked().getOrientation();
     }
 
     @Override
@@ -3222,13 +3138,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            AppWindowToken atoken = findAppWindowToken(token.asBinder());
+            final AppWindowToken atoken = findAppWindowToken(token.asBinder());
             if (atoken == null) {
                 Slog.w(TAG_WM, "Attempted to set orientation of non-existing app token: " + token);
                 return;
             }
 
-            atoken.requestedOrientation = requestedOrientation;
+            atoken.setOrientation(requestedOrientation);
         }
     }
 
@@ -3240,7 +3156,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
-            return wtoken.requestedOrientation;
+            return wtoken.getOrientation();
         }
     }
 
@@ -3556,9 +3472,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setAppFullscreen(IBinder token, boolean toOpaque) {
         synchronized (mWindowMap) {
-            AppWindowToken atoken = findAppWindowToken(token);
+            final AppWindowToken atoken = findAppWindowToken(token);
             if (atoken != null) {
-                atoken.appFullscreen = toOpaque;
+                atoken.setFillsParent(toOpaque);
                 setWindowOpaqueLocked(token, toOpaque);
                 mWindowPlacerLocked.requestTraversal();
             }
@@ -3963,7 +3879,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.setUpdateInputWindowsNeededLw();
         mWindowPlacerLocked.performSurfacePlacement();
         mInputMonitor.updateInputWindowsLw(false /*force*/);
-        //dump();
     }
 
     public void moveTaskToTop(int taskId) {

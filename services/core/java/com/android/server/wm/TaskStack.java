@@ -21,6 +21,9 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -1304,5 +1307,41 @@ public class TaskStack implements DimLayer.DimLayerUser,
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             mTasks.get(i).overridePlayingAppAnimations(a);
         }
+    }
+
+    // TODO: Remove once switched to use WindowContainer
+    int getOrientation() {
+        if (!StackId.canSpecifyOrientation(mStackId)) {
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
+        int candidate = SCREEN_ORIENTATION_UNSET;
+
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+
+            if (!task.isVisible()) {
+                continue;
+            }
+
+            final int orientation = task.getOrientation();
+            if (orientation == SCREEN_ORIENTATION_BEHIND) {
+                candidate = orientation;
+                continue;
+            }
+
+            if (orientation != SCREEN_ORIENTATION_UNSET) {
+                if (task.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                    return orientation;
+                }
+            }
+        }
+
+        return candidate;
+    }
+
+    // TODO: Remove once switched to use WindowContainer
+    boolean fillsParent() {
+        return mFullscreen;
     }
 }

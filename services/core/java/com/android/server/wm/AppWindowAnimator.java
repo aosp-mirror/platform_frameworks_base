@@ -146,7 +146,7 @@ public class AppWindowAnimator {
 
         this.mSkipFirstFrame = skipFirstFrame;
 
-        if (!mAppToken.appFullscreen) {
+        if (!mAppToken.fillsParent()) {
             anim.setBackgroundColor(0);
         }
         if (mClearProlongedAnimation) {

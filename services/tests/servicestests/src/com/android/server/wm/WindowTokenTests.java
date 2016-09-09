@@ -46,18 +46,13 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class WindowTokenTests {
 
-    private static WindowManagerService sWm = null;
-    private final WindowManagerPolicy mPolicy = new TestWindowManagerPolicy();
+    private WindowManagerService mWm = null;
     private final IWindow mIWindow = new TestIWindow();
 
     @Before
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
-        if (sWm == null) {
-            // We only want to do this once for the test process as we don't want WM to try to
-            // register a bunch of local services again.
-            sWm = WindowManagerService.main(context, null, true, false, false, mPolicy);
-        }
+        mWm = TestWindowManagerPolicy.getWindowManagerService(context);
     }
 
     @Test
@@ -161,15 +156,15 @@ public class WindowTokenTests {
     private WindowState createWindow(WindowState parent, int type, WindowToken token) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
 
-        return new WindowState(sWm, null, mIWindow, token, parent, 0, 0, attrs, 0,
-                sWm.getDefaultDisplayContentLocked(), 0);
+        return new WindowState(mWm, null, mIWindow, token, parent, 0, 0, attrs, 0,
+                mWm.getDefaultDisplayContentLocked(), 0);
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowToken} class */
     private class TestWindowToken extends WindowToken {
 
         TestWindowToken() {
-            super(sWm, null, 0, false);
+            super(mWm, null, 0, false);
         }
 
         int getWindowsCount() {
