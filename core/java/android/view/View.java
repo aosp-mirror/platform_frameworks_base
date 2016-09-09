@@ -20524,8 +20524,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param shadowBuilder A {@link android.view.View.DragShadowBuilder} object for building the
      * drag shadow.
      * @param myLocalState An {@link java.lang.Object} containing local data about the drag and
-     * drop operation. This Object is put into every DragEvent object sent by the system during the
-     * current drag.
+     * drop operation. When dispatching drag events to views in the same activity this object
+     * will be available through {@link android.view.DragEvent#getLocalState()}. Views in other
+     * activities will not have access to this data ({@link android.view.DragEvent#getLocalState()}
+     * will return null).
      * <p>
      * myLocalState is a lightweight mechanism for the sending information from the dragged View
      * to the target Views. For example, it can contain flags that differentiate between a
