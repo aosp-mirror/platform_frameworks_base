@@ -150,6 +150,9 @@ final class DefaultPermissionGrantPolicy {
 
     private static final int MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS = 1;
 
+    private static final String ACTION_TWINNING =
+            "com.google.android.clockwork.intent.TWINNING_SETTINGS";
+
     private final PackageManagerService mService;
     private final Handler mHandler;
 
@@ -603,8 +606,9 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
-            // Android Wear Home
+            // Android Wear
             if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
+                // Android Wear Home
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
@@ -620,6 +624,17 @@ final class DefaultPermissionGrantPolicy {
                             userId);
                     grantRuntimePermissionsLPw(wearHomePackage, LOCATION_PERMISSIONS, false,
                             userId);
+                }
+
+                // Android Wear Twinning
+                Intent twinningIntent = new Intent(ACTION_TWINNING);
+                PackageParser.Package twinningPackage = getDefaultSystemHandlerActivityPackageLPr(
+                        twinningIntent, userId);
+
+                if (twinningPackage != null
+                        && doesPackageSupportRuntimePermissions(twinningPackage)) {
+                    grantRuntimePermissionsLPw(twinningPackage, PHONE_PERMISSIONS, false, userId);
+                    grantRuntimePermissionsLPw(twinningPackage, SMS_PERMISSIONS, false, userId);
                 }
             }
 
