@@ -265,6 +265,7 @@ public class IntentFilter implements Parcelable {
     public static final String SCHEME_HTTPS = "https";
 
     private int mPriority;
+    private int mOrder;
     private final ArrayList<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
@@ -425,6 +426,7 @@ public class IntentFilter implements Parcelable {
      */
     public IntentFilter(IntentFilter o) {
         mPriority = o.mPriority;
+        mOrder = o.mOrder;
         mActions = new ArrayList<String>(o.mActions);
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
@@ -475,6 +477,16 @@ public class IntentFilter implements Parcelable {
      */
     public final int getPriority() {
         return mPriority;
+    }
+
+    /** @hide */
+    public final void setOrder(int order) {
+        mOrder = order;
+    }
+
+    /** @hide */
+    public final int getOrder() {
+        return mOrder;
     }
 
     /**
