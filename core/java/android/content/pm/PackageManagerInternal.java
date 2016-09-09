@@ -160,4 +160,12 @@ public abstract class PackageManagerInternal {
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
      */
     public abstract boolean isPackageDataProtected(int userId, String packageName);
+
+    /**
+     * Gets whether the package was ever launched.
+     * @param packageName The package name.
+     * @param userId The user for which to check.
+     * @return Whether was launched.
+     */
+    public abstract boolean wasPackageEverLaunched(String packageName, int userId);
 }
