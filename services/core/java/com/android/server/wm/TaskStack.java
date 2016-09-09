@@ -1309,6 +1309,17 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
+    boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
+        final Task firstTask = first.mTask;
+        final Task secondTask = second.mTask;
+
+        if (firstTask == secondTask) {
+            return firstTask.isFirstGreaterThanSecond(first, second);
+        }
+        return mTasks.indexOf(first) > mTasks.indexOf(second);
+    }
+
     // TODO: Remove once switched to use WindowContainer
     int getOrientation() {
         if (!StackId.canSpecifyOrientation(mStackId)) {

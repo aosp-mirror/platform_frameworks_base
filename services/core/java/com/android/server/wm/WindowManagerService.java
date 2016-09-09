@@ -3638,8 +3638,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (mAppTransition.getAppTransition() == AppTransition.TRANSIT_TASK_OPEN_BEHIND) {
                     // We're launchingBehind, add the launching activity to mOpeningApps.
-                    final WindowState win =
-                            findFocusedWindowLocked(getDefaultDisplayContentLocked());
+                    final WindowState win = getDefaultDisplayContentLocked().findFocusedWindow();
                     if (win != null) {
                         final AppWindowToken focusedToken = win.mAppToken;
                         if (focusedToken != null) {
@@ -8772,72 +8771,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final int displayCount = mDisplayContents.size();
         for (int i = 0; i < displayCount; i++) {
             final DisplayContent displayContent = mDisplayContents.valueAt(i);
-            WindowState win = findFocusedWindowLocked(displayContent);
+            final WindowState win = displayContent.findFocusedWindow();
             if (win != null) {
                 return win;
             }
         }
-        return null;
-    }
-
-    WindowState findFocusedWindowLocked(DisplayContent displayContent) {
-        final WindowList windows = displayContent.getWindowList();
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            final WindowState win = windows.get(i);
-
-            if (localLOGV || DEBUG_FOCUS) Slog.v(
-                TAG_WM, "Looking for focus: " + i
-                + " = " + win
-                + ", flags=" + win.mAttrs.flags
-                + ", canReceive=" + win.canReceiveKeys());
-
-            if (!win.canReceiveKeys()) {
-                continue;
-            }
-
-            AppWindowToken wtoken = win.mAppToken;
-
-            // If this window's application has been removed, just skip it.
-            if (wtoken != null && (wtoken.removed || wtoken.sendingToBottom)) {
-                if (DEBUG_FOCUS) Slog.v(TAG_WM, "Skipping " + wtoken + " because "
-                        + (wtoken.removed ? "removed" : "sendingToBottom"));
-                continue;
-            }
-
-            // Descend through all of the app tokens and find the first that either matches
-            // win.mAppToken (return win) or mFocusedApp (return null).
-            if (wtoken != null && win.mAttrs.type != TYPE_APPLICATION_STARTING &&
-                    mFocusedApp != null) {
-                ArrayList<Task> tasks = displayContent.getTasks();
-                for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                    AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                    int tokenNdx = tokens.size() - 1;
-                    for ( ; tokenNdx >= 0; --tokenNdx) {
-                        final AppWindowToken token = tokens.get(tokenNdx);
-                        if (wtoken == token) {
-                            break;
-                        }
-                        if (mFocusedApp == token && token.windowsAreFocusable()) {
-                            // Whoops, we are below the focused app whose windows are focusable...
-                            // No focus for you!!!
-                            if (localLOGV || DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM,
-                                    "findFocusedWindow: Reached focused app=" + mFocusedApp);
-                            return null;
-                        }
-                    }
-                    if (tokenNdx >= 0) {
-                        // Early exit from loop, must have found the matching token.
-                        break;
-                    }
-                }
-            }
-
-            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: Found new focus @ " + i +
-                        " = " + win);
-            return win;
-        }
-
-        if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: No focusable windows.");
         return null;
     }
 

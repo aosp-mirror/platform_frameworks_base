@@ -26,7 +26,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -763,5 +766,66 @@ class DisplayContent {
                 }
             }
         }
+    }
+
+    WindowState findFocusedWindow() {
+        final AppWindowToken focusedApp = mService.mFocusedApp;
+
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mWindows.get(i);
+
+            if (DEBUG_FOCUS) Slog.v(TAG_WM, "Looking for focus: " + i + " = " + win
+                    + ", flags=" + win.mAttrs.flags + ", canReceive=" + win.canReceiveKeys());
+
+            if (!win.canReceiveKeys()) {
+                continue;
+            }
+
+            final AppWindowToken wtoken = win.mAppToken;
+
+            // If this window's application has been removed, just skip it.
+            if (wtoken != null && (wtoken.removed || wtoken.sendingToBottom)) {
+                if (DEBUG_FOCUS) Slog.v(TAG_WM, "Skipping " + wtoken + " because "
+                        + (wtoken.removed ? "removed" : "sendingToBottom"));
+                continue;
+            }
+
+            if (focusedApp == null) {
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: focusedApp=null"
+                        + " using new focus @ " + i + " = " + win);
+                return win;
+            }
+
+            if (!focusedApp.windowsAreFocusable()) {
+                // Current focused app windows aren't focusable...
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: focusedApp windows not"
+                        + " focusable using new focus @ " + i + " = " + win);
+                return win;
+            }
+
+            // Descend through all of the app tokens and find the first that either matches
+            // win.mAppToken (return win) or mFocusedApp (return null).
+            if (wtoken != null && win.mAttrs.type != TYPE_APPLICATION_STARTING) {
+                final TaskStack focusedAppStack = focusedApp.mTask.mStack;
+                final TaskStack appStack = wtoken.mTask.mStack;
+
+                // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
+                if ((focusedAppStack == appStack
+                        && appStack.isFirstGreaterThanSecond(focusedApp, wtoken))
+                        || mStacks.indexOf(focusedAppStack) > mStacks.indexOf(appStack)) {
+                    // App stack below focused app stack. No focus for you!!!
+                    if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM,
+                            "findFocusedWindow: Reached focused app=" + focusedApp);
+                    return null;
+                }
+            }
+
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: Found new focus @ "
+                    + i + " = " + win);
+            return win;
+        }
+
+        if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: No focusable windows.");
+        return null;
     }
 }
