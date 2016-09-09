@@ -3841,6 +3841,16 @@ public final class Settings {
         /** @hide */ public static final int HEADS_UP_USER_ON = 1;
 
         /**
+         * Immersive recents options
+         *
+         * 0 = Default AOSP look
+         * 1 = Statusbar only
+         * 2 = Navbar only
+         * 3 = Fullscreen
+         */
+        public static final String IMMERSIVE_RECENTS = "immersive_recents";
+
+        /**
          * Whether the phone ringtone should be played in an increasing manner
          * @hide
          */
