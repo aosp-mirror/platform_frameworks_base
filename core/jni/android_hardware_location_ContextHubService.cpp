@@ -337,11 +337,15 @@ static int set_dest_app(hub_message_t *msg, jint id) {
     return 0;
 }
 
-static void query_hub_for_apps(uint64_t appId, uint32_t hubHandle) {
+static void query_hub_for_apps(uint32_t hubHandle) {
     hub_message_t msg;
     query_apps_request_t queryMsg;
 
-    queryMsg.app_name.id = appId;
+    // TODO(b/30835598): When we're able to tell which request our
+    //     response matches, then we should allow this to be more
+    //     targetted, instead of always being every app in the
+    //     system.
+    queryMsg.app_name.id = ALL_APPS;
 
     msg.message_type = CONTEXT_HUB_QUERY_APPS;
     msg.message_len  = sizeof(queryMsg);
@@ -354,9 +358,9 @@ static void query_hub_for_apps(uint64_t appId, uint32_t hubHandle) {
     }
 }
 
-static void sendQueryForApps(uint64_t appId) {
+static void sendQueryForApps() {
     for (int i = 0; i < db.hubInfo.numHubs; i++ ) {
-        query_hub_for_apps(appId, i);
+        query_hub_for_apps(i);
     }
 }
 
@@ -386,9 +390,6 @@ static jint generate_id() {
 
 static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
         jint appInstanceHandle, JNIEnv *env) {
-
-    ALOGI("Loading App");
-
     // Not checking if the apps are indeed distinct
     app_instance_info_s entry;
     assert(appInfo);
@@ -404,13 +405,14 @@ static jint add_app_instance(const hub_app_info *appInfo, uint32_t hubHandle,
 
     db.appInstances[appInstanceHandle] = entry;
 
-    // Finally - let the service know of this app instance
+    // Finally - let the service know of this app instance, to populate
+    // the Java cache.
     env->CallIntMethod(db.jniInfo.jContextHubService,
                        db.jniInfo.contextHubServiceAddAppInstance,
                        hubHandle, entry.instanceId, entry.truncName,
                        entry.appInfo.version);
 
-    ALOGW("%s App 0x%" PRIx64 " on hub Handle %" PRId32
+    ALOGI("%s App 0x%" PRIx64 " on hub Handle %" PRId32
           " as appInstance %" PRId32, action, entry.truncName,
           entry.hubHandle, appInstanceHandle);
 
@@ -532,7 +534,7 @@ static void initContextHubService() {
             }
         }
 
-        sendQueryForApps(ALL_APPS);
+        sendQueryForApps();
     } else {
         ALOGW("No Context Hub Module present");
     }
@@ -576,16 +578,63 @@ int handle_query_apps_response(const uint8_t *msg, int msgLen,
             return -1;
     }
 
-    int numApps = msgLen/sizeof(hub_app_info);
-    hub_app_info info;
+    int numApps = msgLen / sizeof(hub_app_info);
     const hub_app_info *unalignedInfoAddr = (const hub_app_info*)msg;
 
-    for (int i = 0; i < numApps; i++, unalignedInfoAddr++) {
-        memcpy(&info, unalignedInfoAddr, sizeof(info));
+    // We use this information to sync our JNI and Java caches of nanoapp info.
+    // We want to accomplish two things here:
+    // 1) Remove entries from our caches which are stale, and pertained to
+    //    apps no longer running on Context Hub.
+    // 2) Populate our caches with the latest information of all these apps.
+
+    // We make a couple of assumptions here:
+    // A) The JNI and Java caches are in sync with each other (this isn't
+    //    necessarily true; any failure of a single call into Java land to
+    //    update its cache will leave that cache in a bad state.  For NYC,
+    //    we're willing to tolerate this for now).
+    // B) The total number of apps is relatively small, so horribly inefficent
+    //    algorithms aren't too painful.
+    // C) We're going to call this relatively infrequently, so its inefficency
+    //    isn't a big impact.
+
+
+    // (1).  Looking for stale cache entries.  Yes, this is O(N^2).  See
+    // assumption (B).  Per assumption (A), it is sufficient to iterate
+    // over just the JNI cache.
+    auto end = db.appInstances.end();
+    for (auto current = db.appInstances.begin(); current != end; ) {
+        app_instance_info_s cache_entry = current->second;
+        // We perform our iteration here because if we call
+        // delete_app_instance() below, it will erase() this entry.
+        current++;
+        bool entryIsStale = true;
+        for (int i = 0; i < numApps; i++) {
+            // We use memcmp since this could be unaligned.
+            if (memcmp(&unalignedInfoAddr[i].app_name.id,
+                       &cache_entry.appInfo.app_name.id,
+                       sizeof(cache_entry.appInfo.app_name.id)) == 0) {
+                // We found a match; this entry is current.
+                entryIsStale = false;
+                break;
+            }
+        }
+        if (entryIsStale) {
+            delete_app_instance(cache_entry.instanceId, env);
+        }
+    }
+
+    // (2).  Update our caches with the latest.
+    for (int i = 0; i < numApps; i++) {
+        hub_app_info query_info;
+        memcpy(&query_info, &unalignedInfoAddr[i], sizeof(query_info));
         // We will only have one instance of the app
         // TODO : Change this logic once we support multiple instances of the same app
-        jint appInstance = get_app_instance_for_app_id(info.app_name.id);
-        add_app_instance(&info, hubHandle, appInstance, env);
+        jint appInstance = get_app_instance_for_app_id(query_info.app_name.id);
+        if (appInstance == -1) {
+            // This is a previously unknown app, let's allocate an "id" for it.
+            appInstance = generate_id();
+        }
+        add_app_instance(&query_info, hubHandle, appInstance, env);
     }
 
     return 0;
@@ -709,7 +758,12 @@ static bool closeLoadTxn(bool success, jint *appInstanceHandle) {
             ALOGW("Could not attach to JVM !");
             success = false;
         }
-        sendQueryForApps(info->appInfo.app_name.id);
+        // While we just called add_app_instance above, our info->appInfo was
+        // incomplete (for example, the 'version' is hardcoded to -1).  So we
+        // trigger an additional query to the CHRE, so we'll be able to get
+        // all the app "info", and have our JNI and Java caches with the
+        // full information.
+        sendQueryForApps();
     } else {
         ALOGW("Could not load the app successfully ! Unexpected failure");
         *appInstanceHandle = INVALID_APP_ID;
@@ -737,24 +791,6 @@ static bool isValidOsStatus(const uint8_t *msg, size_t msgLen,
 
     // No sanity checks on return values
     return true;
-}
-
-static void invalidateNanoApps(uint32_t hubHandle) {
-    JNIEnv *env;
-
-    if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
-        ALOGW("Could not attach to JVM !");
-        env = nullptr;
-    }
-
-    auto end = db.appInstances.end();
-    for (auto current = db.appInstances.begin(); current != end; ) {
-        app_instance_info_s info = current->second;
-        current++;
-        if (info.hubHandle == hubHandle) {
-             delete_app_instance(info.instanceId, env);
-        }
-    }
 }
 
 static int handle_os_message(uint32_t msgType, uint32_t hubHandle,
@@ -824,8 +860,7 @@ static int handle_os_message(uint32_t msgType, uint32_t hubHandle,
               ALOGW("Context Hub handle %d restarted", hubHandle);
               closeTxn();
               passOnOsResponse(hubHandle, msgType, &rsp, nullptr, 0);
-              invalidateNanoApps(hubHandle);
-              query_hub_for_apps(ALL_APPS, hubHandle);
+              query_hub_for_apps(hubHandle);
               retVal = 0;
           }
           break;
