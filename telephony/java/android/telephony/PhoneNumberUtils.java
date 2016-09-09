@@ -24,6 +24,7 @@ import com.android.i18n.phonenumbers.ShortNumberUtil;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.CountryDetector;
 import android.net.Uri;
@@ -3021,4 +3022,79 @@ public class PhoneNumberUtils
         return SubscriptionManager.getDefaultVoiceSubscriptionId();
     }
     //==== End of utility methods used only in compareStrictly() =====
+
+
+    /*
+     * The config held calling number conversion map, expected to convert to emergency number.
+     */
+    private static final String[] CONVERT_TO_EMERGENCY_MAP = Resources.getSystem().getStringArray(
+            com.android.internal.R.array.config_convert_to_emergency_number_map);
+    /**
+     * Check whether conversion to emergency number is enabled
+     *
+     * @return {@code true} when conversion to emergency numbers is enabled,
+     *         {@code false} otherwise
+     *
+     * @hide
+     */
+    public static boolean isConvertToEmergencyNumberEnabled() {
+        return CONVERT_TO_EMERGENCY_MAP != null && CONVERT_TO_EMERGENCY_MAP.length > 0;
+    }
+
+    /**
+     * Converts to emergency number based on the conversion map.
+     * The conversion map is declared as config_convert_to_emergency_number_map.
+     *
+     * Make sure {@link #isConvertToEmergencyNumberEnabled} is true before calling
+     * this function.
+     *
+     * @return The converted emergency number if the number matches conversion map,
+     * otherwise original number.
+     *
+     * @hide
+     */
+    public static String convertToEmergencyNumber(String number) {
+        if (TextUtils.isEmpty(number)) {
+            return number;
+        }
+
+        String normalizedNumber = normalizeNumber(number);
+
+        // The number is already emergency number. Skip conversion.
+        if (isEmergencyNumber(normalizedNumber)) {
+            return number;
+        }
+
+        for (String convertMap : CONVERT_TO_EMERGENCY_MAP) {
+            if (DBG) log("convertToEmergencyNumber: " + convertMap);
+            String[] entry = null;
+            String[] filterNumbers = null;
+            String convertedNumber = null;
+            if (!TextUtils.isEmpty(convertMap)) {
+                entry = convertMap.split(":");
+            }
+            if (entry != null && entry.length == 2) {
+                convertedNumber = entry[1];
+                if (!TextUtils.isEmpty(entry[0])) {
+                    filterNumbers = entry[0].split(",");
+                }
+            }
+            // Skip if the format of entry is invalid
+            if (TextUtils.isEmpty(convertedNumber) || filterNumbers == null
+                    || filterNumbers.length == 0) {
+                continue;
+            }
+
+            for (String filterNumber : filterNumbers) {
+                if (DBG) log("convertToEmergencyNumber: filterNumber = " + filterNumber
+                        + ", convertedNumber = " + convertedNumber);
+                if (!TextUtils.isEmpty(filterNumber) && filterNumber.equals(normalizedNumber)) {
+                    if (DBG) log("convertToEmergencyNumber: Matched. Successfully converted to: "
+                            + convertedNumber);
+                    return convertedNumber;
+                }
+            }
+        }
+        return number;
+    }
 }
