@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -171,6 +170,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
+            } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
+                // For the time being, if the time changes, then invalidate the
+                // last-stack-active-time, this ensures that we will just show the last N tasks
+                // the next time that Recents loads, but prevents really old tasks from showing
+                // up if the task time is set forward.
+                Prefs.putLong(RecentsActivity.this, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+                        0);
             }
         }
     };
@@ -316,6 +322,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
@@ -793,19 +800,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().dump(prefix, writer);
         Recents.getTaskLoader().dump(prefix, writer);
 
-        ContentResolver cr = getContentResolver();
-        long lastPersistUptime = Settings.Secure.getLong(cr,
-                Settings.Secure.TASK_PERSISTER_LAST_WRITE_UPTIME, 0);
-        long lastVisibleTaskActiveUptime = Settings.Secure.getLongForUser(cr,
-                Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME,
-                SystemClock.elapsedRealtime(), Recents.getSystemServices().getCurrentUser());
-
         String id = Integer.toHexString(System.identityHashCode(this));
+        long lastStackActiveTime = Prefs.getLong(this,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
 
         writer.print(prefix); writer.print(TAG);
         writer.print(" visible="); writer.print(mIsVisible ? "Y" : "N");
-        writer.print(" lastPersistUptime="); writer.print(lastPersistUptime);
-        writer.print(" lastVisibleTaskActiveUptime="); writer.print(lastVisibleTaskActiveUptime);
+        writer.print(" lastStackTaskActiveTime="); writer.print(lastStackActiveTime);
+        writer.print(" currentTime="); writer.print(System.currentTimeMillis());
         writer.print(" [0x"); writer.print(id); writer.print("]");
         writer.println();
 

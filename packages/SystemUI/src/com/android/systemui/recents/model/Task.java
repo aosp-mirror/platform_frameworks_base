@@ -290,10 +290,7 @@ public class Task {
      */
     public boolean isFreeformTask() {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp != null) {
-            return ssp.hasFreeformWorkspaceSupport() && ssp.isFreeformStack(key.stackId);
-        }
-        return false;
+        return ssp.hasFreeformWorkspaceSupport() && ssp.isFreeformStack(key.stackId);
     }
 
     /** Notifies the callback listeners that this task has been loaded */
