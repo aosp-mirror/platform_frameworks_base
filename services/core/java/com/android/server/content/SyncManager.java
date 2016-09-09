@@ -504,7 +504,7 @@ public class SyncManager {
             @Override
             public void onSyncRequest(SyncStorageEngine.EndPoint info, int reason, Bundle extras) {
                 scheduleSync(info.account, info.userId, reason, info.provider, extras,
-                        false);
+                        AuthorityInfo.UNDEFINED);
             }
         });
 
@@ -534,7 +534,7 @@ public class SyncManager {
                 if (!removed) {
                     scheduleSync(null, UserHandle.USER_ALL,
                             SyncOperation.REASON_SERVICE_CHANGED,
-                            type.authority, null, false /* onlyThoseWithUnkownSyncableState */);
+                            type.authority, null, AuthorityInfo.UNDEFINED);
                 }
             }
         }, mSyncHandler);
@@ -575,6 +575,15 @@ public class SyncManager {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
         mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
+
+        mAccountManagerInternal.addOnAppPermissionChangeListener((Account account, int uid) -> {
+            // If the UID gained access to the account kick-off syncs lacking account access
+            if (mAccountManagerInternal.hasAccountAccess(account, uid)) {
+                scheduleSync(account, UserHandle.getUserId(uid),
+                        SyncOperation.REASON_ACCOUNTS_UPDATED,
+                        null, null, AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS);
+            }
+        });
 
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
@@ -671,7 +680,7 @@ public class SyncManager {
                         service.type.accountType, userHandle)) {
                     if (!canAccessAccount(account, packageName, userId)) {
                         mAccountManager.updateAppPermission(account,
-                                AccountManager.ACCOUNT_ACCESS_TOKEN, service.uid, true);
+                                AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, service.uid, true);
                     }
                 }
             }
@@ -778,10 +787,11 @@ public class SyncManager {
      * @param extras a Map of SyncAdapter-specific information to control
      *          syncs of a specific provider. Can be null. Is ignored
      *          if the url is null.
-     * @param onlyThoseWithUnkownSyncableState Only sync authorities that have unknown state.
+     * @param targetSyncState Only sync authorities that have the specified sync state.
+     *           Use {@link AuthorityInfo#UNDEFINED} to sync all authorities.
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
-            String requestedAuthority, Bundle extras, boolean onlyThoseWithUnkownSyncableState) {
+            String requestedAuthority, Bundle extras, int targetSyncState) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -888,7 +898,7 @@ public class SyncManager {
                                 if (result != null
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
                                     scheduleSync(account.account, userId, reason, authority,
-                                            finalExtras, onlyThoseWithUnkownSyncableState);
+                                            finalExtras, targetSyncState);
                                 }
                             }
                         ));
@@ -903,9 +913,10 @@ public class SyncManager {
                     isSyncable = AuthorityInfo.SYNCABLE;
                 }
 
-                if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
+                if (targetSyncState != AuthorityInfo.UNDEFINED && targetSyncState != isSyncable) {
                     continue;
                 }
+
                 if (!syncAdapterInfo.type.supportsUploading() && uploadOnly) {
                     continue;
                 }
@@ -931,7 +942,7 @@ public class SyncManager {
 
                 final String owningPackage = syncAdapterInfo.componentName.getPackageName();
 
-                if (isSyncable < 0) {
+                if (isSyncable == AuthorityInfo.NOT_INITIALIZED) {
                     // Initialisation sync.
                     Bundle newExtras = new Bundle();
                     newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
@@ -950,8 +961,8 @@ public class SyncManager {
                                     owningUid, owningPackage, reason, source,
                                     authority, newExtras, allowParallelSyncs)
                     );
-                }
-                if (!onlyThoseWithUnkownSyncableState) {
+                } else if (targetSyncState == AuthorityInfo.UNDEFINED
+                        || targetSyncState == isSyncable) {
                     if (isLoggable) {
                         Slog.v(TAG, "scheduleSync:"
                                 + " delay until " + delayUntil
@@ -1076,7 +1087,7 @@ public class SyncManager {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
-                false /* onlyThoseWithUnkownSyncableState */);
+                AuthorityInfo.UNDEFINED);
     }
 
     public SyncAdapterType[] getSyncAdapterTypes(int userId) {
@@ -1535,7 +1546,7 @@ public class SyncManager {
                 mContext.getOpPackageName());
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
-                    true /* onlyThoseWithUnknownSyncableState */);
+                    AuthorityInfo.NOT_INITIALIZED);
         }
     }
 
@@ -2714,7 +2725,8 @@ public class SyncManager {
 
             if (syncTargets != null) {
                 scheduleSync(syncTargets.account, syncTargets.userId,
-                        SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider, null, true);
+                        SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider,
+                null, AuthorityInfo.NOT_INITIALIZED);
             }
         }
 
