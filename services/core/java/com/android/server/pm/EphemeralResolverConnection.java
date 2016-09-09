@@ -60,7 +60,7 @@ final class EphemeralResolverConnection {
 
     public EphemeralResolverConnection(Context context, ComponentName componentName) {
         mContext = context;
-        mIntent = new Intent().setComponent(componentName);
+        mIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE).setComponent(componentName);
     }
 
     public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(
