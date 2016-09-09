@@ -156,6 +156,16 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang":"en"
   },
   {
+    "title":"GPU Debugger",
+    "summary":"Use the GPU Debugger to analyze and debug your OpenGL ES apps. Inspect the GPU state and understand what caused a specific rendering outcome.",
+    "url":"studio/debug/am-gpu-debugger.html",
+    "image":"images/tools/thumbnails/am-gpu-debugger_2-2_2x.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor","debug"],
+    "tags": ["android","performance","profiling","tools","monitor","debug"],
+    "lang":"en"
+  },
+  {
     "title":"HPROF Viewer and Analyzer",
     "summary":"Use the Memory Monitor to dump the Java heap to an HPROF file. The HPROF Viewer displays classes, instances of each class, and a reference tree to help you track memory usage and find memory leaks.",
     "url":"studio/profile/am-hprof.html",
@@ -5451,6 +5461,12 @@ METADATA['en'].collections = {
        "studio/profile/am-allocation.html",
        "studio/profile/am-methodtrace.html",
        "studio/profile/am-sysinfo.html"
+    ]
+  },
+"tools/help/gpu": {
+    "title": "",
+    "resources": [
+       "studio/debug/am-gpu-debugger.html"
     ]
   },
   "tools/help/shot": {
