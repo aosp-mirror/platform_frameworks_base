@@ -92,6 +92,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -291,6 +292,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
     private static final int MSG_POLICIES_CHANGED = 13;
+    private static final int MSG_SET_FIREWALL_RULES = 14;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -2584,10 +2586,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     uidRules.put(mUidState.keyAt(i), FIREWALL_RULE_ALLOW);
                 }
             }
-            setUidFirewallRules(chain, uidRules);
+            setUidFirewallRulesAsync(chain, uidRules, CHAIN_TOGGLE_ENABLE);
+        } else {
+            setUidFirewallRulesAsync(chain, null, CHAIN_TOGGLE_DISABLE);
         }
-
-        enableFirewallChainUL(chain, enabled);
     }
 
     private boolean isWhitelistedBatterySaverUL(int uid) {
@@ -2631,7 +2633,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
 
-            setUidFirewallRules(FIREWALL_CHAIN_STANDBY, uidRules);
+            setUidFirewallRulesAsync(FIREWALL_CHAIN_STANDBY, uidRules, CHAIN_TOGGLE_NONE);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
@@ -3237,6 +3239,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     removeInterfaceQuota((String) msg.obj);
                     return true;
                 }
+                case MSG_SET_FIREWALL_RULES: {
+                    final int chain = msg.arg1;
+                    final int toggle = msg.arg2;
+                    final SparseIntArray uidRules = (SparseIntArray) msg.obj;
+                    if (uidRules != null) {
+                        setUidFirewallRules(chain, uidRules);
+                    }
+                    if (toggle != CHAIN_TOGGLE_NONE) {
+                        enableFirewallChainUL(chain, toggle == CHAIN_TOGGLE_ENABLE);
+                    }
+                    return true;
+                }
                 default: {
                     return false;
                 }
@@ -3300,6 +3314,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
+    }
+
+    private static final int CHAIN_TOGGLE_NONE = 0;
+    private static final int CHAIN_TOGGLE_ENABLE = 1;
+    private static final int CHAIN_TOGGLE_DISABLE = 2;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, value = {
+            CHAIN_TOGGLE_NONE,
+            CHAIN_TOGGLE_ENABLE,
+            CHAIN_TOGGLE_DISABLE
+    })
+    public @interface ChainToggleType {
+    }
+
+    /**
+     * Calls {@link #setUidFirewallRules(int, SparseIntArray)} and
+     * {@link #enableFirewallChainUL(int, boolean)} asynchronously.
+     *
+     * @param chain firewall chain.
+     * @param uidRules new UID rules; if {@code null}, only toggles chain state.
+     * @param toggle whether the chain should be enabled, disabled, or not changed.
+     */
+    private void setUidFirewallRulesAsync(int chain, @Nullable SparseIntArray uidRules,
+            @ChainToggleType int toggle) {
+        mHandler.obtainMessage(MSG_SET_FIREWALL_RULES, chain, toggle, uidRules).sendToTarget();
     }
 
     /**
