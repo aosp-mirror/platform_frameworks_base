@@ -2539,18 +2539,18 @@ public final class PowerManagerService extends SystemService
 
     boolean setDeviceIdleModeInternal(boolean enabled) {
         synchronized (mLock) {
-            if (mDeviceIdleMode != enabled) {
-                mDeviceIdleMode = enabled;
-                updateWakeLockDisabledStatesLocked();
-                if (enabled) {
-                    EventLogTags.writeDeviceIdleOnPhase("power");
-                } else {
-                    EventLogTags.writeDeviceIdleOffPhase("power");
-                }
-                return true;
+            if (mDeviceIdleMode == enabled) {
+                return false;
             }
-            return false;
+            mDeviceIdleMode = enabled;
+            updateWakeLockDisabledStatesLocked();
         }
+        if (enabled) {
+            EventLogTags.writeDeviceIdleOnPhase("power");
+        } else {
+            EventLogTags.writeDeviceIdleOffPhase("power");
+        }
+        return true;
     }
 
     boolean setLightDeviceIdleModeInternal(boolean enabled) {
