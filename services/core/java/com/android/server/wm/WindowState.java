@@ -3980,60 +3980,6 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         return false;
     }
 
-    /** Places this window after the input window in the window list. */
-    void addWindowToListAfter(WindowState pos) {
-        final WindowList windows = pos.getWindowList();
-        final int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Adding window " + this + " at " + (i+1) + " of " + windows.size()
-                + " (after " + pos + ")");
-        windows.add(i+1, this);
-        mService.mWindowsChanged = true;
-    }
-
-    /** Places this window before the input window in the window list. */
-    void addWindowToListBefore(WindowState pos) {
-        final WindowList windows = pos.getWindowList();
-        int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Adding window " + this + " at " + i + " of " + windows.size()
-                + " (before " + pos + ")");
-        if (i < 0) {
-            Slog.w(TAG_WM, "addWindowToListBefore: Unable to find " + pos + " in " + windows);
-            i = 0;
-        }
-        windows.add(i, this);
-        mService.mWindowsChanged = true;
-    }
-
-    /** Adds this non-app window to the window list. */
-    void addNonAppWindowToList() {
-        final WindowList windows = getWindowList();
-
-        // Figure out where window should go, based on layer.
-        int i;
-        for (i = windows.size() - 1; i >= 0; i--) {
-            final WindowState otherWin = windows.get(i);
-            if (otherWin.getBaseType() != TYPE_WALLPAPER && otherWin.mBaseLayer <= mBaseLayer) {
-                // Wallpaper wanders through the window list, for example to position itself
-                // directly behind keyguard. Because of this it will break the ordering based on
-                // WindowState.mBaseLayer. There might windows with higher mBaseLayer behind it and
-                // we don't want the new window to appear above them. An example of this is adding
-                // of the docked stack divider. Consider a scenario with the following ordering (top
-                // to bottom): keyguard, wallpaper, assist preview, apps. We want the dock divider
-                // to land below the assist preview, so the dock divider must ignore the wallpaper,
-                // with which it shares the base layer.
-                break;
-            }
-        }
-
-        i++;
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                "Free window: Adding window " + this + " at " + i + " of " + windows.size());
-        windows.add(i, this);
-        mService.mWindowsChanged = true;
-    }
-
     void updateReportedVisibility(UpdateReportedVisibilityResults results) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState c = (WindowState) mChildren.get(i);
