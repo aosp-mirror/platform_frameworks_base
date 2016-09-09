@@ -5929,6 +5929,18 @@ public final class Settings {
         public static final String DOZE_ENABLED = "doze_enabled";
 
         /**
+         * Whether the device should pulse on pick up gesture.
+         * @hide
+         */
+        public static final String DOZE_PULSE_ON_PICK_UP = "doze_pulse_on_pick_up";
+
+        /**
+         * Whether the device should pulse on double tap gesture.
+         * @hide
+         */
+        public static final String DOZE_PULSE_ON_DOUBLE_TAP = "doze_pulse_on_double_tap";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -6413,6 +6425,9 @@ public final class Settings {
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
             SYSTEM_NAVIGATION_KEYS_ENABLED,
             QS_TILES,
+            DOZE_ENABLED,
+            DOZE_PULSE_ON_PICK_UP,
+            DOZE_PULSE_ON_DOUBLE_TAP
         };
 
         /**
