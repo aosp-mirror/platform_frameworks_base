@@ -1469,7 +1469,7 @@ public class ResolverActivity extends Activity {
                 boolean found = false;
                 // Only loop to the end of into as it was before we started; no dupes in from.
                 for (int j = 0; j < intoCount; j++) {
-                    final ResolvedComponentInfo rci = into.get(i);
+                    final ResolvedComponentInfo rci = into.get(j);
                     if (isSameResolvedComponent(newInfo, rci)) {
                         found = true;
                         rci.add(intent, newInfo);
