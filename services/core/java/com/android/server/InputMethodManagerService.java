@@ -822,7 +822,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onUnlockUser(final @UserIdInt int userHandle) {
             // Called on ActivityManager thread.
             mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER,
-                    userHandle));
+                    userHandle /* arg1 */, 0 /* arg2 */));
         }
     }
 
