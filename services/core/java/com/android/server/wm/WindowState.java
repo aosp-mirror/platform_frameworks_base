@@ -1935,7 +1935,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
         }
-        String name = makeInputChannelName();
+        String name = getName();
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
         mInputChannel = inputChannels[0];
         mClientChannel = inputChannels[1];
@@ -2843,6 +2843,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         region.op(mTmpRect, Region.Op.INTERSECT);
     }
 
+    // TODO: This is one reason why WindowList are bad...prime candidate for removal once we
+    // figure-out a good way to replace WindowList with WindowContainer hierarchy.
     WindowList getWindowList() {
         final DisplayContent displayContent = getDisplayContent();
         return displayContent == null ? null : displayContent.getWindowList();
@@ -3329,7 +3331,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
     }
 
-    String makeInputChannelName() {
+    @Override
+    String getName() {
         return Integer.toHexString(System.identityHashCode(this))
             + " " + getWindowTag();
     }
@@ -3741,6 +3744,16 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             }
         }
         return highestAnimLayer;
+    }
+
+    @Override
+    int rebuildWindowList(DisplayContent dc, int addIndex) {
+        final DisplayContent winDisplayContent = getDisplayContent();
+        if (winDisplayContent == dc || winDisplayContent == null) {
+            mDisplayContent = dc;
+            return reAddWindow(addIndex);
+        }
+        return addIndex;
     }
 
     // TODO: come-up with a better name for this method that represents what it does.

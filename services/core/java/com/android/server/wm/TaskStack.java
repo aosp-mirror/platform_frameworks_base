@@ -1083,6 +1083,15 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mMinimizeAmount != 0f;
     }
 
+    void dumpChildrenNames(PrintWriter pw, String prefix) {
+        final String childPrefix = prefix + prefix;
+        for (int j = mTasks.size() - 1; j >= 0; j--) {
+            final Task task = mTasks.get(j);
+            pw.println("#" + j + " " + getName());
+            task.dumpChildrenNames(pw, childPrefix);
+        }
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "mStackId=" + mStackId);
         pw.println(prefix + "mDeferDetach=" + mDeferDetach);
@@ -1150,6 +1159,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override
     public String toString() {
         return "{stackId=" + mStackId + " tasks=" + mTasks + "}";
+    }
+
+    String getName() {
+        return toShortString();
     }
 
     @Override
@@ -1309,6 +1322,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    void onAppTransitionDone() {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.onAppTransitionDone();
+        }
+    }
+
     // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
     boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
         final Task firstTask = first.mTask;
@@ -1318,6 +1338,15 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return firstTask.isFirstGreaterThanSecond(first, second);
         }
         return mTasks.indexOf(first) > mTasks.indexOf(second);
+    }
+
+    int rebuildWindowList(DisplayContent dc, int addIndex) {
+        final int count = mTasks.size();
+        for (int i = 0; i < count; i++) {
+            final Task task = mTasks.get(i);
+            addIndex = task.rebuildWindowList(dc, addIndex);
+        }
+        return addIndex;
     }
 
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,

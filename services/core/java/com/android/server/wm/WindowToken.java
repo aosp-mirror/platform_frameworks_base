@@ -430,4 +430,9 @@ class WindowToken extends WindowContainer {
         }
         return stringName;
     }
+
+    @Override
+    String getName() {
+        return toString();
+    }
 }

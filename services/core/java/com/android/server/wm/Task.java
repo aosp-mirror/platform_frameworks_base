@@ -684,9 +684,25 @@ class Task implements DimLayer.DimLayerUser {
         return false;
     }
 
+    void onAppTransitionDone() {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken token = mAppTokens.get(i);
+            token.onAppTransitionDone();
+        }
+    }
+
     // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
     boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
         return mAppTokens.indexOf(first) > mAppTokens.indexOf(second);
+    }
+
+    int rebuildWindowList(DisplayContent dc, int addIndex) {
+        final int count = mAppTokens.size();
+        for (int i = 0; i < count; i++) {
+            final AppWindowToken token = mAppTokens.get(i);
+            addIndex = token.rebuildWindowList(dc, addIndex);
+        }
+        return addIndex;
     }
 
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
@@ -761,9 +777,22 @@ class Task implements DimLayer.DimLayerUser {
         return "{taskId=" + mTaskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
     }
 
+    String getName() {
+        return toShortString();
+    }
+
     @Override
     public String toShortString() {
         return "Task=" + mTaskId;
+    }
+
+    void dumpChildrenNames(PrintWriter pw, String prefix) {
+        final String childPrefix = prefix + prefix;
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken token = mAppTokens.get(i);
+            pw.println("#" + i + " " + getName());
+            token.dumpChildrenNames(pw, childPrefix);
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {

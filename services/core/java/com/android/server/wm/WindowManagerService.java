@@ -497,12 +497,6 @@ public class WindowManagerService extends IWindowManager.Stub
     Runnable mWaitingForDrawnCallback;
 
     /**
-     * Used when rebuilding window list to keep track of windows that have
-     * been removed.
-     */
-    WindowState[] mRebuildTmp = new WindowState[20];
-
-    /**
      * Stores for each user whether screencapture is disabled
      * This array is essentially a cache for all userId for
      * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
@@ -3805,42 +3799,12 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendMessage(m);
     }
 
-    void dumpAppTokensLocked() {
-        final int numStacks = mStackIdToStack.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
-            Slog.v(TAG_WM, "  Stack #" + stack.mStackId + " tasks from bottom to top:");
-            final ArrayList<Task> tasks = stack.getTasks();
-            final int numTasks = tasks.size();
-            for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                Slog.v(TAG_WM, "    Task #" + task.mTaskId + " activities from bottom to top:");
-                AppTokenList tokens = task.mAppTokens;
-                final int numTokens = tokens.size();
-                for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-                    Slog.v(TAG_WM, "      activity #" + tokenNdx + ": " + tokens.get(tokenNdx).token);
-                }
-            }
-        }
-    }
-
-    void dumpWindowsLocked() {
-        final int numDisplays = mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-            Slog.v(TAG_WM, " Display #" + displayContent.getDisplayId());
-            final WindowList windows = displayContent.getWindowList();
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                Slog.v(TAG_WM, "  #" + winNdx + ": " + windows.get(winNdx));
-            }
-        }
-    }
-
-    void moveStackWindowsLocked(DisplayContent displayContent) {
+    /** Rebuilds the input display's window list and does a relayout if something changed. */
+    private void rebuildAppWindowsAndLayoutIfNeededLocked(DisplayContent displayContent) {
         final WindowList windows = displayContent.getWindowList();
         mTmpWindows.addAll(windows);
 
-        rebuildAppWindowListLocked(displayContent);
+        displayContent.rebuildAppWindowList();
 
         // Set displayContent.layoutNeeded if window order changed.
         final int tmpSize = mTmpWindows.size();
@@ -3904,7 +3868,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(false);
                 }
-                moveStackWindowsLocked(displayContent);
+                rebuildAppWindowsAndLayoutIfNeededLocked(displayContent);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -3926,7 +3890,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAppTransition.isTransitionSet()) {
                     task.setSendingToBottom(true);
                 }
-                moveStackWindowsLocked(stack.getDisplayContent());
+                rebuildAppWindowsAndLayoutIfNeededLocked(stack.getDisplayContent());
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4692,7 +4656,6 @@ public class WindowManagerService extends IWindowManager.Stub
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                 final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
                 displayContent.switchUserStacks();
-                rebuildAppWindowListLocked(displayContent);
             }
             mWindowPlacerLocked.performSurfacePlacement();
 
@@ -8236,102 +8199,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return win;
     }
 
-    final void rebuildAppWindowListLocked() {
-        rebuildAppWindowListLocked(getDefaultDisplayContentLocked());
-    }
-
-    private void rebuildAppWindowListLocked(final DisplayContent displayContent) {
-        final WindowList windows = displayContent.getWindowList();
-        int NW = windows.size();
-        int i;
-        int lastBelow = -1;
-        int numRemoved = 0;
-
-        if (mRebuildTmp.length < NW) {
-            mRebuildTmp = new WindowState[NW+10];
-        }
-
-        // First remove all existing app windows.
-        i=0;
-        while (i < NW) {
-            WindowState w = windows.get(i);
-            if (w.mAppToken != null) {
-                WindowState win = windows.remove(i);
-                win.mRebuilding = true;
-                mRebuildTmp[numRemoved] = win;
-                mWindowsChanged = true;
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Rebuild removing window: " + win);
-                NW--;
-                numRemoved++;
-                continue;
-            } else if (lastBelow == i-1) {
-                if (w.mAttrs.type == TYPE_WALLPAPER) {
-                    lastBelow = i;
-                }
-            }
-            i++;
-        }
-
-        // Keep whatever windows were below the app windows still below, by skipping them.
-        lastBelow++;
-        i = lastBelow;
-
-        // First add all of the exiting app tokens...  these are no longer in the main app list,
-        // but still have windows shown. We put them in the back because now that the animation is
-        // over we no longer will care about them.
-        final ArrayList<TaskStack> stacks = displayContent.getStacks();
-        final int numStacks = stacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            AppTokenList exitingAppTokens = stacks.get(stackNdx).mExitingAppTokens;
-            int NT = exitingAppTokens.size();
-            for (int j = 0; j < NT; j++) {
-                i = exitingAppTokens.get(j).reAddAppWindows(displayContent, i);
-            }
-        }
-
-        // And add in the still active app tokens in Z order.
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            final ArrayList<Task> tasks = stacks.get(stackNdx).getTasks();
-            final int numTasks = tasks.size();
-            for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-                final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                final int numTokens = tokens.size();
-                for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-                    final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (wtoken.mIsExiting && !wtoken.waitingForReplacement()) {
-                        continue;
-                    }
-                    i = wtoken.reAddAppWindows(displayContent, i);
-                }
-            }
-        }
-
-        i -= lastBelow;
-        if (i != numRemoved) {
-            displayContent.layoutNeeded = true;
-            Slog.w(TAG_WM, "On display=" + displayContent.getDisplayId() + " Rebuild removed "
-                    + numRemoved + " windows but added " + i + " rebuildAppWindowListLocked() "
-                    + " callers=" + Debug.getCallers(10));
-            for (i = 0; i < numRemoved; i++) {
-                WindowState ws = mRebuildTmp[i];
-                if (ws.mRebuilding) {
-                    StringWriter sw = new StringWriter();
-                    PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                    ws.dump(pw, "", true);
-                    pw.flush();
-                    Slog.w(TAG_WM, "This window was lost: " + ws);
-                    Slog.w(TAG_WM, sw.toString());
-                    ws.mWinAnimator.destroySurfaceLocked();
-                }
-            }
-            Slog.w(TAG_WM, "Current app token list:");
-            dumpAppTokensLocked();
-            Slog.w(TAG_WM, "Final window list:");
-            dumpWindowsLocked();
-        }
-        Arrays.fill(mRebuildTmp, null);
-    }
-
     void makeWindowFreezingScreenIfNeededLocked(WindowState w) {
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
@@ -8368,27 +8235,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWallpaperControllerLocked.hideDeferredWallpapersIfNeeded();
 
-        // Restore window app tokens to the ActivityManager views
-        ArrayList<TaskStack> stacks = getDefaultDisplayContentLocked().getStacks();
-        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ArrayList<Task> tasks = stacks.get(stackNdx).getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                    tokens.get(tokenNdx).sendingToBottom = false;
-                }
-            }
-        }
-        rebuildAppWindowListLocked();
+        getDefaultDisplayContentLocked().onAppTransitionDone();
 
         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_LAYOUT;
         if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG_WM,
                 "Wallpaper layer changed: assigning layers + relayout");
         moveInputMethodWindowsIfNeededLocked(true);
         mWindowPlacerLocked.mWallpaperMayChange = true;
-        // Since the window list has been rebuilt, focus might
-        // have to be recomputed since the actual order of windows
-        // might have changed again.
+        // Since the window list has been rebuilt, focus might have to be recomputed since the
+        // actual order of windows might have changed again.
         mFocusMayChange = true;
 
         return changes;
@@ -8398,30 +8253,25 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq && !w.isGoneForLayoutLw()) {
             final Task task = w.getTask();
-            // In the case of stack bound animations, the window frames
-            // will update (unlike other animations which just modifiy
-            // various transformation properties). We don't want to
-            // notify the client of frame changes in this case. Not only
-            // is it a lot of churn, but the frame may not correspond
-            // to the surface size or the onscreen area at various
-            // phases in the animation, and the client will become
-            // sad and confused.
+            // In the case of stack bound animations, the window frames will update (unlike other
+            // animations which just modify various transformation properties). We don't want to
+            // notify the client of frame changes in this case. Not only is it a lot of churn, but
+            // the frame may not correspond to the surface size or the onscreen area at various
+            // phases in the animation, and the client will become sad and confused.
             if (task != null && task.mStack.getBoundsAnimating()) {
                 return;
             }
             w.setReportResizeHints();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
-                Slog.v(TAG_WM, "Win " + w + " config changed: "
-                        + mCurConfiguration);
+                Slog.v(TAG_WM, "Win " + w + " config changed: " + mCurConfiguration);
             }
             final boolean dragResizingChanged = w.isDragResizeChanged()
                     && !w.isDragResizingChangeReported();
 
-            if (localLOGV) Slog.v(TAG_WM, "Resizing " + w
-                    + ": configChanged=" + configChanged
-                    + " dragResizingChanged=" + dragResizingChanged
-                    + " last=" + w.mLastFrame + " frame=" + w.mFrame);
+            if (localLOGV) Slog.v(TAG_WM, "Resizing " + w + ": configChanged=" + configChanged
+                    + " dragResizingChanged=" + dragResizingChanged + " last=" + w.mLastFrame
+                    + " frame=" + w.mFrame);
 
             // We update mLastFrame always rather than in the conditional with the
             // last inset variables, because mFrameSizeChanged only tracks the
