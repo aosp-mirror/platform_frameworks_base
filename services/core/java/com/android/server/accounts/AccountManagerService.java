@@ -319,7 +319,7 @@ public class AccountManagerService
 
     private final SparseArray<UserAccounts> mUsers = new SparseArray<>();
     private final SparseBooleanArray mLocalUnlockedUsers = new SparseBooleanArray();
-    private CopyOnWriteArrayList<AccountManagerInternal.OnAppPermissionChangeListener>
+    private final CopyOnWriteArrayList<AccountManagerInternal.OnAppPermissionChangeListener>
             mAppPermissionChangeListeners = new CopyOnWriteArrayList<>();
 
     private static AtomicReference<AccountManagerService> sThis = new AtomicReference<>();
