@@ -2979,7 +2979,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "timestamp": 1383243492000,
     "image": "images/cards/google-search_2x.png",
     "title": "Set Up App Indexing",
-    "summary": "Surface your app content in Google seaerch. Deep link direct to your apps.",
+    "summary": "Surface your app content in Google search. Deep link direct to your apps.",
     "keywords": ["search", "appindexing", "engagement", "getusers"],
     "type": "distribute",
     "category": "google"
