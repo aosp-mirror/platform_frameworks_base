@@ -6340,21 +6340,6 @@ public final class Settings {
         public static final String WEB_ACTION_ENABLED = "web_action_enabled";
 
         /**
-         * The uptime when tasks were last persisted.  This is used to adjust the previous task
-         * active times to be relative to the current boot time.
-         * @hide
-         */
-        public static final String TASK_PERSISTER_LAST_WRITE_UPTIME = "task_persister_write_uptime";
-
-        /**
-         * Used by Overview to keep track of the last visible task's active time to determine what
-         * should tasks be visible.
-         * @hide
-         */
-        public static final String OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME =
-                "overview_last_visible_task_active_uptime";
-
-        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear

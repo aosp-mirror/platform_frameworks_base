@@ -24,15 +24,13 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -58,11 +56,6 @@ public class RecentsTaskLoadPlan {
     private static int SESSION_BEGIN_TIME = 1000 /* ms/s */ * 60 /* s/min */ * 60 /* min/hr */ *
             6 /* hrs */;
 
-    @VisibleForTesting
-    public interface SystemTimeProvider {
-        public long getTime();
-    }
-
     /** The set of conditions to load tasks. */
     public static class Options {
         public int runningTaskId = -1;
@@ -74,46 +67,15 @@ public class RecentsTaskLoadPlan {
         public int numVisibleTaskThumbnails = 0;
     }
 
-    private Context mContext;
-    @VisibleForTesting private SystemServicesProxy mSystemServicesProxy;
+    Context mContext;
 
-    private List<ActivityManager.RecentTaskInfo> mRawTasks;
-    private long mLastVisibileTaskActiveTime;
-    private TaskStack mStack;
-    private ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
-    private SystemTimeProvider mTimeProvider = new SystemTimeProvider() {
-        @Override
-        public long getTime() {
-            return SystemClock.elapsedRealtime();
-        }
-    };
+    List<ActivityManager.RecentTaskInfo> mRawTasks;
+    TaskStack mStack;
+    ArraySet<Integer> mCurrentQuietProfiles = new ArraySet<Integer>();
 
-    @VisibleForTesting
-    public RecentsTaskLoadPlan(Context context, SystemServicesProxy ssp) {
+    /** Package level ctor */
+    RecentsTaskLoadPlan(Context context) {
         mContext = context;
-        mSystemServicesProxy = ssp;
-    }
-
-    @VisibleForTesting
-    public void setInternals(List<ActivityManager.RecentTaskInfo> tasks,
-            final long currentTime, long lastVisibleTaskActiveTime) {
-        setInternals(tasks, MIN_NUM_TASKS, currentTime, lastVisibleTaskActiveTime,
-                SESSION_BEGIN_TIME);
-    }
-
-    @VisibleForTesting
-    public void setInternals(List<ActivityManager.RecentTaskInfo> tasks, int minNumTasks,
-            final long currentTime, long lastVisibleTaskActiveTime,  int sessionBeginTime) {
-        mRawTasks = tasks;
-        mLastVisibileTaskActiveTime = lastVisibleTaskActiveTime;
-        mTimeProvider = new SystemTimeProvider() {
-            @Override
-            public long getTime() {
-                return currentTime;
-            }
-        };
-        MIN_NUM_TASKS = minNumTasks;
-        SESSION_BEGIN_TIME = sessionBeginTime;
     }
 
     private void updateCurrentQuietProfilesCache(int currentUserId) {
@@ -141,13 +103,9 @@ public class RecentsTaskLoadPlan {
     public synchronized void preloadRawTasks(boolean includeFrontMostExcludedTask) {
         int currentUserId = UserHandle.USER_CURRENT;
         updateCurrentQuietProfilesCache(currentUserId);
-        mRawTasks = mSystemServicesProxy.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
                 currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
-        mLastVisibileTaskActiveTime = RecentsDebugFlags.Static.EnableMockTasks
-                ? SystemClock.elapsedRealtime()
-                : Settings.Secure.getLongForUser(mContext.getContentResolver(),
-                        Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME,
-                                0, currentUserId);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -176,9 +134,12 @@ public class RecentsTaskLoadPlan {
                 R.string.accessibility_recents_item_will_be_dismissed);
         String appInfoDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_open_app_info);
-        boolean updatedLastVisibleTaskActiveTime = false;
-        long newLastVisibileTaskActiveTime = 0;
-        long currentTime = mTimeProvider.getTime();
+        long lastStackActiveTime = Prefs.getLong(mContext,
+                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            lastStackActiveTime = 0;
+        }
+        long newLastStackActiveTime = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
@@ -187,20 +148,19 @@ public class RecentsTaskLoadPlan {
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
                     t.userId, t.firstActiveTime, t.lastActiveTime);
 
-            // Only show the task if it is freeform, or later than the last visible task active time
-            // and either recently used, or within the last five tasks
-            boolean isFreeformTask = mSystemServicesProxy.isFreeformStack(t.stackId);
-            boolean isRecentlyUsedTask = t.lastActiveTime >= (currentTime - SESSION_BEGIN_TIME);
-            boolean isMoreRecentThanLastVisible = t.lastActiveTime >= mLastVisibileTaskActiveTime;
-            boolean isStackTask = isFreeformTask || (isMoreRecentThanLastVisible &&
-                    (isRecentlyUsedTask || i >= (taskCount - MIN_NUM_TASKS)));
-            boolean isLaunchTarget = t.persistentId == runningTaskId;
+            // This task is only shown in the stack if it statisfies the historical time or min
+            // number of tasks constraints. Freeform tasks are also always shown.
+            boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
+            boolean isStackTask = isFreeformTask || !isHistoricalTask(t) ||
+                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
+            boolean isLaunchTarget = taskKey.id == runningTaskId;
 
-            // If this is the first task satisfying the stack constraints, update the baseline
-            // at which we show visible tasks
-            if (isStackTask && !updatedLastVisibleTaskActiveTime) {
-                newLastVisibileTaskActiveTime = t.lastActiveTime;
-                updatedLastVisibleTaskActiveTime = true;
+            // The last stack active time is the baseline for which we show visible tasks.  Since
+            // the system will store all the tasks, we don't want to show the tasks prior to the
+            // last visible ones, otherwise, as you dismiss them, the previous tasks may satisfy
+            // the other stack-task constraints.
+            if (isStackTask && newLastStackActiveTime < 0) {
+                newLastStackActiveTime = t.lastActiveTime;
             }
 
             // Load the title, icon, and color
@@ -228,12 +188,9 @@ public class RecentsTaskLoadPlan {
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
             affiliatedTasks.put(taskKey.id, taskKey);
         }
-        if (updatedLastVisibleTaskActiveTime &&
-                newLastVisibileTaskActiveTime != mLastVisibileTaskActiveTime) {
-            Settings.Secure.putLongForUser(mContext.getContentResolver(),
-                    Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME,
-                            newLastVisibileTaskActiveTime, UserHandle.USER_CURRENT);
-            mLastVisibileTaskActiveTime = newLastVisibileTaskActiveTime;
+        if (newLastStackActiveTime != -1) {
+            Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+                    newLastStackActiveTime);
         }
 
         // Initialize the stacks
@@ -297,5 +254,12 @@ public class RecentsTaskLoadPlan {
             return mStack.getTaskCount() > 0;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this task is too old to be shown.
+     */
+    private boolean isHistoricalTask(ActivityManager.RecentTaskInfo t) {
+        return t.lastActiveTime < (System.currentTimeMillis() - SESSION_BEGIN_TIME);
     }
 }
