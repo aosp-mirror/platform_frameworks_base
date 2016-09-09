@@ -566,8 +566,7 @@ public class NetworkPolicyManagerServiceTest {
     @Test
     @NetPolicyXml("uids-with-mixed-policies.xml")
     public void testGetUidsWithPolicy() throws Exception {
-        assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_NONE),
-                UID_A);
+        assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_NONE));
         assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND),
                 UID_B, UID_D);
         assertContainsInAnyOrder(mService.getUidsWithPolicy(POLICY_ALLOW_METERED_BACKGROUND),
