@@ -213,7 +213,9 @@ static void JHwBinder_native_registerService(
     sp<hardware::IBinder> binder = JHwBinder::GetNativeContext(env, thiz);
 
     status_t err = hardware::defaultServiceManager()->addService(
-                String16(reinterpret_cast<const char16_t *>(serviceName)),
+                String16(
+                    reinterpret_cast<const char16_t *>(serviceName),
+                    env->GetStringLength(serviceNameObj)),
                 binder,
                 kVersion);
 
@@ -245,12 +247,15 @@ static jobject JHwBinder_native_getService(
 
     LOG(INFO) << "looking for service '"
               << String8(String16(
-                          reinterpret_cast<const char16_t *>(serviceName))).string()
+                          reinterpret_cast<const char16_t *>(serviceName),
+                          env->GetStringLength(serviceNameObj))).string()
               << "'";
 
     sp<hardware::IBinder> service =
         hardware::defaultServiceManager()->getService(
-                String16(reinterpret_cast<const char16_t *>(serviceName)),
+                String16(
+                    reinterpret_cast<const char16_t *>(serviceName),
+                    env->GetStringLength(serviceNameObj)),
                 kVersion);
 
     env->ReleaseStringCritical(serviceNameObj, serviceName);
