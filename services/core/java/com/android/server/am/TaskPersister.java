@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
-import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Debug;
@@ -25,7 +24,6 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -82,7 +80,7 @@ public class TaskPersister {
     private static final String PERSISTED_TASK_IDS_FILENAME = "persisted_taskIds.txt";
     static final String IMAGE_EXTENSION = ".png";
 
-    @VisibleForTesting static final String TAG_TASK = "task";
+    private static final String TAG_TASK = "task";
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -409,41 +407,16 @@ public class TaskPersister {
         return null;
     }
 
-    @VisibleForTesting
     List<TaskRecord> restoreTasksForUserLocked(final int userId) {
         final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
         File userTasksDir = getUserTasksDir(userId);
+
         File[] recentFiles = userTasksDir.listFiles();
         if (recentFiles == null) {
             Slog.e(TAG, "restoreTasksForUserLocked: Unable to list files from " + userTasksDir);
             return tasks;
-        }
-
-        // Get the last persist uptime so we know how to adjust the first/last active times for each
-        // task
-        ContentResolver cr = mService.mContext.getContentResolver();
-        long lastPersistUptime = Settings.Secure.getLong(cr,
-                Settings.Secure.TASK_PERSISTER_LAST_WRITE_UPTIME, 0);
-        if (DEBUG) {
-            Slog.d(TaskPersister.TAG, "restoreTasksForUserLocked: lastPersistUptime=" +
-                    lastPersistUptime);
-        }
-
-        // Adjust the overview last visible task active time as we adjust the task active times when
-        // loading. See TaskRecord.restoreFromXml().  If we have not migrated yet, SystemUI will
-        // migrate the old value into the system setting.
-        if (lastPersistUptime > 0) {
-            long overviewLastActiveTime = Settings.Secure.getLongForUser(cr,
-                    Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME, 0, userId);
-            if (DEBUG) {
-                Slog.d(TaskPersister.TAG, "restoreTasksForUserLocked: overviewLastActiveTime=" +
-                        overviewLastActiveTime + " lastPersistUptime=" + lastPersistUptime);
-            }
-            Settings.Secure.putLongForUser(cr,
-                    Settings.Secure.OVERVIEW_LAST_VISIBLE_TASK_ACTIVE_UPTIME,
-                    -lastPersistUptime + overviewLastActiveTime, userId);
         }
 
         for (int taskNdx = 0; taskNdx < recentFiles.length; ++taskNdx) {
@@ -466,11 +439,15 @@ public class TaskPersister {
                     if (event == XmlPullParser.START_TAG) {
                         if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: START_TAG name=" + name);
                         if (TAG_TASK.equals(name)) {
-                            final TaskRecord task = TaskRecord.restoreFromXml(in, mService,
-                                    mStackSupervisor, lastPersistUptime);
+                            final TaskRecord task = TaskRecord.restoreFromXml(in, mStackSupervisor);
                             if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: restored task="
                                     + task);
                             if (task != null) {
+                                // XXX Don't add to write queue... there is no reason to write
+                                // out the stuff we just read, if we don't write it we will
+                                // read the same thing again.
+                                // mWriteQueue.add(new TaskWriteQueueItem(task));
+
                                 final int taskId = task.taskId;
                                 if (mStackSupervisor.anyTaskForIdLocked(taskId,
                                         /* restoreFromRecents= */ false, 0) != null) {
@@ -486,12 +463,6 @@ public class TaskPersister {
                                     task.isPersistable = true;
                                     tasks.add(task);
                                     recoveredTaskIds.add(taskId);
-
-                                    // We've shifted the first and last active times, so we need to
-                                    // persist the new task data to disk otherwise they will not
-                                    // have the updated values.  This is only done once whenever
-                                    // the recents are first loaded for the user.
-                                    wakeup(task, false);
                                 }
                             } else {
                                 Slog.e(TAG, "restoreTasksForUserLocked: Unable to restore taskFile="
@@ -780,15 +751,6 @@ public class TaskPersister {
                         }
                     }
                 }
-
-                // Always update the task persister uptime when updating any tasks
-                if (DEBUG) {
-                    Slog.d(TAG, "LazyTaskWriter: Updating last write uptime=" +
-                            SystemClock.elapsedRealtime());
-                }
-                Settings.Secure.putLong(mService.mContext.getContentResolver(),
-                        Settings.Secure.TASK_PERSISTER_LAST_WRITE_UPTIME,
-                        SystemClock.elapsedRealtime());
             }
         }
     }

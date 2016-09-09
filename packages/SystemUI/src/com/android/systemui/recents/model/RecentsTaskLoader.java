@@ -30,7 +30,6 @@ import android.os.HandlerThread;
 import android.util.Log;
 import android.util.LruCache;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -287,20 +286,6 @@ public class RecentsTaskLoader {
         }
     };
 
-    @VisibleForTesting
-    public RecentsTaskLoader() {
-        mActivityInfoCache = null;
-        mIconCache = null;
-        mThumbnailCache = null;
-        mActivityLabelCache = null;
-        mContentDescriptionCache = null;
-        mLoadQueue = null;
-        mLoader = null;
-
-        mMaxThumbnailCacheSize = 0;
-        mMaxIconCacheSize = 0;
-    }
-
     public RecentsTaskLoader(Context context) {
         Resources res = context.getResources();
         mDefaultTaskBarBackgroundColor =
@@ -347,8 +332,7 @@ public class RecentsTaskLoader {
 
     /** Creates a new plan for loading the recent tasks. */
     public RecentsTaskLoadPlan createLoadPlan(Context context) {
-        RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context,
-                Recents.getSystemServices());
+        RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context);
         return plan;
     }
 
@@ -471,8 +455,7 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached task label if the task key is not expired, updating the cache if it is.
      */
-    @VisibleForTesting public String getAndUpdateActivityTitle(Task.TaskKey taskKey,
-            ActivityManager.TaskDescription td) {
+    String getAndUpdateActivityTitle(Task.TaskKey taskKey, ActivityManager.TaskDescription td) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the task description label if it exists
@@ -500,8 +483,7 @@ public class RecentsTaskLoader {
      * Returns the cached task content description if the task key is not expired, updating the
      * cache if it is.
      */
-    @VisibleForTesting public String getAndUpdateContentDescription(Task.TaskKey taskKey,
-            Resources res) {
+    String getAndUpdateContentDescription(Task.TaskKey taskKey, Resources res) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached content description if it exists
@@ -525,8 +507,8 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached task icon if the task key is not expired, updating the cache if it is.
      */
-    @VisibleForTesting public Drawable getAndUpdateActivityIcon(Task.TaskKey taskKey,
-            ActivityManager.TaskDescription td, Resources res, boolean loadIfNotCached) {
+    Drawable getAndUpdateActivityIcon(Task.TaskKey taskKey, ActivityManager.TaskDescription td,
+            Resources res, boolean loadIfNotCached) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached activity icon if it exists
@@ -560,8 +542,7 @@ public class RecentsTaskLoader {
     /**
      * Returns the cached thumbnail if the task key is not expired, updating the cache if it is.
      */
-    @VisibleForTesting public Bitmap getAndUpdateThumbnail(Task.TaskKey taskKey,
-            boolean loadIfNotCached) {
+    Bitmap getAndUpdateThumbnail(Task.TaskKey taskKey, boolean loadIfNotCached) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached thumbnail if it exists
@@ -589,7 +570,7 @@ public class RecentsTaskLoader {
      * Returns the task's primary color if possible, defaulting to the default color if there is
      * no specified primary color.
      */
-    @VisibleForTesting public int getActivityPrimaryColor(ActivityManager.TaskDescription td) {
+    int getActivityPrimaryColor(ActivityManager.TaskDescription td) {
         if (td != null && td.getPrimaryColor() != 0) {
             return td.getPrimaryColor();
         }
@@ -599,7 +580,7 @@ public class RecentsTaskLoader {
     /**
      * Returns the task's background color if possible.
      */
-    @VisibleForTesting public int getActivityBackgroundColor(ActivityManager.TaskDescription td) {
+    int getActivityBackgroundColor(ActivityManager.TaskDescription td) {
         if (td != null && td.getBackgroundColor() != 0) {
             return td.getBackgroundColor();
         }
@@ -610,7 +591,7 @@ public class RecentsTaskLoader {
      * Returns the activity info for the given task key, retrieving one from the system if the
      * task key is expired.
      */
-    @VisibleForTesting public ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
+    ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ComponentName cn = taskKey.getComponent();
         ActivityInfo activityInfo = mActivityInfoCache.get(cn);
