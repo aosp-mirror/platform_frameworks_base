@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.os.IDeviceIdentifiersPolicyService;
 import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -6516,6 +6517,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             ProfilerInfo profilerInfo = profileFile == null ? null
                     : new ProfilerInfo(profileFile, profileFd, samplingInterval, profileAutoStop);
+
+            // We deprecated Build.SERIAL and only apps that target pre NMR1
+            // SDK can see it. Since access to the serial is now behind a
+            // permission we push down the value.
+            String buildSerial = Build.UNKNOWN;
+            if (appInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
+                buildSerial = IDeviceIdentifiersPolicyService.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE))
+                        .getSerial();
+            }
+
             thread.bindApplication(processName, appInfo, providers, app.instrumentationClass,
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode,
@@ -6523,7 +6535,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     isRestrictedBackupMode || !normalMode, app.persistent,
                     new Configuration(mConfiguration), app.compat,
                     getCommonServicesLocked(app.isolated),
-                    mCoreSettingsObserver.getCoreSettingsLocked());
+                    mCoreSettingsObserver.getCoreSettingsLocked(),
+                    buildSerial);
+
             updateLruProcessLocked(app, false, null);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {

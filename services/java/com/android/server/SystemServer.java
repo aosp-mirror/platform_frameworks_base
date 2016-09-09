@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -32,7 +31,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.FileUtils;
-import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -79,6 +77,7 @@ import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
+import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer;
@@ -425,6 +424,12 @@ public final class SystemServer {
         // permissions.  We need this to complete before we initialize other services.
         traceBeginAndSlog("StartInstaller");
         Installer installer = mSystemServiceManager.startService(Installer.class);
+        traceEnd();
+
+        // In some cases after launching an app we need to access device identifiers,
+        // therefore register the device identifier policy before the activity manager.
+        traceBeginAndSlog("DeviceIdentifiersPolicyService");
+        mSystemServiceManager.startService(DeviceIdentifiersPolicyService.class);
         traceEnd();
 
         // Activity manager runs the show.

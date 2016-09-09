@@ -98,8 +98,8 @@ public interface IApplicationThread extends IInterface {
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, Configuration config,
-            CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings)
-            throws RemoteException;
+            CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings,
+            String buildSerial) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;

@@ -301,10 +301,11 @@ public abstract class ApplicationThreadNative extends Binder
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
+            String buildSerial = data.readString();
             bindApplication(packageName, info, providers, testName, profilerInfo, testArgs,
                     testWatcher, uiAutomationConnection, testMode, enableBinderTracking,
                     trackAllocation, restrictedBackupMode, persistent, config, compatInfo, services,
-                    coreSettings);
+                    coreSettings, buildSerial);
             return true;
         }
 
@@ -1058,7 +1059,8 @@ class ApplicationThreadProxy implements IApplicationThread {
             IUiAutomationConnection uiAutomationConnection, int debugMode,
             boolean enableBinderTracking, boolean trackAllocation, boolean restrictedBackupMode,
             boolean persistent, Configuration config, CompatibilityInfo compatInfo,
-            Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
+            Map<String, IBinder> services, Bundle coreSettings, String buildSerial)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -1088,6 +1090,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         compatInfo.writeToParcel(data, 0);
         data.writeMap(services);
         data.writeBundle(coreSettings);
+        data.writeString(buildSerial);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

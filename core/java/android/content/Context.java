@@ -3675,6 +3675,12 @@ public abstract class Context {
     public static final String GATEKEEPER_SERVICE = "android.service.gatekeeper.IGateKeeperService";
 
     /**
+     * Service defining the policy for access to device identifiers.
+     * @hide
+     */
+    public static final String DEVICE_IDENTIFIERS_SERVICE = "device_identifiers";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

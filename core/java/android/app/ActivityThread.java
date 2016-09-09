@@ -128,6 +128,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -517,6 +519,7 @@ public final class ActivityThread {
         boolean persistent;
         Configuration config;
         CompatibilityInfo compatInfo;
+        String buildSerial;
 
         /** Initial values for {@link Profiler}. */
         ProfilerInfo initProfilerInfo;
@@ -851,7 +854,8 @@ public final class ActivityThread {
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
-                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings) {
+                CompatibilityInfo compatInfo, Map<String, IBinder> services, Bundle coreSettings,
+                String buildSerial) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -876,6 +880,7 @@ public final class ActivityThread {
             data.config = config;
             data.compatInfo = compatInfo;
             data.initProfilerInfo = profilerInfo;
+            data.buildSerial = buildSerial;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -5180,6 +5185,18 @@ public final class ActivityThread {
          */
         if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
             StrictMode.enableDeathOnFileUriExposure();
+        }
+
+        // We deprecated Build.SERIAL and only apps that target pre NMR1
+        // SDK can see it. Since access to the serial is now behind a
+        // permission we push down the value and here we fix it up
+        // before any app code has been loaded.
+        try {
+            Field field = Build.class.getDeclaredField("SERIAL");
+            field.setAccessible(true);
+            field.set(Build.class, data.buildSerial);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            /* ignore */
         }
 
         if (data.debugMode != IApplicationThread.DEBUG_OFF) {
