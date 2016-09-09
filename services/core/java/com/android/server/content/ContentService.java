@@ -482,7 +482,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 syncManager.scheduleSync(account, userId, uId, authority, extras,
-                        false /* onlyThoseWithUnkownSyncableState */);
+                        SyncStorageEngine.AuthorityInfo.UNDEFINED);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -548,7 +548,7 @@ public final class ContentService extends IContentService.Stub {
             } else {
                 syncManager.scheduleSync(
                         request.getAccount(), userId, callerUid, request.getProvider(), extras,
-                        false /* onlyThoseWithUnknownSyncableState */);
+                        SyncStorageEngine.AuthorityInfo.UNDEFINED);
             }
         } finally {
             restoreCallingIdentity(identityToken);
