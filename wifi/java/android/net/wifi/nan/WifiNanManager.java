@@ -60,7 +60,7 @@ import java.util.Arrays;
  * The class provides access to:
  * <ul>
  * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
- * {@link #connect(Looper, WifiNanEventCallback)}.
+ * {@link #connect(Handler, WifiNanEventCallback)}.
  * <li>Create discovery sessions (publish or subscribe sessions).
  * Refer to {@link #publish(PublishConfig, WifiNanSessionCallback)} and
  * {@link #subscribe(SubscribeConfig, WifiNanSessionCallback)}.
@@ -77,7 +77,7 @@ import java.util.Arrays;
  *     Note that this broadcast is not sticky - you should register for it and then check the
  *     above API to avoid a race condition.
  * <p>
- *     An application must use {@link #connect(Looper, WifiNanEventCallback)} to initialize a NAN
+ *     An application must use {@link #connect(Handler, WifiNanEventCallback)} to initialize a NAN
  *     cluster - before making any other NAN operation. NAN cluster membership is a device-wide
  *     operation - the API guarantees that the device is in a cluster or joins a NAN cluster (or
  *     starts one if none can be found). Information about connection success (or failure) are
@@ -345,13 +345,13 @@ public class WifiNanManager {
      * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
      * than this function will simply indicate success immediately.
      *
-     * @param looper The Looper on which to execute all callbacks related to the
+     * @param handler The Handler on whose thread to execute all callbacks related to the
      *            connection - including all sessions opened as part of this
-     *            connection.
+     *            connection. If a null is provided then the application's main thread will be used.
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(@NonNull Looper looper, @NonNull WifiNanEventCallback callback) {
-        connect(looper, null, callback);
+    public void connect(@Nullable Handler handler, @NonNull WifiNanEventCallback callback) {
+        connect(handler, null, callback);
     }
 
     /**
@@ -362,30 +362,31 @@ public class WifiNanManager {
      * An application <b>must</b> call {@link #disconnect()} when done with the Wi-Fi NAN
      * connection. Allows requesting a specific configuration using {@link ConfigRequest}. If not
      * necessary (default configuration should usually work) use the
-     * {@link #connect(Looper, WifiNanEventCallback)} method instead.
+     * {@link #connect(Handler, WifiNanEventCallback)} method instead.
      * <p>
      * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
      * than this function will simply indicate success immediately.
      *
-     * @param looper The Looper on which to execute all callbacks related to the
+     * @param handler The Handler on whose thread to execute all callbacks related to the
      *            connection - including all sessions opened as part of this
-     *            connection.
+     *            connection. If a null is provided then the application's main thread will be used.
      * @param configRequest The requested NAN configuration.
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(@NonNull Looper looper, @Nullable ConfigRequest configRequest,
+    public void connect(@Nullable Handler handler, @Nullable ConfigRequest configRequest,
             @NonNull WifiNanEventCallback callback) {
         if (VDBG) {
-            Log.v(TAG, "connect(): looper=" + looper + ", callback=" + callback + ", configRequest="
-                    + configRequest);
+            Log.v(TAG,
+                    "connect(): handler=" + handler + ", callback=" + callback + ", configRequest="
+                            + configRequest);
         }
 
         synchronized (mLock) {
-            mLooper = looper;
+            mLooper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
 
             try {
                 mClientId = mService.connect(mBinder, mContext.getOpPackageName(),
-                        new WifiNanEventCallbackProxy(this, looper, callback), configRequest);
+                        new WifiNanEventCallbackProxy(this, mLooper, callback), configRequest);
             } catch (RemoteException e) {
                 mClientId = INVALID_CLIENT_ID;
                 mLooper = null;
@@ -404,7 +405,7 @@ public class WifiNanManager {
      * connections explicitly before a disconnect.
      * <p>
      * An application may re-connect after a disconnect using
-     * {@link WifiNanManager#connect(Looper, WifiNanEventCallback)} .
+     * {@link WifiNanManager#connect(Handler, WifiNanEventCallback)} .
      */
     public void disconnect() {
         if (VDBG) Log.v(TAG, "disconnect()");
