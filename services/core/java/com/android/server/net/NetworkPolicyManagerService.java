@@ -2217,23 +2217,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void setDeviceIdleMode(boolean enabled) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDeviceIdleMode");
         try {
             synchronized (mUidRulesFirstLock) {
-                if (mDeviceIdleMode != enabled) {
-                    mDeviceIdleMode = enabled;
-                    if (mSystemReady) {
-                        // Device idle change means we need to rebuild rules for all
-                        // known apps, so do a global refresh.
-                        updateRulesForRestrictPowerUL();
-                    }
-                    if (enabled) {
-                        EventLogTags.writeDeviceIdleOnPhase("net");
-                    } else {
-                        EventLogTags.writeDeviceIdleOffPhase("net");
-                    }
+                if (mDeviceIdleMode == enabled) {
+                    return;
                 }
+                mDeviceIdleMode = enabled;
+                if (mSystemReady) {
+                    // Device idle change means we need to rebuild rules for all
+                    // known apps, so do a global refresh.
+                    updateRulesForRestrictPowerUL();
+                }
+            }
+            if (enabled) {
+                EventLogTags.writeDeviceIdleOnPhase("net");
+            } else {
+                EventLogTags.writeDeviceIdleOffPhase("net");
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
