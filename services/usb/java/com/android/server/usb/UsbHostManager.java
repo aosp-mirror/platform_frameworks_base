@@ -63,7 +63,7 @@ public class UsbHostManager {
     private final UsbSettingsManager mSettingsManager;
 
     @GuardedBy("mLock")
-    private UsbUserSettingsManager mCurrentUserSettings;
+    private UsbProfileGroupSettingsManager mCurrentSettings;
 
     @GuardedBy("mLock")
     private ComponentName mUsbDeviceConnectionHandler;
@@ -83,15 +83,15 @@ public class UsbHostManager {
         }
     }
 
-    public void setCurrentUserSettings(UsbUserSettingsManager settings) {
+    public void setCurrentUserSettings(UsbProfileGroupSettingsManager settings) {
         synchronized (mLock) {
-            mCurrentUserSettings = settings;
+            mCurrentSettings = settings;
         }
     }
 
-    private UsbUserSettingsManager getCurrentUserSettings() {
+    private UsbProfileGroupSettingsManager getCurrentUserSettings() {
         synchronized (mLock) {
-            return mCurrentUserSettings;
+            return mCurrentSettings;
         }
     }
 

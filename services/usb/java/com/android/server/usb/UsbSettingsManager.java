@@ -20,10 +20,12 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
@@ -43,8 +45,18 @@ class UsbSettingsManager {
     @GuardedBy("mSettingsByUser")
     private final SparseArray<UsbUserSettingsManager> mSettingsByUser = new SparseArray<>();
 
+    /**
+     * Map from the parent profile's user id to {@link UsbProfileGroupSettingsManager} for the
+     * group.
+     */
+    @GuardedBy("mSettingsByProfileGroup")
+    private final SparseArray<UsbProfileGroupSettingsManager> mSettingsByProfileGroup
+            = new SparseArray<>();
+    private UserManager mUserManager;
+
     public UsbSettingsManager(@NonNull Context context) {
         mContext = context;
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     /**
@@ -60,6 +72,34 @@ class UsbSettingsManager {
             if (settings == null) {
                 settings = new UsbUserSettingsManager(mContext, new UserHandle(userId));
                 mSettingsByUser.put(userId, settings);
+            }
+            return settings;
+        }
+    }
+
+    /**
+     * Get the {@link UsbProfileGroupSettingsManager} for a user.
+     *
+     * @param user Any user of the profile group
+     *
+     * @return The settings for the profile group
+     */
+    @NonNull UsbProfileGroupSettingsManager getSettingsForProfileGroup(@NonNull UserHandle user) {
+        UserHandle parentUser;
+
+        UserInfo parentUserInfo = mUserManager.getProfileParent(user.getIdentifier());
+        if (parentUserInfo != null) {
+            parentUser = parentUserInfo.getUserHandle();
+        } else {
+            parentUser = user;
+        }
+
+        synchronized (mSettingsByProfileGroup) {
+            UsbProfileGroupSettingsManager settings = mSettingsByProfileGroup.get(
+                    parentUser.getIdentifier());
+            if (settings == null) {
+                settings = new UsbProfileGroupSettingsManager(mContext, parentUser, this);
+                mSettingsByProfileGroup.put(parentUser.getIdentifier(), settings);
             }
             return settings;
         }
@@ -83,10 +123,26 @@ class UsbSettingsManager {
      */
     void dump(@NonNull IndentingPrintWriter pw) {
         synchronized (mSettingsByUser) {
-            for (int i = 0; i < mSettingsByUser.size(); i++) {
+            int numUsers = mSettingsByUser.size();
+            for (int i = 0; i < numUsers; i++) {
                 final int userId = mSettingsByUser.keyAt(i);
                 final UsbUserSettingsManager settings = mSettingsByUser.valueAt(i);
                 pw.println("Settings for user " + userId + ":");
+                pw.increaseIndent();
+                try {
+                    settings.dump(pw);
+                } finally {
+                    pw.decreaseIndent();
+                }
+            }
+        }
+
+        synchronized (mSettingsByProfileGroup) {
+            int numProfileGroups = mSettingsByProfileGroup.size();
+            for (int i = 0; i < numProfileGroups; i++) {
+                final int parentUserId = mSettingsByProfileGroup.keyAt(i);
+                final UsbProfileGroupSettingsManager settings = mSettingsByProfileGroup.valueAt(i);
+                pw.println("Settings for profile group " + parentUserId + ":");
                 pw.increaseIndent();
                 try {
                     settings.dump(pw);
