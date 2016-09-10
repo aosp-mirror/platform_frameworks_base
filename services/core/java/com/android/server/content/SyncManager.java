@@ -48,6 +48,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
@@ -324,6 +325,8 @@ public class SyncManager {
 
     private final AccountManagerInternal mAccountManagerInternal;
 
+    private final PackageManagerInternal mPackageManagerInternal;
+
     private List<UserInfo> getAllUsers() {
         return mUserManager.getUsers();
     }
@@ -575,6 +578,7 @@ public class SyncManager {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAccountManager = (AccountManager) mContext.getSystemService(Context.ACCOUNT_SERVICE);
         mAccountManagerInternal = LocalServices.getService(AccountManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mAccountManagerInternal.addOnAppPermissionChangeListener((Account account, int uid) -> {
             // If the UID gained access to the account kick-off syncs lacking account access
@@ -891,9 +895,13 @@ public class SyncManager {
                                 + "isSyncable == SYNCABLE_NO_ACCOUNT_ACCESS");
                     }
                     Bundle finalExtras = new Bundle(extras);
+                    String packageName = syncAdapterInfo.componentName.getPackageName();
+                    // If the app did not run and has no account access, done
+                    if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                        continue;
+                    }
                     mAccountManagerInternal.requestAccountAccess(account.account,
-                            syncAdapterInfo.componentName.getPackageName(),
-                            UserHandle.getUserId(owningUid),
+                            packageName, userId,
                             new RemoteCallback((Bundle result) -> {
                                 if (result != null
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
@@ -2798,9 +2806,14 @@ public class SyncManager {
             final int syncOpState = computeSyncOpState(op);
             switch (syncOpState) {
                 case SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS: {
+                    String packageName = op.owningPackage;
+                    final int userId = UserHandle.getUserId(op.owningUid);
+                    // If the app did not run and has no account access, done
+                    if (!mPackageManagerInternal.wasPackageEverLaunched(packageName, userId)) {
+                        return;
+                    }
                     mAccountManagerInternal.requestAccountAccess(op.target.account,
-                            op.owningPackage, UserHandle.getUserId(op.owningUid),
-                            new RemoteCallback((Bundle result) -> {
+                            packageName, userId, new RemoteCallback((Bundle result) -> {
                                 if (result != null
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
                                     updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
