@@ -380,6 +380,24 @@ public class Environment {
     }
 
     /**
+     * Returns location of preloaded cache directory for package name
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsFileCacheDirectory(String packageName) {
+        return new File(getDataPreloadsFileCacheDirectory(), packageName);
+    }
+
+    /**
+     * Returns location of preloaded cache directory.
+     * @see #getDataPreloadsDirectory()
+     * {@hide}
+     */
+    public static File getDataPreloadsFileCacheDirectory() {
+        return new File(getDataPreloadsDirectory(), "file_cache");
+    }
+
+    /**
      * Return the primary shared/external storage directory. This directory may
      * not currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has
