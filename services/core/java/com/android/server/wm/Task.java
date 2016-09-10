@@ -21,9 +21,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -37,14 +34,13 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.animation.Animation;
 
 import android.view.SurfaceControl;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 
-class Task implements DimLayer.DimLayerUser {
+class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerUser {
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
     // Return value from {@link setBounds} indicating no change was made to the Task bounds.
     static final int BOUNDS_CHANGE_NONE = 0;
@@ -53,8 +49,8 @@ class Task implements DimLayer.DimLayerUser {
     // Return value from {@link setBounds} indicating the size of the Task bounds changed.
     static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
+    // TODO: Track parent marks like this in WindowContainer.
     TaskStack mStack;
-    private final AppTokenList mAppTokens = new AppTokenList();
     final int mTaskId;
     final int mUserId;
     boolean mDeferRemoval = false;
@@ -112,18 +108,22 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {
-        final int lastPos = mAppTokens.size();
+        final int lastPos = mChildren.size();
         if (addPos >= lastPos) {
             addPos = lastPos;
         } else {
             for (int pos = 0; pos < lastPos && pos < addPos; ++pos) {
-                if (mAppTokens.get(pos).removed) {
+                if (mChildren.get(pos).removed) {
                     // addPos assumes removed tokens are actually gone.
                     ++addPos;
                 }
             }
         }
-        mAppTokens.add(addPos, wtoken);
+
+        if (wtoken.mParent != null) {
+            wtoken.mParent.removeChild(wtoken);
+        }
+        addChild(wtoken, addPos);
         wtoken.mTask = this;
         mDeferRemoval = false;
         mResizeMode = resizeMode;
@@ -131,15 +131,16 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     private boolean hasWindowsAlive() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            if (mAppTokens.get(i).hasWindowsAlive()) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if (mChildren.get(i).hasWindowsAlive()) {
                 return true;
             }
         }
         return false;
     }
 
-    void removeLocked() {
+    @Override
+    void removeIfPossible() {
         if (hasWindowsAlive() && mStack.isAnimating()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
@@ -156,6 +157,7 @@ class Task implements DimLayer.DimLayerUser {
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
+    // Change to use reparenting in WC when TaskStack is switched to use WC.
     void moveTaskToStack(TaskStack stack, boolean toTop) {
         if (stack == mStack) {
             return;
@@ -179,48 +181,31 @@ class Task implements DimLayer.DimLayerUser {
         stack.positionTask(this, position, showForAllUsers());
         resizeLocked(bounds, config, false /* force */);
 
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).notifyMovedInStack();
+        for (int activityNdx = mChildren.size() - 1; activityNdx >= 0; --activityNdx) {
+            mChildren.get(activityNdx).notifyMovedInStack();
         }
     }
 
-    boolean checkCompleteDeferredRemoval() {
-        boolean stillDeferringRemoval = false;
-
-        for (int tokenNdx = mAppTokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-            final AppWindowToken token = mAppTokens.get(tokenNdx);
-            stillDeferringRemoval |= token.checkCompleteDeferredRemoval();
+    void removeChild(AppWindowToken token) {
+        if (!mChildren.contains(token)) {
+            Slog.e(TAG, "removeChild: token=" + this + " not found.");
+            return;
         }
 
-        return stillDeferringRemoval;
-    }
+        super.removeChild(token);
 
-    // TODO: Don't forget to switch to WC.detachChild
-    void detachChild(AppWindowToken wtoken) {
-        if (!removeAppToken(wtoken)) {
-            Slog.e(TAG, "detachChild: token=" + this + " not found.");
-        }
-        mStack.mExitingAppTokens.remove(wtoken);
-    }
-
-    boolean removeAppToken(AppWindowToken wtoken) {
-        boolean removed = mAppTokens.remove(wtoken);
-        if (mAppTokens.size() == 0) {
+        if (mChildren.isEmpty()) {
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
             if (mDeferRemoval) {
-                removeLocked();
+                removeIfPossible();
             }
         }
-        wtoken.mTask = null;
-        /* Leave mTaskId for now, it might be useful for debug
-        wtoken.mTaskId = -1;
-         */
-        return removed;
+        token.mTask = null;
     }
 
     void setSendingToBottom(boolean toBottom) {
-        for (int appTokenNdx = 0; appTokenNdx < mAppTokens.size(); appTokenNdx++) {
-            mAppTokens.get(appTokenNdx).sendingToBottom = toBottom;
+        for (int appTokenNdx = 0; appTokenNdx < mChildren.size(); appTokenNdx++) {
+            mChildren.get(appTokenNdx).sendingToBottom = toBottom;
         }
     }
 
@@ -370,13 +355,10 @@ class Task implements DimLayer.DimLayerUser {
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
         final DisplayContent displayContent = mStack.getDisplayContent();
-        if (mFullscreen
+        return mFullscreen
                 || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
                 || displayContent == null
-                || displayContent.getDockedStackVisibleForUserLocked() != null) {
-            return true;
-        }
-        return false;
+                || displayContent.getDockedStackVisibleForUserLocked() != null;
     }
 
     /** Original bounds of the task if applicable, otherwise fullscreen rect. */
@@ -407,8 +389,8 @@ class Task implements DimLayer.DimLayerUser {
      */
     boolean getMaxVisibleBounds(Rect out) {
         boolean foundTop = false;
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = mAppTokens.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = mChildren.get(i);
             // skip hidden (or about to hide) apps
             if (token.mIsExiting || token.clientHidden || token.hiddenRequested) {
                 continue;
@@ -444,8 +426,8 @@ class Task implements DimLayer.DimLayerUser {
         final DisplayContent displayContent = mStack.getDisplayContent();
         // It doesn't matter if we in particular are part of the resize, since we couldn't have
         // a DimLayer anyway if we weren't visible.
-        final boolean dockedResizing = displayContent != null ?
-                displayContent.mDividerControllerLocked.isResizing() : false;
+        final boolean dockedResizing = displayContent != null
+                && displayContent.mDividerControllerLocked.isResizing();
         if (useCurrentBounds()) {
             if (inFreeformWorkspace() && getMaxVisibleBounds(out)) {
                 return;
@@ -471,10 +453,11 @@ class Task implements DimLayer.DimLayerUser {
             return;
         }
 
-        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
-        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
-        // system.
-        displayContent.getLogicalDisplayRect(out);
+        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack is
+        // not currently visible. Go ahead a represent it as fullscreen to the rest of the system.
+        if (displayContent != null) {
+            displayContent.getLogicalDisplayRect(out);
+        }
     }
 
     void setDragResizing(boolean dragResizing, int dragResizeMode) {
@@ -489,36 +472,12 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    private void resetDragResizingChangeReported() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).resetDragResizingChangeReported();
-        }
-    }
-
     boolean isDragResizing() {
         return mDragResizing;
     }
 
     int getDragResizeMode() {
         return mDragResizeMode;
-    }
-
-    /**
-     * Adds all of the tasks windows to {@link WindowManagerService#mWaitingForDrawn} if drag
-     * resizing state of the window has been changed.
-     */
-    void setWaitingForDrawnIfResizingChanged() {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).setWaitingForDrawnIfResizingChanged();
-        }
-    }
-
-    boolean detachFromDisplay() {
-        boolean didSomething = false;
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            didSomething |= mAppTokens.get(i).detachFromDisplay();
-        }
-        return didSomething;
     }
 
     void updateDisplayInfo(final DisplayContent displayContent) {
@@ -556,59 +515,23 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    private void onResize() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).onResize();
-        }
-    }
-
-    private void onMovedByResize() {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            mAppTokens.get(i).onMovedByResize();
-        }
-    }
-
-    /**
-     * Cancels any running app transitions associated with the task.
-     */
+    /** Cancels any running app transitions associated with the task. */
     void cancelTaskWindowTransition() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).mAppAnimator.clearAnimation();
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).mAppAnimator.clearAnimation();
         }
     }
 
-    /**
-     * Cancels any running thumbnail transitions associated with the task.
-     */
+    /** Cancels any running thumbnail transitions associated with the task. */
     void cancelTaskThumbnailTransition() {
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            mAppTokens.get(activityNdx).mAppAnimator.clearThumbnail();
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).mAppAnimator.clearThumbnail();
         }
     }
 
     boolean showForAllUsers() {
-        final int tokensCount = mAppTokens.size();
-        return (tokensCount != 0) && mAppTokens.get(tokensCount - 1).showForAllUsers;
-    }
-
-    boolean hasContentToDisplay() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken appToken = mAppTokens.get(i);
-            if (appToken.hasContentToDisplay()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    boolean isVisible() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken appToken = mAppTokens.get(i);
-            if (appToken.isVisible()) {
-                return true;
-            }
-        }
-        return false;
+        final int tokensCount = mChildren.size();
+        return (tokensCount != 0) && mChildren.get(tokensCount - 1).showForAllUsers;
     }
 
     boolean inHomeStack() {
@@ -633,8 +556,8 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     AppWindowToken getTopVisibleAppToken() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = mAppTokens.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = mChildren.get(i);
             // skip hidden (or about to hide) apps
             if (!token.mIsExiting && !token.clientHidden && !token.hiddenRequested) {
                 return token;
@@ -663,82 +586,21 @@ class Task implements DimLayer.DimLayerUser {
         return mStack.getDisplayContent().getDisplayInfo();
     }
 
-    /**
-     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
-     */
-    void overridePlayingAppAnimations(Animation a) {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            mAppTokens.get(i).overridePlayingAppAnimations(a);
-        }
-    }
-
     void forceWindowsScaleable(boolean force) {
         SurfaceControl.openTransaction();
         try {
-            for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-                mAppTokens.get(i).forceWindowsScaleableInTransaction(force);
+            for (int i = mChildren.size() - 1; i >= 0; i--) {
+                mChildren.get(i).forceWindowsScaleableInTransaction(force);
             }
         } finally {
             SurfaceControl.closeTransaction();
         }
     }
 
-    boolean isAnimating() {
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken aToken = mAppTokens.get(i);
-            if (aToken.isAnimating()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void checkAppWindowsReadyToShow(int displayId) {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken aToken = mAppTokens.get(i);
-            aToken.checkAppWindowsReadyToShow(displayId);
-        }
-    }
-
-    void updateAllDrawn(int displayId) {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken aToken = mAppTokens.get(i);
-            aToken.updateAllDrawn(displayId);
-        }
-    }
-
-    void stepAppWindowsAnimation(long currentTime, int displayId) {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken aToken = mAppTokens.get(i);
-            aToken.stepAppWindowsAnimation(currentTime, displayId);
-        }
-    }
-
-    void onAppTransitionDone() {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken token = mAppTokens.get(i);
-            token.onAppTransitionDone();
-        }
-    }
-
-    // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
-    boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
-        return mAppTokens.indexOf(first) > mAppTokens.indexOf(second);
-    }
-
-    int rebuildWindowList(DisplayContent dc, int addIndex) {
-        final int count = mAppTokens.size();
-        for (int i = 0; i < count; i++) {
-            final AppWindowToken token = mAppTokens.get(i);
-            addIndex = token.rebuildWindowList(dc, addIndex);
-        }
-        return addIndex;
-    }
-
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
             DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken current = mAppTokens.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final AppWindowToken current = mChildren.get(i);
             if (current == token) {
                 // We have reach the token we are interested in. End search.
                 result.reachedToken = true;
@@ -756,8 +618,8 @@ class Task implements DimLayer.DimLayerUser {
 
     void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
             DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken current = mAppTokens.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final AppWindowToken current = mChildren.get(i);
             if (!result.reachedToken) {
                 if (current == token) {
                     // We have reached the token we are interested in. Get whichever window occurs
@@ -775,36 +637,14 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
+    @Override
     boolean fillsParent() {
         return mFullscreen || !StackId.isTaskResizeAllowed(mStack.mStackId);
     }
 
-    // TODO: Remove once switched to use WindowContainer
-    int getOrientation() {
-        int candidate = SCREEN_ORIENTATION_UNSET;
-
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken token = mAppTokens.get(i);
-            final int orientation = token.getOrientation();
-
-            if (orientation == SCREEN_ORIENTATION_BEHIND) {
-                candidate = orientation;
-                continue;
-            }
-
-            if (orientation != SCREEN_ORIENTATION_UNSET) {
-                if (token.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                    return orientation;
-                }
-            }
-        }
-
-        return candidate;
-    }
-
     @Override
     public String toString() {
-        return "{taskId=" + mTaskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
+        return "{taskId=" + mTaskId + " appTokens=" + mChildren + " mdr=" + mDeferRemoval + "}";
     }
 
     String getName() {
@@ -816,15 +656,6 @@ class Task implements DimLayer.DimLayerUser {
         return "Task=" + mTaskId;
     }
 
-    void dumpChildrenNames(PrintWriter pw, String prefix) {
-        final String childPrefix = prefix + prefix;
-        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
-            final AppWindowToken token = mAppTokens.get(i);
-            pw.println("#" + i + " " + getName());
-            token.dumpChildrenNames(pw, childPrefix);
-        }
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         final String doublePrefix = prefix + "  ";
 
@@ -832,13 +663,13 @@ class Task implements DimLayer.DimLayerUser {
         pw.println(doublePrefix + "mFullscreen=" + mFullscreen);
         pw.println(doublePrefix + "mBounds=" + mBounds.toShortString());
         pw.println(doublePrefix + "mdr=" + mDeferRemoval);
-        pw.println(doublePrefix + "appTokens=" + mAppTokens);
+        pw.println(doublePrefix + "appTokens=" + mChildren);
         pw.println(doublePrefix + "mTempInsetBounds=" + mTempInsetBounds.toShortString());
 
         final String triplePrefix = doublePrefix + "  ";
 
-        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            final AppWindowToken wtoken = mAppTokens.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final AppWindowToken wtoken = mChildren.get(i);
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
             wtoken.dump(pw, triplePrefix);
         }

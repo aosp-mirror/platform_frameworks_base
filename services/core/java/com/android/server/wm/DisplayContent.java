@@ -371,7 +371,7 @@ class DisplayContent {
         mStacks.add(addIndex, stack);
     }
 
-    // TODO: Don't forget to switch to WC.detachChild
+    // TODO: Don't forget to switch to WC.removeChild
     void detachChild(TaskStack stack) {
         detachStack(stack);
         if (stack.detachFromDisplay()) {

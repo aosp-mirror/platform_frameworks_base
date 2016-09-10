@@ -1973,7 +1973,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Performs some centralized bookkeeping clean-up on the window that is being removed.
      * NOTE: Should only be called from {@link WindowState#removeImmediately()}
-     * TODO: Maybe better handled with a method {@link WindowContainer#detachChild} if we can
+     * TODO: Maybe better handled with a method {@link WindowContainer#removeChild} if we can
      * figure-out a good way to have all parents of a WindowState doing the same thing without
      * forgetting to add the wiring when a new parent of WindowState is added.
      */
@@ -2881,14 +2881,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "Attempted to set task id of non-existing app token: " + token);
                 return;
             }
-            final Task oldTask = atoken.mTask;
-            oldTask.removeAppToken(atoken);
 
             Task newTask = mTaskIdToTask.get(taskId);
             if (newTask == null) {
-                newTask = createTaskLocked(
-                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, overrideConfig,
-                        isOnTopLauncher);
+                newTask = createTaskLocked(taskId, stackId, atoken.mTask.mUserId, atoken,
+                        taskBounds, overrideConfig, isOnTopLauncher);
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken, taskResizeMode, homeTask);
         }
@@ -4005,7 +4002,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + taskId);
                 return;
             }
-            task.removeLocked();
+            task.removeIfPossible();
         }
     }
 
