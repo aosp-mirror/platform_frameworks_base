@@ -22,12 +22,12 @@ import org.junit.runner.RunWith;
 
 import android.content.Context;
 import android.os.Binder;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.IWindow;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -46,6 +46,7 @@ import static org.junit.Assert.assertTrue;
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowStateTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowStateTests {
 
