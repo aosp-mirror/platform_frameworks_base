@@ -372,7 +372,7 @@ public class WindowContainerTests {
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
-    private class TestWindowContainer extends WindowContainer {
+    private class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;
         private final boolean mCanDetach;
         private boolean mIsAnimating;
@@ -383,13 +383,12 @@ public class WindowContainerTests {
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
          * of z-order and 1 otherwise.
          */
-        private final Comparator<WindowContainer> mWindowSubLayerComparator = (w1, w2) -> {
-            final int layer1 = ((TestWindowContainer)w1).mLayer;
-            final int layer2 = ((TestWindowContainer)w2).mLayer;
+        private final Comparator<TestWindowContainer> mWindowSubLayerComparator = (w1, w2) -> {
+            final int layer1 = w1.mLayer;
+            final int layer2 = w2.mLayer;
             if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
-                // We insert the child window into the list ordered by the mLayer.
-                // For same layers, the negative one should go below others; the positive one should
-                // go above others.
+                // We insert the child window into the list ordered by the mLayer. For same layers,
+                // the negative one should go below others; the positive one should go above others.
                 return -1;
             }
             return 1;
@@ -422,7 +421,7 @@ public class WindowContainerTests {
         }
 
         TestWindowContainer getChildAt(int index) {
-            return (TestWindowContainer) mChildren.get(index);
+            return mChildren.get(index);
         }
 
         @Override

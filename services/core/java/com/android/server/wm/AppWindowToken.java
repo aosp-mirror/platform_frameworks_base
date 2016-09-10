@@ -191,7 +191,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mReportedVisibilityResults.reset();
 
         for (int i = 0; i < count; i++) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             win.updateReportedVisibility(mReportedVisibilityResults);
         }
 
@@ -271,7 +271,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             final int windowsCount = mChildren.size();
             for (int i = 0; i < windowsCount; i++) {
-                final WindowState win = (WindowState) mChildren.get(i);
+                final WindowState win = mChildren.get(i);
                 changed |= win.onAppVisibilityChanged(visible, runningAppAnimation);
             }
 
@@ -307,7 +307,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         for (int i = mChildren.size() - 1; i >= 0 && !delayed; i--) {
-            if (((WindowState) mChildren.get(i)).isWindowAnimationSet()) {
+            if ((mChildren.get(i)).isWindowAnimationSet()) {
                 delayed = true;
             }
         }
@@ -337,7 +337,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         int j = mChildren.size();
         while (j > 0) {
             j--;
-            final WindowState win = (WindowState) mChildren.get(j);
+            final WindowState win = mChildren.get(j);
             final int type = win.mAttrs.type;
             // No need to loop through child window as base application and starting types can't be
             // child windows.
@@ -388,7 +388,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void clearAnimatingFlags() {
         boolean wallpaperMightChange = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             wallpaperMightChange |= win.clearAnimatingFlags();
         }
         if (wallpaperMightChange) {
@@ -412,7 +412,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private void destroySurfaces(boolean cleanupOnResume) {
         final DisplayContentList displayList = new DisplayContentList();
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             final boolean destroyed = win.destroySurface(cleanupOnResume, mAppStopped);
 
             if (destroyed) {
@@ -472,7 +472,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private boolean canRestoreSurfaces() {
         for (int i = mChildren.size() -1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             if (w.canRestoreSurface()) {
                 return true;
             }
@@ -482,7 +482,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private void clearWasVisibleBeforeClientHidden() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.clearWasVisibleBeforeClientHidden();
         }
     }
@@ -493,7 +493,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     boolean isAnimatingInvisibleWithSavedSurface() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             if (w.isAnimatingInvisibleWithSavedSurface()) {
                 return true;
             }
@@ -507,7 +507,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     void stopUsingSavedSurfaceLocked() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.stopUsingSavedSurface();
         }
         destroySurfaces();
@@ -515,7 +515,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void markSavedSurfaceExiting() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.markSavedSurfaceExiting();
         }
     }
@@ -530,7 +530,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         int interestingNotDrawn = -1;
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             interestingNotDrawn = w.restoreSavedSurfaceForInterestingWindow();
         }
 
@@ -549,7 +549,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void destroySavedSurfaces() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             win.destroySavedSurface();
         }
     }
@@ -582,7 +582,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void removeDeadWindows() {
         for (int winNdx = mChildren.size() - 1; winNdx >= 0; --winNdx) {
-            WindowState win = (WindowState) mChildren.get(winNdx);
+            WindowState win = mChildren.get(winNdx);
             if (win.mAppDied) {
                 if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.w(TAG,
                         "removeDeadWindows: " + win);
@@ -598,7 +598,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             // No need to loop through child windows as the answer should be the same as that of the
             // parent window.
-            if (!((WindowState) mChildren.get(i)).mAppDied) {
+            if (!(mChildren.get(i)).mAppDied) {
                 return true;
             }
         }
@@ -610,7 +610,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "Marking app token " + this + " with replacing windows.");
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.setWillReplaceWindow(animate);
         }
         if (animate) {
@@ -627,7 +627,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + this
                 + " with replacing child windows.");
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.setWillReplaceChildWindows();
         }
     }
@@ -637,14 +637,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "Resetting app token " + this + " of replacing window marks.");
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.clearWillReplaceWindow();
         }
     }
 
     void requestUpdateWallpaperIfNeeded() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             w.requestUpdateWallpaperIfNeeded();
         }
     }
@@ -685,7 +685,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         boolean gotReplacementWindow = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState candidate = (WindowState) mChildren.get(i);
+            final WindowState candidate = mChildren.get(i);
             gotReplacementWindow |= candidate.setReplacementWindowIfNeeded(w);
         }
 
@@ -697,7 +697,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     boolean waitingForReplacement() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState candidate = (WindowState) mChildren.get(i);
+            final WindowState candidate = mChildren.get(i);
             if (candidate.waitingForReplacement()) {
                 return true;
             }
@@ -707,7 +707,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void onWindowReplacementTimeout() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            ((WindowState) mChildren.get(i)).onWindowReplacementTimeout();
+            (mChildren.get(i)).onWindowReplacementTimeout();
         }
     }
 
@@ -748,7 +748,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mFrozenMergedConfig.remove();
         }
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             win.onUnfreezeBounds();
         }
         mService.mWindowPlacerLocked.performSurfacePlacement();
@@ -798,13 +798,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void resetJustMovedInStack() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            ((WindowState) mChildren.get(i)).resetJustMovedInStack();
+            (mChildren.get(i)).resetJustMovedInStack();
         }
     }
 
     void notifyMovedInStack() {
         for (int winNdx = mChildren.size() - 1; winNdx >= 0; --winNdx) {
-            final WindowState win = (WindowState) mChildren.get(winNdx);
+            final WindowState win = mChildren.get(winNdx);
             win.notifyMovedInStack();
         }
     }
@@ -813,7 +813,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final WindowAnimator windowAnimator = mAppAnimator.mAnimator;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             // Child windows will be on the same display as their parents.
-            if (displayId == ((WindowState) mChildren.get(i)).getDisplayId()) {
+            if (displayId == (mChildren.get(i)).getDisplayId()) {
                 windowAnimator.setPendingLayoutChanges(displayId, changes);
                 if (DEBUG_LAYOUT_REPEATS) {
                     mService.mWindowPlacerLocked.debugLayoutRepeats(
@@ -826,7 +826,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void removeReplacedWindowIfNeeded(WindowState replacement) {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = (WindowState) mChildren.get(i);
+            final WindowState win = mChildren.get(i);
             if (win.removeReplacedWindowIfNeeded(replacement)) {
                 return;
             }
@@ -851,7 +851,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
-                final WindowState w = (WindowState) mChildren.get(i);
+                final WindowState w = mChildren.get(i);
                 w.onStartFreezingScreen();
             }
         }
@@ -865,7 +865,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final int count = mChildren.size();
         boolean unfrozeWindows = false;
         for (int i = 0; i < count; i++) {
-            final WindowState w = (WindowState) mChildren.get(i);
+            final WindowState w = mChildren.get(i);
             unfrozeWindows |= w.onStopFreezingScreen();
         }
         if (force || unfrozeWindows) {
@@ -998,7 +998,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         final int windowsCount = mChildren.size();
         for (int j = 0; j < windowsCount; j++) {
-            ((WindowState) mChildren.get(j)).addWinAnimatorToList(allAppWinAnimators);
+            (mChildren.get(j)).addWinAnimatorToList(allAppWinAnimators);
         }
     }
 
