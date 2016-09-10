@@ -53,6 +53,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     // The synthetic library dependencies denoting "no checks."
     private final static String[] NO_LIBRARIES = new String[] { "&" };
 
+    // The amount of "available" (free - low threshold) space necessary at the start of an OTA to
+    // not bulk-delete unused apps' odex files.
+    private final static long BULK_DELETE_THRESHOLD = 1024 * 1024 * 1024;  // 1GB.
+
     private final Context mContext;
     private final PackageManagerService mPackageManagerService;
 
@@ -128,6 +132,14 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     generatePackageDexopts(p, PackageManagerService.REASON_FIRST_BOOT));
         }
         completeSize = mDexoptCommands.size();
+
+        if (getAvailableSpace() < BULK_DELETE_THRESHOLD) {
+            Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
+                    + PackageManagerServiceUtils.packagesToString(others));
+            for (PackageParser.Package pkg : others) {
+                deleteOatArtifactsOfPackage(pkg);
+            }
+        }
     }
 
     @Override
@@ -169,28 +181,65 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
 
         String next = mDexoptCommands.remove(0);
 
-        if (IsFreeSpaceAvailable()) {
+        if (getAvailableSpace() > 0) {
             return next;
         } else {
+            if (DEBUG_DEXOPT) {
+                Log.w(TAG, "Not enough space for OTA dexopt, stopping with "
+                        + (mDexoptCommands.size() + 1) + " commands left.");
+            }
             mDexoptCommands.clear();
             return "(no free space)";
         }
     }
 
-    /**
-     * Check for low space. Returns true if there's space left.
-     */
-    private boolean IsFreeSpaceAvailable() {
-        // TODO: If apps are not installed in the internal /data partition, we should compare
-        //       against that storage's free capacity.
+    private long getMainLowSpaceThreshold() {
         File dataDir = Environment.getDataDirectory();
         @SuppressWarnings("deprecation")
         long lowThreshold = StorageManager.from(mContext).getStorageLowBytes(dataDir);
         if (lowThreshold == 0) {
             throw new IllegalStateException("Invalid low memory threshold");
         }
+        return lowThreshold;
+    }
+
+    /**
+     * Returns the difference of free space to the low-storage-space threshold. Positive values
+     * indicate free bytes.
+     */
+    private long getAvailableSpace() {
+        // TODO: If apps are not installed in the internal /data partition, we should compare
+        //       against that storage's free capacity.
+        long lowThreshold = getMainLowSpaceThreshold();
+
+        File dataDir = Environment.getDataDirectory();
         long usableSpace = dataDir.getUsableSpace();
-        return (usableSpace >= lowThreshold);
+
+        return usableSpace - lowThreshold;
+    }
+
+    private static String getOatDir(PackageParser.Package pkg) {
+        if (!pkg.canHaveOatDir()) {
+            return null;
+        }
+        File codePath = new File(pkg.codePath);
+        if (codePath.isDirectory()) {
+            return PackageDexOptimizer.getOatDir(codePath).getAbsolutePath();
+        }
+        return null;
+    }
+
+    private void deleteOatArtifactsOfPackage(PackageParser.Package pkg) {
+        String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
+        for (String codePath : pkg.getAllCodePaths()) {
+            for (String isa : instructionSets) {
+                try {
+                    mPackageManagerService.mInstaller.deleteOdex(codePath, isa, getOatDir(pkg));
+                } catch (InstallerException e) {
+                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
+                }
+            }
+        }
     }
 
     /**

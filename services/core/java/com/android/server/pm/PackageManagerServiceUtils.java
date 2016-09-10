@@ -168,23 +168,8 @@ public class PackageManagerServiceUtils {
                 packageManagerService);
 
         if (DEBUG_DEXOPT) {
-            StringBuilder sb = new StringBuilder();
-            for (PackageParser.Package pkg : result) {
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append(pkg.packageName);
-            }
-            Log.i(TAG, "Packages to be dexopted: " + sb.toString());
-
-            sb.setLength(0);
-            for (PackageParser.Package pkg : remainingPkgs) {
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append(pkg.packageName);
-            }
-            Log.i(TAG, "Packages skipped from dexopt: " + sb.toString());
+            Log.i(TAG, "Packages to be dexopted: " + packagesToString(result));
+            Log.i(TAG, "Packages skipped from dexopt: " + packagesToString(remainingPkgs));
         }
 
         return result;
@@ -200,5 +185,16 @@ public class PackageManagerServiceUtils {
         } catch (ErrnoException ee) {
             throw ee.rethrowAsIOException();
         }
+    }
+
+    public static String packagesToString(Collection<PackageParser.Package> c) {
+        StringBuilder sb = new StringBuilder();
+        for (PackageParser.Package pkg : c) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(pkg.packageName);
+        }
+        return sb.toString();
     }
 }
