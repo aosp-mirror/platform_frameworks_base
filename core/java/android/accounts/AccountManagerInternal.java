@@ -73,4 +73,18 @@ public abstract class AccountManagerInternal {
      */
     public abstract void addOnAppPermissionChangeListener(
             @NonNull OnAppPermissionChangeListener listener);
+
+    /**
+     * Backups the account access permissions.
+     * @param userId The user for which to backup.
+     * @return The backup data.
+     */
+    public abstract byte[] backupAccountAccessPermissions(int userId);
+
+    /**
+     * Restores the account access permissions.
+     * @param data The restore data.
+     * @param userId The user for which to restore.
+     */
+    public abstract void restoreAccountAccessPermissions(byte[] data, int userId);
 }
