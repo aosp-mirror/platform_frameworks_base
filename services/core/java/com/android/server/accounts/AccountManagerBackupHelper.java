@@ -257,7 +257,9 @@ public final class AccountManagerBackupHelper {
             }
 
             // Make sure we eventually prune the in-memory pending restores
-            mRestoreCancelCommand = new CancelRestoreCommand();
+            synchronized (mLock) {
+                mRestoreCancelCommand = new CancelRestoreCommand();
+            }
             mAccountManagerService.mMessageHandler.postDelayed(mRestoreCancelCommand,
                     PENDING_RESTORE_TIMEOUT_MILLIS);
         } catch (XmlPullParserException | IOException e) {
@@ -269,6 +271,7 @@ public final class AccountManagerBackupHelper {
         @Override
         public void onPackageAdded(String packageName, int uid) {
             synchronized (mLock) {
+                // Can happen if restore is cancelled and there is a notification in flight
                 if (mRestorePendingAppPermissions == null) {
                     return;
                 }
