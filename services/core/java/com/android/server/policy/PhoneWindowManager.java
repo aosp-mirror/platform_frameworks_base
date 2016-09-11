@@ -647,6 +647,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // (See Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR.)
     int mIncallPowerBehavior;
 
+    // Behavior of Back button while in-call and screen on
+    int mIncallBackBehavior;
+
     Display mDisplay;
 
     private int mDisplayRotation;
@@ -836,6 +839,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.WAKE_GESTURE_ENABLED), false, this,
@@ -1060,7 +1066,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mBackKeyPressCounter <= PANIC_PRESS_BACK_COUNT) {
                 // This could be a multi-press.  Wait a little bit longer to confirm.
                 Message msg = mHandler.obtainMessage(MSG_BACK_DELAYED_PRESS,
-                        mBackKeyPressCounter, 0, eventTime);
+                    mBackKeyPressCounter, 0, eventTime);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageDelayed(msg, ViewConfiguration.getMultiPressTimeout());
             }
@@ -1068,6 +1074,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Reset back long press state
         cancelPendingBackKeyAction();
+
+        if (mHasFeatureWatch) {
+            TelecomManager telecomManager = getTelecommService();
+
+            if (telecomManager != null) {
+                if (telecomManager.isRinging()) {
+                    // Pressing back while there's a ringing incoming
+                    // call should silence the ringer.
+                    telecomManager.silenceRinger();
+
+                    // It should not prevent navigating away
+                    return false;
+                } else if (
+                    (mIncallBackBehavior & Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR_HANGUP) != 0
+                        && telecomManager.isInCall()) {
+                    // Otherwise, if "Back button ends call" is enabled,
+                    // the Back button will hang up any current active call.
+                    return telecomManager.endCall();
+                }
+            }
+        }
 
         return handled;
     }
@@ -2019,6 +2046,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mIncallPowerBehavior = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
+                    UserHandle.USER_CURRENT);
+            mIncallBackBehavior = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
+                    Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
 
             // Configure wake gesture.
@@ -8040,6 +8071,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
         pw.print(prefix); pw.print("mEndcallBehavior="); pw.print(mEndcallBehavior);
                 pw.print(" mIncallPowerBehavior="); pw.print(mIncallPowerBehavior);
+                pw.print(" mIncallBackBehavior="); pw.print(mIncallBackBehavior);
                 pw.print(" mLongPressOnHomeBehavior="); pw.println(mLongPressOnHomeBehavior);
         pw.print(prefix); pw.print("mLandscapeRotation="); pw.print(mLandscapeRotation);
                 pw.print(" mSeascapeRotation="); pw.println(mSeascapeRotation);
