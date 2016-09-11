@@ -21,9 +21,7 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -48,7 +46,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.animation.Animation;
 
 import android.view.WindowManagerPolicy;
 import com.android.internal.policy.DividerSnapAlgorithm;
@@ -57,9 +54,8 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
-public class TaskStack implements DimLayer.DimLayerUser,
+public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLayerUser,
         BoundsAnimationController.AnimateBoundsUser {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
@@ -75,11 +71,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private final WindowManagerService mService;
 
     /** The display this stack sits under. */
+    // TODO: Track parent marks like this in WindowContainer.
     private DisplayContent mDisplayContent;
-
-    /** The Tasks that define this stack. Oldest Tasks are at the bottom. The ordering must match
-     * mTaskHistory in the ActivityStack with the same mStackId */
-    private final ArrayList<Task> mTasks = new ArrayList<>();
 
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
@@ -98,7 +91,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private final Rect mFullyAdjustedImeBounds = new Rect();
 
     /** Whether mBounds is fullscreen */
-    private boolean mFullscreen = true;
+    private boolean mFillsParent = true;
 
     // Device rotation as of the last time {@link #mBounds} was set.
     int mRotation;
@@ -128,11 +121,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private float mAdjustDividerAmount;
     private final int mDockedStackMinimizeThickness;
 
-    // If this is true, we are in the bounds animating mode.
-    // The task will be down or upscaled to perfectly fit the
-    // region it would have been cropped to. We may also avoid
-    // certain logic we would otherwise apply while resizing,
-    // while resizing in the bounds animating mode.
+    // If this is true, we are in the bounds animating mode. The task will be down or upscaled to
+    // perfectly fit the region it would have been cropped to. We may also avoid certain logic we
+    // would otherwise apply while resizing, while resizing in the bounds animating mode.
     private boolean mBoundsAnimating = false;
 
     // Temporary storage for the new bounds that should be used after the configuration change.
@@ -156,20 +147,20 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return null;
         }
 
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            if (mTasks.get(i).isHomeTask()) {
-                return mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if (mChildren.get(i).isHomeTask()) {
+                return mChildren.get(i);
             }
         }
         return null;
     }
 
     boolean hasMultipleTaskWithHomeTaskNotTop() {
-        return mTasks.size() > 1 && !mTasks.get(mTasks.size() - 1).isHomeTask();
+        return mChildren.size() > 1 && !mChildren.get(mChildren.size() - 1).isHomeTask();
     }
 
     boolean topTaskIsOnTopLauncher() {
-        return mTasks.get(mTasks.size() - 1).isOnTopLauncher();
+        return mChildren.get(mChildren.size() - 1).isOnTopLauncher();
     }
 
     /**
@@ -185,8 +176,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         setBounds(stackBounds);
 
         // Update bounds of containing tasks.
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mChildren.get(taskNdx);
             Configuration config = configs.get(task.mTaskId);
             if (config != null) {
                 Rect bounds = taskBounds.get(task.mTaskId);
@@ -201,8 +192,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     void prepareFreezingTaskBounds() {
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mChildren.get(taskNdx);
             task.prepareFreezingBounds();
         }
     }
@@ -243,29 +234,29 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     private void alignTasksToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds) {
-        if (mFullscreen) {
+        if (mFillsParent) {
             return;
         }
 
         final boolean alignBottom = mAdjustedForIme && getDockSide() == DOCKED_TOP;
 
         // Update bounds of containing tasks.
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mChildren.get(taskNdx);
             task.alignToAdjustedBounds(adjustedBounds, tempInsetBounds, alignBottom);
         }
     }
 
     private boolean setBounds(Rect bounds) {
-        boolean oldFullscreen = mFullscreen;
+        boolean oldFullscreen = mFillsParent;
         int rotation = Surface.ROTATION_0;
         int density = DENSITY_DPI_UNDEFINED;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
             rotation = mDisplayContent.getDisplayInfo().rotation;
             density = mDisplayContent.getDisplayInfo().logicalDensityDpi;
-            mFullscreen = bounds == null;
-            if (mFullscreen) {
+            mFillsParent = bounds == null;
+            if (mFillsParent) {
                 bounds = mTmpRect;
             }
         }
@@ -274,7 +265,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return false;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFillsParent && mRotation == rotation) {
             return false;
         }
 
@@ -302,7 +293,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
-        if (mFullscreen
+        if (mFillsParent
                 || !StackId.isResizeableByDockedStack(mStackId)
                 || mDisplayContent == null
                 || mDisplayContent.getDockedStackLocked() != null) {
@@ -342,13 +333,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return;
         }
 
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
+            mChildren.get(taskNdx).updateDisplayInfo(mDisplayContent);
         }
         if (bounds != null) {
             setBounds(bounds);
             return;
-        } else if (mFullscreen) {
+        } else if (mFillsParent) {
             setBounds(null);
             return;
         }
@@ -381,7 +372,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return false;
         }
 
-        if (mFullscreen) {
+        if (mFillsParent) {
             // Update stack bounds again since rotation changed since updateDisplayInfo().
             setBounds(null);
             // Return false since we don't need the client to resize.
@@ -481,16 +472,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 dividerSize);
     }
 
-    boolean isAnimating() {
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
-            if (task.isAnimating()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    // TODO: Checkout the call points of this method and the ones below to see how they can fit in WC.
     void addTask(Task task, boolean toTop) {
         addTask(task, toTop, task.showForAllUsers());
     }
@@ -502,14 +484,17 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
     void addTask(Task task, boolean toTop, boolean showForAllUsers) {
-        positionTask(task, toTop ? mTasks.size() : 0, showForAllUsers);
+        positionTask(task, toTop ? mChildren.size() : 0, showForAllUsers);
     }
 
+    // TODO: We should really have users as a window container in the hierarchy so that we don't
+    // have to do complicated things like we are doing in this method and also also the method to
+    // just be WindowContainer#addChild
     void positionTask(Task task, int position, boolean showForAllUsers) {
         final boolean canShowTask =
                 showForAllUsers || mService.isCurrentProfileLocked(task.mUserId);
-        mTasks.remove(task);
-        int stackSize = mTasks.size();
+        removeChild(task);
+        int stackSize = mChildren.size();
         int minPosition = 0;
         int maxPosition = stackSize;
 
@@ -523,11 +508,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM,
                 "positionTask: task=" + task + " position=" + position);
-        mTasks.add(position, task);
+        addChild(task, position);
         task.mStack = this;
         task.updateDisplayInfo(mDisplayContent);
-        boolean toTop = position == mTasks.size() - 1;
+        boolean toTop = position == mChildren.size() - 1;
         if (toTop) {
+            // TODO: Have a WidnowContainer method that moves all parents of a container to the
+            // front for cases like this.
             mDisplayContent.moveStack(this, true);
         }
 
@@ -549,7 +536,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
      */
     private int computeMinPosition(int minPosition, int size) {
         while (minPosition < size) {
-            final Task tmpTask = mTasks.get(minPosition);
+            final Task tmpTask = mChildren.get(minPosition);
             final boolean canShowTmpTask =
                     tmpTask.showForAllUsers()
                             || mService.isCurrentProfileLocked(tmpTask.mUserId);
@@ -568,7 +555,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
      */
     private int computeMaxPosition(int maxPosition) {
         while (maxPosition > 0) {
-            final Task tmpTask = mTasks.get(maxPosition - 1);
+            final Task tmpTask = mChildren.get(maxPosition - 1);
             final boolean canShowTmpTask =
                     tmpTask.showForAllUsers()
                             || mService.isCurrentProfileLocked(tmpTask.mUserId);
@@ -580,16 +567,17 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return maxPosition;
     }
 
+    // TODO: Have functionality in WC to move things to the bottom or top. Also, look at the call
+    // points for this methods to see if we need functionality to move something to the front/bottom
+    // with its parents.
     void moveTaskToTop(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToTop: task=" + task + " Callers="
                 + Debug.getCallers(6));
-        mTasks.remove(task);
         addTask(task, true);
     }
 
     void moveTaskToBottom(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "moveTaskToBottom: task=" + task);
-        mTasks.remove(task);
         addTask(task, false);
     }
 
@@ -598,11 +586,18 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * back.
      * @param task The Task to delete.
      */
-    void removeTask(Task task) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeTask: task=" + task);
-        mTasks.remove(task);
+    @Override
+    void removeChild(Task task) {
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
+        if (!mChildren.contains(task)) {
+            Slog.e(TAG_WM, "removeChild: task=" + this + " not found.");
+            return;
+        }
+
+        super.removeChild(task);
+
         if (mDisplayContent != null) {
-            if (mTasks.isEmpty()) {
+            if (mChildren.isEmpty()) {
                 mDisplayContent.moveStack(this, false);
             }
             mDisplayContent.layoutNeeded = true;
@@ -629,7 +624,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         if (mStackId == DOCKED_STACK_ID
                 || (dockedStack != null && StackId.isResizeableByDockedStack(mStackId)
-                        && !dockedStack.isFullscreen())) {
+                        && !dockedStack.fillsParent())) {
             // The existence of a docked stack affects the size of other static stack created since
             // the docked stack occupies a dedicated region on screen, but only if the dock stack is
             // not fullscreen. If it's fullscreen, it means that we are in the transition of
@@ -769,14 +764,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 1 /*allowResizeInDockedMode*/, bounds).sendToTarget();
     }
 
+    // TODO: Should this really be removeImmidiately or removeChild?
     boolean detachFromDisplay() {
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
-
-        boolean didSomething = false;
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            didSomething |= mTasks.get(taskNdx).detachFromDisplay();
-        }
-
+        boolean didSomething = super.detachFromDisplay();
         close();
         return didSomething;
     }
@@ -797,13 +788,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    // TODO: Should each user have there own stacks?
     void switchUser() {
-        int top = mTasks.size();
+        int top = mChildren.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
-            Task task = mTasks.get(taskNdx);
+            Task task = mChildren.get(taskNdx);
             if (mService.isCurrentProfileLocked(task.mUserId) || task.showForAllUsers()) {
-                mTasks.remove(taskNdx);
-                mTasks.add(task);
+                mChildren.remove(taskNdx);
+                mChildren.add(task);
                 --top;
             }
         }
@@ -906,8 +898,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * to the list of to be drawn windows the service is waiting for.
      */
     void beginImeAdjustAnimation() {
-        for (int j = mTasks.size() - 1; j >= 0; j--) {
-            final Task task = mTasks.get(j);
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final Task task = mChildren.get(j);
             if (task.hasContentToDisplay()) {
                 task.setDragResizing(true, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
                 task.setWaitingForDrawnIfResizingChanged();
@@ -919,8 +911,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * Resets the resizing state of all windows.
      */
     void endImeAdjustAnimation() {
-        for (int j = mTasks.size() - 1; j >= 0; j--) {
-            mTasks.get(j).setDragResizing(false, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            mChildren.get(j).setDragResizing(false, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
         }
     }
 
@@ -1083,22 +1075,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mMinimizeAmount != 0f;
     }
 
-    void dumpChildrenNames(PrintWriter pw, String prefix) {
-        final String childPrefix = prefix + prefix;
-        for (int j = mTasks.size() - 1; j >= 0; j--) {
-            final Task task = mTasks.get(j);
-            pw.println("#" + j + " " + getName());
-            task.dumpChildrenNames(pw, childPrefix);
-        }
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "mStackId=" + mStackId);
         pw.println(prefix + "mDeferDetach=" + mDeferDetach);
-        pw.println(prefix + "mFullscreen=" + mFullscreen);
+        pw.println(prefix + "mFillsParent=" + mFillsParent);
         pw.println(prefix + "mBounds=" + mBounds.toShortString());
         if (mMinimizeAmount != 0f) {
-            pw.println(prefix + "mMinimizeAmout=" + mMinimizeAmount);
+            pw.println(prefix + "mMinimizeAmount=" + mMinimizeAmount);
         }
         if (mAdjustedForIme) {
             pw.println(prefix + "mAdjustedForIme=true");
@@ -1108,8 +1091,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (!mAdjustedBounds.isEmpty()) {
             pw.println(prefix + "mAdjustedBounds=" + mAdjustedBounds.toShortString());
         }
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; taskNdx--) {
-            mTasks.get(taskNdx).dump(prefix + "  ", pw);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
+            mChildren.get(taskNdx).dump(prefix + "  ", pw);
         }
         if (mAnimationBackgroundSurface.isDimming()) {
             pw.println(prefix + "mWindowAnimationBackgroundSurface:");
@@ -1130,20 +1113,21 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     /** Fullscreen status of the stack without adjusting for other factors in the system like
      * visibility of docked stack.
-     * Most callers should be using {@link #isFullscreen} as it take into consideration other
+     * Most callers should be using {@link #fillsParent} as it take into consideration other
      * system factors. */
     boolean getRawFullscreen() {
-        return mFullscreen;
+        return mFillsParent;
     }
 
     @Override
     public boolean dimFullscreen() {
-        return mStackId == HOME_STACK_ID || isFullscreen();
+        return mStackId == HOME_STACK_ID || fillsParent();
     }
 
-    boolean isFullscreen() {
+    @Override
+    boolean fillsParent() {
         if (useCurrentBounds()) {
-            return mFullscreen;
+            return mFillsParent;
         }
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
@@ -1158,7 +1142,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     @Override
     public String toString() {
-        return "{stackId=" + mStackId + " tasks=" + mTasks + "}";
+        return "{stackId=" + mStackId + " tasks=" + mChildren + "}";
     }
 
     String getName() {
@@ -1222,19 +1206,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return false;
         }
 
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            final Task task = mTasks.get(i);
-            if (task.isVisible()) {
-                return true;
-            }
-        }
-
-        return false;
+        return super.isVisible();
     }
 
     boolean hasTaskForUser(int userId) {
-        for (int i = mTasks.size() - 1; i >= 0; i--) {
-            final Task task = mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final Task task = mChildren.get(i);
             if (task.mUserId == userId) {
                 return true;
             }
@@ -1248,8 +1225,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return -1;
         }
 
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = mTasks.get(taskNdx);
+        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mChildren.get(taskNdx);
             final WindowState win = task.getTopVisibleAppMainWindow();
             if (win == null) {
                 continue;
@@ -1274,8 +1251,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return;
         }
 
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task task = mChildren.get(i);
             if (task.isFullscreen()) {
                 results.searchDone = true;
                 return;
@@ -1306,8 +1283,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     void setTouchExcludeRegion(Task focusedTask, int delta, Region touchExcludeRegion,
             Rect contentRect, Rect postExclude) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task task = mChildren.get(i);
             AppWindowToken token = task.getTopVisibleAppToken();
             if (token == null || !token.hasContentToDisplay()) {
                 continue;
@@ -1429,15 +1406,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mBoundsAnimating;
     }
 
-    /**
-     * See {@link WindowManagerService#overridePlayingAppAnimationsLw}
-     */
-    void overridePlayingAppAnimations(Animation a) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            mTasks.get(i).overridePlayingAppAnimations(a);
-        }
-    }
-
     /** Returns true if a removal action is still being deferred. */
     boolean checkCompleteDeferredRemoval() {
         if (isAnimating()) {
@@ -1447,33 +1415,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
             mDisplayContent.detachChild(this);
         }
 
-        boolean stillDeferringRemoval = false;
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-            stillDeferringRemoval |= task.checkCompleteDeferredRemoval();
-        }
-        return stillDeferringRemoval;
-    }
-
-    void checkAppWindowsReadyToShow(int displayId) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-            task.checkAppWindowsReadyToShow(displayId);
-        }
-    }
-
-    void updateAllDrawn(int displayId) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-            task.updateAllDrawn(displayId);
-        }
+        return super.checkCompleteDeferredRemoval();
     }
 
     void stepAppWindowsAnimation(long currentTime, int displayId) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-            task.stepAppWindowsAnimation(currentTime, displayId);
-        }
+        super.stepAppWindowsAnimation(currentTime, displayId);
 
         // TODO: Why aren't we just using the loop above for this? mAppAnimator.animating isn't set
         // below but is set in the loop above. See if it really matters...
@@ -1495,37 +1441,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
-    void onAppTransitionDone() {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-            task.onAppTransitionDone();
-        }
-    }
-
-    // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
-    boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
-        final Task firstTask = first.mTask;
-        final Task secondTask = second.mTask;
-
-        if (firstTask == secondTask) {
-            return first.compareTo(second) > 0;
-        }
-        return mTasks.indexOf(firstTask) > mTasks.indexOf(secondTask);
-    }
-
-    int rebuildWindowList(DisplayContent dc, int addIndex) {
-        final int count = mTasks.size();
-        for (int i = 0; i < count; i++) {
-            final Task task = mTasks.get(i);
-            addIndex = task.rebuildWindowList(dc, addIndex);
-        }
-        return addIndex;
-    }
-
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
             DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task task = mChildren.get(i);
             task.getWindowOnDisplayBeforeToken(dc, token, result);
             if (result.reachedToken) {
                 // We have reach the token we are interested in. End search.
@@ -1536,8 +1455,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
             DisplayContent.GetWindowOnDisplaySearchResult result) {
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final Task task = mChildren.get(i);
             task.getWindowOnDisplayAfterToken(dc, token, result);
             if (result.foundWindow != null) {
                 // We have found a window after the token. End search.
@@ -1546,39 +1465,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
-    // TODO: Remove once switched to use WindowContainer
+    @Override
     int getOrientation() {
-        if (!StackId.canSpecifyOrientation(mStackId)) {
-            return SCREEN_ORIENTATION_UNSET;
-        }
-
-        int candidate = SCREEN_ORIENTATION_UNSET;
-
-        for (int i = mTasks.size() - 1; i >= 0; --i) {
-            final Task task = mTasks.get(i);
-
-            if (!task.isVisible()) {
-                continue;
-            }
-
-            final int orientation = task.getOrientation();
-            if (orientation == SCREEN_ORIENTATION_BEHIND) {
-                candidate = orientation;
-                continue;
-            }
-
-            if (orientation != SCREEN_ORIENTATION_UNSET) {
-                if (task.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                    return orientation;
-                }
-            }
-        }
-
-        return candidate;
-    }
-
-    // TODO: Remove once switched to use WindowContainer
-    boolean fillsParent() {
-        return mFullscreen;
+        return (StackId.canSpecifyOrientation(mStackId))
+                ? super.getOrientation() : SCREEN_ORIENTATION_UNSET;
     }
 }

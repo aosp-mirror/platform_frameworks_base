@@ -772,8 +772,7 @@ class DisplayContent {
                 final TaskStack appStack = wtoken.mTask.mStack;
 
                 // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
-                if ((focusedAppStack == appStack
-                        && appStack.isFirstGreaterThanSecond(focusedApp, wtoken))
+                if ((focusedAppStack == appStack && focusedApp.compareTo(wtoken) > 0)
                         || mStacks.indexOf(focusedAppStack) > mStacks.indexOf(appStack)) {
                     // App stack below focused app stack. No focus for you!!!
                     if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM,
