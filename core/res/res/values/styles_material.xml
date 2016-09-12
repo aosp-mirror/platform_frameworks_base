@@ -553,11 +553,7 @@ please see styles_device_defaults.xml.
         <item name="textOff">@string/capital_off</item>
     </style>
 
-    <style name="Widget.Material.BaseButtonBar">
-        <item name="background">?attr/colorBackgroundFloating</item>
-    </style>
-
-    <style name="Widget.Material.ButtonBar" parent="Widget.Material.BaseButtonBar">
+    <style name="Widget.Material.ButtonBar">
         <item name="background">@null</item>
     </style>
 
