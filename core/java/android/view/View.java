@@ -19102,7 +19102,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return mAttachInfo.mTreeObserver;
         }
         if (mFloatingTreeObserver == null) {
-            mFloatingTreeObserver = new ViewTreeObserver();
+            mFloatingTreeObserver = new ViewTreeObserver(mContext);
         }
         return mFloatingTreeObserver;
     }
@@ -23051,7 +23051,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * The view tree observer used to dispatch global events like
          * layout, pre-draw, touch mode change, etc.
          */
-        final ViewTreeObserver mTreeObserver = new ViewTreeObserver();
+        final ViewTreeObserver mTreeObserver;
 
         /**
          * A Canvas used by the view hierarchy to perform bitmap caching.
@@ -23173,7 +23173,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @param handler the events handler the view must use
          */
         AttachInfo(IWindowSession session, IWindow window, Display display,
-                ViewRootImpl viewRootImpl, Handler handler, Callbacks effectPlayer) {
+                ViewRootImpl viewRootImpl, Handler handler, Callbacks effectPlayer,
+                Context context) {
             mSession = session;
             mWindow = window;
             mWindowToken = window.asBinder();
@@ -23181,6 +23182,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mViewRootImpl = viewRootImpl;
             mHandler = handler;
             mRootCallbacks = effectPlayer;
+            mTreeObserver = new ViewTreeObserver(context);
         }
     }
 
