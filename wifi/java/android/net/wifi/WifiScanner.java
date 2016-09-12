@@ -167,18 +167,32 @@ public class WifiScanner {
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
      */
     public static class ScanSettings implements Parcelable {
+        /**
+         * Hidden network to be scanned for.
+         * {@hide}
+         */
+        public static class HiddenNetwork {
+            /** SSID of the network */
+            public String ssid;
+
+            /**
+             * Default constructor for HiddenNetwork.
+             */
+            public HiddenNetwork(String ssid) {
+                this.ssid = ssid;
+            }
+        }
 
         /** one of the WIFI_BAND values */
         public int band;
         /** list of channels; used when band is set to WIFI_BAND_UNSPECIFIED */
         public ChannelSpec[] channels;
         /**
-         * list of networkId's of hidden networks to scan for.
-         * These Id's should correspond to the wpa_supplicant's networkId's and will be used
-         * in connectivity scans using wpa_supplicant.
+         * list of hidden networks to scan for. Explicit probe requests are sent out for such
+         * networks during scan. Only valid for single scan requests.
          * {@hide}
          * */
-        public int[] hiddenNetworkIds;
+        public HiddenNetwork[] hiddenNetworks;
         /** period of background scan; in millisecond, 0 => single shot scan */
         public int periodInMs;
         /** must have a valid REPORT_EVENT value */
@@ -233,7 +247,14 @@ public class WifiScanner {
             } else {
                 dest.writeInt(0);
             }
-            dest.writeIntArray(hiddenNetworkIds);
+            if (hiddenNetworks != null) {
+                dest.writeInt(hiddenNetworks.length);
+                for (int i = 0; i < hiddenNetworks.length; i++) {
+                    dest.writeString(hiddenNetworks[i].ssid);
+                }
+            } else {
+                dest.writeInt(0);
+            }
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -258,7 +279,12 @@ public class WifiScanner {
                             spec.passive = in.readInt() == 1;
                             settings.channels[i] = spec;
                         }
-                        settings.hiddenNetworkIds = in.createIntArray();
+                        int numNetworks = in.readInt();
+                        settings.hiddenNetworks = new HiddenNetwork[numNetworks];
+                        for (int i = 0; i < numNetworks; i++) {
+                            String ssid = in.readString();
+                            settings.hiddenNetworks[i] = new HiddenNetwork(ssid);;
+                        }
                         return settings;
                     }
 
@@ -536,10 +562,6 @@ public class WifiScanner {
 
             /** SSID of the network */
             public String ssid;
-            /** Network ID in wpa_supplicant */
-            public int networkId;
-            /** Assigned priority for the network */
-            public int priority;
             /** Bitmask of the FLAG_XXX */
             public byte flags;
             /** Bitmask of the ATUH_XXX */
@@ -596,8 +618,6 @@ public class WifiScanner {
                 dest.writeInt(networkList.length);
                 for (int i = 0; i < networkList.length; i++) {
                     dest.writeString(networkList[i].ssid);
-                    dest.writeInt(networkList[i].networkId);
-                    dest.writeInt(networkList[i].priority);
                     dest.writeByte(networkList[i].flags);
                     dest.writeByte(networkList[i].authBitField);
                 }
@@ -624,8 +644,6 @@ public class WifiScanner {
                         for (int i = 0; i < numNetworks; i++) {
                             String ssid = in.readString();
                             PnoNetwork network = new PnoNetwork(ssid);
-                            network.networkId = in.readInt();
-                            network.priority = in.readInt();
                             network.flags = in.readByte();
                             network.authBitField = in.readByte();
                             settings.networkList[i] = network;
