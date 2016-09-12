@@ -50,6 +50,8 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.tuner.TunerService;
 
+import java.util.Set;
+
 /**
  * The guts of a notification revealed when performing a long press.
  */
@@ -173,7 +175,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     void bindImportance(final PackageManager pm, final StatusBarNotification sbn,
-            final int importance) {
+            final Set<String> nonBlockablePkgs, final int importance) {
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mStartingUserImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
@@ -182,24 +184,26 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                     mINotificationManager.getImportance(sbn.getPackageName(), sbn.getUid());
         } catch (RemoteException e) {}
         mNotificationImportance = importance;
-        boolean systemApp = false;
+        boolean nonBlockable = false;
         try {
             final PackageInfo info =
                     pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
-            systemApp = Utils.isSystemPackage(getResources(), pm, info);
+            nonBlockable = Utils.isSystemPackage(getResources(), pm, info);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
+        }
+        if (nonBlockablePkgs != null) {
+            nonBlockable |= nonBlockablePkgs.contains(sbn.getPackageName());
         }
 
         final View importanceSlider = findViewById(R.id.importance_slider);
         final View importanceButtons = findViewById(R.id.importance_buttons);
         if (mShowSlider) {
-            bindSlider(importanceSlider, systemApp);
+            bindSlider(importanceSlider, nonBlockable);
             importanceSlider.setVisibility(View.VISIBLE);
             importanceButtons.setVisibility(View.GONE);
         } else {
-
-            bindToggles(importanceButtons, mStartingUserImportance, systemApp);
+            bindToggles(importanceButtons, mStartingUserImportance, nonBlockable);
             importanceButtons.setVisibility(View.VISIBLE);
             importanceSlider.setVisibility(View.GONE);
         }
@@ -239,7 +243,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     private void bindToggles(final View importanceButtons, final int importance,
-            final boolean systemApp) {
+            final boolean nonBlockable) {
         ((RadioGroup) importanceButtons).setOnCheckedChangeListener(
                 new RadioGroup.OnCheckedChangeListener() {
                     @Override
@@ -250,7 +254,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mBlock = (RadioButton) importanceButtons.findViewById(R.id.block_importance);
         mSilent = (RadioButton) importanceButtons.findViewById(R.id.silent_importance);
         mReset = (RadioButton) importanceButtons.findViewById(R.id.reset_importance);
-        if (systemApp) {
+        if (nonBlockable) {
             mBlock.setVisibility(View.GONE);
             mReset.setText(mContext.getString(R.string.do_not_silence));
         } else {
@@ -265,7 +269,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         }
     }
 
-    private void bindSlider(final View importanceSlider, final boolean systemApp) {
+    private void bindSlider(final View importanceSlider, final boolean nonBlockable) {
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.notification_guts_disabled_slider_color);
 
@@ -273,7 +277,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mImportanceTitle = ((TextView) importanceSlider.findViewById(R.id.title));
         mSeekBar = (SeekBar) importanceSlider.findViewById(R.id.seekbar);
 
-        final int minProgress = systemApp ?
+        final int minProgress = nonBlockable ?
                 NotificationListenerService.Ranking.IMPORTANCE_MIN
                 : NotificationListenerService.Ranking.IMPORTANCE_NONE;
         mSeekBar.setMax(NotificationListenerService.Ranking.IMPORTANCE_MAX);
