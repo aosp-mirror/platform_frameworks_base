@@ -20,7 +20,6 @@
 #include "core_jni_helpers.h"
 
 #include <ScopedUtfChars.h>
-#include <UniquePtr.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
 #include <utils/Log.h>
@@ -37,6 +36,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <memory>
 
 #define APK_LIB "lib/"
 #define APK_LIB_LEN (sizeof(APK_LIB) - 1)
@@ -398,7 +398,7 @@ iterateOverNativeFiles(JNIEnv *env, jlong apkHandle, jstring javaCpuAbi,
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    UniquePtr<NativeLibrariesIterator> it(NativeLibrariesIterator::create(zipFile));
+    std::unique_ptr<NativeLibrariesIterator> it(NativeLibrariesIterator::create(zipFile));
     if (it.get() == NULL) {
         return INSTALL_FAILED_INVALID_APK;
     }
@@ -446,7 +446,7 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    UniquePtr<NativeLibrariesIterator> it(NativeLibrariesIterator::create(zipFile));
+    std::unique_ptr<NativeLibrariesIterator> it(NativeLibrariesIterator::create(zipFile));
     if (it.get() == NULL) {
         return INSTALL_FAILED_INVALID_APK;
     }
