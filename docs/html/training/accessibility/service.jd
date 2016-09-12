@@ -17,7 +17,7 @@ previous.link=accessible-app.html
   <li><a href="#create">Create Your Accessibility Service</a></li>
   <li><a href="#configure">Configure Your Accessibility Service</a></li>
   <li><a href="#events">Respond to AccessibilityEvents</a></li>
-  <li><a href="#query">Query the View Heirarchy for More Context</a></li>
+  <li><a href="#query">Query the View Hierarchy for More Context</a></li>
 </ol>
 
 <h2>You should also read</h2>
@@ -200,7 +200,7 @@ public void onAccessibilityEvent(AccessibilityEvent event) {
 }
 </pre>
 
-<h2 id="query">Query the View Heirarchy for More Context</h2>
+<h2 id="query">Query the View Hierarchy's for More Context</h2>
 <p>This step is optional, but highly useful. The Android platform provides the ability for an
 {@link android.accessibilityservice.AccessibilityService} to query the view
 hierarchy, collecting information about the UI component that generated an event, and
