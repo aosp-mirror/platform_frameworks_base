@@ -104,14 +104,16 @@ import java.util.TreeSet;
 // -----------------------------------------------
 // If a network has no chance of satisfying any requests (even if it were to become validated
 // and enter state #5), ConnectivityService will disconnect the NetworkAgent's AsyncChannel.
-// If the network ever for any period of time had satisfied a NetworkRequest (i.e. had been
-// the highest scoring that satisfied the NetworkRequest's constraints), but is no longer the
-// highest scoring network for any NetworkRequest, then there will be a 30s pause before
-// ConnectivityService disconnects the NetworkAgent's AsyncChannel.  During this pause the
-// network is considered "lingering".  This pause exists to allow network communication to be
-// wrapped up rather than abruptly terminated.  During this pause if the network begins satisfying
-// a NetworkRequest, ConnectivityService will cancel the future disconnection of the NetworkAgent's
-// AsyncChannel, and the network is no longer considered "lingering".
+//
+// If the network was satisfying a foreground NetworkRequest (i.e. had been the highest scoring that
+// satisfied the NetworkRequest's constraints), but is no longer the highest scoring network for any
+// foreground NetworkRequest, then there will be a 30s pause to allow network communication to be
+// wrapped up rather than abruptly terminated. During this pause the network is said to be
+// "lingering". During this pause if the network begins satisfying a foreground NetworkRequest,
+// ConnectivityService will cancel the future disconnection of the NetworkAgent's AsyncChannel, and
+// the network is no longer considered "lingering". After the linger timer expires, if the network
+// is satisfying one or more background NetworkRequests it is kept up in the background. If it is
+// not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
 public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
@@ -227,10 +229,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
-    // The list of NetworkRequests that this Network previously satisfied with the highest
-    // score.  A non-empty list indicates that if this Network was validated it is lingered.
+
     // How many of the satisfied requests are actual requests and not listens.
     private int mNumRequestNetworkRequests = 0;
+
+    // How many of the satisfied requests are of type BACKGROUND_REQUEST.
+    private int mNumBackgroundNetworkRequests = 0;
 
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
@@ -265,6 +269,32 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     //
     // These functions must only called on ConnectivityService's main thread.
 
+    private static final boolean ADD = true;
+    private static final boolean REMOVE = false;
+
+    private void updateRequestCounts(boolean add, NetworkRequest request) {
+        int delta = add ? +1 : -1;
+        switch (request.type) {
+            case REQUEST:
+            case TRACK_DEFAULT:
+                mNumRequestNetworkRequests += delta;
+                break;
+
+            case BACKGROUND_REQUEST:
+                mNumRequestNetworkRequests += delta;
+                mNumBackgroundNetworkRequests += delta;
+                break;
+
+            case LISTEN:
+                break;
+
+            case NONE:
+            default:
+                Log.wtf(TAG, "Unhandled request type " + request.type);
+                break;
+        }
+    }
+
     /**
      * Add {@code networkRequest} to this network as it's satisfied by this network.
      * @return true if {@code networkRequest} was added or false if {@code networkRequest} was
@@ -273,9 +303,15 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public boolean addRequest(NetworkRequest networkRequest) {
         NetworkRequest existing = mNetworkRequests.get(networkRequest.requestId);
         if (existing == networkRequest) return false;
-        if (existing != null && existing.isRequest()) mNumRequestNetworkRequests--;
+        if (existing != null) {
+            // Should only happen if the requestId wraps. If that happens lots of other things will
+            // be broken as well.
+            Log.wtf(TAG, String.format("Duplicate requestId for %s and %s on %s",
+                    networkRequest, existing, name()));
+            updateRequestCounts(REMOVE, existing);
+        }
         mNetworkRequests.put(networkRequest.requestId, networkRequest);
-        if (networkRequest.isRequest()) mNumRequestNetworkRequests++;
+        updateRequestCounts(ADD, networkRequest);
         return true;
     }
 
@@ -285,9 +321,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public void removeRequest(int requestId) {
         NetworkRequest existing = mNetworkRequests.get(requestId);
         if (existing == null) return;
+        updateRequestCounts(REMOVE, existing);
         mNetworkRequests.remove(requestId);
         if (existing.isRequest()) {
-            mNumRequestNetworkRequests--;
             unlingerRequest(existing);
         }
     }
@@ -316,10 +352,35 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
+     * Returns the number of requests currently satisfied by this network of type
+     * {@link android.net.NetworkRequest.Type.BACKGROUND_REQUEST}.
+     */
+    public int numBackgroundNetworkRequests() {
+        return mNumBackgroundNetworkRequests;
+    }
+
+    /**
+     * Returns the number of foreground requests currently satisfied by this network.
+     */
+    public int numForegroundNetworkRequests() {
+        return mNumRequestNetworkRequests - mNumBackgroundNetworkRequests;
+    }
+
+    /**
      * Returns the number of requests of any type currently satisfied by this network.
      */
     public int numNetworkRequests() {
         return mNetworkRequests.size();
+    }
+
+    /**
+     * Returns whether the network is a background network. A network is a background network if it
+     * is satisfying no foreground requests and at least one background request. (If it did not have
+     * a background request, it would be a speculative network that is only being kept up because
+     * it might satisfy a request if it validated).
+     */
+    public boolean isBackgroundNetwork() {
+        return numForegroundNetworkRequests() == 0 && mNumBackgroundNetworkRequests > 0;
     }
 
     // Does this network satisfy request?

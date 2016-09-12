@@ -49,7 +49,7 @@ public class NetworkRequest implements Parcelable {
     public final int legacyType;
 
     /**
-     * A NetworkRequest as used by the system can be one of three types:
+     * A NetworkRequest as used by the system can be one of the following types:
      *
      *     - LISTEN, for which the framework will issue callbacks about any
      *       and all networks that match the specified NetworkCapabilities,
@@ -64,7 +64,20 @@ public class NetworkRequest implements Parcelable {
      *       current network (if any) that matches the capabilities of the
      *       default Internet request (mDefaultRequest), but which cannot cause
      *       the framework to either create or retain the existence of any
-     *       specific network.
+     *       specific network. Note that from the point of view of the request
+     *       matching code, TRACK_DEFAULT is identical to REQUEST: its special
+     *       behaviour is not due to different semantics, but to the fact that
+     *       the system will only ever create a TRACK_DEFAULT with capabilities
+     *       that are identical to the default request's capabilities, thus
+     *       causing it to share fate in every way with the default request.
+     *
+     *     - BACKGROUND_REQUEST, like REQUEST but does not cause any networks
+     *       to retain the NET_CAPABILITY_FOREGROUND capability. A network with
+     *       no foreground requests is in the background. A network that has
+     *       one or more background requests and loses its last foreground
+     *       request to a higher-scoring network will not go into the
+     *       background immediately, but will linger and go into the background
+     *       after the linger timeout.
      *
      *     - The value NONE is used only by applications. When an application
      *       creates a NetworkRequest, it does not have a type; the type is set
@@ -77,7 +90,8 @@ public class NetworkRequest implements Parcelable {
         NONE,
         LISTEN,
         TRACK_DEFAULT,
-        REQUEST
+        REQUEST,
+        BACKGROUND_REQUEST,
     };
 
     /**
@@ -140,7 +154,7 @@ public class NetworkRequest implements Parcelable {
          * Add the given capability requirement to this builder.  These represent
          * the requested network's required capabilities.  Note that when searching
          * for a network to satisfy a request, all capabilities requested must be
-         * satisfied.  See {@link NetworkCapabilities} for {@code NET_CAPABILITIY_*}
+         * satisfied.  See {@link NetworkCapabilities} for {@code NET_CAPABILITY_*}
          * definitions.
          *
          * @param capability The {@code NetworkCapabilities.NET_CAPABILITY_*} to add.
@@ -284,7 +298,7 @@ public class NetworkRequest implements Parcelable {
         };
 
     /**
-     * Returns true iff. the contained NetworkRequest is of type LISTEN.
+     * Returns true iff. this NetworkRequest is of type LISTEN.
      *
      * @hide
      */
@@ -298,8 +312,9 @@ public class NetworkRequest implements Parcelable {
      *     - should be associated with at most one satisfying network
      *       at a time;
      *
-     *     - should cause a network to be kept up if it is the best network
-     *       which can satisfy the NetworkRequest.
+     *     - should cause a network to be kept up, but not necessarily in
+     *       the foreground, if it is the best network which can satisfy the
+     *       NetworkRequest.
      *
      * For full detail of how isRequest() is used for pairing Networks with
      * NetworkRequests read rematchNetworkAndRequests().
@@ -307,7 +322,34 @@ public class NetworkRequest implements Parcelable {
      * @hide
      */
     public boolean isRequest() {
+        return isForegroundRequest() || isBackgroundRequest();
+    }
+
+    /**
+     * Returns true iff. the contained NetworkRequest is one that:
+     *
+     *     - should be associated with at most one satisfying network
+     *       at a time;
+     *
+     *     - should cause a network to be kept up and in the foreground if
+     *       it is the best network which can satisfy the NetworkRequest.
+     *
+     * For full detail of how isRequest() is used for pairing Networks with
+     * NetworkRequests read rematchNetworkAndRequests().
+     *
+     * @hide
+     */
+    public boolean isForegroundRequest() {
         return type == Type.TRACK_DEFAULT || type == Type.REQUEST;
+    }
+
+    /**
+     * Returns true iff. this NetworkRequest is of type BACKGROUND_REQUEST.
+     *
+     * @hide
+     */
+    public boolean isBackgroundRequest() {
+        return type == Type.BACKGROUND_REQUEST;
     }
 
     public String toString() {
