@@ -65,8 +65,7 @@ abstract class ShortcutPackageItem {
     /**
      * ID of the user who actually has this package running on.  For {@link ShortcutPackage},
      * this is the same thing as {@link #getOwnerUserId}, but if it's a {@link ShortcutLauncher} and
-     * {@link #getOwnerUserId} is of a work profile, then this ID could be the user who owns the
-     * profile.
+     * {@link #getOwnerUserId} is of work profile, then this ID is of the primary user.
      */
     public int getPackageUserId() {
         return mPackageUserId;
@@ -86,12 +85,12 @@ abstract class ShortcutPackageItem {
         return mPackageInfo;
     }
 
-    public void refreshPackageInfoAndSave() {
+    public void refreshPackageSignatureAndSave() {
         if (mPackageInfo.isShadow()) {
             return; // Don't refresh for shadow user.
         }
         final ShortcutService s = mShortcutUser.mService;
-        mPackageInfo.refresh(s, this);
+        mPackageInfo.refreshSignature(s, this);
         s.scheduleSaveUser(getOwnerUserId());
     }
 

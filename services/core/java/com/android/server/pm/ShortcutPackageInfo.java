@@ -20,6 +20,7 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageInfo;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.backup.BackupUtils;
 
 import libcore.io.Base64;
@@ -89,6 +90,7 @@ class ShortcutPackageInfo {
         return mLastUpdateTime;
     }
 
+    /** Set {@link #mVersionCode} and {@link #mLastUpdateTime} from a {@link PackageInfo}. */
     public void updateVersionInfo(@NonNull PackageInfo pi) {
         if (pi != null) {
             mVersionCode = pi.versionCode;
@@ -119,7 +121,8 @@ class ShortcutPackageInfo {
         return true;
     }
 
-    public static ShortcutPackageInfo generateForInstalledPackage(
+    @VisibleForTesting
+    public static ShortcutPackageInfo generateForInstalledPackageForTest(
             ShortcutService s, String packageName, @UserIdInt int packageUserId) {
         final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, packageUserId);
         if (pi.signatures == null || pi.signatures.length == 0) {
@@ -132,7 +135,7 @@ class ShortcutPackageInfo {
         return ret;
     }
 
-    public void refresh(ShortcutService s, ShortcutPackageItem pkg) {
+    public void refreshSignature(ShortcutService s, ShortcutPackageItem pkg) {
         if (mIsShadow) {
             s.wtf("Attempted to refresh package info for shadow package " + pkg.getPackageName()
                     + ", user=" + pkg.getOwnerUserId());
@@ -145,8 +148,6 @@ class ShortcutPackageInfo {
             Slog.w(TAG, "Package not found: " + pkg.getPackageName());
             return;
         }
-        mVersionCode = pi.versionCode;
-        mLastUpdateTime = pi.lastUpdateTime;
         mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
     }
 

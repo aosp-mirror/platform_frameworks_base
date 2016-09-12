@@ -17,6 +17,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -151,6 +152,16 @@ class ShortcutLauncher extends ShortcutPackageItem {
         return mPinnedShortcuts.remove(PackageWithUser.of(packageUserId, packageName)) != null;
     }
 
+    public void ensureVersionInfo() {
+        final PackageInfo pi = mShortcutUser.mService.getPackageInfoWithSignatures(
+                getPackageName(), getPackageUserId());
+        if (pi == null) {
+            Slog.w(TAG, "Package not found: " + getPackageName());
+            return;
+        }
+        getPackageInfo().updateVersionInfo(pi);
+    }
+
     /**
      * Persist.
      */
@@ -202,7 +213,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 fromBackup ? ownerUserId
                 : ShortcutService.parseIntAttribute(parser, ATTR_LAUNCHER_USER_ID, ownerUserId);
 
-        final ShortcutLauncher ret = new ShortcutLauncher(shortcutUser, launcherUserId,
+        final ShortcutLauncher ret = new ShortcutLauncher(shortcutUser, ownerUserId,
                 launcherPackageName, launcherUserId);
 
         ArraySet<String> ids = null;
