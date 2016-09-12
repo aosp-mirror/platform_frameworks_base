@@ -3912,6 +3912,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private class NotificationSwipeHelper extends SwipeHelper {
         private static final long SHOW_GEAR_DELAY = 60;
         private static final long COVER_GEAR_DELAY = 4000;
+        private static final long SWIPE_GEAR_TIMING = 200;
         private CheckForDrag mCheckForDrag;
         private Runnable mFalsingCheck;
         private Handler mHandler;
@@ -4028,6 +4029,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             boolean gestureTowardsGear = isTowardsGear(velocity, mCurrIconRow.isIconOnLeft());
             boolean gestureFastEnough = Math.abs(velocity) > getEscapeVelocity();
+            final double timeForGesture = ev.getEventTime() - ev.getDownTime();
+            final boolean showGearForSlowOnGoing = !canChildBeDismissed(animView)
+                && timeForGesture >= SWIPE_GEAR_TIMING;
 
             if (mGearSnappedTo && mCurrIconRow.isVisible()) {
                 if (mGearSnappedOnLeft == mCurrIconRow.isIconOnLeft()) {
@@ -4052,7 +4056,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 } else {
                     dismissOrSnapBack(animView, velocity, ev);
                 }
-            } else if ((!gestureFastEnough && swipedEnoughToShowGear(animView))
+            } else if (((!gestureFastEnough || showGearForSlowOnGoing)
+                    && swipedEnoughToShowGear(animView))
                     || gestureTowardsGear) {
                 // Gear has not been snapped to previously and this is gear revealing gesture
                 snapToGear(animView, velocity);
@@ -4104,13 +4109,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             final float multiplier = canChildBeDismissed(animView) ? 0.4f : 0.2f;
             final float snapBackThreshold = getSpaceForGear(animView) * multiplier;
             final float translation = getTranslation(animView);
-            final boolean fromLeft = translation > 0;
-            final float absTrans = Math.abs(translation);
-            final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
-
-            return mCurrIconRow.isVisible() && (mCurrIconRow.isIconOnLeft()
-                    ? (translation > snapBackThreshold && translation <= notiThreshold)
-                    : (translation < -snapBackThreshold && translation >= -notiThreshold));
+            return !swipedFarEnough() && mCurrIconRow.isVisible() && (mCurrIconRow.isIconOnLeft()
+                    ? translation > snapBackThreshold
+                    : translation < -snapBackThreshold);
         }
 
         @Override
