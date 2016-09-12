@@ -171,8 +171,8 @@ public class ApfFilter {
     private static final int ETH_HEADER_LEN = 14;
     private static final int ETH_DEST_ADDR_OFFSET = 0;
     private static final int ETH_ETHERTYPE_OFFSET = 12;
-    private static final byte[] ETH_BROADCAST_MAC_ADDRESS = new byte[]{
-            (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
+    private static final byte[] ETH_BROADCAST_MAC_ADDRESS =
+            {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
     // TODO: Make these offsets relative to end of link-layer header; don't include ETH_HEADER_LEN.
     private static final int IPV4_FRAGMENT_OFFSET_OFFSET = ETH_HEADER_LEN + 6;
     // Endianness is not an issue for this constant because the APF interpreter always operates in
@@ -188,7 +188,7 @@ public class ApfFilter {
     private static final int IPV6_HEADER_LEN = 40;
     // The IPv6 all nodes address ff02::1
     private static final byte[] IPV6_ALL_NODES_ADDRESS =
-            new byte[]{ (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+            { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 
     private static final int ICMP6_TYPE_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
     private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
@@ -206,7 +206,7 @@ public class ApfFilter {
     private static final int ARP_OPCODE_OFFSET = ARP_HEADER_OFFSET + 6;
     private static final short ARP_OPCODE_REQUEST = 1;
     private static final short ARP_OPCODE_REPLY = 2;
-    private static final byte[] ARP_IPV4_HEADER = new byte[]{
+    private static final byte[] ARP_IPV4_HEADER = {
             0, 1, // Hardware type: Ethernet (1)
             8, 0, // Protocol type: IP (0x0800)
             6,    // Hardware size: 6
