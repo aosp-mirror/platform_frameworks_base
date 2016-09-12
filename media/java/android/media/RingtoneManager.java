@@ -17,9 +17,11 @@
 package android.media;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -28,6 +30,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -43,11 +46,16 @@ import com.android.internal.database.SortCursor;
 
 import libcore.io.Streams;
 
+import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.content.pm.PackageManager.NameNotFoundException;
@@ -434,7 +442,35 @@ public class RingtoneManager {
         
         return getUriFromCursor(mCursor);
     }
-    
+
+    /**
+     * Queries the database for the Uri to a ringtone in a specific path (the ringtone has to have
+     * been scanned before)
+     *
+     * @param context Context used to query the database
+     * @param path Path to the ringtone file
+     * @return Uri of the ringtone, null if something fails in the query or the ringtone doesn't
+     *            exist
+     *
+     * @hide
+     */
+    private static Uri getExistingRingtoneUriFromPath(Context context, String path) {
+        final String[] proj = {MediaStore.Audio.Media._ID};
+        final String[] selectionArgs = {path};
+        try (final Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, proj,
+                MediaStore.Audio.Media.DATA + "=? ", selectionArgs, /* sortOrder */ null)) {
+            if (cursor == null || !cursor.moveToFirst()) {
+                return null;
+            }
+            final int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            if (id == -1) {
+                return null;
+            }
+            return Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, "" + id);
+        }
+    }
+
     private static Uri getUriFromCursor(Cursor cursor) {
         return ContentUris.withAppendedId(Uri.parse(cursor.getString(URI_COLUMN_INDEX)), cursor
                 .getLong(ID_COLUMN_INDEX));
@@ -755,6 +791,87 @@ public class RingtoneManager {
     }
 
     /**
+     * Adds an audio file to the list of ringtones.
+     *
+     * After making sure the given file is an audio file, copies the file to the ringtone storage,
+     * and asks the {@link android.media.MediaScanner} to scan that file. This call will block until
+     * the scan is completed.
+     *
+     * The directory where the copied file is stored is the directory that matches the ringtone's
+     * type, which is one of: {@link android.is.Environment#DIRECTORY_RINGTONES};
+     * {@link android.is.Environment#DIRECTORY_NOTIFICATIONS};
+     * {@link android.is.Environment#DIRECTORY_ALARMS}.
+     *
+     * This does not allow modifying the type of an existing ringtone file. To change type, use the
+     * APIs in {@link android.content.ContentResolver} to update the corresponding columns.
+     *
+     * @param fileUri Uri of the file to be added as ringtone. Must be a media file.
+     * @param type The type of the ringtone to be added. Must be one of {@link #TYPE_RINGTONE},
+     *            {@link #TYPE_NOTIFICATION}, or {@link #TYPE_ALARM}.
+     *
+     * @return The Uri of the installed ringtone, which may be the Uri of {@param fileUri} if it is
+     *         already in ringtone storage.
+     *
+     * @throws FileNotFoundexception if an appropriate unique filename to save the new ringtone file
+     *         as cannot be found, for example if the unique name is too long.
+     * @throws IllegalArgumentException if {@param fileUri} does not point to an existing audio
+     *         file, or if the {@param type} is not one of the accepted ringtone types.
+     * @throws IOException if the audio file failed to copy to ringtone storage; for example, if
+     *         external storage was not available, or if the file was copied but the media scanner
+     *         did not recognize it as a ringtone.
+     *
+     * @hide
+     */
+    @WorkerThread
+    public Uri addCustomExternalRingtone(@NonNull final Uri fileUri, final int type)
+            throws FileNotFoundException, IllegalArgumentException, IOException {
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            throw new IOException("External storage is not mounted. Unable to install ringtones.");
+        }
+
+        // Sanity-check: are we actually being asked to install an audio file?
+        final String mimeType = mContext.getContentResolver().getType(fileUri);
+        if(mimeType == null || !mimeType.startsWith("audio/")) {
+            throw new IllegalArgumentException("Ringtone file must have MIME type \"audio/*\"."
+                    + " Given file has MIME type \"" + mimeType + "\"");
+        }
+
+        // Choose a directory to save the ringtone. Only one type of installation at a time is
+        // allowed. Throws IllegalArgumentException if anything else is given.
+        final String subdirectory = getExternalDirectoryForType(type);
+
+        // Find a filename. Throws FileNotFoundException if none can be found.
+        final File outFile = Utils.getUniqueExternalFile(mContext, subdirectory,
+                Utils.getFileDisplayNameFromUri(mContext, fileUri), mimeType);
+
+        // Copy contents to external ringtone storage. Throws IOException if the copy fails.
+        try (final InputStream input = mContext.getContentResolver().openInputStream(fileUri);
+                final OutputStream output = new FileOutputStream(outFile)) {
+            Streams.copy(input, output);
+        }
+
+        // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.
+        try (NewRingtoneScanner scanner =  new NewRingtoneScanner(outFile)) {
+            return scanner.take();
+        } catch (InterruptedException e) {
+            throw new IOException("Audio file failed to scan as a ringtone", e);
+        }
+    }
+
+    private static final String getExternalDirectoryForType(final int type) {
+        switch (type) {
+            case TYPE_RINGTONE:
+                return Environment.DIRECTORY_RINGTONES;
+            case TYPE_NOTIFICATION:
+                return Environment.DIRECTORY_NOTIFICATIONS;
+            case TYPE_ALARM:
+                return Environment.DIRECTORY_ALARMS;
+            default:
+                throw new IllegalArgumentException("Unsupported ringtone type: " + type);
+        }
+    }
+
+    /**
      * Try opening the given ringtone locally first, but failover to
      * {@link IRingtonePlayer} if we can't access it directly. Typically happens
      * when process doesn't hold
@@ -860,5 +977,51 @@ public class RingtoneManager {
             return null;
         }
     }
-    
+
+    /**
+     * Creates a {@link android.media.MediaScannerConnection} to scan a ringtone file and add its
+     * information to the internal database.
+     *
+     * It uses a {@link java.util.concurrent.LinkedBlockingQueue} so that the caller can block until
+     * the scan is completed.
+     */
+    private class NewRingtoneScanner implements Closeable, MediaScannerConnectionClient {
+        private MediaScannerConnection mMediaScannerConnection;
+        private File mFile;
+        private LinkedBlockingQueue<Uri> mQueue = new LinkedBlockingQueue<>(1);
+
+        public NewRingtoneScanner(File file) {
+            mFile = file;
+            mMediaScannerConnection = new MediaScannerConnection(mContext, this);
+            mMediaScannerConnection.connect();
+        }
+
+        @Override
+        public void close() {
+            mMediaScannerConnection.disconnect();
+        }
+
+        @Override
+        public void onMediaScannerConnected() {
+            mMediaScannerConnection.scanFile(mFile.getAbsolutePath(), null);
+        }
+
+        @Override
+        public void onScanCompleted(String path, Uri uri) {
+            if (uri == null) {
+                // There was some issue with scanning. Delete the copied file so it is not oprhaned.
+                mFile.delete();
+                return;
+            }
+            try {
+                mQueue.put(uri);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Unable to put new ringtone Uri in queue", e);
+            }
+        }
+
+        public Uri take() throws InterruptedException {
+            return mQueue.take();
+        }
+    }
 }
