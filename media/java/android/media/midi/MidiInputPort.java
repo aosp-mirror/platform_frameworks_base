@@ -17,7 +17,6 @@
 package android.media.midi;
 
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -26,6 +25,7 @@ import dalvik.system.CloseGuard;
 import libcore.io.IoUtils;
 
 import java.io.Closeable;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -38,7 +38,7 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     private IMidiDeviceServer mDeviceServer;
     private final IBinder mToken;
     private final int mPortNumber;
-    private ParcelFileDescriptor mParcelFileDescriptor;
+    private FileDescriptor mFileDescriptor;
     private FileOutputStream mOutputStream;
 
     private final CloseGuard mGuard = CloseGuard.get();
@@ -48,19 +48,19 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
 
     /* package */ MidiInputPort(IMidiDeviceServer server, IBinder token,
-            ParcelFileDescriptor pfd, int portNumber) {
+            FileDescriptor fd, int portNumber) {
         super(MidiPortImpl.MAX_PACKET_DATA_SIZE);
 
         mDeviceServer = server;
         mToken = token;
-        mParcelFileDescriptor = pfd;
+        mFileDescriptor = fd;
         mPortNumber = portNumber;
-        mOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+        mOutputStream = new FileOutputStream(fd);
         mGuard.open("close");
     }
 
-    /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
-        this(null, null, pfd, portNumber);
+    /* package */ MidiInputPort(FileDescriptor fd, int portNumber) {
+        this(null, null, fd, portNumber);
     }
 
     /**
@@ -102,21 +102,21 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
     }
 
     // used by MidiDevice.connectInputPort() to connect our socket directly to another device
-    /* package */ ParcelFileDescriptor claimFileDescriptor() {
+    /* package */ FileDescriptor claimFileDescriptor() {
         synchronized (mGuard) {
-            ParcelFileDescriptor pfd;
+            FileDescriptor fd;
             synchronized (mBuffer) {
-                pfd = mParcelFileDescriptor;
-                if (pfd == null) return null;
+                fd = mFileDescriptor;
+                if (fd == null) return null;
                 IoUtils.closeQuietly(mOutputStream);
-                mParcelFileDescriptor = null;
+                mFileDescriptor = null;
                 mOutputStream = null;
             }
 
             // Set mIsClosed = true so we will not call mDeviceServer.closePort() in close().
             // MidiDevice.MidiConnection.close() will do the cleanup instead.
             mIsClosed = true;
-            return pfd;
+            return fd;
         }
     }
 
@@ -136,9 +136,9 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
             if (mIsClosed) return;
             mGuard.close();
             synchronized (mBuffer) {
-                if (mParcelFileDescriptor != null) {
-                    mParcelFileDescriptor.close();
-                    mParcelFileDescriptor = null;
+                if (mFileDescriptor != null) {
+                    IoUtils.closeQuietly(mFileDescriptor);
+                    mFileDescriptor = null;
                 }
                 if (mOutputStream != null) {
                     mOutputStream.close();
