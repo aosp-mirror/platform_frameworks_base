@@ -23,9 +23,9 @@
 #include "selinux/selinux.h"
 #include "selinux/android.h"
 #include <errno.h>
+#include <memory>
 #include <ScopedLocalRef.h>
 #include <ScopedUtfChars.h>
-#include <UniquePtr.h>
 
 namespace android {
 
@@ -34,7 +34,7 @@ struct SecurityContext_Delete {
         freecon(p);
     }
 };
-typedef UniquePtr<char[], SecurityContext_Delete> Unique_SecurityContext;
+typedef std::unique_ptr<char[], SecurityContext_Delete> Unique_SecurityContext;
 
 static jboolean isSELinuxDisabled = true;
 
@@ -112,7 +112,7 @@ static jboolean setFSCreateCon(JNIEnv *env, jobject, jstring contextStr) {
         return false;
     }
 
-    UniquePtr<ScopedUtfChars> context;
+    std::unique_ptr<ScopedUtfChars> context;
     const char* context_c_str = NULL;
     if (contextStr != NULL) {
         context.reset(new ScopedUtfChars(env, contextStr));
