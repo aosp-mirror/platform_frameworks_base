@@ -225,8 +225,6 @@ class WindowStateAnimator {
     int mAttrType;
 
     static final long PENDING_TRANSACTION_FINISH_WAIT_TIME = 100;
-    long mDeferTransactionUntilFrame = -1;
-    long mDeferTransactionTime = -1;
 
     boolean mForceScaleUntilResize;
 
@@ -1889,33 +1887,8 @@ class WindowStateAnimator {
         if (!mWin.isChildWindow()) {
             return;
         }
-        mDeferTransactionUntilFrame = frameNumber;
-        mDeferTransactionTime = System.currentTimeMillis();
         mSurfaceController.deferTransactionUntil(
                 mWin.getParentWindow().mWinAnimator.mSurfaceController.getHandle(), frameNumber);
-    }
-
-    // Defer the current transaction to the frame number of the last saved transaction.
-    // We do this to avoid shooting through an unsynchronized transaction while something is
-    // pending. This is generally fine, as either we will get in on the synchronization,
-    // or SurfaceFlinger will see that the frame has already occured. The only
-    // potential problem is in frame number resets so we reset things with a timeout
-    // every so often to be careful.
-    void deferToPendingTransaction() {
-        if (mDeferTransactionUntilFrame < 0) {
-            return;
-        }
-        final WindowState parentWindow = mWin.getParentWindow();
-        long time = System.currentTimeMillis();
-        if (time > mDeferTransactionTime + PENDING_TRANSACTION_FINISH_WAIT_TIME) {
-            mDeferTransactionTime = -1;
-            mDeferTransactionUntilFrame = -1;
-        } else if (parentWindow != null &&
-                parentWindow.mWinAnimator.hasSurface()) {
-            mSurfaceController.deferTransactionUntil(
-                    mWin.getParentWindow().mWinAnimator.mSurfaceController.getHandle(),
-                    mDeferTransactionUntilFrame);
-        }
     }
 
     /**
