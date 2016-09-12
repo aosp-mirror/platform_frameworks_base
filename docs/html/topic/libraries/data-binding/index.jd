@@ -162,7 +162,9 @@ page.tags="databinding", "layouts"
 
 <p>
   To use data binding, Android Plugin for Gradle <strong>1.5.0-alpha1</strong>
-  or higher is required.
+  or higher is required. See how to <a
+href="/studio/releases/gradle-plugin.html#updating-plugin">update the Android
+Plugin for Gradle</a>.
 </p>
 
 <h2 id="build_environment">
