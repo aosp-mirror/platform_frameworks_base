@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Tersambung ke <xliff:g id="SESSION">%s</xliff:g>. Ketuk untuk mengelola jaringan."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Menyambungkan VPN selalu aktif..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN selalu aktif tersambung"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"VPN selalu aktif terputus"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Kesalahan VPN selalu aktif"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Ketuk untuk mengonfigurasi"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Ketuk untuk menyiapkan"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pilih file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Tidak ada file yang dipilih"</string>
     <string name="reset" msgid="2448168080964209908">"Setel ulang"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Ketik nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Disarankan"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Semua bahasa"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Semua wilayah"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Telusuri"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Mode kerja NONAKTIF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Izinkan profil kerja berfungsi, termasuk aplikasi, sinkronisasi latar belakang, dan fitur terkait."</string>

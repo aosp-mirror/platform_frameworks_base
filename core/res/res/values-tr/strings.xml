@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> oturumuna bağlı. Ağı yönetmek için hafifçe vurun."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Her zaman açık VPN\'ye bağlanılıyor…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Her zaman açık VPN\'ye bağlanıldı"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Her zaman açık VPN bağlantısı kesildi"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Her zaman açık VPN hatası"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Yapılandırmak için dokunun"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Ayarlamak için dokunun"</string>
     <string name="upload_file" msgid="2897957172366730416">"Dosya seç"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Seçili dosya yok"</string>
     <string name="reset" msgid="2448168080964209908">"Sıfırla"</string>
@@ -1647,6 +1648,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Dil adını yazın"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Önerilen"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tüm diller"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"Ara"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"İş modu KAPALI"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Uygulamalar, arka planda senkronizasyon ve ilgili özellikler dahil olmak üzere iş profilinin çalışmasına izin ver."</string>

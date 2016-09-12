@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Ühendatud seansiga <xliff:g id="SESSION">%s</xliff:g>. Koputage võrgu haldamiseks"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ühendamine alati sees VPN-iga …"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ühendatud alati sees VPN-iga"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Alati sees VPN pole ühendatud"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Alati sees VPN-i viga"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Puudutage seadistamiseks"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Puudutage seadistamiseks"</string>
     <string name="upload_file" msgid="2897957172366730416">"Valige fail"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ühtegi faili pole valitud"</string>
     <string name="reset" msgid="2448168080964209908">"Lähtesta"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Sisestage keele nimi"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Soovitatud"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Kõik keeled"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Kõik piirkonnad"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Otsing"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Töörežiim on VÄLJA LÜLITATUD"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Lubatakse tööprofiili toimingud, sh rakendused, taustal sünkroonimine ja seotud funktsioonid."</string>

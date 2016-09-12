@@ -1293,8 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Prisijungta prie <xliff:g id="SESSION">%s</xliff:g>. Jei norite valdyti tinklą, palieskite."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Prisijungiama prie visada įjungto VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Prisijungta prie visada įjungto VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Visada įjungtas VPN atjungtas"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Visada įjungto VPN klaida"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Palieskite, kad konfigūruotumėte"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Palieskite, kad nustatytumėte"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pasirinkti failą"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nepasirinktas joks failas"</string>
     <string name="reset" msgid="2448168080964209908">"Atstatyti"</string>
@@ -1719,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Siūloma"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visos kalbos"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Visi regionai"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Paieška"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Darbo režimas išjungtas"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Leisti veikti darbo profiliui, įskaitant programas, sinchronizavimą fone ir susijusias funkcijas."</string>

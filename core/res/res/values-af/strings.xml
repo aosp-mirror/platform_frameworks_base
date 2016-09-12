@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Gekoppel aan <xliff:g id="SESSION">%s</xliff:g>. Tik om die netwerk te bestuur."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Altydaan-VPN koppel tans..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Altydaan-VPN gekoppel"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Altydaan-VPN is ontkoppel"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Altydaan-VPN-fout"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Tik om op te stel"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Tik om op te stel"</string>
     <string name="upload_file" msgid="2897957172366730416">"Kies lêer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Geen lêer gekies nie"</string>
     <string name="reset" msgid="2448168080964209908">"Stel terug"</string>
@@ -1647,6 +1648,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Voer taalnaam in"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Voorgestel"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle tale"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"Soek"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Werkmodus is AF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Stel werkprofiel in staat om te werk, insluitend programme, agtergrondsinkronisering en verwante kenmerke."</string>

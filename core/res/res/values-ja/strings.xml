@@ -374,7 +374,7 @@
     <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS通話サービスへのアクセス"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
-    <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末のステータスとIDの読み取り"</string>
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末情報と ID の読み取り"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"テレビのスリープを無効化"</string>
@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>に接続しました。ネットワークを管理するにはタップしてください。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPNに常時接続しています…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPNに常時接続しました"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"常時接続 VPN の接続を解除しました"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"常時接続VPNのエラー"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"タップして設定"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"設定するにはタップします"</string>
     <string name="upload_file" msgid="2897957172366730416">"ファイルを選択"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ファイルが選択されていません"</string>
     <string name="reset" msgid="2448168080964209908">"リセット"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"言語名を入力"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"言語の候補"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"すべての地域"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Work モード OFF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"仕事用プロファイルで、アプリ、バックグラウンド同期などの関連機能の使用を許可します。"</string>

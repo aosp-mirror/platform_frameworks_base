@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> से कनेक्‍ट किया गया. नेटवर्क प्रबंधित करने के लिए टैप करें."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"हमेशा-चालू VPN कनेक्ट हो रहा है…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"हमेशा-चालू VPN कनेक्ट है"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"हमेशा-चालू VPN डिस्‍कनेक्‍ट है"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"हमेशा-चालू VPN त्रुटि"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"कॉन्फ़िगर करने के लिए टैप करें"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"सेट करने के लिए टैप करें"</string>
     <string name="upload_file" msgid="2897957172366730416">"फ़ाइल चुनें"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"कोई फ़ाइल चुनी नहीं गई"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करें"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा का नाम लिखें"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुझाए गए"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सभी भाषाएं"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"सभी क्षेत्र"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"खोजें"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"कार्य मोड बंद है"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ऐप्स, पृष्ठभूमि समन्वयन और संबंधित सुविधाओं सहित कार्य प्रोफ़ाइल को काम करने की अनुमति दें"</string>

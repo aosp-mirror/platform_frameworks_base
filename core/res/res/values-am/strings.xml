@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"ለ<xliff:g id="SESSION">%s</xliff:g> የተገናኘ። አውታረመረቡን ለማደራጀት ሁለቴ ንካ።"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ሁልጊዜ የበራ VPN በመገናኘት ላይ…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ሁልጊዜ የበራ VPN ተገናኝቷል"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ሁልጊዜ የበራ የVPN ግንኙነት ተቋርጧል"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ሁልጊዜ የበራ VPN ስህተት"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ለማዋቀር መታ ያድርጉ"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ለማዋቀር መታ ያድርጉ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ፋይል ምረጥ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ምንም ፋይል አልተመረጠም"</string>
     <string name="reset" msgid="2448168080964209908">"ዳግም አስጀምር"</string>
@@ -1647,6 +1648,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"የቋንቋ ስም ይተይቡ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"የተጠቆሙ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ሁሉም ቋንቋዎች"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"ፈልግ"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"የሥራ ሁነታ ጠፍቷል"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"መተግበሪያዎችን፣ የበስተጀርባ ሥምረት እና ተዛማጅ ባሕሪዎችን ጨምሮ የሥራ መገለጫ እንዲሰራ ይፍቀዱ።"</string>
