@@ -3750,7 +3750,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * how to override the standard click action by adding a custom label:
          * <pre>
          *   AccessibilityAction action = new AccessibilityAction(
-         *           AccessibilityAction.ACTION_ACTION_CLICK, getLocalizedLabel());
+         *           AccessibilityAction.ACTION_CLICK.getId(), getLocalizedLabel());
          *   node.addAction(action);
          * </pre>
          *
