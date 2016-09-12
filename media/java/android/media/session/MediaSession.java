@@ -501,16 +501,16 @@ public final class MediaSession {
     /**
      * Set the shuffle mode for this session.
      * <p>
-     * Note that if this method is not called before, {@link MediaController#getShuffleMode}
+     * Note that if this method is not called before, {@link MediaController#isShuffleModeEnabled}
      * will return {@code false}.
      *
-     * @param shuffleMode {@code true} if the shuffle mode is on, {@code false} otherwise.
+     * @param enabled {@code true} to enable the shuffle mode, {@code false} to disable.
      */
-    public void setShuffleMode(boolean shuffleMode) {
+    public void setShuffleModeEnabled(boolean enabled) {
         try {
-            mBinder.setShuffleMode(shuffleMode);
+            mBinder.setShuffleModeEnabled(enabled);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in setShuffleMode.", e);
+            Log.e(TAG, "Error in setShuffleModeEnabled.", e);
         }
     }
 
@@ -637,8 +637,8 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_REPEAT_MODE, repeatMode);
     }
 
-    private void dispatchShuffleMode(boolean shuffleMode) {
-        postToCallback(CallbackMessageHandler.MSG_SHUFFLE_MODE, shuffleMode);
+    private void dispatchShuffleMode(boolean enabled) {
+        postToCallback(CallbackMessageHandler.MSG_SHUFFLE_MODE, enabled);
     }
 
     private void dispatchCustomAction(String action, Bundle args) {
@@ -1024,13 +1024,13 @@ public final class MediaSession {
         /**
          * Override to handle the setting of the shuffle mode.
          * <p>
-         * You should call {@link #setShuffleMode} before end of this method in order to notify
-         * the change to the {@link MediaController}, or {@link MediaController#getShuffleMode}
-         * could return an invalid value.
+         * You should call {@link #setShuffleModeEnabled} before the end of this method in order to
+         * notify the change to the {@link MediaController}, or
+         * {@link MediaController#isShuffleModeEnabled} could return an invalid value.
          *
-         * @param shuffleMode true if the shuffle mode is on, false otherwise.
+         * @param enabled true when the shuffle mode is enabled, false otherwise.
          */
-        public void onSetShuffleMode(boolean shuffleMode) {
+        public void onSetShuffleModeEnabled(boolean enabled) {
         }
 
         /**
@@ -1223,10 +1223,10 @@ public final class MediaSession {
         }
 
         @Override
-        public void onShuffleMode(boolean shuffleMode) {
+        public void onShuffleMode(boolean enabled) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchShuffleMode(shuffleMode);
+                session.dispatchShuffleMode(enabled);
             }
         }
 
@@ -1468,7 +1468,7 @@ public final class MediaSession {
                     mCallback.onSetRepeatMode((int) msg.obj);
                     break;
                 case MSG_SHUFFLE_MODE:
-                    mCallback.onSetShuffleMode((boolean) msg.obj);
+                    mCallback.onSetShuffleModeEnabled((boolean) msg.obj);
                     break;
                 case MSG_CUSTOM_ACTION:
                     mCallback.onCustomAction((String) msg.obj, msg.getData());

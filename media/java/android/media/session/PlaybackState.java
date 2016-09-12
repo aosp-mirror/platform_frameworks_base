@@ -46,7 +46,7 @@ public final class PlaybackState implements Parcelable {
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,
             ACTION_PREPARE_FROM_MEDIA_ID, ACTION_PREPARE_FROM_SEARCH, ACTION_PREPARE_FROM_URI,
-            ACTION_SET_REPEAT_MODE, ACTION_SET_SHUFFLE_MODE})
+            ACTION_SET_REPEAT_MODE, ACTION_SET_SHUFFLE_MODE_ENABLED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Actions {}
 
@@ -184,11 +184,11 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_SET_REPEAT_MODE = 1 << 18;
 
     /**
-     * Indicates this session supports the set shuffle mode command.
+     * Indicates this session supports the set shuffle mode enabled command.
      *
      * @see Builder#setActions(long)
      */
-    public static final long ACTION_SET_SHUFFLE_MODE = 1 << 19;
+    public static final long ACTION_SET_SHUFFLE_MODE_ENABLED = 1 << 19;
 
     /**
      * @hide
@@ -467,7 +467,7 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
      * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
      * <li> {@link PlaybackState#ACTION_SET_REPEAT_MODE}</li>
-     * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE}</li>
+     * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE_ENABLED}</li>
      * </ul>
      */
     @Actions
@@ -1003,7 +1003,7 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
          * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
          * <li> {@link PlaybackState#ACTION_SET_REPEAT_MODE}</li>
-         * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE}</li>
+         * <li> {@link PlaybackState#ACTION_SET_SHUFFLE_MODE_ENABLED}</li>
          * </ul>
          *
          * @param actions The set of actions allowed.

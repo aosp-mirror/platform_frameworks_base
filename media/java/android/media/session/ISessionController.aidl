@@ -55,7 +55,7 @@ interface ISessionController {
     Bundle getExtras();
     int getRatingType();
     int getRepeatMode();
-    boolean getShuffleMode();
+    boolean isShuffleModeEnabled();
 
     // These commands are for the TransportControls
     void prepare();
@@ -76,6 +76,6 @@ interface ISessionController {
     void seekTo(long pos);
     void rate(in Rating rating);
     void repeatMode(int repeatMode);
-    void shuffleMode(boolean shuffleMode);
+    void shuffleMode(boolean enabled);
     void sendCustomAction(String action, in Bundle args);
 }
