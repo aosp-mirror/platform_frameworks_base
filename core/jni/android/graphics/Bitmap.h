@@ -51,8 +51,8 @@ public:
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable);
-    Bitmap(void* address, int fd, const SkImageInfo& info, size_t rowBytes,
-            SkColorTable* ctable);
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
+            size_t rowBytes, SkColorTable* ctable);
 
     const SkImageInfo& info() const;
 
