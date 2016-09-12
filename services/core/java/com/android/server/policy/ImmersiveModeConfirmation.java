@@ -25,7 +25,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -36,7 +38,6 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,6 +67,7 @@ public class ImmersiveModeConfirmation {
     private final H mHandler;
     private final long mShowDelayMs;
     private final long mPanicThresholdMs;
+    private final IBinder mWindowToken = new Binder();
 
     private boolean mConfirmed;
     private ClingWindowView mClingWindow;
@@ -190,13 +192,13 @@ public class ImmersiveModeConfirmation {
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 0
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 ,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ImmersiveModeConfirmation");
         lp.windowAnimations = com.android.internal.R.style.Animation_ImmersiveModeConfirmation;
+        lp.token = getWindowToken();
         return lp;
     }
 
@@ -206,6 +208,13 @@ public class ImmersiveModeConfirmation {
                         R.dimen.immersive_mode_cling_width),
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+    }
+
+    /**
+     * @return the window token that's used by all ImmersiveModeConfirmation windows.
+     */
+    public IBinder getWindowToken() {
+        return mWindowToken;
     }
 
     private class ClingWindowView extends FrameLayout {
