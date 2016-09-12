@@ -1758,11 +1758,22 @@ public class PopupWindow {
      */
     public int getMaxAvailableHeight(
             @NonNull View anchor, int yOffset, boolean ignoreBottomDecorations) {
-        final Rect displayFrame = new Rect();
+        Rect displayFrame = null;
+        final Rect visibleDisplayFrame = new Rect();
+
+        anchor.getWindowVisibleDisplayFrame(visibleDisplayFrame);
         if (ignoreBottomDecorations) {
+            // In the ignore bottom decorations case we want to
+            // still respect all other decorations so we use the inset visible
+            // frame on the top right and left and take the bottom
+            // value from the full frame.
+            displayFrame = new Rect();
             anchor.getWindowDisplayFrame(displayFrame);
+            displayFrame.top = visibleDisplayFrame.top;
+            displayFrame.right = visibleDisplayFrame.right;
+            displayFrame.left = visibleDisplayFrame.left;
         } else {
-            anchor.getWindowVisibleDisplayFrame(displayFrame);
+            displayFrame = visibleDisplayFrame;
         }
 
         final int[] anchorPos = mTmpDrawingLocation;
