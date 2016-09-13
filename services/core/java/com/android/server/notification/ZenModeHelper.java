@@ -35,6 +35,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
@@ -736,13 +737,14 @@ public class ZenModeHelper {
         // total silence restrictions
         final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
 
-        for (int i = USAGE_UNKNOWN; i <= USAGE_VIRTUAL_SOURCE; i++) {
-            if (i == USAGE_NOTIFICATION) {
-                applyRestrictions(muteNotifications || muteEverything, i);
-            } else if (i == USAGE_NOTIFICATION_RINGTONE) {
-                applyRestrictions(muteCalls || muteEverything, i);
+        for (int usage : AudioAttributes.SDK_USAGES) {
+            final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
+            if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_NOTIFICATION) {
+                applyRestrictions(muteNotifications || muteEverything, usage);
+            } else if (suppressionBehavior == AudioAttributes.SUPPRESSIBLE_CALL) {
+                applyRestrictions(muteCalls || muteEverything, usage);
             } else {
-                applyRestrictions(muteEverything, i);
+                applyRestrictions(muteEverything, usage);
             }
         }
     }
