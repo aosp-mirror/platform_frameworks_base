@@ -5166,7 +5166,7 @@ public final class ContactsContract {
      * </table>
      */
     public static final class PhoneLookup implements BaseColumns, PhoneLookupColumns,
-            ContactsColumns, ContactOptionsColumns {
+            ContactsColumns, ContactOptionsColumns, ContactNameColumns {
         /**
          * This utility class cannot be instantiated
          */
