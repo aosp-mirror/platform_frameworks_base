@@ -141,13 +141,27 @@ bool createBufferQueueAudioPlayer(const ChunkFormat* chunkFormat) {
     // configure audio source
     SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 1};
 
+    // Determine channelMask from num_channels
+    SLuint32 channelMask;
+    switch (chunkFormat->num_channels) {
+        case 1:
+            channelMask = SL_SPEAKER_FRONT_CENTER;
+            break;
+        case 2:
+            channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+            break;
+        default:
+            // Default of 0 will derive mask from num_channels and log a warning.
+            channelMask = 0;
+    }
+
     SLDataFormat_PCM format_pcm = {
         SL_DATAFORMAT_PCM,
         chunkFormat->num_channels,
         chunkFormat->sample_rate * 1000,  // convert to milliHz
         chunkFormat->bits_per_sample,
         16,
-        SL_SPEAKER_FRONT_CENTER,
+        channelMask,
         SL_BYTEORDER_LITTLEENDIAN
     };
     SLDataSource audioSrc = {&loc_bufq, &format_pcm};
