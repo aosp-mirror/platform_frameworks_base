@@ -154,10 +154,16 @@ application must request the audio capture permission.
 &lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
 </pre>
   </li>
-  <li><strong>Location Permission</strong> - If your application tags images with GPS location
-information, you must request location permission:
+  <li>
+    <p><strong>Location Permission</strong> - If your application tags images
+    with GPS location information, you must request the "fine location"
+    permission. Note that, if your app targets Android 5.0 (API level 21) or
+    higher, you also need to declare that your app uses the device's GPS:</p>
 <pre>
 &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+...
+&lt;!-- Needed only if your app targets Android 5.0 (API level 21) or higher. --&gt;
+&lt;uses-feature android:name="android.hardware.location.gps" /&gt;
 </pre>
 <p>For more information about getting user location, see
 <a href="{@docRoot}guide/topics/location/strategies.html">Location Strategies</a>.</p>
