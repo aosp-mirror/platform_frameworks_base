@@ -63,7 +63,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
-    private static final int BIND_RETRY_DELAY = 1000;
+    private static final int DEFAULT_BIND_RETRY_DELAY = 1000;
 
     // Shared prefs that hold tile lifecycle info.
     private static final String TILES = "tiles_prefs";
@@ -81,8 +81,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IBinder mClickBinder;
 
     private int mBindTryCount;
+    private int mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
     private boolean mBound;
-    @VisibleForTesting
     boolean mReceiverRegistered;
     private boolean mUnbindImmediate;
     private TileChangeListener mChangeListener;
@@ -115,6 +115,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         synchronized (mQueuedMessages) {
             return mQueuedMessages.contains(MSG_ON_CLICK);
         }
+    }
+
+    public void setBindRetryDelay(int delayMs) {
+        mBindRetryDelay = delayMs;
     }
 
     public boolean isActiveTile() {
@@ -264,7 +268,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                         setBindService(true);
                     }
                 }
-            }, BIND_RETRY_DELAY);
+            }, mBindRetryDelay);
         }
     }
 

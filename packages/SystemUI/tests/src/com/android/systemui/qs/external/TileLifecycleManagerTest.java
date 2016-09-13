@@ -15,12 +15,14 @@
  */
 package com.android.systemui.qs.external;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Service;
@@ -29,6 +31,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
@@ -43,55 +46,74 @@ import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Log;
-import com.android.systemui.SysuiTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TileLifecycleManagerTest extends SysuiTestCase {
-    public static final String TILE_UPDATE_BROADCAST = "com.android.systemui.tests.TILE_UPDATE";
-    public static final String EXTRA_CALLBACK = "callback";
+public class TileLifecycleManagerTest {
+    private static final int TEST_FAIL_TIMEOUT = 5000;
 
+    private final Context mMockContext = Mockito.mock(Context.class);
+    private final PackageManagerAdapter mMockPackageManagerAdapter =
+            Mockito.mock(PackageManagerAdapter.class);
+    private final IQSTileService.Stub mMockTileService = Mockito.mock(IQSTileService.Stub.class);
+    private ComponentName mTileServiceComponentName;
+    private Intent mTileServiceIntent;
+    private UserHandle mUser;
     private HandlerThread mThread;
     private Handler mHandler;
     private TileLifecycleManager mStateManager;
-    private final Object mBroadcastLock = new Object();
-    private final ArraySet<String> mCallbacks = new ArraySet<>();
-    private final PackageManagerAdapter mMockPackageManagerAdapter =
-            Mockito.mock(PackageManagerAdapter.class);
-    private boolean mBound;
 
     @Before
     public void setUp() throws Exception {
         setPackageEnabled(true);
+        mTileServiceComponentName = new ComponentName(
+                InstrumentationRegistry.getTargetContext(), "FakeTileService.class");
+
+        // Stub.asInterface will just return itself.
+        when(mMockTileService.queryLocalInterface(anyString())).thenReturn(mMockTileService);
+
+        // Default behavior for bind is success and connects as mMockTileService.
+        when(mMockContext.bindServiceAsUser(any(), any(), anyInt(), any()))
+                .thenAnswer(
+                        new Answer<Boolean>() {
+                            @Override
+                            public Boolean answer(InvocationOnMock invocation) {
+                                ServiceConnection connection =
+                                        (ServiceConnection) invocation.getArguments()[1];
+                                connection.onServiceConnected(
+                                        mTileServiceComponentName, mMockTileService);
+                                return true;
+                            }
+                        });
+
+
+        mTileServiceIntent = new Intent().setComponent(mTileServiceComponentName);
+        mUser = new UserHandle(UserHandle.myUserId());
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
-        ComponentName component = new ComponentName(getContext(), FakeTileService.class);
-        mStateManager = new TileLifecycleManager(mHandler, getContext(),
+        mStateManager = new TileLifecycleManager(mHandler, mMockContext,
                 Mockito.mock(IQSService.class), new Tile(),
-                new Intent().setComponent(component),
-                new UserHandle(UserHandle.myUserId()),
+                mTileServiceIntent,
+                mUser,
                 mMockPackageManagerAdapter);
-        mCallbacks.clear();
-        getContext().registerReceiver(mReceiver, new IntentFilter(TILE_UPDATE_BROADCAST));
     }
 
     @After
     public void tearDown() throws Exception {
-        if (mBound) {
-            unbindService();
-        }
         mThread.quit();
-        getContext().unregisterReceiver(mReceiver);
     }
 
     private void setPackageEnabled(boolean enabled) throws Exception {
@@ -110,260 +132,134 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 .thenReturn(defaultPackageInfo);
     }
 
-    @Test
-    public void testSync() {
-        syncWithHandler();
+    private void verifyBind(int times) {
+        verify(mMockContext, times(times)).bindServiceAsUser(
+                mTileServiceIntent,
+                mStateManager,
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                mUser);
     }
 
     @Test
     public void testBind() {
-        bindService();
-        waitForCallback("onCreate");
+        mStateManager.setBindService(true);
+        verifyBind(1);
     }
 
     @Test
     public void testUnbind() {
-        bindService();
-        waitForCallback("onCreate");
-        unbindService();
-        waitForCallback("onDestroy");
+        mStateManager.setBindService(true);
+        mStateManager.setBindService(false);
+        verify(mMockContext).unbindService(mStateManager);
     }
 
     @Test
-    public void testTileServiceCallbacks() {
-        bindService();
-        waitForCallback("onCreate");
-
+    public void testTileServiceCallbacks() throws Exception {
+        mStateManager.setBindService(true);
         mStateManager.onTileAdded();
-        waitForCallback("onTileAdded");
+        verify(mMockTileService).onTileAdded();
         mStateManager.onStartListening();
-        waitForCallback("onStartListening");
+        verify(mMockTileService).onStartListening();
         mStateManager.onClick(null);
-        waitForCallback("onClick");
+        verify(mMockTileService).onClick(null);
         mStateManager.onStopListening();
-        waitForCallback("onStopListening");
+        verify(mMockTileService).onStopListening();
         mStateManager.onTileRemoved();
-        waitForCallback("onTileRemoved");
-
-        unbindService();
+        verify(mMockTileService).onTileRemoved();
     }
 
     @Test
-    public void testAddedBeforeBind() {
+    public void testAddedBeforeBind() throws Exception {
         mStateManager.onTileAdded();
+        mStateManager.setBindService(true);
 
-        bindService();
-        waitForCallback("onCreate");
-        waitForCallback("onTileAdded");
+        verifyBind(1);
+        verify(mMockTileService).onTileAdded();
     }
 
     @Test
-    public void testListeningBeforeBind() {
+    public void testListeningBeforeBind() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
+        mStateManager.setBindService(true);
 
-        bindService();
-        waitForCallback("onCreate");
-        waitForCallback("onTileAdded");
-        waitForCallback("onStartListening");
+        verifyBind(1);
+        verify(mMockTileService).onTileAdded();
+        verify(mMockTileService).onStartListening();
     }
 
     @Test
-    public void testClickBeforeBind() {
+    public void testClickBeforeBind() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
         mStateManager.onClick(null);
+        mStateManager.setBindService(true);
 
-        bindService();
-        waitForCallback("onCreate");
-        waitForCallback("onTileAdded");
-        waitForCallback("onStartListening");
-        waitForCallback("onClick");
+        verifyBind(1);
+        verify(mMockTileService).onTileAdded();
+        verify(mMockTileService).onStartListening();
+        verify(mMockTileService).onClick(null);
     }
 
     @Test
-    public void testListeningNotListeningBeforeBind() {
+    public void testListeningNotListeningBeforeBind() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
         mStateManager.onStopListening();
+        mStateManager.setBindService(true);
 
-        bindService();
-        waitForCallback("onCreate");
-        unbindService();
-        waitForCallback("onDestroy");
-        assertFalse(mCallbacks.contains("onStartListening"));
+        verifyBind(1);
+        mStateManager.setBindService(false);
+        verify(mMockContext).unbindService(mStateManager);
+        verify(mMockTileService, never()).onStartListening();
     }
 
     @Test
-    public void testNoClickOfNotListeningAnymore() {
+    public void testNoClickOfNotListeningAnymore() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
         mStateManager.onClick(null);
         mStateManager.onStopListening();
+        mStateManager.setBindService(true);
 
-        bindService();
-        waitForCallback("onCreate");
-        unbindService();
-        waitForCallback("onDestroy");
-        assertFalse(mCallbacks.contains("onClick"));
+        verifyBind(1);
+        mStateManager.setBindService(false);
+        verify(mMockContext).unbindService(mStateManager);
+        verify(mMockTileService, never()).onClick(null);
     }
 
     @Test
     public void testComponentEnabling() throws Exception {
         mStateManager.onTileAdded();
         mStateManager.onStartListening();
-
         setPackageEnabled(false);
-        bindService();
-        // Package not available, should be listening for package changes.
-        assertTrue(mStateManager.mReceiverRegistered);
+        mStateManager.setBindService(true);
+        // Package not available, not yet created.
+        verifyBind(0);
 
         // Package is re-enabled.
         setPackageEnabled(true);
         mStateManager.onReceive(
-                mContext,
+                mMockContext,
                 new Intent(
                         Intent.ACTION_PACKAGE_CHANGED,
-                        Uri.fromParts("package", getContext().getPackageName(), null)));
-        waitForCallback("onCreate");
+                        Uri.fromParts(
+                                "package", mTileServiceComponentName.getPackageName(), null)));
+        verifyBind(1);
     }
 
     @Test
-    public void testKillProcess() {
+    public void testKillProcess() throws Exception {
         mStateManager.onStartListening();
-        bindService();
-        waitForCallback("onCreate");
-        waitForCallback("onStartListening");
-
-        getContext().sendBroadcast(new Intent(FakeTileService.ACTION_KILL));
-
-        waitForCallback("onCreate");
-        waitForCallback("onStartListening");
-    }
-
-    private void bindService() {
-        mBound = true;
         mStateManager.setBindService(true);
-    }
+        mStateManager.setBindRetryDelay(0);
+        mStateManager.onServiceDisconnected(mTileServiceComponentName);
 
-    private void unbindService() {
-        mBound = false;
-        mStateManager.setBindService(false);
-    }
+        // Guarantees mHandler has processed all messages.
+        assertTrue(mHandler.runWithScissors(()->{}, TEST_FAIL_TIMEOUT));
 
-    private void waitForCallback(String callback) {
-        for (int i = 0; i < 50; i++) {
-            if (mCallbacks.contains(callback)) {
-                mCallbacks.remove(callback);
-                return;
-            }
-            synchronized (mBroadcastLock) {
-                try {
-                    mBroadcastLock.wait(500);
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-        if (mCallbacks.contains(callback)) {
-            mCallbacks.remove(callback);
-            return;
-        }
-        fail("Didn't receive callback: " + callback);
-    }
-
-    private void syncWithHandler() {
-        final Object lock = new Object();
-        synchronized (lock) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    synchronized (lock) {
-                        lock.notify();
-                    }
-                }
-            });
-            try {
-                lock.wait(10000);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mCallbacks.add(intent.getStringExtra(EXTRA_CALLBACK));
-            synchronized (mBroadcastLock) {
-                mBroadcastLock.notify();
-            }
-        }
-    };
-
-    public static class FakeTileService extends Service {
-        public static final String ACTION_KILL = "com.android.systemui.test.KILL";
-
-        @Override
-        public IBinder onBind(Intent intent) {
-            return new IQSTileService.Stub() {
-                @Override
-                public void onTileAdded() throws RemoteException {
-                    sendCallback("onTileAdded");
-                }
-
-                @Override
-                public void onTileRemoved() throws RemoteException {
-                    sendCallback("onTileRemoved");
-                }
-
-                @Override
-                public void onStartListening() throws RemoteException {
-                    sendCallback("onStartListening");
-                }
-
-                @Override
-                public void onStopListening() throws RemoteException {
-                    sendCallback("onStopListening");
-                }
-
-                @Override
-                public void onClick(IBinder iBinder) throws RemoteException {
-                    sendCallback("onClick");
-                }
-
-                @Override
-                public void onUnlockComplete() throws RemoteException {
-                    sendCallback("onUnlockComplete");
-                }
-            };
-        }
-
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            registerReceiver(mReceiver, new IntentFilter(ACTION_KILL));
-            sendCallback("onCreate");
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            unregisterReceiver(mReceiver);
-            sendCallback("onDestroy");
-        }
-
-        private void sendCallback(String callback) {
-            Log.d("TileLifecycleManager", "Relaying: " + callback);
-            sendBroadcast(new Intent(TILE_UPDATE_BROADCAST)
-                    .putExtra(EXTRA_CALLBACK, callback));
-        }
-
-        private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (ACTION_KILL.equals(intent.getAction())) {
-                    Process.killProcess(Process.myPid());
-                }
-            }
-        };
+        // Two calls: one for the first bind, one for the restart.
+        verifyBind(2);
+        verify(mMockTileService, times(2)).onStartListening();
     }
 }
