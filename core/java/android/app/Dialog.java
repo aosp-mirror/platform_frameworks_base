@@ -325,6 +325,7 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void hide() {
         if (mDecor != null) {
             mDecor.setVisibility(View.GONE);
+            mShowing = false;
         }
     }
 
