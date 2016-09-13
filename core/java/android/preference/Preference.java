@@ -58,14 +58,14 @@ import java.util.Set;
  * This class contains a {@code key} that will be used as the key into the
  * {@link SharedPreferences}. It is up to the subclass to decide how to store
  * the value.
- * 
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For information about building a settings UI with Preferences,
  * read the <a href="{@docRoot}guide/topics/ui/settings.html">Settings</a>
  * guide.</p>
  * </div>
- * 
+ *
  * @attr ref android.R.styleable#Preference_icon
  * @attr ref android.R.styleable#Preference_key
  * @attr ref android.R.styleable#Preference_title
@@ -89,13 +89,13 @@ public class Preference implements Comparable<Preference> {
 
     private Context mContext;
     private PreferenceManager mPreferenceManager;
-    
+
     /**
      * Set when added to hierarchy since we need a unique ID within that
      * hierarchy.
      */
     private long mId;
-    
+
     private OnPreferenceChangeListener mOnChangeListener;
     private OnPreferenceClickListener mOnClickListener;
 
@@ -120,22 +120,22 @@ public class Preference implements Comparable<Preference> {
     private Object mDefaultValue;
     private boolean mDependencyMet = true;
     private boolean mParentDependencyMet = true;
-    
+
     /**
      * @see #setShouldDisableView(boolean)
      */
     private boolean mShouldDisableView = true;
-    
+
     private int mLayoutResId = com.android.internal.R.layout.preference;
     private int mWidgetLayoutResId;
     private boolean mCanRecycleLayout = true;
-    
+
     private OnPreferenceChangeInternalListener mListener;
-    
+
     private List<Preference> mDependents;
-    
+
     private boolean mBaseMethodCalled;
-    
+
     /**
      * Interface definition for a callback to be invoked when the value of this
      * {@link Preference} has been changed by the user and is
@@ -147,7 +147,7 @@ public class Preference implements Comparable<Preference> {
          * Called when a Preference has been changed by the user. This is
          * called before the state of the Preference is about to be updated and
          * before the state is persisted.
-         * 
+         *
          * @param preference The changed Preference.
          * @param newValue The new value of the Preference.
          * @return True to update the state of the Preference with the new value.
@@ -177,14 +177,14 @@ public class Preference implements Comparable<Preference> {
     interface OnPreferenceChangeInternalListener {
         /**
          * Called when this Preference has changed.
-         * 
+         *
          * @param preference This preference.
          */
         void onPreferenceChange(Preference preference);
-        
+
         /**
          * Called when this group has added/removed {@link Preference}(s).
-         * 
+         *
          * @param preference This Preference.
          */
         void onPreferenceHierarchyChange(Preference preference);
@@ -220,7 +220,7 @@ public class Preference implements Comparable<Preference> {
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.Preference, defStyleAttr, defStyleRes);
         for (int i = a.getIndexCount() - 1; i >= 0; i--) {
-            int attr = a.getIndex(i); 
+            int attr = a.getIndex(i);
             switch (attr) {
                 case com.android.internal.R.styleable.Preference_icon:
                     mIconResId = a.getResourceId(attr, 0);
@@ -229,16 +229,16 @@ public class Preference implements Comparable<Preference> {
                 case com.android.internal.R.styleable.Preference_key:
                     mKey = a.getString(attr);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_title:
                     mTitleRes = a.getResourceId(attr, 0);
-                    mTitle = a.getString(attr);
+                    mTitle = a.getText(attr);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_summary:
-                    mSummary = a.getString(attr);
+                    mSummary = a.getText(attr);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_order:
                     mOrder = a.getInt(attr, mOrder);
                     break;
@@ -254,27 +254,27 @@ public class Preference implements Comparable<Preference> {
                 case com.android.internal.R.styleable.Preference_widgetLayout:
                     mWidgetLayoutResId = a.getResourceId(attr, mWidgetLayoutResId);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_enabled:
                     mEnabled = a.getBoolean(attr, true);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_selectable:
                     mSelectable = a.getBoolean(attr, true);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_persistent:
                     mPersistent = a.getBoolean(attr, mPersistent);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_dependency:
                     mDependencyKey = a.getString(attr);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_defaultValue:
                     mDefaultValue = onGetDefaultValue(a, attr);
                     break;
-                    
+
                 case com.android.internal.R.styleable.Preference_shouldDisableView:
                     mShouldDisableView = a.getBoolean(attr, mShouldDisableView);
                     break;
@@ -312,14 +312,14 @@ public class Preference implements Comparable<Preference> {
     public Preference(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
-    
+
     /**
      * Constructor that is called when inflating a Preference from XML. This is
      * called when a Preference is being constructed from an XML file, supplying
      * attributes that were specified in the XML file. This version uses a
      * default style of 0, so the only attribute values applied are those in the
      * Context's Theme and the given AttributeSet.
-     * 
+     *
      * @param context The Context this is associated with, through which it can
      *            access the current theme, resources, {@link SharedPreferences},
      *            etc.
@@ -333,7 +333,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Constructor to create a Preference.
-     * 
+     *
      * @param context The Context in which to store Preference values.
      */
     public Preference(Context context) {
@@ -348,7 +348,7 @@ public class Preference implements Comparable<Preference> {
      * <p>
      * For example, if the value type is String, the body of the method would
      * proxy to {@link TypedArray#getString(int)}.
-     * 
+     *
      * @param a The set of attributes.
      * @param index The index of the default value attribute.
      * @return The default value of this preference type.
@@ -356,20 +356,20 @@ public class Preference implements Comparable<Preference> {
     protected Object onGetDefaultValue(TypedArray a, int index) {
         return null;
     }
-    
+
     /**
      * Sets an {@link Intent} to be used for
      * {@link Context#startActivity(Intent)} when this Preference is clicked.
-     * 
+     *
      * @param intent The intent associated with this Preference.
      */
     public void setIntent(Intent intent) {
         mIntent = intent;
     }
-    
+
     /**
      * Return the {@link Intent} associated with this Preference.
-     * 
+     *
      * @return The {@link Intent} last set via {@link #setIntent(Intent)} or XML. 
      */
     public Intent getIntent() {
@@ -423,7 +423,7 @@ public class Preference implements Comparable<Preference> {
      * {@link android.R.id#widget_frame} to be the parent of the specific widget
      * for this Preference. It should similarly contain
      * {@link android.R.id#title} and {@link android.R.id#summary}.
-     * 
+     *
      * @param layoutResId The layout resource ID to be inflated and returned as
      *            a {@link View}.
      * @see #setWidgetLayoutResource(int)
@@ -436,23 +436,23 @@ public class Preference implements Comparable<Preference> {
 
         mLayoutResId = layoutResId;
     }
-    
+
     /**
      * Gets the layout resource that will be shown as the {@link View} for this Preference.
-     * 
+     *
      * @return The layout resource ID.
      */
     @LayoutRes
     public int getLayoutResource() {
         return mLayoutResId;
     }
-    
+
     /**
      * Sets the layout for the controllable widget portion of this Preference. This
      * is inflated into the main layout. For example, a {@link CheckBoxPreference}
      * would specify a custom layout (consisting of just the CheckBox) here,
      * instead of creating its own main layout.
-     * 
+     *
      * @param widgetLayoutResId The layout resource ID to be inflated into the
      *            main layout.
      * @see #setLayoutResource(int)
@@ -467,17 +467,17 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Gets the layout resource for the controllable widget portion of this Preference.
-     * 
+     *
      * @return The layout resource ID.
      */
     @LayoutRes
     public int getWidgetLayoutResource() {
         return mWidgetLayoutResId;
     }
-    
+
     /**
      * Gets the View that will be shown in the {@link PreferenceActivity}.
-     * 
+     *
      * @param convertView The old View to reuse, if possible. Note: You should
      *            check that this View is non-null and of an appropriate type
      *            before using. If it is not possible to convert this View to
@@ -495,7 +495,7 @@ public class Preference implements Comparable<Preference> {
         onBindView(convertView);
         return convertView;
     }
-    
+
     /**
      * Creates the View to be shown for this Preference in the
      * {@link PreferenceActivity}. The default behavior is to inflate the main
@@ -504,7 +504,7 @@ public class Preference implements Comparable<Preference> {
      * {@link android.R.id#widget_frame}.
      * <p>
      * Make sure to call through to the superclass's implementation.
-     * 
+     *
      * @param parent The parent that this View will eventually be attached to.
      * @return The View that displays this Preference.
      * @see #onBindView(View)
@@ -512,10 +512,10 @@ public class Preference implements Comparable<Preference> {
     @CallSuper
     protected View onCreateView(ViewGroup parent) {
         final LayoutInflater layoutInflater =
-            (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        
-        final View layout = layoutInflater.inflate(mLayoutResId, parent, false); 
-        
+                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        final View layout = layoutInflater.inflate(mLayoutResId, parent, false);
+
         final ViewGroup widgetFrame = (ViewGroup) layout
                 .findViewById(com.android.internal.R.id.widget_frame);
         if (widgetFrame != null) {
@@ -527,7 +527,7 @@ public class Preference implements Comparable<Preference> {
         }
         return layout;
     }
-    
+
     /**
      * Binds the created View to the data for this Preference.
      * <p>
@@ -535,7 +535,7 @@ public class Preference implements Comparable<Preference> {
      * set properties on them.
      * <p>
      * Make sure to call through to the superclass's implementation.
-     * 
+     *
      * @param view The View that shows this Preference.
      * @see #onCreateView(ViewGroup)
      */
@@ -592,7 +592,7 @@ public class Preference implements Comparable<Preference> {
      */
     private void setEnabledStateOnViews(View v, boolean enabled) {
         v.setEnabled(enabled);
-        
+
         if (v instanceof ViewGroup) {
             final ViewGroup vg = (ViewGroup) v;
             for (int i = vg.getChildCount() - 1; i >= 0; i--) {
@@ -600,14 +600,14 @@ public class Preference implements Comparable<Preference> {
             }
         }
     }
-    
+
     /**
      * Sets the order of this Preference with respect to other
      * Preference objects on the same level. If this is not specified, the
      * default behavior is to sort alphabetically. The
      * {@link PreferenceGroup#setOrderingAsAdded(boolean)} can be used to order
      * Preference objects based on the order they appear in the XML.
-     * 
+     *
      * @param order The order for this Preference. A lower value will be shown
      *            first. Use {@link #DEFAULT_ORDER} to sort alphabetically or
      *            allow ordering from XML.
@@ -622,11 +622,11 @@ public class Preference implements Comparable<Preference> {
             notifyHierarchyChanged();
         }
     }
-    
+
     /**
      * Gets the order of this Preference with respect to other Preference objects
      * on the same level.
-     * 
+     *
      * @return The order of this Preference.
      * @see #setOrder(int)
      */
@@ -639,7 +639,7 @@ public class Preference implements Comparable<Preference> {
      * This title will be placed into the ID
      * {@link android.R.id#title} within the View created by
      * {@link #onCreateView(ViewGroup)}.
-     * 
+     *
      * @param title The title for this Preference.
      */
     public void setTitle(CharSequence title) {
@@ -649,10 +649,10 @@ public class Preference implements Comparable<Preference> {
             notifyChanged();
         }
     }
-    
+
     /**
      * Sets the title for this Preference with a resource ID. 
-     * 
+     *
      * @see #setTitle(CharSequence)
      * @param titleResId The title as a resource ID.
      */
@@ -660,7 +660,7 @@ public class Preference implements Comparable<Preference> {
         setTitle(mContext.getString(titleResId));
         mTitleRes = titleResId;
     }
-    
+
     /**
      * Returns the title resource ID of this Preference.  If the title did
      * not come from a resource, 0 is returned.
@@ -675,7 +675,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Returns the title of this Preference.
-     * 
+     *
      * @return The title.
      * @see #setTitle(CharSequence)
      */
@@ -688,7 +688,7 @@ public class Preference implements Comparable<Preference> {
      * This icon will be placed into the ID
      * {@link android.R.id#icon} within the View created by
      * {@link #onCreateView(ViewGroup)}.
-     * 
+     *
      * @param icon The optional icon for this Preference.
      */
     public void setIcon(Drawable icon) {
@@ -701,7 +701,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Sets the icon for this Preference with a resource ID. 
-     * 
+     *
      * @see #setIcon(Drawable)
      * @param iconResId The icon as a resource ID.
      */
@@ -714,7 +714,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Returns the icon of this Preference.
-     * 
+     *
      * @return The icon.
      * @see #setIcon(Drawable)
      */
@@ -727,7 +727,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Returns the summary of this Preference.
-     * 
+     *
      * @return The summary.
      * @see #setSummary(CharSequence)
      */
@@ -737,7 +737,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Sets the summary for this Preference with a CharSequence. 
-     * 
+     *
      * @param summary The summary for the preference.
      */
     public void setSummary(CharSequence summary) {
@@ -749,18 +749,18 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Sets the summary for this Preference with a resource ID. 
-     * 
+     *
      * @see #setSummary(CharSequence)
      * @param summaryResId The summary as a resource.
      */
     public void setSummary(@StringRes int summaryResId) {
         setSummary(mContext.getString(summaryResId));
     }
-    
+
     /**
      * Sets whether this Preference is enabled. If disabled, it will
      * not handle clicks.
-     * 
+     *
      * @param enabled Set true to enable it.
      */
     public void setEnabled(boolean enabled) {
@@ -773,10 +773,10 @@ public class Preference implements Comparable<Preference> {
             notifyChanged();
         }
     }
-    
+
     /**
      * Checks whether this Preference should be enabled in the list.
-     * 
+     *
      * @return True if this Preference is enabled, false otherwise.
      */
     public boolean isEnabled() {
@@ -785,7 +785,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Sets whether this Preference is selectable.
-     * 
+     *
      * @param selectable Set true to make it selectable.
      */
     public void setSelectable(boolean selectable) {
@@ -794,10 +794,10 @@ public class Preference implements Comparable<Preference> {
             notifyChanged();
         }
     }
-    
+
     /**
      * Checks whether this Preference should be selectable in the list.
-     * 
+     *
      * @return True if it is selectable, false otherwise.
      */
     public boolean isSelectable() {
@@ -811,7 +811,7 @@ public class Preference implements Comparable<Preference> {
      * For example, set this and {@link #setEnabled(boolean)} to false for
      * preferences that are only displaying information and 1) should not be
      * clickable 2) should not have the view set to the disabled state.
-     * 
+     *
      * @param shouldDisableView Set true if this preference should disable its view
      *            when the preference is disabled.
      */
@@ -819,7 +819,7 @@ public class Preference implements Comparable<Preference> {
         mShouldDisableView = shouldDisableView;
         notifyChanged();
     }
-    
+
     /**
      * Checks whether this Preference should disable its view when it's action is disabled.
      * @see #setShouldDisableView(boolean)
@@ -832,13 +832,13 @@ public class Preference implements Comparable<Preference> {
     /**
      * Returns a unique ID for this Preference.  This ID should be unique across all
      * Preference objects in a hierarchy.
-     * 
+     *
      * @return A unique ID for this Preference.
      */
     long getId() {
         return mId;
     }
-    
+
     /**
      * Processes a click on the preference. This includes saving the value to
      * the {@link SharedPreferences}. However, the overridden method should
@@ -847,93 +847,93 @@ public class Preference implements Comparable<Preference> {
      */
     protected void onClick() {
     }
-    
+
     /**
      * Sets the key for this Preference, which is used as a key to the
      * {@link SharedPreferences}. This should be unique for the package.
-     * 
+     *
      * @param key The key for the preference.
      */
     public void setKey(String key) {
         mKey = key;
-        
+
         if (mRequiresKey && !hasKey()) {
             requireKey();
         }
     }
-    
+
     /**
      * Gets the key for this Preference, which is also the key used for storing
      * values into SharedPreferences.
-     * 
+     *
      * @return The key.
      */
     public String getKey() {
         return mKey;
     }
-    
+
     /**
      * Checks whether the key is present, and if it isn't throws an
      * exception. This should be called by subclasses that store preferences in
      * the {@link SharedPreferences}.
-     * 
+     *
      * @throws IllegalStateException If there is no key assigned.
      */
     void requireKey() {
         if (mKey == null) {
             throw new IllegalStateException("Preference does not have a key assigned.");
         }
-        
+
         mRequiresKey = true;
     }
-    
+
     /**
      * Checks whether this Preference has a valid key.
-     * 
+     *
      * @return True if the key exists and is not a blank string, false otherwise.
      */
     public boolean hasKey() {
         return !TextUtils.isEmpty(mKey);
     }
-    
+
     /**
      * Checks whether this Preference is persistent. If it is, it stores its value(s) into
      * the persistent {@link SharedPreferences} storage.
-     * 
+     *
      * @return True if it is persistent.
      */
     public boolean isPersistent() {
         return mPersistent;
     }
-    
+
     /**
      * Checks whether, at the given time this method is called,
      * this Preference should store/restore its value(s) into the
      * {@link SharedPreferences}. This, at minimum, checks whether this
      * Preference is persistent and it currently has a key. Before you
      * save/restore from the {@link SharedPreferences}, check this first.
-     * 
+     *
      * @return True if it should persist the value.
      */
     protected boolean shouldPersist() {
         return mPreferenceManager != null && isPersistent() && hasKey();
     }
-    
+
     /**
      * Sets whether this Preference is persistent. When persistent,
      * it stores its value(s) into the persistent {@link SharedPreferences}
      * storage.
-     * 
+     *
      * @param persistent Set true if it should store its value(s) into the {@link SharedPreferences}.
      */
     public void setPersistent(boolean persistent) {
         mPersistent = persistent;
     }
-    
+
     /**
      * Call this method after the user changes the preference, but before the
      * internal state is set. This allows the client to ignore the user value.
-     * 
+     *
      * @param newValue The new value of this Preference.
      * @return True if the user value should be set as the preference
      *         value (and persisted).
@@ -941,11 +941,11 @@ public class Preference implements Comparable<Preference> {
     protected boolean callChangeListener(Object newValue) {
         return mOnChangeListener == null ? true : mOnChangeListener.onPreferenceChange(this, newValue);
     }
-    
+
     /**
      * Sets the callback to be invoked when this Preference is changed by the
      * user (but before the internal state has been updated).
-     * 
+     *
      * @param onPreferenceChangeListener The callback to be invoked.
      */
     public void setOnPreferenceChangeListener(OnPreferenceChangeListener onPreferenceChangeListener) {
@@ -955,7 +955,7 @@ public class Preference implements Comparable<Preference> {
     /**
      * Returns the callback to be invoked when this Preference is changed by the
      * user (but before the internal state has been updated).
-     * 
+     *
      * @return The callback to be invoked.
      */
     public OnPreferenceChangeListener getOnPreferenceChangeListener() {
@@ -964,7 +964,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Sets the callback to be invoked when this Preference is clicked.
-     * 
+     *
      * @param onPreferenceClickListener The callback to be invoked.
      */
     public void setOnPreferenceClickListener(OnPreferenceClickListener onPreferenceClickListener) {
@@ -973,7 +973,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Returns the callback to be invoked when this Preference is clicked.
-     * 
+     *
      * @return The callback to be invoked.
      */
     public OnPreferenceClickListener getOnPreferenceClickListener() {
@@ -982,24 +982,24 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Called when a click should be performed.
-     * 
+     *
      * @param preferenceScreen A {@link PreferenceScreen} whose hierarchy click
      *            listener should be called in the proper order (between other
      *            processing). May be null.
      * @hide
      */
     public void performClick(PreferenceScreen preferenceScreen) {
-        
+
         if (!isEnabled()) {
             return;
         }
-        
+
         onClick();
-        
+
         if (mOnClickListener != null && mOnClickListener.onPreferenceClick(this)) {
             return;
         }
-        
+
         PreferenceManager preferenceManager = getPreferenceManager();
         if (preferenceManager != null) {
             PreferenceManager.OnPreferenceTreeClickListener listener = preferenceManager
@@ -1009,7 +1009,7 @@ public class Preference implements Comparable<Preference> {
                 return;
             }
         }
-        
+
         if (mIntent != null) {
             Context context = getContext();
             context.startActivity(mIntent);
@@ -1026,19 +1026,19 @@ public class Preference implements Comparable<Preference> {
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         return false;
     }
-    
+
     /**
      * Returns the {@link android.content.Context} of this Preference. 
      * Each Preference in a Preference hierarchy can be
      * from different Context (for example, if multiple activities provide preferences into a single
      * {@link PreferenceActivity}). This Context will be used to save the Preference values.
-     * 
+     *
      * @return The Context of this Preference.
      */
     public Context getContext() {
         return mContext;
     }
-    
+
     /**
      * Returns the {@link SharedPreferences} where this Preference can read its
      * value(s). Usually, it's easier to use one of the helper read methods:
@@ -1051,7 +1051,7 @@ public class Preference implements Comparable<Preference> {
      * right away and hence not show up in the returned
      * {@link SharedPreferences}, this is intended behavior to improve
      * performance.
-     * 
+     *
      * @return The {@link SharedPreferences} where this Preference reads its
      *         value(s), or null if it isn't attached to a Preference hierarchy.
      * @see #getEditor()
@@ -1060,10 +1060,10 @@ public class Preference implements Comparable<Preference> {
         if (mPreferenceManager == null) {
             return null;
         }
-        
+
         return mPreferenceManager.getSharedPreferences();
     }
-    
+
     /**
      * Returns an {@link SharedPreferences.Editor} where this Preference can
      * save its value(s). Usually it's easier to use one of the helper save
@@ -1076,7 +1076,7 @@ public class Preference implements Comparable<Preference> {
      * In some cases, writes to this will not be committed right away and hence
      * not show up in the SharedPreferences, this is intended behavior to
      * improve performance.
-     * 
+     *
      * @return A {@link SharedPreferences.Editor} where this preference saves
      *         its value(s), or null if it isn't attached to a Preference
      *         hierarchy.
@@ -1087,15 +1087,15 @@ public class Preference implements Comparable<Preference> {
         if (mPreferenceManager == null) {
             return null;
         }
-        
+
         return mPreferenceManager.getEditor();
     }
-    
+
     /**
      * Returns whether the {@link Preference} should commit its saved value(s) in
      * {@link #getEditor()}. This may return false in situations where batch
      * committing is being done (by the manager) to improve performance.
-     * 
+     *
      * @return Whether the Preference should commit its saved value(s).
      * @see #getEditor()
      */
@@ -1103,13 +1103,13 @@ public class Preference implements Comparable<Preference> {
         if (mPreferenceManager == null) {
             return false;
         }
-        
+
         return mPreferenceManager.shouldCommit();
     }
-    
+
     /**
      * Compares Preference objects based on order (if set), otherwise alphabetically on the titles.
-     * 
+     *
      * @param another The Preference to compare to this one.
      * @return 0 if the same; less than 0 if this Preference sorts ahead of <var>another</var>;
      *          greater than 0 if this Preference sorts after <var>another</var>.
@@ -1131,10 +1131,10 @@ public class Preference implements Comparable<Preference> {
             return CharSequences.compareToIgnoreCase(mTitle, another.mTitle);
         }
     }
-    
+
     /**
      * Sets the internal change listener.
-     * 
+     *
      * @param listener The listener.
      * @see #notifyChanged()
      */
@@ -1150,7 +1150,7 @@ public class Preference implements Comparable<Preference> {
             mListener.onPreferenceChange(this);
         }
     }
-    
+
     /**
      * Should be called when a Preference has been
      * added/removed from this group, or the ordering should be
@@ -1164,27 +1164,27 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Gets the {@link PreferenceManager} that manages this Preference object's tree.
-     * 
+     *
      * @return The {@link PreferenceManager}.
      */
     public PreferenceManager getPreferenceManager() {
         return mPreferenceManager;
     }
-    
+
     /**
      * Called when this Preference has been attached to a Preference hierarchy.
      * Make sure to call the super implementation.
-     * 
+     *
      * @param preferenceManager The PreferenceManager of the hierarchy.
      */
     protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
         mPreferenceManager = preferenceManager;
-        
+
         mId = preferenceManager.getNextId();
-        
+
         dispatchSetInitialValue();
     }
-    
+
     /**
      * Called when the Preference hierarchy has been attached to the
      * {@link PreferenceActivity}. This can also be called when this
@@ -1198,9 +1198,9 @@ public class Preference implements Comparable<Preference> {
     }
 
     private void registerDependency() {
-        
+
         if (TextUtils.isEmpty(mDependencyKey)) return;
-        
+
         Preference preference = findPreferenceInHierarchy(mDependencyKey);
         if (preference != null) {
             preference.registerDependent(this);
@@ -1218,14 +1218,14 @@ public class Preference implements Comparable<Preference> {
             }
         }
     }
-    
+
     /**
      * Finds a Preference in this hierarchy (the whole thing,
      * even above/below your {@link PreferenceScreen} screen break) with the given
      * key.
      * <p>
      * This only functions after we have been attached to a hierarchy.
-     * 
+     *
      * @param key The key of the Preference to find.
      * @return The Preference that uses the given key.
      */
@@ -1233,16 +1233,16 @@ public class Preference implements Comparable<Preference> {
         if (TextUtils.isEmpty(key) || mPreferenceManager == null) {
             return null;
         }
-        
+
         return mPreferenceManager.findPreference(key);
     }
-    
+
     /**
      * Adds a dependent Preference on this Preference so we can notify it.
      * Usually, the dependent Preference registers itself (it's good for it to
      * know it depends on something), so please use
      * {@link Preference#setDependency(String)} on the dependent Preference.
-     * 
+     *
      * @param dependent The dependent Preference that will be enabled/disabled
      *            according to the state of this Preference.
      */
@@ -1250,15 +1250,15 @@ public class Preference implements Comparable<Preference> {
         if (mDependents == null) {
             mDependents = new ArrayList<Preference>();
         }
-        
+
         mDependents.add(dependent);
-        
+
         dependent.onDependencyChanged(this, shouldDisableDependents());
     }
-    
+
     /**
      * Removes a dependent Preference on this Preference.
-     * 
+     *
      * @param dependent The dependent Preference that will be enabled/disabled
      *            according to the state of this Preference.
      * @return Returns the same Preference object, for chaining multiple calls
@@ -1269,21 +1269,21 @@ public class Preference implements Comparable<Preference> {
             mDependents.remove(dependent);
         }
     }
-    
+
     /**
      * Notifies any listening dependents of a change that affects the
      * dependency.
-     * 
+     *
      * @param disableDependents Whether this Preference should disable
      *            its dependents.
      */
     public void notifyDependencyChange(boolean disableDependents) {
         final List<Preference> dependents = mDependents;
-        
+
         if (dependents == null) {
             return;
         }
-        
+
         final int dependentsCount = dependents.size();
         for (int i = 0; i < dependentsCount; i++) {
             dependents.get(i).onDependencyChanged(this, disableDependents);
@@ -1292,7 +1292,7 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Called when the dependency changes.
-     * 
+     *
      * @param dependency The Preference that this Preference depends on.
      * @param disableDependent Set true to disable this Preference.
      */
@@ -1327,38 +1327,38 @@ public class Preference implements Comparable<Preference> {
     /**
      * Checks whether this preference's dependents should currently be
      * disabled.
-     * 
+     *
      * @return True if the dependents should be disabled, otherwise false.
      */
     public boolean shouldDisableDependents() {
         return !isEnabled();
     }
-    
+
     /**
      * Sets the key of a Preference that this Preference will depend on. If that
      * Preference is not set or is off, this Preference will be disabled.
-     * 
+     *
      * @param dependencyKey The key of the Preference that this depends on.
      */
     public void setDependency(String dependencyKey) {
         // Unregister the old dependency, if we had one
         unregisterDependency();
-        
+
         // Register the new
         mDependencyKey = dependencyKey;
         registerDependency();
     }
-    
+
     /**
      * Returns the key of the dependency on this Preference.
-     * 
+     *
      * @return The key of the dependency.
      * @see #setDependency(String)
      */
     public String getDependency() {
         return mDependencyKey;
     }
-    
+
     /**
      * Called when this Preference is being removed from the hierarchy. You
      * should remove any references to this Preference that you know about. Make
@@ -1368,18 +1368,18 @@ public class Preference implements Comparable<Preference> {
     protected void onPrepareForRemoval() {
         unregisterDependency();
     }
-    
+
     /**
      * Sets the default value for this Preference, which will be set either if
      * persistence is off or persistence is on and the preference is not found
      * in the persistent storage.
-     * 
+     *
      * @param defaultValue The default value.
      */
     public void setDefaultValue(Object defaultValue) {
         mDefaultValue = defaultValue;
     }
-    
+
     private void dispatchSetInitialValue() {
         // By now, we know if we are persistent.
         final boolean shouldPersist = shouldPersist();
@@ -1391,7 +1391,7 @@ public class Preference implements Comparable<Preference> {
             onSetInitialValue(true, null);
         }
     }
-    
+
     /**
      * Implement this to set the initial value of the Preference. 
      * <p>
@@ -1403,7 +1403,7 @@ public class Preference implements Comparable<Preference> {
      * <p>
      * This may not always be called. One example is if it should not persist
      * but there is no default value given.
-     * 
+     *
      * @param restorePersistedValue True to restore the persisted value;
      *            false to use the given <var>defaultValue</var>.
      * @param defaultValue The default value for this Preference. Only use this
@@ -1424,14 +1424,14 @@ public class Preference implements Comparable<Preference> {
             }
         }
     }
-    
+
     /**
      * Attempts to persist a String to the {@link android.content.SharedPreferences}.
      * <p>
      * This will check if this Preference is persistent, get an editor from
      * the {@link PreferenceManager}, put in the string, and check if we should commit (and
      * commit if so).
-     * 
+     *
      * @param value The value to persist.
      * @return True if the Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1445,7 +1445,7 @@ public class Preference implements Comparable<Preference> {
                 // It's already there, so the same as persisting
                 return true;
             }
-            
+
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putString(mKey, value);
             tryCommit(editor);
@@ -1453,13 +1453,13 @@ public class Preference implements Comparable<Preference> {
         }
         return false;
     }
-    
+
     /**
      * Attempts to get a persisted String from the {@link android.content.SharedPreferences}.
      * <p>
      * This will check if this Preference is persistent, get the SharedPreferences
      * from the {@link PreferenceManager}, and get the value.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either the
      *            Preference is not persistent or the Preference is not in the
      *            shared preferences.
@@ -1471,17 +1471,17 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getString(mKey, defaultReturnValue);
     }
-    
+
     /**
      * Attempts to persist a set of Strings to the {@link android.content.SharedPreferences}.
      * <p>
      * This will check if this Preference is persistent, get an editor from
      * the {@link PreferenceManager}, put in the strings, and check if we should commit (and
      * commit if so).
-     * 
+     *
      * @param values The values to persist.
      * @return True if the Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1495,7 +1495,7 @@ public class Preference implements Comparable<Preference> {
                 // It's already there, so the same as persisting
                 return true;
             }
-            
+
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putStringSet(mKey, values);
             tryCommit(editor);
@@ -1510,7 +1510,7 @@ public class Preference implements Comparable<Preference> {
      * <p>
      * This will check if this Preference is persistent, get the SharedPreferences
      * from the {@link PreferenceManager}, and get the value.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either the
      *            Preference is not persistent or the Preference is not in the
      *            shared preferences.
@@ -1522,13 +1522,13 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getStringSet(mKey, defaultReturnValue);
     }
-    
+
     /**
      * Attempts to persist an int to the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param value The value to persist.
      * @return True if the Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1542,7 +1542,7 @@ public class Preference implements Comparable<Preference> {
                 // It's already there, so the same as persisting
                 return true;
             }
-            
+
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putInt(mKey, value);
             tryCommit(editor);
@@ -1550,10 +1550,10 @@ public class Preference implements Comparable<Preference> {
         }
         return false;
     }
-    
+
     /**
      * Attempts to get a persisted int from the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either this
      *            Preference is not persistent or this Preference is not in the
      *            SharedPreferences.
@@ -1566,13 +1566,13 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getInt(mKey, defaultReturnValue);
     }
-    
+
     /**
      * Attempts to persist a float to the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1594,10 +1594,10 @@ public class Preference implements Comparable<Preference> {
         }
         return false;
     }
-    
+
     /**
      * Attempts to get a persisted float from the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either this
      *            Preference is not persistent or this Preference is not in the
      *            SharedPreferences.
@@ -1610,13 +1610,13 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getFloat(mKey, defaultReturnValue);
     }
-    
+
     /**
      * Attempts to persist a long to the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1630,7 +1630,7 @@ public class Preference implements Comparable<Preference> {
                 // It's already there, so the same as persisting
                 return true;
             }
-            
+
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putLong(mKey, value);
             tryCommit(editor);
@@ -1638,10 +1638,10 @@ public class Preference implements Comparable<Preference> {
         }
         return false;
     }
-    
+
     /**
      * Attempts to get a persisted long from the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either this
      *            Preference is not persistent or this Preference is not in the
      *            SharedPreferences.
@@ -1654,13 +1654,13 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getLong(mKey, defaultReturnValue);
     }
-    
+
     /**
      * Attempts to persist a boolean to the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param value The value to persist.
      * @return True if this Preference is persistent. (This is not whether the
      *         value was persisted, since we may not necessarily commit if there
@@ -1674,7 +1674,7 @@ public class Preference implements Comparable<Preference> {
                 // It's already there, so the same as persisting
                 return true;
             }
-            
+
             SharedPreferences.Editor editor = mPreferenceManager.getEditor();
             editor.putBoolean(mKey, value);
             tryCommit(editor);
@@ -1682,10 +1682,10 @@ public class Preference implements Comparable<Preference> {
         }
         return false;
     }
-    
+
     /**
      * Attempts to get a persisted boolean from the {@link android.content.SharedPreferences}.
-     * 
+     *
      * @param defaultReturnValue The default value to return if either this
      *            Preference is not persistent or this Preference is not in the
      *            SharedPreferences.
@@ -1698,26 +1698,26 @@ public class Preference implements Comparable<Preference> {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         return mPreferenceManager.getSharedPreferences().getBoolean(mKey, defaultReturnValue);
     }
-    
+
     boolean canRecycleLayout() {
         return mCanRecycleLayout;
     }
-    
+
     @Override
     public String toString() {
         return getFilterableStringBuilder().toString();
     }
-        
+
     /**
      * Returns the text that will be used to filter this Preference depending on
      * user input.
      * <p>
      * If overridding and calling through to the superclass, make sure to prepend
      * your additions with a space.
-     * 
+     *
      * @return Text as a {@link StringBuilder} that will be used to filter this
      *         preference. By default, this is the title and summary
      *         (concatenated with a space).
@@ -1741,9 +1741,9 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Store this Preference hierarchy's frozen state into the given container.
-     * 
+     *
      * @param container The Bundle in which to save the instance of this Preference.
-     * 
+     *
      * @see #restoreHierarchyState
      * @see #onSaveInstanceState
      */
@@ -1755,9 +1755,9 @@ public class Preference implements Comparable<Preference> {
      * Called by {@link #saveHierarchyState} to store the instance for this Preference and its children.
      * May be overridden to modify how the save happens for children. For example, some
      * Preference objects may want to not store an instance for their children.
-     * 
+     *
      * @param container The Bundle in which to save the instance of this Preference.
-     * 
+     *
      * @see #saveHierarchyState
      * @see #onSaveInstanceState
      */
@@ -1780,7 +1780,7 @@ public class Preference implements Comparable<Preference> {
      * state that can later be used to create a new instance with that same
      * state. This state should only contain information that is not persistent
      * or can be reconstructed later.
-     * 
+     *
      * @return A Parcelable object containing the current dynamic state of
      *         this Preference, or null if there is nothing interesting to save.
      *         The default implementation returns null.
@@ -1794,9 +1794,9 @@ public class Preference implements Comparable<Preference> {
 
     /**
      * Restore this Preference hierarchy's previously saved state from the given container.
-     * 
+     *
      * @param container The Bundle that holds the previously saved state.
-     * 
+     *
      * @see #saveHierarchyState
      * @see #onRestoreInstanceState
      */
@@ -1809,7 +1809,7 @@ public class Preference implements Comparable<Preference> {
      * Preference and its children. May be overridden to modify how restoring
      * happens to the children of a Preference. For example, some Preference objects may
      * not want to save state for their children.
-     * 
+     *
      * @param container The Bundle that holds the previously saved state.
      * @see #restoreHierarchyState
      * @see #onRestoreInstanceState
@@ -1832,7 +1832,7 @@ public class Preference implements Comparable<Preference> {
      * Hook allowing a Preference to re-apply a representation of its internal
      * state that had previously been generated by {@link #onSaveInstanceState}.
      * This function will never be called with a null state.
-     * 
+     *
      * @param state The saved state that had previously been returned by
      *            {@link #onSaveInstanceState}.
      * @see #onSaveInstanceState
@@ -1856,17 +1856,17 @@ public class Preference implements Comparable<Preference> {
         public BaseSavedState(Parcelable superState) {
             super(superState);
         }
-        
+
         public static final Parcelable.Creator<BaseSavedState> CREATOR =
                 new Parcelable.Creator<BaseSavedState>() {
-            public BaseSavedState createFromParcel(Parcel in) {
-                return new BaseSavedState(in);
-            }
+                    public BaseSavedState createFromParcel(Parcel in) {
+                        return new BaseSavedState(in);
+                    }
 
-            public BaseSavedState[] newArray(int size) {
-                return new BaseSavedState[size];
-            }
-        };
+                    public BaseSavedState[] newArray(int size) {
+                        return new BaseSavedState[size];
+                    }
+                };
     }
 
 }
