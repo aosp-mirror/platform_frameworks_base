@@ -174,7 +174,10 @@ public class KeyguardAffordanceView extends ImageView {
 
     private void drawBackgroundCircle(Canvas canvas) {
         if (mCircleRadius > 0 || mFinishing) {
-            if (mFinishing && mSupportHardware) {
+            if (mFinishing && mSupportHardware && mHwCenterX != null) {
+                // Our hardware drawing proparties can be null if the finishing started but we have
+                // never drawn before. In that case we are not doing a render thread animation
+                // anyway, so we need to use the normal drawing.
                 DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
                 displayListCanvas.drawCircle(mHwCenterX, mHwCenterY, mHwCircleRadius,
                         mHwCirclePaint);
