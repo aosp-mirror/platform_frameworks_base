@@ -1243,11 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Conectado a <xliff:g id="SESSION">%s</xliff:g>. Toque para gerenciar a rede."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN sempre ativa conectando..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN sempre ativa conectada"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"VPN sempre ativa desconectada"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Erro na VPN sempre ativa"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Toque para configurar"</string>
     <string name="upload_file" msgid="2897957172366730416">"Escolher arquivo"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nenhum arquivo escolhido"</string>
     <string name="reset" msgid="2448168080964209908">"Redefinir"</string>
@@ -1650,6 +1648,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Digitar nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugeridos"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"Pesquisa"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Modo de trabalho DESATIVADO"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Permitir que o perfil de trabalho funcione, incluindo apps, sincronização em segundo plano e recursos relacionados"</string>

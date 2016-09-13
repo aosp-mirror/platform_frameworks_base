@@ -1243,11 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>కు కనెక్ట్ చేయబడింది. నెట్‌వర్క్‌ను నిర్వహించడానికి నొక్కండి."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడుతోంది…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడింది"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ఎల్లప్పుడూ ఆన్‌లో ఉండే VPN డిస్‌కనెక్ట్ చేయబడింది"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN లోపం"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"సెటప్ చేయడానికి నొక్కండి"</string>
     <string name="upload_file" msgid="2897957172366730416">"ఫైల్‌ను ఎంచుకోండి"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ఫైల్ ఎంచుకోబడలేదు"</string>
     <string name="reset" msgid="2448168080964209908">"రీసెట్ చేయి"</string>
@@ -1650,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"సూచించినవి"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"శోధించు"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"కార్యాలయ మోడ్ ఆఫ్ చేయబడింది"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"అనువర్తనాలు, నేపథ్య సమకాలీకరణ మరియు సంబంధిత లక్షణాలతో సహా కార్యాలయ ప్రొఫైల్‌ను పని చేయడానికి అనుమతించండి."</string>

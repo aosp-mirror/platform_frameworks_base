@@ -1268,11 +1268,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Conectat la <xliff:g id="SESSION">%s</xliff:g>. Apăsați pentru a gestiona rețeaua."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Se efectuează conectarea la rețeaua VPN activată permanent…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Conectat(ă) la rețeaua VPN activată permanent"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Rețeaua VPN activată permanent a fost deconectată"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Eroare de rețea VPN activată permanent"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Atingeți pentru a configura"</string>
     <string name="upload_file" msgid="2897957172366730416">"Alegeți un fișier"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nu au fost găsite fișiere"</string>
     <string name="reset" msgid="2448168080964209908">"Resetați"</string>
@@ -1686,6 +1684,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Numele limbii"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugerate"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toate limbile"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Toate regiunile"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Căutați"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Modul de serviciu e DEZACTIVAT"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Permiteți profilului de serviciu să funcționeze, inclusiv aplicațiile, sincronizarea în fundal și funcțiile asociate."</string>

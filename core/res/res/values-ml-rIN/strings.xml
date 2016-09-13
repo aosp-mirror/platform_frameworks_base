@@ -1243,11 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> എന്ന സെഷനിലേക്ക് കണക്റ്റുചെയ്തു. നെറ്റ്‌വർക്ക് മാനേജുചെയ്യാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN കണക്റ്റുചെയ്യുന്നു…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN കണക്റ്റുചെയ്‌തു"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"\'എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN\' വിച്ഛേദിച്ചു"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"എല്ലായ്‌പ്പോഴും ഓണായിരിക്കുന്ന VPN പിശക്"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"സജ്ജമാക്കാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="upload_file" msgid="2897957172366730416">"ഫയല്‍‌ തിരഞ്ഞെടുക്കുക"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ഫയലൊന്നും തിരഞ്ഞെടുത്തില്ല"</string>
     <string name="reset" msgid="2448168080964209908">"പുനഃസജ്ജമാക്കുക"</string>
@@ -1650,6 +1648,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"ഭാഷയുടെ പേര് ടൈപ്പുചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"ഔദ്യോഗിക മോഡ് ഓഫാണ്"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ആപ്സും, പശ്ചാത്തല സമന്വയവും ബന്ധപ്പെട്ട ഫീച്ചറുകളും ഉൾപ്പെടെ, ഔദ്യോഗിക പ്രൊഫൈലിനെ പ്രവർത്തിക്കാൻ അനുവദിക്കുക."</string>
