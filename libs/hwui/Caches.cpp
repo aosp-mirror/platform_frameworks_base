@@ -21,6 +21,9 @@
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+#include "font/FontCacheHistoryTracker.h"
+#endif
 #include "utils/GLUtils.h"
 
 #include <cutils/properties.h>
@@ -212,6 +215,10 @@ void Caches::dumpMemoryUsage(String8 &log) {
 
     log.appendFormat("Total memory usage:\n");
     log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    fontRenderer.getFontRenderer().historyTracker().dump(log);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
