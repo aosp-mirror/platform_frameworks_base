@@ -20,6 +20,9 @@ import static android.system.OsConstants.*;
 
 import com.android.frameworks.servicestests.R;
 
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.NetworkUtils;
 import android.net.apf.ApfCapabilities;
 import android.net.apf.ApfFilter;
 import android.net.apf.ApfGenerator;
@@ -28,8 +31,6 @@ import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
-import android.net.LinkAddress;
-import android.net.LinkProperties;
 import android.os.ConditionVariable;
 import android.os.Parcelable;
 import android.system.ErrnoException;
@@ -713,7 +714,7 @@ public class ApfTest extends AndroidTestCase {
     private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
 
     private static final byte[] MOCK_IPV4_ADDR           = {10, 0, 0, 1};
-    private static final byte[] MOCK_BROADCAST_IPV4_ADDR = {10, 0, (byte) 255, (byte) 255};
+    private static final byte[] MOCK_BROADCAST_IPV4_ADDR = {10, 0, 31, (byte) 255}; // prefix = 19
     private static final byte[] MOCK_MULTICAST_IPV4_ADDR = {(byte) 224, 0, 0, 1};
     private static final byte[] ANOTHER_IPV4_ADDR        = {10, 0, 0, 2};
     private static final byte[] IPV4_ANY_HOST_ADDR       = {0, 0, 0, 0};
@@ -721,8 +722,12 @@ public class ApfTest extends AndroidTestCase {
     @LargeTest
     public void testApfFilterIPv4() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
+        LinkAddress link = new LinkAddress(InetAddress.getByAddress(MOCK_IPV4_ADDR), 19);
+        LinkProperties lp = new LinkProperties();
+        lp.addLinkAddress(link);
 
         ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST, mLog);
+        apfFilter.setLinkProperties(lp);
 
         byte[] program = ipManagerCallback.getApfProgram();
 
@@ -740,7 +745,7 @@ public class ApfTest extends AndroidTestCase {
         put(packet, IPV4_DEST_ADDR_OFFSET, IPV4_BROADCAST_ADDRESS);
         assertDrop(program, packet.array());
         put(packet, IPV4_DEST_ADDR_OFFSET, MOCK_BROADCAST_IPV4_ADDR);
-        assertPass(program, packet.array());
+        assertDrop(program, packet.array());
 
         // Verify multicast/broadcast IPv4, not DHCP to us, is dropped
         put(packet, ETH_DEST_ADDR_OFFSET, ETH_BROADCAST_MAC_ADDRESS);
@@ -797,14 +802,20 @@ public class ApfTest extends AndroidTestCase {
 
     @LargeTest
     public void testApfFilterMulticast() throws Exception {
-        MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST, mLog);
-        byte[] program = ipManagerCallback.getApfProgram();
-
         final byte[] unicastIpv4Addr   = {(byte)192,0,2,63};
-        final byte[] broadcastIpv4Addr = {(byte)192,0,(byte)255,(byte)255};
+        final byte[] broadcastIpv4Addr = {(byte)192,0,2,(byte)255};
         final byte[] multicastIpv4Addr = {(byte)224,0,0,1};
         final byte[] multicastIpv6Addr = {(byte)0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,(byte)0xfb};
+
+        MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
+        LinkAddress link = new LinkAddress(InetAddress.getByAddress(unicastIpv4Addr), 24);
+        LinkProperties lp = new LinkProperties();
+        lp.addLinkAddress(link);
+
+        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, ALLOW_MULTICAST, mLog);
+        apfFilter.setLinkProperties(lp);
+
+        byte[] program = ipManagerCallback.getApfProgram();
 
         // Construct IPv4 and IPv6 multicast packets.
         ByteBuffer mcastv4packet = ByteBuffer.wrap(new byte[100]);
@@ -848,7 +859,7 @@ public class ApfTest extends AndroidTestCase {
         assertDrop(program, mcastv6packet.array());
         assertDrop(program, bcastv4packet1.array());
         assertDrop(program, bcastv4packet2.array());
-        assertPass(program, bcastv4unicastl2packet.array());
+        assertDrop(program, bcastv4unicastl2packet.array());
 
         // Turn off multicast filter and verify it's off
         ipManagerCallback.resetApfProgramWait();
@@ -864,11 +875,12 @@ public class ApfTest extends AndroidTestCase {
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
         apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST, mLog);
+        apfFilter.setLinkProperties(lp);
         program = ipManagerCallback.getApfProgram();
         assertDrop(program, mcastv4packet.array());
         assertDrop(program, mcastv6packet.array());
         assertDrop(program, bcastv4packet1.array());
-        assertPass(program, bcastv4unicastl2packet.array());
+        assertDrop(program, bcastv4unicastl2packet.array());
 
         // Verify that ICMPv6 multicast is not dropped.
         mcastv6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
@@ -1154,4 +1166,30 @@ public class ApfTest extends AndroidTestCase {
      */
     private native static boolean compareBpfApf(String filter, String pcap_filename,
             byte[] apf_program);
+
+    public void testBytesToInt() {
+        assertEquals(0x00000000, ApfFilter.bytesToInt(IPV4_ANY_HOST_ADDR));
+        assertEquals(0xffffffff, ApfFilter.bytesToInt(IPV4_BROADCAST_ADDRESS));
+        assertEquals(0x0a000001, ApfFilter.bytesToInt(MOCK_IPV4_ADDR));
+        assertEquals(0x0a000002, ApfFilter.bytesToInt(ANOTHER_IPV4_ADDR));
+        assertEquals(0x0a001fff, ApfFilter.bytesToInt(MOCK_BROADCAST_IPV4_ADDR));
+        assertEquals(0xe0000001, ApfFilter.bytesToInt(MOCK_MULTICAST_IPV4_ADDR));
+    }
+
+    public void testBroadcastAddress() throws Exception {
+        assertEqualsIp("255.255.255.255", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 0));
+        assertEqualsIp("0.0.0.0", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 32));
+        assertEqualsIp("0.0.3.255", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 22));
+        assertEqualsIp("0.255.255.255", ApfFilter.ipv4BroadcastAddress(IPV4_ANY_HOST_ADDR, 8));
+
+        assertEqualsIp("255.255.255.255", ApfFilter.ipv4BroadcastAddress(MOCK_IPV4_ADDR, 0));
+        assertEqualsIp("10.0.0.1", ApfFilter.ipv4BroadcastAddress(MOCK_IPV4_ADDR, 32));
+        assertEqualsIp("10.0.0.255", ApfFilter.ipv4BroadcastAddress(MOCK_IPV4_ADDR, 24));
+        assertEqualsIp("10.0.255.255", ApfFilter.ipv4BroadcastAddress(MOCK_IPV4_ADDR, 16));
+    }
+
+    public void assertEqualsIp(String expected, int got) throws Exception {
+        int want = ApfFilter.bytesToInt(InetAddress.getByName(expected).getAddress());
+        assertEquals(want, got);
+    }
 }
