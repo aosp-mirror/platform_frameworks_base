@@ -1264,7 +1264,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"انقر لاختيار لغة وتنسيق"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"العناصر المرشحة"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"جارٍ تحضير <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"جارٍ التحقق من الأخطاء"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"تم اكتشاف <xliff:g id="NAME">%s</xliff:g> جديدة"</string>
@@ -1343,8 +1342,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"تم الاتصال بـ <xliff:g id="SESSION">%s</xliff:g>. انقر لإدارة الشبكة."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏جارٍ الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏تم الاتصال بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏تم فصل الشبكة الظاهرية الخاصة (VPN) دائمة التشغيل"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطأ بشبكة ظاهرية خاصة (VPN) دائمة التشغيل"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"انقر للتهيئة."</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"انقر للإعداد."</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
     <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
@@ -1791,6 +1791,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"وضع العمل معطَّل"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"السماح باستخدام الملف الشخصي للعمل، بما في ذلك التطبيقات ومزامنة الخلفية والميزات ذات الصلة."</string>

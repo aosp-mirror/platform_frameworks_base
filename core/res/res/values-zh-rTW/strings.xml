@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"輕觸即可選取語言和版面配置"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在準備「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"正在檢查錯誤"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"偵測到新的「<xliff:g id="NAME">%s</xliff:g>」"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕觸一下即可管理網路。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在連線至永久連線的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已連線至永久連線的 VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"永久連線的 VPN 已中斷連線"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"永久連線的 VPN 發生錯誤"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"輕觸即可進行設定"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"輕觸即可進行設定"</string>
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未選擇任何檔案"</string>
     <string name="reset" msgid="2448168080964209908">"重設"</string>
@@ -1647,6 +1647,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"請輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"建議語言"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Work 模式已關閉"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"啟用 Work 設定檔，包括應用程式、背景同步處理和相關功能。"</string>

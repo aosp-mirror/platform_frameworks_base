@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"hautagaiak"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> prestatzen"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Errorerik dagoen egiaztatzen"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> berria hauteman da"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> saiora konektatuta. Sakatu sarea kudeatzeko."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Beti aktibatuta dagoen VPNa konektatzen…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Beti aktibatuta dagoen VPNa konektatu da"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Deskonektatu egin da beti aktibatuta dagoen VPN konexioa"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Beti aktibatuta dagoen VPN errorea"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Sakatu konfiguratzeko"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Konfiguratzeko, sakatu hau"</string>
     <string name="upload_file" msgid="2897957172366730416">"Aukeratu fitxategia"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ez da fitxategirik aukeratu"</string>
     <string name="reset" msgid="2448168080964209908">"Berrezarri"</string>
@@ -1647,6 +1647,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Iradokitakoak"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Desaktibatuta dago laneko modua"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Baimendu laneko profilak funtzionatzea, besteak beste, aplikazioak, atzeko planoko sinkronizazioa eta erlazionatutako eginbideak."</string>

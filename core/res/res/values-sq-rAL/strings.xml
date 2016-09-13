@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Trokit për të zgjedhur gjuhën dhe strukturën"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidatë"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Po përgatit <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Po kontrollon për gabime"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"U zbulua karta e re <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Lidhur me <xliff:g id="SESSION">%s</xliff:g>. Trokit për të menaxhuar rrjetin."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Po lidh VPN-në për aktivizim të përhershëm…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN e lidhur në mënyrë të përhershme"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Rrjeti VPN gjithmonë aktiv u shkëput"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Gabimi VPN-je për aktivizimin e përhershëm"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Trokit për të konfiguruar"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Trokit për ta konfiguruar"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zgjidh skedarin"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nuk u zgjodh asnjë skedar"</string>
     <string name="reset" msgid="2448168080964209908">"Rivendos"</string>
@@ -1647,6 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Shkruaj emrin e gjuhës"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugjeruar"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Të gjitha rajonet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Modaliteti i punës është JOAKTIV"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Lejoje profilin e punës të funksionojë, duke përfshirë aplikacionet, sinkronizimin në sfond dhe funksionet e lidhura."</string>

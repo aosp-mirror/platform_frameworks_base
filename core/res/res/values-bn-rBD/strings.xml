@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ভাষা এবং লেআউট নির্বাচন করুন আলতো চাপ দিন"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"প্রার্থীরা"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> প্রস্তুত করা হচ্ছে"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ত্রুটি রয়েছে কিনা পরীক্ষা করা হচ্ছে"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"নতুন <xliff:g id="NAME">%s</xliff:g> সনাক্ত করা হয়েছে"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> তে সংযুক্ত হয়েছে৷ নেটওয়ার্ক পরিচালনা করতে আলতো চাপুন৷"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"সর্বদা-চালু VPN সংযুক্ত হচ্ছে..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"সর্বদা-চালু VPN সংযুক্ত হয়েছে"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"সর্বদা-চালু VPN এর সংযোগ বিচ্ছিন্ন হয়েছে"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"সর্বদা-চালু VPN ত্রুটি"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"কনফিগার করতে আলতো চাপুন"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"সেট আপ করতে আলতো চাপুন"</string>
     <string name="upload_file" msgid="2897957172366730416">"ফাইল বেছে নিন"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"কোনো ফাইল নির্বাচন করা হয়নি"</string>
     <string name="reset" msgid="2448168080964209908">"পুনরায় সেট করুন"</string>
@@ -1647,6 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"ভাষার নাম লিখুন"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"প্রস্তাবিত"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকল ভাষা"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"সমস্ত অঞ্চল"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"অনুসন্ধান করুন"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"কাজের মোড বন্ধ আছে"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"অ্যাপ্লিকেশান, পটভূমি সিঙ্ক এবং সম্পর্কিত বৈশিষ্ট্যগুলি সহ কর্মস্থলের প্রোফাইলটিকে কাজ করার অনুমতি দিন।"</string>
