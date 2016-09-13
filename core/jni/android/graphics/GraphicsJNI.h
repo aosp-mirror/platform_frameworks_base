@@ -99,7 +99,7 @@ public:
             SkColorTable* ctable);
 
     static android::Bitmap* mapAshmemPixelRef(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable, int fd, void* addr, bool readOnly);
+            SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
