@@ -108,7 +108,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private CharSequence mQueueTitle;
     private int mRatingType;
     private int mRepeatMode;
-    private boolean mShuffleMode;
+    private boolean mShuffleModeEnabled;
     private long mLastActiveTime;
     // End TransportPerformer fields
 
@@ -649,7 +649,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             for (int i = mControllerCallbacks.size() - 1; i >= 0; i--) {
                 ISessionControllerCallback cb = mControllerCallbacks.get(i);
                 try {
-                    cb.onShuffleModeChanged(mShuffleMode);
+                    cb.onShuffleModeChanged(mShuffleModeEnabled);
                 } catch (DeadObjectException e) {
                     mControllerCallbacks.remove(i);
                     Log.w(TAG, "Removed dead callback in pushShuffleModeUpdate.", e);
@@ -880,11 +880,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setShuffleMode(boolean shuffleMode) {
+        public void setShuffleModeEnabled(boolean enabled) {
             boolean changed;
             synchronized (mLock) {
-                changed = mShuffleMode != shuffleMode;
-                mShuffleMode = shuffleMode;
+                changed = mShuffleModeEnabled != enabled;
+                mShuffleModeEnabled = enabled;
             }
             if (changed) {
                 mHandler.post(MessageHandler.MSG_UPDATE_SHUFFLE_MODE);
@@ -1115,9 +1115,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
-        public void shuffleMode(boolean shuffleMode) {
+        public void shuffleMode(boolean enabled) {
             try {
-                mCb.onShuffleMode(shuffleMode);
+                mCb.onShuffleMode(enabled);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in shuffleMode.", e);
             }
@@ -1364,9 +1364,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void shuffleMode(boolean shuffleMode) throws RemoteException {
+        public void shuffleMode(boolean enabled) throws RemoteException {
             updateCallingPackage();
-            mSessionCb.shuffleMode(shuffleMode);
+            mSessionCb.shuffleMode(enabled);
         }
 
 
@@ -1419,8 +1419,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public boolean getShuffleMode() {
-            return mShuffleMode;
+        public boolean isShuffleModeEnabled() {
+            return mShuffleModeEnabled;
         }
 
         @Override

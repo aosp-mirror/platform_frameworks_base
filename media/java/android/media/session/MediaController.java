@@ -251,15 +251,15 @@ public final class MediaController {
     }
 
     /**
-     * Get the shuffle mode for this session.
+     * Return whether the shuffle mode is enabled for this session.
      *
-     * @return The latest shuffle mode set to the session, or false if not set.
+     * @return {@code true} if the shuffle mode is enabled, {@code false} if disabled or not set.
      */
-    public boolean getShuffleMode() {
+    public boolean isShuffleModeEnabled() {
         try {
-            return mSessionBinder.getShuffleMode();
+            return mSessionBinder.isShuffleModeEnabled();
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Error calling getShuffleMode.", e);
+            Log.wtf(TAG, "Error calling isShuffleModeEnabled.", e);
             return false;
         }
     }
@@ -625,10 +625,9 @@ public final class MediaController {
         /**
          * Override to handle changes to the shuffle mode.
          *
-         * @param shuffleMode The shuffle mode. {@code true} if _the_ shuffle mode is on,
-         *                    {@code false} otherwise.
+         * @param enabled {@code true} if the shuffle mode is enabled, {@code false} otherwise.
          */
-        public void onShuffleModeChanged(boolean shuffleMode) {
+        public void onShuffleModeChanged(boolean enabled) {
         }
     }
 
@@ -931,13 +930,13 @@ public final class MediaController {
         /**
          * Set the shuffle mode for this session.
          *
-         * @param shuffleMode {@code true} if the shuffle mode is on, {@code false} otherwise.
+         * @param enabled {@code true} to enable the shuffle mode, {@code false} to disable.
          */
-        public void setShuffleMode(boolean shuffleMode) {
+        public void setShuffleModeEnabled(boolean enabled) {
             try {
-                mSessionBinder.shuffleMode(shuffleMode);
+                mSessionBinder.shuffleMode(enabled);
             } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling shuffleQueue.", e);
+                Log.wtf(TAG, "Error calling shuffleMode.", e);
             }
         }
 
@@ -1151,10 +1150,10 @@ public final class MediaController {
         }
 
         @Override
-        public void onShuffleModeChanged(boolean shuffleMode) {
+        public void onShuffleModeChanged(boolean enabled) {
             MediaController controller = mController.get();
             if (controller != null) {
-                controller.postMessage(MSG_UPDATE_SHUFFLE_MODE, shuffleMode, null);
+                controller.postMessage(MSG_UPDATE_SHUFFLE_MODE, enabled, null);
             }
         }
     }

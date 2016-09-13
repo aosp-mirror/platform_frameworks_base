@@ -230,8 +230,8 @@ public class Media extends BaseCommand {
         }
 
         @Override
-        public void onShuffleModeChanged(boolean shuffleMode) throws RemoteException {
-            System.out.println("onShuffleModeChanged " + shuffleMode);
+        public void onShuffleModeChanged(boolean enabled) throws RemoteException {
+            System.out.println("onShuffleModeChanged " + enabled);
         }
 
         void printUsageMessage() {

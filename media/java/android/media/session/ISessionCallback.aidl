@@ -47,7 +47,7 @@ oneway interface ISessionCallback {
     void onSeekTo(long pos);
     void onRate(in Rating rating);
     void onRepeatMode(int repeatMode);
-    void onShuffleMode(boolean shuffleMode);
+    void onShuffleMode(boolean enabled);
     void onCustomAction(String action, in Bundle args);
 
     // These callbacks are for volume handling
