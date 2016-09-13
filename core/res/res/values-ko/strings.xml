@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"새로운 <xliff:g id="NAME">%s</xliff:g> 감지됨"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g>에 연결되어 있습니다. 네트워크를 관리하려면 누르세요."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"연결 유지 VPN에 연결하는 중…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"연결 유지 VPN에 연결됨"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"연결 유지 VPN 연결 해제됨"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"연결 유지 VPN 오류"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"설정하려면 탭하세요."</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"탭하여 설정"</string>
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
@@ -1647,6 +1647,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"추천"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"모든 언어"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"검색"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"직장 모드가 사용 중지됨"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"앱, 백그라운드 동기화 및 관련 기능을 포함한 직장 프로필이 작동하도록 허용"</string>

@@ -924,9 +924,9 @@
       <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
       <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
     </plurals>
-    <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدیو"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
-    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدیو ممکن نیست."</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدئو"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدئو ممکن نیست."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"تأیید"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"ظهر"</string>
@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"داوطلبین"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"در حال آماده‌سازی <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"در حال بررسی برای خطاها"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> جدید شناسایی شد"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"به <xliff:g id="SESSION">%s</xliff:g> متصل شد. برای مدیریت شبکه ضربه بزنید."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"‏در حال اتصال VPN همیشه فعال…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"‏VPN همیشه فعال متصل شد"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"‏ارتباط VPN همیشه روشن قطع شد"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"‏خطای VPN همیشه فعال"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"جهت پیکربندی ضربه بزنید"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"برای راه‌اندازی ضربه بزنید"</string>
     <string name="upload_file" msgid="2897957172366730416">"انتخاب فایل"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"هیچ فایلی انتخاب نشد"</string>
     <string name="reset" msgid="2448168080964209908">"بازنشانی"</string>
@@ -1647,6 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"پیشنهادشده"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"همه زبان‌ها"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"همه منطقه‌ها"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"جستجو"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"حالت کاری خاموش است"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"به نمایه کاری اجازه فعالیت ( شامل استفاده از برنامه‌ها، همگام‌سازی در پس‌زمینه و قابلیت‌های مرتبط) داده شود."</string>

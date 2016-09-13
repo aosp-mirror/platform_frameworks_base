@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"候选"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"正在准备<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"检查是否有错误"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"检测到新的<xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1243,8 +1242,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已连接到<xliff:g id="SESSION">%s</xliff:g>。点按即可管理网络。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在连接到始终开启的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已连接到始终开启的 VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"始终开启的 VPN 已断开连接"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"始终开启的 VPN 出现错误"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"点按即可进行配置"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"点按即可进行设置"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
     <string name="reset" msgid="2448168080964209908">"重置"</string>
@@ -1647,6 +1647,8 @@
     <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"建议语言"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有语言"</string>
+    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
+    <skip />
     <string name="locale_search_menu" msgid="2560710726687249178">"搜索"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已关闭"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"启用工作资料，包括应用、后台同步和相关功能。"</string>
