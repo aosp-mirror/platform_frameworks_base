@@ -126,6 +126,13 @@ public class StorageMeasurement {
          * internal storage. Key is {@link UserHandle}.
          */
         public SparseLongArray usersSize = new SparseLongArray();
+
+        @Override
+        public String toString() {
+            return "MeasurementDetails: [totalSize: " + totalSize + " availSize: " + availSize
+                    + " cacheSize: " + cacheSize + " mediaSize: " + mediaSize
+                    + " miscSize: " + miscSize + "usersSize: " + usersSize + "]";
+        }
     }
 
     public interface MeasurementReceiver {
@@ -435,7 +442,7 @@ public class StorageMeasurement {
     private static long getDirectorySize(IMediaContainerService imcs, File path) {
         try {
             final long size = imcs.calculateDirectorySize(path.toString());
-            Log.d(TAG, "getDirectorySize(" + path + ") returned " + size);
+            if (LOGV) Log.v(TAG, "getDirectorySize(" + path + ") returned " + size);
             return size;
         } catch (Exception e) {
             Log.w(TAG, "Could not read memory from default container service for " + path, e);
