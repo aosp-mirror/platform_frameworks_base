@@ -121,6 +121,9 @@ public class WindowAnimator {
 
     private final AppTokenList mTmpExitingAppTokens = new AppTokenList();
 
+    /** The window that was previously hiding the Keyguard. */
+    private WindowState mLastShowWinWhenLocked;
+
     private String forceHidingToString() {
         switch (mForceHiding) {
             case KEYGUARD_NOT_SHOWN:    return "KEYGUARD_NOT_SHOWN";
@@ -221,24 +224,43 @@ public class WindowAnimator {
         }
     }
 
+    /**
+     * @return The window that is currently hiding the Keyguard, or if it was hiding the Keyguard,
+     *         and it's still animating.
+     */
+    private WindowState getWinShowWhenLockedOrAnimating() {
+        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+        if (winShowWhenLocked != null) {
+            return winShowWhenLocked;
+        }
+        if (mLastShowWinWhenLocked != null && mLastShowWinWhenLocked.isOnScreen()
+                && mLastShowWinWhenLocked.isAnimatingLw()
+                && (mLastShowWinWhenLocked.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+            return mLastShowWinWhenLocked;
+        }
+        return null;
+    }
+
     private boolean shouldForceHide(WindowState win) {
         final WindowState imeTarget = mService.mInputMethodTarget;
         final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
                 ((imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0
                         || !mPolicy.canBeForceHidden(imeTarget, imeTarget.mAttrs));
 
-        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+        final WindowState winShowWhenLocked = getWinShowWhenLockedOrAnimating();
         final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
                 null : winShowWhenLocked.mAppToken;
 
         boolean allowWhenLocked = false;
         // Show IME over the keyguard if the target allows it
         allowWhenLocked |= (win.mIsImWindow || imeTarget == win) && showImeOverKeyguard;
-        // Show SHOW_WHEN_LOCKED windows
-        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+        // Show SHOW_WHEN_LOCKED windows that turn on the screen
+        allowWhenLocked |= (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && win.mTurnOnScreen;
 
         if (appShowWhenLocked != null) {
             allowWhenLocked |= appShowWhenLocked == win.mAppToken
+                    // Show all SHOW_WHEN_LOCKED windows if some apps are shown over lockscreen
+                    || (win.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
                     // Show error dialogs over apps that are shown on lockscreen
                     || (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0;
         }
@@ -553,6 +575,11 @@ public class WindowAnimator {
                 if (DEBUG_KEYGUARD) Slog.v(TAG, "Done with Keyguard exit animations.");
                 mPostKeyguardExitAnimation = null;
             }
+        }
+
+        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+        if (winShowWhenLocked != null) {
+            mLastShowWinWhenLocked = winShowWhenLocked;
         }
     }
 
