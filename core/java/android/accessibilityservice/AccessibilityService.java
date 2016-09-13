@@ -53,7 +53,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
- * Accessibility services are intended to assist users with disabilities in using
+ * Accessibility services should only be used to assist users with disabilities in using
  * Android devices and apps. They run in the background and receive callbacks by the system
  * when {@link AccessibilityEvent}s are fired. Such events denote some state transition
  * in the user interface, for example, the focus has changed, a button has been clicked,
