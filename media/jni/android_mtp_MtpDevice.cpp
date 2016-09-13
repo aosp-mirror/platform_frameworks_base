@@ -194,6 +194,9 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
         return JNI_FALSE;
     }
 
+    // The passed in fd is maintained by the UsbDeviceConnection
+    fd = dup(fd);
+
     MtpDevice* device = MtpDevice::open(deviceNameStr, fd);
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
 
