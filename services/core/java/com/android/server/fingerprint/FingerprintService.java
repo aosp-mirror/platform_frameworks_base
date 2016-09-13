@@ -178,6 +178,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     public void binderDied() {
         Slog.v(TAG, "fingerprintd died");
         mDaemon = null;
+        mCurrentUserId = UserHandle.USER_CURRENT;
         handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE);
     }
 
