@@ -1293,11 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Падлучаны да <xliff:g id="SESSION">%s</xliff:g>. Націсніце, каб кiраваць сеткай."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Падключэнне заўсёды ўключанага VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Заўсёды ўключаны i падключаны VPN"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Заўсёды ўключаны VPN адключаны"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Памылка заўсёды ўключанага VPN"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Дакраніцеся, каб наладзіць"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выберыце файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Файл не выбраны"</string>
     <string name="reset" msgid="2448168080964209908">"Скінуць"</string>
@@ -1722,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Увядзіце назву мовы"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Прапанаваныя"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усе мовы"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Усе рэгіёны"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Шукаць"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Рэжым працы АДКЛЮЧАНЫ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Дазволіць функцыянаванне працоўнага профілю, у тым ліку праграм, фонавай сінхранізацыі і звязаных з імі функцый."</string>

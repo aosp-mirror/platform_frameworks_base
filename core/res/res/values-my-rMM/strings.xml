@@ -1243,11 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> သို့ ချိတ်ဆက်ထားသည်။ ကွန်ရက်ကို စီမံခန့်ခွဲရန် တို့ပါ။"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်နေစဉ်…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်မှုရှိ"</string>
-    <!-- no translation found for vpn_lockdown_disconnected (4532298952570796327) -->
-    <skip />
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"အမြဲတမ်းဖွင့်ထားရသော VPN ပြတ်တောက်နေသည်"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"အမြဲတမ်းဖွင့်ထား VPN အမှား"</string>
-    <!-- no translation found for vpn_lockdown_config (5099330695245008680) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ပြင်ဆင်သတ်မှတ်ရန် တို့ပါ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ဖိုင်ရွေးချယ်ရန်"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"မည်သည့်ဖိုင်ကိုမှမရွေးပါ"</string>
     <string name="reset" msgid="2448168080964209908">"ပြန်လည်သတ်မှတ်ရန်"</string>
@@ -1650,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"အကြံပြုထားသော"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားများအားလုံး"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ရှာဖွေရန်"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"အလုပ်မုဒ် ပိတ်ထားသည်"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"အက်ပ်များ၊ နောက်ခံစင့်ခ်လုပ်ခြင်း၊ နှင့်သက်ဆိုင်သည့်အင်္ဂါရပ်များကို ဆောင်ရွက်ရန် အလုပ်ပရိုဖိုင်ကိုခွင့်ပြုပါ။"</string>
