@@ -591,6 +591,9 @@ public final class SystemServer {
         boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices", false);
         boolean disableSamplingProfiler = SystemProperties.getBoolean("config.disable_samplingprof",
                 false);
+
+        boolean disableConsumerIr = SystemProperties.getBoolean("config.disable_consumerir", false);
+
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
@@ -646,10 +649,12 @@ public final class SystemServer {
             ServiceManager.addService("vibrator", vibrator);
             traceEnd();
 
-            traceBeginAndSlog("StartConsumerIrService");
-            consumerIr = new ConsumerIrService(context);
-            ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
-            traceEnd();
+            if (!disableConsumerIr) {
+                traceBeginAndSlog("StartConsumerIrService");
+                consumerIr = new ConsumerIrService(context);
+                ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
+                traceEnd();
+            }
 
             traceBeginAndSlog("StartAlarmManagerService");
             mSystemServiceManager.startService(AlarmManagerService.class);
