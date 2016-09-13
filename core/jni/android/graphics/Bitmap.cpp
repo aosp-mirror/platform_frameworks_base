@@ -150,12 +150,12 @@ Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,
     mPixelRef->unref();
 }
 
-Bitmap::Bitmap(void* address, int fd,
+Bitmap::Bitmap(void* address, int fd, size_t mappedSize,
             const SkImageInfo& info, size_t rowBytes, SkColorTable* ctable)
         : mPixelStorageType(PixelStorageType::Ashmem) {
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
-    mPixelStorage.ashmem.size = ashmem_get_size_region(fd);
+    mPixelStorage.ashmem.size = mappedSize;
     mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));
     // Note: this will trigger a call to onStrongRefDestroyed(), but
     // we want the pixel ref to have a ref count of 0 at this point
@@ -1015,7 +1015,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
         // Map the pixels in place and take ownership of the ashmem region.
         nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),
-                ctable, dupFd, const_cast<void*>(blob.data()), !isMutable);
+                ctable, dupFd, const_cast<void*>(blob.data()), size, !isMutable);
         SkSafeUnref(ctable);
         if (!nativeBitmap) {
             close(dupFd);
