@@ -217,7 +217,7 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault" />
+    <style name="systemui_theme" parent="@*android:style/Theme.DeviceDefault.Settings.Dark" />
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
