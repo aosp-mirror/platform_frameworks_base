@@ -40,9 +40,9 @@ public class FocusRequester {
     private static final String TAG = "MediaFocusControl";
     private static final boolean DEBUG = false;
 
-    private AudioFocusDeathHandler mDeathHandler;
-    private final IAudioFocusDispatcher mFocusDispatcher; // may be null
-    private final IBinder mSourceRef;
+    private AudioFocusDeathHandler mDeathHandler; // may be null
+    private IAudioFocusDispatcher mFocusDispatcher; // may be null
+    private final IBinder mSourceRef; // may be null
     private final String mClientId;
     private final String mPackageName;
     private final int mCallingUid;
@@ -205,6 +205,7 @@ public class FocusRequester {
             if (mSourceRef != null && mDeathHandler != null) {
                 mSourceRef.unlinkToDeath(mDeathHandler, 0);
                 mDeathHandler = null;
+                mFocusDispatcher = null;
             }
         } catch (java.util.NoSuchElementException e) {
             Log.e(TAG, "FocusRequester.release() hit ", e);
@@ -275,12 +276,13 @@ public class FocusRequester {
             mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
             mFocusController.notifyExtPolicyFocusGrant_syncAf(toAudioFocusInfo(),
                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
-            if (mFocusDispatcher != null) {
+            final IAudioFocusDispatcher fd = mFocusDispatcher;
+            if (fd != null) {
                 if (DEBUG) {
                     Log.v(TAG, "dispatching " + focusChangeToString(focusGain) + " to "
                         + mClientId);
                 }
-                mFocusDispatcher.dispatchAudioFocusChange(focusGain, mClientId);
+                fd.dispatchAudioFocusChange(focusGain, mClientId);
             }
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
@@ -311,14 +313,15 @@ public class FocusRequester {
                             toAudioFocusInfo(), false /* wasDispatched */);
                     return;
                 }
-                if (mFocusDispatcher != null) {
+                final IAudioFocusDispatcher fd = mFocusDispatcher;
+                if (fd != null) {
                     if (DEBUG) {
                         Log.v(TAG, "dispatching " + focusChangeToString(mFocusLossReceived) + " to "
                             + mClientId);
                     }
                     mFocusController.notifyExtPolicyFocusLoss_syncAf(
                             toAudioFocusInfo(), true /* wasDispatched */);
-                    mFocusDispatcher.dispatchAudioFocusChange(mFocusLossReceived, mClientId);
+                    fd.dispatchAudioFocusChange(mFocusLossReceived, mClientId);
                 }
             }
         } catch (android.os.RemoteException e) {
