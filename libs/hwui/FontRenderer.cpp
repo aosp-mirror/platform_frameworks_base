@@ -168,10 +168,17 @@ void FontRenderer::flushAllAndInvalidate() {
 
     for (uint32_t i = 0; i < mACacheTextures.size(); i++) {
         mACacheTextures[i]->init();
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+        mHistoryTracker.glyphsCleared(mACacheTextures[i]);
+#endif
     }
 
     for (uint32_t i = 0; i < mRGBACacheTextures.size(); i++) {
         mRGBACacheTextures[i]->init();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+        mHistoryTracker.glyphsCleared(mRGBACacheTextures[i]);
+#endif
     }
 
     mDrawn = false;
@@ -183,6 +190,9 @@ void FontRenderer::flushLargeCaches(std::vector<CacheTexture*>& cacheTextures) {
         CacheTexture* cacheTexture = cacheTextures[i];
         if (cacheTexture->getPixelBuffer()) {
             cacheTexture->init();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+            mHistoryTracker.glyphsCleared(cacheTexture);
+#endif
             LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
             while (it.next()) {
                 it.value()->invalidateTextureCache(cacheTexture);
@@ -385,6 +395,10 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     }
 
     cachedGlyph->mIsValid = true;
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    mHistoryTracker.glyphUploaded(cacheTexture, startX, startY, glyph.fWidth, glyph.fHeight);
+#endif
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum format,
@@ -747,18 +761,67 @@ static uint32_t calculateCacheSize(const std::vector<CacheTexture*>& cacheTextur
     return size;
 }
 
-uint32_t FontRenderer::getCacheSize(GLenum format) const {
-    switch (format) {
-        case GL_ALPHA: {
-            return calculateCacheSize(mACacheTextures);
-        }
-        case GL_RGBA: {
-            return calculateCacheSize(mRGBACacheTextures);
-        }
-        default: {
-            return 0;
+static uint32_t calculateFreeCacheSize(const std::vector<CacheTexture*>& cacheTextures) {
+    uint32_t size = 0;
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = cacheTextures[i];
+        if (cacheTexture && cacheTexture->getPixelBuffer()) {
+            size += cacheTexture->calculateFreeMemory();
         }
     }
+    return size;
+}
+
+const std::vector<CacheTexture*>& FontRenderer::cacheTexturesForFormat(GLenum format) const {
+    switch (format) {
+        case GL_ALPHA: {
+            return mACacheTextures;
+        }
+        case GL_RGBA: {
+            return mRGBACacheTextures;
+        }
+        default: {
+            LOG_ALWAYS_FATAL("Unsupported format: %d", format);
+            // Impossible to hit this, but the compiler doesn't know that
+            return *(new std::vector<CacheTexture*>());
+        }
+    }
+}
+
+static void dumpTextures(String8& log, const char* tag,
+        const std::vector<CacheTexture*>& cacheTextures) {
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = cacheTextures[i];
+        if (cacheTexture && cacheTexture->getPixelBuffer()) {
+            uint32_t free = cacheTexture->calculateFreeMemory();
+            uint32_t total = cacheTexture->getPixelBuffer()->getSize();
+            log.appendFormat("    %-4s texture %d     %8d / %8d\n", tag, i, total - free, total);
+        }
+    }
+}
+
+void FontRenderer::dumpMemoryUsage(String8& log) const {
+    const uint32_t sizeA8 = getCacheSize(GL_ALPHA);
+    const uint32_t usedA8 = sizeA8 - getFreeCacheSize(GL_ALPHA);
+    const uint32_t sizeRGBA = getCacheSize(GL_RGBA);
+    const uint32_t usedRGBA = sizeRGBA - getFreeCacheSize(GL_RGBA);
+    log.appendFormat("  FontRenderer A8      %8d / %8d\n", usedA8, sizeA8);
+    dumpTextures(log, "A8", cacheTexturesForFormat(GL_ALPHA));
+    log.appendFormat("  FontRenderer RGBA    %8d / %8d\n", usedRGBA, sizeRGBA);
+    dumpTextures(log, "RGBA", cacheTexturesForFormat(GL_RGBA));
+    log.appendFormat("  FontRenderer total   %8d / %8d\n", usedA8 + usedRGBA, sizeA8 + sizeRGBA);
+}
+
+uint32_t FontRenderer::getCacheSize(GLenum format) const {
+    return calculateCacheSize(cacheTexturesForFormat(format));
+}
+
+uint32_t FontRenderer::getFreeCacheSize(GLenum format) const {
+    return calculateFreeCacheSize(cacheTexturesForFormat(format));
+}
+
+uint32_t FontRenderer::getSize() const {
+    return getCacheSize(GL_ALPHA) + getCacheSize(GL_RGBA);
 }
 
 }; // namespace uirenderer
