@@ -168,10 +168,17 @@ void FontRenderer::flushAllAndInvalidate() {
 
     for (uint32_t i = 0; i < mACacheTextures.size(); i++) {
         mACacheTextures[i]->init();
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+        mHistoryTracker.glyphsCleared(mACacheTextures[i]);
+#endif
     }
 
     for (uint32_t i = 0; i < mRGBACacheTextures.size(); i++) {
         mRGBACacheTextures[i]->init();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+        mHistoryTracker.glyphsCleared(mRGBACacheTextures[i]);
+#endif
     }
 
     mDrawn = false;
@@ -183,6 +190,9 @@ void FontRenderer::flushLargeCaches(std::vector<CacheTexture*>& cacheTextures) {
         CacheTexture* cacheTexture = cacheTextures[i];
         if (cacheTexture->getPixelBuffer()) {
             cacheTexture->init();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+            mHistoryTracker.glyphsCleared(cacheTexture);
+#endif
             LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
             while (it.next()) {
                 it.value()->invalidateTextureCache(cacheTexture);
@@ -385,6 +395,10 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     }
 
     cachedGlyph->mIsValid = true;
+
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    mHistoryTracker.glyphUploaded(cacheTexture, startX, startY, glyph.fWidth, glyph.fHeight);
+#endif
 }
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum format,
