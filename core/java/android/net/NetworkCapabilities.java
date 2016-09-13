@@ -182,8 +182,15 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_CAPTIVE_PORTAL = 17;
 
+    /**
+     * Indicates that this network is available for use by apps, and not a network that is being
+     * kept up in the background to facilitate fast network switching.
+     * @hide
+     */
+    public static final int NET_CAPABILITY_FOREGROUND = 18;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_CAPTIVE_PORTAL;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_FOREGROUND;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -194,7 +201,8 @@ public final class NetworkCapabilities implements Parcelable {
             // http://b/18206275
             (1 << NET_CAPABILITY_TRUSTED) |
             (1 << NET_CAPABILITY_VALIDATED) |
-            (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
+            (1 << NET_CAPABILITY_CAPTIVE_PORTAL) |
+            (1 << NET_CAPABILITY_FOREGROUND);
 
     /**
      * Network specifier for factories which want to match any network specifier
@@ -217,8 +225,7 @@ public final class NetworkCapabilities implements Parcelable {
      * get immediately torn down because they do not have the requested capability.
      */
     private static final long NON_REQUESTABLE_CAPABILITIES =
-            (1 << NET_CAPABILITY_VALIDATED) |
-            (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
+            MUTABLE_CAPABILITIES & ~(1 << NET_CAPABILITY_TRUSTED);
 
     /**
      * Capabilities that are set by default when the object is constructed.
@@ -325,6 +332,7 @@ public final class NetworkCapabilities implements Parcelable {
     public String describeFirstNonRequestableCapability() {
         if (hasCapability(NET_CAPABILITY_VALIDATED)) return "NET_CAPABILITY_VALIDATED";
         if (hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) return "NET_CAPABILITY_CAPTIVE_PORTAL";
+        if (hasCapability(NET_CAPABILITY_FOREGROUND)) return "NET_CAPABILITY_FOREGROUND";
         // This cannot happen unless the preceding checks are incomplete.
         if ((mNetworkCapabilities & NON_REQUESTABLE_CAPABILITIES) != 0) {
             return "unknown non-requestable capabilities " + Long.toHexString(mNetworkCapabilities);
@@ -350,6 +358,11 @@ public final class NetworkCapabilities implements Parcelable {
     private boolean equalsNetCapabilitiesImmutable(NetworkCapabilities that) {
         return ((this.mNetworkCapabilities & ~MUTABLE_CAPABILITIES) ==
                 (that.mNetworkCapabilities & ~MUTABLE_CAPABILITIES));
+    }
+
+    private boolean equalsNetCapabilitiesRequestable(NetworkCapabilities that) {
+        return ((this.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES) ==
+                (that.mNetworkCapabilities & ~NON_REQUESTABLE_CAPABILITIES));
     }
 
     /**
@@ -749,6 +762,19 @@ public final class NetworkCapabilities implements Parcelable {
                 equalsSpecifier(nc));
     }
 
+    /**
+     * Checks that our requestable capabilities are the same as those of the given
+     * {@code NetworkCapabilities}.
+     *
+     * @hide
+     */
+    public boolean equalRequestableCapabilities(NetworkCapabilities nc) {
+        if (nc == null) return false;
+        return (equalsNetCapabilitiesRequestable(nc) &&
+                equalsTransportTypes(nc) &&
+                equalsSpecifier(nc));
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null || (obj instanceof NetworkCapabilities == false)) return false;
@@ -833,6 +859,7 @@ public final class NetworkCapabilities implements Parcelable {
                 case NET_CAPABILITY_NOT_VPN:        capabilities += "NOT_VPN"; break;
                 case NET_CAPABILITY_VALIDATED:      capabilities += "VALIDATED"; break;
                 case NET_CAPABILITY_CAPTIVE_PORTAL: capabilities += "CAPTIVE_PORTAL"; break;
+                case NET_CAPABILITY_FOREGROUND:     capabilities += "FOREGROUND"; break;
             }
             if (++i < types.length) capabilities += "&";
         }
