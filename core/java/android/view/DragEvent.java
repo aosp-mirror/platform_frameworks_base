@@ -377,6 +377,10 @@ public class DragEvent implements Parcelable {
      * The object is intended to provide local information about the drag and drop operation. For
      * example, it can indicate whether the drag and drop operation is a copy or a move.
      * <p>
+     * The local state is available only to views in the activity which has started the drag
+     * operation. In all other activities this method will return null
+     * </p>
+     * <p>
      *  This method returns valid data for all event actions except for {@link #ACTION_DRAG_ENDED}.
      * </p>
      * @return The local state object sent to the system by startDrag().
