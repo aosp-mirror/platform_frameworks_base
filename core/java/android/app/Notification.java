@@ -2887,8 +2887,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Make this notification automatically dismissed when the user touches it. The
-         * PendingIntent set with {@link #setDeleteIntent} will be sent when this happens.
+         * Make this notification automatically dismissed when the user touches it.
          *
          * @see Notification#FLAG_AUTO_CANCEL
          */
@@ -2988,7 +2987,8 @@ public class Notification implements Parcelable
         /**
          * Set this notification to be the group summary for a group of notifications.
          * Grouped notifications may display in a cluster or stack on devices which
-         * support such rendering. Requires a group key also be set using {@link #setGroup}.
+         * support such rendering. If thereRequires a group key also be set using {@link #setGroup}.
+         * The group summary may be suppressed if too few notifications are included in the group.
          * @param isGroupSummary Whether this notification should be a group summary.
          * @return this object for method chaining
          */
