@@ -610,6 +610,13 @@ public class ZygoteInit {
         // an error.
         ZygoteHooks.startZygoteNoThreadCreation();
 
+        // Zygote goes into its own process group.
+        try {
+            Os.setpgid(0, 0);
+        } catch (ErrnoException ex) {
+            throw new RuntimeException("Failed to setpgid(0,0)", ex);
+        }
+
         try {
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygoteInit");
             RuntimeInit.enableDdms();
