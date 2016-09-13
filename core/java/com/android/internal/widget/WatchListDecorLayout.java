@@ -306,8 +306,9 @@ public class WatchListDecorLayout extends FrameLayout
             if (mListView.getChildCount() > 0) {
                 if (mListView.getLastVisiblePosition() >= mListView.getCount() - 1) {
                     View lastChild = mListView.getChildAt(mListView.getChildCount() - 1);
-                    setScrolling(mBottomPanel,
-                            lastChild.getY() + lastChild.getHeight() - mBottomPanel.getTop());
+                    setScrolling(mBottomPanel, Math.max(
+                            0,
+                            lastChild.getY() + lastChild.getHeight() - mBottomPanel.getTop()));
                 } else {
                     // shift to hide the frame, last child is not the last position
                     setScrolling(mBottomPanel, mBottomPanel.getHeight());
