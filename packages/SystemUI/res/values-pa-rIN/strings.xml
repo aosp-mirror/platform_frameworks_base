@@ -404,7 +404,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"ਡੀਵਾਈਸ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"ਨੈੱਟਵਰਕ ਦਾ ਨਿਰੀਖਣ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ"</string>
-    <string name="branded_vpn_footer" msgid="2168111859226496230">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਨੈੱਟਵਰਕ ਦੀ ਨਿਗਰਾਨੀ ਹੋ ਰਹੀ ਹੋਵੇ"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"ਹੋ ਸਕਦਾ ਹੈ ਨੈੱਟਵਰਕ ਦੀ ਨਿਗਰਾਨੀ ਹੋ ਰਹੀ ਹੋਵੇ"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"ਡੀਵਾਈਸ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"ਪ੍ਰੋਫਾਈਲ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="monitoring_title" msgid="169206259253048106">"ਨੈੱਟਵਰਕ ਨਿਰੀਖਣ ਕਰ ਰਿਹਾ ਹੈ"</string>
