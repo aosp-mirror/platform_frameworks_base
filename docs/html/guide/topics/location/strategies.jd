@@ -133,35 +133,65 @@ notifications and the third is the minimum change in distance between notificati
 both to zero requests location notifications as frequently as possible. The last parameter is your
 {@link android.location.LocationListener}, which receives callbacks for location updates.</p>
 
-<p>To request location updates from the GPS provider,
-substitute <code>GPS_PROVIDER</code> for <code>NETWORK_PROVIDER</code>. You can also request
-location updates from both the GPS and the Network Location Provider by calling {@link
-android.location.LocationManager#requestLocationUpdates requestLocationUpdates()} twice&mdash;once
-for <code>NETWORK_PROVIDER</code> and once for <code>GPS_PROVIDER</code>.</p>
+<p>To request location updates from the GPS provider, use {@link
+android.location.LocationManager#GPS_PROVIDER} instead of {@link
+android.location.LocationManager#NETWORK_PROVIDER}. You can also request
+location updates from both the GPS and the Network Location Provider by calling
+{@link android.location.LocationManager#requestLocationUpdates
+requestLocationUpdates()} twice&mdash;once for {@link
+android.location.LocationManager#NETWORK_PROVIDER} and once for {@link
+android.location.LocationManager#GPS_PROVIDER}.</p>
 
 
 <h3 id="Permission">Requesting User Permissions</h3>
 
-<p>In order to receive location updates from <code>NETWORK_PROVIDER</code> or
-<code>GPS_PROVIDER</code>, you must request user permission by declaring either the {@code
-ACCESS_COARSE_LOCATION} or {@code ACCESS_FINE_LOCATION} permission, respectively, in your Android
-manifest file. For example:</p>
+<p>
+  In order to receive location updates from {@link
+  android.location.LocationManager#NETWORK_PROVIDER} or {@link
+  android.location.LocationManager#GPS_PROVIDER}, you must request the user's
+  permission by declaring either the {@code ACCESS_COARSE_LOCATION} or {@code
+  ACCESS_FINE_LOCATION} permission, respectively, in your Android manifest file.
+  Without these permissions, your application will fail at runtime when
+  requesting location updates.
+</p>
 
+<p>
+  If you are using both {@link
+  android.location.LocationManager#NETWORK_PROVIDER} and {@link
+  android.location.LocationManager#GPS_PROVIDER}, then you need to request only
+  the {@code ACCESS_FINE_LOCATION} permission, because it includes permission
+  for both providers. (Permission for {@code ACCESS_COARSE_LOCATION} includes
+  permission only for {@link
+  android.location.LocationManager#NETWORK_PROVIDER}.)
+</p>
+
+<p class="note">
+  <strong>Note:</strong> If your app targets Android 5.0 (API level 21) or
+  higher, you must also declare that your app uses the
+  <code>android.hardware.location.network</code> or
+  <code>android.hardware.location.gps</code> hardware feature in the manifest
+  file, depending on whether your app receives location updates from {@link
+  android.location.LocationManager#NETWORK_PROVIDER} or from {@link
+  android.location.LocationManager#GPS_PROVIDER}. If your app receives location
+  information from both of these providers, you need to declare that the app
+  uses both <code>android.hardware.location.network</code> and
+  <code>android.hardware.location.gps</code>.
+</p>
+
+<p>
+   The following code sample demonstrates how to declare the permission and
+   hardware feature in the manifest file of an app that reads data from the
+   device's GPS:
+</p>
 <pre>
 &lt;manifest ... &gt;
     &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
     ...
+    &lt;!-- Needed only if your app targets Android 5.0 (API level 21) or higher. --&gt;
+    &lt;uses-feature android:name="android.hardware.location.gps" /&gt;
+    ...
 &lt;/manifest&gt;
 </pre>
-
-<p>Without these permissions, your application will fail at runtime when requesting
-location updates.</p>
-
-<p class="note"><strong>Note:</strong> If you are using both <code>NETWORK_PROVIDER</code> and
-<code>GPS_PROVIDER</code>, then you need to request only the {@code ACCESS_FINE_LOCATION}
-permission, because it includes permission for both providers. (Permission for {@code
-ACCESS_COARSE_LOCATION} includes permission only for <code>NETWORK_PROVIDER</code>.)</p>
-
 
 <h2 id="BestPerformance">Defining a Model for the Best Performance</h2>
 
@@ -404,9 +434,10 @@ don't have a device, you can still test your location-based features by mocking 
 the Android emulator. There are three different ways to send your application mock location
 data: using Android Studio, DDMS, or the "geo" command in the emulator console.</p>
 
-<p class="note"><strong>Note:</strong> Providing mock location data is injected as GPS location
-data, so you must request location updates from <code>GPS_PROVIDER</code> in order for mock location
-data to work.</p>
+<p class="note"><strong>Note:</strong> Providing mock location data is injected
+as GPS location data, so you must request location updates from {@link
+android.location.LocationManager#GPS_PROVIDER} in order for mock location data
+to work.</p>
 
 <h3 id="MockAVD">Using Android Studio</h3>
 
