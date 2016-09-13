@@ -39,12 +39,25 @@ public class LatencyTracker {
 
     private static final String TAG = "LatencyTracker";
 
+    /**
+     * Time it takes until the first frame of the notification panel to be displayed while expanding
+     */
     public static final int ACTION_EXPAND_PANEL = 0;
+
+    /**
+     * Time it takes until the first frame of recents is drawn after invoking it with the button.
+     */
     public static final int ACTION_TOGGLE_RECENTS = 1;
+
+    /**
+     * Time between we get a fingerprint acquired signal until we start with the unlock animation
+     */
+    public static final int ACTION_FINGERPRINT_WAKE_AND_UNLOCK = 2;
 
     private static final String[] NAMES = new String[] {
             "expand panel",
-            "toggle recents" };
+            "toggle recents",
+            "fingerprint wake-and-unlock" };
 
     private static LatencyTracker sLatencyTracker;
 

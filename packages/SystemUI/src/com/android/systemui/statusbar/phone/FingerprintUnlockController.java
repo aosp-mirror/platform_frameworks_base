@@ -16,7 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -26,6 +30,7 @@ import android.util.Log;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.LatencyTracker;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
 /**
@@ -37,6 +42,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private static final boolean DEBUG_FP_WAKELOCK = KeyguardConstants.DEBUG_FP_WAKELOCK;
     private static final long FINGERPRINT_WAKELOCK_TIMEOUT_MS = 15 * 1000;
     private static final String FINGERPRINT_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
+    private static final String ACTION_FINGERPRINT_WAKE_FAKE =
+            "com.android.systemui.ACTION_FINGERPRINT_WAKE_FAKE";
 
     /**
      * Mode in which we don't need to wake up the device when we get a fingerprint.
@@ -94,6 +101,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     private KeyguardViewMediator mKeyguardViewMediator;
     private ScrimController mScrimController;
     private PhoneStatusBar mPhoneStatusBar;
+    private final UnlockMethodCache mUnlockMethodCache;
+    private final Context mContext;
     private boolean mGoingToSleep;
     private int mPendingAuthenticatedUserId = -1;
 
@@ -102,7 +111,9 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
             ScrimController scrimController,
-            PhoneStatusBar phoneStatusBar) {
+            PhoneStatusBar phoneStatusBar,
+            UnlockMethodCache unlockMethodCache) {
+        mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mUpdateMonitor.registerCallback(this);
@@ -111,6 +122,15 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
         mPhoneStatusBar = phoneStatusBar;
+        mUnlockMethodCache = unlockMethodCache;
+        if (Build.IS_DEBUGGABLE) {
+            context.registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    fakeWakeAndUnlock();
+                }
+            }, new IntentFilter(ACTION_FINGERPRINT_WAKE_FAKE));
+        }
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -139,11 +159,20 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         }
     }
 
+    public void fakeWakeAndUnlock() {
+        onFingerprintAcquired();
+        onFingerprintAuthenticated(KeyguardUpdateMonitor.getCurrentUser());
+    }
+
     @Override
     public void onFingerprintAcquired() {
         Trace.beginSection("FingerprintUnlockController#onFingerprintAcquired");
         releaseFingerprintWakeLock();
         if (!mUpdateMonitor.isDeviceInteractive()) {
+            if (LatencyTracker.isEnabled(mContext)) {
+                LatencyTracker.getInstance(mContext).onActionStart(
+                        LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
+            }
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, FINGERPRINT_WAKE_LOCK_NAME);
             Trace.beginSection("acquiring wake-and-unlock");
@@ -263,7 +292,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 return MODE_ONLY_WAKE;
             } else if (mDozeScrimController.isPulsing() && unlockingAllowed) {
                 return MODE_WAKE_AND_UNLOCK_PULSING;
-            } else if (unlockingAllowed) {
+            } else if (unlockingAllowed || !mUnlockMethodCache.isMethodSecure()) {
                 return MODE_WAKE_AND_UNLOCK;
             } else {
                 return MODE_SHOW_BOUNCER;
