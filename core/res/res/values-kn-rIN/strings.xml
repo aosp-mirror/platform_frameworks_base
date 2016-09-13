@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ. ನೆಟ್‍ವರ್ಕ್ ನಿರ್ವಹಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ಯಾವಾಗಲೂ-ಆನ್ VPN ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ಯಾವಾಗಲೂ-ಆನ್ VPN ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"ಯಾವಾಗಲೂ-ಆನ್ VPN ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ಯಾವಾಗಲೂ-ಆನ್ VPN ದೋಷ"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ಫೈಲ್ ಆಯ್ಕೆಮಾಡು"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ಯಾವುದೇ ಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಿಲ್ಲ"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"ಭಾಷೆ ಹೆಸರನ್ನು ಟೈಪ್ ಮಾಡಿ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"ಸೂಚಿತ ಭಾಷೆ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ಎಲ್ಲಾ ಭಾಷೆಗಳು"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"ಎಲ್ಲಾ ಪ್ರದೇಶಗಳು"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕು"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"ಕೆಲಸದ ಮೋಡ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಹಿನ್ನೆಲೆ ಸಿಂಕ್ ಮತ್ತು ಇತರ ಸಂಬಂಧಿತ ವೈಶಿಷ್ಟ್ಯಗಳು ಸೇರಿದಂತೆ ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌‌ ಕಾರ್ಯನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಿ."</string>

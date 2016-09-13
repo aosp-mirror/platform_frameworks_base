@@ -1293,8 +1293,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Pripojené k relácii <xliff:g id="SESSION">%s</xliff:g>. Po klepnutí môžete sieť spravovať."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Pripájanie k vždy zapnutej sieti VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Pripojenie k vždy zapnutej sieti VPN"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Vždy zapnutá sieť VPN bola odpojená"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Chyba vždy zapnutej siete VPN"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Klepnutím spustíte konfiguráciu"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Klepnutím prejdete do Nastavení"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
     <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
@@ -1719,6 +1720,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Zadajte názov jazyka"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Navrhované"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všetky jazyky"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Všetky regióny"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhľadávanie"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Pracovný režim je VYPNUTÝ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Povoľte fungovanie pracovného profilu vrátane aplikácií, synchronizácie na pozadí a súvisiacich funkcií."</string>

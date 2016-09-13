@@ -1243,8 +1243,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> உடன் இணைக்கப்பட்டது. நெட்வொர்க்கை நிர்வகிக்க, தட்டவும்."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"எப்போதும் இயங்கும் VPN உடன் இணைக்கிறது…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"எப்போதும் இயங்கும் VPN இணைக்கப்பட்டது"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"எப்போதும் இயங்கும் VPN துண்டிக்கப்பட்டது"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"எப்போதும் இயங்கும் VPN பிழை"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"உள்ளமைக்க, தட்டவும்"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"அமைக்க, தட்டவும்"</string>
     <string name="upload_file" msgid="2897957172366730416">"கோப்பைத் தேர்வுசெய்"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"எந்தக் கோப்பும் தேர்வுசெய்யப்படவில்லை"</string>
     <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>
@@ -1647,6 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"பரிந்துரைகள்"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"எல்லா மொழிகளும்"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"தேடு"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"பணிப் பயன்முறை முடக்கப்பட்டது"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"செயல்பட, பணி சுயவிவரத்தை அனுமதி. இதில் பயன்பாடுகள், பின்னணி ஒத்திசைவு மற்றும் தொடர்புடைய அம்சங்கள் அடங்கும்."</string>

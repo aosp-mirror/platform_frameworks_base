@@ -1268,8 +1268,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Povezan sa sesijom <xliff:g id="SESSION">%s</xliff:g>. Dotaknite za upravljanje mrežom."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje s uvijek uključenom VPN mrežom…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan s uvijek uključenom VPN mrežom"</string>
+    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Prekinuta je veza s uvijek uključenom VPN mrežom"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Pogreška uvijek uključene VPN mreže"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Dodirnite da biste konfigurirali"</string>
+    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Dodirnite za postavljanje"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odaberite datoteku"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nema odabranih datoteka"</string>
     <string name="reset" msgid="2448168080964209908">"Ponovo postavi"</string>
@@ -1683,6 +1684,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženo"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Sve regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pretraži"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Radni je način ISKLJUČEN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućuje radnom profilu da funkcionira, uključujući aplikacije, sinkronizaciju u pozadini i povezane značajke."</string>
