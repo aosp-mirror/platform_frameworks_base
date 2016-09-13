@@ -8674,6 +8674,16 @@ public final class Settings {
                 "ephemeral_cookie_max_size_bytes";
 
         /**
+         * Toggle to enable/disable the entire ephemeral feature. By default, ephemeral is
+         * enabled. Set to zero to disable.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String ENABLE_EPHEMERAL_FEATURE = "enable_ephemeral_feature";
+
+        /**
          * A mask applied to the ephemeral hash to generate the hash prefix.
          * <p>
          * Type: int
