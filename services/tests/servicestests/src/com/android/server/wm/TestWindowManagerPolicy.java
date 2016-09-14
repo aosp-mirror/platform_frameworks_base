@@ -82,6 +82,18 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 public class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static final String TAG = "TestWindowManagerPolicy";
 
+    private static WindowManagerService sWm = null;
+
+    static synchronized WindowManagerService getWindowManagerService(Context context) {
+        if (sWm == null) {
+            // We only want to do this once for the test process as we don't want WM to try to
+            // register a bunch of local services again.
+            sWm = WindowManagerService.main(
+                    context, null, true, false, false, new TestWindowManagerPolicy());
+        }
+        return sWm;
+    }
+
     @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
             throws RemoteException {

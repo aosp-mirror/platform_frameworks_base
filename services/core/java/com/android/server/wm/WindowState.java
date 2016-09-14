@@ -1202,7 +1202,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             // has been hidden.
             return true;
         }
-        return super.isVisible();
+        return false;
     }
 
     /**

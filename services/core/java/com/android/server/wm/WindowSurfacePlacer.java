@@ -1154,7 +1154,7 @@ class WindowSurfacePlacer {
 
             voiceInteraction |= wtoken.voiceInteraction;
 
-            if (wtoken.appFullscreen) {
+            if (wtoken.fillsParent()) {
                 WindowState ws = wtoken.findMainWindow();
                 if (ws != null) {
                     animLp = ws.mAttrs;

@@ -23,8 +23,12 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import java.util.Comparator;
-import java.util.LinkedList;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -195,7 +199,7 @@ public class WindowContainerTests {
         final TestWindowContainer child12 = child1.addChildWindow(builder.setIsVisible(true));
         final TestWindowContainer child21 = child2.addChildWindow();
 
-        assertTrue(root.isVisible());
+        assertFalse(root.isVisible());
         assertTrue(child1.isVisible());
         assertFalse(child11.isVisible());
         assertTrue(child12.isVisible());
@@ -230,15 +234,105 @@ public class WindowContainerTests {
         assertTrue(gotException);
     }
 
+    @Test
+    public void testGetOrientation_Unset() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
+        // Unspecified well because we didn't specify anything...
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+    }
+
+    @Test
+    public void testGetOrientation_InvisibleParentUnsetVisibleChildren() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
+
+        builder.setIsVisible(false).setLayer(-1);
+        final TestWindowContainer invisible = root.addChildWindow(builder);
+        builder.setIsVisible(true).setLayer(-2);
+        final TestWindowContainer invisibleChild1VisibleAndSet = invisible.addChildWindow(builder);
+        invisibleChild1VisibleAndSet.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        // Landscape well because the container is visible and that is what we set on it above.
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, invisibleChild1VisibleAndSet.getOrientation());
+        // Unset because the container isn't visible even though it has a child that thinks it is
+        // visible.
+        assertEquals(SCREEN_ORIENTATION_UNSET, invisible.getOrientation());
+        // Unspecified because we are visible and we didn't specify an orientation and there isn't
+        // a visible child.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+
+        builder.setIsVisible(true).setLayer(-3);
+        final TestWindowContainer visibleUnset = root.addChildWindow(builder);
+        visibleUnset.setOrientation(SCREEN_ORIENTATION_UNSET);
+        assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnset.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+
+    }
+
+    @Test
+    public void testGetOrientation_setBehind() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
+
+        builder.setIsVisible(true).setLayer(-1);
+        final TestWindowContainer visibleUnset = root.addChildWindow(builder);
+        visibleUnset.setOrientation(SCREEN_ORIENTATION_UNSET);
+
+        builder.setIsVisible(true).setLayer(-2);
+        final TestWindowContainer visibleUnsetChild1VisibleSetBehind =
+                visibleUnset.addChildWindow(builder);
+        visibleUnsetChild1VisibleSetBehind.setOrientation(SCREEN_ORIENTATION_BEHIND);
+        // Setting to visible behind will be used by the parents if there isn't another other
+        // container behind this one that has an orientation set.
+        assertEquals(SCREEN_ORIENTATION_BEHIND,
+                visibleUnsetChild1VisibleSetBehind.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_BEHIND, visibleUnset.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_BEHIND, root.getOrientation());
+    }
+
+    @Test
+    public void testGetOrientation_fillsParent() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
+
+        builder.setIsVisible(true).setLayer(-1);
+        final TestWindowContainer visibleUnset = root.addChildWindow(builder);
+        visibleUnset.setOrientation(SCREEN_ORIENTATION_BEHIND);
+
+        builder.setLayer(1).setIsVisible(true);
+        final TestWindowContainer visibleUnspecifiedRootChild = root.addChildWindow(builder);
+        visibleUnspecifiedRootChild.setFillsParent(false);
+        visibleUnspecifiedRootChild.setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        // Unset because the child doesn't fill the parent. May as well be invisible...
+        assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnspecifiedRootChild.getOrientation());
+        // The parent uses whatever orientation is set behind this container since it doesn't fill
+        // the parent.
+        assertEquals(SCREEN_ORIENTATION_BEHIND, root.getOrientation());
+
+        // Test case of child filling its parent, but its parent isn't filling its own parent.
+        builder.setLayer(2).setIsVisible(true);
+        final TestWindowContainer visibleUnspecifiedRootChildChildFillsParent =
+                visibleUnspecifiedRootChild.addChildWindow(builder);
+        visibleUnspecifiedRootChildChildFillsParent.setOrientation(
+                SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT,
+                visibleUnspecifiedRootChildChildFillsParent.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnspecifiedRootChild.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_BEHIND, root.getOrientation());
+
+
+        visibleUnspecifiedRootChild.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, visibleUnspecifiedRootChild.getOrientation());
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, root.getOrientation());
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private class TestWindowContainer extends WindowContainer {
         private final int mLayer;
-        private final LinkedList<String> mUsers = new LinkedList();
         private final boolean mCanDetach;
         private boolean mIsAnimating;
         private boolean mIsVisible;
-        private int mRemoveIfPossibleCount;
-        private int mRemoveImmediatelyCount;
+        private boolean mFillsParent;
 
         /**
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
@@ -256,13 +350,12 @@ public class WindowContainerTests {
             return 1;
         };
 
-        TestWindowContainer(int layer, LinkedList<String> users, boolean canDetach,
-                boolean isAnimating, boolean isVisible) {
+        TestWindowContainer(int layer, boolean canDetach, boolean isAnimating, boolean isVisible) {
             mLayer = layer;
-            mUsers.addAll(users);
             mCanDetach = canDetach;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;
+            mFillsParent = true;
         }
 
         TestWindowContainer getParentWindow() {
@@ -299,36 +392,31 @@ public class WindowContainerTests {
 
         @Override
         boolean isVisible() {
-            return mIsVisible || super.isVisible();
+            return mIsVisible;
         }
 
         @Override
-        void removeImmediately() {
-            super.removeImmediately();
-            mRemoveImmediatelyCount++;
+        boolean fillsParent() {
+            return mFillsParent;
         }
 
-        @Override
-        void removeIfPossible() {
-            super.removeIfPossible();
-            mRemoveIfPossibleCount++;
+        void setFillsParent(boolean fillsParent) {
+            mFillsParent = fillsParent;
         }
     }
 
     private class TestWindowContainerBuilder {
         private int mLayer;
-        private LinkedList<String> mUsers = new LinkedList();
         private boolean mCanDetach;
         private boolean mIsAnimating;
         private boolean mIsVisible;
 
-        TestWindowContainerBuilder setLayer(int layer) {
-            mLayer = layer;
-            return this;
+        public TestWindowContainerBuilder() {
+            reset();
         }
 
-        TestWindowContainerBuilder addUser(String user) {
-            mUsers.add(user);
+        TestWindowContainerBuilder setLayer(int layer) {
+            mLayer = layer;
             return this;
         }
 
@@ -349,7 +437,6 @@ public class WindowContainerTests {
 
         TestWindowContainerBuilder reset() {
             mLayer = 0;
-            mUsers.clear();
             mCanDetach = false;
             mIsAnimating = false;
             mIsVisible = false;
@@ -357,7 +444,7 @@ public class WindowContainerTests {
         }
 
         TestWindowContainer build() {
-            return new TestWindowContainer(mLayer, mUsers, mCanDetach, mIsAnimating, mIsVisible);
+            return new TestWindowContainer(mLayer, mCanDetach, mIsAnimating, mIsVisible);
         }
     }
 }

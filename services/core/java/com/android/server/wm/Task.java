@@ -21,6 +21,9 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -679,6 +682,33 @@ class Task implements DimLayer.DimLayerUser {
             }
         }
         return false;
+    }
+
+    boolean fillsParent() {
+        return mFullscreen || !StackId.isTaskResizeAllowed(mStack.mStackId);
+    }
+
+    // TODO: Remove once switched to use WindowContainer
+    int getOrientation() {
+        int candidate = SCREEN_ORIENTATION_UNSET;
+
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken token = mAppTokens.get(i);
+            final int orientation = token.getOrientation();
+
+            if (orientation == SCREEN_ORIENTATION_BEHIND) {
+                candidate = orientation;
+                continue;
+            }
+
+            if (orientation != SCREEN_ORIENTATION_UNSET) {
+                if (token.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                    return orientation;
+                }
+            }
+        }
+
+        return candidate;
     }
 
     @Override

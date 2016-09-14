@@ -716,6 +716,11 @@ public class ActivityManager {
         public static boolean hasMovementAnimations(int stackId) {
             return stackId != PINNED_STACK_ID;
         }
+
+        /** Returns true if the input stack and its content can affect the device orientation. */
+        public static boolean canSpecifyOrientation(int stackId) {
+            return stackId == HOME_STACK_ID || stackId == FULLSCREEN_WORKSPACE_STACK_ID;
+        }
     }
 
     /**

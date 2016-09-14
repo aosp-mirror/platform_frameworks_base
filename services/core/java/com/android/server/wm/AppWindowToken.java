@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -40,7 +41,6 @@ import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
 
 import android.annotation.NonNull;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -75,9 +75,8 @@ class AppWindowToken extends WindowToken {
     final boolean voiceInteraction;
 
     Task mTask;
-    // TODO: Have a fillParent variable in WindowContainer to this?
-    boolean appFullscreen;
-    int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    /** @see WindowContainer#fillsParent() */
+    private boolean mFillsParent;
     boolean layoutConfigChanges;
     boolean showForAllUsers;
     int targetSdk;
@@ -985,10 +984,31 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    /**
+     * We override because this class doesn't want its children affecting its reported orientation
+     * in anyway.
+     */
+    @Override
+    int getOrientation() {
+        if (hidden || hiddenRequested) {
+            return SCREEN_ORIENTATION_UNSET;
+        }
+        return mOrientation;
+    }
+
     @Override
     AppWindowToken asAppWindowToken() {
         // I am an app window token!
         return this;
+    }
+
+    @Override
+    boolean fillsParent() {
+        return mFillsParent;
+    }
+
+    void setFillsParent(boolean fillsParent) {
+        mFillsParent = fillsParent;
     }
 
     @Override
@@ -998,8 +1018,8 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("app=true voiceInteraction="); pw.println(voiceInteraction);
         }
         pw.print(prefix); pw.print("task="); pw.println(mTask);
-        pw.print(prefix); pw.print(" appFullscreen="); pw.print(appFullscreen);
-                pw.print(" requestedOrientation="); pw.println(requestedOrientation);
+        pw.print(prefix); pw.print(" mFillsParent="); pw.print(mFillsParent);
+                pw.print(" mOrientation="); pw.println(mOrientation);
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                 pw.print(" clientHidden="); pw.print(clientHidden);
                 pw.print(" reportedDrawn="); pw.print(reportedDrawn);

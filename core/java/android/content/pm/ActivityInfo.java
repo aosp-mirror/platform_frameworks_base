@@ -377,6 +377,7 @@ public class ActivityInfo extends ComponentInfo
 
     /** @hide */
     @IntDef({
+            SCREEN_ORIENTATION_UNSET,
             SCREEN_ORIENTATION_UNSPECIFIED,
             SCREEN_ORIENTATION_LANDSCAPE,
             SCREEN_ORIENTATION_PORTRAIT,
@@ -397,6 +398,15 @@ public class ActivityInfo extends ComponentInfo
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScreenOrientation {}
 
+    /**
+     * Internal constant used to indicate that the app didn't set a specific orientation value.
+     * Different from {@link #SCREEN_ORIENTATION_UNSPECIFIED} below as the app can set its
+     * orientation to {@link #SCREEN_ORIENTATION_UNSPECIFIED} while this means that the app didn't
+     * set anything. The system will mostly treat this similar to
+     * {@link #SCREEN_ORIENTATION_UNSPECIFIED}.
+     * @hide
+     */
+    public static final int SCREEN_ORIENTATION_UNSET = -2;
     /**
      * Constant corresponding to <code>unspecified</code> in
      * the {@link android.R.attr#screenOrientation} attribute.

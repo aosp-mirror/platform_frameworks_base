@@ -21,9 +21,13 @@ import android.annotation.CallSuper;
 import java.util.Comparator;
 import java.util.LinkedList;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
 /**
  * Defines common functionality for classes that can hold windows directly or through their
- * children.
+ * children in a hierarchy form.
  * The test class is {@link WindowContainerTests} which must be kept up-to-date and ran anytime
  * changes are made to this class.
  */
@@ -36,7 +40,10 @@ class WindowContainer {
     // screen with the top-most window container at the tail of the list.
     protected final LinkedList<WindowContainer> mChildren = new LinkedList();
 
-    protected WindowContainer getParent() {
+    // The specified orientation for this window container.
+    protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    final protected WindowContainer getParent() {
         return mParent;
     }
 
@@ -221,6 +228,10 @@ class WindowContainer {
      * the container has any content to display.
      */
     boolean isVisible() {
+        // TODO: Will this be more correct if it checks the visibility of its parents? Yes.
+        // That is this container is only visible if its parents are visible vs visible if it has a
+        // visible child. In that case all overrides will need to call super and return false if
+        // this returns false.
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             if (wc.isVisible()) {
@@ -233,5 +244,71 @@ class WindowContainer {
     /** Returns the top child container or this container if there are no children. */
     WindowContainer getTop() {
         return mChildren.isEmpty() ? this : mChildren.peekLast();
+    }
+
+    void setOrientation(int orientation) {
+        mOrientation = orientation;
+    }
+
+    /**
+     * Returns the specified orientation for this window container or one of its children is there
+     * is one set, or {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSET} if no
+     * specification is set.
+     * NOTE: {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_UNSPECIFIED} is a
+     * specification...
+     */
+    int getOrientation() {
+
+        if (!fillsParent() || !isVisible()) {
+            // Ignore invisible containers or containers that don't completely fills their parents.
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
+        // The container fills its parent so we can use it orientation if it has one specified,
+        // otherwise we prefer to use the orientation of its topmost child that has one
+        // specified and fall back on this container's unset or unspecified value as a candidate
+        // if none of the children have a better candidate for the orientation.
+        if (mOrientation != SCREEN_ORIENTATION_UNSET
+                && mOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            return mOrientation;
+        }
+        int candidate = mOrientation;
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+
+            final int orientation = wc.getOrientation();
+            if (orientation == SCREEN_ORIENTATION_BEHIND) {
+                // container wants us to use the orientation of the container behind it. See if we
+                // can find one. Else return SCREEN_ORIENTATION_BEHIND so the caller can choose to
+                // look behind this container.
+                candidate = orientation;
+                continue;
+            }
+
+            if (orientation == SCREEN_ORIENTATION_UNSET) {
+                continue;
+            }
+
+            if (wc.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                // Use the orientation if the container fills its parent or requested an explicit
+                // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
+                return orientation;
+            }
+        }
+
+        return candidate;
+    }
+
+    /**
+     * Returns true if this container is opaque and fills all the space made available by its parent
+     * container.
+     *
+     * NOTE: It is possible for this container to occupy more space than the parent has (or less),
+     * this is just a signal from the client to window manager stating its intent, but not what it
+     * actually does.
+     */
+    boolean fillsParent() {
+        return false;
     }
 }
