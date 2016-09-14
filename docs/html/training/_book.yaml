@@ -898,6 +898,11 @@ toc:
         value: 順応性のある UI フローの実装
       - name: zh-cn-lang
         value: 实施自适应用户界面流程
+  - title: Build a Responsive UI with ConstraintLayout
+    path: /training/constraint-layout/index.html
+    path_attributes:
+    - name: description
+      value: How to build a layout using ConstraintLayout and the Android Studio Layout Editor.
   - title: Adding the App Bar
     path: /training/appbar/index.html
     path_attributes:
