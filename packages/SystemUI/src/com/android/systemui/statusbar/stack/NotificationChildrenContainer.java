@@ -123,8 +123,10 @@ public class NotificationChildrenContainer extends ViewGroup {
             mDividers.get(i).layout(0, 0, getWidth(), mDividerHeight);
         }
         if (mOverflowNumber != null) {
-            mOverflowNumber.layout(getWidth() - mOverflowNumber.getMeasuredWidth(), 0, getWidth(),
-                    mOverflowNumber.getMeasuredHeight());
+            boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+            int left = (isRtl ? 0 : getWidth() - mOverflowNumber.getMeasuredWidth());
+            int right = left + mOverflowNumber.getMeasuredWidth();
+            mOverflowNumber.layout(left, 0, right, mOverflowNumber.getMeasuredHeight());
         }
         if (mNotificationHeader != null) {
             mNotificationHeader.layout(0, 0, mNotificationHeader.getMeasuredWidth(),
