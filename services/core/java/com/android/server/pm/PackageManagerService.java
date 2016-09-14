@@ -367,8 +367,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** REMOVE. According to Svet, this was only used to reset permissions during development. */
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
-    // STOPSHIP; b/30256615
-    private static final boolean DISABLE_EPHEMERAL_APPS = !Build.IS_DEBUGGABLE;
+    private static final boolean DISABLE_EPHEMERAL_APPS = false;
+    private static final boolean HIDE_EPHEMERAL_APIS = true;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -6302,7 +6302,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<EphemeralApplicationInfo> getEphemeralApplications(int userId) {
-        if (isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
@@ -6326,7 +6326,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isEphemeral");
-        if (isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return false;
         }
 
@@ -6344,7 +6344,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public byte[] getEphemeralApplicationCookie(String packageName, int userId) {
-        if (isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
@@ -6362,7 +6362,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean setEphemeralApplicationCookie(String packageName, byte[] cookie, int userId) {
-        if (isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return true;
         }
 
@@ -6380,7 +6380,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public Bitmap getEphemeralApplicationIcon(String packageName, int userId) {
-        if (isEphemeralDisabled()) {
+        if (HIDE_EPHEMERAL_APIS || isEphemeralDisabled()) {
             return null;
         }
 
