@@ -1948,9 +1948,18 @@ public abstract class BaseStatusBar extends SystemUI implements
                                             .getIdentifier();
                                     if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
                                             && mKeyguardManager.isDeviceLocked(userId)) {
-                                        if (startWorkChallengeIfNecessary(userId,
-                                                intent.getIntentSender(), notificationKey)) {
-                                            // Show work challenge, do not run pendingintent and
+                                        boolean canBypass = false;
+                                        try {
+                                            canBypass = ActivityManagerNative.getDefault()
+                                                    .canBypassWorkChallenge(intent);
+                                        } catch (RemoteException e) {
+                                        }
+                                        // For direct-boot aware activities, they can be shown when
+                                        // the device is still locked without triggering the work
+                                        // challenge.
+                                        if ((!canBypass) && startWorkChallengeIfNecessary(userId,
+                                                    intent.getIntentSender(), notificationKey)) {
+                                            // Show work challenge, do not run PendingIntent and
                                             // remove notification
                                             return;
                                         }
