@@ -141,6 +141,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_SERVICE_STATE_CHANGE = 330;
     private static final int MSG_SCREEN_TURNED_ON = 331;
     private static final int MSG_SCREEN_TURNED_OFF = 332;
+    private static final int MSG_DREAMING_STATE_CHANGED = 333;
 
     /** Fingerprint state: Not listening to fingerprint. */
     private static final int FINGERPRINT_STATE_STOPPED = 0;
@@ -292,6 +293,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     Trace.beginSection("KeyguardUpdateMonitor#handler MSG_SCREEN_TURNED_ON");
                     handleScreenTurnedOff();
                     Trace.endSection();
+                    break;
+                case MSG_DREAMING_STATE_CHANGED:
+                    handleDreamingStateChanged(msg.arg1);
                     break;
             }
         }
@@ -986,6 +990,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
                 cb.onScreenTurnedOff();
+            }
+        }
+    }
+
+    private void handleDreamingStateChanged(int dreamStart) {
+        final int count = mCallbacks.size();
+        boolean showingDream = dreamStart == 1;
+        for (int i = 0; i < count; i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onDreamingStateChanged(showingDream);
             }
         }
     }
@@ -1737,6 +1752,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             mScreenOn = false;
         }
         mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_OFF);
+    }
+
+    public void dispatchDreamingStarted() {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_DREAMING_STATE_CHANGED, 1, 0));
+    }
+
+    public void dispatchDreamingStopped() {
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_DREAMING_STATE_CHANGED, 0, 0));
     }
 
     public boolean isDeviceInteractive() {
