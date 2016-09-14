@@ -4644,6 +4644,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
     }
 
+    private void processListenRequests(NetworkAgentInfo nai) {
+        // For consistency with previous behaviour, send onLost callbacks before onAvailable.
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            NetworkRequest nr = nri.request;
+            if (!nr.isListen()) continue;
+            if (nai.isSatisfyingRequest(nr.requestId) && !nai.satisfies(nr)) {
+                nai.removeRequest(nri.request.requestId);
+                callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_LOST, 0);
+            }
+        }
+
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            NetworkRequest nr = nri.request;
+            if (!nr.isListen()) continue;
+            if (nai.satisfies(nr) && !nai.isSatisfyingRequest(nr.requestId)) {
+                nai.addRequest(nr);
+                notifyNetworkCallback(nai, nri);
+            }
+        }
+    }
+
     // Handles a network appearing or improving its score.
     //
     // - Evaluates all current NetworkRequests that can be
@@ -4684,6 +4705,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<NetworkRequestInfo>();
         if (VDBG) log(" network has: " + newNetwork.networkCapabilities);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            // Process requests in the first pass and listens in the second pass. This allows us to
+            // change a network's capabilities depending on which requests it has. This is only
+            // correct if the change in capabilities doesn't affect whether the network satisfies
+            // requests or not, and doesn't affect the network's score.
+            if (nri.request.isListen()) continue;
+
             final NetworkAgentInfo currentNetwork = mNetworkForRequestId.get(nri.request.requestId);
             final boolean satisfies = newNetwork.satisfies(nri.request);
             if (newNetwork == currentNetwork && satisfies) {
@@ -4698,13 +4725,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
             if (satisfies) {
-                if (nri.request.isListen()) {
-                    // This is not a request, it's a callback listener.
-                    // Add it to newNetwork regardless of score.
-                    if (newNetwork.addRequest(nri.request)) addedRequests.add(nri);
-                    continue;
-                }
-
                 // next check if it's better than any current network we're using for
                 // this request
                 if (VDBG) {
@@ -4761,16 +4781,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mNetworkForRequestId.remove(nri.request.requestId);
                     sendUpdatedScoreToFactories(nri.request, 0);
                 } else {
-                    if (nri.request.isRequest()) {
-                        Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
-                                newNetwork.name() +
-                                " without updating mNetworkForRequestId or factories!");
-                    }
+                    Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
+                            newNetwork.name() +
+                            " without updating mNetworkForRequestId or factories!");
                 }
-                // TODO: technically, sending CALLBACK_LOST here is
-                // incorrect if nri is a request (not a listen) and there
-                // is a replacement network currently connected that can
-                // satisfy it. However, the only capability that can both
+                // TODO: Technically, sending CALLBACK_LOST here is
+                // incorrect if there is a replacement network currently
+                // connected that can satisfy nri, which is a request
+                // (not a listen). However, the only capability that can both
                 // a) be requested and b) change is NET_CAPABILITY_TRUSTED,
                 // so this code is only incorrect for a network that loses
                 // the TRUSTED capability, which is a rare case.
@@ -4794,6 +4812,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
+
+        // Second pass: process all listens.
+        processListenRequests(newNetwork);
 
         // do this after the default net is switched, but
         // before LegacyTypeTracker sends legacy broadcasts
