@@ -1303,7 +1303,9 @@ final class ActivityStack {
             // It is possible the activity was freezing the screen before it was paused.
             // In that case go ahead and remove the freeze this activity has on the screen
             // since it is no longer visible.
-            prev.stopFreezingScreenLocked(true /*force*/);
+            if (prev != null) {
+                prev.stopFreezingScreenLocked(true /*force*/);
+            }
             mPausingActivity = null;
         }
 
