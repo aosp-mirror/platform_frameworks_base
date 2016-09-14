@@ -1029,8 +1029,10 @@ public class StaticLayout extends Layout {
 
                 for (i = len; i > 0; i--) {
                     float w = widths[i - 1 + lineStart - widthStart];
-
                     if (w + sum + ellipsisWidth > avail) {
+                        while (i < len && widths[i + lineStart - widthStart] == 0.0f) {
+                            i++;
+                        }
                         break;
                     }
 
@@ -1076,9 +1078,11 @@ public class StaticLayout extends Layout {
                     float w = widths[right - 1 + lineStart - widthStart];
 
                     if (w + rsum > ravail) {
+                        while (right < len && widths[right + lineStart - widthStart] == 0.0f) {
+                            right++;
+                        }
                         break;
                     }
-
                     rsum += w;
                 }
 
