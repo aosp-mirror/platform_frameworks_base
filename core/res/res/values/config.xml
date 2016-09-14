@@ -2617,4 +2617,13 @@
         <!-- Verizon requires any SMS that starts with //VZWVVM to be treated as a VVM SMS-->
         <item>310004,310010,310012,310013,310590,310890,310910,311110,311270,311271,311272,311273,311274,311275,311276,311277,311278,311279,311280,311281,311282,311283,311284,311285,311286,311287,311288,311289,311390,311480,311481,311482,311483,311484,311485,311486,311487,311488,311489;^//VZWVVM.*</item>
     </string-array>
+
+    <!-- This config is holding calling number conversion map - expected to convert to emergency
+         number. Formats for this config as below:
+         <item>[dialstring1],[dialstring2],[dialstring3]:[replacement]</item>
+
+         E.g. for Taiwan Type Approval, 110 and 119 should be converted to 112.
+         <item>110,119:112</item>
+    -->
+    <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 </resources>
