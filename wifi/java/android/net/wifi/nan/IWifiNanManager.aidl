@@ -19,8 +19,8 @@ package android.net.wifi.nan;
 import android.app.PendingIntent;
 
 import android.net.wifi.nan.ConfigRequest;
+import android.net.wifi.nan.IWifiNanDiscoverySessionCallback;
 import android.net.wifi.nan.IWifiNanEventCallback;
-import android.net.wifi.nan.IWifiNanSessionCallback;
 import android.net.wifi.nan.PublishConfig;
 import android.net.wifi.nan.SubscribeConfig;
 import android.net.wifi.RttManager;
@@ -42,9 +42,10 @@ interface IWifiNanManager
             in ConfigRequest configRequest);
     void disconnect(int clientId, in IBinder binder);
 
-    void publish(int clientId, in PublishConfig publishConfig, in IWifiNanSessionCallback callback);
+    void publish(int clientId, in PublishConfig publishConfig,
+            in IWifiNanDiscoverySessionCallback callback);
     void subscribe(int clientId, in SubscribeConfig subscribeConfig,
-            in IWifiNanSessionCallback callback);
+            in IWifiNanDiscoverySessionCallback callback);
 
     // session API
     void updatePublish(int clientId, int sessionId, in PublishConfig publishConfig);
