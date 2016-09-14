@@ -1315,8 +1315,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void updateServicesLocked(UserState userState) {
         Map<ComponentName, Service> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
-        boolean isUnlockingOrUnlocked = mContext.getSystemService(UserManager.class)
-                .isUserUnlockingOrUnlocked(userState.mUserId);
+        boolean isUnlockingOrUnlocked;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            isUnlockingOrUnlocked = mContext.getSystemService(UserManager.class)
+                    .isUserUnlockingOrUnlocked(userState.mUserId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
@@ -2531,7 +2537,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
-                    .resolveCallingUserIdEnforcingPermissionsLocked(UserHandle.USER_CURRENT);
+                    .resolveCallingUserIdEnforcingPermissionsLocked(UserHandle.getCallingUserId());
             return resolvedUserId == mCurrentUserId;
         }
 
