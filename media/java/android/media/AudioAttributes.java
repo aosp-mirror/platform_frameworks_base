@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -168,6 +169,66 @@ public final class AudioAttributes implements Parcelable {
      * source, such as audio capture devices.
      */
     public final static int USAGE_VIRTUAL_SOURCE = 15;
+
+    /**
+     * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
+     *            if applicable.
+     */
+
+    /**
+     * @hide
+     * Denotes a usage for notifications that do not expect immediate intervention from the user,
+     * will be muted when the Zen mode disables notifications
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_NOTIFICATION = 1;
+    /**
+     * @hide
+     * Denotes a usage for notifications that do expect immediate intervention from the user,
+     * will be muted when the Zen mode disables calls
+     * @see #SUPPRESSIBLE_USAGES
+     */
+    public final static int SUPPRESSIBLE_CALL = 2;
+
+    /**
+     * @hide
+     * Array of all usage types for calls and notifications to assign the suppression behavior,
+     * used by the Zen mode restrictions.
+     * @see com.android.server.notification.ZenModeHelper
+     */
+    public static final SparseIntArray SUPPRESSIBLE_USAGES;
+
+    static {
+        SUPPRESSIBLE_USAGES = new SparseIntArray();
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION,                      SUPPRESSIBLE_NOTIFICATION);
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_RINGTONE,             SUPPRESSIBLE_CALL);
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_COMMUNICATION_REQUEST,SUPPRESSIBLE_CALL);
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_COMMUNICATION_INSTANT,SUPPRESSIBLE_NOTIFICATION);
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_COMMUNICATION_DELAYED,SUPPRESSIBLE_NOTIFICATION);
+        SUPPRESSIBLE_USAGES.put(USAGE_NOTIFICATION_EVENT,                SUPPRESSIBLE_NOTIFICATION);
+    }
+
+    /**
+     * @hide
+     * Array of all usage types exposed in the SDK that applications can use.
+     */
+    public final static int[] SDK_USAGES = {
+            USAGE_UNKNOWN,
+            USAGE_MEDIA,
+            USAGE_VOICE_COMMUNICATION,
+            USAGE_VOICE_COMMUNICATION_SIGNALLING,
+            USAGE_ALARM,
+            USAGE_NOTIFICATION,
+            USAGE_NOTIFICATION_RINGTONE,
+            USAGE_NOTIFICATION_COMMUNICATION_REQUEST,
+            USAGE_NOTIFICATION_COMMUNICATION_INSTANT,
+            USAGE_NOTIFICATION_COMMUNICATION_DELAYED,
+            USAGE_NOTIFICATION_EVENT,
+            USAGE_ASSISTANCE_ACCESSIBILITY,
+            USAGE_ASSISTANCE_NAVIGATION_GUIDANCE,
+            USAGE_ASSISTANCE_SONIFICATION,
+            USAGE_GAME
+    };
 
     /**
      * Flag defining a behavior where the audibility of the sound will be ensured by the system.
