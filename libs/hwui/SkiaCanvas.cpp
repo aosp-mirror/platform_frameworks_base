@@ -329,9 +329,10 @@ void SkiaCanvas::restoreToCount(int restoreCount) {
 static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
     SkCanvas::SaveLayerFlags layerFlags = 0;
 
-    if (!(flags & SaveFlags::HasAlphaLayer)) {
-        layerFlags |= SkCanvas::kIsOpaque_SaveLayerFlag;
-    }
+    // We intentionally ignore the SaveFlags::HasAlphaLayer and
+    // SkCanvas::kIsOpaque_SaveLayerFlag flags because HWUI ignores it
+    // and our Android client may use it incorrectly.
+    // In Skia, this flag is purely for performance optimization.
 
     if (!(flags & SaveFlags::ClipToLayer)) {
         layerFlags |= SkCanvas::kDontClipToLayer_Legacy_SaveLayerFlag;
