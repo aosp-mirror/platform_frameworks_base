@@ -102,6 +102,14 @@ public class NekoService extends JobService {
         return false;
     }
 
+    public static void registerJobIfNeeded(Context context, long intervalMinutes) {
+        JobScheduler jss = context.getSystemService(JobScheduler.class);
+        JobInfo info = jss.getPendingJob(JOB_ID);
+        if (info == null) {
+            registerJob(context, intervalMinutes);
+        }
+    }
+
     public static void registerJob(Context context, long intervalMinutes) {
         JobScheduler jss = context.getSystemService(JobScheduler.class);
         jss.cancel(JOB_ID);

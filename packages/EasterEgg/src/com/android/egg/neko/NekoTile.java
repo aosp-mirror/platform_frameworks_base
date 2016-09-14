@@ -68,6 +68,9 @@ public class NekoTile extends TileService implements PrefsListener {
         Tile tile = getQsTile();
         int foodState = mPrefs.getFoodState();
         Food food = new Food(foodState);
+        if (foodState != 0) {
+            NekoService.registerJobIfNeeded(this, food.getInterval(this));
+        }
         tile.setIcon(food.getIcon(this));
         tile.setLabel(food.getName(this));
         tile.setState(foodState != 0 ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE);
