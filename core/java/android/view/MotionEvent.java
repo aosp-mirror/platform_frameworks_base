@@ -2334,6 +2334,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #getButtonState()
      * @hide
      */
+    @TestApi
     public final void setButtonState(int buttonState) {
         nativeSetButtonState(mNativePtr, buttonState);
     }
