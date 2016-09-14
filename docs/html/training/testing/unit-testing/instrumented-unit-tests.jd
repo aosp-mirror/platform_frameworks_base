@@ -53,8 +53,9 @@ you choose, to simulate any dependency relationships.</p>
 
 <p>In your Android Studio project, you must store the source files for
 instrumented tests at
-<code><var>module-name</var>/src/androidTests/java/</code>. This directory
-already exists when you create a new project.</p>
+<code><var>module-name</var>/src/androidTest/java/</code>. This directory
+already exists when you create a new project and contains an example
+instrumented test.</p>
 
 <p>Before you begin, you should
   <a href="{@docRoot}tools/testing-support-library/index.html#setup">download
