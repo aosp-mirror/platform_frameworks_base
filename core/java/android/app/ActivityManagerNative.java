@@ -3017,6 +3017,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case CAN_BYPASS_WORK_CHALLENGE: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final PendingIntent intent = PendingIntent.CREATOR.createFromParcel(data);
+            final boolean result = canBypassWorkChallenge(intent);
+            reply.writeNoException();
+            reply.writeInt(result ? 1 : 0);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -7090,6 +7098,20 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return;
+    }
+    @Override
+    public boolean canBypassWorkChallenge(PendingIntent intent)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        intent.writeToParcel(data, 0);
+        mRemote.transact(CAN_BYPASS_WORK_CHALLENGE, data, reply, 0);
+        reply.readException();
+        final int result = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return result != 0;
     }
 
     private IBinder mRemote;
