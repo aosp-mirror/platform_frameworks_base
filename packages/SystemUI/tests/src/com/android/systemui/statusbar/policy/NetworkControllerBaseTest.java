@@ -37,6 +37,9 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionD
 import com.android.systemui.SysuiTestCase;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -75,6 +78,19 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected int mSubId;
 
     private NetworkCapabilities mNetCapabilities;
+
+    @Rule
+    public TestWatcher failWatcher = new TestWatcher() {
+        @Override
+        protected void failed(Throwable e, Description description) {
+            // Print out mNetworkController state if the test fails.
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            mNetworkController.dump(null, pw, null);
+            pw.flush();
+            Log.d(TAG, sw.toString());
+        }
+    };
 
     @Before
     public void setUp() throws Exception {
@@ -145,15 +161,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
       return networkControllerNoMobile;
 
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        mNetworkController.dump(null, pw, null);
-        pw.flush();
-        Log.d(TAG, sw.toString());
     }
 
     // 2 Bars 3G GSM.
