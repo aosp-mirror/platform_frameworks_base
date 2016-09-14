@@ -905,6 +905,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void resetTranslation() {
+        if (mTranslateAnim != null) {
+            mTranslateAnim.cancel();
+        }
         if (mTranslateableViews != null) {
             for (int i = 0; i < mTranslateableViews.size(); i++) {
                 mTranslateableViews.get(i).setTranslationX(0);
