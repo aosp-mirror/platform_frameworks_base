@@ -609,7 +609,7 @@ public class WindowAnimator {
 
         if (SHOW_TRANSACTIONS) Slog.i(
                 TAG, ">>> OPEN TRANSACTION animateLocked");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         SurfaceControl.setAnimationTransaction();
         try {
             final int numDisplays = mDisplayContentsAnimators.size();
@@ -686,7 +686,7 @@ public class WindowAnimator {
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_TRANSACTIONS) Slog.i(
                     TAG, "<<< CLOSE TRANSACTION animateLocked");
         }
@@ -742,7 +742,7 @@ public class WindowAnimator {
 
     private void removeReplacedWindowsLocked() {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             for (int i = mService.mDisplayContents.size() - 1; i >= 0; i--) {
                 DisplayContent display = mService.mDisplayContents.valueAt(i);
@@ -756,7 +756,7 @@ public class WindowAnimator {
                 }
             }
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
         }
         mRemoveReplacedWindows = false;

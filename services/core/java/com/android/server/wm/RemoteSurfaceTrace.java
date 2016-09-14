@@ -83,7 +83,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
 
     @Override
     public void setWindowCrop(Rect crop) {
-        writeRectEvent("WindowCrop", crop);
+        writeRectEvent("Crop", crop);
         super.setWindowCrop(crop);
     }
 
@@ -107,13 +107,13 @@ class RemoteSurfaceTrace extends SurfaceControl {
 
     @Override
     public void hide() {
-        writeEvent("hide");
+        writeEvent("Hide");
         super.hide();
     }
 
     @Override
     public void show() {
-        writeEvent("show");
+        writeEvent("Show");
         super.show();
     }
 
@@ -122,6 +122,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
             mOut.writeUTF(tag);
             mOut.writeUTF(mWindow.getWindowTag().toString());
         } catch (Exception e) {
+            RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
         }
     }
@@ -134,6 +135,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
                 mOut.writeInt(value);
             }
         } catch (Exception e) {
+            RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
         }
     }
@@ -146,11 +148,12 @@ class RemoteSurfaceTrace extends SurfaceControl {
                 mOut.writeFloat(value);
             }
         } catch (Exception e) {
+            RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
         }
     }
 
     private void writeRectEvent(String tag, Rect value) {
-        writeFloatEvent(tag, value.top, value.left, value.right, value.bottom);
+        writeFloatEvent(tag, value.left, value.top, value.right, value.bottom);
     }
 }

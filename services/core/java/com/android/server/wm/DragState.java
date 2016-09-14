@@ -432,14 +432,14 @@ class DragState {
         // Move the surface to the given touch
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                 TAG_WM, ">>> OPEN TRANSACTION notifyMoveLw");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setPosition(x - mThumbOffsetX, y - mThumbOffsetY);
             if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  DRAG "
                     + mSurfaceControl + ": pos=(" +
                     (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLw");
         }

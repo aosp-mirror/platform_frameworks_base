@@ -1581,7 +1581,7 @@ class WindowStateAnimator {
 
         try {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             mSurfaceController.setPositionInTransaction(mWin.mFrame.left + left,
                     mWin.mFrame.top + top, false);
             calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
@@ -1590,7 +1590,7 @@ class WindowStateAnimator {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setWallpaperOffset");
         }

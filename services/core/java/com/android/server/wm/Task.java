@@ -673,13 +673,13 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void forceWindowsScaleable(boolean force) {
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             for (int i = mAppTokens.size() - 1; i >= 0; i--) {
                 mAppTokens.get(i).forceWindowsScaleableInTransaction(force);
             }
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
         }
     }
 

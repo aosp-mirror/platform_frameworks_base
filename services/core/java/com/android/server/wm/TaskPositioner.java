@@ -459,13 +459,13 @@ class TaskPositioner implements DimLayer.DimLayerUser {
         mCurrentDimSide = dimSide;
 
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION updateDimLayerVisibility");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         if (mCurrentDimSide == CTRL_NONE) {
             mDimLayer.hide();
         } else {
             showDimLayer();
         }
-        SurfaceControl.closeTransaction();
+        mService.closeSurfaceTransaction();
     }
 
     /**

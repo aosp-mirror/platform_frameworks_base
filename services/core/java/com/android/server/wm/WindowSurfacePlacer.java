@@ -310,13 +310,13 @@ class WindowSurfacePlacer {
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction(recoveringMemory, numDisplays, defaultDw, defaultDh);
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
@@ -1256,11 +1256,11 @@ class WindowSurfacePlacer {
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             try {
                 mService.mAnimator.orAnimating(appAnimator.showAllWindowsLocked());
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                         "<<< CLOSE TRANSACTION handleAppTransitionReadyLocked()");
             }

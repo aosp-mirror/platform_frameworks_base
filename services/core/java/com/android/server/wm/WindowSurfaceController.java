@@ -71,6 +71,8 @@ class WindowSurfaceController {
     private boolean mHiddenForOtherReasons = true;
     private final String title;
 
+    private final WindowManagerService mService;
+
     public WindowSurfaceController(SurfaceSession s,
             String name, int w, int h, int format, int flags, WindowStateAnimator animator) {
         mAnimator = animator;
@@ -79,6 +81,8 @@ class WindowSurfaceController {
         mSurfaceH = h;
 
         title = name;
+
+        mService = animator.mService;
 
         // For opaque child windows placed under parent windows,
         // we use a special SurfaceControl which mirrors commands
@@ -97,8 +101,8 @@ class WindowSurfaceController {
                     s, name, w, h, format, flags);
         }
 
-        if (animator.mService.mSurfaceTraceEnabled) {
-            mSurfaceControl = new RemoteSurfaceTrace(animator.mService.mSurfaceTraceFd.getFileDescriptor(),
+        if (mService.mSurfaceTraceEnabled) {
+            mSurfaceControl = new RemoteSurfaceTrace(mService.mSurfaceTraceFd.getFileDescriptor(),
                     mSurfaceControl, animator.mWin);
         }
     }
@@ -141,7 +145,7 @@ class WindowSurfaceController {
     }
 
     void setPositionAndLayer(float left, float top, int layerStack, int layer) {
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceX = left;
             mSurfaceY = top;
@@ -160,7 +164,7 @@ class WindowSurfaceController {
                 mAnimator.reclaimSomeSurfaceMemory("create-init", true);
             }
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setPositionAndLayer");
         }
@@ -244,11 +248,11 @@ class WindowSurfaceController {
 
     void setLayer(int layer) {
         if (mSurfaceControl != null) {
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             try {
                 mSurfaceControl.setLayer(layer);
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
             }
         }
     }
@@ -352,11 +356,11 @@ class WindowSurfaceController {
             return;
         }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setTransparentRegion");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setTransparentRegionHint(region);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setTransparentRegion");
         }
@@ -370,11 +374,11 @@ class WindowSurfaceController {
             return;
         }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setOpaque(isOpaque);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
         }
     }
@@ -387,11 +391,11 @@ class WindowSurfaceController {
             return;
         }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setSecureLocked");
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             mSurfaceControl.setSecure(isSecure);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
         }
     }
