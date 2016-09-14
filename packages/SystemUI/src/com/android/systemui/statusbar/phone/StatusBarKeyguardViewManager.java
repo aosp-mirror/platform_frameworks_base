@@ -30,11 +30,14 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.DejankUtils;
+import com.android.systemui.LatencyTracker;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import static com.android.systemui.statusbar.phone.FingerprintUnlockController.*;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -323,8 +326,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 }
             });
         } else {
-            if (mFingerprintUnlockController.getMode()
-                    == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING) {
+            if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING) {
                 mFingerprintUnlockController.startKeyguardFadingAway();
                 mPhoneStatusBar.setKeyguardFadingAway(startTime, 0, 240);
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
@@ -341,8 +343,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 boolean staying = mPhoneStatusBar.hideKeyguard();
                 if (!staying) {
                     mStatusBarWindowManager.setKeyguardFadingAway(true);
-                    if (mFingerprintUnlockController.getMode()
-                            == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK) {
+                    if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK) {
                         if (!mScreenTurnedOn) {
                             mDeferScrimFadeOut = true;
                         } else {
@@ -396,6 +397,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, "Fading out", 0);
             }
         }, skipFirstFrame);
+        if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
+                && LatencyTracker.isEnabled(mContext)) {
+            DejankUtils.postAfterTraversal(() ->
+                    LatencyTracker.getInstance(mContext).onActionEnd(
+                            LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK));
+        }
     }
 
     private void executeAfterKeyguardGoneAction() {

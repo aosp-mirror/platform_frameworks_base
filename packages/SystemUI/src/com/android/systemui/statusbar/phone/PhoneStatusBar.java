@@ -1242,7 +1242,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mFingerprintUnlockController = new FingerprintUnlockController(mContext,
                 mStatusBarWindowManager, mDozeScrimController, keyguardViewMediator,
-                mScrimController, this);
+                mScrimController, this, UnlockMethodCache.getInstance(mContext));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mStatusBarWindowManager, mScrimController,
                 mFingerprintUnlockController);
