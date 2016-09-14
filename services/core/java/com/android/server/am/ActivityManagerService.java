@@ -3424,16 +3424,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.killed = false;
             app.killedByAm = false;
             checkTime(startTime, "startProcess: starting to update pids map");
+            ProcessRecord oldApp;
             synchronized (mPidsSelfLocked) {
-                ProcessRecord oldApp;
-                // If there is already an app occupying that pid that hasn't been cleaned up
-                if ((oldApp = mPidsSelfLocked.get(startResult.pid)) != null && !app.isolated) {
-                    // Clean up anything relating to this pid first
-                    Slog.w(TAG, "Reusing pid " + startResult.pid
-                            + " while app is still mapped to it");
-                    cleanUpApplicationRecordLocked(oldApp, false, false, -1,
-                            true /*replacingPid*/);
-                }
+                oldApp = mPidsSelfLocked.get(startResult.pid);
+            }
+            // If there is already an app occupying that pid that hasn't been cleaned up
+            if (oldApp != null && !app.isolated) {
+                // Clean up anything relating to this pid first
+                Slog.w(TAG, "Reusing pid " + startResult.pid
+                        + " while app is still mapped to it");
+                cleanUpApplicationRecordLocked(oldApp, false, false, -1,
+                        true /*replacingPid*/);
+            }
+            synchronized (mPidsSelfLocked) {
                 this.mPidsSelfLocked.put(startResult.pid, app);
                 if (isActivityProcess) {
                     Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
