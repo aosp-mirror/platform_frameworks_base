@@ -358,7 +358,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     mMeasuredScreenWidth, MeasureSpec.EXACTLY,
                     mMeasuredScreenHeight, MeasureSpec.EXACTLY);
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
-            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+            mSystemViewInfoList =
+                    visitAllChildren(mViewRoot, 0, 0, params.getExtendedViewInfoMode(),
                     false);
 
             return SUCCESS.createResult();
@@ -521,7 +522,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         mMeasuredScreenHeight);
             }
 
-            mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
+            mSystemViewInfoList =
+                    visitAllChildren(mViewRoot, 0, 0, params.getExtendedViewInfoMode(),
                     false);
 
             // success!
@@ -1242,20 +1244,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * bounds of all the views.
      *
      * @param view the root View
-     * @param offset an offset for the view bounds.
+     * @param hOffset horizontal offset for the view bounds.
+     * @param vOffset vertical offset for the view bounds.
      * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
      *                       content frame.
      *
      * @return {@code ViewInfo} containing the bounds of the view and it children otherwise.
      */
-    private ViewInfo visit(View view, int offset, boolean setExtendedInfo,
+    private ViewInfo visit(View view, int hOffset, int vOffset, boolean setExtendedInfo,
             boolean isContentFrame) {
-        ViewInfo result = createViewInfo(view, offset, setExtendedInfo, isContentFrame);
+        ViewInfo result = createViewInfo(view, hOffset, vOffset, setExtendedInfo, isContentFrame);
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
-            result.setChildren(visitAllChildren(group, isContentFrame ? 0 : offset,
+            result.setChildren(visitAllChildren(group, isContentFrame ? 0 : hOffset,
+                    isContentFrame ? 0 : vOffset,
                     setExtendedInfo, isContentFrame));
         }
         return result;
@@ -1267,20 +1271,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * the children of the {@code mContentRoot}.
      *
      * @param viewGroup the root View
-     * @param offset an offset from the top for the content view frame.
+     * @param hOffset horizontal offset from the top for the content view frame.
+     * @param vOffset vertical offset from the top for the content view frame.
      * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      * @param isContentFrame {@code true} if the {@code ViewInfo} to be created is part of the
      *                       content frame. {@code false} if the {@code ViewInfo} to be created is
      *                       part of the system decor.
      */
-    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset,
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int hOffset, int vOffset,
             boolean setExtendedInfo, boolean isContentFrame) {
         if (viewGroup == null) {
             return null;
         }
 
         if (!isContentFrame) {
-            offset += viewGroup.getTop();
+            vOffset += viewGroup.getTop();
+            hOffset += viewGroup.getLeft();
         }
 
         int childCount = viewGroup.getChildCount();
@@ -1288,7 +1294,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             List<ViewInfo> childrenWithoutOffset = new ArrayList<ViewInfo>(childCount);
             List<ViewInfo> childrenWithOffset = new ArrayList<ViewInfo>(childCount);
             for (int i = 0; i < childCount; i++) {
-                ViewInfo[] childViewInfo = visitContentRoot(viewGroup.getChildAt(i), offset,
+                ViewInfo[] childViewInfo =
+                        visitContentRoot(viewGroup.getChildAt(i), hOffset, vOffset,
                         setExtendedInfo);
                 childrenWithoutOffset.add(childViewInfo[0]);
                 childrenWithOffset.add(childViewInfo[1]);
@@ -1298,7 +1305,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         } else {
             List<ViewInfo> children = new ArrayList<ViewInfo>(childCount);
             for (int i = 0; i < childCount; i++) {
-                children.add(visit(viewGroup.getChildAt(i), offset, setExtendedInfo,
+                children.add(visit(viewGroup.getChildAt(i), hOffset, vOffset, setExtendedInfo,
                         isContentFrame));
             }
             return children;
@@ -1317,16 +1324,18 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      *         index 1 is with the offset.
      */
     @NonNull
-    private ViewInfo[] visitContentRoot(View view, int offset, boolean setExtendedInfo) {
+    private ViewInfo[] visitContentRoot(View view, int hOffset, int vOffset,
+            boolean setExtendedInfo) {
         ViewInfo[] result = new ViewInfo[2];
         if (view == null) {
             return result;
         }
 
-        result[0] = createViewInfo(view, 0, setExtendedInfo, true);
-        result[1] = createViewInfo(view, offset, setExtendedInfo, true);
+        result[0] = createViewInfo(view, 0, 0, setExtendedInfo, true);
+        result[1] = createViewInfo(view, hOffset, vOffset, setExtendedInfo, true);
         if (view instanceof ViewGroup) {
-            List<ViewInfo> children = visitAllChildren((ViewGroup) view, 0, setExtendedInfo, true);
+            List<ViewInfo> children =
+                    visitAllChildren((ViewGroup) view, 0, 0, setExtendedInfo, true);
             result[0].setChildren(children);
             result[1].setChildren(children);
         }
@@ -1337,9 +1346,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * Creates a {@link ViewInfo} for the view. The {@code ViewInfo} corresponding to the children
      * of the {@code view} are not created. Consequently, the children of {@code ViewInfo} is not
      * set.
-     * @param offset an offset for the view bounds. Used only if view is part of the content frame.
+     * @param hOffset horizontal offset for the view bounds. Used only if view is part of the
+     * content frame.
+     * @param vOffset vertial an offset for the view bounds. Used only if view is part of the
+     * content frame.
      */
-    private ViewInfo createViewInfo(View view, int offset, boolean setExtendedInfo,
+    private ViewInfo createViewInfo(View view, int hOffset, int vOffset, boolean setExtendedInfo,
             boolean isContentFrame) {
         if (view == null) {
             return null;
@@ -1355,9 +1367,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // The view is part of the layout added by the user. Hence,
             // the ViewCookie may be obtained only through the Context.
             result = new ViewInfo(view.getClass().getName(),
-                    getContext().getViewKey(view),
-                    -scrollX + view.getLeft(), -scrollY + view.getTop() + offset,
-                    -scrollX + view.getRight(), -scrollY + view.getBottom() + offset,
+                    getContext().getViewKey(view), -scrollX + view.getLeft() + hOffset,
+                    -scrollY + view.getTop() + vOffset, -scrollX + view.getRight() + hOffset,
+                    -scrollY + view.getBottom() + vOffset,
                     view, view.getLayoutParams());
         } else {
             // We are part of the system decor.
