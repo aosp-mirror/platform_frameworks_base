@@ -47,7 +47,7 @@ android_hardware_UsbRequest_init(JNIEnv *env, jobject thiz, jobject java_device,
     struct usb_device* device = get_device_from_object(env, java_device);
     if (!device) {
         ALOGE("device null in native_init");
-        return false;
+        return JNI_FALSE;
     }
 
     // construct an endpoint descriptor from the Java object fields
@@ -83,13 +83,13 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
         ALOGE("request is closed in native_queue");
-        return false;
+        return JNI_FALSE;
     }
 
     if (buffer && length) {
         request->buffer = malloc(length);
         if (!request->buffer)
-            return false;
+            return JNI_FALSE;
         memset(request->buffer, 0, length);
         if (out) {
             // copy data from Java buffer to native buffer
@@ -110,9 +110,9 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
             request->buffer = NULL;
         }
         env->DeleteGlobalRef((jobject)request->client_data);
-        return false;
+        return JNI_FALSE;
     }
-    return true;
+    return JNI_TRUE;
 }
 
 static jint
@@ -141,13 +141,13 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
         ALOGE("request is closed in native_queue");
-        return false;
+        return JNI_FALSE;
     }
 
     if (buffer && length) {
         request->buffer = env->GetDirectBufferAddress(buffer);
         if (!request->buffer)
-            return false;
+            return JNI_FALSE;
     } else {
         request->buffer = NULL;
     }
@@ -161,9 +161,9 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
     if (usb_request_queue(request)) {
         request->buffer = NULL;
         env->DeleteGlobalRef((jobject)request->client_data);
-        return false;
+        return JNI_FALSE;
     }
-    return true;
+    return JNI_TRUE;
 }
 
 static jint
@@ -185,7 +185,7 @@ android_hardware_UsbRequest_cancel(JNIEnv *env, jobject thiz)
     struct usb_request* request = get_request_from_object(env, thiz);
     if (!request) {
         ALOGE("request is closed in native_cancel");
-        return false;
+        return JNI_FALSE;
     }
     return (usb_request_cancel(request) == 0);
 }

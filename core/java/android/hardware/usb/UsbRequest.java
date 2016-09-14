@@ -150,6 +150,11 @@ public class UsbRequest {
      */
     public boolean queue(ByteBuffer buffer, int length) {
         boolean out = (mEndpoint.getDirection() == UsbConstants.USB_DIR_OUT);
+
+        // save our buffer for when the request has completed
+        mBuffer = buffer;
+        mLength = length;
+
         boolean result;
         if (buffer.isDirect()) {
             result = native_queue_direct(buffer, length, out);
@@ -158,10 +163,9 @@ public class UsbRequest {
         } else {
             throw new IllegalArgumentException("buffer is not direct and has no array");
         }
-        if (result) {
-            // save our buffer for when the request has completed
-            mBuffer = buffer;
-            mLength = length;
+        if (!result) {
+            mBuffer = null;
+            mLength = 0;
         }
         return result;
     }
