@@ -278,7 +278,6 @@ public class UsbDeviceConnection {
     protected void finalize() throws Throwable {
         try {
             mCloseGuard.warnIfOpen();
-            close();
         } finally {
             super.finalize();
         }
