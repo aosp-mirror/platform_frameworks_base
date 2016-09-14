@@ -181,6 +181,7 @@ public class ApfFilter {
     private static final int IPV4_PROTOCOL_OFFSET = ETH_HEADER_LEN + 9;
     private static final int IPV4_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 16;
     private static final int IPV4_ANY_HOST_ADDRESS = 0;
+    private static final int IPV4_BROADCAST_ADDRESS = -1; // 255.255.255.255
 
     private static final int IPV6_NEXT_HEADER_OFFSET = ETH_HEADER_LEN + 6;
     private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
@@ -737,39 +738,54 @@ public class ApfFilter {
         // Here's a basic summary of what the IPv4 filter program does:
         //
         // if filtering multicast (i.e. multicast lock not held):
-        //   if it's multicast:
-        //     drop
-        //   if it's not broadcast:
+        //   if it's DHCP destined to our MAC:
         //     pass
-        //   if it's not DHCP destined to our MAC:
+        //   if it's L2 broadcast:
+        //     drop
+        //   if it's IPv4 multicast:
+        //     drop
+        //   if it's IPv4 broadcast:
         //     drop
         // pass
 
         if (mMulticastFilter) {
-            // Check for multicast destination address range
+            final String skipDhcpv4Filter = "skip_dhcp_v4_filter";
+
+            // Pass DHCP addressed to us.
+            // Check it's UDP.
+            gen.addLoad8(Register.R0, IPV4_PROTOCOL_OFFSET);
+            gen.addJumpIfR0NotEquals(IPPROTO_UDP, skipDhcpv4Filter);
+            // Check it's not a fragment. This matches the BPF filter installed by the DHCP client.
+            gen.addLoad16(Register.R0, IPV4_FRAGMENT_OFFSET_OFFSET);
+            gen.addJumpIfR0AnyBitsSet(IPV4_FRAGMENT_OFFSET_MASK, skipDhcpv4Filter);
+            // Check it's addressed to DHCP client port.
+            gen.addLoadFromMemory(Register.R1, gen.IPV4_HEADER_SIZE_MEMORY_SLOT);
+            gen.addLoad16Indexed(Register.R0, UDP_DESTINATION_PORT_OFFSET);
+            gen.addJumpIfR0NotEquals(DHCP_CLIENT_PORT, skipDhcpv4Filter);
+            // Check it's DHCP to our MAC address.
+            gen.addLoadImmediate(Register.R0, DHCP_CLIENT_MAC_OFFSET);
+            // NOTE: Relies on R1 containing IPv4 header offset.
+            gen.addAddR1();
+            gen.addJumpIfBytesNotEqual(Register.R0, mHardwareAddress, skipDhcpv4Filter);
+            gen.addJump(gen.PASS_LABEL);
+
+            // Drop all multicasts/broadcasts.
+            gen.defineLabel(skipDhcpv4Filter);
+
+            // If IPv4 destination address is in multicast range, drop.
             gen.addLoad8(Register.R0, IPV4_DEST_ADDR_OFFSET);
             gen.addAnd(0xf0);
             gen.addJumpIfR0Equals(0xe0, gen.DROP_LABEL);
 
-            // Drop all broadcasts besides DHCP addressed to us
-            // If not a broadcast packet, pass
+            // If IPv4 broadcast packet, drop regardless of L2 (b/30231088).
+            gen.addLoad32(Register.R0, IPV4_DEST_ADDR_OFFSET);
+            gen.addJumpIfR0Equals(IPV4_BROADCAST_ADDRESS, gen.DROP_LABEL);
+            // TODO: also filter subnet broadcast address.
+
+            // If L2 broadcast packet, drop.
             gen.addLoadImmediate(Register.R0, ETH_DEST_ADDR_OFFSET);
             gen.addJumpIfBytesNotEqual(Register.R0, ETH_BROADCAST_MAC_ADDRESS, gen.PASS_LABEL);
-            // If not UDP, drop
-            gen.addLoad8(Register.R0, IPV4_PROTOCOL_OFFSET);
-            gen.addJumpIfR0NotEquals(IPPROTO_UDP, gen.DROP_LABEL);
-            // If fragment, drop. This matches the BPF filter installed by the DHCP client.
-            gen.addLoad16(Register.R0, IPV4_FRAGMENT_OFFSET_OFFSET);
-            gen.addJumpIfR0AnyBitsSet(IPV4_FRAGMENT_OFFSET_MASK, gen.DROP_LABEL);
-            // If not to DHCP client port, drop
-            gen.addLoadFromMemory(Register.R1, gen.IPV4_HEADER_SIZE_MEMORY_SLOT);
-            gen.addLoad16Indexed(Register.R0, UDP_DESTINATION_PORT_OFFSET);
-            gen.addJumpIfR0NotEquals(DHCP_CLIENT_PORT, gen.DROP_LABEL);
-            // If not DHCP to our MAC address, drop
-            gen.addLoadImmediate(Register.R0, DHCP_CLIENT_MAC_OFFSET);
-            // NOTE: Relies on R1 containing IPv4 header offset.
-            gen.addAddR1();
-            gen.addJumpIfBytesNotEqual(Register.R0, mHardwareAddress, gen.DROP_LABEL);
+            gen.addJump(gen.DROP_LABEL);
         }
 
         // Otherwise, pass

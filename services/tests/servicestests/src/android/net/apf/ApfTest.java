@@ -604,7 +604,7 @@ public class ApfTest extends AndroidTestCase {
 
         public TestApfFilter(IpManager.Callback ipManagerCallback, boolean multicastFilter,
                 IpConnectivityLog log) throws Exception {
-            super(new ApfCapabilities(2, 1536, ARPHRD_ETHER), NetworkInterface.getByName("lo"),
+            super(new ApfCapabilities(2, 1700, ARPHRD_ETHER), NetworkInterface.getByName("lo"),
                     ipManagerCallback, multicastFilter, log);
         }
 
@@ -721,7 +721,9 @@ public class ApfTest extends AndroidTestCase {
     @LargeTest
     public void testApfFilterIPv4() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
+
         ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, DROP_MULTICAST, mLog);
+
         byte[] program = ipManagerCallback.getApfProgram();
 
         // Verify empty packet of 100 zero bytes is passed
@@ -734,9 +736,9 @@ public class ApfTest extends AndroidTestCase {
         put(packet, IPV4_DEST_ADDR_OFFSET, MOCK_IPV4_ADDR);
         assertPass(program, packet.array());
 
-        // Verify L2 unicast to IPv4 broadcast addresses is passed (b/30231088)
+        // Verify L2 unicast to IPv4 broadcast addresses is dropped (b/30231088)
         put(packet, IPV4_DEST_ADDR_OFFSET, IPV4_BROADCAST_ADDRESS);
-        assertPass(program, packet.array());
+        assertDrop(program, packet.array());
         put(packet, IPV4_DEST_ADDR_OFFSET, MOCK_BROADCAST_IPV4_ADDR);
         assertPass(program, packet.array());
 
