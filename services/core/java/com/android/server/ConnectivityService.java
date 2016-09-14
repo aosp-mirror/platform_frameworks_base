@@ -262,6 +262,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         DONT_REAP
     };
 
+    private enum UnneededFor {
+        LINGER,    // Determine whether this network is unneeded and should be lingered.
+        TEARDOWN,  // Determine whether this network is unneeded and should be torn down.
+    }
+
     /**
      * used internally to change our mobile data enabled flag
      */
@@ -691,13 +696,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("ConnectivityService starting up");
 
         mMetricsLog = logger;
-        mDefaultRequest = createInternetRequestForTransport(-1);
+        mDefaultRequest = createInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest, new Binder());
         mNetworkRequests.put(mDefaultRequest, defaultNRI);
         mNetworkRequestInfoLogs.log("REGISTER " + defaultNRI);
 
         mDefaultMobileDataRequest = createInternetRequestForTransport(
-                NetworkCapabilities.TRANSPORT_CELLULAR);
+                NetworkCapabilities.TRANSPORT_CELLULAR, NetworkRequest.Type.BACKGROUND_REQUEST);
 
         mHandlerThread = createHandlerThread();
         mHandlerThread.start();
@@ -848,15 +853,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
     }
 
-    private NetworkRequest createInternetRequestForTransport(int transportType) {
+    private NetworkRequest createInternetRequestForTransport(
+            int transportType, NetworkRequest.Type type) {
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
         netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         if (transportType > -1) {
             netCap.addTransportType(transportType);
         }
-        return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(),
-                NetworkRequest.Type.REQUEST);
+        return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId(), type);
     }
 
     // Used only for testing.
@@ -1964,8 +1969,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
             pw.println(nai.toString());
             pw.increaseIndent();
-            pw.println(String.format("Requests: %d request/%d total",
-                    nai.numRequestNetworkRequests(), nai.numNetworkRequests()));
+            pw.println(String.format(
+                    "Requests: REQUEST:%d LISTEN:%d BACKGROUND_REQUEST:%d total:%d",
+                    nai.numForegroundNetworkRequests(),
+                    nai.numNetworkRequests() - nai.numRequestNetworkRequests(),
+                    nai.numBackgroundNetworkRequests(),
+                    nai.numNetworkRequests()));
             pw.increaseIndent();
             for (int i = 0; i < nai.numNetworkRequests(); i++) {
                 pw.println(nai.requestAt(i).toString());
@@ -2286,15 +2295,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // 3. If this network is unneeded (which implies it is not lingering), and there is at least
         //    one lingered request, start lingering.
         nai.updateLingerTimer();
-        if (nai.isLingering() && nai.numRequestNetworkRequests() > 0) {
+        if (nai.isLingering() && nai.numForegroundNetworkRequests() > 0) {
             if (DBG) log("Unlingering " + nai.name());
             nai.unlinger();
             logNetworkEvent(nai, NetworkEvent.NETWORK_UNLINGER);
-        } else if (unneeded(nai) && nai.getLingerExpiry() > 0) {  // unneeded() calls isLingering()
+        } else if (unneeded(nai, UnneededFor.LINGER) && nai.getLingerExpiry() > 0) {
             int lingerTime = (int) (nai.getLingerExpiry() - now);
-            if (DBG) {
-                Log.d(TAG, "Lingering " + nai.name() + " for " + lingerTime + "ms");
-            }
+            if (DBG) log("Lingering " + nai.name() + " for " + lingerTime + "ms");
             nai.linger();
             logNetworkEvent(nai, NetworkEvent.NETWORK_LINGER);
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING, lingerTime);
@@ -2473,15 +2480,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    // Is nai unneeded by all NetworkRequests (and should be disconnected)?
-    // This is whether it is satisfying any NetworkRequests or were it to become validated,
-    // would it have a chance of satisfying any NetworkRequests.
-    private boolean unneeded(NetworkAgentInfo nai) {
-        if (!nai.everConnected || nai.isVPN() ||
-               nai.isLingering() || nai.numRequestNetworkRequests() > 0) {
+    // Determines whether the network is the best (or could become the best, if it validated), for
+    // none of a particular type of NetworkRequests. The type of NetworkRequests considered depends
+    // on the value of reason:
+    //
+    // - UnneededFor.TEARDOWN: non-listen NetworkRequests. If a network is unneeded for this reason,
+    //   then it should be torn down.
+    // - UnneededFor.LINGER: foreground NetworkRequests. If a network is unneeded for this reason,
+    //   then it should be lingered.
+    private boolean unneeded(NetworkAgentInfo nai, UnneededFor reason) {
+        final int numRequests;
+        switch (reason) {
+            case TEARDOWN:
+                numRequests = nai.numRequestNetworkRequests();
+                break;
+            case LINGER:
+                numRequests = nai.numForegroundNetworkRequests();
+                break;
+            default:
+                Slog.wtf(TAG, "Invalid reason. Cannot happen.");
+                return true;
+        }
+
+        if (!nai.everConnected || nai.isVPN() || nai.isLingering() || numRequests > 0) {
             return false;
         }
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            if (reason == UnneededFor.LINGER && nri.request.isBackgroundRequest()) {
+                // Background requests don't affect lingering.
+                continue;
+            }
+
             // If this Network is already the highest scoring Network for a request, or if
             // there is hope for it to become one if it validated, then it is needed.
             if (nri.request.isRequest() && nai.satisfies(nri.request) &&
@@ -2591,7 +2620,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // If there are still lingered requests on this network, don't tear it down,
                 // but resume lingering instead.
                 updateLingerState(nai, SystemClock.elapsedRealtime());
-                if (unneeded(nai)) {
+                if (unneeded(nai, UnneededFor.TEARDOWN)) {
                     if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
                     teardownUnneededNetwork(nai);
                 } else {
@@ -4625,7 +4654,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // must be no other active linger timers, and we must stop lingering.
         oldNetwork.clearLingerState();
 
-        if (unneeded(oldNetwork)) {
+        if (unneeded(oldNetwork, UnneededFor.TEARDOWN)) {
             teardownUnneededNetwork(oldNetwork);
         }
     }
@@ -4893,7 +4922,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
             for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                if (unneeded(nai)) {
+                if (unneeded(nai, UnneededFor.TEARDOWN)) {
                     if (nai.getLingerExpiry() > 0) {
                         // This network has active linger timers and no requests, but is not
                         // lingering. Linger it.
