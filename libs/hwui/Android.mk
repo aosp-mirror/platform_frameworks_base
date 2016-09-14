@@ -2,6 +2,8 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
+BUGREPORT_FONT_CACHE_USAGE := true
+
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
 # Has moderate overhead
@@ -134,6 +136,13 @@ hwui_cflags += -Wno-free-nonheap-object
 
 # clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
 hwui_cflags += -Wno-missing-braces
+
+ifeq (true, $(BUGREPORT_FONT_CACHE_USAGE))
+    hwui_src_files += \
+        font/FontCacheHistoryTracker.cpp
+    hwui_cflags += -DBUGREPORT_FONT_CACHE_USAGE
+endif
+
 
 ifndef HWUI_COMPILE_SYMBOLS
     hwui_cflags += -fvisibility=hidden
