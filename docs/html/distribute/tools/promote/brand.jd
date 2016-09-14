@@ -100,7 +100,9 @@ used according to terms described in the Creative Commons 3.0 Attribution Licens
 <h4 style="clear:right">Android logo</h4>
 
 <div style="float:right;width:210px;margin-left:30px;margin-top:-10px">
-  <img alt="" src="{@docRoot}images/brand/android_logo_no.png">
+  <img alt="" src="{@docRoot}images/brand/android_logo_no.png"
+    srcset="{@docRoot}images/brand/android_logo_no.png 1x,
+    {@docRoot}images/brand/android_logo_no_2x.png 2x">
 </div>
 
 <p>The Android logo may not be used.</p>
