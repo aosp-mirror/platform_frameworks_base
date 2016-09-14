@@ -5947,6 +5947,36 @@ public final class Settings {
                 INCALL_POWER_BUTTON_BEHAVIOR_SCREEN_OFF;
 
         /**
+         * What happens when the user presses the Back button while in-call
+         * and the screen is on.<br/>
+         * <b>Values:</b><br/>
+         * 0 - The Back buttons does nothing different.<br/>
+         * 1 - The Back button hangs up the current call.<br/>
+         *
+         * @hide
+         */
+        public static final String INCALL_BACK_BUTTON_BEHAVIOR = "incall_back_button_behavior";
+
+        /**
+         * INCALL_BACK_BUTTON_BEHAVIOR value for no action.
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_NONE = 0x0;
+
+        /**
+         * INCALL_BACK_BUTTON_BEHAVIOR value for "hang up".
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_HANGUP = 0x1;
+
+        /**
+         * INCALL_POWER_BUTTON_BEHAVIOR default value.
+         * @hide
+         */
+        public static final int INCALL_BACK_BUTTON_BEHAVIOR_DEFAULT =
+                INCALL_BACK_BUTTON_BEHAVIOR_NONE;
+
+        /**
          * Whether the device should wake when the wake gesture sensor detects motion.
          * @hide
          */
