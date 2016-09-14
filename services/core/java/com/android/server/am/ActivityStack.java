@@ -2550,7 +2550,8 @@ final class ActivityStack {
                             break;
                         }
                     }
-                    next.app.thread.scheduleNewIntent(next.newIntents, next.appToken);
+                    next.app.thread.scheduleNewIntent(
+                            next.newIntents, next.appToken, false /* andPause */);
                 }
 
                 // Well the app will no longer be stopped.

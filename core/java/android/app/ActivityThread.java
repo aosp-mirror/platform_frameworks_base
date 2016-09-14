@@ -433,8 +433,10 @@ public final class ActivityThread {
     static final class NewIntentData {
         List<ReferrerIntent> intents;
         IBinder token;
+        boolean andPause;
         public String toString() {
-            return "NewIntentData{intents=" + intents + " token=" + token + "}";
+            return "NewIntentData{intents=" + intents + " token=" + token
+                    + " andPause=" + andPause +"}";
         }
     }
 
@@ -751,10 +753,12 @@ public final class ActivityThread {
                     configChanges, notResumed, config, overrideConfig, true, preserveWindow);
         }
 
-        public final void scheduleNewIntent(List<ReferrerIntent> intents, IBinder token) {
+        public final void scheduleNewIntent(
+                List<ReferrerIntent> intents, IBinder token, boolean andPause) {
             NewIntentData data = new NewIntentData();
             data.intents = intents;
             data.token = token;
+            data.andPause = andPause;
 
             sendMessage(H.NEW_INTENT, data);
         }
@@ -2792,24 +2796,34 @@ public final class ActivityThread {
         }
     }
 
-    public final void performNewIntents(IBinder token, List<ReferrerIntent> intents) {
-        ActivityClientRecord r = mActivities.get(token);
-        if (r != null) {
-            final boolean resumed = !r.paused;
-            if (resumed) {
-                r.activity.mTemporaryPause = true;
-                mInstrumentation.callActivityOnPause(r.activity);
-            }
-            deliverNewIntents(r, intents);
-            if (resumed) {
-                r.activity.performResume();
-                r.activity.mTemporaryPause = false;
-            }
+    void performNewIntents(IBinder token, List<ReferrerIntent> intents, boolean andPause) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r == null) {
+            return;
+        }
+
+        final boolean resumed = !r.paused;
+        if (resumed) {
+            r.activity.mTemporaryPause = true;
+            mInstrumentation.callActivityOnPause(r.activity);
+        }
+        deliverNewIntents(r, intents);
+        if (resumed) {
+            r.activity.performResume();
+            r.activity.mTemporaryPause = false;
+        }
+
+        if (r.paused && andPause) {
+            // In this case the activity was in the paused state when we delivered the intent,
+            // to guarantee onResume gets called after onNewIntent we temporarily resume the
+            // activity and pause again as the caller wanted.
+            performResumeActivity(token, false, "performNewIntents");
+            performPauseActivityIfNeeded(r, "performNewIntents");
         }
     }
 
     private void handleNewIntent(NewIntentData data) {
-        performNewIntents(data.token, data.intents);
+        performNewIntents(data.token, data.intents, data.andPause);
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {

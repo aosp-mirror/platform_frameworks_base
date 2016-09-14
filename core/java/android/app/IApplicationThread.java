@@ -67,7 +67,8 @@ public interface IApplicationThread extends IInterface {
             List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
             Configuration config, Configuration overrideConfig, boolean preserveWindow)
             throws RemoteException;
-    void scheduleNewIntent(List<ReferrerIntent> intent, IBinder token) throws RemoteException;
+    void scheduleNewIntent(
+            List<ReferrerIntent> intent, IBinder token, boolean andPause) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
     void scheduleReceiver(Intent intent, ActivityInfo info, CompatibilityInfo compatInfo,

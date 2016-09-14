@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
@@ -945,21 +946,29 @@ final class ActivityRecord {
         // The activity now gets access to the data associated with this Intent.
         service.grantUriPermissionFromIntentLocked(callingUid, packageName,
                 intent, getUriPermissionsLocked(), userId);
-        // We want to immediately deliver the intent to the activity if
-        // it is currently the top resumed activity...  however, if the
-        // device is sleeping, then all activities are stopped, so in that
-        // case we will deliver it if this is the current top activity on its
-        // stack.
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
-        if ((state == ActivityState.RESUMED
-                || (service.isSleepingLocked() && task.stack != null
-                    && task.stack.topRunningActivityLocked() == this))
-                && app != null && app.thread != null) {
+        final ActivityStack stack = task.stack;
+        final boolean isTopActivityInStack =
+                stack != null && stack.topRunningActivityLocked() == this;
+        final boolean isTopActivityWhileSleeping =
+                service.isSleepingLocked() && isTopActivityInStack;
+        final boolean isTopActivityInMinimizedDockedStack = isTopActivityInStack
+                && stack.mStackId == DOCKED_STACK_ID && mStackSupervisor.mIsDockMinimized
+                && state == ActivityState.PAUSED;
+
+        // We want to immediately deliver the intent to the activity if:
+        // - It is the resumed activity.
+        // - The device is sleeping and it is the top activity behind the lock screen (b/6700897).
+        // - It is the top activity in a minimized docked stack. In this case the activity will be
+        //   temporarily resumed then paused again on the client side.
+        if ((state == ActivityState.RESUMED || isTopActivityWhileSleeping
+                || isTopActivityInMinimizedDockedStack) && app != null && app.thread != null) {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
-                app.thread.scheduleNewIntent(ar, appToken);
+                app.thread.scheduleNewIntent(
+                        ar, appToken, isTopActivityInMinimizedDockedStack /* andPause */);
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
