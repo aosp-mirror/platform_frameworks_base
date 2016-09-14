@@ -1442,8 +1442,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 + "; generating default policy");
 
         // Build default mobile policy, and assume usage cycle starts today
-        final long warningBytes = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_networkPolicyDefaultWarning) * MB_IN_BYTES;
+        final int dataWarningConfig = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_networkPolicyDefaultWarning);
+        final long warningBytes;
+        if (dataWarningConfig == WARNING_DISABLED) {
+            warningBytes = WARNING_DISABLED;
+        } else {
+            warningBytes = dataWarningConfig * MB_IN_BYTES;
+        }
 
         final Time time = new Time();
         time.setToNow();
