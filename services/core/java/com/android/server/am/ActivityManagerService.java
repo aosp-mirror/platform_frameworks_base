@@ -627,7 +627,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     final AppErrors mAppErrors;
 
     public boolean canShowErrorDialogs() {
-        return mShowDialogs && !mSleeping && !mShuttingDown;
+        return mShowDialogs && !mSleeping && !mShuttingDown
+                && mLockScreenShown != LOCK_SCREEN_SHOWN;
     }
 
     private static final class PriorityState {
