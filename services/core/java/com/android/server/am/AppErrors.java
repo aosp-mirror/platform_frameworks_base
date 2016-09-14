@@ -759,6 +759,9 @@ class AppErrors {
             } else if (app.crashing) {
                 Slog.i(TAG, "Crashing app skipping ANR: " + app + " " + annotation);
                 return;
+            } else if (app.killedByAm) {
+                Slog.i(TAG, "App already killed by AM skipping ANR: " + app + " " + annotation);
+                return;
             }
 
             // In case we come through here for the same app before completing
