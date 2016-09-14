@@ -525,6 +525,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
+        private static final String TAG_TEST_ONLY_ADMIN = "test-only-admin";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
         private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
         private static final String TAG_DISABLE_CONTACTS_SEARCH = "disable-contacts-search";
@@ -617,6 +618,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int disabledKeyguardFeatures = DEF_KEYGUARD_FEATURES_DISABLED;
 
         boolean encryptionRequested = false;
+        boolean testOnlyAdmin = false;
         boolean disableCamera = false;
         boolean disableCallerId = false;
         boolean disableContactsSearch = false;
@@ -785,6 +787,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, TAG_ENCRYPTION_REQUESTED);
                 out.attribute(null, ATTR_VALUE, Boolean.toString(encryptionRequested));
                 out.endTag(null, TAG_ENCRYPTION_REQUESTED);
+            }
+            if (testOnlyAdmin) {
+                out.startTag(null, TAG_TEST_ONLY_ADMIN);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(testOnlyAdmin));
+                out.endTag(null, TAG_TEST_ONLY_ADMIN);
             }
             if (disableCamera) {
                 out.startTag(null, TAG_DISABLE_CAMERA);
@@ -980,6 +987,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_ENCRYPTION_REQUESTED.equals(tag)) {
                     encryptionRequested = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_TEST_ONLY_ADMIN.equals(tag)) {
+                    testOnlyAdmin = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_CAMERA.equals(tag)) {
                     disableCamera = Boolean.parseBoolean(
@@ -1179,6 +1189,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("uid="); pw.println(getUid());
+            pw.print(prefix); pw.print("testOnlyAdmin=");
+            pw.println(testOnlyAdmin);
             pw.print(prefix); pw.println("policies:");
             ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
             if (pols != null) {
@@ -2829,8 +2841,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                if (!refreshing
-                        && getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null) {
+                final ActiveAdmin existingAdmin
+                        = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
+                if (!refreshing && existingAdmin != null) {
                     throw new IllegalArgumentException("Admin is already added");
                 }
                 if (policy.mRemovingAdmins.contains(adminReceiver)) {
@@ -2838,6 +2851,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             "Trying to set an admin which is being removed");
                 }
                 ActiveAdmin newAdmin = new ActiveAdmin(info, /* parent */ false);
+                newAdmin.testOnlyAdmin =
+                        (existingAdmin != null) ? existingAdmin.testOnlyAdmin
+                                : isPackageTestOnly(adminReceiver.getPackageName(), userHandle);
                 policy.mAdminMap.put(adminReceiver, newAdmin);
                 int replaceIndex = -1;
                 final int N = policy.mAdminList.size();
@@ -2949,12 +2965,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceShell("forceRemoveActiveAdmin");
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            if (!isPackageTestOnly(adminReceiver.getPackageName(), userHandle)) {
-                throw new SecurityException("Attempt to remove non-test admin "
-                        + adminReceiver + " " + userHandle);
-            }
-            // If admin is a device or profile owner tidy that up first.
             synchronized (this)  {
+                if (!isAdminTestOnlyLocked(adminReceiver, userHandle)) {
+                    throw new SecurityException("Attempt to remove non-test admin "
+                            + adminReceiver + " " + userHandle);
+                }
+
+                // If admin is a device or profile owner tidy that up first.
                 if (isDeviceOwner(adminReceiver, userHandle)) {
                     clearDeviceOwnerLocked(getDeviceOwnerAdminLocked(), userHandle);
                 }
@@ -2972,6 +2989,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Return if a given package has testOnly="true", in which case we'll relax certain rules
+     * for CTS.
+     *
+     * DO NOT use this method except in {@link #setActiveAdmin}.  Use {@link #isAdminTestOnlyLocked}
+     * to check wehter an active admin is test-only or not.
+     *
+     * The system allows this flag to be changed when an app is updated, which is not good
+     * for us.  So we persist the flag in {@link ActiveAdmin} when an admin is first installed,
+     * and used the persisted version in actual checks. (See b/31382361 and b/28928996)
+     */
     private boolean isPackageTestOnly(String packageName, int userHandle) {
         final ApplicationInfo ai;
         try {
@@ -2986,6 +3014,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + packageName + " " + userHandle);
         }
         return (ai.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+    }
+
+    /**
+     * See {@link #isPackageTestOnly}.
+     */
+    private boolean isAdminTestOnlyLocked(ComponentName who, int userHandle) {
+        final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+        return (admin != null) && admin.testOnlyAdmin;
     }
 
     private void enforceShell(String method) {
@@ -6251,7 +6287,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The profile owner can only be set before the user setup phase has completed,
      * except for:
      * - SYSTEM_UID
-     * - adb if there are no accounts. (But see {@link #hasIncompatibleAccounts})
+     * - adb if there are no accounts. (But see {@link #hasIncompatibleAccountsLocked})
      */
     private void enforceCanSetProfileOwnerLocked(@Nullable ComponentName owner, int userHandle) {
         UserInfo info = getUserInfo(userHandle);
@@ -6274,7 +6310,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int callingUid = mInjector.binderGetCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             if (hasUserSetupCompleted(userHandle)
-                    && hasIncompatibleAccounts(userHandle, owner)) {
+                    && hasIncompatibleAccountsLocked(userHandle, owner)) {
                 throw new IllegalStateException("Not allowed to set the profile owner because "
                         + "there are already some accounts on the profile");
             }
@@ -6298,7 +6334,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceCanManageProfileAndDeviceOwners();
         }
 
-        final int code = checkSetDeviceOwnerPreCondition(owner, userId, isAdb);
+        final int code = checkSetDeviceOwnerPreConditionLocked(owner, userId, isAdb);
         switch (code) {
             case CODE_OK:
                 return;
@@ -8566,7 +8602,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * The device owner can only be set before the setup phase of the primary user has completed,
      * except for adb command if no accounts or additional users are present on the device.
      */
-    private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreCondition(
+    private synchronized @DeviceOwnerPreConditionCode int checkSetDeviceOwnerPreConditionLocked(
             @Nullable ComponentName owner, int deviceOwnerUserId, boolean isAdb) {
         if (mOwners.hasDeviceOwner()) {
             return CODE_HAS_DEVICE_OWNER;
@@ -8584,7 +8620,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (mUserManager.getUserCount() > 1) {
                         return CODE_NONSYSTEM_USER_EXISTS;
                     }
-                    if (hasIncompatibleAccounts(UserHandle.USER_SYSTEM, owner)) {
+                    if (hasIncompatibleAccountsLocked(UserHandle.USER_SYSTEM, owner)) {
                         return CODE_ACCOUNTS_NOT_EMPTY;
                     }
                 } else {
@@ -8610,8 +8646,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isDeviceOwnerProvisioningAllowed(int deviceOwnerUserId) {
-        return CODE_OK == checkSetDeviceOwnerPreCondition(
-                /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false);
+        synchronized (this) {
+            return CODE_OK == checkSetDeviceOwnerPreConditionLocked(
+                    /* owner unknown */ null, deviceOwnerUserId, /* isAdb */ false);
+        }
     }
 
     private boolean hasFeatureManagedUsers() {
@@ -9257,7 +9295,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *   ..._DISALLOWED, return true.
      * - Otherwise return false.
      */
-    private boolean hasIncompatibleAccounts(int userId, @Nullable ComponentName owner) {
+    private boolean hasIncompatibleAccountsLocked(int userId, @Nullable ComponentName owner) {
         final long token = mInjector.binderClearCallingIdentity();
         try {
             final AccountManager am = AccountManager.get(mContext);
@@ -9295,7 +9333,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Owner is unknown.  Suppose it's not test-only
                 compatible = false;
                 log = "Only test-only device/profile owner can be installed with accounts";
-            } else if (isPackageTestOnly(owner.getPackageName(), userId)) {
+            } else if (isAdminTestOnlyLocked(owner, userId)) {
                 if (compatible) {
                     log = "Installing test-only owner " + owner;
                 } else {
