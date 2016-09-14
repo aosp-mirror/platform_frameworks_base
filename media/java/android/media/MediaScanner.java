@@ -21,12 +21,14 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.drm.DrmManagerClient;
 import android.graphics.BitmapFactory;
 import android.mtp.MtpConstants;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -152,6 +154,11 @@ public class MediaScanner implements AutoCloseable {
     private static final String ALARMS_DIR = "/alarms/";
     private static final String MUSIC_DIR = "/music/";
     private static final String PODCAST_DIR = "/podcasts/";
+
+    public static final String SCANNED_BUILD_PREFS_NAME = "MediaScanBuild";
+    public static final String LAST_INTERNAL_SCAN_FINGERPRINT = "lastScanFingerprint";
+    private static final String SYSTEM_SOUNDS_DIR = "/system/media/audio";
+    private static String sLastInternalScanFingerprint;
 
     private static final String[] ID3_GENRES = {
         // ID3v1 Genres
@@ -402,6 +409,13 @@ public class MediaScanner implements AutoCloseable {
         mMediaProvider = mContext.getContentResolver()
                 .acquireContentProviderClient(MediaStore.AUTHORITY);
 
+        if (sLastInternalScanFingerprint == null) {
+            final SharedPreferences scanSettings =
+                    mContext.getSharedPreferences(SCANNED_BUILD_PREFS_NAME, Context.MODE_PRIVATE);
+            sLastInternalScanFingerprint =
+                    scanSettings.getString(LAST_INTERNAL_SCAN_FINGERPRINT, new String());
+        }
+
         mAudioUri = Audio.Media.getContentUri(volumeName);
         mVideoUri = Video.Media.getContentUri(volumeName);
         mImagesUri = Images.Media.getContentUri(volumeName);
@@ -585,16 +599,24 @@ public class MediaScanner implements AutoCloseable {
                     entry.mRowId = 0;
                 }
 
-                if (entry.mPath != null &&
-                        ((!mDefaultNotificationSet &&
+                if (entry.mPath != null) {
+                    if (((!mDefaultNotificationSet &&
                                 doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename))
                         || (!mDefaultRingtoneSet &&
                                 doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename))
                         || (!mDefaultAlarmSet &&
                                 doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)))) {
-                    Log.w(TAG, "forcing rescan of " + entry.mPath +
-                            "since ringtone setting didn't finish");
-                    scanAlways = true;
+                        Log.w(TAG, "forcing rescan of " + entry.mPath +
+                                "since ringtone setting didn't finish");
+                        scanAlways = true;
+                    } else if (isSystemSoundWithMetadata(entry.mPath)
+                            && !Build.FINGERPRINT.equals(sLastInternalScanFingerprint)) {
+                        // file is located on the system partition where the date cannot be trusted:
+                        // rescan if the build fingerprint has changed since the last scan.
+                        Log.i(TAG, "forcing rescan of " + entry.mPath
+                                + " since build fingerprint changed");
+                        scanAlways = true;
+                    }
                 }
 
                 // rescan for metadata if file was modified since last scan
@@ -1128,6 +1150,15 @@ public class MediaScanner implements AutoCloseable {
 
     }; // end of anonymous MediaScannerClient instance
 
+    private static boolean isSystemSoundWithMetadata(String path) {
+        if (path.startsWith(SYSTEM_SOUNDS_DIR + ALARMS_DIR)
+                || path.startsWith(SYSTEM_SOUNDS_DIR + RINGTONES_DIR)
+                || path.startsWith(SYSTEM_SOUNDS_DIR + NOTIFICATIONS_DIR)) {
+            return true;
+        }
+        return false;
+    }
+
     private String settingSetIndicatorName(String base) {
         return base + "_set";
     }
@@ -1250,16 +1281,6 @@ public class MediaScanner implements AutoCloseable {
             mOriginalCount = c.getCount();
             c.close();
         }
-    }
-
-    private boolean inScanDirectory(String path, String[] directories) {
-        for (int i = 0; i < directories.length; i++) {
-            String directory = directories[i];
-            if (path.startsWith(directory)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void pruneDeadThumbnailFiles() {
