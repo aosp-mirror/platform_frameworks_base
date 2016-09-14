@@ -3392,6 +3392,10 @@ public class AudioService extends IAudioService.Stub {
     private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted,
             String caller, int flags) {
         int result = FLAG_ADJUST_VOLUME;
+        if (isPlatformTelevision()) {
+            return result;
+        }
+
         int ringerMode = getRingerModeInternal();
 
         switch (ringerMode) {
