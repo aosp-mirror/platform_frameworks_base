@@ -441,18 +441,11 @@ public class CarrierConfigManager {
             "disable_severe_when_extreme_disabled_bool";
 
     /**
-     * The data call APN retry configuration for default type APN.
+     * The data call retry configuration for different types of APN.
      * @hide
      */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING =
-            "carrier_data_call_retry_config_default_string";
-
-    /**
-     * The data call APN retry configuration for other type APNs.
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING =
-            "carrier_data_call_retry_config_others_string";
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS =
+            "carrier_data_call_retry_config_strings";
 
     /**
      * Delay between trying APN from the pool
@@ -1051,11 +1044,12 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL, true);
-        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING,
-                "default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000");
-        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING,
-                "max_retries=3, 5000, 5000, 5000");
+        sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
+                "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "others:max_retries=3, 5000, 5000, 5000"});
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
