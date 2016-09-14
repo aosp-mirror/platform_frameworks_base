@@ -21,7 +21,7 @@ package android.net.wifi.nan;
  *
  * {@hide}
  */
-oneway interface IWifiNanSessionCallback
+oneway interface IWifiNanDiscoverySessionCallback
 {
     void onSessionStarted(int sessionId);
     void onSessionConfigSuccess();

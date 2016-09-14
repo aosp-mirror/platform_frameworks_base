@@ -21,32 +21,33 @@ import android.util.Log;
 
 /**
  * A class representing a NAN publish session. Created when
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} is called and a
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} is called and a
  * discovery session is created and returned in
- * {@link WifiNanSessionCallback#onPublishStarted(WifiNanPublishSession)}. See baseline
- * functionality of all discovery sessions in {@link WifiNanSession}. This object allows updating
- * an existing/running publish discovery session using {@link #updatePublish(PublishConfig)}.
+ * {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}. See
+ * baseline functionality of all discovery sessions in {@link WifiNanDiscoveryBaseSession}. This
+ * object allows updating an existing/running publish discovery session using
+ * {@link #updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
-public class WifiNanPublishSession extends WifiNanSession {
-    private static final String TAG = "WifiNanPublishSession";
+public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession {
+    private static final String TAG = "WifiNanPublishDiscSsn";
 
     /** @hide */
-    public WifiNanPublishSession(WifiNanManager manager, int sessionId) {
+    public WifiNanPublishDiscoverySession(WifiNanManager manager, int sessionId) {
         super(manager, sessionId);
     }
 
     /**
      * Re-configure the currently active publish session. The
-     * {@link WifiNanSessionCallback} is not replaced - the same listener used
+     * {@link WifiNanDiscoverySessionCallback} is not replaced - the same listener used
      * at creation is still used. The results of the configuration are returned using
-     * {@link WifiNanSessionCallback}:
+     * {@link WifiNanDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanSessionCallback#onSessionConfigSuccess()}: configuration update
-     *     succeeded.
-     *     <li>{@link WifiNanSessionCallback#onSessionConfigFail(int)}: configuration update
-     *     failed. The publish discovery session is still running using its previous
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigSuccess()}: configuration
+     *     update succeeded.
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)}: configuration
+     *     update failed. The publish discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>
      *
