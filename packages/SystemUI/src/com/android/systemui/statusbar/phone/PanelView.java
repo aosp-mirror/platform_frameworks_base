@@ -23,6 +23,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
@@ -32,9 +33,11 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
+import com.android.systemui.LatencyTracker;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
@@ -115,6 +118,7 @@ public abstract class PanelView extends FrameLayout {
     protected boolean mExpanding;
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
+    private boolean mExpandLatencyTracking;
     private Runnable mPeekRunnable = new Runnable() {
         @Override
         public void run() {
@@ -212,6 +216,14 @@ public abstract class PanelView extends FrameLayout {
         mTouchDisabled = disabled;
         if (mTouchDisabled && mTracking) {
             onTrackingStopped(true /* expanded */);
+        }
+    }
+
+    public void startExpandLatencyTracking() {
+        if (LatencyTracker.isEnabled(mContext)) {
+            LatencyTracker.getInstance(mContext).onActionStart(
+                    LatencyTracker.ACTION_EXPAND_PANEL);
+            mExpandLatencyTracking = true;
         }
     }
 
@@ -739,6 +751,11 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public void setExpandedHeightInternal(float h) {
+        if (mExpandLatencyTracking && h != 0f) {
+            DejankUtils.postAfterTraversal(() -> LatencyTracker.getInstance(mContext).onActionEnd(
+                    LatencyTracker.ACTION_EXPAND_PANEL));
+            mExpandLatencyTracking = false;
+        }
         float fhWithoutOverExpansion = getMaxPanelHeight() - getOverExpansionAmount();
         if (mHeightAnimator == null) {
             float overExpansionPixels = Math.max(0, h - fhWithoutOverExpansion);
