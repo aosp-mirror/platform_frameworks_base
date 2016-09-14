@@ -412,6 +412,11 @@ void CanvasContext::draw() {
     }
 
     GpuMemoryTracker::onFrameCompleted();
+#ifdef BUGREPORT_FONT_CACHE_USAGE
+    Caches& caches = Caches::getInstance();
+    caches.fontRenderer.getFontRenderer().historyTracker().frameCompleted();
+#endif
+
 }
 
 // Called by choreographer to do an RT-driven animation
