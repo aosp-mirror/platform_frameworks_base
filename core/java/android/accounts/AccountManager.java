@@ -2707,8 +2707,6 @@ public class AccountManager {
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
      *         adding the the to the device later.
-     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
-     *         hash of the account.
      *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
      *         status of the account
      *         </ul>
@@ -2796,8 +2794,6 @@ public class AccountManager {
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_SESSION_BUNDLE} - encrypted Bundle for
      *         updating the local credentials on device later.
-     *         <li>{@link #KEY_PASSWORD} - optional, the password or password
-     *         hash of the account
      *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
      *         status of the account
      *         </ul>
