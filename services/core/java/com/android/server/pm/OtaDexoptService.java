@@ -31,7 +31,7 @@ import android.os.ServiceManager;
 import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
-
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.InstallerConnection;
 import com.android.internal.os.InstallerConnection.InstallerException;
 
@@ -40,6 +40,7 @@ import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service for A/B OTA dexopting.
@@ -68,6 +69,25 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     private List<String> mDexoptCommands;
 
     private int completeSize;
+
+    // MetricsLogger properties.
+
+    // Space before and after.
+    private long availableSpaceBefore;
+    private long availableSpaceAfterBulkDelete;
+    private long availableSpaceAfterDexopt;
+
+    // Packages.
+    private int importantPackageCount;
+    private int otherPackageCount;
+
+    // Number of dexopt commands. This may be different from the count of packages.
+    private int dexoptCommandCountTotal;
+    private int dexoptCommandCountExecuted;
+
+    // For spent time.
+    private long otaDexoptTimeStart;
+
 
     public OtaDexoptService(Context context, PackageManagerService packageManagerService) {
         this.mContext = context;
@@ -133,13 +153,17 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
         completeSize = mDexoptCommands.size();
 
-        if (getAvailableSpace() < BULK_DELETE_THRESHOLD) {
+        long spaceAvailable = getAvailableSpace();
+        if (spaceAvailable < BULK_DELETE_THRESHOLD) {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
             for (PackageParser.Package pkg : others) {
                 deleteOatArtifactsOfPackage(pkg);
             }
         }
+        long spaceAvailableNow = getAvailableSpace();
+
+        prepareMetricsLogging(important.size(), others.size(), spaceAvailable, spaceAvailableNow);
     }
 
     @Override
@@ -148,6 +172,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Cleaning up OTA Dexopt state.");
         }
         mDexoptCommands = null;
+
+        performMetricsLogging();
     }
 
     @Override
@@ -182,6 +208,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         String next = mDexoptCommands.remove(0);
 
         if (getAvailableSpace() > 0) {
+            dexoptCommandCountExecuted++;
+
             return next;
         } else {
             if (DEBUG_DEXOPT) {
@@ -318,6 +346,55 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 }
             }
         }
+    }
+
+    /**
+     * Initialize logging fields.
+     */
+    private void prepareMetricsLogging(int important, int others, long spaceBegin, long spaceBulk) {
+        availableSpaceBefore = spaceBegin;
+        availableSpaceAfterBulkDelete = spaceBulk;
+        availableSpaceAfterDexopt = 0;
+
+        importantPackageCount = important;
+        otherPackageCount = others;
+
+        dexoptCommandCountTotal = mDexoptCommands.size();
+        dexoptCommandCountExecuted = 0;
+
+        otaDexoptTimeStart = System.nanoTime();
+    }
+
+    private static int inMegabytes(long value) {
+        long in_mega_bytes = value / (1024 * 1024);
+        if (in_mega_bytes > Integer.MAX_VALUE) {
+            Log.w(TAG, "Recording " + in_mega_bytes + "MB of free space, overflowing range");
+            return Integer.MAX_VALUE;
+        }
+        return (int)in_mega_bytes;
+    }
+
+    private void performMetricsLogging() {
+        long finalTime = System.nanoTime();
+
+        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_before_mb",
+                inMegabytes(availableSpaceBefore));
+        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_bulk_delete_mb",
+                inMegabytes(availableSpaceAfterBulkDelete));
+        MetricsLogger.histogram(mContext, "ota_dexopt_available_space_after_dexopt_mb",
+                inMegabytes(availableSpaceAfterDexopt));
+
+        MetricsLogger.histogram(mContext, "ota_dexopt_num_important_packages",
+                importantPackageCount);
+        MetricsLogger.histogram(mContext, "ota_dexopt_num_other_packages", otherPackageCount);
+
+        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands", dexoptCommandCountTotal);
+        MetricsLogger.histogram(mContext, "ota_dexopt_num_commands_executed",
+                dexoptCommandCountExecuted);
+
+        final int elapsedTimeSeconds =
+                (int) TimeUnit.NANOSECONDS.toSeconds(finalTime - otaDexoptTimeStart);
+        MetricsLogger.histogram(mContext, "ota_dexopt_time_s", elapsedTimeSeconds);
     }
 
     private static class OTADexoptPackageDexOptimizer extends
