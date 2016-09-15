@@ -695,6 +695,8 @@ toc:
         value: 再生中カードを表示する
     - title: Adding a Guided Step
       path: /training/tv/playback/guided-step.html
+    - title: Introducing First-time Users to Your App
+      path: /training/tv/playback/onboarding.html
     - title: Enabling Background Playback
       path: /training/tv/playback/options.html
     - title: Adding Picture-in-picture
