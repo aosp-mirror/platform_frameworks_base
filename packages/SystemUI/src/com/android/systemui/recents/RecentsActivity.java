@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
@@ -87,6 +88,7 @@ import com.android.systemui.statusbar.BaseStatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * The main Recents activity that is started from RecentsComponent.
@@ -165,18 +167,39 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     final BroadcastReceiver mSystemBroadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context ctx, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
             } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
-                // For the time being, if the time changes, then invalidate the
-                // last-stack-active-time, this ensures that we will just show the last N tasks
-                // the next time that Recents loads, but prevents really old tasks from showing
-                // up if the task time is set forward.
-                Prefs.putLong(RecentsActivity.this, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
-                        0);
+                // If the time shifts but the currentTime >= lastStackActiveTime, then that boundary
+                // is still valid.  Otherwise, we need to reset the lastStackactiveTime to the
+                // currentTime and remove the old tasks in between which would not be previously
+                // visible, but currently would be in the new currentTime
+                long oldLastStackActiveTime = Prefs.getLong(RecentsActivity.this,
+                        Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, -1);
+                if (oldLastStackActiveTime != -1) {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime < oldLastStackActiveTime) {
+                        // We are only removing tasks that are between the new current time
+                        // and the old last stack active time, they were not visible and in the
+                        // TaskStack so we don't need to remove any associated TaskViews but we do
+                        // need to load the task id's from the system
+                        RecentsTaskLoadPlan loadPlan = Recents.getTaskLoader().createLoadPlan(ctx);
+                        loadPlan.preloadRawTasks(false /* includeFrontMostExcludedTask */);
+                        List<ActivityManager.RecentTaskInfo> tasks = loadPlan.getRawTasks();
+                        for (int i = tasks.size() - 1; i >= 0; i--) {
+                            ActivityManager.RecentTaskInfo task = tasks.get(i);
+                            if (currentTime <= task.lastActiveTime && task.lastActiveTime <
+                                    oldLastStackActiveTime) {
+                                Recents.getSystemServices().removeTask(task.persistentId);
+                            }
+                        }
+                        Prefs.putLong(RecentsActivity.this,
+                                Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, currentTime);
+                    }
+                }
             }
         }
     };
