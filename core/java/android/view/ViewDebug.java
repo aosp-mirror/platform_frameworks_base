@@ -846,6 +846,8 @@ public class ViewDebug {
         view.post(new Runnable() {
             @Override
             public void run() {
+                encoder.addProperty("window:left", view.mAttachInfo.mWindowLeft);
+                encoder.addProperty("window:top", view.mAttachInfo.mWindowTop);
                 view.encode(encoder);
                 latch.countDown();
             }
