@@ -117,6 +117,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
 
     std::unique_ptr<TestScene> scene(info.createScene(opts));
 
+    Properties::forceDrawFrame = true;
     TestContext testContext;
     testContext.setRenderOffscreen(opts.renderOffscreen);
 

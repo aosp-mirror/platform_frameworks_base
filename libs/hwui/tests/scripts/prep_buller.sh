@@ -38,12 +38,27 @@ adb shell "echo 0 > /sys/class/kgsl/kgsl-3d0/bus_split"
 adb shell "echo 1 > /sys/class/kgsl/kgsl-3d0/force_clk_on"
 adb shell "echo 10000 > /sys/class/kgsl/kgsl-3d0/idle_timer"
 
-#0 762 1144 1525 2288 3509 4173 5271 5928 7904 9887 11863
+# angler: 0 762 1144 1525 2288 3509 4173 5271 5928 7904 9887 11863
 adb shell "echo 11863 > /sys/class/devfreq/qcom,gpubw.70/min_freq" &> /dev/null
-adb shell "echo 11863 > /sys/class/devfreq/qcom,gpubw.19/min_freq" &> /dev/null
+# bullhead: 0 762 1144 1525 2288 3509 4173 5271 5928 7102
+adb shell "echo 7102 > /sys/class/devfreq/qcom,gpubw.19/min_freq" &> /dev/null
 
-#600000000 510000000 450000000 390000000 305000000 180000000
-echo "performance mode, 305 MHz"
+
+board=$(adb shell "getprop ro.product.board")
+freq=0
+if [ "$board" = "bullhead" ]
+then
+    #600000000 490000000 450000000 367000000 300000000 180000000
+    freq=300000000
+else
+    #600000000 510000000 450000000 390000000 305000000 180000000
+    freq=305000000
+fi
+echo "performance mode, $freq Hz"
 adb shell "echo performance > /sys/class/kgsl/kgsl-3d0/devfreq/governor"
-adb shell "echo 305000000 > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq"
-adb shell "echo 305000000 > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq"
+adb shell "echo $freq > /sys/class/kgsl/kgsl-3d0/devfreq/min_freq"
+adb shell "echo $freq > /sys/class/kgsl/kgsl-3d0/devfreq/max_freq"
+
+adb shell "echo 4 > /sys/class/kgsl/kgsl-3d0/min_pwrlevel"
+adb shell "echo 4 > /sys/class/kgsl/kgsl-3d0/max_pwrlevel"
+
