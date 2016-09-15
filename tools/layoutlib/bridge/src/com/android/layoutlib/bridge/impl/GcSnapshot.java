@@ -620,7 +620,8 @@ public class GcSnapshot {
             int y = 0;
             int width;
             int height;
-            Rectangle clipBounds = originalGraphics.getClipBounds();
+            Rectangle clipBounds = originalGraphics.getClip() != null ? originalGraphics
+                    .getClipBounds() : null;
             if (clipBounds != null) {
                 if (clipBounds.width == 0 || clipBounds.height == 0) {
                     // Clip is 0 so no need to paint anything.
