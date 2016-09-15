@@ -827,6 +827,14 @@ public class CarrierConfigManager {
             "duration_blocking_disabled_after_emergency_int";
 
     /**
+     * For carriers which require an empty flash to be sent before sending the normal 3-way calling
+     * flash, the duration in milliseconds of the empty flash to send.  When {@code 0}, no empty
+     * flash is sent.
+     */
+    public static final String KEY_CDMA_3WAYCALL_FLASH_DELAY_INT = "cdma_3waycall_flash_delay_int";
+
+
+    /**
      * @hide
      * The default value for preferred CDMA roaming mode (aka CDMA system select.)
      *          CDMA_ROAMING_MODE_RADIO_DEFAULT = the default roaming mode from the radio
@@ -1076,6 +1084,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_GSM_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_IMS_DTMF_TONE_DELAY_INT, 0);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
+        sDefaults.putInt(KEY_CDMA_3WAYCALL_FLASH_DELAY_INT , 0);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
         sDefaults.putBoolean(KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL, true);
