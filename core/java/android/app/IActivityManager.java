@@ -672,6 +672,18 @@ public interface IActivityManager extends IInterface {
      */
     public void setHasTopUi(boolean hasTopUi) throws RemoteException;
 
+    /**
+     * Returns if the target of the PendingIntent can be fired directly, without triggering
+     * a work profile challenge. This can happen if the PendingIntent is to start direct-boot
+     * aware activities, and the target user is in RUNNING_LOCKED state, i.e. we should allow
+     * direct-boot aware activity to bypass work challenge when the user hasn't unlocked yet.
+     * @param intent the {@link  PendingIntent} to be tested.
+     * @return {@code true} if the intent should not trigger a work challenge, {@code false}
+     *     otherwise.
+     * @throws RemoteException
+     */
+    public boolean canBypassWorkChallenge(PendingIntent intent) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -1062,6 +1074,7 @@ public interface IActivityManager extends IInterface {
     int SET_VR_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 377;
     int SET_RENDER_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
     int SET_HAS_TOP_UI = IBinder.FIRST_CALL_TRANSACTION + 379;
+    int CAN_BYPASS_WORK_CHALLENGE = IBinder.FIRST_CALL_TRANSACTION + 380;
 
     // Start of O transactions
     int REQUEST_ACTIVITY_RELAUNCH = IBinder.FIRST_CALL_TRANSACTION+400;
