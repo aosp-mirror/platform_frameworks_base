@@ -3242,7 +3242,7 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         data.writeInt(userId);
-        mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);
+        mRemote.transact(START_ACTIVITY_WITH_CONFIG_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();
         reply.recycle();
@@ -5608,7 +5608,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(mode);
         data.writeInt(sourceUserId);
         data.writeInt(targetUserId);
-        mRemote.transact(GRANT_URI_PERMISSION_TRANSACTION, data, reply, 0);
+        mRemote.transact(GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
@@ -5628,7 +5628,7 @@ class ActivityManagerProxy implements IActivityManager
         }
         data.writeInt(mode);
         data.writeInt(userId);
-        mRemote.transact(REVOKE_URI_PERMISSION_TRANSACTION, data, reply, 0);
+        mRemote.transact(REVOKE_URI_PERMISSION_FROM_OWNER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
