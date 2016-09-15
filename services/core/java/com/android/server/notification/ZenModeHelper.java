@@ -620,8 +620,10 @@ public class ZenModeHelper {
         return setConfigLocked(config, reason, true /*setRingerMode*/);
     }
 
-    public void setConfigAsync(ZenModeConfig config, String reason) {
-        mHandler.postSetConfig(config, reason);
+    public void setConfig(ZenModeConfig config, String reason) {
+        synchronized (mConfig) {
+            setConfigLocked(config, reason);
+        }
     }
 
     private boolean setConfigLocked(ZenModeConfig config, String reason, boolean setRingerMode) {
@@ -1084,19 +1086,12 @@ public class ZenModeHelper {
     private final class H extends Handler {
         private static final int MSG_DISPATCH = 1;
         private static final int MSG_METRICS = 2;
-        private static final int MSG_SET_CONFIG = 3;
         private static final int MSG_APPLY_CONFIG = 4;
 
         private final class ConfigMessageData {
             public final ZenModeConfig config;
             public final String reason;
             public final boolean setRingerMode;
-
-            ConfigMessageData(ZenModeConfig config, String reason) {
-                this.config = config;
-                this.reason = reason;
-                this.setRingerMode = false;
-            }
 
             ConfigMessageData(ZenModeConfig config, String reason, boolean setRingerMode) {
                 this.config = config;
@@ -1121,10 +1116,6 @@ public class ZenModeHelper {
             sendEmptyMessageDelayed(MSG_METRICS, METRICS_PERIOD_MS);
         }
 
-        private void postSetConfig(ZenModeConfig config, String reason) {
-            sendMessage(obtainMessage(MSG_SET_CONFIG, new ConfigMessageData(config, reason)));
-        }
-
         private void postApplyConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
             sendMessage(obtainMessage(MSG_APPLY_CONFIG,
                     new ConfigMessageData(config, reason, setRingerMode)));
@@ -1138,12 +1129,6 @@ public class ZenModeHelper {
                     break;
                 case MSG_METRICS:
                     mMetrics.emit();
-                    break;
-                case MSG_SET_CONFIG:
-                    ConfigMessageData configData = (ConfigMessageData) msg.obj;
-                    synchronized (mConfig) {
-                        setConfigLocked(configData.config, configData.reason);
-                    }
                     break;
                 case MSG_APPLY_CONFIG:
                     ConfigMessageData applyConfigData = (ConfigMessageData) msg.obj;
