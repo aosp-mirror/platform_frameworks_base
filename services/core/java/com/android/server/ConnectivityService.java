@@ -2138,7 +2138,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
                                 + nai.networkCapabilities + " -> " + networkCapabilities);
                     }
-                    updateCapabilities(nai, networkCapabilities);
+                    updateCapabilities(nai.getCurrentScore(), nai, networkCapabilities);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
@@ -2215,7 +2215,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             final int oldScore = nai.getCurrentScore();
                             nai.lastValidated = valid;
                             nai.everValidated |= valid;
-                            updateCapabilities(nai, nai.networkCapabilities);
+                            updateCapabilities(oldScore, nai, nai.networkCapabilities);
                             // If score has changed, rebroadcast to NetworkFactories. b/17726566
                             if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
                         }
@@ -2239,9 +2239,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     // If captive portal status has changed, update capabilities.
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
+                        final int oldScore = nai.getCurrentScore();
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
-                        updateCapabilities(nai, nai.networkCapabilities);
+                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
                     }
                     if (!visible) {
                         mNotifier.clearNotification(netId);
@@ -4459,10 +4460,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * augmented with any stateful capabilities implied from {@code networkAgent}
      * (e.g., validated status and captive portal status).
      *
+     * @param oldScore score of the network before any of the changes that prompted us
+     *                 to call this function.
      * @param nai the network having its capabilities updated.
      * @param networkCapabilities the new network capabilities.
      */
-    private void updateCapabilities(NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
+    private void updateCapabilities(
+            int oldScore, NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
         // Don't modify caller's NetworkCapabilities.
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
         if (nai.lastValidated) {
@@ -4476,7 +4480,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             networkCapabilities.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         }
         if (!Objects.equals(nai.networkCapabilities, networkCapabilities)) {
-            final int oldScore = nai.getCurrentScore();
             if (nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) !=
                     networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)) {
                 try {
