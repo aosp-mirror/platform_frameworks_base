@@ -684,6 +684,11 @@ class Task implements DimLayer.DimLayerUser {
         return false;
     }
 
+    // TODO: Use WindowContainer.compareTo() once everything is using WindowContainer
+    boolean isFirstGreaterThanSecond(AppWindowToken first, AppWindowToken second) {
+        return mAppTokens.indexOf(first) > mAppTokens.indexOf(second);
+    }
+
     boolean fillsParent() {
         return mFullscreen || !StackId.isTaskResizeAllowed(mStack.mStackId);
     }

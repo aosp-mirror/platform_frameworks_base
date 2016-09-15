@@ -326,6 +326,49 @@ public class WindowContainerTests {
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, root.getOrientation());
     }
 
+    @Test
+    public void testCompareTo() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child11 = child1.addChildWindow();
+        final TestWindowContainer child12 = child1.addChildWindow();
+
+        final TestWindowContainer child2 = root.addChildWindow();
+        final TestWindowContainer child21 = child2.addChildWindow();
+        final TestWindowContainer child22 = child2.addChildWindow();
+        final TestWindowContainer child23 = child2.addChildWindow();
+        final TestWindowContainer child221 = child22.addChildWindow();
+        final TestWindowContainer child222 = child22.addChildWindow();
+        final TestWindowContainer child223 = child22.addChildWindow();
+        final TestWindowContainer child2221 = child222.addChildWindow();
+        final TestWindowContainer child2222 = child222.addChildWindow();
+        final TestWindowContainer child2223 = child222.addChildWindow();
+
+        final TestWindowContainer root2 = builder.setLayer(0).build();
+
+        assertEquals(0, root.compareTo(root));
+        assertEquals(-1, child1.compareTo(child2));
+        assertEquals(1, child2.compareTo(child1));
+
+        boolean inTheSameTree = true;
+        try {
+            root.compareTo(root2);
+        } catch (IllegalArgumentException e) {
+            inTheSameTree = false;
+        }
+        assertFalse(inTheSameTree);
+
+        assertEquals(-1, child1.compareTo(child11));
+        assertEquals(1, child21.compareTo(root));
+        assertEquals(1, child21.compareTo(child12));
+        assertEquals(-1, child11.compareTo(child2));
+        assertEquals(1, child2221.compareTo(child11));
+        assertEquals(-1, child2222.compareTo(child223));
+        assertEquals(1, child2223.compareTo(child21));
+    }
+
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private class TestWindowContainer extends WindowContainer {
         private final int mLayer;

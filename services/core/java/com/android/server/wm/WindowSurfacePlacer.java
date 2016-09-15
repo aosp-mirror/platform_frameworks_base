@@ -1569,8 +1569,7 @@ class WindowSurfacePlacer {
     private void processApplicationsAnimatingInPlace(int transit) {
         if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
             // Find the focused window
-            final WindowState win = mService.findFocusedWindowLocked(
-                    mService.getDefaultDisplayContentLocked());
+            final WindowState win = mService.getDefaultDisplayContentLocked().findFocusedWindow();
             if (win != null) {
                 final AppWindowToken wtoken = win.mAppToken;
                 final AppWindowAnimator appAnimator = wtoken.mAppAnimator;

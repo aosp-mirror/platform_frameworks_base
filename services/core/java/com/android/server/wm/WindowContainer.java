@@ -31,7 +31,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
  * The test class is {@link WindowContainerTests} which must be kept up-to-date and ran anytime
  * changes are made to this class.
  */
-class WindowContainer {
+class WindowContainer implements Comparable<WindowContainer> {
 
     // The parent of this window container.
     private WindowContainer mParent = null;
@@ -46,6 +46,10 @@ class WindowContainer {
     final protected WindowContainer getParent() {
         return mParent;
     }
+
+    // Temp. holders for a chain of containers we are currently processing.
+    private final LinkedList<WindowContainer> mTmpChain1 = new LinkedList();
+    private final LinkedList<WindowContainer> mTmpChain2 = new LinkedList();
 
     /**
      * Adds the input window container has a child of this container in order based on the input
@@ -310,5 +314,66 @@ class WindowContainer {
      */
     boolean fillsParent() {
         return false;
+    }
+
+    /**
+     * Returns -1, 0, or 1 depending on if the input container is greater than, equal to, or lesser
+     * than the input container in terms of z-order.
+     */
+    @Override
+    public int compareTo(WindowContainer other) {
+        if (this == other) {
+            return 0;
+        }
+
+        if (mParent != null && mParent == other.mParent) {
+            final LinkedList<WindowContainer> list = mParent.mChildren;
+            return list.indexOf(this) > list.indexOf(other) ? 1 : -1;
+        }
+
+        final LinkedList<WindowContainer> thisParentChain = mTmpChain1;
+        final LinkedList<WindowContainer> otherParentChain = mTmpChain2;
+        getParents(thisParentChain);
+        other.getParents(otherParentChain);
+
+        // Find the common ancestor of both containers.
+        WindowContainer commonAncestor = null;
+        WindowContainer thisTop = thisParentChain.peekLast();
+        WindowContainer otherTop = otherParentChain.peekLast();
+        while (thisTop != null && otherTop != null && thisTop == otherTop) {
+            commonAncestor = thisParentChain.removeLast();
+            otherParentChain.removeLast();
+            thisTop = thisParentChain.peekLast();
+            otherTop = otherParentChain.peekLast();
+        }
+
+        // Containers don't belong to the same hierarchy???
+        if (commonAncestor == null) {
+            throw new IllegalArgumentException("No in the same hierarchy this="
+                    + thisParentChain + " other=" + otherParentChain);
+        }
+
+        // Children are always considered greater than their parents, so if one of the containers
+        // we are comparing it the parent of the other then whichever is the child is greater.
+        if (commonAncestor == this) {
+            return -1;
+        } else if (commonAncestor == other) {
+            return 1;
+        }
+
+        // The position of the first non-common ancestor in the common ancestor list determines
+        // which is greater the which.
+        final LinkedList<WindowContainer> list = commonAncestor.mChildren;
+        return list.indexOf(thisParentChain.peekLast()) > list.indexOf(otherParentChain.peekLast())
+                ? 1 : -1;
+    }
+
+    private void getParents(LinkedList<WindowContainer> parents) {
+        parents.clear();
+        WindowContainer current = this;
+        do {
+            parents.addLast(current);
+            current = current.mParent;
+        } while (current != null);
     }
 }
