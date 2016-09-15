@@ -398,6 +398,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_REQUEST_LINKPROPERTIES  = 32;
     private static final int EVENT_REQUEST_NETCAPABILITIES = 33;
 
+    /**
+     * Used internally to (re)configure avoid bad wifi setting.
+     */
+    private static final int EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI = 34;
+
     /** Handler thread used for both of the handlers below. */
     @VisibleForTesting
     protected final HandlerThread mHandlerThread;
@@ -902,6 +907,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSettingsObserver.observe(
                 Settings.Global.getUriFor(Settings.Global.MOBILE_DATA_ALWAYS_ON),
                 EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+
+        // Watch for whether to automatically switch away from wifi networks that lose Internet
+        // access.
+        mSettingsObserver.observe(
+                Settings.Global.getUriFor(Settings.Global.NETWORK_AVOID_BAD_WIFI),
+                EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
     }
 
     private synchronized int nextNetworkRequestId() {
@@ -2215,6 +2226,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (nai != null) {
                         final boolean valid =
                                 (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
+                        final boolean wasValidated = nai.lastValidated;
                         if (DBG) log(nai.name() + " validation " + (valid ? "passed" : "failed") +
                                 (msg.obj == null ? "" : " with redirect to " + (String)msg.obj));
                         if (valid != nai.lastValidated) {
@@ -2233,6 +2245,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                                 (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
                                 0, redirectUrlBundle);
+                         if (wasValidated && !nai.lastValidated) {
+                             handleNetworkUnvalidated(nai);
+                         }
                     }
                     break;
                 }
@@ -2737,11 +2752,40 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @VisibleForTesting
     public boolean avoidBadWifi() {
+        // There are two modes: either we always automatically avoid unvalidated wifi, or we show a
+        // dialog and don't switch to it. The behaviour is controlled by the NETWORK_AVOID_BAD_WIFI
+        // setting. If the setting has no value, then the value is taken from the config value,
+        // which can be changed via OEM/carrier overlays.
         int defaultAvoidBadWifi =
             mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi);
         int avoid = Settings.Global.getInt(mContext.getContentResolver(),
             Settings.Global.NETWORK_AVOID_BAD_WIFI, defaultAvoidBadWifi);
         return avoid == 1;
+    }
+
+    private void showValidationNotification(NetworkAgentInfo nai, NotificationType type) {
+        final String action;
+        switch (type) {
+            case NO_INTERNET:
+                action = ConnectivityManager.ACTION_PROMPT_UNVALIDATED;
+                break;
+            case LOST_INTERNET:
+                action = ConnectivityManager.ACTION_PROMPT_LOST_VALIDATION;
+                break;
+            default:
+                Slog.wtf(TAG, "Unknown notification type " + type);
+                return;
+        }
+
+        Intent intent = new Intent(action);
+        intent.setData(Uri.fromParts("netId", Integer.toString(nai.network.netId), null));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName("com.android.settings",
+                "com.android.settings.wifi.WifiNoInternetDialog");
+
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, true);
     }
 
     private void handlePromptUnvalidated(Network network) {
@@ -2755,18 +2799,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated) {
             return;
         }
+        showValidationNotification(nai, NotificationType.NO_INTERNET);
+    }
 
-        Intent intent = new Intent(ConnectivityManager.ACTION_PROMPT_UNVALIDATED);
-        intent.setData(Uri.fromParts("netId", Integer.toString(network.netId), null));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setClassName("com.android.settings",
-                "com.android.settings.wifi.WifiNoInternetDialog");
+    private void handleNetworkUnvalidated(NetworkAgentInfo nai) {
+        NetworkCapabilities nc = nai.networkCapabilities;
+        if (DBG) log("handleNetworkUnvalidated " + nai.name() + " cap=" + nc);
 
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
-
-        mNotifier.showNotification(nai.network.netId, NotificationType.NO_INTERNET, nai, null,
-                pendingIntent, true);
+        if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !avoidBadWifi()) {
+            showValidationNotification(nai, NotificationType.LOST_INTERNET);
+        }
     }
 
     private class InternalHandler extends Handler {
@@ -2848,6 +2890,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON: {
                     handleMobileDataAlwaysOn();
+                    break;
+                }
+                case EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI: {
+                    rematchAllNetworksAndRequests(null, 0);
                     break;
                 }
                 case EVENT_REQUEST_LINKPROPERTIES:
@@ -4836,7 +4882,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
                 // mark it as no longer satisfying "nri".  Because networks are processed by
-                // rematchAllNetworkAndRequests() in descending score order, "currentNetwork" will
+                // rematchAllNetworksAndRequests() in descending score order, "currentNetwork" will
                 // match "newNetwork" before this loop will encounter a "currentNetwork" with higher
                 // score than "newNetwork" and where "currentNetwork" no longer satisfies "nri".
                 // This means this code doesn't have to handle the case where "currentNetwork" no
@@ -5396,6 +5442,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
+
+        Settings.Global.putString(mContext.getContentResolver(),
+                Settings.Global.NETWORK_AVOID_BAD_WIFI, null);
     }
 
     @VisibleForTesting
