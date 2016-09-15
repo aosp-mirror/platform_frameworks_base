@@ -343,6 +343,15 @@ public class ConnectivityManager {
     public static final String ACTION_PROMPT_UNVALIDATED = "android.net.conn.PROMPT_UNVALIDATED";
 
     /**
+     * Action used to display a dialog that asks the user whether to avoid a network that is no
+     * longer validated. This intent is used to start the dialog in settings via startActivity.
+     *
+     * @hide
+     */
+    public static final String ACTION_PROMPT_LOST_VALIDATION =
+            "android.net.conn.PROMPT_LOST_VALIDATION";
+
+    /**
      * Invalid tethering type.
      * @see #startTethering(int, OnStartTetheringCallback, boolean)
      * @hide
