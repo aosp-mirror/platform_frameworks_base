@@ -870,7 +870,7 @@ public class VolumeDialog implements TunerService.Tunable {
                 if (row.anim != null) {
                     row.anim.cancel();
                 }
-                row.slider.setProgress(newProgress);
+                row.slider.setProgress(newProgress, true);
             }
         }
     }
