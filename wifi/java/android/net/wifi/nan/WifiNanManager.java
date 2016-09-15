@@ -28,7 +28,6 @@ import android.net.wifi.RttManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -37,8 +36,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-
-import dalvik.system.CloseGuard;
 
 import libcore.util.HexEncoding;
 
@@ -59,15 +56,15 @@ import java.util.Arrays;
  * The class provides access to:
  * <ul>
  * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
- * {@link #connect(Handler, WifiNanEventCallback)}.
- * <li>Create discovery sessions (publish or subscribe sessions).
- * Refer to {@link #publish(PublishConfig, WifiNanDiscoverySessionCallback)} and
- * {@link #subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}.
- * <li>Create a NAN network specifier to be used with
+ * {@link #connect(Handler, WifiNanEventCallback)}. <li>Create discovery sessions (publish or
+ * subscribe sessions). Refer to
+ * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} and
+ * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}. <li>Create
+ * a NAN network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a NAN connection with a peer. Refer to
  * {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])} and
- * {@link #createNetworkSpecifier(int, byte[], byte[])}.
+ * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
  * <p>
  *     NAN may not be usable when Wi-Fi is disabled (and other conditions). To validate that
@@ -82,16 +79,16 @@ import java.util.Arrays;
  *     starts one if none can be found). Information about connection success (or failure) are
  *     returned in callbacks of {@link WifiNanEventCallback}. Proceed with NAN discovery or
  *     connection setup only after receiving confirmation that NAN connection succeeded -
- *     {@link WifiNanEventCallback#onConnectSuccess()}.
- *     When an application is finished using NAN it <b>must</b> use the {@link #disconnect()} API
+ *     {@link WifiNanEventCallback#onConnectSuccess(WifiNanSession)}. When an application is
+ *     finished using NAN it <b>must</b> use the {@link WifiNanSession#disconnect()} API
  *     to indicate to the NAN service that the device may disconnect from the NAN cluster. The
  *     device will actually disconnect from the NAN cluster once the last application disconnects.
  * <p>
  *     Once a NAN connection is confirmed use the
- *     {@link #publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
- *     {@link #subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} to create publish or
- *     subscribe NAN discovery sessions. Events are called on the provided callback object
- *     {@link WifiNanDiscoverySessionCallback}. Specifically, the
+ *     {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
+ *     {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} to
+ *     create publish or subscribe NAN discovery sessions. Events are called on the provided
+ *     callback object {@link WifiNanDiscoverySessionCallback}. Specifically, the
  *     {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
  *     and
  *     {@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
@@ -111,7 +108,7 @@ import java.util.Arrays;
  *        <li>{@link NetworkRequest.Builder#addTransportType(int)} of
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
- *        {@link #createNetworkSpecifier(int, byte[], byte[])} or
+ *        {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])} or
  *        {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])}.
  *    </ul>
  *
@@ -121,8 +118,6 @@ public class WifiNanManager {
     private static final String TAG = "WifiNanManager";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
-
-    private static final int INVALID_CLIENT_ID = 0;
 
     /**
      * Keys used to generate a Network Specifier for the NAN network request. The network specifier
@@ -251,7 +246,7 @@ public class WifiNanManager {
      * when requesting a NAN network.
      *
      * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])
-     * @see #createNetworkSpecifier(int, byte[], byte[])
+     * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
 
@@ -260,24 +255,14 @@ public class WifiNanManager {
      * when requesting a NAN network.
      *
      * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])
-     * @see #createNetworkSpecifier(int, byte[], byte[])
+     * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
 
     private final Context mContext;
     private final IWifiNanManager mService;
-    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private final Object mLock = new Object(); // lock access to the following vars
-
-    @GuardedBy("mLock")
-    private final IBinder mBinder = new Binder();
-
-    @GuardedBy("mLock")
-    private int mClientId = INVALID_CLIENT_ID;
-
-    @GuardedBy("mLock")
-    private Looper mLooper;
 
     @GuardedBy("mLock")
     private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
@@ -340,8 +325,8 @@ public class WifiNanManager {
      * create connection to peers. The device will connect to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
      * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
-     * An application <b>must</b> call {@link #disconnect()} when done with the Wi-Fi NAN
-     * connection.
+     * An application <b>must</b> call {@link WifiNanSession#disconnect()} when done with the
+     * Wi-Fi NAN connection.
      * <p>
      * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
      * than this function will simply indicate success immediately.
@@ -360,10 +345,10 @@ public class WifiNanManager {
      * create connection to peers. The device will connect to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
      * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
-     * An application <b>must</b> call {@link #disconnect()} when done with the Wi-Fi NAN
-     * connection. Allows requesting a specific configuration using {@link ConfigRequest}. If not
-     * necessary (default configuration should usually work) use the
-     * {@link #connect(Handler, WifiNanEventCallback)} method instead.
+     * An application <b>must</b> call {@link WifiNanSession#disconnect()} when done with the
+     * Wi-Fi NAN connection. Allows requesting a specific configuration using
+     * {@link ConfigRequest}. If not necessary (default configuration should usually work) use
+     * the {@link #connect(Handler, WifiNanEventCallback)} method instead.
      * <p>
      * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
      * than this function will simply indicate success immediately.
@@ -383,50 +368,23 @@ public class WifiNanManager {
         }
 
         synchronized (mLock) {
-            mLooper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+            Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
 
             try {
-                mClientId = mService.connect(mBinder, mContext.getOpPackageName(),
-                        new WifiNanEventCallbackProxy(this, mLooper, callback), configRequest);
+                Binder binder = new Binder();
+                mService.connect(binder, mContext.getOpPackageName(),
+                        new WifiNanEventCallbackProxy(this, looper, binder, callback),
+                        configRequest);
             } catch (RemoteException e) {
-                mClientId = INVALID_CLIENT_ID;
-                mLooper = null;
                 e.rethrowAsRuntimeException();
             }
         }
-
-        mCloseGuard.open("disconnect");
     }
 
-    /**
-     * Disconnect from the Wi-Fi NAN service and, if no other applications are connected to NAN,
-     * also disconnect from the NAN cluster. This method destroys all outstanding operations -
-     * i.e. all publish and subscribes are terminated, and any outstanding data-links are
-     * shut-down. However, it is good practice to terminate these discovery sessions and
-     * connections explicitly before a disconnect.
-     * <p>
-     * An application may re-connect after a disconnect using
-     * {@link WifiNanManager#connect(Handler, WifiNanEventCallback)} .
-     */
-    public void disconnect() {
+    /** @hide */
+    public void disconnect(int clientId, Binder binder) {
         if (VDBG) Log.v(TAG, "disconnect()");
 
-        IBinder binder;
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.w(TAG, "disconnect(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            binder = mBinder;
-            clientId = mClientId;
-
-            mLooper = null;
-            mClientId = INVALID_CLIENT_ID;
-        }
-
-        mCloseGuard.close();
         try {
             mService.disconnect(clientId, binder);
         } catch (RemoteException e) {
@@ -435,78 +393,26 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            mCloseGuard.warnIfOpen();
-            disconnect();
-        } finally {
-            super.finalize();
-        }
-    }
+    public void publish(int clientId, Looper looper, PublishConfig publishConfig,
+            WifiNanDiscoverySessionCallback callback) {
+        if (VDBG) Log.v(TAG, "publish(): clientId=" + clientId + ", config=" + publishConfig);
 
-    /**
-     * Issue a request to the NAN service to create a new NAN publish discovery session, using
-     * the specified {@code publishConfig} configuration. The results of the publish operation
-     * are routed to the callbacks of {@link WifiNanDiscoverySessionCallback}:
-     * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
-     *     is called when the publish session is created and provides a handle to the session.
-     *     Further operations on the publish session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)} is called if the
-     *     publish operation failed.
-     * </ul>
-     * <p>
-     * Other results of the publish session operations will also be routed to callbacks
-     * on the {@code callback} object. The resulting publish session can be modified using
-     * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
-     * <p>
-     *      An application must use the {@link WifiNanDiscoveryBaseSession#terminate()} to
-     *      terminate the publish discovery session once it isn't needed. This will free
-     *      resources as well terminate any on-air transmissions.
-     *
-     * @param publishConfig The {@link PublishConfig} specifying the
-     *            configuration of the requested publish session.
-     * @param callback A {@link WifiNanDiscoverySessionCallback} derived object to be used for
-     *                 session event callbacks.
-     */
-    public void publish(@NonNull PublishConfig publishConfig,
-            @NonNull WifiNanDiscoverySessionCallback callback) {
-        if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
-
-        int clientId;
-        Looper looper;
-        synchronized (mLock) {
-            if (mLooper == null || mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG, "publish(): called with null looper or invalid client ID - "
-                        + "not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
-            looper = mLooper;
-        }
         try {
             mService.publish(clientId, publishConfig,
-                    new WifiNanDiscoverySessionCallbackProxy(this, looper, true, callback));
+                    new WifiNanDiscoverySessionCallbackProxy(this, looper, true, callback,
+                            clientId));
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     /** @hide */
-    public void updatePublish(int sessionId, PublishConfig publishConfig) {
-        if (VDBG) Log.v(TAG, "updatePublish(): config=" + publishConfig);
-
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG, "updatePublish(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
+    public void updatePublish(int clientId, int sessionId, PublishConfig publishConfig) {
+        if (VDBG) {
+            Log.v(TAG, "updatePublish(): clientId=" + clientId + ",sessionId=" + sessionId
+                    + ", config=" + publishConfig);
         }
+
         try {
             mService.updatePublish(clientId, sessionId, publishConfig);
         } catch (RemoteException e) {
@@ -514,73 +420,30 @@ public class WifiNanManager {
         }
     }
 
-    /**
-     * Issue a request to the NAN service to create a new NAN subscribe discovery session, using
-     * the specified {@code subscribeConfig} configuration. The results of the subscribe
-     * operation are routed to the callbacks of {@link WifiNanDiscoverySessionCallback}:
-     * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
-     *     is called when the subscribe session is created and provides a handle to the session.
-     *     Further operations on the subscribe session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)} is called if the
-     *     subscribe operation failed.
-     * </ul>
-     * <p>
-     * Other results of the subscribe session operations will also be routed to callbacks
-     * on the {@code callback} object. The resulting subscribe session can be modified using
-     * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
-     * <p>
-     *      An application must use the {@link WifiNanDiscoveryBaseSession#terminate()} to
-     *      terminate the subscribe discovery session once it isn't needed. This will free
-     *      resources as well terminate any on-air transmissions.
-     *
-     * @param subscribeConfig The {@link SubscribeConfig} specifying the
-     *            configuration of the requested subscribe session.
-     * @param callback A {@link WifiNanDiscoverySessionCallback} derived object to be used for
-     *                 session event callbacks.
-     */
-    public void subscribe(@NonNull SubscribeConfig subscribeConfig,
-            @NonNull WifiNanDiscoverySessionCallback callback) {
+    /** @hide */
+    public void subscribe(int clientId, Looper looper, SubscribeConfig subscribeConfig,
+            WifiNanDiscoverySessionCallback callback) {
         if (VDBG) {
-            Log.v(TAG, "subscribe(): config=" + subscribeConfig);
-        }
-
-        int clientId;
-        Looper looper;
-        synchronized (mLock) {
-            if (mLooper == null || mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG, "subscribe(): called with null looper or invalid client ID - "
-                        + "not connected first?");
-                return;
+            if (VDBG) {
+                Log.v(TAG,
+                        "subscribe(): clientId=" + clientId + ", config=" + subscribeConfig);
             }
-
-            clientId = mClientId;
-            looper = mLooper;
         }
 
         try {
             mService.subscribe(clientId, subscribeConfig,
-                    new WifiNanDiscoverySessionCallbackProxy(this, looper, false, callback));
+                    new WifiNanDiscoverySessionCallbackProxy(this, looper, false, callback,
+                            clientId));
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     /** @hide */
-    public void updateSubscribe(int sessionId, SubscribeConfig subscribeConfig) {
+    public void updateSubscribe(int clientId, int sessionId, SubscribeConfig subscribeConfig) {
         if (VDBG) {
-            Log.v(TAG, "subscribe(): config=" + subscribeConfig);
-        }
-
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG,
-                        "updateSubscribe(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
+            Log.v(TAG, "updateSubscribe(): clientId=" + clientId + ",sessionId=" + sessionId
+                    + ", config=" + subscribeConfig);
         }
 
         try {
@@ -591,18 +454,10 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public void terminateSession(int sessionId) {
-        if (DBG) Log.d(TAG, "Terminate NAN session #" + sessionId);
-
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG,
-                        "terminateSession(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
+    public void terminateSession(int clientId, int sessionId) {
+        if (VDBG) {
+            Log.d(TAG,
+                    "terminateSession(): clientId=" + clientId + ", sessionId=" + sessionId);
         }
 
         try {
@@ -613,21 +468,12 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public void sendMessage(int sessionId, int peerId, byte[] message, int messageId,
+    public void sendMessage(int clientId, int sessionId, int peerId, byte[] message, int messageId,
             int retryCount) {
         if (VDBG) {
-            Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
-                    + ", messageId=" + messageId + ", retryCount=" + retryCount);
-        }
-
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG, "sendMessage(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
+            Log.v(TAG,
+                    "sendMessage(): clientId=" + clientId + ", sessionId=" + sessionId + ", peerId="
+                            + peerId + ", messageId=" + messageId + ", retryCount=" + retryCount);
         }
 
         try {
@@ -638,21 +484,11 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public void startRanging(int sessionId, RttManager.RttParams[] params,
+    public void startRanging(int clientId, int sessionId, RttManager.RttParams[] params,
                              RttManager.RttListener listener) {
         if (VDBG) {
-            Log.v(TAG, "startRanging: sessionId=" + sessionId + ", " + "params="
-                    + Arrays.toString(params) + ", listener=" + listener);
-        }
-
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG, "startRanging(): called with invalid client ID - not connected first?");
-                return;
-            }
-
-            clientId = mClientId;
+            Log.v(TAG, "startRanging: clientId=" + clientId + ", sessionId=" + sessionId + ", "
+                    + "params=" + Arrays.toString(params) + ", listener=" + listener);
         }
 
         int rangingKey = 0;
@@ -669,7 +505,7 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public String createNetworkSpecifier(@DataPathRole int role, int sessionId, int peerId,
+    public String createNetworkSpecifier(int clientId, int role, int sessionId, int peerId,
             byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
@@ -705,18 +541,6 @@ public class WifiNanManager {
             }
         }
 
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG,
-                        "createNetworkSpecifier: called with invalid client ID - not connected "
-                                + "first?");
-                return null;
-            }
-
-            clientId = mClientId;
-        }
-
         JSONObject json;
         try {
             json = new JSONObject();
@@ -738,36 +562,8 @@ public class WifiNanManager {
         return json.toString();
     }
 
-    /**
-     * Create a {@link NetworkRequest.Builder#setNetworkSpecifier(String)} for a
-     * WiFi NAN connection to the specified peer. The
-     * {@link NetworkRequest.Builder#addTransportType(int)} should be set to
-     * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
-     * <p>
-     *     This API is targeted for applications which can obtain the peer MAC address using OOB
-     *     (out-of-band) discovery. NAN discovery does not provide the MAC address of the peer -
-     *     when using NAN discovery use the alternative network specifier method -
-     *     {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])}.
-     *
-     * @param role  The role of this device:
-     *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
-     *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
-     * @param peer  The MAC address of the peer's NAN discovery interface. On a RESPONDER this
-     *              value is used to gate the acceptance of a connection request from only that
-     *              peer. A RESPONDER may specified a null - indicating that it will accept
-     *              connection requests from any device.
-     * @param token An arbitrary token (message) to be used to match connection initiation request
-     *              to a responder setup. A RESPONDER is set up with a {@code token} which must
-     *              be matched by the token provided by the INITIATOR. A null token is permitted
-     *              on the RESPONDER and matches any peer token. An empty ({@code ""}) token is
-     *              not the same as a null token and requires the peer token to be empty as well.
-     *
-     * @return A string to be used to construct
-     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to
-     * {@link android.net.ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
-     * [or other varieties of that API].
-     */
-    public String createNetworkSpecifier(@DataPathRole int role, @Nullable byte[] peer,
+    /** @hide */
+    public String createNetworkSpecifier(int clientId, @DataPathRole int role, @Nullable byte[] peer,
             @Nullable byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", token=" + token);
@@ -806,18 +602,6 @@ public class WifiNanManager {
             }
         }
 
-        int clientId;
-        synchronized (mLock) {
-            if (mClientId == INVALID_CLIENT_ID) {
-                Log.e(TAG,
-                        "createNetworkSpecifier: called with invalid client ID - not connected "
-                                + "first?");
-                return null;
-            }
-
-            clientId = mClientId;
-        }
-
         JSONObject json;
         try {
             json = new JSONObject();
@@ -848,6 +632,8 @@ public class WifiNanManager {
 
         private final Handler mHandler;
         private final WeakReference<WifiNanManager> mNanManager;
+        private final Binder mBinder;
+        private final Looper mLooper;
 
         RttManager.RttListener getAndRemoveRangingListener(int rangingId) {
             WifiNanManager mgr = mNanManager.get();
@@ -869,9 +655,11 @@ public class WifiNanManager {
          *
          * @param looper The looper on which to execute the callbacks.
          */
-        WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper,
+        WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper, Binder binder,
                 final WifiNanEventCallback originalCallback) {
             mNanManager = new WeakReference<>(mgr);
+            mLooper = looper;
+            mBinder = binder;
 
             if (VDBG) Log.v(TAG, "WifiNanEventCallbackProxy ctor: looper=" + looper);
             mHandler = new Handler(looper) {
@@ -889,13 +677,10 @@ public class WifiNanManager {
 
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
-                            originalCallback.onConnectSuccess();
+                            originalCallback.onConnectSuccess(
+                                    new WifiNanSession(mgr, mBinder, mLooper, msg.arg1));
                             break;
                         case CALLBACK_CONNECT_FAIL:
-                            synchronized (mgr.mLock) {
-                                mgr.mLooper = null;
-                                mgr.mClientId = INVALID_CLIENT_ID;
-                            }
                             mNanManager.clear();
                             originalCallback.onConnectFail(msg.arg1);
                             break;
@@ -939,10 +724,11 @@ public class WifiNanManager {
         }
 
         @Override
-        public void onConnectSuccess() {
+        public void onConnectSuccess(int clientId) {
             if (VDBG) Log.v(TAG, "onConnectSuccess");
 
             Message msg = mHandler.obtainMessage(CALLBACK_CONNECT_SUCCESS);
+            msg.arg1 = clientId;
             mHandler.sendMessage(msg);
         }
 
@@ -1019,15 +805,17 @@ public class WifiNanManager {
         private final WeakReference<WifiNanManager> mNanManager;
         private final boolean mIsPublish;
         private final WifiNanDiscoverySessionCallback mOriginalCallback;
+        private final int mClientId;
 
         private final Handler mHandler;
         private WifiNanDiscoveryBaseSession mSession;
 
         WifiNanDiscoverySessionCallbackProxy(WifiNanManager mgr, Looper looper, boolean isPublish,
-                WifiNanDiscoverySessionCallback originalCallback) {
+                WifiNanDiscoverySessionCallback originalCallback, int clientId) {
             mNanManager = new WeakReference<>(mgr);
             mIsPublish = isPublish;
             mOriginalCallback = originalCallback;
+            mClientId = clientId;
 
             if (VDBG) {
                 Log.v(TAG, "WifiNanDiscoverySessionCallbackProxy ctor: isPublish=" + isPublish);
@@ -1183,12 +971,12 @@ public class WifiNanManager {
 
             if (mIsPublish) {
                 WifiNanPublishDiscoverySession session = new WifiNanPublishDiscoverySession(mgr,
-                        sessionId);
+                        mClientId, sessionId);
                 mSession = session;
                 mOriginalCallback.onPublishStarted(session);
             } else {
                 WifiNanSubscribeDiscoverySession
-                        session = new WifiNanSubscribeDiscoverySession(mgr, sessionId);
+                        session = new WifiNanSubscribeDiscoverySession(mgr, mClientId, sessionId);
                 mSession = session;
                 mOriginalCallback.onSubscribeStarted(session);
             }
