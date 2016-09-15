@@ -133,7 +133,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
-import com.android.systemui.LatencyTracker;
+import com.android.keyguard.LatencyTracker;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;

@@ -2,10 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := SystemUI-proto-tags
+LOCAL_MODULE := SystemUI-proto
 
-LOCAL_SRC_FILES := $(call all-proto-files-under,src) \
-    src/com/android/systemui/EventLogTags.logtags
+LOCAL_SRC_FILES := $(call all-proto-files-under,src)
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
@@ -33,7 +32,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     framework-protos \
-    SystemUI-proto-tags
+    SystemUI-proto
 
 LOCAL_JAVA_LIBRARIES := telephony-common
 LOCAL_JAVA_LIBRARIES += android.car
