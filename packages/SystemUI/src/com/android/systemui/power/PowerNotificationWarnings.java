@@ -31,6 +31,7 @@ import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -73,7 +74,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Context mContext;
     private final NotificationManager mNoMan;
     private final PowerManager mPowerMan;
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
 
@@ -89,9 +90,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean mInvalidCharger;
     private SystemUIDialog mSaverConfirmation;
 
-    public PowerNotificationWarnings(Context context, PhoneStatusBar phoneStatusBar) {
+    public PowerNotificationWarnings(Context context, NotificationManager notificationManager,
+            PhoneStatusBar phoneStatusBar) {
         mContext = context;
-        mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNoMan = notificationManager;
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mReceiver.init();
     }

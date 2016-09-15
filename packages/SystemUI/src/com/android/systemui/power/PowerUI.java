@@ -16,6 +16,7 @@
 
 package com.android.systemui.power;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,10 +31,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
-
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -60,7 +59,10 @@ public class PowerUI extends SystemUI {
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
-        mWarnings = new PowerNotificationWarnings(mContext, getComponent(PhoneStatusBar.class));
+        mWarnings = new PowerNotificationWarnings(
+                mContext,
+                (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE),
+                getComponent(PhoneStatusBar.class));
 
         ContentObserver obs = new ContentObserver(mHandler) {
             @Override
