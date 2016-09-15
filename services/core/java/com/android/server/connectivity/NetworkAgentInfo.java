@@ -115,6 +115,7 @@ import java.util.TreeSet;
 // is satisfying one or more background NetworkRequests it is kept up in the background. If it is
 // not, ConnectivityService disconnects the NetworkAgent's AsyncChannel.
 public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
+
     public NetworkInfo networkInfo;
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
@@ -415,11 +416,18 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         int score = currentScore;
-        if (!lastValidated && !pretendValidated) {
+        if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty()) {
             score -= UNVALIDATED_SCORE_PENALTY;
         }
         if (score < 0) score = 0;
         return score;
+    }
+
+    // Return true on devices configured to ignore score penalty for wifi networks
+    // that become unvalidated (b/31075769).
+    private boolean ignoreWifiUnvalidationPenalty() {
+        boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        return isWifi && !mConnService.avoidBadWifi() && everValidated;
     }
 
     // Get the current score for this Network.  This may be modified from what the
