@@ -319,6 +319,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_RETRIEVE_INTERACTIVE_WINDOWS = 0x00000040;
 
+    /**
+     * This flag requests that all audio tracks system-wide with
+     * {@link android.media.AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY} be controlled by the
+     * {@link android.media.AudioManager#STREAM_ACCESSIBILITY} volume.
+     */
+    public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 0x00000080;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -930,6 +937,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_FILTER_KEY_EVENTS";
             case FLAG_RETRIEVE_INTERACTIVE_WINDOWS:
                 return "FLAG_RETRIEVE_INTERACTIVE_WINDOWS";
+            case FLAG_ENABLE_ACCESSIBILITY_VOLUME:
+                return "FLAG_ENABLE_ACCESSIBILITY_VOLUME";
             default:
                 return null;
         }

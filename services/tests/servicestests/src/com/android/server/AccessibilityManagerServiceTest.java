@@ -285,7 +285,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testSendAccessibilityEvent_OneService_NotifivationAfterTimeout() throws Exception {
+    public void testSendAccessibilityEvent_OneService_NotificationAfterTimeout() throws Exception {
         // enable the mock accessibility service
         ensureOnlyMockServicesEnabled(mContext, true, false);
 
@@ -569,6 +569,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         public void setState(int state) {
             mState = state;
         }
+
+        public void notifyServicesStateChanged() {}
 
         public void setTouchExplorationEnabled(boolean enabled) {
         }
