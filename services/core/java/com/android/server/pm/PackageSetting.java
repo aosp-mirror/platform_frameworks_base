@@ -29,10 +29,14 @@ import java.util.List;
 final class PackageSetting extends PackageSettingBase {
     int appId;
     PackageParser.Package pkg;
+    /**
+     * WARNING. The object reference is important. We perform integer equality and NOT
+     * object equality to check whether shared user settings are the same.
+     */
     SharedUserSetting sharedUser;
     /**
      * Temporary holding space for the shared user ID. While parsing package settings, the
-     * shared users tag may be after the packages. In this case, we must delay linking the
+     * shared users tag may come after the packages. In this case, we must delay linking the
      * shared user setting with the package setting. The shared user ID lets us link the
      * two objects.
      */
@@ -54,7 +58,17 @@ final class PackageSetting extends PackageSettingBase {
      * Note that it keeps the same PackageParser.Package instance.
      */
     PackageSetting(PackageSetting orig) {
-        super(orig);
+        super(orig, orig.realName);
+        doCopy(orig);
+    }
+
+    /**
+     * New instance of PackageSetting replicating the original settings, but, allows specifying
+     * a real package name.
+     * Note that it keeps the same PackageParser.Package instance.
+     */
+    PackageSetting(PackageSetting orig, String realPkgName) {
+        super(orig, realPkgName);
         doCopy(orig);
     }
 

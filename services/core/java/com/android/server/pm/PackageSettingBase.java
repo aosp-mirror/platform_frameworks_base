@@ -27,6 +27,8 @@ import android.os.storage.VolumeInfo;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +101,7 @@ abstract class PackageSettingBase extends SettingBase {
 
     boolean uidError;
 
-    PackageSignatures signatures = new PackageSignatures();
+    PackageSignatures signatures;
 
     boolean installPermissionsFixed;
 
@@ -147,11 +149,17 @@ abstract class PackageSettingBase extends SettingBase {
                 secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
     }
 
-    /** New instance of PackageSetting with one-level-deep cloning. */
-    PackageSettingBase(PackageSettingBase base) {
+    /**
+     * New instance of PackageSetting with one-level-deep cloning.
+     * <p>
+     * IMPORTANT: With a shallow copy, we do NOT create new contained objects.
+     * This means, for example, changes to the user state of the original PackageSetting
+     * will also change the user state in its copy.
+     */
+    PackageSettingBase(PackageSettingBase base, String realName) {
         super(base);
         name = base.name;
-        realName = base.realName;
+        this.realName = realName;
         doCopy(base);
     }
 
@@ -167,6 +175,7 @@ abstract class PackageSettingBase extends SettingBase {
         this.secondaryCpuAbiString = secondaryCpuAbiString;
         this.cpuAbiOverrideString = cpuAbiOverrideString;
         this.versionCode = pVersionCode;
+        this.signatures = new PackageSignatures();
     }
 
     public void setInstallerPackageName(String packageName) {
@@ -278,6 +287,12 @@ abstract class PackageSettingBase extends SettingBase {
 
     boolean getInstalled(int userId) {
         return readUserState(userId).installed;
+    }
+
+    /** Only use for testing. Do NOT use in production code. */
+    @VisibleForTesting
+    SparseArray<PackageUserState> getUserState() {
+        return userState;
     }
 
     boolean isAnyInstalled(int[] users) {
