@@ -1320,6 +1320,30 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mTasks.indexOf(first) > mTasks.indexOf(second);
     }
 
+    void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
+            DisplayContent.GetWindowOnDisplaySearchResults result) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.getWindowOnDisplayBeforeToken(dc, token, result);
+            if (result.reachedToken) {
+                // We have reach the token we are interested in. End search.
+                return;
+            }
+        }
+    }
+
+    void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
+            DisplayContent.GetWindowOnDisplaySearchResults result) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.getWindowOnDisplayAfterToken(dc, token, result);
+            if (result.foundWindow != null) {
+                // We have found a window after the token. End search.
+                return;
+            }
+        }
+    }
+
     // TODO: Remove once switched to use WindowContainer
     int getOrientation() {
         if (!StackId.canSpecifyOrientation(mStackId)) {

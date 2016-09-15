@@ -27,9 +27,14 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -44,6 +49,7 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.IWindow;
 import android.view.Surface;
 import android.view.animation.Animation;
 
@@ -827,5 +833,265 @@ class DisplayContent {
 
         if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: No focusable windows.");
         return null;
+    }
+
+    int addAppWindowToWindowList(final WindowState win) {
+        final IWindow client = win.mClient;
+
+        WindowList tokenWindowList = getTokenWindowsOnDisplay(win.mToken);
+        if (!tokenWindowList.isEmpty()) {
+            return addAppWindowExisting(win, tokenWindowList);
+        }
+
+        // No windows from this token on this display
+        if (mService.localLOGV) Slog.v(TAG_WM, "Figuring out where to add app window "
+                + client.asBinder() + " (token=" + this + ")");
+
+        final WindowToken wToken = win.mToken;
+
+        // Figure out where the window should go, based on the order of applications.
+        final GetWindowOnDisplaySearchResults result = new GetWindowOnDisplaySearchResults();
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.getWindowOnDisplayBeforeToken(this, wToken, result);
+            if (result.reachedToken) {
+                // We have reach the token we are interested in. End search.
+                break;
+            }
+        }
+
+        WindowState pos = result.foundWindow;
+
+        // We now know the index into the apps. If we found an app window above, that gives us the
+        // position; else we need to look some more.
+        if (pos != null) {
+            // Move behind any windows attached to this one.
+            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
+            if (atoken != null) {
+                tokenWindowList = getTokenWindowsOnDisplay(atoken);
+                final int NC = tokenWindowList.size();
+                if (NC > 0) {
+                    WindowState bottom = tokenWindowList.get(0);
+                    if (bottom.mSubLayer < 0) {
+                        pos = bottom;
+                    }
+                }
+            }
+            addWindowToListBefore(win, pos);
+            return 0;
+        }
+
+        // Continue looking down until we find the first token that has windows on this display.
+        result.reset();
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.getWindowOnDisplayAfterToken(this, wToken, result);
+            if (result.foundWindow != null) {
+                // We have found a window after the token. End search.
+                break;
+            }
+        }
+
+        pos = result.foundWindow;
+
+        if (pos != null) {
+            // Move in front of any windows attached to this one.
+            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
+            if (atoken != null) {
+                final WindowState top = atoken.getTopWindow();
+                if (top != null && top.mSubLayer >= 0) {
+                    pos = top;
+                }
+            }
+            addWindowToListAfter(win, pos);
+            return 0;
+        }
+
+        // Just search for the start of this layer.
+        final int myLayer = win.mBaseLayer;
+        int i;
+        for (i = mWindows.size() - 1; i >= 0; --i) {
+            final WindowState w = mWindows.get(i);
+            // Dock divider shares the base layer with application windows, but we want to always
+            // keep it above the application windows. The sharing of the base layer is intended
+            // for window animations, which need to be above the dock divider for the duration
+            // of the animation.
+            if (w.mBaseLayer <= myLayer && w.mAttrs.type != TYPE_DOCK_DIVIDER) {
+                break;
+            }
+        }
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                "Based on layer: Adding window " + win + " at " + (i + 1) + " of "
+                + mWindows.size());
+        mWindows.add(i + 1, win);
+        mService.mWindowsChanged = true;
+        return 0;
+    }
+
+    /** Adds this non-app window to the window list. */
+    void addNonAppWindowToWindowList(WindowState win) {
+        // Figure out where window should go, based on layer.
+        int i;
+        for (i = mWindows.size() - 1; i >= 0; i--) {
+            final WindowState otherWin = mWindows.get(i);
+            if (otherWin.getBaseType() != TYPE_WALLPAPER && otherWin.mBaseLayer <= win.mBaseLayer) {
+                // Wallpaper wanders through the window list, for example to position itself
+                // directly behind keyguard. Because of this it will break the ordering based on
+                // WindowState.mBaseLayer. There might windows with higher mBaseLayer behind it and
+                // we don't want the new window to appear above them. An example of this is adding
+                // of the docked stack divider. Consider a scenario with the following ordering (top
+                // to bottom): keyguard, wallpaper, assist preview, apps. We want the dock divider
+                // to land below the assist preview, so the dock divider must ignore the wallpaper,
+                // with which it shares the base layer.
+                break;
+            }
+        }
+
+        i++;
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                "Free window: Adding window " + this + " at " + i + " of " + mWindows.size());
+        mWindows.add(i, win);
+        mService.mWindowsChanged = true;
+    }
+
+    void addChildWindowToWindowList(WindowState win) {
+        final WindowState parentWindow = win.getParentWindow();
+
+        WindowList windowsOnSameDisplay = getTokenWindowsOnDisplay(win.mToken);
+
+        // Figure out this window's ordering relative to the parent window.
+        final int wCount = windowsOnSameDisplay.size();
+        final int sublayer = win.mSubLayer;
+        int largestSublayer = Integer.MIN_VALUE;
+        WindowState windowWithLargestSublayer = null;
+        int i;
+        for (i = 0; i < wCount; i++) {
+            WindowState w = windowsOnSameDisplay.get(i);
+            final int wSublayer = w.mSubLayer;
+            if (wSublayer >= largestSublayer) {
+                largestSublayer = wSublayer;
+                windowWithLargestSublayer = w;
+            }
+            if (sublayer < 0) {
+                // For negative sublayers, we go below all windows in the same sublayer.
+                if (wSublayer >= sublayer) {
+                    addWindowToListBefore(win, wSublayer >= 0 ? parentWindow : w);
+                    break;
+                }
+            } else {
+                // For positive sublayers, we go above all windows in the same sublayer.
+                if (wSublayer > sublayer) {
+                    addWindowToListBefore(win, w);
+                    break;
+                }
+            }
+        }
+        if (i >= wCount) {
+            if (sublayer < 0) {
+                addWindowToListBefore(win, parentWindow);
+            } else {
+                addWindowToListAfter(win,
+                        largestSublayer >= 0 ? windowWithLargestSublayer : parentWindow);
+            }
+        }
+    }
+
+    /** Return the list of Windows on this display associated with the input token. */
+    WindowList getTokenWindowsOnDisplay(WindowToken token) {
+        final WindowList windowList = new WindowList();
+        final int count = mWindows.size();
+        for (int i = 0; i < count; i++) {
+            final WindowState win = mWindows.get(i);
+            if (win.mToken == token) {
+                windowList.add(win);
+            }
+        }
+        return windowList;
+    }
+
+    private int addAppWindowExisting(WindowState win, WindowList tokenWindowList) {
+
+        int tokenWindowsPos;
+        // If this application has existing windows, we simply place the new window on top of
+        // them... but keep the starting window on top.
+        if (win.mAttrs.type == TYPE_BASE_APPLICATION) {
+            // Base windows go behind everything else.
+            final WindowState lowestWindow = tokenWindowList.get(0);
+            addWindowToListBefore(win, lowestWindow);
+            tokenWindowsPos = win.mToken.getWindowIndex(lowestWindow);
+        } else {
+            final AppWindowToken atoken = win.mAppToken;
+            final int windowListPos = tokenWindowList.size();
+            final WindowState lastWindow = tokenWindowList.get(windowListPos - 1);
+            if (atoken != null && lastWindow == atoken.startingWindow) {
+                addWindowToListBefore(win, lastWindow);
+                tokenWindowsPos = win.mToken.getWindowIndex(lastWindow);
+            } else {
+                int newIdx = findIdxBasedOnAppTokens(win);
+                // There is a window above this one associated with the same apptoken note that the
+                // window could be a floating window that was created later or a window at the top
+                // of the list of windows associated with this token.
+                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                        "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of "
+                                + mWindows.size());
+                mWindows.add(newIdx + 1, win);
+                if (newIdx < 0) {
+                    // No window from token found on win's display.
+                    tokenWindowsPos = 0;
+                } else {
+                    tokenWindowsPos = win.mToken.getWindowIndex(mWindows.get(newIdx)) + 1;
+                }
+                mService.mWindowsChanged = true;
+            }
+        }
+        return tokenWindowsPos;
+    }
+
+    /** Places the first input window after the second input window in the window list. */
+    private void addWindowToListAfter(WindowState first, WindowState second) {
+        final int i = mWindows.indexOf(second);
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                "Adding window " + this + " at " + (i + 1) + " of " + mWindows.size()
+                + " (after " + second + ")");
+        mWindows.add(i + 1, first);
+        mService.mWindowsChanged = true;
+    }
+
+    /** Places the first input window before the second input window in the window list. */
+    private void addWindowToListBefore(WindowState first, WindowState second) {
+        int i = mWindows.indexOf(second);
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                "Adding window " + this + " at " + i + " of " + mWindows.size()
+                + " (before " + second + ")");
+        if (i < 0) {
+            Slog.w(TAG_WM, "addWindowToListBefore: Unable to find " + second + " in " + mWindows);
+            i = 0;
+        }
+        mWindows.add(i, first);
+        mService.mWindowsChanged = true;
+    }
+
+    /**
+     * This method finds out the index of a window that has the same app token as win. used for z
+     * ordering the windows in mWindows
+     */
+    private int findIdxBasedOnAppTokens(WindowState win) {
+        for(int j = mWindows.size() - 1; j >= 0; j--) {
+            final WindowState wentry = mWindows.get(j);
+            if(wentry.mAppToken == win.mAppToken) {
+                return j;
+            }
+        }
+        return -1;
+    }
+
+    static final class GetWindowOnDisplaySearchResults {
+        boolean reachedToken;
+        WindowState foundWindow;
+
+        void reset() {
+            reachedToken = false;
+            foundWindow = null;
+        }
     }
 }
