@@ -134,6 +134,7 @@ public class DragEvent implements Parcelable {
 
     Object mLocalState;
     boolean mDragResult;
+    boolean mEventHandlerWasCalled;
 
     private DragEvent mNext;
     private RuntimeException mRecycledLocation;
@@ -435,6 +436,7 @@ public class DragEvent implements Parcelable {
         mClipData = null;
         mClipDescription = null;
         mLocalState = null;
+        mEventHandlerWasCalled = false;
 
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {
