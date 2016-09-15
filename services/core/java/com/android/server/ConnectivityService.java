@@ -2138,7 +2138,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             networkCapabilities.hasCapability(NET_CAPABILITY_FOREGROUND)) {
                         Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
                     }
-                    updateCapabilities(nai, networkCapabilities);
+                    updateCapabilities(nai.getCurrentScore(), nai, networkCapabilities);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
@@ -2215,7 +2215,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             final int oldScore = nai.getCurrentScore();
                             nai.lastValidated = valid;
                             nai.everValidated |= valid;
-                            updateCapabilities(nai, nai.networkCapabilities);
+                            updateCapabilities(oldScore, nai, nai.networkCapabilities);
                             // If score has changed, rebroadcast to NetworkFactories. b/17726566
                             if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
                         }
@@ -2239,9 +2239,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     // If captive portal status has changed, update capabilities.
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
+                        final int oldScore = nai.getCurrentScore();
                         nai.lastCaptivePortalDetected = visible;
                         nai.everCaptivePortalDetected |= visible;
-                        updateCapabilities(nai, nai.networkCapabilities);
+                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
                     }
                     if (!visible) {
                         mNotifier.clearNotification(netId);
@@ -2627,7 +2628,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mNetworkForRequestId.remove(nri.request.requestId);
                 if (!wasBackgroundNetwork && nai.isBackgroundNetwork()) {
                     // Went from foreground to background.
-                    updateCapabilities(nai, nai.networkCapabilities);
+                    updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
                 }
             }
 
@@ -4503,10 +4504,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * augmented with any stateful capabilities implied from {@code networkAgent}
      * (e.g., validated status and captive portal status).
      *
+     * @param oldScore score of the network before any of the changes that prompted us
+     *                 to call this function.
      * @param nai the network having its capabilities updated.
      * @param networkCapabilities the new network capabilities.
      */
-    private void updateCapabilities(NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
+    private void updateCapabilities(
+            int oldScore, NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
         if (nai.everConnected && !nai.networkCapabilities.equalImmutableCapabilities(
                 networkCapabilities)) {
             Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
@@ -4544,7 +4548,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        final int oldScore = nai.getCurrentScore();
         final NetworkCapabilities prevNc = nai.networkCapabilities;
         synchronized (nai) {
             nai.networkCapabilities = networkCapabilities;
@@ -4686,7 +4689,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             teardownUnneededNetwork(oldNetwork);
         } else {
             // Put the network in the background.
-            updateCapabilities(oldNetwork, oldNetwork.networkCapabilities);
+            updateCapabilities(oldNetwork.getCurrentScore(), oldNetwork,
+                    oldNetwork.networkCapabilities);
         }
     }
 
@@ -4899,7 +4903,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // its foreground state. It is safe to do this after rematching the requests because
             // NET_CAPABILITY_FOREGROUND does not affect requests, as is not a requestable
             // capability and does not affect the network's score (see the Slog.wtf call above).
-            updateCapabilities(newNetwork, newNetwork.networkCapabilities);
+            updateCapabilities(score, newNetwork, newNetwork.networkCapabilities);
         } else {
             processListenRequests(newNetwork, false);
         }
