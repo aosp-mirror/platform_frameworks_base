@@ -496,6 +496,11 @@ final public class MediaExtractor {
     /**
      * Advance to the next sample. Returns false if no more sample data
      * is available (end of stream).
+     *
+     * When extracting a local file, the behaviors of {@link #advance} and
+     * {@link #readSampleData} are undefined in presence of concurrent
+     * writes to the same local file; more specifically, end of stream
+     * could be signalled earlier than expected.
      */
     public native boolean advance();
 
