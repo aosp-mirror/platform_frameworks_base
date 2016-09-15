@@ -77,7 +77,7 @@ public class Wm extends BaseCommand {
                 "wm dismiss-keyguard: dismiss the keyguard, prompting the user for auth if " +
                 "necessary.\n" +
                 "\n" +
-                "wm surface-trace: log surface commands to stdout.\n"
+                "wm surface-trace: log surface commands to stdout in a binary format.\n"
                 );
     }
 
@@ -112,46 +112,15 @@ public class Wm extends BaseCommand {
         }
     }
 
-    private void parseTrace(String next, DataInputStream is) throws Exception {
-        switch (next) {
-        case "Alpha":
-            System.out.println(is.readFloat());
-            break;
-        case "Layer":
-            System.out.println(is.readInt());
-            break;
-        case "Position":
-            System.out.println(is.readFloat() + ", " + is.readFloat());
-            break;
-        case "Size":
-            System.out.println(is.readInt() + ", " + is.readInt());
-            break;
-        case "LayerStack":
-            System.out.println(is.readInt());
-            break;
-        case "Matrix":
-            System.out.println(is.readFloat() + "," + is.readFloat() + "," + is.readFloat() + "," +
-                    is.readFloat());
-            break;
-        case "Hide":
-        case "Show":
-        case "GeometryAppliesWithResize":
-            break;
-        }
-    }
-
     private void runSurfaceTrace() throws Exception {
-        ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
-
-        mWm.enableSurfaceTrace(fds[1]);
-        DataInputStream is = new DataInputStream(new FileInputStream(fds[0].getFileDescriptor()));
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(FileDescriptor.out);
+        mWm.enableSurfaceTrace(pfd);
 
         try {
-            while (true) {
-                String cmd = is.readUTF();
-                String window = is.readUTF();
-                System.out.print(cmd + "(" + window + "): ");
-                parseTrace(cmd, is);
+            // No one is going to wake us up, we are just waiting on SIGINT. Otherwise
+            // the WM can happily continue writing to our stdout.
+            synchronized (this) {
+                this.wait();
             }
         } finally {
             mWm.disableSurfaceTrace();
