@@ -303,6 +303,31 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
 
         WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
         assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
+        assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
+
+        // Now install a package
+        String singlePackage = "singlePackage";
+        packages = new WebViewProviderInfo[]{
+            new WebViewProviderInfo(singlePackage, "", true, false, null)};
+        setupWithPackages(packages);
+        setEnabledAndValidPackageInfos(packages);
+
+        mWebViewUpdateServiceImpl.packageStateChanged(singlePackage,
+                WebViewUpdateService.PACKAGE_ADDED, 0);
+
+        checkPreparationPhasesForPackage(singlePackage, 1 /* number of finished preparations */);
+        assertEquals(singlePackage,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
+
+        // Remove the package again
+        mTestSystemImpl.removePackageInfo(singlePackage);
+        mWebViewUpdateServiceImpl.packageStateChanged(singlePackage,
+                WebViewUpdateService.PACKAGE_ADDED, 0);
+
+        // Package removed - ensure our interface states that there is no package
+        response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
+        assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
+        assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
     }
 
     public void testFailListingInvalidWebviewPackage() {
@@ -395,7 +420,8 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
                 Mockito.argThat(new IsPackageInfoWithName(firstPackage)));
 
-        assertEquals(firstPackage, mWebViewUpdateServiceImpl.getCurrentWebViewPackageName());
+        assertEquals(firstPackage,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
 
         new Thread(new Runnable() {
             @Override
@@ -1242,5 +1268,43 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
                 WebViewUpdateService.PACKAGE_ADDED_REPLACED, 2);
 
         checkPreparationPhasesForPackage(primaryPackage, 3 /* third preparation phase */);
+    }
+
+    public void testGetCurrentWebViewPackage() {
+        PackageInfo firstPackage = createPackageInfo("first", true /* enabled */,
+                        true /* valid */, true /* installed */);
+        firstPackage.versionCode = 100;
+        firstPackage.versionName = "first package version";
+        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
+            new WebViewProviderInfo(firstPackage.packageName, "", true, false, null)};
+        setupWithPackages(packages, true);
+        mTestSystemImpl.setPackageInfo(firstPackage);
+
+        mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
+
+        Mockito.verify(mTestSystemImpl).onWebViewProviderChanged(
+                Mockito.argThat(new IsPackageInfoWithName(firstPackage.packageName)));
+
+        mWebViewUpdateServiceImpl.notifyRelroCreationCompleted();
+
+        // Ensure the API is correct before running waitForAndGetProvider
+        assertEquals(firstPackage.packageName,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
+        assertEquals(firstPackage.versionCode,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.versionName,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
+
+        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
+        assertEquals(WebViewFactory.LIBLOAD_SUCCESS, response.status);
+        assertEquals(firstPackage.packageName, response.packageInfo.packageName);
+
+        // Ensure the API is still correct after running waitForAndGetProvider
+        assertEquals(firstPackage.packageName,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
+        assertEquals(firstPackage.versionCode,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.versionName,
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
     }
 }

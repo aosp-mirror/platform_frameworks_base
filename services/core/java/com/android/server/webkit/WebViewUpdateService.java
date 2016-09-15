@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.PatternMatcher;
@@ -224,7 +225,13 @@ public class WebViewUpdateService extends SystemService {
 
         @Override // Binder call
         public String getCurrentWebViewPackageName() {
-            return WebViewUpdateService.this.mImpl.getCurrentWebViewPackageName();
+            PackageInfo pi = WebViewUpdateService.this.mImpl.getCurrentWebViewPackage();
+            return pi == null ? null : pi.packageName;
+        }
+
+        @Override // Binder call
+        public PackageInfo getCurrentWebViewPackage() {
+            return WebViewUpdateService.this.mImpl.getCurrentWebViewPackage();
         }
 
         @Override // Binder call
