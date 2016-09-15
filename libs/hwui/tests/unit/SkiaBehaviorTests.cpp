@@ -68,3 +68,13 @@ TEST(SkiaBehavior, lightingColorFilter_simplify) {
         EXPECT_FALSE(failFilter->asColorMode(nullptr, nullptr));
     }
 }
+
+TEST(SkiaBehavior, porterDuffCreateIsCached) {
+    SkPaint paint;
+    paint.setXfermodeMode(SkXfermode::kOverlay_Mode);
+    auto expected = paint.getXfermode();
+    paint.setXfermodeMode(SkXfermode::kClear_Mode);
+    ASSERT_NE(expected, paint.getXfermode());
+    paint.setXfermodeMode(SkXfermode::kOverlay_Mode);
+    ASSERT_EQ(expected, paint.getXfermode());
+}

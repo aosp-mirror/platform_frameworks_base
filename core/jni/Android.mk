@@ -124,7 +124,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/PathMeasure.cpp \
     android/graphics/PathEffect.cpp \
     android/graphics/Picture.cpp \
-    android/graphics/PorterDuff.cpp \
     android/graphics/BitmapRegionDecoder.cpp \
     android/graphics/Rasterizer.cpp \
     android/graphics/Region.cpp \
@@ -132,7 +131,6 @@ LOCAL_SRC_FILES:= \
     android/graphics/SurfaceTexture.cpp \
     android/graphics/Typeface.cpp \
     android/graphics/Utils.cpp \
-    android/graphics/Xfermode.cpp \
     android/graphics/YuvToJpegEncoder.cpp \
     android/graphics/pdf/PdfDocument.cpp \
     android/graphics/pdf/PdfEditor.cpp \

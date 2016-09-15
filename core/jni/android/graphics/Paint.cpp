@@ -275,10 +275,30 @@ namespace PaintGlue {
         return reinterpret_cast<jlong>(obj->setColorFilter(filter));
     }
 
-    static jlong setXfermode(JNIEnv* env, jobject clazz, jlong objHandle, jlong xfermodeHandle) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        SkXfermode* xfermode = reinterpret_cast<SkXfermode*>(xfermodeHandle);
-        return reinterpret_cast<jlong>(obj->setXfermode(xfermode));
+    static void setXfermode(JNIEnv* env, jobject clazz, jlong paintHandle, jint xfermodeHandle) {
+        // validate that the Java enum values match our expectations
+        static_assert(0 == SkXfermode::kClear_Mode, "xfermode_mismatch");
+        static_assert(1 == SkXfermode::kSrc_Mode, "xfermode_mismatch");
+        static_assert(2 == SkXfermode::kDst_Mode, "xfermode_mismatch");
+        static_assert(3 == SkXfermode::kSrcOver_Mode, "xfermode_mismatch");
+        static_assert(4 == SkXfermode::kDstOver_Mode, "xfermode_mismatch");
+        static_assert(5 == SkXfermode::kSrcIn_Mode, "xfermode_mismatch");
+        static_assert(6 == SkXfermode::kDstIn_Mode, "xfermode_mismatch");
+        static_assert(7 == SkXfermode::kSrcOut_Mode, "xfermode_mismatch");
+        static_assert(8 == SkXfermode::kDstOut_Mode, "xfermode_mismatch");
+        static_assert(9 == SkXfermode::kSrcATop_Mode, "xfermode_mismatch");
+        static_assert(10 == SkXfermode::kDstATop_Mode, "xfermode_mismatch");
+        static_assert(11 == SkXfermode::kXor_Mode, "xfermode_mismatch");
+        static_assert(16 == SkXfermode::kDarken_Mode, "xfermode_mismatch");
+        static_assert(17 == SkXfermode::kLighten_Mode, "xfermode_mismatch");
+        static_assert(13 == SkXfermode::kModulate_Mode, "xfermode_mismatch");
+        static_assert(14 == SkXfermode::kScreen_Mode, "xfermode_mismatch");
+        static_assert(12 == SkXfermode::kPlus_Mode, "xfermode_mismatch");
+        static_assert(15 == SkXfermode::kOverlay_Mode, "xfermode_mismatch");
+
+        SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setXfermodeMode(mode);
     }
 
     static jlong setPathEffect(JNIEnv* env, jobject clazz, jlong objHandle, jlong effectHandle) {
@@ -961,7 +981,7 @@ static const JNINativeMethod methods[] = {
     {"nGetFillPath","!(JJJ)Z", (void*) PaintGlue::getFillPath},
     {"nSetShader","!(JJ)J", (void*) PaintGlue::setShader},
     {"nSetColorFilter","!(JJ)J", (void*) PaintGlue::setColorFilter},
-    {"nSetXfermode","!(JJ)J", (void*) PaintGlue::setXfermode},
+    {"nSetXfermode","!(JI)V", (void*) PaintGlue::setXfermode},
     {"nSetPathEffect","!(JJ)J", (void*) PaintGlue::setPathEffect},
     {"nSetMaskFilter","!(JJ)J", (void*) PaintGlue::setMaskFilter},
     {"nSetTypeface","!(JJ)J", (void*) PaintGlue::setTypeface},

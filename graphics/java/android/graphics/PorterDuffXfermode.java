@@ -18,19 +18,11 @@ package android.graphics;
 
 public class PorterDuffXfermode extends Xfermode {
     /**
-     * @hide
-     */
-    public final PorterDuff.Mode mode;
-
-    /**
      * Create an xfermode that uses the specified porter-duff mode.
      *
      * @param mode           The porter-duff mode that is applied
      */
     public PorterDuffXfermode(PorterDuff.Mode mode) {
-        this.mode = mode;
-        native_instance = nativeCreateXfermode(mode.nativeInt);
+        porterDuffMode = mode.nativeInt;
     }
-    
-    private static native long nativeCreateXfermode(int mode);
 }
