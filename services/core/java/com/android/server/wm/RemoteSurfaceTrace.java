@@ -121,6 +121,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
         try {
             mOut.writeUTF(tag);
             mOut.writeUTF(mWindow.getWindowTag().toString());
+            writeSigil();
         } catch (Exception e) {
             RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
@@ -134,6 +135,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
             for (int value: values) {
                 mOut.writeInt(value);
             }
+            writeSigil();
         } catch (Exception e) {
             RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
@@ -147,6 +149,7 @@ class RemoteSurfaceTrace extends SurfaceControl {
             for (float value: values) {
                 mOut.writeFloat(value);
             }
+            writeSigil();
         } catch (Exception e) {
             RemoteEventTrace.logException(e);
             mService.disableSurfaceTrace();
@@ -155,5 +158,9 @@ class RemoteSurfaceTrace extends SurfaceControl {
 
     private void writeRectEvent(String tag, Rect value) {
         writeFloatEvent(tag, value.left, value.top, value.right, value.bottom);
+    }
+
+    private void writeSigil() throws Exception {
+        mOut.write(RemoteEventTrace.sigil, 0, 4);
     }
 }

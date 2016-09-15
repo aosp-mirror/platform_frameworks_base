@@ -26,6 +26,11 @@ import android.os.Debug;
 // Counterpart to remote surface trace for events which are not tied to a particular surface.
 class RemoteEventTrace {
     private static final String TAG = "RemoteEventTrace";
+
+    // We terminate all our messages with a recognizable marker, to avoid issues
+    // with partial reads (which ADB makes impossible to avoid).
+    static final byte[] sigil = {(byte)0xfc, (byte)0xfc, (byte)0xfc, (byte)0xfc};
+
     private final WindowManagerService mService;
     private final DataOutputStream mOut;
 
@@ -37,6 +42,7 @@ class RemoteEventTrace {
     void openSurfaceTransaction() {
         try {
             mOut.writeUTF("OpenTransaction");
+            writeSigil();
         } catch (Exception e) {
             logException(e);
             mService.disableSurfaceTrace();
@@ -46,10 +52,15 @@ class RemoteEventTrace {
     void closeSurfaceTransaction() {
         try {
             mOut.writeUTF("CloseTransaction");
+            writeSigil();
         } catch (Exception e) {
             logException(e);
             mService.disableSurfaceTrace();
         }
+    }
+
+    private void writeSigil() throws Exception {
+        mOut.write(RemoteEventTrace.sigil, 0, 4);
     }
 
     static void logException(Exception e) {
