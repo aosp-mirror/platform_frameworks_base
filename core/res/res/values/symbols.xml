@@ -1754,6 +1754,7 @@
   <java-symbol type="integer" name="config_networkTransitionTimeout" />
   <java-symbol type="integer" name="config_networkNotifySwitchType" />
   <java-symbol type="array" name="config_networkNotifySwitches" />
+  <java-symbol type="integer" name="config_networkAvoidBadWifi" />
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOn" />

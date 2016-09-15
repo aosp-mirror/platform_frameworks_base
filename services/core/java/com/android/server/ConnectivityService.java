@@ -2743,6 +2743,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
+    @VisibleForTesting
+    public boolean avoidBadWifi() {
+        int defaultAvoidBadWifi =
+            mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi);
+        int avoid = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.NETWORK_AVOID_BAD_WIFI, defaultAvoidBadWifi);
+        return avoid == 1;
+    }
+
     private void handlePromptUnvalidated(Network network) {
         if (VDBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
