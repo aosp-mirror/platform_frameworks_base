@@ -58,6 +58,7 @@ public class SettingsDrawerActivity extends Activity {
 
     protected static final boolean DEBUG_TIMING = false;
     private static final String TAG = "SettingsDrawerActivity";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final String EXTRA_SHOW_MENU = "show_drawer_menu";
 
@@ -289,7 +290,7 @@ public class SettingsDrawerActivity extends Activity {
 
         for (int i = userHandles.size()-1; i >= 0; i--) {
             if (mUserManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
-                if (DEBUG_TIMING) {
+                if (DEBUG) {
                     Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
                 }
                 userHandles.remove(i);
