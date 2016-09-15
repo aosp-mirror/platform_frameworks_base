@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -83,7 +84,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private static final int MAX_POOL_SIZE = 10;
     private static final SynchronizedPool<AccessibilityWindowInfo> sPool =
             new SynchronizedPool<AccessibilityWindowInfo>(MAX_POOL_SIZE);
-    private static final AtomicInteger sNumInstancesInUse = new AtomicInteger();
+    private static AtomicInteger sNumInstancesInUse;
 
     // Data.
     private int mType = UNDEFINED;
@@ -403,7 +404,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
         if (info == null) {
             info = new AccessibilityWindowInfo();
         }
-        sNumInstancesInUse.incrementAndGet();
+        if (sNumInstancesInUse != null) {
+            sNumInstancesInUse.incrementAndGet();
+        }
         return info;
     }
 
@@ -441,12 +444,15 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     /**
-     * @return The number of instances of this class that have been obtained but not recycled.
+     * Specify a counter that will be incremented on obtain() and decremented on recycle()
      *
      * @hide
      */
-    public static int getNumInstancesInUse() {
-        return sNumInstancesInUse.get();
+    @TestApi
+    public static void setNumInstancesInUseCounter(AtomicInteger counter) {
+        if (sNumInstancesInUse != null) {
+            sNumInstancesInUse = counter;
+        }
     }
 
     /**
@@ -460,7 +466,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
     public void recycle() {
         clear();
         sPool.release(this);
-        sNumInstancesInUse.decrementAndGet();
+        if (sNumInstancesInUse != null) {
+            sNumInstancesInUse.decrementAndGet();
+        }
     }
 
     @Override
