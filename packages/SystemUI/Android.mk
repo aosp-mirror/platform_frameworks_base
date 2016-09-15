@@ -43,9 +43,11 @@ LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
-ifneq ($(SYSTEM_UI_INCREMENTAL_BUILDS),)
+ifneq ($(INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
     LOCAL_JACK_ENABLED := incremental
+    LOCAL_DX_FLAGS := --multi-dex
+    LOCAL_JACK_FLAGS := --multi-dex native
 endif
 
 include frameworks/base/packages/SettingsLib/common.mk
