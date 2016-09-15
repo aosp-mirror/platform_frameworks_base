@@ -113,8 +113,11 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 
@@ -267,6 +270,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected AssistManager mAssistManager;
 
     protected boolean mVrMode;
+
+    private Set<String> mNonBlockablePkgs;
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
@@ -828,6 +833,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             Slog.e(TAG, "Failed to register VR mode state listener: " + e);
         }
 
+        mNonBlockablePkgs = new HashSet<String>();
+        Collections.addAll(mNonBlockablePkgs, mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_nonBlockableNotificationPackages));
     }
 
     protected void notifyUserAboutHiddenNotifications() {
@@ -1108,7 +1116,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             settingsButton.setVisibility(View.GONE);
         }
 
-        guts.bindImportance(pmUser, sbn, mNotificationData.getImportance(sbn.getKey()));
+        guts.bindImportance(pmUser, sbn, mNonBlockablePkgs,
+                mNotificationData.getImportance(sbn.getKey()));
 
         final TextView doneButton = (TextView) guts.findViewById(R.id.done);
         doneButton.setText(R.string.notification_done);
