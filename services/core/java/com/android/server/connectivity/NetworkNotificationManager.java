@@ -35,7 +35,7 @@ import static android.net.NetworkCapabilities.*;
 
 public class NetworkNotificationManager {
 
-    public static enum NotificationType { SIGN_IN, NO_INTERNET, NETWORK_SWITCH };
+    public static enum NotificationType { SIGN_IN, NO_INTERNET, LOST_INTERNET, NETWORK_SWITCH };
 
     private static final String NOTIFICATION_ID = "Connectivity.Notification";
 
@@ -91,8 +91,8 @@ public class NetworkNotificationManager {
      * @param id an identifier that uniquely identifies this notification.  This must match
      *         between show and hide calls.  We use the NetID value but for legacy callers
      *         we concatenate the range of types with the range of NetIDs.
-     * @param nai the network with which the notification is associated. For a SIGN_IN or
-     *         NO_INTERNET notification, this is the network we're connecting to. For a
+     * @param nai the network with which the notification is associated. For a SIGN_IN, NO_INTERNET,
+     *         or LOST_INTERNET notification, this is the network we're connecting to. For a
      *         NETWORK_SWITCH notification it's the network that we switched from. When this network
      *         disconnects the notification is removed.
      * @param switchToNai for a NETWORK_SWITCH notification, the network we are switching to. Null
@@ -124,6 +124,10 @@ public class NetworkNotificationManager {
         CharSequence details;
         int icon = getIcon(transportType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
+            title = r.getString(R.string.wifi_no_internet, 0);
+            details = r.getString(R.string.wifi_no_internet_detailed);
+        } else if (notifyType == NotificationType.LOST_INTERNET &&
+                transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet, 0);
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.SIGN_IN) {
