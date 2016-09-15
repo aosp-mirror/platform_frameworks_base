@@ -354,10 +354,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         int score = currentScore;
-        // Use NET_CAPABILITY_VALIDATED here instead of lastValidated, this allows
-        // ConnectivityService.updateCapabilities() to compute the old score prior to updating
-        // networkCapabilities (with a potentially different validated state).
-        if (!networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED) && !pretendValidated) {
+        if (!lastValidated && !pretendValidated) {
             score -= UNVALIDATED_SCORE_PENALTY;
         }
         if (score < 0) score = 0;
