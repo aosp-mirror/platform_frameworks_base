@@ -2771,6 +2771,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         showValidationNotification(nai, NotificationType.NO_INTERNET);
     }
 
+    // TODO: Delete this like updateMobileDataAlwaysOn above.
+    @VisibleForTesting
+    void updateNetworkAvoidBadWifi() {
+        mHandler.sendEmptyMessage(EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
+    }
+
     private void handleNetworkUnvalidated(NetworkAgentInfo nai) {
         NetworkCapabilities nc = nai.networkCapabilities;
         if (DBG) log("handleNetworkUnvalidated " + nai.name() + " cap=" + nc);

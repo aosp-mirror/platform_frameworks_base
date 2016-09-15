@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.*;
 
 import static org.mockito.Mockito.mock;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -137,7 +138,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         @Override
         public Object getSystemService(String name) {
-            if (name == Context.CONNECTIVITY_SERVICE) return mCm;
+            if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
+            if (Context.NOTIFICATION_SERVICE.equals(name)) return mock(NotificationManager.class);
             return super.getSystemService(name);
         }
 
@@ -1951,6 +1953,79 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         testFactory.unregister();
         mCm.unregisterNetworkCallback(cellNetworkCallback);
         handlerThread.quit();
+    }
+
+    @SmallTest
+    public void testAvoidBadWifiSetting() throws Exception {
+        ContentResolver cr = mServiceContext.getContentResolver();
+
+        // File a request for cell to ensure it doesn't go down.
+        final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        mCm.requestNetwork(cellRequest, cellNetworkCallback);
+
+        TestNetworkCallback defaultCallback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(defaultCallback);
+
+        NetworkRequest validatedWifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI)
+                .addCapability(NET_CAPABILITY_VALIDATED)
+                .build();
+        TestNetworkCallback validatedWifiCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(validatedWifiRequest, validatedWifiCallback);
+
+        // Takes effect on every rematch.
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 0);
+
+        // Bring up validated cell.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        Network cellNetwork = mCellNetworkAgent.getNetwork();
+
+        // Bring up validated wifi.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        validatedWifiCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        Network wifiNetwork = mWiFiNetworkAgent.getNetwork();
+
+        // Fail validation on wifi.
+        mWiFiNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 599;
+        mCm.reportNetworkConnectivity(wifiNetwork, false);
+        validatedWifiCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+
+        // Because avoid bad wifi is off, we don't switch to cellular.
+        defaultCallback.assertNoCallback();
+        assertFalse(mCm.getNetworkCapabilities(wifiNetwork).hasCapability(
+                NET_CAPABILITY_VALIDATED));
+        assertTrue(mCm.getNetworkCapabilities(cellNetwork).hasCapability(
+                NET_CAPABILITY_VALIDATED));
+        assertEquals(mCm.getActiveNetwork(), wifiNetwork);
+
+        // Simulate the user selecting "switch" on the dialog.
+        Settings.Global.putInt(cr, Settings.Global.NETWORK_AVOID_BAD_WIFI, 1);
+        mService.updateNetworkAvoidBadWifi();
+
+        // We now switch to cell.
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
+        assertFalse(mCm.getNetworkCapabilities(wifiNetwork).hasCapability(
+                NET_CAPABILITY_VALIDATED));
+        assertTrue(mCm.getNetworkCapabilities(cellNetwork).hasCapability(
+                NET_CAPABILITY_VALIDATED));
+        assertEquals(mCm.getActiveNetwork(), cellNetwork);
+
+        // If cell goes down, we switch to wifi.
+        mCellNetworkAgent.disconnect();
+        defaultCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+        defaultCallback.expectCallback(CallbackState.AVAILABLE, mWiFiNetworkAgent);
+        validatedWifiCallback.assertNoCallback();
+
+        mCm.unregisterNetworkCallback(cellNetworkCallback);
+        mCm.unregisterNetworkCallback(validatedWifiCallback);
+        mCm.unregisterNetworkCallback(defaultCallback);
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
