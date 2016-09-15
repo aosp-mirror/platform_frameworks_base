@@ -140,6 +140,18 @@ public class PhoneConstants {
     /** APN type for Emergency PDN. This is not an IA apn, but is used
      * for access to carrier services in an emergency call situation. */
     public static final String APN_TYPE_EMERGENCY = "emergency";
+    /** Array of all APN types */
+    public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
+            APN_TYPE_MMS,
+            APN_TYPE_SUPL,
+            APN_TYPE_DUN,
+            APN_TYPE_HIPRI,
+            APN_TYPE_FOTA,
+            APN_TYPE_IMS,
+            APN_TYPE_CBS,
+            APN_TYPE_IA,
+            APN_TYPE_EMERGENCY
+    };
 
     public static final int RIL_CARD_MAX_APPS    = 8;
 
