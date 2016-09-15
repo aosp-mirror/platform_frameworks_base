@@ -50,6 +50,8 @@ public class WifiNanDiscoveryBaseSession {
     /** @hide */
     protected WeakReference<WifiNanManager> mMgr;
     /** @hide */
+    protected final int mClientId;
+    /** @hide */
     protected final int mSessionId;
     /** @hide */
     protected boolean mTerminated = false;
@@ -67,10 +69,14 @@ public class WifiNanDiscoveryBaseSession {
     }
 
     /** @hide */
-    public WifiNanDiscoveryBaseSession(WifiNanManager manager, int sessionId) {
-        if (VDBG) Log.v(TAG, "New client created: manager=" + manager + ", sessionId=" + sessionId);
+    public WifiNanDiscoveryBaseSession(WifiNanManager manager, int clientId, int sessionId) {
+        if (VDBG) {
+            Log.v(TAG, "New discovery session created: manager=" + manager + ", clientId="
+                    + clientId + ", sessionId=" + sessionId);
+        }
 
         mMgr = new WeakReference<>(manager);
+        mClientId = clientId;
         mSessionId = sessionId;
 
         mCloseGuard.open("terminate");
@@ -93,7 +99,7 @@ public class WifiNanDiscoveryBaseSession {
             Log.w(TAG, "terminate: called post GC on WifiNanManager");
             return;
         }
-        mgr.terminateSession(mSessionId);
+        mgr.terminateSession(mClientId, mSessionId);
         mTerminated = true;
         mMgr.clear();
         mCloseGuard.close();
@@ -166,7 +172,7 @@ public class WifiNanDiscoveryBaseSession {
                 return;
             }
 
-            mgr.sendMessage(mSessionId, peerId, message, messageId, retryCount);
+            mgr.sendMessage(mClientId, mSessionId, peerId, message, messageId, retryCount);
         }
     }
 
@@ -223,7 +229,7 @@ public class WifiNanDiscoveryBaseSession {
                 return;
             }
 
-            mgr.startRanging(mSessionId, params, listener);
+            mgr.startRanging(mClientId, mSessionId, params, listener);
         }
     }
 
@@ -237,7 +243,7 @@ public class WifiNanDiscoveryBaseSession {
      * discovery or communication (in such scenarios the MAC address of the peer is shielded by
      * an opaque peer ID handle). If a NAN connection is needed to a peer discovered using other
      * OOB (out-of-band) mechanism then use the alternative
-     * {@link WifiNanManager#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
+     * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])} method - which uses the
      * peer's MAC address.
      *
      * @param role The role of this device:
@@ -272,7 +278,7 @@ public class WifiNanDiscoveryBaseSession {
                 return null;
             }
 
-            return mgr.createNetworkSpecifier(role, mSessionId, peerId, token);
+            return mgr.createNetworkSpecifier(mClientId, role, mSessionId, peerId, token);
         }
     }
 }
