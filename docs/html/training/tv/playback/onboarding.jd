@@ -1,0 +1,377 @@
+page.title=Introducing First-time Users to Your App
+page.tags=tv,onboarding,OnboardingFragment
+page.keywords=tv,onboarding,OnboardingFragment
+helpoutsWidget=true
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#addFragment">Add an OnboardingFragment</a></li>
+    <li><a href="#pageContent">Add OnboardingFragment Pages</a></li>
+    <li><a href="#logoScreen">Add an Initial Logo Screen</a></li>
+    <li><a href="#pageAnimations">Customize Page Animations</a></li>
+    <li><a href="#themes">Customize Themes</a></li>
+  </ol>
+  <h2>Try it out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+    Leanback sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+To show a first-time user how to get the most from your app, present
+onboarding information at app startup. Here are some examples of onboarding
+information:
+</p>
+
+<ul>
+<li>Present detailed information on which channels are available when a user
+first accesses a channel app.</li>
+<li>Call attention to noteworthy features in your app.</li>
+<li>Illustrate any required or recommended steps that users should take when
+using the app for the first time.</li>
+</ul>
+
+<p>The <a href=
+"{@docRoot}tools/support-library/features.html#v17-leanback">v17 Leanback
+support library</a> provides the
+{@link android.support.v17.leanback.app.OnboardingFragment} class for
+presenting first-time user information. This lesson describes how to use the
+{@link android.support.v17.leanback.app.OnboardingFragment} class to present
+introductory information that is shown when the app launches for the first
+time. {@link android.support.v17.leanback.app.OnboardingFragment} uses TV UI
+best practices to present the information in a way that matches TV UI styles,
+and is easy to navigate on TV devices.</p>
+
+<img src="{@docRoot}images/training/tv/playback/onboarding-fragment.png"
+srcset="{@docRoot}images/training/tv/playback/onboarding-fragment.png 1x,
+{@docRoot}images/training/tv/playback/onboarding-fragment_2x.png 2x" />
+<p class="img-caption"><strong>Figure 1.</strong> An example
+OnboardingFragment.</p>
+
+<p>Your {@link android.support.v17.leanback.app.OnboardingFragment} should
+not contain UI elements that require user input, such as buttons and fields.
+Similarly, it should not be used as a UI element for a task the user will do
+regularly. If you need to present a multi-page UI that requires
+user input, consider using a
+{@link android.support.v17.leanback.app.GuidedStepFragment}.</p>
+
+<h2 id="addFragment">Add an OnboardingFragment</h2>
+
+<p>To add an {@link android.support.v17.leanback.app.OnboardingFragment}
+to your app, implement a class that extends
+the {@link android.support.v17.leanback.app.OnboardingFragment} class. Add
+this fragment to an activity, either via the activity's layout XML, or
+programmatically. Make sure the activity or
+fragment is using a theme derived from
+{@link android.support.v17.leanback.R.style#Theme_Leanback_Onboarding},
+as described in <a href="#themes">Customize Themes</a>.</p>
+
+<p>In the {@link android.app.Activity#onCreate onCreate()} method of your
+app's main activity, call
+{@link android.app.Activity#startActivity startActivity()}
+with an {@link android.content.Intent} that points to your
+{@link android.support.v17.leanback.app.OnboardingFragment OnboardingFragment's}
+parent activity. This ensures that your
+{@link android.support.v17.leanback.app.OnboardingFragment} appears as
+soon as your app starts.<p>
+
+<p>To ensure that the
+{@link android.support.v17.leanback.app.OnboardingFragment} only appears the
+first time that the user starts your app, use a
+{@link android.content.SharedPreferences} object
+to track whether the user has already viewed the
+{@link android.support.v17.leanback.app.OnboardingFragment}. Define a boolean
+value that changes to true when the user finishes viewing the
+{@link android.support.v17.leanback.app.OnboardingFragment}. Check
+this value in your main activity’s
+{@link android.app.Activity#onCreate onCreate()}, and only start the
+{@link android.support.v17.leanback.app.OnboardingFragment} parent activity if
+the value is false. The following example shows an override of
+{@link android.app.Activity#onCreate onCreate()} that checks for a
+{@link android.content.SharedPreferences} value and, if not set to true, calls
+{@link android.app.Activity#startActivity startActivity()} to
+show the {@link android.support.v17.leanback.app.OnboardingFragment}:</p>
+
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    SharedPreferences sharedPreferences =
+            PreferenceManager.getDefaultSharedPreferences(this);
+    // Check if we need to display our OnboardingFragment
+    if (!sharedPreferences.getBoolean(
+            MyOnboardingFragment.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+        // The user hasn't seen the OnboardingFragment yet, so show it
+        startActivity(new Intent(this, OnboardingActivity.class));
+    }
+}
+</pre>
+
+<p>After the user views the
+{@link android.support.v17.leanback.app.OnboardingFragment}, mark it as viewed
+using the {@link android.content.SharedPreferences} object. To do this, in your
+{@link android.support.v17.leanback.app.OnboardingFragment}, override
+{@link android.support.v17.leanback.app.OnboardingFragment#onFinishFragment
+onFinishFragment()} and set your {@link android.content.SharedPreferences} value
+to true, as shown in the following example:
+
+<pre>
+&#64;Override
+protected void onFinishFragment() {
+    super.onFinishFragment();
+    // User has seen OnboardingFragment, so mark our SharedPreferences
+    // flag as completed so that we don't show our OnboardingFragment
+    // the next time the user launches the app.
+    SharedPreferences.Editor sharedPreferencesEditor =
+            PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
+    sharedPreferencesEditor.putBoolean(
+            COMPLETED_ONBOARDING_PREF_NAME, true);
+    sharedPreferencesEditor.apply();
+}
+</pre>
+
+<h2 id="pageContent">Add OnboardingFragment Pages</h2>
+
+<p>After you add your
+{@link android.support.v17.leanback.app.OnboardingFragment}, you need to define
+the onboarding pages. An
+{@link android.support.v17.leanback.app.OnboardingFragment} displays content
+in a series of ordered pages. Each page can have a title, description, and
+several sub-views that can contain images or animations.</p>
+
+<img src="{@docRoot}images/training/tv/playback/onboarding-fragment-diagram.png"
+/><p class="img-caption"><strong>Figure 2.</strong> OnboardingFragment
+page elements.
+</p>
+
+<p>Figure 2 shows an example page with callouts marking customizable page
+elements that your {@link android.support.v17.leanback.app.OnboardingFragment}
+can provide. The page elements are:</p>
+
+<ol>
+<li>The page title.</li>
+<li>The page description.</li>
+<li>The page content view, in this case a simple green checkmark in a grey box.
+This view is optional. Use this view to illustrate page details such as a
+screenshot that highlights the app feature that the page describes.</li>
+<li>The page background view, in this case a simple blue gradient. This view
+always renders behind other views on the page. This view is optional.</li>
+<li>The page foreground view, in this case a logo. This view always renders
+in front of all other views on the page. This view is optional.</li>
+</ol>
+
+<p>Initialize page information when your
+{@link android.support.v17.leanback.app.OnboardingFragment} is first created
+or attached to the parent activity, as the system requests page
+information when it creates the fragment's view. You can initialize page
+information in your class constructor or in an override of
+{@link android.app.Fragment#onAttach onAttach()}.</p>
+
+<p>Override each of the following methods that provide page information
+to the system:</p>
+
+<ul>
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#getPageCount
+getPageCount()} returns the number of pages in your
+{@link android.support.v17.leanback.app.OnboardingFragment}.</li>
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#getPageTitle
+getPageTitle()} returns the title for the requested page number.</li>
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#getPageDescription
+getPagedescription()} returns the description for the requested page
+number.</li>
+</ul>
+
+<p>Override each of the following methods to provide optional sub-views used
+to display images or animations:</p>
+
+<ul>
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#onCreateBackgroundView
+onCreateBackgroundView()} returns a {@link android.view.View} that you
+create to act as the background view, or null if no background view is needed.
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#onCreateContentView
+onCreateContentView()} returns a {@link android.view.View} that you
+create to act as the content view, or null if no content view is needed.
+<li>{@link android.support.v17.leanback.app.OnboardingFragment#onCreateForegroundView
+onCreateForegroundView()} returns a {@link android.view.View} that you
+create to act as the foreground view, or null if no foreground view is needed.
+</ul>
+
+<p>The system adds the {@link android.view.View} that you create to the page
+layout. The following example overrides
+{@link android.support.v17.leanback.app.OnboardingFragment#onCreateContentView
+onCreateContentView()} and returns an {@link android.widget.ImageView}:</p>
+
+<pre>
+private ImageView mContentView;
+...
+&#64;Override
+protected View onCreateContentView(LayoutInflater inflater, ViewGroup container) {
+    mContentView = new ImageView(getContext());
+    mContentView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+    mContentView.setImageResource(R.drawable.onboarding_content_view);
+    mContentView.setPadding(0, 32, 0, 32);
+    return mContentView;
+}
+</pre>
+
+<h2 id="logoScreen">Add an Initial Logo Screen</h2>
+
+<p>Your {@link android.support.v17.leanback.app.OnboardingFragment} can start
+with an optional logo screen that introduces your app. If you want to display
+a {@link android.graphics.drawable.Drawable} as your logo screen, in your
+{@link android.support.v17.leanback.app.OnboardingFragment OnboardingFragment's}
+{@link android.app.Fragment#onCreate onCreate()} method, call
+{@link android.support.v17.leanback.app.OnboardingFragment#setLogoResourceId
+setLogoResourceId()} with the ID of your
+{@link android.graphics.drawable.Drawable}. The
+system will fade in and briefly display this
+{@link android.graphics.drawable.Drawable}, and then fade out the
+{@link android.graphics.drawable.Drawable}
+before displaying the first page of your
+{@link android.support.v17.leanback.app.OnboardingFragment}.</p>
+
+<p>If you want to provide a custom animation for your logo screen, instead of
+calling
+{@link android.support.v17.leanback.app.OnboardingFragment#setLogoResourceId
+setLogoResourceId()}, override
+{@link android.support.v17.leanback.app.OnboardingFragment#onCreateLogoAnimation
+onCreateLogoAnimation()} and return an {@link android.animation.Animator}
+object that renders your custom animation, as shown in the following example:
+</p>
+
+<pre>
+&#64;Override
+public Animator onCreateLogoAnimation() {
+    return AnimatorInflater.loadAnimator(mContext,
+            R.animator.onboarding_logo_screen_animation);
+}
+</pre>
+
+<h2 id="pageAnimations">Customize Page Animations</h2>
+
+<p>The system uses default animations when displaying the first page of your
+{@link android.support.v17.leanback.app.OnboardingFragment} and when the user
+navigates to a different page. You can customize these animations by
+overriding methods in your
+{@link android.support.v17.leanback.app.OnboardingFragment}.</p>
+
+<p>To customize the animation that appears on your first page,
+override
+{@link android.support.v17.leanback.app.OnboardingFragment#onCreateEnterAnimation
+onCreateEnterAnimation()} and return an {@link android.animation.Animator}.
+The following example creates an
+{@link android.animation.Animator} that scales the content view
+horizontally:</p>
+
+<pre>
+&#64;Override
+protected Animator onCreateEnterAnimation() {
+    Animator startAnimator = ObjectAnimator.ofFloat(mContentView,
+            View.SCALE_X, 0.2f, 1.0f).setDuration(ANIMATION_DURATION);
+    return startAnimator;
+}
+</pre>
+
+<p>To customize the animation used when the user navigates to a different page,
+override
+{@link android.support.v17.leanback.app.OnboardingFragment#onPageChanged
+onPageChanged()}. In your
+{@link android.support.v17.leanback.app.OnboardingFragment#onPageChanged
+onPageChanged()} method, create {@link android.animation.Animator Animators}
+that remove the previous page and display the next page, add these to an
+{@link android.animation.AnimatorSet}, and play the set. The following
+example uses a fade-out animation to remove the previous page, updates the
+content view image, and uses a fade-in animation to display the next page:</p>
+
+<pre>
+&#64;Override
+protected void onPageChanged(final int newPage, int previousPage) {
+    // Create a fade-out animation used to fade out previousPage and, once
+    // done, swaps the contentView image with the next page's image.
+    Animator fadeOut = ObjectAnimator.ofFloat(mContentView,
+            View.ALPHA, 1.0f, 0.0f).setDuration(ANIMATION_DURATION);
+    fadeOut.addListener(new AnimatorListenerAdapter() {
+        &#64;Override
+        public void onAnimationEnd(Animator animation) {
+            mContentView.setImageResource(pageImages[newPage]);
+        }
+    });
+    // Create a fade-in animation used to fade in nextPage
+    Animator fadeIn = ObjectAnimator.ofFloat(mContentView,
+            View.ALPHA, 0.0f, 1.0f).setDuration(ANIMATION_DURATION);
+    // Create AnimatorSet with our fade-out and fade-in animators, and start it
+    AnimatorSet set = new AnimatorSet();
+    set.playSequentially(fadeOut, fadeIn);
+    set.start();
+}
+</pre>
+
+<p>For more details about how to create
+{@link android.animation.Animator Animators} and
+{@link android.animation.AnimatorSet AnimatorSets}, see
+<a href="https://developer.android.com/guide/topics/graphics/prop-animation.html">
+Property Animations</a>.</p>
+
+<h2 id="themes">Customize Themes</h2>
+
+<p>Any {@link android.support.v17.leanback.app.OnboardingFragment}
+implementation must use either the
+{@link android.support.v17.leanback.R.style#Theme_Leanback_Onboarding} theme
+or a theme that inherits from
+{@link android.support.v17.leanback.R.style#Theme_Leanback_Onboarding}. Set the
+theme for your {@link android.support.v17.leanback.app.OnboardingFragment} by
+doing one of the following:</p>
+
+<ul>
+<li>Set the {@link android.support.v17.leanback.app.OnboardingFragment
+OnboardingFragment's} parent activity to use the desired theme. The following
+example shows how to set an activity to use
+{@link android.support.v17.leanback.R.style#Theme_Leanback_Onboarding} in the
+app manifest:
+<pre>
+&lt;activity
+   android:name=".OnboardingActivity"
+   android:enabled="true"
+   android:exported="true"
+   android:theme="&#64;style/Theme.Leanback.Onboarding"&gt;
+&lt;/activity&gt;
+</pre>
+</li>
+<li>
+Set the theme in the parent activity by using the
+{@link android.support.v17.leanback.R.styleable#LeanbackOnboardingTheme_onboardingTheme}
+attribute in a custom activity theme. Point this attribute to another
+custom theme that only the
+{@link android.support.v17.leanback.app.OnboardingFragment}
+objects in your activity use. Use this approach if your activity already uses
+a custom theme and you don't want to apply
+{@link android.support.v17.leanback.app.OnboardingFragment} styles to other
+views in the activity.
+</li>
+<li>Override
+{@link android.support.v17.leanback.app.OnboardingFragment#onProvideTheme
+onProvideTheme()} and return the desired theme. Use this approach if
+multiple activities use your
+{@link android.support.v17.leanback.app.OnboardingFragment}
+or if the parent activity can't use the desired theme.
+The following example overrides
+{@link android.support.v17.leanback.app.OnboardingFragment#onProvideTheme
+onProvideTheme()} and returns
+{@link android.support.v17.leanback.R.style#Theme_Leanback_Onboarding}:
+<pre>
+&#64;Override
+public int onProvideTheme() {
+   return R.style.Theme_Leanback_Onboarding;
+}
+</pre>
+</li>
+</ul>
