@@ -530,7 +530,7 @@ public class ZenModeHelper {
 
     public void readXml(XmlPullParser parser, boolean forRestore)
             throws XmlPullParserException, IOException {
-        final ZenModeConfig config = ZenModeConfig.readXml(parser, mConfigMigration);
+        final ZenModeConfig config = ZenModeConfig.readXml(parser);
         if (config != null) {
             if (forRestore) {
                 //TODO: http://b/22388012
@@ -810,7 +810,7 @@ public class ZenModeHelper {
         try {
             parser = resources.getXml(R.xml.default_zen_mode_config);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                final ZenModeConfig config = ZenModeConfig.readXml(parser, mConfigMigration);
+                final ZenModeConfig config = ZenModeConfig.readXml(parser);
                 if (config != null) return config;
             }
         } catch (Exception e) {
@@ -881,45 +881,6 @@ public class ZenModeHelper {
             default: return 0;
         }
     }
-
-    private final ZenModeConfig.Migration mConfigMigration = new ZenModeConfig.Migration() {
-        @Override
-        public ZenModeConfig migrate(ZenModeConfig.XmlV1 v1) {
-            if (v1 == null) return null;
-            final ZenModeConfig rt = new ZenModeConfig();
-            rt.allowCalls = v1.allowCalls;
-            rt.allowEvents = v1.allowEvents;
-            rt.allowCallsFrom = v1.allowFrom;
-            rt.allowMessages = v1.allowMessages;
-            rt.allowMessagesFrom = v1.allowFrom;
-            rt.allowReminders = v1.allowReminders;
-            // don't migrate current exit condition
-            final int[] days = ZenModeConfig.XmlV1.tryParseDays(v1.sleepMode);
-            if (days != null && days.length > 0) {
-                Log.i(TAG, "Migrating existing V1 downtime to single schedule");
-                final ScheduleInfo schedule = new ScheduleInfo();
-                schedule.days = days;
-                schedule.startHour = v1.sleepStartHour;
-                schedule.startMinute = v1.sleepStartMinute;
-                schedule.endHour = v1.sleepEndHour;
-                schedule.endMinute = v1.sleepEndMinute;
-                final ZenRule rule = new ZenRule();
-                rule.enabled = true;
-                rule.name = mContext.getResources()
-                        .getString(R.string.zen_mode_downtime_feature_name);
-                rule.conditionId = ZenModeConfig.toScheduleConditionId(schedule);
-                rule.zenMode = v1.sleepNone ? Global.ZEN_MODE_NO_INTERRUPTIONS
-                        : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-                rule.component = ScheduleConditionProvider.COMPONENT;
-                rt.automaticRules.put(ZenModeConfig.newRuleId(), rule);
-            } else {
-                Log.i(TAG, "No existing V1 downtime found, generating default schedules");
-                appendDefaultScheduleRules(rt);
-            }
-            appendDefaultEventRules(rt);
-            return rt;
-        }
-    };
 
     private final class RingerModeDelegate implements AudioManagerInternal.RingerModeDelegate {
         @Override
