@@ -7488,6 +7488,12 @@ public final class Settings {
               "network_switch_notification_rate_limit_millis";
 
        /**
+        * Whether to automatically switch away from wifi networks that lose Internet access.
+        * @hide
+        */
+       public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
+
+       /**
         * Whether Wifi display is enabled/disabled
         * 0=disabled. 1=enabled.
         * @hide
