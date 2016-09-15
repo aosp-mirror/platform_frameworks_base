@@ -82,6 +82,20 @@ public:
     T* nextBlock(size_t count = 1);
 
     /**
+     * Returns the next block available and puts the size in outCount.
+     * This is useful for grabbing blocks where the size doesn't matter.
+     * Use backUp() to give back any bytes that were not used.
+     */
+    void* nextBlock(size_t* outCount);
+
+    /**
+     * Backs up count bytes. This must only be called after nextBlock()
+     * and can not be larger than sizeof(T) * count of the last nextBlock()
+     * call.
+     */
+    void backUp(size_t count);
+
+    /**
      * Moves the specified BigBuffer into this one. When this method
      * returns, buffer is empty.
      */
@@ -96,6 +110,8 @@ public:
      * Pads the block so that it aligns on a 4 byte boundary.
      */
     void align4();
+
+    size_t getBlockSize() const;
 
     const_iterator begin() const;
     const_iterator end() const;
@@ -123,11 +139,21 @@ inline size_t BigBuffer::size() const {
     return mSize;
 }
 
+inline size_t BigBuffer::getBlockSize() const {
+    return mBlockSize;
+}
+
 template <typename T>
 inline T* BigBuffer::nextBlock(size_t count) {
     static_assert(std::is_standard_layout<T>::value, "T must be standard_layout type");
     assert(count != 0);
     return reinterpret_cast<T*>(nextBlockImpl(sizeof(T) * count));
+}
+
+inline void BigBuffer::backUp(size_t count) {
+    Block& block = mBlocks.back();
+    block.size -= count;
+    mSize -= count;
 }
 
 inline void BigBuffer::appendBuffer(BigBuffer&& buffer) {

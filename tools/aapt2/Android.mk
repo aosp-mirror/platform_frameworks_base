@@ -24,7 +24,10 @@ main := Main.cpp
 sources := \
 	compile/IdAssigner.cpp \
 	compile/InlineXmlFormatParser.cpp \
+	compile/NinePatch.cpp \
 	compile/Png.cpp \
+	compile/PngChunkFilter.cpp \
+	compile/PngCrunch.cpp \
 	compile/PseudolocaleGenerator.cpp \
 	compile/Pseudolocalizer.cpp \
 	compile/XmlIdCollector.cpp \
@@ -34,6 +37,7 @@ sources := \
 	flatten/XmlFlattener.cpp \
 	io/File.cpp \
 	io/FileSystem.cpp \
+	io/Io.cpp \
 	io/ZipArchive.cpp \
 	link/AutoVersioner.cpp \
 	link/ManifestFixer.cpp \
@@ -80,6 +84,7 @@ sources += Format.proto
 testSources := \
 	compile/IdAssigner_test.cpp \
 	compile/InlineXmlFormatParser_test.cpp \
+	compile/NinePatch_test.cpp \
 	compile/PseudolocaleGenerator_test.cpp \
 	compile/Pseudolocalizer_test.cpp \
 	compile/XmlIdCollector_test.cpp \
