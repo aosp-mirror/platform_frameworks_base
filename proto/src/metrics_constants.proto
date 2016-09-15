@@ -2283,26 +2283,55 @@ message MetricsEvent {
     // PACKAGE: DPC's package name.
     PROVISIONING_DPC_PACKAGE_NAME = 517;
 
-    // ACTION: Managed provisioning installed DPC from play or other source.
-    PROVISIONING_DPC_INSTALLED_FROM_PLAY = 518;
+    // ACTION: Managed provisioning triggered DPC installation.
+    // PACKAGE: Package name of package which installed DPC.
+    PROVISIONING_DPC_INSTALLED_BY_PACKAGE = 518;
+
+    // ACTION: Logged when provisioning activity finishes.
+    // TIME: Indicates time taken by provisioning activity to finish in MS.
+    PROVISIONING_PROVISIONING_ACTIVITY_TIME_MS = 519;
+
+    // ACTION: Logged when preprovisioning activity finishes.
+    // TIME: Indicates time taken by preprovisioning activity to finish in MS.
+    PROVISIONING_PREPROVISIONING_ACTIVITY_TIME_MS = 520;
+
+    // ACTION: Logged when encrypt device activity finishes.
+    // TIME: Indicates time taken by encrypt device activity to finish in MS.
+    PROVISIONING_ENCRYPT_DEVICE_ACTIVITY_TIME_MS = 521;
+
+    // ACTION: Logged when web activity finishes.
+    // TIME: Indicates total time taken by web activity to finish in MS.
+    PROVISIONING_WEB_ACTIVITY_TIME_MS = 522;
+
+    // ACTION: Logged when trampoline activity finishes.
+    // TIME: Indicates total time taken by trampoline activity to finish in MS.
+    PROVISIONING_TRAMPOLINE_ACTIVITY_TIME_MS = 523;
+
+    // ACTION: Logged when encryption activity finishes.
+    // TIME: Indicates total time taken by post encryption activity to finish in MS.
+    PROVISIONING_POST_ENCRYPTION_ACTIVITY_TIME_MS = 524;
+
+    // ACTION: Logged when finalization activity finishes.
+    // TIME: Indicates time taken by finalization activity to finish in MS.
+    PROVISIONING_FINALIZATION_ACTIVITY_TIME_MS = 525;
 
     // OPEN: Settings Support > Phone/Chat -> Disclaimer
-    DIALOG_SUPPORT_DISCLAIMER = 519;
+    DIALOG_SUPPORT_DISCLAIMER = 526;
 
     // OPEN: Settings Support > Travel abroad
-    DIALOG_SUPPORT_PHONE = 520;
+    DIALOG_SUPPORT_PHONE = 527;
 
     // OPEN: Settings > Security > Factory Reset Protection dialog
-    DIALOG_FRP = 521;
+    DIALOG_FRP = 528;
 
     // OPEN: Settings > Custom list preference with confirmation message
-    DIALOG_CUSTOM_LIST_CONFIRMATION = 522;
+    DIALOG_CUSTOM_LIST_CONFIRMATION = 529;
 
     // OPEN: Settings > APN Editor > Error dialog
-    DIALOG_APN_EDITOR_ERROR = 523;
+    DIALOG_APN_EDITOR_ERROR = 530;
 
     // OPEN: Settings > Users > Edit owner info dialog
-    DIALOG_OWNER_INFO_SETTINGS = 524;
+    DIALOG_OWNER_INFO_SETTINGS = 531;
 
     // ---- End O Constants, all O constants go above this line ----
 
