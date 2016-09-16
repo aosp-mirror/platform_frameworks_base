@@ -1,0 +1,310 @@
+<html devsite>
+<head>
+  <title>Selecting Colors with the Palette API</title>
+  <meta name="book_path" value="/training/_book.yaml" />
+  <meta name="top_category" value="develop" />
+  <meta name="subcategory" value="training" />
+</head>
+<body>
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>This lesson teaches you to</h2>
+    <ol>
+      <li><a href="#set-up-the-library">Set up the library</a></li>
+      <li><a href="#create-a-palette">Create a palette</a>
+        <ol>
+          <li><a href="#generate-a-palette-instance">Generate a Palette instance</a></li>
+          <li><a href="#customize-your-palette">Customize your palette</a></li>
+        </ol>
+      </li>
+      <li><a href="#extract-color-profiles">Extract color profiles</a>
+        <ol>
+          <li><a href="#use-swatches">Use swatches to create color schemes</a></li>
+        </ol>
+      </li>
+    </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="http://www.google.com/design/spec">Material design specification</a></li>
+      <li><a href="/design/material/index.html">Material design on Android</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>Good visual design is essential for a successful app, and color schemes are a primary component of design. The palette library is a
+<a href="/topic/libraries/support-library/features.html#v7-palette">support library</a>
+that extracts prominent colors from images to help you create visually engaging apps.</p>
+
+<p>You can use the palette library to design layout
+<a href="/guide/topics/ui/themes.html">themes</a> and apply custom colors to visual elements in your app.
+For example, you can use a palette to create a color-coordinated title 
+card for a song based on its album cover or to adjust an app’s toolbar color when its 
+background image changes. The <code><a 
+href="/reference/android/support/v7/graphics/Palette.html">Palette</a></code> object gives 
+you access to the colors in a <code><a
+href="/reference/android/graphics/Bitmap.html">Bitmap</a></code> 
+image while also providing six main color profiles from the bitmap to help
+inform your <a href="http://material.google.com">design choices</a>.</p>
+
+<h2 id="set-up-the-library">Set up the library</h2>
+
+<p>To use the palette library, install or update the <a
+href="/topic/libraries/support-library/index.html">Android
+Support Library</a> to version 24.0.0 or higher and follow the instructions for <a
+href="/topic/libraries/support-library/setup.html#add-library">Adding
+Support Libraries</a> to add the palette library to your app development project.</p>
+
+<p>Make sure that the version specified in your dependency identifier matches your
+app’s <code>compileSdkVersion</code>, set in the <code>build.gradle</code>
+file:</p>
+
+<pre class="prettyprint">
+android {
+  compileSdkVersion 24
+  ...
+}
+
+dependencies {
+  ...
+  compile 'com.android.support:palette-v7:24.2.1'
+}
+</pre>
+
+<p>For more information about adding the palette dependency, read about the palette
+feature in the <a
+href="/topic/libraries/support-library/features.html#v7-palette">support
+library documentation</a>.</p>
+
+<h2 id="create-a-palette">Create a palette</h2>
+
+<p>A <code>Palette</code> object gives you access to the primary colors in an
+image, as well as the corresponding colors for overlaid text. Use palettes to design
+your app’s style and to dynamically change your app’s color scheme based on a
+given source image.</p>
+
+<p>To create a palette, first instantiate a <code><a
+href="https://developer.android.com/reference/android/support/v7/graphics/Palette.Builder.html">Palette.Builder</a></code>
+from a <code>Bitmap</code>. You can then use the
+<code>Palette.Builder</code> to customize the palette before generating it. This
+section will describe palette generation and customization from a bitmap
+image.</p>
+
+<h3 id="generate-a-palette-instance">Generate a Palette instance</h3>
+
+<p>Generate a <code>Palette</code> instance using <code>Palette</code>’s
+<code><a
+href="/reference/android/support/v7/graphics/Palette.html#from(android.graphics.Bitmap)">from(Bitmap
+bitmap)</a></code> method to first create a <code>Palette.Builder</code>
+from a <code>Bitmap</code>. The builder can then generate the palette either
+synchronously or asynchronously.</p>
+
+<p>Use synchronous palette generation if you want to create the palette on
+the same thread as the method being called. If you generate the palette
+asynchronously on a different thread, use the <code><a
+href="/reference/android/support/v7/graphics/Palette.PaletteAsyncListener.html#onGenerated(android.support.v7.graphics.Palette)">onGenerated()</a></code>
+method to access the palette immediately after it has been created.</p>
+
+<p>The following code snippet provides example methods for both types of palette generation:</p>
+
+<pre class="prettyprint">
+// Generate palette synchronously and return it
+public Palette createPaletteSync(Bitmap bitmap) {
+  Palette p = Palette.from(bitmap).generate();
+  return p;
+}
+
+// Generate palette asynchronously and use it on a different
+// thread using onGenerated()
+public void createPaletteAsync(Bitmap bitmap) {
+  Palette.from(bitmap).generate(new PaletteAsyncListener() {
+    public void onGenerated(Palette p) {
+      // Use generated instance
+    }
+  });
+}
+</pre>
+
+<p>If you need to continuously generate palettes for a sorted list of images
+or objects, consider <a
+href="/reference/android/util/LruCache.html">caching</a>
+the <code>Palette</code> instances to prevent slow UI performance. You also
+should not create the palettes on your <a href="/training/articles/perf-anr.html">main thread</a>.</p>
+
+<h3 id="customize-your-palette">Customize your palette</h3>
+
+<p>The <code>Palette.Builder</code> allows you to customize your palette by
+choosing how many colors are in the resulting palette, what area of your
+image the builder uses to generate the palette, and what colors are allowed in the
+palette. For example, you can filter out the color black or ensure that the
+builder only uses the top half of an image to generate your palette.</p>
+
+<p>Fine-tune your palette’s size and colors with the following methods from
+the <code>Palette.Builder</code> class:</p>
+
+<dl>
+
+  <dt><code><a 
+  href="/reference/android/support/v7/graphics/Palette.Builder.html#addFilter(android.support.v7.graphics.Palette.Filter)">addFilter()</a></code></dt>
+  <dd>This method adds a filter that indicates what colors are allowed in the
+  resulting palette. Pass in your own<code> <a
+  href="/reference/android/support/v7/graphics/Palette.Filter.html">Palette.Filter</a></code>
+  and modify its <code>isAllowed()</code> method to determine which colors are
+  filtered from the palette.</dd>
+
+  <dt><code><a
+  href="/reference/android/support/v7/graphics/Palette.Builder.html#maximumColorCount(int)">maximumColorCount()</a></code></dt>
+  <dd>This method sets the maximum number of colors in your palette. The
+  default value is 16, and the optimal value depends on the source image. 
+  For landscapes, optimal values range from 8-16 while pictures with faces 
+  usually have values that fall between 24-32. The
+  <code>Palette.Builder</code> takes longer to generate palettes with more
+  colors.</dd>
+
+  <dt><code><a 
+  href="/reference/android/support/v7/graphics/Palette.Builder.html#setRegion(int,%20int,%20int,%20int)">setRegion()</a></code></dt>
+  <dd>This method indicates what area of the bitmap the builder uses when
+  creating the palette. You can only use this method when generating the palette from
+  a bitmap, and it does not affect the original image.</dd>
+
+  <dt><code><a
+  href="/reference/android/support/v7/graphics/Palette.Builder.html#addTarget(android.support.v7.graphics.Target)">addTarget()</a></code></dt>
+  <dd>This method allows you to perform your own color matching by adding a
+  <code><a
+  href="/reference/android/support/v7/graphics/Target.html">Target</a></code>
+  color profile to the builder. If the default <code>Target</code>s are not
+  sufficient, advanced developers can create their own <code>Target</code>s
+  using a <code><a
+  href="/reference/android/support/v7/graphics/Target.Builder.html">Target.Builder</a></code>.</dd>
+
+</dl>
+
+<h2 id="extract-color-profiles">Extract color profiles</h2>
+
+<p>Based on the <a
+href="https://material.google.com/style/color.html#">standards
+of material design</a>, the palette library extracts commonly used color
+profiles from an image. Each profile is defined by a <code><a
+href="/reference/android/support/v7/graphics/Target.html">Target</a></code>,
+and colors extracted from the bitmap image are scored against each profile
+based on saturation, luminance, and population (number of pixels in the bitmap
+represented by the color). For each profile, the color with the best score
+defines that color profile for the given image.</p>
+
+<p>By default, a <code>Palette</code> object contains 16 primary colors from
+a given image. When generating your palette, you can <a
+href="#customize-your-palette">customize</a> its number of colors using the
+<code>Palette.Builder</code>. Extracting more colors provides more potential
+matches for each color profile but also causes <code>Palette.Builder</code> to
+take longer when generating the palette.</p>
+
+<p>The palette library attempts to extract the following six color
+profiles:</p>
+
+<ul>
+  <li>Light Vibrant</li>
+  <li>Vibrant</li>
+  <li>Dark Vibrant</li>
+  <li>Light Muted</li>
+  <li>Muted</li>
+  <li>Dark Muted</li>
+</ul>
+
+<p>Each of <code>Palette</code>’s <code>get&lt;<em>Profile</em>&gt;Color()</code>
+methods returns the color in the palette associated with that particular profile,
+where <code>&lt;<em>Profile</em>&gt;</code> is replaced by the name of one of the six
+color profiles. For example, the method to get the Dark Vibrant color profile is <code><a
+href="/reference/android/support/v7/graphics/Palette.html#getDarkVibrantColor(int)">getDarkVibrantColor()</a></code>.
+Since not all images will contain all color profiles, you must also provide
+a default color to return.</p>
+
+<p>Figure 1 displays a photo and its corresponding color
+profiles from the <code>get&lt;<em>Profile</em>&gt;Color()</code> methods.</p>
+
+<img src="/training/material/images/palette-library-color-profiles_2-1_2x.png" alt="" width="624"/>
+
+<p class="img-caption"><strong>Figure 1.</strong> An example image and its
+extracted color profiles given the default maximum color count (16) for the palette.</p>
+
+<h3 id="use-swatches">Use swatches to create color schemes</h3>
+
+<p>The <code>Palette</code> class also generates <code><a 
+href="/reference/android/support/v7/graphics/Palette.Swatch.html">Palette.Swatch</a></code>
+objects for each color profile. <code>Palette.Swatch</code>
+objects contain the associated color for that profile, as well as the
+color’s population in pixels.</p>
+
+<p>Swatches have additional methods for accessing more information about the color
+profile, such as HSL values and pixel population. You can use swatches to help
+create more comprehensive color schemes and app themes using the <code><a
+href="/reference/android/support/v7/graphics/Palette.Swatch.html#getBodyTextColor()">getBodyTextColor()</a></code>
+and <code><a
+href="/reference/android/support/v7/graphics/Palette.Swatch.html#getTitleTextColor()">getTitleTextColor()</a></code>
+methods. These methods return colors appropriate for use over the swatch’s
+color.</p>
+
+<p>Each of <code>Palette</code>’s <code>get&lt;<em>Profile</em>&gt;Swatch()</code>
+methods returns the swatch associated with that particular profile,
+where <code>&lt;<em>Profile</em>&gt;</code> is replaced by the name of one of the six
+color profiles. Although the palette’s <code>get&lt;<em>Profile</em>&gt;Swatch()</code> methods
+do not require default value parameters, they return <code>null</code> if that
+particular profile does not exist in the image. Therefore, you should check that
+a swatch is not null before using it. For example, the following method 
+returns the Vibrant swatch from a palette if the swatch is not null:</p>
+
+<pre class="prettyprint">
+// Return a palette's vibrant swatch after checking that it exists
+private Palette.Swatch checkVibrantSwatch(Palette p) {
+  Palette.Swatch vibrant = p.getVibrantSwatch();
+  if (vibrant != null) {
+    return vibrant;
+  }
+  // Throw error
+}
+</pre>
+
+<p>To access all colors in a palette, the <code><a
+href="/reference/android/support/v7/graphics/Palette.html#getSwatches()">getSwatches()</a></code>
+method returns a list of all swatches generated from an
+image, including the standard six color profiles.</p>
+
+<p>The following snippet of code uses the methods from the above code snippets to
+synchronously generate a palette, get its vibrant swatch, and change the colors of a
+toolbar to match the bitmap image. Figure 2 displays the resulting image and toolbar.</p>
+
+<div class="cols">
+
+  <div class="col-2of3">
+
+<pre class="prettyprint">
+// Set the background and text colors of a toolbar given a
+// bitmap image to match
+public void setToolbarColor(Bitmap bitmap) {
+  // Generate the palette and get the vibrant swatch
+  // See the createPaletteSync() and checkVibrantSwatch() methods
+  // from the code snippets above
+  Palette p = createPaletteSync(bitmap);
+  Palette.Swatch vibrantSwatch = checkVibrantSwatch(p);
+  
+  // Set the toolbar background and text colors
+  Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+  toolbar.setBackgroundColor(vibrantSwatch.getRgb());
+  toolbar.setTitleTextColor(vibrantSwatch.getTitleTextColor());
+}
+</pre>
+
+  </div>
+
+  <div class="col-1of3">
+
+    <img src="/training/material/images/palette-library-title-text-color_2-1_2x.png" alt="" width="400"/>
+
+    <p class="img-caption"><strong>Figure 2.</strong> An example image with its
+    vibrant-colored toolbar and corresponding title text color.</p>
+
+  </div>
+
+</div>
+
+</body>
+</html>
