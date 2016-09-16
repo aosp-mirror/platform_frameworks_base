@@ -32,6 +32,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <sys/capability.h>
+#include <sys/cdefs.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -693,11 +694,39 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
 static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* env, jclass) {
     // Zygote process unmount root storage space initially before every child processes are forked.
     // Every forked child processes (include SystemServer) only mount their own root storage space
-    // And no need unmount storage operation in MountEmulatedStorage method.
-    // Zygote process does not utilize root storage spaces and unshared its mount namespace from the ART.
+    // and no need unmount storage operation in MountEmulatedStorage method.
+    // Zygote process does not utilize root storage spaces and unshares its mount namespace below.
+
+    // See storage config details at http://source.android.com/tech/storage/
+    // Create private mount namespace shared by all children
+    if (unshare(CLONE_NEWNS) == -1) {
+        RuntimeAbort(env, __LINE__, "Failed to unshare()");
+        return;
+    }
+
+    // Mark rootfs as being a slave so that changes from default
+    // namespace only flow into our children.
+    if (mount("rootfs", "/", nullptr, (MS_SLAVE | MS_REC), nullptr) == -1) {
+        RuntimeAbort(env, __LINE__, "Failed to mount() rootfs as MS_SLAVE");
+        return;
+    }
+
+    // Create a staging tmpfs that is shared by our children; they will
+    // bind mount storage into their respective private namespaces, which
+    // are isolated from each other.
+    const char* target_base = getenv("EMULATED_STORAGE_TARGET");
+    if (target_base != nullptr) {
+#define STRINGIFY_UID(x) __STRING(x)
+        if (mount("tmpfs", target_base, "tmpfs", MS_NOSUID | MS_NODEV,
+                  "uid=0,gid=" STRINGIFY_UID(AID_SDCARD_R) ",mode=0751") == -1) {
+            ALOGE("Failed to mount tmpfs to %s", target_base);
+            RuntimeAbort(env, __LINE__, "Failed to mount tmpfs");
+            return;
+        }
+#undef STRINGIFY_UID
+    }
 
     UnmountTree("/storage");
-    return;
 }
 
 static const JNINativeMethod gMethods[] = {
