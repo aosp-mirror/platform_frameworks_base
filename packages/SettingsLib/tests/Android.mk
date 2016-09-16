@@ -24,8 +24,10 @@ LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 
 LOCAL_PACKAGE_NAME := SettingsLibTests
 
-LOCAL_STATIC_JAVA_LIBRARIES := mockito-target \
-    android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android-support-test \
+    espresso-core \
+    mockito-target-minus-junit4
 
 include frameworks/base/packages/SettingsLib/common.mk
 
