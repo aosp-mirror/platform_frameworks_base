@@ -1158,12 +1158,25 @@ public class ShortcutService extends IShortcutService.Stub {
         }
     }
 
-    /** Return the per-user per-package state. */
+    /**
+     * Return the per-user per-package state.  If the caller is a publisher, use
+     * {@link #getPackageShortcutsForPublisherLocked} instead.
+     */
     @GuardedBy("mLock")
     @NonNull
     ShortcutPackage getPackageShortcutsLocked(
             @NonNull String packageName, @UserIdInt int userId) {
         return getUserShortcutsLocked(userId).getPackageShortcuts(packageName);
+    }
+
+    /** Return the per-user per-package state.  Use this when the caller is a publisher. */
+    @GuardedBy("mLock")
+    @NonNull
+    ShortcutPackage getPackageShortcutsForPublisherLocked(
+            @NonNull String packageName, @UserIdInt int userId) {
+        final ShortcutPackage ret = getUserShortcutsLocked(userId).getPackageShortcuts(packageName);
+        ret.getUser().onCalledByPublisher(packageName);
+        return ret;
     }
 
     @GuardedBy("mLock")
@@ -1634,8 +1647,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1686,8 +1698,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1767,8 +1778,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
@@ -1817,8 +1827,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1847,8 +1856,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1870,8 +1878,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncludedWithIds((List<String>) shortcutIds);
 
@@ -1895,8 +1902,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
             ps.deleteAllDynamicShortcuts();
         }
         packageShortcutsChanged(packageName, userId);
@@ -1951,8 +1957,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
-        final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-        ps.getUser().onCalledByPublisher(packageName);
+        final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
         ps.findAll(ret, query, cloneFlags);
 
         return new ParceledListSlice<>(ret);
@@ -1973,8 +1978,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
             return mMaxUpdatesPerInterval - ps.getApiCallCount();
         }
     }
@@ -2013,8 +2017,7 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             throwIfUserLockedL(userId);
 
-            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
-            ps.getUser().onCalledByPublisher(packageName);
+            final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             if (ps.findShortcutById(shortcutId) == null) {
                 Log.w(TAG, String.format("reportShortcutUsed: package %s doesn't have shortcut %s",
@@ -3151,9 +3154,19 @@ public class ShortcutService extends IShortcutService.Stub {
                 return null;
             }
 
-            user.forAllPackageItems(spi -> spi.refreshPackageInfoAndSave());
+            // Update the signatures for all packages.
+            user.forAllPackageItems(spi -> spi.refreshPackageSignatureAndSave());
 
-            // Then save.
+            // Set the version code for the launchers.
+            // We shouldn't do this for publisher packages, because we don't want to update the
+            // version code without rescanning the manifest.
+            user.forAllLaunchers(launcher -> launcher.ensureVersionInfo());
+
+            // Save to the filesystem.
+            scheduleSaveUser(userId);
+            saveDirtyInfo();
+
+            // Then create the backup payload.
             final ByteArrayOutputStream os = new ByteArrayOutputStream(32 * 1024);
             try {
                 saveUserInternalLocked(userId, os, /* forBackup */ true);
