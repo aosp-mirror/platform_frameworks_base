@@ -160,22 +160,25 @@ android.location.LocationManager#GPS_PROVIDER}.</p>
   android.location.LocationManager#NETWORK_PROVIDER} and {@link
   android.location.LocationManager#GPS_PROVIDER}, then you need to request only
   the {@code ACCESS_FINE_LOCATION} permission, because it includes permission
-  for both providers. (Permission for {@code ACCESS_COARSE_LOCATION} includes
-  permission only for {@link
-  android.location.LocationManager#NETWORK_PROVIDER}.)
+  for both providers. Permission for {@code ACCESS_COARSE_LOCATION} allows
+  access only to {@link android.location.LocationManager#NETWORK_PROVIDER}.
 </p>
 
-<p class="note">
-  <strong>Note:</strong> If your app targets Android 5.0 (API level 21) or
-  higher, you must also declare that your app uses the
+<p id="location-feature-caution" class="caution">
+  <strong>Caution:</strong> If your app targets Android 5.0 (API level 21) or
+  higher, you <em>must</em> declare that your app uses the
   <code>android.hardware.location.network</code> or
   <code>android.hardware.location.gps</code> hardware feature in the manifest
   file, depending on whether your app receives location updates from {@link
   android.location.LocationManager#NETWORK_PROVIDER} or from {@link
   android.location.LocationManager#GPS_PROVIDER}. If your app receives location
-  information from both of these providers, you need to declare that the app
-  uses both <code>android.hardware.location.network</code> and
-  <code>android.hardware.location.gps</code>.
+  information from either of these location provider sources, you need to
+  declare that the app uses these hardware features in your app manifest.
+  On devices running verions prior to Android 5.0 (API 21), requesting the
+  {@code ACCESS_FINE_LOCATION} or {@code ACCESS_COARSE_LOCATION} permission
+  includes an implied request for location hardware features. However,
+  requesting those permissions <em>does not</em> automatically request location
+  hardware features on Android 5.0 (API level 21) and higher.
 </p>
 
 <p>
