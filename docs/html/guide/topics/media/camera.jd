@@ -156,7 +156,7 @@ application must request the audio capture permission.
   </li>
   <li>
     <p><strong>Location Permission</strong> - If your application tags images
-    with GPS location information, you must request the "fine location"
+    with GPS location information, you must request the {@code ACCESS_FINE_LOCATION}
     permission. Note that, if your app targets Android 5.0 (API level 21) or
     higher, you also need to declare that your app uses the device's GPS:</p>
 <pre>
