@@ -1666,13 +1666,13 @@ densities: '160'
 
 <pre>&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;</pre>
 
-<p class="note">
-  <strong>Note:</strong> If your app targets Android 5.0 (API level 21) or
+<p class="caution">
+  <strong>Caution:</strong> If your app targets Android 5.0 (API level 21) or
   higher and uses the <code>ACCESS_COARSE_LOCATION</code> or
   <code>ACCESS_FINE_LOCATION</code> permission in order to receive location
   updates from the network or a GPS, respectively, you must also explicitly
   declare that your app uses the <code>android.hardware.location.network</code>
-  or <code>android.hardware.location.gps</code> hardware feature, respectively.
+  or <code>android.hardware.location.gps</code> hardware features.
 </p>
 
 <p class="table-caption" id="permissions-features">
@@ -1731,8 +1731,8 @@ densities: '160'
       <code>android.hardware.location</code>
     </p>
     <p>
-      <code>android.hardware.location.network</code> (Target API level 20 or
-      lower only.)
+      <code>android.hardware.location.network</code>
+      (Only when target API level is 20 orlower.)
     </p>
   </td>
 <!--  <td></td> -->
@@ -1744,8 +1744,8 @@ densities: '160'
       <code>android.hardware.location</code>
     </p>
     <p>
-      <code>android.hardware.location.gps</code> (Target API level 20 or lower
-      only.)
+      <code>android.hardware.location.gps</code>
+      (Only when target API level is 20 orlower.)
     </p>
   </td>
 
