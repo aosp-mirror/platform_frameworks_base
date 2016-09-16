@@ -1030,7 +1030,7 @@ public class DownloadManager {
             if (cursor.moveToFirst()) {
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
-                    return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+                    return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
                 }
             }
         } finally {
@@ -1227,7 +1227,7 @@ public class DownloadManager {
      * @hide
      */
     public Uri getDownloadUri(long id) {
-        return ContentUris.withAppendedId(mBaseUri, id);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
     }
 
     /**
@@ -1308,7 +1308,7 @@ public class DownloadManager {
 
             // return content URI for cache download
             long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
-            return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
+            return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId).toString();
         }
 
         private long getReason(int status) {
