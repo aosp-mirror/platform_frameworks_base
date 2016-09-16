@@ -187,15 +187,6 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
     }
 
-    boolean detachFromDisplay() {
-        boolean didSomething = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            didSomething |= wc.detachFromDisplay();
-        }
-        return didSomething;
-    }
-
     void forceWindowsScaleableInTransaction(boolean force) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);

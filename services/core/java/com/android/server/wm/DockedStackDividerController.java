@@ -131,8 +131,8 @@ public class DockedStackDividerController implements DimLayerUser {
     private boolean mAdjustedForDivider;
     private float mDividerAnimationStart;
     private float mDividerAnimationTarget;
-    private float mLastAnimationProgress;
-    private float mLastDividerProgress;
+    float mLastAnimationProgress;
+    float mLastDividerProgress;
     private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
     private boolean mImeHideRequested;
 
@@ -594,15 +594,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean clearImeAdjustAnimation() {
-        boolean changed = false;
-        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
-        for (int i = stacks.size() - 1; i >= 0; --i) {
-            final TaskStack stack = stacks.get(i);
-            if (stack != null && stack.isAdjustedForIme()) {
-                stack.resetAdjustedForIme(true /* adjustBoundsNow */);
-                changed  = true;
-            }
-        }
+        final boolean changed = mDisplayContent.clearImeAdjustAnimation();
         mAnimatingForIme = false;
         return changed;
     }
@@ -634,13 +626,7 @@ public class DockedStackDividerController implements DimLayerUser {
         mAnimationTarget = adjustedForIme ? 1 : 0;
         mDividerAnimationTarget = adjustedForDivider ? 1 : 0;
 
-        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
-        for (int i = stacks.size() - 1; i >= 0; --i) {
-            final TaskStack stack = stacks.get(i);
-            if (stack.isVisible() && stack.isAdjustedForIme()) {
-                stack.beginImeAdjustAnimation();
-            }
-        }
+        mDisplayContent.beginImeAdjustAnimation();
 
         // We put all tasks into drag resizing mode - wait until all of them have completed the
         // drag resizing switch.
@@ -721,27 +707,8 @@ public class DockedStackDividerController implements DimLayerUser {
         float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
         t = (mAnimationTarget == 1f ? IME_ADJUST_ENTRY_INTERPOLATOR : TOUCH_RESPONSE_INTERPOLATOR)
                 .getInterpolation(t);
-        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
-        boolean updated = false;
-        for (int i = stacks.size() - 1; i >= 0; --i) {
-            final TaskStack stack = stacks.get(i);
-            if (stack != null && stack.isAdjustedForIme()) {
-                if (t >= 1f && mAnimationTarget == 0f && mDividerAnimationTarget == 0f) {
-                    stack.resetAdjustedForIme(true /* adjustBoundsNow */);
-                    updated = true;
-                } else {
-                    mLastAnimationProgress = getInterpolatedAnimationValue(t);
-                    mLastDividerProgress = getInterpolatedDividerValue(t);
-                    updated |= stack.updateAdjustForIme(
-                            mLastAnimationProgress,
-                            mLastDividerProgress,
-                            false /* force */);
-                }
-                if (t >= 1f) {
-                    stack.endImeAdjustAnimation();
-                }
-            }
-        }
+        final boolean updated =
+                mDisplayContent.animateForIme(t, mAnimationTarget, mDividerAnimationTarget);
         if (updated) {
             mService.mWindowPlacerLocked.performSurfacePlacement();
         }
@@ -785,11 +752,11 @@ public class DockedStackDividerController implements DimLayerUser {
         }
     }
 
-    private float getInterpolatedAnimationValue(float t) {
+    float getInterpolatedAnimationValue(float t) {
         return t * mAnimationTarget + (1 - t) * mAnimationStart;
     }
 
-    private float getInterpolatedDividerValue(float t) {
+    float getInterpolatedDividerValue(float t) {
         return t * mDividerAnimationTarget + (1 - t) * mDividerAnimationStart;
     }
 

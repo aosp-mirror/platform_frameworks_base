@@ -173,9 +173,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -3153,13 +3151,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void prepareFreezingAllTaskBounds() {
         for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
-            ArrayList<TaskStack> stacks = mDisplayContents.valueAt(i).getStacks();
-            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                final TaskStack stack = stacks.get(stackNdx);
-                stack.prepareFreezingTaskBounds();
-            }
+            mDisplayContents.valueAt(i).prepareFreezingTaskBounds();
         }
-
     }
 
     private int[] onConfigurationChanged() {
@@ -3986,10 +3979,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         stack = displayContent.getStackById(stackId);
                         if (stack != null) {
-                            // It's already attached to the display. Detach and re-attach
-                            // because onTop might change, and be sure to clear mDeferDetach!
-                            displayContent.detachStack(stack);
-                            stack.mDeferDetach = false;
+                            // It's already attached to the display...clear mDeferRemoval!
+                            stack.mDeferRemoval = false;
                             attachedToDisplay = true;
                         } else {
                             stack = new TaskStack(this, stackId);
@@ -4023,14 +4014,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack != null) {
-                final DisplayContent displayContent = stack.getDisplayContent();
-                if (displayContent != null) {
-                    if (stack.isAnimating()) {
-                        stack.mDeferDetach = true;
-                        return;
-                    }
-                    displayContent.detachChild(stack);
-                }
+                stack.removeIfPossible();
             }
         }
     }
@@ -4135,7 +4119,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void overridePlayingAppAnimationsLw(Animation a) {
-        getDefaultDisplayContentLocked().overridePlayingAppAnimationsLw(a);
+        getDefaultDisplayContentLocked().overridePlayingAppAnimations(a);
     }
 
     /**
@@ -4751,7 +4735,7 @@ public class WindowManagerService extends IWindowManager.Stub
             hideBootMessagesLocked();
             // If the screen still doesn't come up after 30 seconds, give
             // up and turn it on.
-            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30*1000);
+            mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 30 * 1000);
         }
 
         mPolicy.systemBooted();
@@ -6689,51 +6673,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void adjustForImeIfNeeded(final DisplayContent displayContent) {
-        final WindowState imeWin = mInputMethodWindow;
-        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
-                && !displayContent.mDividerControllerLocked.isImeHideRequested();
-        final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
-        final TaskStack imeTargetStack = getImeFocusStackLocked();
-        final int imeDockSide = (dockVisible && imeTargetStack != null) ?
-                imeTargetStack.getDockSide() : DOCKED_INVALID;
-        final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
-        final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
-        final boolean dockMinimized = displayContent.mDividerControllerLocked.isMinimizedDock();
-        final int imeHeight = mPolicy.getInputMethodWindowVisibleHeightLw();
-        final boolean imeHeightChanged = imeVisible &&
-                imeHeight != displayContent.mDividerControllerLocked.getImeHeightAdjustedFor();
-
-        // The divider could be adjusted for IME position, or be thinner than usual,
-        // or both. There are three possible cases:
-        // - If IME is visible, and focus is on top, divider is not moved for IME but thinner.
-        // - If IME is visible, and focus is on bottom, divider is moved for IME and thinner.
-        // - If IME is not visible, divider is not moved and is normal width.
-
-        if (imeVisible && dockVisible && (imeOnTop || imeOnBottom) && !dockMinimized) {
-            final ArrayList<TaskStack> stacks = displayContent.getStacks();
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                final TaskStack stack = stacks.get(i);
-                final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
-                if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)) {
-                    stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
-                } else {
-                    stack.resetAdjustedForIme(false);
-                }
-            }
-            displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin, imeHeight);
-        } else {
-            final ArrayList<TaskStack> stacks = displayContent.getStacks();
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                final TaskStack stack = stacks.get(i);
-                stack.resetAdjustedForIme(!dockVisible);
-            }
-            displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin, imeHeight);
-        }
-    }
-
     // -------------------------------------------------------------
     // Drag and drop
     // -------------------------------------------------------------
@@ -7636,7 +7575,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         final DisplayContent displayContent = getDefaultDisplayContentLocked();
                         displayContent.getDockedDividerController().reevaluateVisibility(false);
-                        adjustForImeIfNeeded(displayContent);
+                        displayContent.adjustForImeIfNeeded();
                     }
                 }
                 break;
@@ -8619,7 +8558,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
             }
 
-            adjustForImeIfNeeded(displayContent);
+            displayContent.adjustForImeIfNeeded();
 
             // We may need to schedule some toast windows to be removed. The
             // toasts for an app that does not have input focus are removed
@@ -9753,17 +9692,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleDisplayRemovedLocked(int displayId) {
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
-            if (displayContent.isAnimating()) {
-                displayContent.mDeferredRemoval = true;
-                return;
-            }
-            if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + displayContent);
-            mDisplayContents.delete(displayId);
-            displayContent.close();
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                unregisterPointerEventListener(displayContent.mTapDetector);
-                unregisterPointerEventListener(mMousePositionTracker);
-            }
+            displayContent.removeIfPossible();
         }
         mAnimator.removeDisplayLocked(displayId);
         mWindowPlacerLocked.requestTraversal();
@@ -10030,7 +9959,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private MousePositionTracker mMousePositionTracker = new MousePositionTracker();
+    MousePositionTracker mMousePositionTracker = new MousePositionTracker();
 
     private static class MousePositionTracker implements PointerEventListener {
         private boolean mLatestEventWasMouse;

@@ -178,25 +178,6 @@ public class WindowContainerTests {
     }
 
     @Test
-    public void testDetachFromDisplay() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
-        final TestWindowContainer root = builder.setLayer(0).build();
-
-        final TestWindowContainer child1 = root.addChildWindow(builder.setCanDetach(true));
-        final TestWindowContainer child2 = root.addChildWindow();
-        final TestWindowContainer child11 = child1.addChildWindow();
-        final TestWindowContainer child12 = child1.addChildWindow(builder.setCanDetach(true));
-        final TestWindowContainer child21 = child2.addChildWindow();
-
-        assertTrue(root.detachFromDisplay());
-        assertTrue(child1.detachFromDisplay());
-        assertFalse(child11.detachFromDisplay());
-        assertTrue(child12.detachFromDisplay());
-        assertFalse(child2.detachFromDisplay());
-        assertFalse(child21.detachFromDisplay());
-    }
-
-    @Test
     public void testIsAnimating() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -399,7 +380,6 @@ public class WindowContainerTests {
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
     private class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;
-        private final boolean mCanDetach;
         private boolean mIsAnimating;
         private boolean mIsVisible;
         private boolean mFillsParent;
@@ -419,9 +399,8 @@ public class WindowContainerTests {
             return 1;
         };
 
-        TestWindowContainer(int layer, boolean canDetach, boolean isAnimating, boolean isVisible) {
+        TestWindowContainer(int layer, boolean isAnimating, boolean isVisible) {
             mLayer = layer;
-            mCanDetach = canDetach;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;
             mFillsParent = true;
@@ -455,11 +434,6 @@ public class WindowContainerTests {
         }
 
         @Override
-        boolean detachFromDisplay() {
-            return super.detachFromDisplay() || mCanDetach;
-        }
-
-        @Override
         boolean isAnimating() {
             return mIsAnimating || super.isAnimating();
         }
@@ -481,7 +455,6 @@ public class WindowContainerTests {
 
     private class TestWindowContainerBuilder {
         private int mLayer;
-        private boolean mCanDetach;
         private boolean mIsAnimating;
         private boolean mIsVisible;
 
@@ -491,11 +464,6 @@ public class WindowContainerTests {
 
         TestWindowContainerBuilder setLayer(int layer) {
             mLayer = layer;
-            return this;
-        }
-
-        TestWindowContainerBuilder setCanDetach(boolean canDetach) {
-            mCanDetach = canDetach;
             return this;
         }
 
@@ -511,14 +479,13 @@ public class WindowContainerTests {
 
         TestWindowContainerBuilder reset() {
             mLayer = 0;
-            mCanDetach = false;
             mIsAnimating = false;
             mIsVisible = false;
             return this;
         }
 
         TestWindowContainer build() {
-            return new TestWindowContainer(mLayer, mCanDetach, mIsAnimating, mIsVisible);
+            return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible);
         }
     }
 }
