@@ -2333,6 +2333,132 @@ message MetricsEvent {
     // OPEN: Settings > Users > Edit owner info dialog
     DIALOG_OWNER_INFO_SETTINGS = 531;
 
+    // OPEN: Settings > Security > Use one lock dialog
+    DIALOG_UNIFICATION_CONFIRMATION = 532;
+
+    // OPEN: Settings > Security > User Credential
+    DIALOG_USER_CREDENTIAL = 533;
+
+    // OPEN: Settings > Accounts > Remove account
+    DIALOG_REMOVE_USER = 534;
+
+    // OPEN: Settings > Accounts > Confirm auto sync dialog
+    DIALOG_CONFIRM_AUTO_SYNC_CHANGE = 535;
+
+    // OPEN: Settings > Apps > Dialog for running service details
+    DIALOG_RUNNIGN_SERVICE = 536;
+
+    // OPEN: Settings > Dialog for hiding home settings
+    DIALOG_NO_HOME = 537;
+
+    // OPEN: Settings > Bluetooth > Rename this device
+    DIALOG_BLUETOOTH_RENAME = 538;
+
+    // OPEN: Settings > Bluetooth > Paired device profile
+    DIALOG_BLUETOOTH_PAIRED_DEVICE_PROFILE = 539;
+
+    // OPEN: Settings > Battery optimization > details for app
+    DIALOG_HIGH_POWER_DETAILS = 540;
+
+    // OPEN: Settings > Keyboard > Show keyboard layout dialog
+    DIALOG_KEYBOARD_LAYOUT = 541;
+
+    // OPEN: Settings > Wifi > WPS Setup dialog
+    DIALOG_WPS_SETUP = 542;
+
+    // OPEN: Settings > WIFI Scan permission dialog
+    DIALOG_WIFI_SCAN_MODE = 543;
+
+    // OPEN: Settings > WIFI Setup > Skip Wifi dialog
+    DIALOG_WIFI_SKIP = 544;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog
+    DIALOG_LEGACY_VPN_CONFIG = 545;
+
+    // OPEN: Settings > Wireless > VPN > Config dialog for app
+    DIALOG_VPN_APP_CONFIG = 546;
+
+    // OPEN: Settings > Wireless > VPN > Cannot connect dialog
+    DIALOG_VPN_CANNOT_CONNECT = 547;
+
+    // OPEN: Settings > Wireless > VPN > Replace existing VPN dialog
+    DIALOG_VPN_REPLACE_EXISTING = 548;
+
+    // OPEN: Settings > Billing cycle > Edit billing cycle dates dialog
+    DIALOG_BILLING_CYCLE = 549;
+
+    // OPEN: Settings > Billing cycle > Edit data limit/warning dialog
+    DIALOG_BILLING_BYTE_LIMIT = 550;
+
+    // OPEN: Settings > Billing cycle > turn on data limit dialog
+    DIALOG_BILLING_CONFIRM_LIMIT = 551;
+
+    // OPEN: Settings > Service > Turn off notification access dialog
+    DIALOG_DISABLE_NOTIFICATION_ACCESS = 552;
+
+    // OPEN: Settings > Sound > Use personal sound for work profile dialog
+    DIALOG_UNIFY_SOUND_SETTINGS = 553;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being granted.
+    DIALOG_ZEN_ACCESS_GRANT = 554;
+
+    // OPEN: Settings > Zen mode > Dialog warning about the zen access privileges being revoked.
+    DIALOG_ZEN_ACCESS_REVOKE = 555;
+
+    // OPEN: Settings > Zen mode > Dialog that picks time for zen mode.
+    DIALOG_ZEN_TIMEPICKER = 556;
+
+    // OPEN: Settings > Apps > Dialog that informs user to allow service access for app.
+    DIALOG_SERVICE_ACCESS_WARNING = 557;
+
+    // OPEN: Settings > Apps > Dialog for app actions (such as force stop/clear data)
+    DIALOG_APP_INFO_ACTION = 558;
+
+    // OPEN: Settings > Storage > Dialog for forgetting a storage device
+    DIALOG_VOLUME_FORGET = 559;
+
+    // OPEN: Settings > Storage > Dialog warning that a volume is slow
+    DIALOG_VOLUME_SLOW_WARNING = 560;
+
+    // OPEN: Settings > Storage > Dialog for initializing a volume
+    DIALOG_VOLUME_INIT = 561;
+
+    // OPEN: Settings > Storage > Dialog for unmounting a volume
+    DIALOG_VOLUME_UNMOUNT = 562;
+
+    // OPEN: Settings > Storage > Dialog for renaming a volume
+    DIALOG_VOLUME_RENAME = 563;
+
+    // OPEN: Settings > Storage > Dialog for clear cache
+    DIALOG_STORAGE_CLEAR_CACHE = 564;
+
+    // OPEN: Settings > Storage > Dialog for system info
+    DIALOG_STORAGE_SYSTEM_INFO = 565;
+
+    // OPEN: Settings > Storage > Dialog for other info
+    DIALOG_STORAGE_OTHER_INFO = 566;
+
+    // OPEN: Settings > Storage > Dialog for user info
+    DIALOG_STORAGE_USER_INFO = 567;
+
+    // OPEN: Settings > Add fingerprint > Dialog when user touches fingerprint icon.
+    DIALOG_FINGERPRINT_ICON_TOUCH = 568;
+
+    // OPEN: Settings > Add fingerprint > Error dialog
+    DIALOG_FINGERPINT_ERROR = 569;
+
+    // OPEN: Settings > Fingerprint > Rename or delete dialog
+    DIALOG_FINGERPINT_EDIT = 570;
+
+    // OPEN: Settings > Fingerprint > Dialog for deleting last fingerprint
+    DIALOG_FINGERPINT_DELETE_LAST = 571;
+
+    // OPEN: SUW > Fingerprint > Dialog to confirm cancel fingerprint setup.
+    DIALOG_FINGERPRINT_CANCEL_SETUP = 572;
+
+    // OPEN: SUW > Fingerprint > Dialog to confirm skip fingerprint setup entirely.
+    DIALOG_FINGERPRINT_SKIP_SETUP = 573;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
