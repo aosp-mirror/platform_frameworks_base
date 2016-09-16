@@ -115,7 +115,7 @@ public class UsbService extends IUsbManager.Stub {
     public UsbService(Context context) {
         mContext = context;
 
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mUserManager = context.getSystemService(UserManager.class);
         mSettingsManager = new UsbSettingsManager(context);
         mAlsaManager = new UsbAlsaManager(context);
 
@@ -160,15 +160,16 @@ public class UsbService extends IUsbManager.Stub {
         synchronized (mLock) {
             mCurrentUserId = newUserId;
 
-            // The following two modules need to know about the current user. If they need to
-            // distinguish by profile of the user, the id has to be passed in the call to the
+            // The following two modules need to know about the current profile group. If they need
+            // to distinguish by profile of the user, the id has to be passed in the call to the
             // module.
-            UsbUserSettingsManager userSettings = getSettingsForUser(newUserId);
+            UsbProfileGroupSettingsManager settings =
+                    mSettingsManager.getSettingsForProfileGroup(UserHandle.of(newUserId));
             if (mHostManager != null) {
-                mHostManager.setCurrentUserSettings(userSettings);
+                mHostManager.setCurrentUserSettings(settings);
             }
             if (mDeviceManager != null) {
-                mDeviceManager.setCurrentUser(newUserId, userSettings);
+                mDeviceManager.setCurrentUser(newUserId, settings);
             }
         }
     }
@@ -284,14 +285,24 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public void setDevicePackage(UsbDevice device, String packageName, int userId) {
+        device = Preconditions.checkNotNull(device);
+
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        getSettingsForUser(userId).setDevicePackage(device, packageName);
+
+        UserHandle user = UserHandle.of(userId);
+        mSettingsManager.getSettingsForProfileGroup(user).setDevicePackage(device, packageName,
+                user);
     }
 
     @Override
     public void setAccessoryPackage(UsbAccessory accessory, String packageName, int userId) {
+        accessory = Preconditions.checkNotNull(accessory);
+
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        getSettingsForUser(userId).setAccessoryPackage(accessory, packageName);
+
+        UserHandle user = UserHandle.of(userId);
+        mSettingsManager.getSettingsForProfileGroup(user).setAccessoryPackage(accessory,
+                packageName, user);
     }
 
     @Override
@@ -335,14 +346,22 @@ public class UsbService extends IUsbManager.Stub {
 
     @Override
     public boolean hasDefaults(String packageName, int userId) {
+        packageName = Preconditions.checkStringNotEmpty(packageName);
+
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        return getSettingsForUser(userId).hasDefaults(packageName);
+
+        UserHandle user = UserHandle.of(userId);
+        return mSettingsManager.getSettingsForProfileGroup(user).hasDefaults(packageName, user);
     }
 
     @Override
     public void clearDefaults(String packageName, int userId) {
+        packageName = Preconditions.checkStringNotEmpty(packageName);
+
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        getSettingsForUser(userId).clearDefaults(packageName);
+
+        UserHandle user = UserHandle.of(userId);
+        mSettingsManager.getSettingsForProfileGroup(user).clearDefaults(packageName, user);
     }
 
     @Override

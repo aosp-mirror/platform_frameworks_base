@@ -137,7 +137,7 @@ public class UsbDeviceManager {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     @GuardedBy("mLock")
-    private UsbUserSettingsManager mCurrentUserSettings;
+    private UsbProfileGroupSettingsManager mCurrentSettings;
     private NotificationManager mNotificationManager;
     private final boolean mHasUsbAccessory;
     private boolean mUseUsbNotification;
@@ -221,9 +221,9 @@ public class UsbDeviceManager {
                 new IntentFilter(UsbManager.ACTION_USB_PORT_CHANGED));
     }
 
-    private UsbUserSettingsManager getCurrentUserSettings() {
+    private UsbProfileGroupSettingsManager getCurrentSettings() {
         synchronized (mLock) {
-            return mCurrentUserSettings;
+            return mCurrentSettings;
         }
     }
 
@@ -258,9 +258,9 @@ public class UsbDeviceManager {
         mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
     }
 
-    public void setCurrentUser(int newCurrentUserId, UsbUserSettingsManager settings) {
+    public void setCurrentUser(int newCurrentUserId, UsbProfileGroupSettingsManager settings) {
         synchronized (mLock) {
-            mCurrentUserSettings = settings;
+            mCurrentSettings = settings;
             mHandler.obtainMessage(MSG_USER_SWITCHED, newCurrentUserId, 0).sendToTarget();
         }
     }
@@ -574,7 +574,7 @@ public class UsbDeviceManager {
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
-                        getCurrentUserSettings().accessoryAttached(mCurrentAccessory);
+                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     } // else handle in boot completed
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
@@ -767,7 +767,7 @@ public class UsbDeviceManager {
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
                     if (mCurrentAccessory != null) {
-                        getCurrentUserSettings().accessoryAttached(mCurrentAccessory);
+                        getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
                     if (mDebuggingManager != null) {
                         mDebuggingManager.setAdbEnabled(mAdbEnabled);
