@@ -37,7 +37,6 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/av/drm/libdrmframework/include \
     $(TOP)/frameworks/av/drm/libdrmframework/plugins/common/include \
     $(TOP)/frameworks/av/include \
-    $(TOP)/libcore/include
 
 LOCAL_MODULE_TAGS := optional
 
