@@ -3956,7 +3956,7 @@ final class Settings {
     }
 
     void createNewUserLI(@NonNull PackageManagerService service, @NonNull Installer installer,
-            int userHandle) {
+            int userHandle, String[] disallowedPackages) {
         String[] volumeUuids;
         String[] names;
         int[] appIds;
@@ -3977,8 +3977,10 @@ final class Settings {
                 if (ps.pkg == null || ps.pkg.applicationInfo == null) {
                     continue;
                 }
+                final boolean shouldInstall = ps.isSystem() &&
+                        !ArrayUtils.contains(disallowedPackages, ps.name);
                 // Only system apps are initially installed.
-                ps.setInstalled(ps.isSystem(), userHandle);
+                ps.setInstalled(shouldInstall, userHandle);
                 // Need to create a data directory for all apps under this user. Accumulate all
                 // required args and call the installer after mPackages lock has been released
                 volumeUuids[i] = ps.volumeUuid;

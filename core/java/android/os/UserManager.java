@@ -1340,15 +1340,34 @@ public class UserManager {
      *
      * @param name the user's name
      * @param flags flags that identify the type of user and other properties.
-     * @see UserInfo
-     * @param userHandle new user will be a profile of this use.
+     * @param userHandle new user will be a profile of this user.
      *
-     * @return the UserInfo object for the created user, or null if the user could not be created.
+     * @return the {@link UserInfo} object for the created user, or null if the user
+     *         could not be created.
      * @hide
      */
     public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle) {
+        return createProfileForUser(name, flags, userHandle, null);
+    }
+
+    /**
+     * Version of {@link #createProfileForUser(String, int, int)} that allows you to specify
+     * any packages that should not be installed in the new profile by default, these packages can
+     * still be installed later by the user if needed.
+     *
+     * @param name the user's name
+     * @param flags flags that identify the type of user and other properties.
+     * @param userHandle new user will be a profile of this user.
+     * @param disallowedPackages packages that will not be installed in the profile being created.
+     *
+     * @return the {@link UserInfo} object for the created user, or null if the user
+     *         could not be created.
+     * @hide
+     */
+    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle,
+            String[] disallowedPackages) {
         try {
-            return mService.createProfileForUser(name, flags, userHandle);
+            return mService.createProfileForUser(name, flags, userHandle, disallowedPackages);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
