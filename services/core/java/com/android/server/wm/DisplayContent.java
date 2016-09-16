@@ -240,7 +240,8 @@ class DisplayContent {
             // Apps and their containers are not allowed to specify an orientation while the docked
             // or freeform stack is visible...except for the home stack/task if the docked stack is
             // minimized and it actually set something.
-            if (mHomeStack.isVisible() && mDividerControllerLocked.isMinimizedDock()) {
+            if (mHomeStack != null && mHomeStack.isVisible()
+                    && mDividerControllerLocked.isMinimizedDock()) {
                 final int orientation = mHomeStack.getOrientation();
                 if (orientation != SCREEN_ORIENTATION_UNSET) {
                     return orientation;

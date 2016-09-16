@@ -153,7 +153,7 @@ public class DockedStackDividerController implements DimLayerUser {
         // If the bounds are fullscreen, return the value of the fullscreen configuration
         if (bounds == null || (bounds.left == 0 && bounds.top == 0
                 && bounds.right == di.logicalWidth && bounds.bottom == di.logicalHeight)) {
-            return mService.mCurConfiguration.smallestScreenWidthDp;
+            return mService.mGlobalConfiguration.smallestScreenWidthDp;
         }
         final int baseDisplayWidth = mDisplayContent.mBaseDisplayWidth;
         final int baseDisplayHeight = mDisplayContent.mBaseDisplayHeight;
@@ -190,7 +190,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void initSnapAlgorithmForRotations() {
-        final Configuration baseConfig = mService.mCurConfiguration;
+        final Configuration baseConfig = mService.mGlobalConfiguration;
 
         // Initialize the snap algorithms for all 4 screen orientations.
         final Configuration config = new Configuration();

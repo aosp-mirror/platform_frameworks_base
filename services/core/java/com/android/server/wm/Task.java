@@ -74,8 +74,10 @@ class Task implements DimLayer.DimLayerUser {
     // Whether mBounds is fullscreen
     private boolean mFullscreen = true;
 
-    // Contains configurations settings that are different from the global configuration due to
-    // stack specific operations. E.g. {@link #setBounds}.
+    /**
+     * Contains configurations settings that are different from the parent configuration due to
+     * stack specific operations. E.g. {@link #setBounds}.
+     */
     Configuration mOverrideConfig = Configuration.EMPTY;
 
     // For comparison with DisplayContent bounds.
@@ -96,13 +98,13 @@ class Task implements DimLayer.DimLayerUser {
     private boolean mIsOnTopLauncher;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration config, boolean isOnTopLauncher) {
+            Configuration overrideConfig, boolean isOnTopLauncher) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
         mIsOnTopLauncher = isOnTopLauncher;
-        setBounds(bounds, config);
+        setBounds(bounds, overrideConfig);
     }
 
     DisplayContent getDisplayContent() {
@@ -212,15 +214,15 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
-    private int setBounds(Rect bounds, Configuration config) {
-        if (config == null) {
-            config = Configuration.EMPTY;
+    private int setBounds(Rect bounds, Configuration overrideConfig) {
+        if (overrideConfig == null) {
+            overrideConfig = Configuration.EMPTY;
         }
-        if (bounds == null && !Configuration.EMPTY.equals(config)) {
+        if (bounds == null && !Configuration.EMPTY.equals(overrideConfig)) {
             throw new IllegalArgumentException("null bounds but non empty configuration: "
-                    + config);
+                    + overrideConfig);
         }
-        if (bounds != null && Configuration.EMPTY.equals(config)) {
+        if (bounds != null && Configuration.EMPTY.equals(overrideConfig)) {
             throw new IllegalArgumentException("non null bounds, but empty configuration");
         }
         boolean oldFullscreen = mFullscreen;
@@ -257,7 +259,7 @@ class Task implements DimLayer.DimLayerUser {
         if (displayContent != null) {
             displayContent.mDimLayerController.updateDimLayer(this);
         }
-        mOverrideConfig = mFullscreen ? Configuration.EMPTY : config;
+        mOverrideConfig = mFullscreen ? Configuration.EMPTY : overrideConfig;
         return boundsChange;
     }
 
@@ -302,12 +304,8 @@ class Task implements DimLayer.DimLayerUser {
         return mHomeTask;
     }
 
-    private boolean inCropWindowsResizeMode() {
-        return !mHomeTask && !isResizeable() && mResizeMode == RESIZE_MODE_CROP_WINDOWS;
-    }
-
-    boolean resizeLocked(Rect bounds, Configuration configuration, boolean forced) {
-        int boundsChanged = setBounds(bounds, configuration);
+    boolean resizeLocked(Rect bounds, Configuration overrideConfig, boolean forced) {
+        int boundsChanged = setBounds(bounds, overrideConfig);
         if (forced) {
             boundsChanged |= BOUNDS_CHANGE_SIZE;
         }
@@ -328,7 +326,7 @@ class Task implements DimLayer.DimLayerUser {
      */
     void prepareFreezingBounds() {
         mPreparedFrozenBounds.set(mBounds);
-        mPreparedFrozenMergedConfig.setTo(mService.mCurConfiguration);
+        mPreparedFrozenMergedConfig.setTo(mService.mGlobalConfiguration);
         mPreparedFrozenMergedConfig.updateFrom(mOverrideConfig);
     }
 

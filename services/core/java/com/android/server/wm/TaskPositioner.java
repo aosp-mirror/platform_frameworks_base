@@ -478,7 +478,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private int getDimSide(int x) {
         if (mTask.mStack.mStackId != FREEFORM_WORKSPACE_STACK_ID
                 || !mTask.mStack.isFullscreen()
-                || mService.mCurConfiguration.orientation != ORIENTATION_LANDSCAPE) {
+                || mService.mGlobalConfiguration.orientation != ORIENTATION_LANDSCAPE) {
             return CTRL_NONE;
         }
 

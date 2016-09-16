@@ -2497,7 +2497,7 @@ final class ActivityStack {
             boolean notUpdated = true;
             if (mStackSupervisor.isFocusedStack(this)) {
                 Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                        mService.mConfiguration,
+                        mService.mGlobalConfiguration,
                         next.mayFreezeScreenLocked(next.app) ? next.appToken : null);
                 if (config != null) {
                     next.frozenBeforeDestroy = true;
@@ -4543,7 +4543,7 @@ final class ActivityStack {
 
         // Short circuit: if the two configurations are equal (the common case), then there is
         // nothing to do.
-        final Configuration newConfig = mService.mConfiguration;
+        final Configuration newConfig = mService.mGlobalConfiguration;
         r.task.sanitizeOverrideConfiguration(newConfig);
         final Configuration taskConfig = r.task.mOverrideConfig;
         if (r.configuration.equals(newConfig)
@@ -4773,7 +4773,7 @@ final class ActivityStack {
             r.forceNewConfig = false;
             mStackSupervisor.activityRelaunchingLocked(r);
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
-                    !andResume, new Configuration(mService.mConfiguration),
+                    !andResume, new Configuration(mService.mGlobalConfiguration),
                     new Configuration(r.task.mOverrideConfig), preserveWindow);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is

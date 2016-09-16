@@ -468,7 +468,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         // Snap the position to a target.
         final int rotation = displayInfo.rotation;
-        final int orientation = mService.mCurConfiguration.orientation;
+        final int orientation = mService.mGlobalConfiguration.orientation;
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
@@ -720,7 +720,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                     di.logicalWidth,
                     di.logicalHeight,
                     dockDividerWidth,
-                    mService.mCurConfiguration.orientation == ORIENTATION_PORTRAIT,
+                    mService.mGlobalConfiguration.orientation == ORIENTATION_PORTRAIT,
                     mTmpRect2).getMiddleTarget().position;
 
             if (dockOnTopOrLeft) {
@@ -1186,7 +1186,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             return DOCKED_INVALID;
         }
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
-        final int orientation = mService.mCurConfiguration.orientation;
+        final int orientation = mService.mGlobalConfiguration.orientation;
         return getDockSideUnchecked(bounds, mTmpRect, orientation);
     }
 

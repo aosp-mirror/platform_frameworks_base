@@ -913,7 +913,7 @@ class WindowSurfacePlacer {
         }
 
         mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,
-                mService.mCurConfiguration.uiMode);
+                mService.mGlobalConfiguration.uiMode);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
             mService.mSystemDecorLayer = mService.mPolicy.getSystemDecorLayerLw();
@@ -1639,8 +1639,8 @@ class WindowSurfacePlacer {
                 // synchronize its thumbnail surface with the surface for the
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
-                        insets, thumbnailHeader, taskId, mService.mCurConfiguration.uiMode,
-                        mService.mCurConfiguration.orientation);
+                        insets, thumbnailHeader, taskId, mService.mGlobalConfiguration.uiMode,
+                        mService.mGlobalConfiguration.orientation);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();
