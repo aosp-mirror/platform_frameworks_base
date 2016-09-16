@@ -220,6 +220,7 @@ final class ProcessList {
     void applyDisplaySize(WindowManagerService wm) {
         if (!mHaveDisplaySize) {
             Point p = new Point();
+            // TODO(multi-display): Compute based on sum of all connected displays' resolutions.
             wm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, p);
             if (p.x != 0 && p.y != 0) {
                 updateOomLevels(p.x, p.y, true);

@@ -118,6 +118,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -228,6 +229,13 @@ final class ActivityStack {
     // stack and the new stack will be on top of all stacks.
     static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
+    // The height/width divide used when fitting a task within a bounds with method
+    // {@link #fitWithinBounds}.
+    // We always want the task to to be visible in the bounds without affecting its size when
+    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
+    // the input bounds right or bottom side minus the width or height divided by this value.
+    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
+
     final ActivityManagerService mService;
     final WindowManagerService mWindowManager;
     private final RecentTasks mRecentTasks;
@@ -320,6 +328,12 @@ final class ActivityStack {
     ArrayList<ActivityStack> mStacks;
     /** The attached Display's unique identifier, or -1 if detached */
     int mDisplayId;
+
+    /** Temp variables used during override configuration update. */
+    private final SparseArray<Configuration> mTmpConfigs = new SparseArray<>();
+    private final SparseArray<Rect> mTmpBounds = new SparseArray<>();
+    private final SparseArray<Rect> mTmpInsetBounds = new SparseArray<>();
+    private final Rect tempRect2 = new Rect();
 
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
@@ -4521,6 +4535,86 @@ final class ActivityStack {
             // Ensure the resumed state of the focus activity if we updated the configuration of
             // any activity.
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
+        }
+    }
+
+    /** Update override configurations of all tasks in the stack. */
+    void updateOverrideConfiguration(Rect stackBounds, Rect tempTaskBounds,
+            Rect tempTaskInsetBounds) {
+
+        final Rect taskBounds = tempTaskBounds != null ? tempTaskBounds : stackBounds;
+        final Rect insetBounds = tempTaskInsetBounds != null ? tempTaskInsetBounds : taskBounds;
+
+        mTmpBounds.clear();
+        mTmpConfigs.clear();
+        mTmpInsetBounds.clear();
+
+        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+            final TaskRecord task = mTaskHistory.get(i);
+            if (task.isResizeable()) {
+                if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
+                    // For freeform stack we don't adjust the size of the tasks to match that
+                    // of the stack, but we do try to make sure the tasks are still contained
+                    // with the bounds of the stack.
+                    tempRect2.set(task.mBounds);
+                    fitWithinBounds(tempRect2, stackBounds);
+                    task.updateOverrideConfiguration(tempRect2);
+                } else {
+                    task.updateOverrideConfiguration(taskBounds, insetBounds);
+                }
+            }
+
+            mTmpConfigs.put(task.taskId, task.mOverrideConfig);
+            mTmpBounds.put(task.taskId, task.mBounds);
+            if (tempTaskInsetBounds != null) {
+                mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
+            }
+        }
+
+        // We might trigger a configuration change. Save the current task bounds for freezing.
+        mWindowManager.prepareFreezingTaskBounds(mStackId);
+        mFullscreen = mWindowManager.resizeStack(mStackId, stackBounds, mTmpConfigs, mTmpBounds,
+                mTmpInsetBounds);
+        setBounds(stackBounds);
+    }
+
+
+    /**
+     * Adjust bounds to stay within stack bounds.
+     *
+     * Since bounds might be outside of stack bounds, this method tries to move the bounds in a way
+     * that keep them unchanged, but be contained within the stack bounds.
+     *
+     * @param bounds Bounds to be adjusted.
+     * @param stackBounds Bounds within which the other bounds should remain.
+     */
+    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
+        if (stackBounds == null || stackBounds.contains(bounds)) {
+            return;
+        }
+
+        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
+            final int maxRight = stackBounds.right
+                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int horizontalDiff = stackBounds.left - bounds.left;
+            if ((horizontalDiff < 0 && bounds.left >= maxRight)
+                    || (bounds.left + horizontalDiff >= maxRight)) {
+                horizontalDiff = maxRight - bounds.left;
+            }
+            bounds.left += horizontalDiff;
+            bounds.right += horizontalDiff;
+        }
+
+        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
+            final int maxBottom = stackBounds.bottom
+                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
+            int verticalDiff = stackBounds.top - bounds.top;
+            if ((verticalDiff < 0 && bounds.top >= maxBottom)
+                    || (bounds.top + verticalDiff >= maxBottom)) {
+                verticalDiff = maxBottom - bounds.top;
+            }
+            bounds.top += verticalDiff;
+            bounds.bottom += verticalDiff;
         }
     }
 
