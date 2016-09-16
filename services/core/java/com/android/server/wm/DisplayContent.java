@@ -432,7 +432,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         }
     }
 
-    void switchUserStacks() {
+    void switchUser() {
         final WindowList windows = getWindowList();
         for (int i = 0; i < windows.size(); i++) {
             final WindowState win = windows.get(i);
@@ -485,7 +485,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
     void removeImmediately() {
         super.removeImmediately();
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-        mService.mDisplayContents.delete(mDisplayId);
+        // TODO: remove this line once RootWindowContainer is online.
+        mService.mRoot.mDisplayContents.delete(mDisplayId);
         mDimLayerController.close();
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mService.unregisterPointerEventListener(mTapDetector);

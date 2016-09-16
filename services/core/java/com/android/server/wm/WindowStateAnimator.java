@@ -685,7 +685,7 @@ class WindowStateAnimator {
             }
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "OutOfResourcesException creating surface");
-            mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
+            mService.mRoot.reclaimSomeSurfaceMemory(this, "create", true);
             mDrawState = NO_SURFACE;
             return null;
         } catch (Exception e) {
@@ -1020,7 +1020,7 @@ class WindowStateAnimator {
                     + " screen=" + (screenAnimation ?
                             screenRotationAnimation.getEnterTransformation().getAlpha() : "null"));
             return;
-        } else if (mIsWallpaper && mService.mWindowPlacerLocked.mWallpaperActionPending) {
+        } else if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
             return;
         } else if (mWin.isDragResizeChanged()) {
             // This window is awaiting a relayout because user just started (or ended)
@@ -1850,7 +1850,7 @@ class WindowStateAnimator {
     }
 
     void reclaimSomeSurfaceMemory(String operation, boolean secure) {
-        mService.reclaimSomeSurfaceMemoryLocked(this, operation, secure);
+        mService.mRoot.reclaimSomeSurfaceMemory(this, operation, secure);
     }
 
     boolean getShown() {

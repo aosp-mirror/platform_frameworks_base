@@ -641,7 +641,7 @@ class WallpaperController {
     }
 
     boolean adjustWallpaperWindows() {
-        mService.mWindowPlacerLocked.mWallpaperMayChange = false;
+        mService.mRoot.mWallpaperMayChange = false;
 
         final WindowList windows = mService.getDefaultWindowListLocked();
         // First find top-most window that has asked to be on top of the wallpaper;

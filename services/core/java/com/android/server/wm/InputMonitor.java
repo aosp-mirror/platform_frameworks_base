@@ -165,7 +165,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         return 0; // abort dispatching
     }
 
-    private void addInputWindowHandleLw(final InputWindowHandle windowHandle) {
+    void addInputWindowHandle(final InputWindowHandle windowHandle) {
         if (mInputWindowHandles == null) {
             mInputWindowHandles = new InputWindowHandle[16];
         }
@@ -176,7 +176,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         mInputWindowHandles[mInputWindowHandleCount++] = windowHandle;
     }
 
-    private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
+    void addInputWindowHandle(final InputWindowHandle inputWindowHandle,
             final WindowState child, int flags, final int type, final boolean isVisible,
             final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
@@ -214,7 +214,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             Slog.d(TAG_WM, "addInputWindowHandle: "
                     + child + ", " + inputWindowHandle);
         }
-        addInputWindowHandleLw(inputWindowHandle);
+        addInputWindowHandle(inputWindowHandle);
     }
 
     private void clearInputWindowHandlesLw() {
@@ -241,9 +241,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // As an optimization, we could try to prune the list of windows but this turns
         // out to be difficult because only the native code knows for sure which window
         // currently has touch focus.
-        boolean disableWallpaperTouchEvents = false;
 
-        // If there's a drag in flight, provide a pseudowindow to catch drag input
+        // If there's a drag in flight, provide a pseudo-window to catch drag input
         final boolean inDrag = (mService.mDragState != null);
         if (inDrag) {
             if (DEBUG_DRAG) {
@@ -251,7 +250,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
             final InputWindowHandle dragWindowHandle = mService.mDragState.getInputWindowHandle();
             if (dragWindowHandle != null) {
-                addInputWindowHandleLw(dragWindowHandle);
+                addInputWindowHandle(dragWindowHandle);
             } else {
                 Slog.w(TAG_WM, "Drag is in progress but there is no "
                         + "drag window handle.");
@@ -265,78 +264,15 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
             final InputWindowHandle dragWindowHandle = mService.mTaskPositioner.mDragWindowHandle;
             if (dragWindowHandle != null) {
-                addInputWindowHandleLw(dragWindowHandle);
+                addInputWindowHandle(dragWindowHandle);
             } else {
                 Slog.e(TAG_WM,
                         "Repositioning is in progress but there is no drag window handle.");
             }
         }
 
-        boolean addInputConsumerHandle = mService.mInputConsumer != null;
-
-        boolean addWallpaperInputConsumerHandle = mService.mWallpaperInputConsumer != null;
-
         // Add all windows on the default display.
-        final int numDisplays = mService.mDisplayContents.size();
-        final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
-            final WindowList windows = displayContent.getWindowList();
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState child = windows.get(winNdx);
-                final InputChannel inputChannel = child.mInputChannel;
-                final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
-                if (inputChannel == null || inputWindowHandle == null || child.mRemoved
-                        || child.isAdjustedForMinimizedDock()) {
-                    // Skip this window because it cannot possibly receive input.
-                    continue;
-                }
-                if (addInputConsumerHandle
-                        && inputWindowHandle.layer <= mService.mInputConsumer.mWindowHandle.layer) {
-                    addInputWindowHandleLw(mService.mInputConsumer.mWindowHandle);
-                    addInputConsumerHandle = false;
-                }
-
-                if (addWallpaperInputConsumerHandle) {
-                    if (child.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER &&
-                            child.isVisibleLw()) {
-                        // Add the wallpaper input consumer above the first visible wallpaper.
-                        addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
-                        addWallpaperInputConsumerHandle = false;
-                    }
-                }
-
-                final int flags = child.mAttrs.flags;
-                final int privateFlags = child.mAttrs.privateFlags;
-                final int type = child.mAttrs.type;
-
-                final boolean hasFocus = (child == mInputFocus);
-                final boolean isVisible = child.isVisibleLw();
-                if ((privateFlags
-                        & WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS)
-                            != 0) {
-                    disableWallpaperTouchEvents = true;
-                }
-                final boolean hasWallpaper = wallpaperController.isWallpaperTarget(child)
-                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0
-                        && !disableWallpaperTouchEvents;
-                final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
-
-                // If there's a drag in progress and 'child' is a potential drop target,
-                // make sure it's been told about the drag
-                if (inDrag && isVisible && onDefaultDisplay) {
-                    mService.mDragState.sendDragStartedIfNeededLw(child);
-                }
-
-                addInputWindowHandleLw(
-                        inputWindowHandle, child, flags, type, isVisible, hasFocus, hasWallpaper);
-            }
-        }
-
-        if (addWallpaperInputConsumerHandle) {
-            // No visible wallpaper found, add the wallpaper input consumer at the end.
-            addInputWindowHandleLw(mService.mWallpaperInputConsumer.mWindowHandle);
-        }
+        mService.mRoot.updateInputWindows(this, mInputFocus, inDrag);
 
         // Send windows to native code.
         mService.mInputManager.setInputWindows(mInputWindowHandles);
