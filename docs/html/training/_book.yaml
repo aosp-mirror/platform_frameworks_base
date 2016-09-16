@@ -1151,6 +1151,8 @@ toc:
         value: 维护兼容性
       - name: zh-tw-lang
         value: 維持相容性
+    - title: Selecting Colors with the Palette API 
+      path: /training/material/palette-colors.html
 
 - title: Best Practices for User Input
   path: /training/best-user-input.html
