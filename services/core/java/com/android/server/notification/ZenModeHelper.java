@@ -491,7 +491,6 @@ public class ZenModeHelper {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mZenMode=");
         pw.println(Global.zenModeToString(mZenMode));
-        dump(pw, prefix, "mDefaultConfig", mDefaultConfig);
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
             dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
