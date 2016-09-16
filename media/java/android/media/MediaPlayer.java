@@ -1641,7 +1641,8 @@ public class MediaPlayer extends PlayerBase
      * (i.e. reaches the end of the stream).
      * The media framework will attempt to transition from this player to
      * the next as seamlessly as possible. The next player can be set at
-     * any time before completion. The next player must be prepared by the
+     * any time before completion, but shall be after setDataSource has been
+     * called successfully. The next player must be prepared by the
      * app, and the application should not call start() on it.
      * The next MediaPlayer must be different from 'this'. An exception
      * will be thrown if next == this.
