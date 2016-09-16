@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.widget.DrawerLayout;
 import android.util.ArraySet;
 import android.util.Log;
@@ -296,6 +297,11 @@ public class SettingsDrawerActivity extends Activity {
                 userHandles.remove(i);
             }
         }
+    }
+
+    @VisibleForTesting
+    public void setUserManager(UserManager userManager) {
+        mUserManager = userManager;
     }
 
     protected void onTileClicked(Tile tile) {
