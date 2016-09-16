@@ -1045,7 +1045,7 @@ public class DownloadManager {
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri
-                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+                        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
                     } else {
                         // return public uri
                         String path = cursor.getString(
@@ -1248,7 +1248,7 @@ public class DownloadManager {
      * @hide
      */
     public Uri getDownloadUri(long id) {
-        return ContentUris.withAppendedId(mBaseUri, id);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
     }
 
     /**
@@ -1329,7 +1329,7 @@ public class DownloadManager {
 
             // return content URI for cache download
             long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
-            return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
+            return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId).toString();
         }
 
         private long getReason(int status) {
