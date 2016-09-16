@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.annotation.CallSuper;
 
+import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -250,6 +251,13 @@ class WindowContainer implements Comparable<WindowContainer> {
         return mChildren.isEmpty() ? this : mChildren.peekLast();
     }
 
+    void onAppTransitionDone() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            wc.onAppTransitionDone();
+        }
+    }
+
     void setOrientation(int orientation) {
         mOrientation = orientation;
     }
@@ -317,6 +325,22 @@ class WindowContainer implements Comparable<WindowContainer> {
     }
 
     /**
+     * Rebuilds the WindowList for the input display content.
+     * @param dc The display content to rebuild the window list for.
+     * @param addIndex The index in the window list to add the next entry to.
+     * @return The next index in the window list to.
+     */
+    // TODO: Hoping we can get rid of WindowList so this method wouldn't be needed.
+    int rebuildWindowList(DisplayContent dc, int addIndex) {
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            final WindowContainer wc = mChildren.get(i);
+            addIndex = wc.rebuildWindowList(dc, addIndex);
+        }
+        return addIndex;
+    }
+
+    /**
      * Returns -1, 0, or 1 depending on if the input container is greater than, equal to, or lesser
      * than the input container in terms of z-order.
      */
@@ -376,4 +400,22 @@ class WindowContainer implements Comparable<WindowContainer> {
             current = current.mParent;
         } while (current != null);
     }
+
+    /**
+     * Dumps the names of this container children in the input print writer indenting each
+     * level with the input prefix.
+     */
+    void dumpChildrenNames(PrintWriter pw, String prefix) {
+        final String childPrefix = prefix + prefix;
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = mChildren.get(i);
+            pw.println("#" + i + " " + getName());
+            wc.dumpChildrenNames(pw, childPrefix);
+        }
+    }
+
+    String getName() {
+        return toString();
+    }
+
 }

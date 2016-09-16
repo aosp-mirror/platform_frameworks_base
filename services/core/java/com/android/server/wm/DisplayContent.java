@@ -45,6 +45,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Debug;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -52,9 +53,12 @@ import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.Surface;
 import android.view.animation.Animation;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
 }
@@ -87,7 +91,7 @@ class DisplayContent {
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     Rect mBaseDisplayRect = new Rect();
-    Rect mContentRect = new Rect();
+    private Rect mContentRect = new Rect();
 
     // Accessed directly by all users.
     boolean layoutNeeded;
@@ -109,7 +113,7 @@ class DisplayContent {
     TaskTapPointerEventListener mTapDetector;
 
     /** Detect user tapping outside of current focused stack bounds .*/
-    Region mTouchExcludeRegion = new Region();
+    private Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when calculating rects */
     private final Rect mTmpRect = new Rect();
@@ -117,7 +121,7 @@ class DisplayContent {
     private final Region mTmpRegion = new Region();
 
     /** For gathering Task objects in order. */
-    final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
+    private final ArrayList<Task> mTmpTaskHistory = new ArrayList<Task>();
 
     final WindowManagerService mService;
 
@@ -129,6 +133,9 @@ class DisplayContent {
     final DimLayerController mDimLayerController;
 
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
+
+    /** Used when rebuilding window list to keep track of windows that have been removed. */
+    private WindowState[] mRebuildTmp = new WindowState[20];
 
     /**
      * @param display May not be null.
@@ -213,6 +220,15 @@ class DisplayContent {
             }
         }
         return null;
+    }
+
+    void onAppTransitionDone() {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final TaskStack stack = mStacks.get(i);
+            stack.onAppTransitionDone();
+        }
+
+        rebuildAppWindowList();
     }
 
     int getOrientation() {
@@ -515,6 +531,8 @@ class DisplayContent {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             mStacks.get(stackNdx).switchUser();
         }
+
+        rebuildAppWindowList();
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -675,7 +693,11 @@ class DisplayContent {
 
     @Override
     public String toString() {
-        return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mStacks;
+        return getName() + " stacks=" + mStacks;
+    }
+
+    String getName() {
+        return "Display " + mDisplayId + " info=" + mDisplayInfo;
     }
 
     /**
@@ -695,9 +717,7 @@ class DisplayContent {
         return (stack != null && stack.isVisible(true /* ignoreKeyguard */)) ? stack : null;
     }
 
-    /**
-     * Find the visible, touch-deliverable window under the given point
-     */
+    /** Find the visible, touch-deliverable window under the given point */
     WindowState getTouchableWinAtPointLocked(float xf, float yf) {
         WindowState touchedWin = null;
         final int x = (int) xf;
@@ -996,6 +1016,98 @@ class DisplayContent {
         }
     }
 
+    /**
+     * Z-orders the display window list so that:
+     * <ul>
+     * <li>Any windows that are currently below the wallpaper window stay below the wallpaper
+     *      window.
+     * <li>Exiting application windows are at the bottom, but above the wallpaper window.
+     * <li>All other application windows are above the exiting application windows and ordered based
+     *      on the ordering of their stacks and tasks on the display.
+     * <li>Non-application windows are at the very top.
+     * </ul>
+     * <p>
+     * NOTE: This isn't a complete picture of what the user see. Further manipulation of the window
+     *       surface layering is done in {@link WindowLayersController}.
+     */
+    void rebuildAppWindowList() {
+        int count = mWindows.size();
+        int i;
+        int lastBelow = -1;
+        int numRemoved = 0;
+
+        if (mRebuildTmp.length < count) {
+            mRebuildTmp = new WindowState[count + 10];
+        }
+
+        // First remove all existing app windows.
+        i = 0;
+        while (i < count) {
+            final WindowState w = mWindows.get(i);
+            if (w.mAppToken != null) {
+                final WindowState win = mWindows.remove(i);
+                win.mRebuilding = true;
+                mRebuildTmp[numRemoved] = win;
+                mService.mWindowsChanged = true;
+                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Rebuild removing window: " + win);
+                count--;
+                numRemoved++;
+                continue;
+            } else if (lastBelow == i-1) {
+                if (w.mAttrs.type == TYPE_WALLPAPER) {
+                    lastBelow = i;
+                }
+            }
+            i++;
+        }
+
+        // Keep whatever windows were below the app windows still below, by skipping them.
+        lastBelow++;
+        i = lastBelow;
+
+        // First add all of the exiting app tokens...  these are no longer in the main app list,
+        // but still have windows shown. We put them in the back because now that the animation is
+        // over we no longer will care about them.
+        final int numStacks = mStacks.size();
+        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            AppTokenList exitingAppTokens = mStacks.get(stackNdx).mExitingAppTokens;
+            int NT = exitingAppTokens.size();
+            for (int j = 0; j < NT; j++) {
+                i = exitingAppTokens.get(j).rebuildWindowList(this, i);
+            }
+        }
+
+        // And add in the still active app tokens in Z order.
+        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            i = mStacks.get(stackNdx).rebuildWindowList(this, i);
+        }
+
+        i -= lastBelow;
+        if (i != numRemoved) {
+            layoutNeeded = true;
+            Slog.w(TAG_WM, "On display=" + mDisplayId + " Rebuild removed " + numRemoved
+                    + " windows but added " + i + " rebuildAppWindowListLocked() "
+                    + " callers=" + Debug.getCallers(10));
+            for (i = 0; i < numRemoved; i++) {
+                WindowState ws = mRebuildTmp[i];
+                if (ws.mRebuilding) {
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+                    ws.dump(pw, "", true);
+                    pw.flush();
+                    Slog.w(TAG_WM, "This window was lost: " + ws);
+                    Slog.w(TAG_WM, sw.toString());
+                    ws.mWinAnimator.destroySurfaceLocked();
+                }
+            }
+            Slog.w(TAG_WM, "Current app token list:");
+            dumpChildrenNames();
+            Slog.w(TAG_WM, "Final window list:");
+            dumpWindows();
+        }
+        Arrays.fill(mRebuildTmp, null);
+    }
+
     /** Return the list of Windows on this display associated with the input token. */
     WindowList getTokenWindowsOnDisplay(WindowToken token) {
         final WindowList windowList = new WindowList();
@@ -1083,6 +1195,33 @@ class DisplayContent {
             }
         }
         return -1;
+    }
+
+    private void dumpChildrenNames() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+        dumpChildrenNames(pw, "  ");
+    }
+
+    private void dumpChildrenNames(PrintWriter pw, String prefix) {
+        final String childPrefix = prefix + prefix;
+        for (int j = mStacks.size() - 1; j >= 0; j--) {
+            final TaskStack stack = mStacks.get(j);
+            pw.println("#" + j + " " + getName());
+            stack.dumpChildrenNames(pw, childPrefix);
+        }
+    }
+
+    private void dumpWindows() {
+        final int numDisplays = mService.mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
+            Slog.v(TAG_WM, " Display #" + displayContent.getDisplayId());
+            final WindowList windows = displayContent.getWindowList();
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                Slog.v(TAG_WM, "  #" + winNdx + ": " + windows.get(winNdx));
+            }
+        }
     }
 
     static final class GetWindowOnDisplaySearchResults {

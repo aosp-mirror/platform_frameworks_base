@@ -984,6 +984,11 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    @Override
+    void onAppTransitionDone() {
+        sendingToBottom = false;
+    }
+
     /**
      * We override because this class doesn't want its children affecting its reported orientation
      * in anyway.
@@ -994,6 +999,14 @@ class AppWindowToken extends WindowToken {
             return SCREEN_ORIENTATION_UNSET;
         }
         return mOrientation;
+    }
+
+    @Override
+    int rebuildWindowList(DisplayContent dc, int addIndex) {
+        if (mIsExiting && !waitingForReplacement()) {
+            return addIndex;
+        }
+        return super.rebuildWindowList(dc, addIndex);
     }
 
     @Override

@@ -1079,7 +1079,8 @@ class WindowSurfacePlacer {
 
         mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
-        mService.rebuildAppWindowListLocked();
+        final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
+        displayContent.rebuildAppWindowList();
 
         mWallpaperMayChange = false;
 
@@ -1103,7 +1104,6 @@ class WindowSurfacePlacer {
         }
         // Adjust wallpaper before we pull the lower/upper target, since pending changes
         // (like the clearAnimatingFlags() above) might affect wallpaper target result.
-        final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
         if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
                 mWallpaperControllerLocked.adjustWallpaperWindows()) {
             mService.mLayersController.assignLayersLocked(windows);
