@@ -3,7 +3,6 @@ page.type=design
 page.image=images/cards/material_2x.png
 page.metaDescription=Learn how to apply material design to your apps.
 
-
 @jd:body
 
 <div id="tb-wrapper">
@@ -58,6 +57,9 @@ specification</a> and use the new components and functionality available in Andr
 
   <dt><a href="{@docRoot}training/material/compatibility.html">Maintaining Compatibility</a></dt>
   <dd>Learn how to maintain compatibility with platform versions earlier than Android 5.0.</dd>
+
+  <dt><a href="{@docRoot}training/material/palette-colors.html">Selecting Colors with the Palette API</a></dt>
+  <dd>Learn how to select colors for your app using the v7 Palette library.</dd>
 </dl>
 
 <h2>Video Training</h2>
