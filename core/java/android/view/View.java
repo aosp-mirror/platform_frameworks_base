@@ -20856,6 +20856,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
+    // Dispatches ACTION_DRAG_ENTERED and ACTION_DRAG_EXITED events for pre-Nougat apps.
+    boolean dispatchDragEnterExitInPreN(DragEvent event) {
+        return callDragEventHandler(event);
+    }
+
     /**
      * Detects if this View is enabled and has a drag event listener.
      * If both are true, then it calls the drag event listener with the
@@ -20884,13 +20889,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     final boolean callDragEventHandler(DragEvent event) {
+        final boolean result;
+
         ListenerInfo li = mListenerInfo;
         //noinspection SimplifiableIfStatement
         if (li != null && li.mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && li.mOnDragListener.onDrag(this, event)) {
-            return true;
+            result = true;
+        } else {
+            result = onDragEvent(event);
         }
-        return onDragEvent(event);
+
+        switch (event.mAction) {
+            case DragEvent.ACTION_DRAG_ENTERED: {
+                mPrivateFlags2 |= View.PFLAG2_DRAG_HOVERED;
+                refreshDrawableState();
+            } break;
+            case DragEvent.ACTION_DRAG_EXITED: {
+                mPrivateFlags2 &= ~View.PFLAG2_DRAG_HOVERED;
+                refreshDrawableState();
+            } break;
+            case DragEvent.ACTION_DRAG_ENDED: {
+                mPrivateFlags2 &= ~View.DRAG_MASK;
+                refreshDrawableState();
+            } break;
+        }
+
+        return result;
     }
 
     boolean canAcceptDrag() {
