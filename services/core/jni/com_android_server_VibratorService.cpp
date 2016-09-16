@@ -16,6 +16,9 @@
 
 #define LOG_TAG "VibratorService"
 
+#include <android/hardware/vibrator/1.0/IVibrator.h>
+#include <android/hardware/vibrator/1.0/types.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -26,32 +29,27 @@
 
 #include <stdio.h>
 
+using android::hardware::getService;
+using android::hardware::vibrator::V1_0::IVibrator;
+using android::hardware::vibrator::V1_0::Status;
+
 namespace android
 {
 
-static hw_module_t *gVibraModule = NULL;
-static vibrator_device_t *gVibraDevice = NULL;
+static sp<IVibrator> mHal;
 
 static void vibratorInit(JNIEnv /* env */, jobject /* clazz */)
 {
-    if (gVibraModule != NULL) {
+    /* TODO(b/31632518) */
+    if (mHal != nullptr) {
         return;
     }
-
-    int err = hw_get_module(VIBRATOR_HARDWARE_MODULE_ID, (hw_module_t const**)&gVibraModule);
-
-    if (err) {
-        ALOGE("Couldn't load %s module (%s)", VIBRATOR_HARDWARE_MODULE_ID, strerror(-err));
-    } else {
-        if (gVibraModule) {
-            vibrator_open(gVibraModule, &gVibraDevice);
-        }
-    }
+    mHal = IVibrator::getService("vibrator");
 }
 
 static jboolean vibratorExists(JNIEnv* /* env */, jobject /* clazz */)
 {
-    if (gVibraModule && gVibraDevice) {
+    if (mHal != nullptr) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -60,10 +58,10 @@ static jboolean vibratorExists(JNIEnv* /* env */, jobject /* clazz */)
 
 static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
 {
-    if (gVibraDevice) {
-        int err = gVibraDevice->vibrator_on(gVibraDevice, timeout_ms);
-        if (err != 0) {
-            ALOGE("The hw module failed in vibrator_on: %s", strerror(-err));
+    if (mHal != nullptr) {
+        Status retStatus = mHal->on(timeout_ms);
+        if (retStatus == Status::ERR) {
+            ALOGE("vibratorOn command failed.");
         }
     } else {
         ALOGW("Tried to vibrate but there is no vibrator device.");
@@ -72,10 +70,10 @@ static void vibratorOn(JNIEnv* /* env */, jobject /* clazz */, jlong timeout_ms)
 
 static void vibratorOff(JNIEnv* /* env */, jobject /* clazz */)
 {
-    if (gVibraDevice) {
-        int err = gVibraDevice->vibrator_off(gVibraDevice);
-        if (err != 0) {
-            ALOGE("The hw module failed in vibrator_off(): %s", strerror(-err));
+    if (mHal != nullptr) {
+        Status retStatus = mHal->off();
+        if (retStatus == Status::ERR) {
+            ALOGE("vibratorOff command failed.");
         }
     } else {
         ALOGW("Tried to stop vibrating but there is no vibrator device.");

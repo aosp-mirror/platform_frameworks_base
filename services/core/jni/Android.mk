@@ -66,3 +66,6 @@ LOCAL_SHARED_LIBRARIES += \
     libGLESv2 \
     libnetutils \
 
+LOCAL_SHARED_LIBRARIES += \
+    libhidl libhwbinder android.hardware.vibrator@1.0
+
