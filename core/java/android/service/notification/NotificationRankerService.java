@@ -99,6 +99,9 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     /** Autobundled summary notification was canceled because its group was unbundled */
     public static final int REASON_UNAUTOBUNDLED = 16;
 
+    /** Notification was canceled by the user banning the channel. */
+    public static final int REASON_CHANNEL_BANNED = 17;
+
     private Handler mHandler;
 
     /** @hide */

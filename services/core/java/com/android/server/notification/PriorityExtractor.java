@@ -15,6 +15,7 @@
 */
 package com.android.server.notification;
 
+import android.app.Notification;
 import android.content.Context;
 import android.util.Slog;
 
@@ -42,8 +43,11 @@ public class PriorityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        record.setPackagePriority(
-                mConfig.getPriority(record.sbn.getPackageName(), record.sbn.getUid()));
+        int priority = mConfig.getPriority(record.sbn.getPackageName(), record.sbn.getUid());
+        if (priority == Notification.PRIORITY_DEFAULT && record.getChannel().canBypassDnd()){
+            priority = Notification.PRIORITY_MAX;
+        }
+        record.setPackagePriority(priority);
 
         return null;
     }

@@ -1,0 +1,171 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.server.notification;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.Notification.Builder;
+import android.app.NotificationManager;
+import android.app.NotificationChannel;
+import android.content.Context;
+import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+
+import static org.junit.Assert.assertEquals;
+
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class ImportanceExtractorTest {
+
+    @Mock RankingConfig mConfig;
+
+    private String mPkg = "com.android.server.notification";
+    private int mId = 1001;
+    private int mOtherId = 1002;
+    private String mTag = null;
+    private int mUid = 1000;
+    private int mPid = 2000;
+    private int mScore = 10;
+    private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    private NotificationRecord getNotificationRecord(NotificationChannel channel) {
+        final Builder builder = new Builder(getContext())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_SOUND);
+
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
+                mPid, mScore, n, mUser, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        return r;
+    }
+
+    private Context getContext() {
+        return InstrumentationRegistry.getTargetContext();
+    }
+
+    //
+    // Tests
+    //
+
+    @Test
+    public void testAppPreferenceChannelNone() throws Exception {
+        ImportanceExtractor extractor = new ImportanceExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
+          NotificationManager.IMPORTANCE_MIN);
+        NotificationChannel channel = new NotificationChannel("a", "a");
+        channel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+
+        NotificationRecord r = getNotificationRecord(channel);
+
+        extractor.process(r);
+
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
+    }
+
+    @Test
+    public void testAppPreferenceChannelPermissive() throws Exception {
+        ImportanceExtractor extractor = new ImportanceExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
+          NotificationManager.IMPORTANCE_MIN);
+        NotificationChannel channel = new NotificationChannel("a", "a");
+        channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+
+        NotificationRecord r = getNotificationRecord(channel);
+
+        extractor.process(r);
+
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
+    }
+
+    @Test
+    public void testAppPreferenceChannelStrict() throws Exception {
+        ImportanceExtractor extractor = new ImportanceExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
+          NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel = new NotificationChannel("a", "a");
+        channel.setImportance(NotificationManager.IMPORTANCE_MIN);
+
+        NotificationRecord r = getNotificationRecord(channel);
+
+        extractor.process(r);
+
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
+    }
+
+    @Test
+    public void testNoAppPreferenceChannelPreference() throws Exception {
+        ImportanceExtractor extractor = new ImportanceExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
+          NotificationManager.IMPORTANCE_UNSPECIFIED);
+        NotificationChannel channel = new NotificationChannel("a", "a");
+        channel.setImportance(NotificationManager.IMPORTANCE_MIN);
+
+        NotificationRecord r = getNotificationRecord(channel);
+
+        extractor.process(r);
+
+        assertEquals(r.getUserImportance(), NotificationManager.IMPORTANCE_MIN);
+    }
+
+    @Test
+    public void testNoPreferences() throws Exception {
+        ImportanceExtractor extractor = new ImportanceExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
+          NotificationManager.IMPORTANCE_UNSPECIFIED);
+        NotificationChannel channel = new NotificationChannel("a", "a");
+        channel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
+
+        NotificationRecord r = getNotificationRecord(channel);
+
+        extractor.process(r);
+
+        assertEquals(r.getUserImportance(), 
+             NotificationManager.IMPORTANCE_UNSPECIFIED);
+    }
+}

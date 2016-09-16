@@ -16,16 +16,19 @@
 package com.android.server.notification;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
+import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
 
-import com.android.server.notification.NotificationManagerService.DumpFilter;
+import com.android.internal.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +41,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -48,15 +52,15 @@ public class RankingHelper implements RankingConfig {
 
     private static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
-    private static final String ATT_VERSION = "version";
+    private static final String TAG_CHANNEL = "channel";
 
+    private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
+    private static final String ATT_ID = "id";
     private static final String ATT_PRIORITY = "priority";
     private static final String ATT_VISIBILITY = "visibility";
     private static final String ATT_IMPORTANCE = "importance";
-    private static final String ATT_TOPIC_ID = "id";
-    private static final String ATT_TOPIC_LABEL = "label";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = Ranking.VISIBILITY_NO_OVERRIDE;
@@ -166,6 +170,28 @@ public class RankingHelper implements RankingConfig {
                         r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                         r.priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
                         r.visibility = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+
+                        final int innerDepth = parser.getDepth();
+                        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                                && (type != XmlPullParser.END_TAG
+                                || parser.getDepth() > innerDepth)) {
+                            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                                continue;
+                            }
+
+                            String tagName = parser.getName();
+                            if (TAG_CHANNEL.equals(tagName)) {
+                                String id = parser.getAttributeValue(null, ATT_ID);
+                                CharSequence channelName = parser.getAttributeValue(null, ATT_NAME);
+
+                                if (!TextUtils.isEmpty(id)) {
+                                    final NotificationChannel channel =
+                                            new NotificationChannel(id, channelName);
+                                    channel.populateFromXml(parser);
+                                    r.channels.put(id, channel);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -184,9 +210,16 @@ public class RankingHelper implements RankingConfig {
             r = new Record();
             r.pkg = pkg;
             r.uid = uid;
+            NotificationChannel defaultChannel = createDefaultChannel();
+            r.channels.put(defaultChannel.getId(), defaultChannel);
             mRecords.put(key, r);
         }
         return r;
+    }
+
+    private NotificationChannel createDefaultChannel() {
+        return new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID,
+                mContext.getString(R.string.default_notification_channel_label));
     }
 
     public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
@@ -201,7 +234,8 @@ public class RankingHelper implements RankingConfig {
                 continue;
             }
             final boolean hasNonDefaultSettings = r.importance != DEFAULT_IMPORTANCE
-                    || r.priority != DEFAULT_PRIORITY || r.visibility != DEFAULT_VISIBILITY;
+                    || r.priority != DEFAULT_PRIORITY || r.visibility != DEFAULT_VISIBILITY
+                    || r.channels.size() > 0;
             if (hasNonDefaultSettings) {
                 out.startTag(null, TAG_PACKAGE);
                 out.attribute(null, ATT_NAME, r.pkg);
@@ -217,6 +251,10 @@ public class RankingHelper implements RankingConfig {
 
                 if (!forBackup) {
                     out.attribute(null, ATT_UID, Integer.toString(r.uid));
+                }
+
+                for (NotificationChannel channel : r.channels.values()) {
+                    channel.writeXml(out);
                 }
 
                 out.endTag(null, TAG_PACKAGE);
@@ -309,11 +347,6 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    private static boolean tryParseBool(String value, boolean defValue) {
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
-    }
-
     /**
      * Gets priority.
      */
@@ -354,6 +387,65 @@ public class RankingHelper implements RankingConfig {
     @Override
     public int getImportance(String packageName, int uid) {
         return getOrCreateRecord(packageName, uid).importance;
+    }
+
+    @Override
+    public void createNotificationChannel(String pkg, int uid, NotificationChannel channel) {
+        Record r = getOrCreateRecord(pkg, uid);
+        if (r.channels.containsKey(channel.getId()) || channel.getName().equals(
+                mContext.getString(R.string.default_notification_channel_label))) {
+            throw new IllegalArgumentException("Channel already exists");
+        }
+        if (channel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
+            channel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
+        }
+        r.channels.put(channel.getId(), channel);
+        updateConfig();
+    }
+
+    @Override
+    public void updateNotificationChannel(int callingUid, String pkg, int uid,
+            NotificationChannel updatedChannel) {
+        Record r = getOrCreateRecord(pkg, uid);
+        NotificationChannel channel = r.channels.get(updatedChannel.getId());
+        if (channel == null) {
+            throw new IllegalArgumentException("Channel does not exist");
+        }
+        if (!isUidSystem(callingUid)) {
+            updatedChannel.setImportance(channel.getImportance());
+            updatedChannel.setName(channel.getName());
+        }
+        if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
+            updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
+        }
+        r.channels.put(updatedChannel.getId(), updatedChannel);
+        updateConfig();
+    }
+
+    @Override
+    public NotificationChannel getNotificationChannel(String pkg, int uid, String channelId) {
+        Record r = getOrCreateRecord(pkg, uid);
+        if (channelId == null) {
+            channelId = NotificationChannel.DEFAULT_CHANNEL_ID;
+        }
+        return r.channels.get(channelId);
+    }
+
+    @Override
+    public void deleteNotificationChannel(String pkg, int uid, String channelId) {
+        Record r = getOrCreateRecord(pkg, uid);
+        r.channels.remove(channelId);
+    }
+
+    @Override
+    public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid) {
+        List<NotificationChannel> channels = new ArrayList<>();
+        Record r = getOrCreateRecord(pkg, uid);
+        int N = r.channels.size();
+        for (int i = 0; i < N; i++) {
+            channels.add(r.channels.valueAt(i));
+        }
+        return new ParceledListSlice<NotificationChannel>(channels);
     }
 
     /**
@@ -420,6 +512,12 @@ public class RankingHelper implements RankingConfig {
                     pw.print(Notification.visibilityToString(r.visibility));
                 }
                 pw.println();
+                for (NotificationChannel channel : r.channels.values()) {
+                    pw.print(prefix);
+                    pw.print("  ");
+                    pw.print("  ");
+                    pw.println(channel);
+                }
             }
         }
     }
@@ -448,6 +546,9 @@ public class RankingHelper implements RankingConfig {
                     }
                     if (r.visibility != DEFAULT_VISIBILITY) {
                         record.put("visibility", Notification.visibilityToString(r.visibility));
+                    }
+                    for (NotificationChannel channel : r.channels.values()) {
+                        record.put("channel", channel.toJson());
                     }
                 } catch (JSONException e) {
                    // pass
@@ -530,6 +631,11 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    private static boolean isUidSystem(int uid) {
+        final int appid = UserHandle.getAppId(uid);
+        return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
+    }
+
     private static class Record {
         static int UNKNOWN_UID = UserHandle.USER_NULL;
 
@@ -538,5 +644,7 @@ public class RankingHelper implements RankingConfig {
         int importance = DEFAULT_IMPORTANCE;
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
+
+        ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
    }
 }
