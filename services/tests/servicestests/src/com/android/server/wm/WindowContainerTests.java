@@ -19,6 +19,7 @@ package com.android.server.wm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertTrue;
  * Run: adb shell am instrument -w -e class com.android.server.wm.WindowContainerTests com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  */
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class WindowContainerTests {
 
