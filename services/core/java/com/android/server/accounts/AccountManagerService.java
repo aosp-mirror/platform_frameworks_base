@@ -928,14 +928,16 @@ public class AccountManagerService
         String interestedPackages = null;
         try {
             String[] allPackages = mPackageManager.getPackagesForUid(uid);
-            for(String aPackage : allPackages) {
-                ApplicationInfo ai = mPackageManager.getApplicationInfo(aPackage,
-                        PackageManager.GET_META_DATA);
-                Bundle b = ai.metaData;
-                if(b == null) {
-                    return;
+            if (allPackages != null) {
+                for(String aPackage : allPackages) {
+                    ApplicationInfo ai = mPackageManager.getApplicationInfo(aPackage,
+                            PackageManager.GET_META_DATA);
+                    Bundle b = ai.metaData;
+                    if(b == null) {
+                        return;
+                    }
+                    interestedPackages = b.getString("android.accounts.SupportedLoginTypes");
                 }
-                interestedPackages = b.getString("android.accounts.SupportedLoginTypes");
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.d("NameNotFoundException", e.getMessage());
