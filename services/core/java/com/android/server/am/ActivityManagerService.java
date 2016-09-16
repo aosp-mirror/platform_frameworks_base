@@ -19037,8 +19037,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
-     * Decide based on the configuration whether we should shouw the ANR,
-     * crash, etc dialogs.  The idea is that if there is no affordence to
+     * Decide based on the configuration whether we should show the ANR,
+     * crash, etc dialogs.  The idea is that if there is no affordance to
      * press the on-screen buttons, or the user experience would be more
      * greatly impacted than the crash itself, we shouldn't show the dialog.
      *

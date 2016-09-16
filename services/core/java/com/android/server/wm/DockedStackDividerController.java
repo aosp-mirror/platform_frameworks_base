@@ -203,7 +203,7 @@ public class DockedStackDividerController implements DimLayerUser {
                     ? mDisplayContent.mBaseDisplayWidth
                     : mDisplayContent.mBaseDisplayHeight;
             mService.mPolicy.getStableInsetsLw(rotation, dw, dh, mTmpRect);
-            config.setToDefaults();
+            config.unset();
             config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
             config.screenWidthDp = (int)
                     (mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, baseConfig.uiMode) /

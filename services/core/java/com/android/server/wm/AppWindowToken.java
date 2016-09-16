@@ -734,7 +734,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         } else {
             mFrozenMergedConfig.offer(new Configuration(mTask.mPreparedFrozenMergedConfig));
         }
-        mTask.mPreparedFrozenMergedConfig.setToDefaults();
+        // Calling unset() to make it equal to Configuration.EMPTY.
+        mTask.mPreparedFrozenMergedConfig.unset();
     }
 
     /**

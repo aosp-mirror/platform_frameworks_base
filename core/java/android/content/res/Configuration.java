@@ -1139,78 +1139,88 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
      */
     public int diff(Configuration delta) {
+        return diff(delta, false /* compareUndefined */);
+    }
+
+    /**
+     * Variation of {@link #diff(Configuration)} with an option to skip checks for undefined values.
+     *
+     * @hide
+     */
+    public int diff(Configuration delta, boolean compareUndefined) {
         int changed = 0;
-        if (delta.fontScale > 0 && fontScale != delta.fontScale) {
+        if ((compareUndefined || delta.fontScale > 0) && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
         }
-        if (delta.mcc != 0 && mcc != delta.mcc) {
+        if ((compareUndefined || delta.mcc != 0) && mcc != delta.mcc) {
             changed |= ActivityInfo.CONFIG_MCC;
         }
-        if (delta.mnc != 0 && mnc != delta.mnc) {
+        if ((compareUndefined || delta.mnc != 0) && mnc != delta.mnc) {
             changed |= ActivityInfo.CONFIG_MNC;
         }
         fixUpLocaleList();
         delta.fixUpLocaleList();
-        if (!delta.mLocaleList.isEmpty() && !mLocaleList.equals(delta.mLocaleList)) {
+        if ((compareUndefined || !delta.mLocaleList.isEmpty())
+                && !mLocaleList.equals(delta.mLocaleList)) {
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
         final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
-        if (deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED &&
-                deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
+        if ((compareUndefined || deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED)
+                && deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
-        if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
+        if ((compareUndefined || delta.touchscreen != TOUCHSCREEN_UNDEFINED)
                 && touchscreen != delta.touchscreen) {
             changed |= ActivityInfo.CONFIG_TOUCHSCREEN;
         }
-        if (delta.keyboard != KEYBOARD_UNDEFINED
+        if ((compareUndefined || delta.keyboard != KEYBOARD_UNDEFINED)
                 && keyboard != delta.keyboard) {
             changed |= ActivityInfo.CONFIG_KEYBOARD;
         }
-        if (delta.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED)
                 && keyboardHidden != delta.keyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED)
                 && hardKeyboardHidden != delta.hardKeyboardHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.navigation != NAVIGATION_UNDEFINED
+        if ((compareUndefined || delta.navigation != NAVIGATION_UNDEFINED)
                 && navigation != delta.navigation) {
             changed |= ActivityInfo.CONFIG_NAVIGATION;
         }
-        if (delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED
+        if ((compareUndefined || delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED)
                 && navigationHidden != delta.navigationHidden) {
             changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
         }
-        if (delta.orientation != ORIENTATION_UNDEFINED
+        if ((compareUndefined || delta.orientation != ORIENTATION_UNDEFINED)
                 && orientation != delta.orientation) {
             changed |= ActivityInfo.CONFIG_ORIENTATION;
         }
-        if (getScreenLayoutNoDirection(delta.screenLayout) !=
-                    (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED)
+        if ((compareUndefined || getScreenLayoutNoDirection(delta.screenLayout) !=
+                (SCREENLAYOUT_SIZE_UNDEFINED | SCREENLAYOUT_LONG_UNDEFINED))
                 && getScreenLayoutNoDirection(screenLayout) !=
-                    getScreenLayoutNoDirection(delta.screenLayout)) {
+                getScreenLayoutNoDirection(delta.screenLayout)) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }
-        if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
+        if ((compareUndefined || delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED))
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
         }
-        if (delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED
+        if ((compareUndefined || delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED)
                 && screenWidthDp != delta.screenWidthDp) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
-        if (delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED
+        if ((compareUndefined || delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED)
                 && screenHeightDp != delta.screenHeightDp) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
-        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+        if ((compareUndefined || delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED)
                 && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
             changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
-        if (delta.densityDpi != DENSITY_DPI_UNDEFINED
+        if ((compareUndefined || delta.densityDpi != DENSITY_DPI_UNDEFINED)
                 && densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
         }

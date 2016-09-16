@@ -1580,7 +1580,6 @@ final class TaskRecord {
         extracted.smallestScreenWidthDp = config.smallestScreenWidthDp;
         extracted.orientation = config.orientation;
         extracted.screenLayout = config.screenLayout;
-        extracted.fontScale = config.fontScale;
         return extracted;
     }
 
