@@ -3813,9 +3813,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 10, "sig1");
         addPackage(CALLING_PACKAGE_2, CALLING_UID_1, 10, "sig1", "sig2");
 
-        final ShortcutPackageInfo spi1 = ShortcutPackageInfo.generateForInstalledPackage(
+        final ShortcutPackageInfo spi1 = ShortcutPackageInfo.generateForInstalledPackageForTest(
                 mService, CALLING_PACKAGE_1, USER_0);
-        final ShortcutPackageInfo spi2 = ShortcutPackageInfo.generateForInstalledPackage(
+        final ShortcutPackageInfo spi2 = ShortcutPackageInfo.generateForInstalledPackageForTest(
                 mService, CALLING_PACKAGE_2, USER_0);
 
         checkCanRestoreTo(true, spi1, 10, "sig1");
@@ -5661,6 +5661,32 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                                 buildAllQuery(CALLING_PACKAGE_1), HANDLE_USER_P0);
                     });
         });
+        // Check the user-IDs.
+        assertEquals(USER_0,
+                mService.getUserShortcutsLocked(USER_0).getPackageShortcuts(CALLING_PACKAGE_1)
+                        .getOwnerUserId());
+        assertEquals(USER_0,
+                mService.getUserShortcutsLocked(USER_0).getPackageShortcuts(CALLING_PACKAGE_1)
+                        .getPackageUserId());
+        assertEquals(USER_P0,
+                mService.getUserShortcutsLocked(USER_P0).getPackageShortcuts(CALLING_PACKAGE_1)
+                        .getOwnerUserId());
+        assertEquals(USER_P0,
+                mService.getUserShortcutsLocked(USER_P0).getPackageShortcuts(CALLING_PACKAGE_1)
+                        .getPackageUserId());
+
+        assertEquals(USER_0,
+                mService.getUserShortcutsLocked(USER_0).getLauncherShortcuts(LAUNCHER_1, USER_0)
+                        .getOwnerUserId());
+        assertEquals(USER_0,
+                mService.getUserShortcutsLocked(USER_0).getLauncherShortcuts(LAUNCHER_1, USER_0)
+                        .getPackageUserId());
+        assertEquals(USER_P0,
+                mService.getUserShortcutsLocked(USER_P0).getLauncherShortcuts(LAUNCHER_1, USER_0)
+                        .getOwnerUserId());
+        assertEquals(USER_0,
+                mService.getUserShortcutsLocked(USER_P0).getLauncherShortcuts(LAUNCHER_1, USER_0)
+                        .getPackageUserId());
     }
 
     public void testOnApplicationActive_permission() {

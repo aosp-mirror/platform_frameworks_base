@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -145,30 +144,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         return mPackageUid;
     }
 
-    /**
-     * Called when a shortcut is about to be published.  At this point we know the publisher
-     * package
-     * exists (as opposed to Launcher trying to fetch shortcuts from a non-existent package), so
-     * we do some initialization for the package.
-     */
-    private void ensurePackageVersionInfo() {
-        // Make sure we have the version code for the app.  We need the version code in
-        // handlePackageUpdated().
-        if (getPackageInfo().getVersionCode() < 0) {
-            final ShortcutService s = mShortcutUser.mService;
-
-            final PackageInfo pi = s.getPackageInfo(getPackageName(), getOwnerUserId());
-            if (pi != null) {
-                if (ShortcutService.DEBUG) {
-                    Slog.d(TAG, String.format("Package %s version = %d", getPackageName(),
-                            pi.versionCode));
-                }
-                getPackageInfo().updateVersionInfo(pi);
-                s.scheduleSaveUser(getOwnerUserId());
-            }
-        }
-    }
-
     @Nullable
     public Resources getPackageResources() {
         return mShortcutUser.mService.injectGetResourcesForApplicationAsUser(
@@ -250,8 +225,6 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         Preconditions.checkArgument(newShortcut.isEnabled(),
                 "add/setDynamicShortcuts() cannot publish disabled shortcuts");
-
-        ensurePackageVersionInfo();
 
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
