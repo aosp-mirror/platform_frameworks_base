@@ -851,6 +851,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
                 LingerMonitor.DEFAULT_NOTIFICATION_RATE_LIMIT_MILLIS);
         mLingerMonitor = new LingerMonitor(mContext, mNotifier, dailyLimit, rateLimit);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                mHandler.sendEmptyMessage(EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI);
+            }
+        }, UserHandle.ALL, intentFilter, null, null);
+        updateAvoidBadWifi();
     }
 
     private NetworkRequest createInternetRequestForTransport(int transportType) {
@@ -2719,17 +2728,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
-    @VisibleForTesting
+    private boolean mAvoidBadWifi;
+
     public boolean avoidBadWifi() {
+        return mAvoidBadWifi;
+    }
+
+    @VisibleForTesting
+    public boolean updateAvoidBadWifi() {
         // There are two modes: either we always automatically avoid unvalidated wifi, or we show a
         // dialog and don't switch to it. The behaviour is controlled by the NETWORK_AVOID_BAD_WIFI
         // setting. If the setting has no value, then the value is taken from the config value,
         // which can be changed via OEM/carrier overlays.
+        //
+        // The only valid values for NETWORK_AVOID_BAD_WIFI are null and unset. Currently, the unit
+        // test uses 0 in order to avoid having to mock out fetching the carrier setting.
         int defaultAvoidBadWifi =
             mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi);
         int avoid = Settings.Global.getInt(mContext.getContentResolver(),
             Settings.Global.NETWORK_AVOID_BAD_WIFI, defaultAvoidBadWifi);
-        return avoid == 1;
+
+        boolean prev = mAvoidBadWifi;
+        mAvoidBadWifi = (avoid == 1);
+        return mAvoidBadWifi != prev;
     }
 
     private void showValidationNotification(NetworkAgentInfo nai, NotificationType type) {
@@ -2868,7 +2889,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI: {
-                    rematchAllNetworksAndRequests(null, 0);
+                    if (updateAvoidBadWifi()) {
+                        rematchAllNetworksAndRequests(null, 0);
+                    }
                     break;
                 }
                 case EVENT_REQUEST_LINKPROPERTIES:
