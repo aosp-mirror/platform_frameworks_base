@@ -2728,9 +2728,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * Toggle the firewall standby chain and inform listeners if the uid rules have effectively
+     * changed.
+     */
     void updateRulesForAppIdleParoleUL() {
-        boolean enableChain = !mUsageStats.isAppIdleParoleOn();
+        boolean paroled = mUsageStats.isAppIdleParoleOn();
+        boolean enableChain = !paroled;
         enableFirewallChainUL(FIREWALL_CHAIN_STANDBY, enableChain);
+
+        int ruleCount = mUidFirewallStandbyRules.size();
+        for (int i = 0; i < ruleCount; i++) {
+            int uid = mUidFirewallStandbyRules.keyAt(i);
+            int oldRules = mUidRules.get(uid);
+            if (enableChain) {
+                // Chain wasn't enabled before and the other power-related
+                // chains are whitelists, so we can clear the
+                // MASK_ALL_NETWORKS part of the rules and re-inform listeners if
+                // the effective rules result in blocking network access.
+                oldRules &= MASK_METERED_NETWORKS;
+            } else {
+                // Skip if it had no restrictions to begin with
+                if ((oldRules & MASK_ALL_NETWORKS) == 0) continue;
+            }
+            updateRulesForPowerRestrictionsUL(uid, oldRules, paroled);
+        }
     }
 
     /**
@@ -3084,14 +3106,34 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <strong>NOTE: </strong>This method does not update the firewall rules on {@code netd}.
      */
     private void updateRulesForPowerRestrictionsUL(int uid) {
+        final int oldUidRules = mUidRules.get(uid, RULE_NONE);
+
+        final int newUidRules = updateRulesForPowerRestrictionsUL(uid, oldUidRules, false);
+
+        if (newUidRules == RULE_NONE) {
+            mUidRules.delete(uid);
+        } else {
+            mUidRules.put(uid, newUidRules);
+        }
+    }
+
+    /**
+     * Similar to above but ignores idle state if app standby is currently disabled by parole.
+     *
+     * @param uid the uid of the app to update rules for
+     * @param oldUidRules the current rules for the uid, in order to determine if there's a change
+     * @param paroled whether to ignore idle state of apps and only look at other restrictions.
+     *
+     * @return the new computed rules for the uid
+     */
+    private int updateRulesForPowerRestrictionsUL(int uid, int oldUidRules, boolean paroled) {
         if (!isUidValidForBlacklistRules(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict power rules for uid " + uid);
-            return;
+            return RULE_NONE;
         }
 
-        final boolean isIdle = isUidIdle(uid);
+        final boolean isIdle = !paroled && isUidIdle(uid);
         final boolean restrictMode = isIdle || mRestrictPower || mDeviceIdleMode;
-        final int oldUidRules = mUidRules.get(uid, RULE_NONE);
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
 
         final boolean isWhitelisted = isWhitelistedBatterySaverUL(uid);
@@ -3125,12 +3167,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", oldUidRules=" + uidRulesToString(oldUidRules));
         }
 
-        if (newUidRules == RULE_NONE) {
-            mUidRules.delete(uid);
-        } else {
-            mUidRules.put(uid, newUidRules);
-        }
-
         // Second step: notify listeners if state changed.
         if (newRule != oldRule) {
             if (newRule == RULE_NONE || (newRule & RULE_ALLOW_ALL) != 0) {
@@ -3147,6 +3183,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRules).sendToTarget();
         }
+
+        return newUidRules;
     }
 
     private class AppIdleStateChangeListener
