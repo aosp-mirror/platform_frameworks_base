@@ -22,6 +22,5 @@ for pid in $( adb shell ps | awk '{ if ( $9 == "surfaceflinger" ) { print $2 } }
     adb shell kill $pid
 done
 adb shell setprop debug.egl.traceGpuCompletion 1
+adb shell setprop debug.sf.nobootanimation 1
 adb shell daemonize surfaceflinger
-sleep 3
-adb shell setprop service.bootanim.exit 1
