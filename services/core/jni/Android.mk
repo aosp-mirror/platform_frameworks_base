@@ -45,8 +45,6 @@ LOCAL_C_INCLUDES += \
     frameworks/base/libs/hwui \
     frameworks/base/core/jni \
     frameworks/native/services \
-    libcore/include \
-    libcore/include/libsuspend \
     system/security/keystore/include \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
