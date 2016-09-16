@@ -32,6 +32,7 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
@@ -39,6 +40,7 @@ import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Debug;
 import android.os.RemoteException;
 import android.util.EventLog;
@@ -48,6 +50,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.animation.Animation;
 
+import android.view.WindowManagerPolicy;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
@@ -113,6 +116,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
     /** Detach this stack from its display when animation completes. */
+    // TODO: maybe tie this to WindowContainer#detachChild some how...
     boolean mDeferDetach;
 
     private final Rect mTmpAdjustedBounds = new Rect();
@@ -145,10 +149,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     DisplayContent getDisplayContent() {
         return mDisplayContent;
-    }
-
-    ArrayList<Task> getTasks() {
-        return mTasks;
     }
 
     Task findHomeTask() {
@@ -1232,6 +1232,122 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return false;
     }
 
+    boolean hasTaskForUser(int userId) {
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            final Task task = mTasks.get(i);
+            if (task.mUserId == userId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    int taskIdFromPoint(int x, int y) {
+        getBounds(mTmpRect);
+        if (!mTmpRect.contains(x, y) || isAdjustedForMinimizedDockedStack()) {
+            return -1;
+        }
+
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTasks.get(taskNdx);
+            final WindowState win = task.getTopVisibleAppMainWindow();
+            if (win == null) {
+                continue;
+            }
+            // We need to use the task's dim bounds (which is derived from the visible bounds of its
+            // apps windows) for any touch-related tests. Can't use the task's original bounds
+            // because it might be adjusted to fit the content frame. For example, the presence of
+            // the IME adjusting the windows frames when the app window is the IME target.
+            task.getDimBounds(mTmpRect);
+            if (mTmpRect.contains(x, y)) {
+                return task.mTaskId;
+            }
+        }
+
+        return -1;
+    }
+
+    void findTaskForResizePoint(int x, int y, int delta,
+            DisplayContent.TaskForResizePointSearchResult results) {
+        if (!StackId.isTaskResizeAllowed(mStackId)) {
+            results.searchDone = true;
+            return;
+        }
+
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            if (task.isFullscreen()) {
+                results.searchDone = true;
+                return;
+            }
+
+            // We need to use the task's dim bounds (which is derived from the visible bounds of
+            // its apps windows) for any touch-related tests. Can't use the task's original
+            // bounds because it might be adjusted to fit the content frame. One example is when
+            // the task is put to top-left quadrant, the actual visible area would not start at
+            // (0,0) after it's adjusted for the status bar.
+            task.getDimBounds(mTmpRect);
+            mTmpRect.inset(-delta, -delta);
+            if (mTmpRect.contains(x, y)) {
+                mTmpRect.inset(delta, delta);
+
+                results.searchDone = true;
+
+                if (!mTmpRect.contains(x, y)) {
+                    results.taskForResize = task;
+                    return;
+                }
+                // User touched inside the task. No need to look further,
+                // focus transfer will be handled in ACTION_UP.
+                return;
+            }
+        }
+    }
+
+    void setTouchExcludeRegion(Task focusedTask, int delta, Region touchExcludeRegion,
+            Rect contentRect, Rect postExclude) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            AppWindowToken token = task.getTopVisibleAppToken();
+            if (token == null || !token.hasContentToDisplay()) {
+                continue;
+            }
+
+            /**
+             * Exclusion region is the region that TapDetector doesn't care about.
+             * Here we want to remove all non-focused tasks from the exclusion region.
+             * We also remove the outside touch area for resizing for all freeform
+             * tasks (including the focused).
+             *
+             * We save the focused task region once we find it, and add it back at the end.
+             */
+
+            task.getDimBounds(mTmpRect);
+
+            if (task == focusedTask) {
+                // Add the focused task rect back into the exclude region once we are done
+                // processing stacks.
+                postExclude.set(mTmpRect);
+            }
+
+            final boolean isFreeformed = task.inFreeformWorkspace();
+            if (task != focusedTask || isFreeformed) {
+                if (isFreeformed) {
+                    // If the task is freeformed, enlarge the area to account for outside
+                    // touch area for resize.
+                    mTmpRect.inset(-delta, -delta);
+                    // Intersect with display content rect. If we have system decor (status bar/
+                    // navigation bar), we want to exclude that from the tap detection.
+                    // Otherwise, if the app is partially placed under some system button (eg.
+                    // Recents, Home), pressing that button would cause a full series of
+                    // unwanted transfer focus/resume/pause, before we could go home.
+                    mTmpRect.intersect(contentRect);
+                }
+                touchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
+            }
+        }
+    }
+
     @Override  // AnimatesBounds
     public boolean setSize(Rect bounds) {
         synchronized (mService.mWindowMap) {
@@ -1322,6 +1438,63 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
+    /** Returns true if a removal action is still being deferred. */
+    boolean checkCompleteDeferredRemoval() {
+        if (isAnimating()) {
+            return true;
+        }
+        if (mDeferDetach) {
+            mDisplayContent.detachChild(this);
+        }
+
+        boolean stillDeferringRemoval = false;
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            stillDeferringRemoval |= task.checkCompleteDeferredRemoval();
+        }
+        return stillDeferringRemoval;
+    }
+
+    void checkAppWindowsReadyToShow(int displayId) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.checkAppWindowsReadyToShow(displayId);
+        }
+    }
+
+    void updateAllDrawn(int displayId) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.updateAllDrawn(displayId);
+        }
+    }
+
+    void stepAppWindowsAnimation(long currentTime, int displayId) {
+        for (int i = mTasks.size() - 1; i >= 0; --i) {
+            final Task task = mTasks.get(i);
+            task.stepAppWindowsAnimation(currentTime, displayId);
+        }
+
+        // TODO: Why aren't we just using the loop above for this? mAppAnimator.animating isn't set
+        // below but is set in the loop above. See if it really matters...
+        final int exitingCount = mExitingAppTokens.size();
+        for (int i = 0; i < exitingCount; i++) {
+            final AppWindowAnimator appAnimator = mExitingAppTokens.get(i).mAppAnimator;
+            appAnimator.wasAnimating = appAnimator.animating;
+            if (appAnimator.stepAnimationLocked(currentTime, displayId)) {
+                mService.mAnimator.setAnimating(true);
+                mService.mAnimator.mAppWindowAnimating = true;
+            } else if (appAnimator.wasAnimating) {
+                // stopped animating, do one more pass through the layout
+                appAnimator.mAppToken.setAppLayoutChanges(
+                        WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
+                        "exiting appToken " + appAnimator.mAppToken + " done", displayId);
+                if (DEBUG_ANIM) Slog.v(TAG_WM,
+                        "updateWindowsApps...: done animating exiting " + appAnimator.mAppToken);
+            }
+        }
+    }
+
     void onAppTransitionDone() {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
@@ -1350,7 +1523,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResults result) {
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
             task.getWindowOnDisplayBeforeToken(dc, token, result);
@@ -1362,7 +1535,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResults result) {
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
             task.getWindowOnDisplayAfterToken(dc, token, result);

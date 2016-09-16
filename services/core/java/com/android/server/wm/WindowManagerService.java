@@ -162,7 +162,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -170,7 +169,6 @@ import java.util.List;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -216,7 +214,6 @@ import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
@@ -926,6 +923,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     };
+
+    final ArrayList<AppFreezeListener> mAppFreezeListeners = new ArrayList<>();
+
+    interface AppFreezeListener {
+        void onAppFreezeTimeout();
+    }
 
     public static WindowManagerService main(final Context context,
             final InputManagerService im,
@@ -3967,20 +3970,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
-    void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
-        displayContent.detachStack(stack);
-        if (stack.detachFromDisplay()) {
-            mWindowPlacerLocked.requestTraversal();
-        }
-        if (stack.mStackId == DOCKED_STACK_ID) {
-            getDefaultDisplayContentLocked().mDividerControllerLocked
-                    .notifyDockedStackExistsChanged(false);
-        }
-    }
-
     public void detachStack(int stackId) {
         synchronized (mWindowMap) {
-            TaskStack stack = mStackIdToStack.get(stackId);
+            final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack != null) {
                 final DisplayContent displayContent = stack.getDisplayContent();
                 if (displayContent != null) {
@@ -3988,7 +3980,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         stack.mDeferDetach = true;
                         return;
                     }
-                    detachStackLocked(displayContent, stack);
+                    displayContent.detachChild(stack);
                 }
             }
         }
@@ -4675,22 +4667,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Returns whether there is a docked task for the current user.
-     */
+    /** Returns whether there is a docked task for the current user. */
     boolean hasDockedTasksForUser(int userId) {
         final TaskStack stack = mStackIdToStack.get(DOCKED_STACK_ID);
         if (stack == null) {
             return false;
         }
-
-        final ArrayList<Task> tasks = stack.getTasks();
-        boolean hasUserTask = false;
-        for (int i = tasks.size() - 1; i >= 0 && !hasUserTask; i--) {
-            final Task task = tasks.get(i);
-            hasUserTask = (task.mUserId == userId);
-        }
-        return hasUserTask;
+        return stack.hasTaskForUser(userId);
     }
 
     /* Called by WindowState */
@@ -7382,20 +7365,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         Slog.w(TAG_WM, "App freeze timeout expired.");
                         mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
-                        final int numStacks = mStackIdToStack.size();
-                        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-                            final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
-                            final ArrayList<Task> tasks = stack.getTasks();
-                            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                                AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                                    AppWindowToken tok = tokens.get(tokenNdx);
-                                    if (tok.mAppAnimator.freezingScreen) {
-                                        Slog.w(TAG_WM, "Force clearing freeze: " + tok);
-                                        tok.stopFreezingScreen(true, true);
-                                    }
-                                }
-                            }
+                        for (int i = mAppFreezeListeners.size() - 1; i >=0 ; --i) {
+                            mAppFreezeListeners.get(i).onAppFreezeTimeout();
                         }
                     }
                     break;
@@ -10326,4 +10297,15 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
+
+    void registerAppFreezeListener(AppFreezeListener listener) {
+        if (!mAppFreezeListeners.contains(listener)) {
+            mAppFreezeListeners.add(listener);
+        }
+    }
+
+    void unregisterAppFreezeListener(AppFreezeListener listener) {
+        mAppFreezeListeners.remove(listener);
+    }
+
 }

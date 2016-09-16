@@ -54,7 +54,7 @@ class Task implements DimLayer.DimLayerUser {
     static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
     TaskStack mStack;
-    final AppTokenList mAppTokens = new AppTokenList();
+    private final AppTokenList mAppTokens = new AppTokenList();
     final int mTaskId;
     final int mUserId;
     boolean mDeferRemoval = false;
@@ -180,6 +180,17 @@ class Task implements DimLayer.DimLayerUser {
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
             mAppTokens.get(activityNdx).notifyMovedInStack();
         }
+    }
+
+    boolean checkCompleteDeferredRemoval() {
+        boolean stillDeferringRemoval = false;
+
+        for (int tokenNdx = mAppTokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+            final AppWindowToken token = mAppTokens.get(tokenNdx);
+            stillDeferringRemoval |= token.checkCompleteDeferredRemoval();
+        }
+
+        return stillDeferringRemoval;
     }
 
     // TODO: Don't forget to switch to WC.detachChild
@@ -684,6 +695,27 @@ class Task implements DimLayer.DimLayerUser {
         return false;
     }
 
+    void checkAppWindowsReadyToShow(int displayId) {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken aToken = mAppTokens.get(i);
+            aToken.checkAppWindowsReadyToShow(displayId);
+        }
+    }
+
+    void updateAllDrawn(int displayId) {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken aToken = mAppTokens.get(i);
+            aToken.updateAllDrawn(displayId);
+        }
+    }
+
+    void stepAppWindowsAnimation(long currentTime, int displayId) {
+        for (int i = mAppTokens.size() - 1; i >= 0; --i) {
+            final AppWindowToken aToken = mAppTokens.get(i);
+            aToken.stepAppWindowsAnimation(currentTime, displayId);
+        }
+    }
+
     void onAppTransitionDone() {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
             final AppWindowToken token = mAppTokens.get(i);
@@ -706,7 +738,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void getWindowOnDisplayBeforeToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResults result) {
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
             final AppWindowToken current = mAppTokens.get(i);
             if (current == token) {
@@ -725,7 +757,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void getWindowOnDisplayAfterToken(DisplayContent dc, WindowToken token,
-            DisplayContent.GetWindowOnDisplaySearchResults result) {
+            DisplayContent.GetWindowOnDisplaySearchResult result) {
         for (int i = mAppTokens.size() - 1; i >= 0; --i) {
             final AppWindowToken current = mAppTokens.get(i);
             if (!result.reachedToken) {

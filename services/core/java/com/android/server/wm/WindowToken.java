@@ -29,7 +29,6 @@ import java.util.ArrayList;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_SCRIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;

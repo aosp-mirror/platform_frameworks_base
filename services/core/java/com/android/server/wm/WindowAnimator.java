@@ -29,7 +29,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
@@ -167,61 +166,6 @@ public class WindowAnimator {
         }
 
         mDisplayContentsAnimators.delete(displayId);
-    }
-
-    private void updateAppWindowsLocked(int displayId) {
-        ArrayList<TaskStack> stacks = mService.getDisplayContentLocked(displayId).getStacks();
-        for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = stacks.get(stackNdx);
-            final ArrayList<Task> tasks = stack.getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                    final AppWindowAnimator appAnimator = tokens.get(tokenNdx).mAppAnimator;
-                    appAnimator.wasAnimating = appAnimator.animating;
-                    if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
-                        appAnimator.animating = true;
-                        setAnimating(true);
-                        mAppWindowAnimating = true;
-                    } else if (appAnimator.wasAnimating) {
-                        // stopped animating, do one more pass through the layout
-                        setAppLayoutChanges(appAnimator,
-                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                                "appToken " + appAnimator.mAppToken + " done", displayId);
-                        if (DEBUG_ANIM) Slog.v(TAG,
-                                "updateWindowsApps...: done animating " + appAnimator.mAppToken);
-                    }
-                }
-            }
-
-            mTmpExitingAppTokens.clear();
-            mTmpExitingAppTokens.addAll(stack.mExitingAppTokens);
-
-            final int exitingCount = mTmpExitingAppTokens.size();
-            for (int i = 0; i < exitingCount; i++) {
-                final AppWindowAnimator appAnimator = mTmpExitingAppTokens.get(i).mAppAnimator;
-                // stepAnimation can trigger finishExit->removeWindowInnerLocked
-                // ->performSurfacePlacement
-                // performSurfacePlacement will directly manipulate the mExitingAppTokens list
-                // so we need to iterate over a copy and check for modifications.
-                if (!stack.mExitingAppTokens.contains(appAnimator)) {
-                    continue;
-                }
-                appAnimator.wasAnimating = appAnimator.animating;
-                if (appAnimator.stepAnimationLocked(mCurrentTime, displayId)) {
-                    setAnimating(true);
-                    mAppWindowAnimating = true;
-                } else if (appAnimator.wasAnimating) {
-                    // stopped animating, do one more pass through the layout
-                    setAppLayoutChanges(appAnimator,
-                            WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                            "exiting appToken " + appAnimator.mAppToken + " done", displayId);
-                    if (DEBUG_ANIM) Slog.v(TAG,
-                            "updateWindowsApps...: done animating exiting "
-                                    + appAnimator.mAppToken);
-                }
-            }
-        }
     }
 
     /**
@@ -648,54 +592,6 @@ public class WindowAnimator {
         }
     }
 
-    /** See if any windows have been drawn, so they (and others associated with them) can now be
-     *  shown. */
-    private void testTokenMayBeDrawnLocked(int displayId) {
-        // See if any windows have been drawn, so they (and others
-        // associated with them) can now be shown.
-        final ArrayList<Task> tasks = mService.getDisplayContentLocked(displayId).getTasks();
-        final int numTasks = tasks.size();
-        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            final AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            final int numTokens = tokens.size();
-            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-                final AppWindowToken wtoken = tokens.get(tokenNdx);
-                AppWindowAnimator appAnimator = wtoken.mAppAnimator;
-                final boolean allDrawn = wtoken.allDrawn;
-                if (allDrawn != appAnimator.allDrawn) {
-                    appAnimator.allDrawn = allDrawn;
-                    if (allDrawn) {
-                        // The token has now changed state to having all
-                        // windows shown...  what to do, what to do?
-                        if (appAnimator.freezingScreen) {
-                            appAnimator.showAllWindowsLocked();
-                            wtoken.stopFreezingScreen(false, true);
-                            if (DEBUG_ORIENTATION) Slog.i(TAG,
-                                    "Setting mOrientationChangeComplete=true because wtoken "
-                                    + wtoken + " numInteresting=" + wtoken.numInterestingWindows
-                                    + " numDrawn=" + wtoken.numDrawnWindows);
-                            // This will set mOrientationChangeComplete and cause a pass through
-                            // layout.
-                            setAppLayoutChanges(appAnimator,
-                                    WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
-                                    "testTokenMayBeDrawnLocked: freezingScreen", displayId);
-                        } else {
-                            setAppLayoutChanges(appAnimator,
-                                    WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                                    "testTokenMayBeDrawnLocked", displayId);
-
-                            // We can now show all of the drawn windows!
-                            if (!mService.mOpeningApps.contains(wtoken)) {
-                                orAnimating(appAnimator.showAllWindowsLocked());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
     /** Locked on mService.mWindowMap. */
     private void animateLocked(long frameTimeNs) {
         if (!mInitialized) {
@@ -719,7 +615,8 @@ public class WindowAnimator {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                updateAppWindowsLocked(displayId);
+                final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+                displayContent.stepAppWindowsAnimation(mCurrentTime);
                 DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
                 final ScreenRotationAnimation screenRotationAnimation =
@@ -757,8 +654,9 @@ public class WindowAnimator {
 
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
+                final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
 
-                testTokenMayBeDrawnLocked(displayId);
+                displayContent.checkAppWindowsReadyToShow();
 
                 final ScreenRotationAnimation screenRotationAnimation =
                         mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
@@ -766,12 +664,10 @@ public class WindowAnimator {
                     screenRotationAnimation.updateSurfacesInTransaction();
                 }
 
-                orAnimating(mService.getDisplayContentLocked(displayId).animateDimLayers());
-                orAnimating(mService.getDisplayContentLocked(displayId).getDockedDividerController()
-                        .animate(mCurrentTime));
+                orAnimating(displayContent.animateDimLayers());
+                orAnimating(displayContent.getDockedDividerController().animate(mCurrentTime));
                 //TODO (multidisplay): Magnification is supported only for the default display.
-                if (mService.mAccessibilityController != null
-                        && displayId == Display.DEFAULT_DISPLAY) {
+                if (mService.mAccessibilityController != null && displayContent.isDefaultDisplay) {
                     mService.mAccessibilityController.drawMagnifiedRegionBorderIfNeededLocked();
                 }
             }
@@ -948,11 +844,6 @@ public class WindowAnimator {
         if (displayContent != null) {
             displayContent.pendingLayoutChanges |= changes;
         }
-    }
-
-    void setAppLayoutChanges(
-            AppWindowAnimator appAnimator, int changes, String reason, int displayId) {
-        appAnimator.mAppToken.setAppLayoutChanges(changes, reason, displayId);
     }
 
     private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {
