@@ -3069,8 +3069,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) {
                     Slog.d(TAG, "Found an input method " + p);
                 }
-            } catch (XmlPullParserException | IOException e) {
-                Slog.w(TAG, "Unable to load input method " + compName, e);
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Unable to load input method " + compName, e);
             }
         }
 
