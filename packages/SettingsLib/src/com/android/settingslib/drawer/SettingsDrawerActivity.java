@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -58,6 +59,7 @@ public class SettingsDrawerActivity extends Activity {
 
     protected static final boolean DEBUG_TIMING = false;
     private static final String TAG = "SettingsDrawerActivity";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final String EXTRA_SHOW_MENU = "show_drawer_menu";
 
@@ -111,7 +113,7 @@ public class SettingsDrawerActivity extends Activity {
             public void onItemClick(android.widget.AdapterView<?> parent, View view, int position,
                     long id) {
                 onTileClicked(mDrawerAdapter.getTile(position));
-            };
+            }
         });
 
         mUserManager = UserManager.get(this);
@@ -143,8 +145,16 @@ public class SettingsDrawerActivity extends Activity {
 
             new CategoriesUpdater().execute();
         }
-        if (getIntent() != null && getIntent().getBooleanExtra(EXTRA_SHOW_MENU, false)) {
-            showMenuIcon();
+        final Intent intent = getIntent();
+        if (intent != null) {
+            if (intent.hasExtra(EXTRA_SHOW_MENU)) {
+                if (intent.getBooleanExtra(EXTRA_SHOW_MENU, false)) {
+                    // Intent explicitly set to show menu.
+                    showMenuIcon();
+                }
+            } else if (isTopLevelTile(intent)) {
+                showMenuIcon();
+            }
         }
     }
 
@@ -155,6 +165,30 @@ public class SettingsDrawerActivity extends Activity {
         }
 
         super.onPause();
+    }
+
+    private boolean isTopLevelTile(Intent intent) {
+        final ComponentName componentName = intent.getComponent();
+        if (componentName == null) {
+            return false;
+        }
+        // Look for a tile that has the same component as incoming intent
+        final List<DashboardCategory> categories = getDashboardCategories();
+        for (DashboardCategory category : categories) {
+            for (Tile tile : category.tiles) {
+                if (TextUtils.equals(tile.intent.getComponent().getClassName(),
+                        componentName.getClassName())) {
+                    if (DEBUG) {
+                        Log.d(TAG, "intent is for top level tile: " + tile.title);
+                    }
+                    return true;
+                }
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Intent is not for top level settings " + intent);
+        }
+        return false;
     }
 
     public void addCategoryListener(CategoryListener listener) {
@@ -287,9 +321,9 @@ public class SettingsDrawerActivity extends Activity {
     private void updateUserHandlesIfNeeded(Tile tile) {
         List<UserHandle> userHandles = tile.userHandle;
 
-        for (int i = userHandles.size()-1; i >= 0; i--) {
+        for (int i = userHandles.size() - 1; i >= 0; i--) {
             if (mUserManager.getUserInfo(userHandles.get(i).getIdentifier()) == null) {
-                if (DEBUG_TIMING) {
+                if (DEBUG) {
                     Log.d(TAG, "Delete the user: " + userHandles.get(i).getIdentifier());
                 }
                 userHandles.remove(i);
