@@ -33,6 +33,18 @@ import dalvik.system.CloseGuard;
 
 /**
  * Handle onto a raw buffer that is being managed by the screen compositor.
+ *
+ * <p>A Surface is generally created by or from a consumer of image buffers (such as a
+ * {@link android.graphics.SurfaceTexture}, {@link android.media.MediaRecorder}, or
+ * {@link android.renderscript.Allocation}), and is handed to some kind of producer (such as
+ * {@link android.opengl.EGL14#eglCreateWindowSurface(android.opengl.EGLDisplay,android.opengl.EGLConfig,java.lang.Object,int[],int) OpenGL},
+ * {@link android.media.MediaPlayer#setSurface MediaPlayer}, or
+ * {@link android.hardware.camera2.CameraDevice#createCaptureSession CameraDevice}) to draw
+ * into.</p>
+ *
+ * <p><strong>Note:</strong> A Surface acts like a
+ * {@link java.lang.ref.WeakReference weak reference} to the consumer it is associated with. By
+ * itself it will not keep its parent consumer from being reclaimed.</p>
  */
 public class Surface implements Parcelable {
     private static final String TAG = "Surface";
