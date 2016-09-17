@@ -32,6 +32,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,6 +49,7 @@ public class DeviceInfoUtils {
     private static final String FILENAME_PROC_VERSION = "/proc/version";
     private static final String FILENAME_MSV = "/sys/board_properties/soc/msv";
     private static final String FILENAME_PROC_CPUINFO = "/proc/cpuinfo";
+    private static final String FILENAME_PROC_MEMINFO = "/proc/meminfo";
 
     /**
      * Reads a line from the specified file.
@@ -243,5 +245,27 @@ public class DeviceInfoUtils {
 
              return "Unknown";
          }
+     }
+
+     public static String getDeviceMemoryInfo() {
+         String result = null;
+
+         try {
+             /* /proc/meminfo entries follow this format:
+              * MemTotal:         362096 kB
+              * MemFree:           29144 kB
+              * Buffers:            5236 kB
+              * Cached:            81652 kB
+              */
+             String firstLine = readLine(FILENAME_PROC_MEMINFO);
+             if (firstLine != null) {
+                 String parts[] = firstLine.split("\\s+");
+                 if (parts.length == 3) {
+                     result = Long.parseLong(parts[1])/1024 + " MB";
+                 }
+             }
+         } catch (IOException e) {}
+
+         return result;
      }
 }
