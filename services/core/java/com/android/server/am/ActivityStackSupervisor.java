@@ -1191,7 +1191,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // just restarting it anyway.
         if (checkConfig) {
             Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mService.mConfiguration,
+                    mService.mGlobalConfiguration,
                     r.mayFreezeScreenLocked(app) ? r.appToken : null);
             // Deferring resume here because we're going to launch new activity shortly.
             // We don't want to perform a redundant launch of the same record while ensuring
@@ -1282,7 +1282,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             app.forceProcessStateUpTo(mService.mTopProcessState);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
-                    System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
+                    System.identityHashCode(r), r.info,
+                    new Configuration(mService.mGlobalConfiguration),
                     new Configuration(task.mOverrideConfig), r.compat, r.launchedFromPackage,
                     task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,
                     newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);
@@ -2272,12 +2273,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + task.taskId);
 
-        final Configuration overrideConfig =  task.updateOverrideConfiguration(bounds);
+        final boolean updatedConfig = task.updateOverrideConfiguration(bounds);
         // This variable holds information whether the configuration didn't change in a significant
         // way and the activity was kept the way it was. If it's false, it means the activity had
         // to be relaunched due to configuration change.
         boolean kept = true;
-        if (overrideConfig != null) {
+        if (updatedConfig) {
             final ActivityRecord r = task.topRunningActivityLocked();
             if (r != null) {
                 final ActivityStack stack = task.stack;

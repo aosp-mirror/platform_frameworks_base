@@ -99,11 +99,9 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -471,7 +469,7 @@ class ActivityStarter {
         }
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
-                intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
+                intent, resolvedType, aInfo, mService.mGlobalConfiguration, resultRecord, resultWho,
                 requestCode, componentSpecified, voiceSession != null, mSupervisor, container,
                 options, sourceRecord);
         if (outActivity != null) {
@@ -713,8 +711,8 @@ class ActivityStarter {
             String callingPackage, Intent intent, String resolvedType,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
-            ProfilerInfo profilerInfo, IActivityManager.WaitResult outResult, Configuration config,
-            Bundle bOptions, boolean ignoreTargetSecurity, int userId,
+            ProfilerInfo profilerInfo, IActivityManager.WaitResult outResult,
+            Configuration globalConfig, Bundle bOptions, boolean ignoreTargetSecurity, int userId,
             IActivityContainer iContainer, TaskRecord inTask) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
@@ -783,7 +781,8 @@ class ActivityStarter {
             } else {
                 stack = container.mStack;
             }
-            stack.mConfigWillChange = config != null && mService.mConfiguration.diff(config) != 0;
+            stack.mConfigWillChange = globalConfig != null
+                    && mService.mGlobalConfiguration.diff(globalConfig) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Starting activity when config will change = " + stack.mConfigWillChange);
 
@@ -872,7 +871,7 @@ class ActivityStarter {
                 stack.mConfigWillChange = false;
                 if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Updating to new configuration after starting activity.");
-                mService.updateConfigurationLocked(config, null, false);
+                mService.updateConfigurationLocked(globalConfig, null, false);
             }
 
             if (outResult != null) {

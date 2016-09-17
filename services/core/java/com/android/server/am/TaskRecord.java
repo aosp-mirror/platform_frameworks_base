@@ -271,6 +271,7 @@ final class TaskRecord {
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = -1;
 
+    /** Contains configurations settings that are different from the parent's configuration. */
     Configuration mOverrideConfig = Configuration.EMPTY;
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
@@ -575,7 +576,7 @@ final class TaskRecord {
      * @return whether the thumbnail was set
      */
     boolean setLastThumbnailLocked(Bitmap thumbnail) {
-        final Configuration serviceConfig = mService.mConfiguration;
+        final Configuration serviceConfig = mService.mGlobalConfiguration;
         int taskWidth = 0;
         int taskHeight = 0;
         if (mBounds != null) {
@@ -1453,9 +1454,9 @@ final class TaskRecord {
     /**
      * Update task's override configuration based on the bounds.
      * @param bounds The bounds of the task.
-     * @return Update configuration or null if there is no change.
+     * @return True if the override configuration was updated.
      */
-    Configuration updateOverrideConfiguration(Rect bounds) {
+    boolean updateOverrideConfiguration(Rect bounds) {
         return updateOverrideConfiguration(bounds, null /* insetBounds */);
     }
 
@@ -1465,11 +1466,11 @@ final class TaskRecord {
      * @param insetBounds The bounds used to calculate the system insets, which is used here to
      *                    subtract the navigation bar/status bar size from the screen size reported
      *                    to the application. See {@link IActivityManager#resizeDockedStack}.
-     * @return Update configuration or null if there is no change.
+     * @return True if the override configuration was updated.
      */
-    Configuration updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
+    boolean updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
         if (Objects.equals(mBounds, bounds)) {
-            return null;
+            return false;
         }
         final Configuration oldConfig = mOverrideConfig;
         final boolean oldFullscreen = mFullscreen;
@@ -1500,7 +1501,7 @@ final class TaskRecord {
             mService.mStackSupervisor.scheduleReportMultiWindowModeChanged(this);
         }
 
-        return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
+        return !mOverrideConfig.equals(oldConfig);
     }
 
     private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds,
@@ -1538,7 +1539,7 @@ final class TaskRecord {
 
         // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
         // i.e. the screen area without the system bars.
-        final Configuration serviceConfig = mService.mConfiguration;
+        final Configuration serviceConfig = mService.mGlobalConfiguration;
         final Configuration config = new Configuration(Configuration.EMPTY);
         // TODO(multidisplay): Update Dp to that of display stack is on.
         final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;

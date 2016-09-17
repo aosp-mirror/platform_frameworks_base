@@ -265,8 +265,20 @@ public interface IActivityManager extends IInterface {
     public void finishInstrumentation(IApplicationThread target,
             int resultCode, Bundle results) throws RemoteException;
 
+    /**
+     * @return A copy of global {@link Configuration}, contains general settings for the entire
+     *         system. Corresponds to the configuration of the default display.
+     * @throws RemoteException
+     */
     public Configuration getConfiguration() throws RemoteException;
+
+    /**
+     * Updates global configuration and applies changes to the entire system.
+     * @param values Update values for global configuration.
+     * @throws RemoteException
+     */
     public void updateConfiguration(Configuration values) throws RemoteException;
+
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) throws RemoteException;
     public int getRequestedOrientation(IBinder token) throws RemoteException;

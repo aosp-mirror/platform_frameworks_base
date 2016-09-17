@@ -598,7 +598,11 @@ public class WindowManagerService extends IWindowManager.Stub
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
 
-    Configuration mCurConfiguration = new Configuration();
+    /**
+     * Current global configuration information. Contains general settings for the entire system,
+     * corresponds to the configuration of the default display.
+     */
+    Configuration mGlobalConfiguration = new Configuration();
 
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
@@ -2695,9 +2699,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.d(TAG_WM, "Loading animation for app transition."
                     + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter, mCurConfiguration.uiMode,
-                    mCurConfiguration.orientation, frame, displayFrame, insets, surfaceInsets,
-                    isVoiceInteraction, freeform, atoken.mTask.mTaskId);
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
+                    mGlobalConfiguration.uiMode, mGlobalConfiguration.orientation, frame,
+                    displayFrame, insets, surfaceInsets, isVoiceInteraction, freeform,
+                    atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
@@ -2788,7 +2793,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken,
-            Rect bounds, Configuration config, boolean isOnTopLauncher) {
+            Rect bounds, Configuration overrideConfig, boolean isOnTopLauncher) {
         if (DEBUG_STACK) Slog.i(TAG_WM, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
                 + " atoken=" + atoken + " bounds=" + bounds);
         final TaskStack stack = mStackIdToStack.get(stackId);
@@ -2796,7 +2801,7 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(taskId, stack, userId, this, bounds, config, isOnTopLauncher);
+        Task task = new Task(taskId, stack, userId, this, bounds, overrideConfig, isOnTopLauncher);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */, atoken.showForAllUsers);
         return task;
@@ -2806,9 +2811,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
-            boolean homeTask, int targetSdkVersion, int rotationAnimationHint,
-            boolean isOnTopLauncher) {
+            Rect taskBounds, Configuration overrideConfig, int taskResizeMode,
+            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion,
+            int rotationAnimationHint, boolean isOnTopLauncher) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -2850,7 +2855,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, config,
+                task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, overrideConfig,
                         isOnTopLauncher);
             }
             task.addAppToken(addPos, atoken, taskResizeMode, homeTask);
@@ -2863,7 +2868,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setAppTask(IBinder token, int taskId, int stackId, Rect taskBounds,
-            Configuration config, int taskResizeMode, boolean homeTask, boolean isOnTopLauncher) {
+            Configuration overrideConfig, int taskResizeMode, boolean homeTask,
+            boolean isOnTopLauncher) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -2881,7 +2887,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Task newTask = mTaskIdToTask.get(taskId);
             if (newTask == null) {
                 newTask = createTaskLocked(
-                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, config,
+                        taskId, stackId, oldTask.mUserId, atoken, taskBounds, overrideConfig,
                         isOnTopLauncher);
             }
             newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken, taskResizeMode, homeTask);
@@ -3071,12 +3077,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
-            boolean configChanged = mCurConfiguration.diff(config) != 0;
+            boolean configChanged = mGlobalConfiguration.diff(config) != 0;
             if (!configChanged) {
                 return null;
             }
             prepareFreezingAllTaskBounds();
-            mCurConfiguration = new Configuration(config);
+            mGlobalConfiguration = new Configuration(config);
             return onConfigurationChanged();
         }
     }
@@ -4155,7 +4161,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns a {@link Configuration} object that contains configurations settings
      * that should be overridden due to the operation.
      */
-    public void resizeTask(int taskId, Rect bounds, Configuration configuration,
+    public void resizeTask(int taskId, Rect bounds, Configuration overrideConfig,
             boolean relayout, boolean forced) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
@@ -4164,7 +4170,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " not found.");
             }
 
-            if (task.resizeLocked(bounds, configuration, forced) && relayout) {
+            if (task.resizeLocked(bounds, overrideConfig, forced) && relayout) {
                 task.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }
@@ -5690,7 +5696,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // computeScreenConfigurationLocked later.
-        updateDisplayAndOrientationLocked(mCurConfiguration.uiMode);
+        updateDisplayAndOrientationLocked(mGlobalConfiguration.uiMode);
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (!inTransaction) {
@@ -6240,9 +6246,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
-    /*
-     * Instruct the Activity Manager to fetch the current configuration and broadcast
-     * that to config-changed listeners if appropriate.
+    /**
+     * Instruct the Activity Manager to fetch new configurations, update global configuration
+     * and broadcast changes to config-changed listeners if appropriate.
      */
     void sendNewConfiguration() {
         try {
@@ -8072,9 +8078,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
         mTempConfiguration.setToDefaults();
-        mTempConfiguration.updateFrom(mCurConfiguration);
+        mTempConfiguration.updateFrom(mGlobalConfiguration);
         computeScreenConfigurationLocked(mTempConfiguration);
-        configChanged |= mCurConfiguration.diff(mTempConfiguration) != 0;
+        configChanged |= mGlobalConfiguration.diff(mTempConfiguration) != 0;
 
         if (configChanged) {
             mWaitingForConfig = true;
@@ -8235,7 +8241,7 @@ public class WindowManagerService extends IWindowManager.Stub
             w.setReportResizeHints();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
-                Slog.v(TAG_WM, "Win " + w + " config changed: " + mCurConfiguration);
+                Slog.v(TAG_WM, "Win " + w + " config changed: " + mGlobalConfiguration);
             }
             final boolean dragResizingChanged = w.isDragResizeChanged()
                     && !w.isDragResizingChangeReported();
@@ -9242,7 +9248,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         pw.println();
-        pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
+        pw.print("  mGlobalConfiguration="); pw.println(mGlobalConfiguration);
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
         if (mLastFocus != mCurrentFocus) {

@@ -101,7 +101,7 @@ interface IWindowManager
      * @param launchTaskBehind True if the token is been launched from behind.
      * @param taskBounds Bounds to use when creating a new Task with the input task Id if
      *                   the task doesn't exist yet.
-     * @param configuration Configuration that is being used with this task.
+     * @param overrideConfig Override configuration that is being used with this task.
      * @param taskResizeMode The resize mode of the task.
      * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
      *                        they are in.
@@ -112,7 +112,7 @@ interface IWindowManager
     void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            in Rect taskBounds, in Configuration configuration, int taskResizeMode,
+            in Rect taskBounds, in Configuration overrideConfig, int taskResizeMode,
             boolean alwaysFocusable, boolean homeTask, int targetSdkVersion,
             int rotationAnimationHint, boolean isOnTopLauncher);
     /**
@@ -123,13 +123,14 @@ interface IWindowManager
      *                if the task doesn't exist yet.
      * @param taskBounds Bounds to use when creating a new Task with the input task Id if
      *                   the task doesn't exist yet.
-     * @param config Configuration that is being used with this task.
+     * @param overrideConfig Override configuration that is being used with this task.
      * @param taskResizeMode The resize mode of the task.
      * @param homeTask True if this is the task.
      * @param isOnTopLauncher True if this task is an on-top launcher.
      */
     void setAppTask(IBinder token, int taskId, int stackId, in Rect taskBounds,
-            in Configuration config, int taskResizeMode, boolean homeTask, boolean isOnTopLauncher);
+            in Configuration overrideConfig, int taskResizeMode, boolean homeTask,
+            boolean isOnTopLauncher);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);

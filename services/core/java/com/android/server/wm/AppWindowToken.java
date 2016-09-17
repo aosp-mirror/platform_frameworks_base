@@ -728,7 +728,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (mTask.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
             // We didn't call prepareFreezingBounds on the task, so use the current value.
-            final Configuration config = new Configuration(mService.mCurConfiguration);
+            final Configuration config = new Configuration(mService.mGlobalConfiguration);
             config.updateFrom(mTask.mOverrideConfig);
             mFrozenMergedConfig.offer(config);
         } else {

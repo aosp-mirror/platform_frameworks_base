@@ -197,8 +197,8 @@ public final class CompatModePackages {
     }
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
-        CompatibilityInfo ci = new CompatibilityInfo(ai, mService.mConfiguration.screenLayout,
-                mService.mConfiguration.smallestScreenWidthDp,
+        CompatibilityInfo ci = new CompatibilityInfo(ai, mService.mGlobalConfiguration.screenLayout,
+                mService.mGlobalConfiguration.smallestScreenWidthDp,
                 (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0);
         //Slog.i(TAG, "*********** COMPAT FOR PKG " + ai.packageName + ": " + ci);
         return ci;
@@ -207,8 +207,8 @@ public final class CompatModePackages {
     public int computeCompatModeLocked(ApplicationInfo ai) {
         boolean enabled = (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0;
         CompatibilityInfo info = new CompatibilityInfo(ai,
-                mService.mConfiguration.screenLayout,
-                mService.mConfiguration.smallestScreenWidthDp, enabled);
+                mService.mGlobalConfiguration.screenLayout,
+                mService.mGlobalConfiguration.smallestScreenWidthDp, enabled);
         if (info.alwaysSupportsScreen()) {
             return ActivityManager.COMPAT_MODE_NEVER;
         }
@@ -408,8 +408,8 @@ public final class CompatModePackages {
             out.startTag(null, "compat-packages");
 
             final IPackageManager pm = AppGlobals.getPackageManager();
-            final int screenLayout = mService.mConfiguration.screenLayout;
-            final int smallestScreenWidthDp = mService.mConfiguration.smallestScreenWidthDp;
+            final int screenLayout = mService.mGlobalConfiguration.screenLayout;
+            final int smallestScreenWidthDp = mService.mGlobalConfiguration.smallestScreenWidthDp;
             final Iterator<Map.Entry<String, Integer>> it = pkgs.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<String, Integer> entry = it.next();

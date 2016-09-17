@@ -1588,7 +1588,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean isConfigChanged() {
         getMergedConfig(mTmpConfig);
 
-        // If the merged configuration is still empty, it means that we haven't issues the
+        // If the merged configuration is still empty, it means that we haven't issued the
         // configuration to the client yet and we need to return true so the configuration updates.
         boolean configChanged = mMergedConfiguration.equals(Configuration.EMPTY)
                 || mTmpConfig.diff(mMergedConfiguration) != 0;
@@ -2901,8 +2901,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         final Configuration overrideConfig = task != null
                 ? task.mOverrideConfig
                 : Configuration.EMPTY;
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        outConfig.setTo(serviceConfig);
+        outConfig.setTo(mService.mGlobalConfiguration);
         if (overrideConfig != Configuration.EMPTY) {
             outConfig.updateFrom(overrideConfig);
         }
