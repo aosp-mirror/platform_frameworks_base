@@ -191,7 +191,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Consentire impostazioni di sviluppo?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Queste impostazioni sono utilizzabili solo a scopo di sviluppo. Possono causare l\'arresto o il comportamento anomalo del dispositivo e delle applicazioni su di esso."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica app tramite USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Controlla che le applicazioni installate tramite ADB/ADT non abbiano un comportamento dannoso."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Controlla che le app installate tramite ADB/ADT non abbiano un comportamento dannoso."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Consente di disattivare la funzione del volume assoluto Bluetooth in caso di problemi con il volume dei dispositivi remoti, ad esempio un volume troppo alto o la mancanza di controllo."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminale locale"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Abilita l\'app Terminale che offre l\'accesso alla shell locale"</string>
@@ -329,8 +329,8 @@
     <string name="home" msgid="3256884684164448244">"Home page Impostazioni"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
-    <item msgid="8934126114226089439">"50%%"</item>
-    <item msgid="1286113608943010849">"100%%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> fa"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> rimanenti"</string>
