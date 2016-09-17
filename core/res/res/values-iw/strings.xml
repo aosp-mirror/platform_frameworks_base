@@ -1126,6 +1126,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"‏אין ל-Wi-Fi גישה לאינטרנט"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"הקש לקבלת אפשרויות"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"מעבר אל <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"המכשיר משתמש ברשת <xliff:g id="NEW_NETWORK">%1$s</xliff:g> כשלרשת <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> אין גישה לאינטרנט. עשויים לחול חיובים."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"עבר מרשת <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> לרשת <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"נתונים סלולריים"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"סוג רשת לא מזוהה"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏אין אפשרות להתחבר ל-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" אינו מחובר היטב לאינטרנט."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"האם להתיר את החיבור?"</string>
@@ -1362,7 +1373,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"אפשרויות נוספות"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"‏%1$s‏, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"‏%1$s‏, %2$s‏, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"אחסון משותף פנימי"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"אחסון שיתוף פנימי"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏כרטיס SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏כרטיס SD של <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏כונן USB"</string>

@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi тармагы Интернетке туташпай турат"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Параметрлерди ачуу үчүн таптап коюңуз"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> тармагына которуштурулду"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> тармагы Интернетке туташпай турганда, түзмөгүңүз <xliff:g id="NEW_NETWORK">%1$s</xliff:g> тармагын колдонот. Акы алынышы мүмкүн."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> дегенден <xliff:g id="NEW_NETWORK">%2$s</xliff:g> тармагына которуштурулду"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"мобилдик дайындар"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"белгисиз тармак түрү"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi менен туташуу түзүлбөдү"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" хотспотунун интернет байланышы начар."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Туташууга уруксатпы?"</string>
@@ -1197,8 +1208,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Колдонмого орнотуу сеанстарын окуу мүмкүнчүлүгүн берет. Ушуну менен, ал жигердүү топтом орнотууларынын чоо-жайын көрө алат."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"орнотуу топтомдорун суроо"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Колдонмо топтомдорду орнотууга уруксат сурай алат."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Масштабдын параметрлерин өзгөртүү үчүн бул жерди эки жолу басыңыз."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетти кошуу мүмкүн болбоду."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Өтүү"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Издөө"</string>
@@ -1229,10 +1239,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Эскертмелердин маанилүүлүгүн баалоо кызматы"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN иштетилди"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g> аркылуу жандырылды"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Тармактын параметрлерин өзгөртүү үчүн бул жерди басыңыз."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> сеансына туташуу ишке ашты. Желенин параметрлерин өзгөртүү үчүн бул жерди басыңыз."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Дайым иштеген VPN туташууда…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Дайым иштеген VPN туташтырылды"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Дайым иштеген VPN\'де ката кетти"</string>

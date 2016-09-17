@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Walang access sa Internet ang Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa Internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"cellular data"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"isang hindi kilalang uri ng network"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Hindi makakonekta sa Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ay mayroong mahinang koneksyon sa Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Payagan ang kuneksyon?"</string>

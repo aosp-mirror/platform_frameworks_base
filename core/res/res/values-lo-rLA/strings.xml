@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ບໍ່ມີການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ແຕະເພື່ອເບິ່ງຕົວເລືອກ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"ສະຫຼັບໄປໃຊ້ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"ອຸປະກອນຈະໃຊ້ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ເມື່ອ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ. ອາດມີການຮຽກເກັບຄ່າບໍລິການ."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"ສະຫຼັບຈາກ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ໄປໃຊ້ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ແລ້ວ"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"ຂໍ້ມູນອິນເຕີເນັດມືຖື"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"ອີເທີເນັດ"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ບໍ່ຮູ້ຈັກປະເພດເຄືອຂ່າຍ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ບໍ່ສາມາດເຊື່ອມຕໍ່ Wi-Fi ໄດ້"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ມີສັນຍານອິນເຕີເນັດທີ່ບໍ່ດີ."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"​ອະ​ນຸ​ຍາດ​ການ​ເຊື່ອມ​ຕໍ່ຫຼື​ບໍ່?"</string>

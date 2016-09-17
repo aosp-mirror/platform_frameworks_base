@@ -1101,6 +1101,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi нема приступ интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Додирните за опције"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Прешли сте на тип мреже <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Уређај користи тип мреже <xliff:g id="NEW_NETWORK">%1$s</xliff:g> када тип мреже <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> нема приступ интернету. Можда ће се наплаћивати трошкови."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Прешли сте са типа мреже <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на тип мреже <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"мобилни подаци"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Етернет"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"непознат тип мреже"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није могуће повезати са Wi-Fi мрежом"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" има лошу интернет везу."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Желите ли да дозволите повезивање?"</string>
@@ -1172,7 +1183,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Задржи га на екрану док је физичка тастатура активна"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Задржи је на екрану док је физичка тастатура активна"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелну тастатуру"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Конфигуришите физичку тастатуру"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Додирните да бисте изабрали језик и распоред"</string>
