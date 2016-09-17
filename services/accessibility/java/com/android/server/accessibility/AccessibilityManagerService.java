@@ -3739,18 +3739,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 Rect boundsInScreen = mTempRect;
                 focus.getBoundsInScreen(boundsInScreen);
 
-                // Clip to the window bounds.
-                Rect windowBounds = mTempRect1;
-                getWindowBounds(focus.getWindowId(), windowBounds);
-                if (!boundsInScreen.intersect(windowBounds)) {
-                    return false;
-                }
-
                 // Apply magnification if needed.
                 MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
                 if (spec != null && !spec.isNop()) {
                     boundsInScreen.offset((int) -spec.offsetX, (int) -spec.offsetY);
                     boundsInScreen.scale(1 / spec.scale);
+                }
+
+                // Clip to the window bounds.
+                Rect windowBounds = mTempRect1;
+                getWindowBounds(focus.getWindowId(), windowBounds);
+                if (!boundsInScreen.intersect(windowBounds)) {
+                    return false;
                 }
 
                 // Clip to the screen bounds.
