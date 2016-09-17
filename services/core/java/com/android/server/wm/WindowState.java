@@ -141,10 +141,8 @@ class WindowList extends ArrayList<WindowState> {
     }
 }
 
-/**
- * A window in the window manager.
- */
-class WindowState extends WindowContainer implements WindowManagerPolicy.WindowState {
+/** A window in the window manager. */
+class WindowState extends WindowContainer<WindowState> implements WindowManagerPolicy.WindowState {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
     // The minimal size of a window within the usable area of the freeform stack.
@@ -551,9 +549,9 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
      * Compares to window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
-    private static final Comparator<WindowContainer> sWindowSubLayerComparator = (w1, w2) -> {
-        final int layer1 = ((WindowState)w1).mSubLayer;
-        final int layer2 = ((WindowState)w2).mSubLayer;
+    private static final Comparator<WindowState> sWindowSubLayerComparator = (w1, w2) -> {
+        final int layer1 = w1.mSubLayer;
+        final int layer2 = w2.mSubLayer;
         if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
             // We insert the child window into the list ordered by the sub-layer.
             // For same sub-layers, the negative one should go below others; the positive one should
@@ -1449,7 +1447,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         boolean changed = false;
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             changed |= c.onAppVisibilityChanged(visible, runningAppAnimation);
         }
 
@@ -1500,7 +1498,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             changed |= c.onSetAppExiting();
         }
 
@@ -1543,7 +1541,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void onUnfreezeBounds() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.onUnfreezeBounds();
         }
 
@@ -1618,7 +1616,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             removeImmediately();
         } else {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final WindowState c = (WindowState) mChildren.get(i);
+                final WindowState c = mChildren.get(i);
                 c.onWindowReplacementTimeout();
             }
         }
@@ -1891,7 +1889,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mJustMovedInStack = true;
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.notifyMovedInStack();
         }
     }
@@ -1912,7 +1910,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mJustMovedInStack = false;
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.resetJustMovedInStack();
         }
     }
@@ -2007,7 +2005,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             if (c.removeReplacedWindowIfNeeded(replacement)) {
                 return true;
             }
@@ -2041,7 +2039,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             replacementSet |= c.setReplacementWindowIfNeeded(replacementCandidate);
         }
 
@@ -2414,7 +2412,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return true;
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             if (c.isAnimatingInvisibleWithSavedSurface()) {
                 return true;
             }
@@ -2424,7 +2422,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void stopUsingSavedSurface() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.stopUsingSavedSurface();
         }
 
@@ -2445,7 +2443,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             mWinAnimator.mAnimating = true;
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.markSavedSurfaceExiting();
         }
     }
@@ -2454,7 +2452,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         animators.add(mWinAnimator);
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.addWinAnimatorToList(animators);
         }
     }
@@ -2486,7 +2484,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     public void clearWasVisibleBeforeClientHidden() {
         mWasVisibleBeforeClientHidden = false;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.clearWasVisibleBeforeClientHidden();
         }
     }
@@ -2498,7 +2496,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     void onStartFreezingScreen() {
         mAppFreezing = true;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.onStartFreezingScreen();
         }
     }
@@ -2506,7 +2504,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean onStopFreezingScreen() {
         boolean unfrozeWindows = false;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             unfrozeWindows |= c.onStopFreezingScreen();
         }
 
@@ -2576,7 +2574,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     boolean destroySurface(boolean cleanupOnResume, boolean appStopped) {
         boolean destroyedSomething = false;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             destroyedSomething |= c.destroySurface(cleanupOnResume, appStopped);
         }
 
@@ -2636,7 +2634,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void destroySavedSurface() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.destroySavedSurface();
         }
 
@@ -2652,7 +2650,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     int restoreSavedSurfaceForInterestingWindow() {
         int interestingNotDrawn = -1;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             final int childInterestingNotDrawn = c.restoreSavedSurfaceForInterestingWindow();
             if (childInterestingNotDrawn != -1) {
                 if (interestingNotDrawn == -1) {
@@ -2723,7 +2721,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             if (c.canRestoreSurface()) {
                 return true;
             }
@@ -3463,8 +3461,8 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     WindowState getBottomChild() {
         // Child windows are z-ordered based on sub-layer using {@link #sWindowSubLayerComparator}
         // and the child with the lowest z-order will be at the head of the list.
-        WindowContainer c = mChildren.peekFirst();
-        return c == null ? null : (WindowState)c;
+        WindowState c = mChildren.peekFirst();
+        return c == null ? null : c;
     }
 
     boolean layoutInParentFrame() {
@@ -3495,7 +3493,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void setWillReplaceWindow(boolean animate) {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.setWillReplaceWindow(animate);
         }
 
@@ -3517,7 +3515,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         mAnimateReplacingWindow = false;
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.clearWillReplaceWindow();
         }
     }
@@ -3528,7 +3526,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             if (c.waitingForReplacement()) {
                 return true;
             }
@@ -3544,7 +3542,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.requestUpdateWallpaperIfNeeded();
         }
     }
@@ -3592,7 +3590,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             setWillReplaceWindow(false /* animate */);
         }
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.setWillReplaceChildWindows();
         }
     }
@@ -3602,7 +3600,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return this;
         }
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             final WindowState replacing = c.getReplacingWindow();
             if (replacing != null) {
                 return replacing;
@@ -3650,7 +3648,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             final DisplayContent displayContent = getDisplayContent();
 
             for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final WindowState c = (WindowState) mChildren.get(i);
+                final WindowState c = mChildren.get(i);
                 if (c.mWinAnimator.mSurfaceController != null) {
                     c.performShowLocked();
                     // It hadn't been shown, which means layout not performed on it, so now we
@@ -3712,7 +3710,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
                 windowInfo.childTokens = new ArrayList(childCount);
             }
             for (int j = 0; j < childCount; j++) {
-                final WindowState child = (WindowState) mChildren.get(j);
+                final WindowState child = mChildren.get(j);
                 windowInfo.childTokens.add(child.mClient.asBinder());
             }
         }
@@ -3722,7 +3720,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
     int getHighestAnimLayer() {
         int highest = mWinAnimator.mAnimLayer;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             final int childLayer = c.getHighestAnimLayer();
             if (childLayer > highest) {
                 highest = childLayer;
@@ -3736,7 +3734,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         if (DEBUG_LAYERS || DEBUG_WALLPAPER) Slog.v(TAG_WM,
                 "adjustAnimLayer win=" + this + " anim layer: " + mWinAnimator.mAnimLayer);
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState childWindow = (WindowState) mChildren.get(i);
+            final WindowState childWindow = mChildren.get(i);
             childWindow.adjustAnimLayer(adj);
             if (childWindow.mWinAnimator.mAnimLayer > highestAnimLayer) {
                 highestAnimLayer = childWindow.mWinAnimator.mAnimLayer;
@@ -3765,7 +3763,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         final int childCount = mChildren.size();
         boolean winAdded = false;
         for (int j = 0; j < childCount; j++) {
-            final WindowState child = (WindowState) mChildren.get(j);
+            final WindowState child = mChildren.get(j);
             if (!winAdded && child.mSubLayer >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM,
                         "Re-adding child window at " + index + ": " + child);
@@ -3803,7 +3801,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         int childCount = mChildren.size();
         while (childCount > 0) {
             childCount--;
-            final WindowState cw = (WindowState) mChildren.get(childCount);
+            final WindowState cw = mChildren.get(childCount);
             int cpos = windows.indexOf(cw);
             if (cpos >= 0) {
                 if (cpos < interestingPos) interestingPos--;
@@ -3820,7 +3818,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return true;
         }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             if (c.isWindowAnimationSet()) {
                 return true;
             }
@@ -3836,9 +3834,9 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         if (!mChildren.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
             // TODO: Not sure if we really need to copy this into a different list.
-            final LinkedList childWindows = new LinkedList(mChildren);
+            final LinkedList<WindowState> childWindows = new LinkedList(mChildren);
             for (int i = childWindows.size() - 1; i >= 0; i--) {
-                ((WindowState)childWindows.get(i)).onExitAnimationDone();
+                childWindows.get(i).onExitAnimationDone();
             }
         }
 
@@ -3932,7 +3930,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
         }
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            didSomething |= ((WindowState) mChildren.get(i)).clearAnimatingFlags();
+            didSomething |= (mChildren.get(i)).clearAnimatingFlags();
         }
 
         return didSomething;
@@ -3944,7 +3942,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void hideWallpaperWindow(boolean wasDeferred, String reason) {
         for (int j = mChildren.size() - 1; j >= 0; --j) {
-            final WindowState c = (WindowState) mChildren.get(j);
+            final WindowState c = mChildren.get(j);
             c.hideWallpaperWindow(wasDeferred, reason);
         }
         if (!mWinAnimator.mLastHidden || wasDeferred) {
@@ -3984,7 +3982,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
             return true;
         }
         for (int j = mChildren.size() - 1; j >= 0; --j) {
-            final WindowState c = (WindowState) mChildren.get(j);
+            final WindowState c = mChildren.get(j);
             if (c.hasVisibleNotDrawnWallpaper()) {
                 return true;
             }
@@ -3994,7 +3992,7 @@ class WindowState extends WindowContainer implements WindowManagerPolicy.WindowS
 
     void updateReportedVisibility(UpdateReportedVisibilityResults results) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = (WindowState) mChildren.get(i);
+            final WindowState c = mChildren.get(i);
             c.updateReportedVisibility(results);
         }
 

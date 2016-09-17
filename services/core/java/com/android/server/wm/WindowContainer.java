@@ -32,14 +32,14 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
  * The test class is {@link WindowContainerTests} which must be kept up-to-date and ran anytime
  * changes are made to this class.
  */
-class WindowContainer implements Comparable<WindowContainer> {
+class WindowContainer<E extends WindowContainer> implements Comparable<WindowContainer> {
 
     // The parent of this window container.
-    private WindowContainer mParent = null;
+    protected WindowContainer mParent = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
-    protected final LinkedList<WindowContainer> mChildren = new LinkedList();
+    protected final LinkedList<E> mChildren = new LinkedList();
 
     // The specified orientation for this window container.
     protected int mOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
@@ -60,7 +60,7 @@ class WindowContainer implements Comparable<WindowContainer> {
      *                   If null, the child will be added to the top.
      */
     @CallSuper
-    protected void addChild(WindowContainer child, Comparator<WindowContainer> comparator) {
+    protected void addChild(E child, Comparator<E> comparator) {
         child.mParent = this;
 
         if (mChildren.isEmpty() || comparator == null) {
