@@ -96,13 +96,10 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE
 /** Root {@link WindowContainer} for the device. */
 // TODO: Several methods in here are accessing children of this container's children through various
 // references (WindowList I am looking at you :/). See if we can delegate instead.
-class RootWindowContainer {
+class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
     WindowManagerService mService;
-
-    /** All DisplayContents in the world, kept here */
-    SparseArray<DisplayContent> mDisplayContents = new SparseArray<>(2);
 
     private boolean mWallpaperForceHidingChanged = false;
     private Object mLastWindowFreezeSource = null;
@@ -148,9 +145,9 @@ class RootWindowContainer {
     }
 
     WindowState computeFocusedWindow() {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; i++) {
-            final DisplayContent dc = mDisplayContents.valueAt(i);
+            final DisplayContent dc = mChildren.get(i);
             final WindowState win = dc.findFocusedWindow();
             if (win != null) {
                 return win;
@@ -166,8 +163,9 @@ class RootWindowContainer {
      * @param displayId The display the caller is interested in.
      * @return The DisplayContent associated with displayId or null if there is no Display for it.
      */
-    DisplayContent getDisplayContent(final int displayId) {
-        DisplayContent dc = mDisplayContents.get(displayId);
+    DisplayContent getDisplayContentOrCreate(int displayId) {
+        DisplayContent dc = getDisplayContent(displayId);
+
         if (dc == null) {
             final Display display = mService.mDisplayManager.getDisplay(displayId);
             if (display != null) {
@@ -177,13 +175,24 @@ class RootWindowContainer {
         return dc;
     }
 
-    private DisplayContent createDisplayContent(final Display display) {
-        DisplayContent displayContent = new DisplayContent(display, mService);
-        final int displayId = display.getDisplayId();
-        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
-        mDisplayContents.put(displayId, displayContent);
+    private DisplayContent getDisplayContent(int displayId) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final DisplayContent current = mChildren.get(i);
+            if (current.getDisplayId() == displayId) {
+                return current;
+            }
+        }
+        return null;
+    }
 
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+    private DisplayContent createDisplayContent(final Display display) {
+        final DisplayContent dc = new DisplayContent(display, mService);
+        final int displayId = display.getDisplayId();
+
+        if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
+        addChild(dc, null);
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
         final Rect rect = new Rect();
         mService.mDisplaySettings.getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
         displayInfo.overscanLeft = rect.left;
@@ -193,23 +202,23 @@ class RootWindowContainer {
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayId, displayInfo);
-            mService.configureDisplayPolicyLocked(displayContent);
+            mService.configureDisplayPolicyLocked(dc);
 
             // TODO(multi-display): Create an input channel for each display with touch capability.
             if (displayId == Display.DEFAULT_DISPLAY) {
-                displayContent.mTapDetector = new TaskTapPointerEventListener(
-                        mService, displayContent);
-                mService.registerPointerEventListener(displayContent.mTapDetector);
+                dc.mTapDetector = new TaskTapPointerEventListener(
+                        mService, dc);
+                mService.registerPointerEventListener(dc.mTapDetector);
                 mService.registerPointerEventListener(mService.mMousePositionTracker);
             }
         }
 
-        return displayContent;
+        return dc;
     }
 
     /** Adds the input stack id to the input display id and returns the bounds of the added stack.*/
     Rect addStackToDisplay(int stackId, int displayId, boolean onTop) {
-        final DisplayContent dc = mDisplayContents.get(displayId);
+        final DisplayContent dc = getDisplayContent(displayId);
         if (dc == null) {
             Slog.w(TAG_WM, "addStackToDisplay: Trying to add stackId=" + stackId
                     + " to unknown displayId=" + displayId + " callers=" + Debug.getCallers(6));
@@ -249,9 +258,9 @@ class RootWindowContainer {
     }
 
     boolean layoutNeeded() {
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.layoutNeeded) {
                 return true;
             }
@@ -260,17 +269,17 @@ class RootWindowContainer {
     }
 
     void getWindows(WindowList output) {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mDisplayContents.valueAt(i);
+            final DisplayContent dc = mChildren.get(i);
             output.addAll(dc.getWindowList());
         }
     }
 
     void getWindows(WindowList output, boolean visibleOnly, boolean appsOnly) {
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if ((!visibleOnly || w.mWinAnimator.getShown())
@@ -289,9 +298,9 @@ class RootWindowContainer {
             name = null;
         } catch (RuntimeException e) {
         }
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if (name != null) {
@@ -306,9 +315,9 @@ class RootWindowContainer {
     }
 
     WindowState findWindow(int hashCode) {
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final WindowList windows = mChildren.get(displayNdx).getWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState w = windows.get(winNdx);
@@ -323,9 +332,9 @@ class RootWindowContainer {
 
     // TODO: Users would have their own window containers under the display container?
     void switchUser() {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mDisplayContents.valueAt(i);
+            final DisplayContent dc = mChildren.get(i);
             dc.switchUser();
         }
     }
@@ -338,24 +347,24 @@ class RootWindowContainer {
 
         mChangedStackList.clear();
 
-        final int numDisplays = mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-            displayContent.onConfigurationChanged(mChangedStackList);
+        final int numDisplays = mChildren.size();
+        for (int i = 0; i < numDisplays; ++i) {
+            final DisplayContent dc = mChildren.get(i);
+            dc.onConfigurationChanged(mChangedStackList);
         }
 
         return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
     }
 
     private void prepareFreezingTaskBounds() {
-        for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
-            mDisplayContents.valueAt(i).prepareFreezingTaskBounds();
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            mChildren.get(i).prepareFreezingTaskBounds();
         }
     }
 
     void setSecureSurfaceState(int userId, boolean disabled) {
-        for (int i = mDisplayContents.size() - 1; i >= 0; --i) {
-            final WindowList windows = mDisplayContents.valueAt(i).getWindowList();
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowList windows = mChildren.get(i).getWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (win.mHasSurface && userId == UserHandle.getUserId(win.mOwnerUid)) {
@@ -366,9 +375,9 @@ class RootWindowContainer {
     }
 
     void updateAppOpsState() {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mDisplayContents.valueAt(i).getWindowList();
+            final WindowList windows = mChildren.get(i).getWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState win = windows.get(winNdx);
@@ -384,9 +393,9 @@ class RootWindowContainer {
     }
 
     boolean canShowStrictModeViolation(int pid) {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mDisplayContents.valueAt(i).getWindowList();
+            final WindowList windows = mChildren.get(i).getWindowList();
             final int numWindows = windows.size();
             for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                 final WindowState ws = windows.get(winNdx);
@@ -399,9 +408,9 @@ class RootWindowContainer {
     }
 
     void closeSystemDialogs(String reason) {
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final WindowList windows = mDisplayContents.valueAt(i).getWindowList();
+            final WindowList windows = mChildren.get(i).getWindowList();
             final int numWindows = windows.size();
             for (int j = 0; j < numWindows; ++j) {
                 final WindowState w = windows.get(j);
@@ -419,8 +428,8 @@ class RootWindowContainer {
         if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
         mService.openSurfaceTransaction();
         try {
-            for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
-                DisplayContent dc = mDisplayContents.valueAt(i);
+            for (int i = mChildren.size() - 1; i >= 0; i--) {
+                DisplayContent dc = mChildren.get(i);
                 final WindowList windows = dc.getWindowList();
                 for (int j = windows.size() - 1; j >= 0; j--) {
                     final WindowState win = windows.get(j);
@@ -439,9 +448,9 @@ class RootWindowContainer {
     boolean hasPendingLayoutChanges(WindowAnimator animator) {
         boolean hasChanges = false;
 
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mDisplayContents.valueAt(i);
+            final DisplayContent dc = mChildren.get(i);
             final int pendingChanges = animator.getPendingLayoutChanges(dc.getDisplayId());
             if ((pendingChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 animator.mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;
@@ -460,9 +469,9 @@ class RootWindowContainer {
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
         boolean disableWallpaperTouchEvents = false;
 
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mDisplayContents.valueAt(i);
+            final DisplayContent dc = mChildren.get(i);
             final WindowList windows = dc.getWindowList();
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState child = windows.get(winNdx);
@@ -537,9 +546,9 @@ class RootWindowContainer {
             // we haven't left any dangling surfaces around.
 
             Slog.i(TAG_WM, "Out of memory for surface!  Looking for leaks...");
-            final int numDisplays = mDisplayContents.size();
+            final int numDisplays = mChildren.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                final WindowList windows = mChildren.get(displayNdx).getWindowList();
                 final int numWindows = windows.size();
                 for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                     final WindowState ws = windows.get(winNdx);
@@ -572,7 +581,7 @@ class RootWindowContainer {
                 Slog.w(TAG_WM, "No leaked surfaces; killing applications!");
                 SparseIntArray pidCandidates = new SparseIntArray();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-                    final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                    final WindowList windows = mChildren.get(displayNdx).getWindowList();
                     final int numWindows = windows.size();
                     for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                         final WindowState ws = windows.get(winNdx);
@@ -639,9 +648,9 @@ class RootWindowContainer {
         }
 
         // Initialize state of exiting tokens.
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            final DisplayContent displayContent = mChildren.get(displayNdx);
             for (i = displayContent.mExitingTokens.size() - 1; i >= 0; i--) {
                 displayContent.mExitingTokens.get(i).hasVisible = false;
             }
@@ -788,7 +797,7 @@ class RootWindowContainer {
 
         // Time to remove any exiting tokens?
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            final DisplayContent displayContent = mChildren.get(displayNdx);
             ArrayList<WindowToken> exitingTokens = displayContent.mExitingTokens;
             for (i = exitingTokens.size() - 1; i >= 0; i--) {
                 WindowToken token = exitingTokens.get(i);
@@ -827,7 +836,7 @@ class RootWindowContainer {
         }
 
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.pendingLayoutChanges != 0) {
                 displayContent.layoutNeeded = true;
             }
@@ -913,8 +922,8 @@ class RootWindowContainer {
         }
 
         // Remove all deferred displays stacks, tasks, and activities.
-        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
-            mDisplayContents.valueAt(displayNdx).checkCompleteDeferredRemoval();
+        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
+            mChildren.get(displayNdx).checkCompleteDeferredRemoval();
         }
 
         if (updateInputWindowsNeeded) {
@@ -954,9 +963,9 @@ class RootWindowContainer {
 
         boolean focusDisplayed = false;
 
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
-            final DisplayContent dc = mDisplayContents.valueAt(j);
+            final DisplayContent dc = mChildren.get(j);
             boolean updateAllDrawn = false;
             WindowList windows = dc.getWindowList();
             DisplayInfo displayInfo = dc.getDisplayInfo();
@@ -1359,8 +1368,8 @@ class RootWindowContainer {
         mSurfaceTraceEnabled = true;
         mRemoteEventTrace = new RemoteEventTrace(mService, fd);
         mSurfaceTraceFd = pfd;
-        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
-            DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent dc = mChildren.get(displayNdx);
             dc.enableSurfaceTrace(fd);
         }
     }
@@ -1369,8 +1378,8 @@ class RootWindowContainer {
         mSurfaceTraceEnabled = false;
         mRemoteEventTrace = null;
         mSurfaceTraceFd = null;
-        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
-            DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
+            final DisplayContent dc = mChildren.get(displayNdx);
             dc.disableSurfaceTrace();
         }
     }
@@ -1378,9 +1387,9 @@ class RootWindowContainer {
     void dumpDisplayContents(PrintWriter pw) {
         pw.println("WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)");
         if (mService.mDisplayReady) {
-            final int count = mDisplayContents.size();
+            final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
-                final DisplayContent displayContent = mDisplayContents.valueAt(i);
+                final DisplayContent displayContent = mChildren.get(i);
                 displayContent.dump("  ", pw);
             }
         } else {
@@ -1393,9 +1402,9 @@ class RootWindowContainer {
             return;
         }
         pw.print("  layoutNeeded on displays=");
-        final int count = mDisplayContents.size();
+        final int count = mChildren.size();
         for (int displayNdx = 0; displayNdx < count; ++displayNdx) {
-            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.layoutNeeded) {
                 pw.print(displayContent.getDisplayId());
             }
@@ -1404,9 +1413,9 @@ class RootWindowContainer {
     }
 
     void dumpWindowsNoHeader(PrintWriter pw, boolean dumpAll, ArrayList<WindowState> windows) {
-        final int numDisplays = mDisplayContents.size();
+        final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final WindowList windowList = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final WindowList windowList = mChildren.get(displayNdx).getWindowList();
             for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState w = windowList.get(winNdx);
                 if (windows == null || windows.contains(w)) {

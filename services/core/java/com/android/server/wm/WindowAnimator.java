@@ -40,7 +40,6 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
-import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.content.Context;
@@ -528,7 +527,7 @@ public class WindowAnimator {
     }
 
     private void updateWallpaperLocked(int displayId) {
-        mService.mRoot.getDisplayContent(displayId).resetAnimationBackgroundAnimator();
+        mService.mRoot.getDisplayContentOrCreate(displayId).resetAnimationBackgroundAnimator();
 
         final WindowList windows = mService.getWindowListLocked(displayId);
         WindowState detachedWallpaper = null;
@@ -615,7 +614,8 @@ public class WindowAnimator {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+                final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(
+                        displayId);
                 displayContent.stepAppWindowsAnimation(mCurrentTime);
                 DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
@@ -654,7 +654,8 @@ public class WindowAnimator {
 
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+                final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(
+                        displayId);
 
                 displayContent.checkAppWindowsReadyToShow();
 
@@ -799,7 +800,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
         return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
@@ -807,7 +808,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
         if (displayContent != null) {
             displayContent.pendingLayoutChanges |= changes;
         }
