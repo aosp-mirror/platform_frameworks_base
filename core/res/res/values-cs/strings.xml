@@ -692,7 +692,7 @@
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Vložte SIM kartu."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM karta chybí nebo je nečitelná. Vložte SIM kartu."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Nepoužitelná karta SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Nepoužitelná SIM karta."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaše SIM karta byla natrvalo zablokována.\n Požádejte svého poskytovatele bezdrátových služeb o další SIM kartu."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Předchozí skladba"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Další skladba"</string>
@@ -1126,6 +1126,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nemá přístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím zobrazíte možnosti"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Přechod na síť <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Když síť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nebude mít přístup k internetu, zařízení použije síť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Mohou být účtovány poplatky."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Přechod ze sítě <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na síť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobilní data"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"neznámý typ sítě"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Připojení k síti Wi-Fi se nezdařilo"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má pomalé připojení k internetu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povolit připojení?"</string>

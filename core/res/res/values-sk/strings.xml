@@ -1126,6 +1126,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Sieť Wi-Fi nemá prístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím získate možnosti"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Prepnuté na sieť: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Keď sieť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nemá prístup k internetu, zariadenie používa sieť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Môžu sa účtovať poplatky."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prepnuté zo siete <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sieť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobilné dáta"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"neznámy typ siete"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepodarilo sa pripojiť k sieti Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má nekvalitné internetové pripojenie."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povoliť pripojenie?"</string>

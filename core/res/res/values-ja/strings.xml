@@ -374,7 +374,7 @@
     <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS通話サービスへのアクセス"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
-    <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末のステータスとIDの読み取り"</string>
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"端末情報と ID の読み取り"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"端末の電話機能へのアクセスをアプリに許可します。これにより、電話番号、端末ID、通話中かどうか、通話相手の電話番号をアプリから特定できるようになります。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"テレビのスリープを無効化"</string>
@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fiはインターネットに接続していません"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"タップしてその他のオプションを表示"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"端末で「<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>」によるインターネット接続ができない場合に「<xliff:g id="NEW_NETWORK">%1$s</xliff:g>」を使用します。通信料が発生することがあります。"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"「<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>」から「<xliff:g id="NEW_NETWORK">%2$s</xliff:g>」に切り替えました"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"モバイルデータ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"イーサネット"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"不明なネットワーク タイプ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiに接続できませんでした"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" はインターネット接続に問題があります。"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"接続を許可しますか？"</string>

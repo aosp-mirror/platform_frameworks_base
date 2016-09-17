@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi ไม่สามารถเข้าถึงอินเทอร์เน็ต"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"อุปกรณ์จะใช้ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> เมื่อ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ไม่สามารถเข้าถึงอินเทอร์เน็ต อาจมีค่าบริการ"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"เปลี่ยนจาก <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> เป็น <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"เน็ตมือถือ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"บลูทูธ"</item>
+    <item msgid="5447331121797802871">"อีเทอร์เน็ต"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ประเภทเครือข่ายที่ไม่รู้จัก"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ไม่สามารถเชื่อมต่อ WiFi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" มีสัญญาณอินเทอร์เน็ตไม่ดี"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"อนุญาตการเชื่อมต่อใช่ไหม"</string>

@@ -1078,6 +1078,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi មិនមានអ៊ិនធឺណិតនោះទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"ឧបករណ៍ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅពេលដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> គ្មានការតភ្ជាប់អ៊ីនធឺណិត។ អាចគិតប្រាក់លើការប្រើប្រាស់ទិន្នន័យ។"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"ទិន្នន័យចល័ត"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ប៊្លូធូស"</item>
+    <item msgid="5447331121797802871">"អ៊ីសឺរណិត"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ប្រភេទបណ្តាញមិនស្គាល់"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​មិន​ល្អ។"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"អនុញ្ញាត​ភ្ជាប់?"</string>

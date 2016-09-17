@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"WLAN hat keinen Internetzugriff"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Für Optionen tippen"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"Zu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> gewechselt"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Auf dem Gerät wird \"<xliff:g id="NEW_NETWORK">%1$s</xliff:g>\" verwendet, wenn über \"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>\" kein Internet verfügbar ist. Eventuell fallen Gebühren an."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"Von \"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>\" zu \"<xliff:g id="NEW_NETWORK">%2$s</xliff:g>\" gewechselt"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"mobile Datennutzung"</item>
+    <item msgid="75483255295529161">"WLAN"</item>
+    <item msgid="6862614801537202646">"Bluetooth"</item>
+    <item msgid="5447331121797802871">"Ethernet"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ein unbekannter Netzwerktyp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Es konnte keine WLAN-Verbindung hergestellt werden."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" hat eine schlechte Internetverbindung."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Verbindung zulassen?"</string>

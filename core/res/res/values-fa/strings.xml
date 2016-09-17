@@ -924,9 +924,9 @@
       <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
       <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
     </plurals>
-    <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدیو"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
-    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدیو ممکن نیست."</string>
+    <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدئو"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
+    <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدئو ممکن نیست."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"تأیید"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"ظهر"</string>
@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"برای گزینه‌ها ضربه بزنید"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> دسترسی به اینترنت نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"داده شبکه تلفن همراه"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"بلوتوث"</item>
+    <item msgid="5447331121797802871">"اترنت"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبکه نامشخص"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏اتصال به Wi-Fi ممکن نیست"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" اتصال اینترنتی ضعیفی دارد."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"اتصال مجاز است؟"</string>

@@ -1076,6 +1076,17 @@
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ဝိုင်-ဖို်ငတွင် အင်တာနက် ဝင်ရောက်သုံးခွင့် မရှိပါ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"အခြားရွေးချယ်စရာများကိုကြည့်ရန် တို့ပါ"</string>
+    <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"စက်ပစ္စည်းသည် <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ဖြင့် အင်တာနက် အသုံးမပြုနိုင်သည့်အချိန်တွင် <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ကို သုံးပါသည်။ ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
+    <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> မှ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
+  <string-array name="network_switch_type_name">
+    <item msgid="2952042958050315394">"ဆယ်လူလာဒေတာ"</item>
+    <item msgid="75483255295529161">"Wi-Fi"</item>
+    <item msgid="6862614801537202646">"ဘလူးတုသ်"</item>
+    <item msgid="5447331121797802871">"အီသာနက်"</item>
+    <item msgid="8257233890381651999">"VPN"</item>
+  </string-array>
+    <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"အမည်မသိကွန်ရက်အမျိုးအစား"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ဝိုင်ဖိုင်ကိုချိတ်ဆက်မရပါ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" အင်တာနက် ဆက်သွယ်မှု ကောင်းကောင်းမရှိပါ"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ချိတ်ဆက်မှုကို ခွင့်ပြုမလား?"</string>
