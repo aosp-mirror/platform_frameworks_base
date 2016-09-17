@@ -29,7 +29,7 @@
     <string name="label_pages" msgid="7768589729282182230">"ページ"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"プリンタを選択"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ページすべて"</string>
-    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ページ分"</string>
+    <string name="template_page_range" msgid="428638530038286328">"範囲選択（<xliff:g id="PAGE_COUNT">%1$s</xliff:g>ページ内）"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"例: 1-5,8,11-13"</string>
     <string name="print_preview" msgid="8010217796057763343">"印刷プレビュー"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"プレビュー用PDFビューアをインストール"</string>
