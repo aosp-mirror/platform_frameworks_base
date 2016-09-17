@@ -241,6 +241,10 @@ public class ImageReader implements AutoCloseable {
      * same {@link Surface} can be reused with a different API once the first source is
      * disconnected from the {@link Surface}.</p>
      *
+     * <p>Please note that holding on to the Surface object returned by this method is not enough
+     * to keep its parent ImageReader from being reclaimed. In that sense, a Surface acts like a
+     * {@link java.lang.ref.WeakReference weak reference} to the ImageReader that provides it.</p>
+     *
      * @return A {@link Surface} to use for a drawing target for various APIs.
      */
     public Surface getSurface() {
