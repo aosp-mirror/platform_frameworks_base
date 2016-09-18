@@ -22,6 +22,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
@@ -50,6 +51,8 @@ public class DeviceInfoUtils {
     private static final String FILENAME_MSV = "/sys/board_properties/soc/msv";
     private static final String FILENAME_PROC_CPUINFO = "/proc/cpuinfo";
     private static final String FILENAME_PROC_MEMINFO = "/proc/meminfo";
+
+    private static final String PROPERTY_VENDOR_NUMBER = "ro.vendor.build.fingerprint";
 
     /**
      * Reads a line from the specified file.
@@ -267,4 +270,20 @@ public class DeviceInfoUtils {
 
          return result;
      }
+
+    public static String getVendorNumber() {
+        String result = null;
+
+        try {
+            String vendorFingerprint = SystemProperties.get(PROPERTY_VENDOR_NUMBER);
+            if (vendorFingerprint != null && !TextUtils.isEmpty(vendorFingerprint)) {
+                String[] splitFingerprint = vendorFingerprint.split("/");
+                if (splitFingerprint.length >= 3) {
+                    result = splitFingerprint[3];
+                }
+            }
+        } catch (IllegalArgumentException e) {}
+
+        return result;
+    }
 }
