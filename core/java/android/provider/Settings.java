@@ -7443,6 +7443,13 @@ public final class Settings {
 
        /**
         * Whether to automatically switch away from wifi networks that lose Internet access.
+        * Only meaningful if config_networkAvoidBadWifi is set to 0, otherwise the system always
+        * avoids such networks. Valid values are:
+        *
+        * 0: Don't avoid bad wifi, don't prompt the user. Get stuck on bad wifi like it's 2013.
+        * null: Ask the user whether to switch away from bad wifi.
+        * 1: Avoid bad wifi.
+        *
         * @hide
         */
        public static final String NETWORK_AVOID_BAD_WIFI = "network_avoid_bad_wifi";
