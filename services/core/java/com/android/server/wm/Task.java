@@ -153,7 +153,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (content != null) {
             content.mDimLayerController.removeDimLayerUser(this);
         }
-        mStack.removeTask(this);
+        mParent.removeChild(this);
         mService.mTaskIdToTask.delete(mTaskId);
     }
 
@@ -165,9 +165,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
-        if (mStack != null) {
-            mStack.removeTask(this);
-        }
+        mParent.removeChild(this);
         stack.addTask(this, toTop);
     }
 
@@ -176,7 +174,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
-            mStack.removeTask(this);
+            mStack.removeChild(this);
         }
         stack.positionTask(this, position, showForAllUsers());
         resizeLocked(bounds, config, false /* force */);
@@ -186,6 +184,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         }
     }
 
+    @Override
     void removeChild(AppWindowToken token) {
         if (!mChildren.contains(token)) {
             Slog.e(TAG, "removeChild: token=" + this + " not found.");

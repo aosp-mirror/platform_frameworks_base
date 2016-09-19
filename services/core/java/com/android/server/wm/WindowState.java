@@ -1569,7 +1569,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isObscuringFullscreen(final DisplayInfo displayInfo) {
         Task task = getTask();
-        if (task != null && task.mStack != null && !task.mStack.isFullscreen()) {
+        if (task != null && task.mStack != null && !task.mStack.fillsParent()) {
             return false;
         }
         if (!isOpaqueDrawn() || !isFrameFullscreen(displayInfo)) {
