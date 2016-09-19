@@ -88,6 +88,31 @@ public class WindowContainerTests {
     }
 
     @Test
+    public void testAdd_AlreadyHasParent() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child1 = root.addChildWindow();
+        final TestWindowContainer child2 = root.addChildWindow();
+
+        boolean gotException = false;
+        try {
+            child1.addChildWindow(child2);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+
+        gotException = false;
+        try {
+            root.addChildWindow(child2);
+        } catch (IllegalArgumentException e) {
+            gotException = true;
+        }
+        assertTrue(gotException);
+    }
+
+    @Test
     public void testHasChild() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
@@ -210,7 +235,7 @@ public class WindowContainerTests {
     }
 
     @Test
-    public void testDetachChild() throws Exception {
+    public void testRemoveChild() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();
         final TestWindowContainer child1 = root.addChildWindow();
@@ -220,7 +245,7 @@ public class WindowContainerTests {
 
         assertTrue(root.hasChild(child2));
         assertTrue(root.hasChild(child21));
-        root.detachChild(child2);
+        root.removeChild(child2);
         assertFalse(root.hasChild(child2));
         assertFalse(root.hasChild(child21));
         assertNull(child2.getParentWindow());
@@ -229,7 +254,7 @@ public class WindowContainerTests {
         assertTrue(root.hasChild(child11));
         try {
             // Can only detach our direct children.
-            root.detachChild(child11);
+            root.removeChild(child11);
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
@@ -408,6 +433,11 @@ public class WindowContainerTests {
 
         int getChildrenCount() {
             return mChildren.size();
+        }
+
+        TestWindowContainer addChildWindow(TestWindowContainer child) {
+            addChild(child, mWindowSubLayerComparator);
+            return child;
         }
 
         TestWindowContainer addChildWindow(TestWindowContainerBuilder childBuilder) {

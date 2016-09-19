@@ -180,24 +180,11 @@ class WindowToken extends WindowContainer<WindowState> {
             }
             if (!mChildren.contains(win)) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
-                mChildren.add(tokenWindowsPos, win);
+                addChild(win, tokenWindowsPos);
             }
         } else if (dc != null) {
             dc.addChildWindowToWindowList(win);
         }
-    }
-
-    int reAddAppWindows(DisplayContent displayContent, int index) {
-        final int count = mChildren.size();
-        for (int i = 0; i < count; i++) {
-            final WindowState win = mChildren.get(i);
-            final DisplayContent winDisplayContent = win.getDisplayContent();
-            if (winDisplayContent == displayContent || winDisplayContent == null) {
-                win.mDisplayContent = displayContent;
-                index = win.reAddWindow(index);
-            }
-        }
-        return index;
     }
 
     /** Return the first window in the token window list that isn't a starting window or null. */

@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.CallSuper;
+import android.view.animation.Animation;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
@@ -61,6 +62,11 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      */
     @CallSuper
     protected void addChild(E child, Comparator<E> comparator) {
+        if (child.mParent != null) {
+            throw new IllegalArgumentException("addChild: container=" + child
+                    + " is already a child of container=" + child.mParent
+                    + " can't add to container=" + this);
+        }
         child.mParent = this;
 
         if (mChildren.isEmpty() || comparator == null) {
@@ -77,6 +83,33 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
 
         mChildren.add(child);
+    }
+
+    /** Adds the input window container has a child of this container at the input index. */
+    @CallSuper
+    protected void addChild(E child, int index) {
+        if (child.mParent != null) {
+            throw new IllegalArgumentException("addChild: container=" + child
+                    + " is already a child of container=" + child.mParent
+                    + " can't add to container=" + this);
+        }
+        child.mParent = this;
+        mChildren.add(index, child);
+    }
+
+    /**
+     * Removes the input child container from this container which is its parent.
+     *
+     * @return True if the container did contain the input child and it was detached.
+     */
+    @CallSuper
+    void removeChild(E child) {
+        if (mChildren.remove(child)) {
+            child.mParent = null;
+        } else {
+            throw new IllegalArgumentException("removeChild: container=" + child
+                    + " is not a child of container=" + this);
+        }
     }
 
     /**
@@ -97,7 +130,7 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
 
         if (mParent != null) {
-            mParent.detachChild(this);
+            mParent.removeChild(this);
         }
     }
 
@@ -112,17 +145,6 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.removeIfPossible();
-        }
-    }
-
-    /** Detaches the input child container from this container which is its parent. */
-    @CallSuper
-    void detachChild(WindowContainer child) {
-        if (mChildren.remove(child)) {
-            child.mParent = null;
-        } else {
-            throw new IllegalArgumentException("detachChild: container=" + child
-                    + " is not a child of container=" + this);
         }
     }
 
@@ -233,10 +255,10 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      * the container has any content to display.
      */
     boolean isVisible() {
-        // TODO: Will this be more correct if it checks the visibility of its parents? Yes.
-        // That is this container is only visible if its parents are visible vs visible if it has a
-        // visible child. In that case all overrides will need to call super and return false if
-        // this returns false.
+        // TODO: Will this be more correct if it checks the visibility of its parents?
+        // It depends...For example, Tasks and Stacks are only visible if there children are visible
+        // but, WindowState are not visible if there parent are not visible. Maybe have the
+        // container specify which direction to treverse for for visibility?
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             if (wc.isVisible()) {
@@ -300,6 +322,12 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onAppTransitionDone();
+        }
+    }
+
+    void overridePlayingAppAnimations(Animation a) {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            mChildren.get(i).overridePlayingAppAnimations(a);
         }
     }
 
@@ -386,8 +414,8 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     }
 
     /**
-     * Returns -1, 0, or 1 depending on if the input container is greater than, equal to, or lesser
-     * than the input container in terms of z-order.
+     * Returns 1, 0, or -1 depending on if this container is greater than, equal to, or lesser than
+     * the input container in terms of z-order.
      */
     @Override
     public int compareTo(WindowContainer other) {

@@ -116,7 +116,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     final AppTokenList mExitingAppTokens = new AppTokenList();
 
     /** Detach this stack from its display when animation completes. */
-    // TODO: maybe tie this to WindowContainer#detachChild some how...
+    // TODO: maybe tie this to WindowContainer#removeChild some how...
     boolean mDeferDetach;
 
     private final Rect mTmpAdjustedBounds = new Rect();
@@ -1508,9 +1508,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final Task secondTask = second.mTask;
 
         if (firstTask == secondTask) {
-            return firstTask.isFirstGreaterThanSecond(first, second);
+            return first.compareTo(second) > 0;
         }
-        return mTasks.indexOf(first) > mTasks.indexOf(second);
+        return mTasks.indexOf(firstTask) > mTasks.indexOf(secondTask);
     }
 
     int rebuildWindowList(DisplayContent dc, int addIndex) {

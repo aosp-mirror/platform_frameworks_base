@@ -76,6 +76,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     final boolean voiceInteraction;
 
+    // TODO: Use getParent instead?
     Task mTask;
     /** @see WindowContainer#fillsParent() */
     private boolean mFillsParent;
@@ -373,7 +374,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mIsExiting = false;
         removeAllWindows();
         if (mTask != null) {
-            mTask.detachChild(this);
+            mTask.mStack.mExitingAppTokens.remove(this);
+            mTask.removeChild(this);
         }
     }
 
