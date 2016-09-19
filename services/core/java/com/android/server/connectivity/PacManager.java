@@ -28,6 +28,7 @@ import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -42,10 +43,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.net.IProxyCallback;
 import com.android.net.IProxyPortListener;
 import com.android.net.IProxyService;
-import com.android.server.IoThread;
 
 import libcore.io.Streams;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -69,6 +70,7 @@ public class PacManager {
     private static final int DELAY_1 = 0;
     private static final int DELAY_4 = 3;
     private static final int DELAY_LONG = 4;
+    private static final long MAX_PAC_SIZE = 20 * 1000 * 1000;
 
     /** Keep these values up-to-date with ProxyService.java */
     public static final String KEY_PROXY = "keyProxy";
@@ -126,15 +128,21 @@ public class PacManager {
         }
     };
 
+    private final HandlerThread mNetThread = new HandlerThread("android.pacmanager",
+            android.os.Process.THREAD_PRIORITY_DEFAULT);
+    private final Handler mNetThreadHandler;
+
     class PacRefreshIntentReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            IoThread.getHandler().post(mPacDownloader);
+            mNetThreadHandler.post(mPacDownloader);
         }
     }
 
     public PacManager(Context context, Handler handler, int proxyMessage) {
         mContext = context;
         mLastPort = -1;
+        mNetThread.start();
+        mNetThreadHandler = new Handler(mNetThread.getLooper());
 
         mPacRefreshIntent = PendingIntent.getBroadcast(
                 context, 0, new Intent(ACTION_PAC_REFRESH), 0);
@@ -202,7 +210,25 @@ public class PacManager {
     private static String get(String urlString) throws IOException {
         URL url = new URL(urlString);
         URLConnection urlConnection = url.openConnection(java.net.Proxy.NO_PROXY);
-        return new String(Streams.readFully(urlConnection.getInputStream()));
+        long contentLength = -1;
+        try {
+            contentLength = Long.parseLong(urlConnection.getHeaderField("Content-Length"));
+        } catch (NumberFormatException e) {
+            // Ignore
+        }
+        if (contentLength > MAX_PAC_SIZE) {
+            throw new IOException("PAC too big: " + contentLength + " bytes");
+        }
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int count;
+        while ((count = urlConnection.getInputStream().read(buffer)) != -1) {
+            bytes.write(buffer, 0, count);
+            if (bytes.size() > MAX_PAC_SIZE) {
+                throw new IOException("PAC too big");
+            }
+        }
+        return bytes.toString();
     }
 
     private int getNextDelay(int currentDelay) {
@@ -305,7 +331,7 @@ public class PacManager {
                         } catch (RemoteException e) {
                             Log.e(TAG, "Unable to reach ProxyService - PAC will not be started", e);
                         }
-                        IoThread.getHandler().post(mPacDownloader);
+                        mNetThreadHandler.post(mPacDownloader);
                     }
                 }
             }
