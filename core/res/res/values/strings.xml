@@ -3551,7 +3551,7 @@
     <string name="extract_edit_menu_button">Edit</string>
 
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_title">Data usage warning</string>
+    <string name="data_usage_warning_title">Data usage alert</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_warning_body">Tap to view usage and settings.</string>
 
