@@ -1096,10 +1096,11 @@ public class Paint {
      * @return         xfermode
      */
     public Xfermode setXfermode(Xfermode xfermode) {
-        long xfermodeNative = 0;
-        if (xfermode != null)
-            xfermodeNative = xfermode.native_instance;
-        nSetXfermode(mNativePaint, xfermodeNative);
+        int newMode = xfermode != null ? xfermode.porterDuffMode : Xfermode.DEFAULT;
+        int curMode = mXfermode != null ? mXfermode.porterDuffMode : Xfermode.DEFAULT;
+        if (newMode != curMode) {
+            nSetXfermode(mNativePaint, newMode);
+        }
         mXfermode = xfermode;
         return xfermode;
     }
@@ -2694,8 +2695,7 @@ public class Paint {
     private static native long nSetShader(long paintPtr, long shader);
     private static native long nSetColorFilter(long paintPtr,
                                                     long filter);
-    private static native long nSetXfermode(long paintPtr,
-                                                  long xfermode);
+    private static native void nSetXfermode(long paintPtr, int xfermode);
     private static native long nSetPathEffect(long paintPtr,
                                                     long effect);
     private static native long nSetMaskFilter(long paintPtr,

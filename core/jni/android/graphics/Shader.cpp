@@ -225,24 +225,13 @@ static jlong SweepGradient_create2(JNIEnv* env, jobject, jfloat x, jfloat y,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong ComposeShader_create1(JNIEnv* env, jobject o,
-        jlong shaderAHandle, jlong shaderBHandle, jlong modeHandle)
-{
-    SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
-    SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
-    SkXfermode* mode = reinterpret_cast<SkXfermode *>(modeHandle);
-    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, mode);
-    return reinterpret_cast<jlong>(shader);
-}
-
-static jlong ComposeShader_create2(JNIEnv* env, jobject o,
+static jlong ComposeShader_create(JNIEnv* env, jobject o,
         jlong shaderAHandle, jlong shaderBHandle, jint xfermodeHandle)
 {
     SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
     SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
-    SkAutoTUnref<SkXfermode> xfermode(SkXfermode::Create(mode));
-    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, xfermode.get());
+    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, mode);
     return reinterpret_cast<jlong>(shader);
 }
 
@@ -278,8 +267,7 @@ static const JNINativeMethod gSweepGradientMethods[] = {
 };
 
 static const JNINativeMethod gComposeShaderMethods[] = {
-    { "nativeCreate1",      "(JJJ)J",   (void*)ComposeShader_create1     },
-    { "nativeCreate2",      "(JJI)J",   (void*)ComposeShader_create2     },
+    { "nativeCreate",      "(JJI)J",   (void*)ComposeShader_create     },
 };
 
 int register_android_graphics_Shader(JNIEnv* env)

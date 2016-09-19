@@ -29,17 +29,6 @@ package android.graphics;
  * objects drawn with that paint have the xfermode applied.
  */
 public class Xfermode {
-
-    protected void finalize() throws Throwable {
-        try {
-            finalizer(native_instance);
-            native_instance = 0;
-        } finally {
-            super.finalize();
-        }
-    }
-
-    private static native void finalizer(long native_instance);
-
-    long native_instance;
+    static final int DEFAULT = PorterDuff.Mode.SRC_OVER.nativeInt;
+    int porterDuffMode = DEFAULT;
 }

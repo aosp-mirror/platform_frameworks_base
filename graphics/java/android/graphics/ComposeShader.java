@@ -21,23 +21,8 @@ package android.graphics;
 */
 public class ComposeShader extends Shader {
 
-    private static final int TYPE_XFERMODE = 1;
-    private static final int TYPE_PORTERDUFFMODE = 2;
-
-    /**
-     * Type of the ComposeShader: can be either TYPE_XFERMODE or TYPE_PORTERDUFFMODE
-     */
-    private int mType;
-
-    private Xfermode mXferMode;
-    private PorterDuff.Mode mPorterDuffMode;
-
-    /**
-     * Hold onto the shaders to avoid GC.
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
+    private int mPorterDuffMode;
     private final Shader mShaderA;
-    @SuppressWarnings({"UnusedDeclaration"})
     private final Shader mShaderB;
 
     /** Create a new compose shader, given shaders A, B, and a combining mode.
@@ -49,12 +34,7 @@ public class ComposeShader extends Shader {
                         is null, then SRC_OVER is assumed.
     */
     public ComposeShader(Shader shaderA, Shader shaderB, Xfermode mode) {
-        mType = TYPE_XFERMODE;
-        mShaderA = shaderA;
-        mShaderB = shaderB;
-        mXferMode = mode;
-        init(nativeCreate1(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
-                (mode != null) ? mode.native_instance : 0));
+        this(shaderA, shaderB, mode.porterDuffMode);
     }
 
     /** Create a new compose shader, given shaders A, B, and a combining PorterDuff mode.
@@ -65,12 +45,15 @@ public class ComposeShader extends Shader {
         @param mode     The PorterDuff mode that combines the colors from the two shaders.
     */
     public ComposeShader(Shader shaderA, Shader shaderB, PorterDuff.Mode mode) {
-        mType = TYPE_PORTERDUFFMODE;
+        this(shaderA, shaderB, mode.nativeInt);
+    }
+
+    private ComposeShader(Shader shaderA, Shader shaderB, int nativeMode) {
         mShaderA = shaderA;
         mShaderB = shaderB;
-        mPorterDuffMode = mode;
-        init(nativeCreate2(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
-                mode.nativeInt));
+        mPorterDuffMode = nativeMode;
+        init(nativeCreate(shaderA.getNativeInstance(), shaderB.getNativeInstance(),
+                nativeMode));
     }
 
     /**
@@ -78,24 +61,12 @@ public class ComposeShader extends Shader {
      */
     @Override
     protected Shader copy() {
-        final ComposeShader copy;
-        switch (mType) {
-            case TYPE_XFERMODE:
-                copy = new ComposeShader(mShaderA.copy(), mShaderB.copy(), mXferMode);
-                break;
-            case TYPE_PORTERDUFFMODE:
-                copy = new ComposeShader(mShaderA.copy(), mShaderB.copy(), mPorterDuffMode);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "ComposeShader should be created with either Xfermode or PorterDuffMode");
-        }
+        final ComposeShader copy = new ComposeShader(
+                mShaderA.copy(), mShaderB.copy(), mPorterDuffMode);
         copyLocalMatrix(copy);
         return copy;
     }
 
-    private static native long nativeCreate1(long native_shaderA, long native_shaderB,
-            long native_mode);
-    private static native long nativeCreate2(long native_shaderA, long native_shaderB,
+    private static native long nativeCreate(long native_shaderA, long native_shaderB,
             int porterDuffMode);
 }
