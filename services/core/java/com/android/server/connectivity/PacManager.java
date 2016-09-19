@@ -293,7 +293,7 @@ public class PacManager {
         intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
         if ((mProxyConnection != null) && (mConnection != null)) {
             // Already bound no need to bind again, just download the new file.
-            IoThread.getHandler().post(mPacDownloader);
+            mNetThreadHandler.post(mPacDownloader);
             return;
         }
         mConnection = new ServiceConnection() {
