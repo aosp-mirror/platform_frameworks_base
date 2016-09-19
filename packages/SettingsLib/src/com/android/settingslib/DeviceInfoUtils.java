@@ -214,27 +214,41 @@ public class DeviceInfoUtils {
     }
 
      /**
-      * Returns the Hardware value in /proc/cpuinfo, else returns "Unknown".
+      * Returns the Hardware or Processor value in /proc/cpuinfo,
+      * else returns "Unknown".
       * @return a string that describes the processor
       */
      public static String getDeviceProcessorInfo() {
-         // Hardware : XYZ
-         final String PROC_HARDWARE_REGEX = "Hardware\\s*:\\s*(.*?)(?:\\(.*)?$"; /* hardware string */
+        // Hardware or Processor : XYZ
+        final String PROC_REGEX = ".*\\s*:\\s*(.*?)(?:\\(.*)?$"; /* hardware or processor string */
 
          try {
              BufferedReader reader = new BufferedReader(new FileReader(FILENAME_PROC_CPUINFO));
              String cpuinfo;
+            String hardware = "";
+            String processor = "";
 
              try {
                  while (null != (cpuinfo = reader.readLine())) {
                      if (cpuinfo.startsWith("Hardware")) {
-                         Matcher m = Pattern.compile(PROC_HARDWARE_REGEX).matcher(cpuinfo);
+                         Matcher m = Pattern.compile(PROC_REGEX).matcher(cpuinfo);
                          if (m.matches()) {
-                             return m.group(1);
+                             hardware = m.group(1);
+                         }
+                    } else if (cpuinfo.contains("Processor")) {
+                        Matcher m = Pattern.compile(PROC_REGEX).matcher(cpuinfo);
+                        if (m.matches()) {
+                            processor = m.group(1);
                          }
                      }
                  }
-                 return "Unknown";
+                if (hardware.isEmpty() && processor.isEmpty()) {
+                    return "Unknown";
+                } else if (hardware.length() > processor.length()) {
+                    return hardware;
+                } else {
+                    return processor;
+                }
              } finally {
                  reader.close();
              }
