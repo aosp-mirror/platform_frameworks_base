@@ -23,7 +23,7 @@ import android.os.Parcelable;
 /**
  * Defines a request object to configure a Wi-Fi NAN network. Built using
  * {@link ConfigRequest.Builder}. Configuration is requested using
- * {@link WifiNanManager#connect(android.os.Looper, ConfigRequest, WifiNanEventCallback)}.
+ * {@link WifiNanManager#connect(android.os.Handler, ConfigRequest, WifiNanEventCallback)}.
  * Note that the actual achieved configuration may be different from the
  * requested configuration - since different applications may request different
  * configurations.
