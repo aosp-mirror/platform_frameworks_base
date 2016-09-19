@@ -4673,7 +4673,7 @@ final class ActivityStack {
         // that has come back from the app after going idle.  In that case
         // we just want to leave the official config object now in the
         // activity and do nothing else.
-        int taskChanges = oldTaskOverride.diff(taskConfig);
+        int taskChanges = oldTaskOverride.diff(taskConfig, true /* skipUndefined */);
         // We don't want to use size changes if they don't cross boundaries that are important to
         // the app.
         if ((taskChanges & CONFIG_SCREEN_SIZE) != 0) {
@@ -4690,48 +4690,6 @@ final class ActivityStack {
             final int newSmallest = taskConfig.smallestScreenWidthDp;
             if (!record.crossesSmallestSizeThreshold(oldSmallest, newSmallest)) {
                 taskChanges &= ~CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-        }
-        return catchConfigChangesFromUnset(taskConfig, oldTaskOverride, taskChanges);
-    }
-
-    private static int catchConfigChangesFromUnset(Configuration taskConfig,
-            Configuration oldTaskOverride, int taskChanges) {
-        if (taskChanges == 0) {
-            // {@link Configuration#diff} doesn't catch changes from unset values.
-            // Check for changes we care about.
-            if (oldTaskOverride.orientation != taskConfig.orientation) {
-                taskChanges |= CONFIG_ORIENTATION;
-            }
-            // We want to explicitly track situations where the size configuration goes from
-            // undefined to defined. We don't care about crossing the threshold in that case,
-            // because there is no threshold.
-            final int oldHeight = oldTaskOverride.screenHeightDp;
-            final int newHeight = taskConfig.screenHeightDp;
-            final int undefinedHeight = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
-            if ((oldHeight == undefinedHeight && newHeight != undefinedHeight)
-                    || (oldHeight != undefinedHeight && newHeight == undefinedHeight)) {
-                taskChanges |= CONFIG_SCREEN_SIZE;
-            }
-            final int oldWidth = oldTaskOverride.screenWidthDp;
-            final int newWidth = taskConfig.screenWidthDp;
-            final int undefinedWidth = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
-            if ((oldWidth == undefinedWidth && newWidth != undefinedWidth)
-                    || (oldWidth != undefinedWidth && newWidth == undefinedWidth)) {
-                taskChanges |= CONFIG_SCREEN_SIZE;
-            }
-            final int oldSmallest = oldTaskOverride.smallestScreenWidthDp;
-            final int newSmallest = taskConfig.smallestScreenWidthDp;
-            final int undefinedSmallest = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-            if ((oldSmallest == undefinedSmallest && newSmallest != undefinedSmallest)
-                    || (oldSmallest != undefinedSmallest && newSmallest == undefinedSmallest)) {
-                taskChanges |= CONFIG_SMALLEST_SCREEN_SIZE;
-            }
-            final int oldLayout = oldTaskOverride.screenLayout;
-            final int newLayout = taskConfig.screenLayout;
-            if ((oldLayout == SCREENLAYOUT_UNDEFINED && newLayout != SCREENLAYOUT_UNDEFINED)
-                || (oldLayout != SCREENLAYOUT_UNDEFINED && newLayout == SCREENLAYOUT_UNDEFINED)) {
-                taskChanges |= CONFIG_SCREEN_LAYOUT;
             }
         }
         return taskChanges;

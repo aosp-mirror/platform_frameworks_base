@@ -3002,11 +3002,12 @@ public class WindowManagerService extends IWindowManager.Stub
             config = computeNewConfigurationLocked();
 
         } else if (currentConfig != null) {
-            // No obvious action we need to take, but if our current
-            // state mismatches the activity manager's, update it,
-            // disregarding font scale, which should remain set to
-            // the value of the previous configuration.
-            mTempConfiguration.setToDefaults();
+            // No obvious action we need to take, but if our current state mismatches the activity
+            // manager's, update it, disregarding font scale, which should remain set to the value
+            // of the previous configuration.
+            // Here we're calling Configuration#unset() instead of setToDefaults() because we need
+            // to keep override configs clear of non-empty values (e.g. fontSize).
+            mTempConfiguration.unset();
             mTempConfiguration.updateFrom(currentConfig);
             computeScreenConfigurationLocked(mTempConfiguration);
             if (currentConfig.diff(mTempConfiguration) != 0) {
@@ -8074,8 +8075,7 @@ public class WindowManagerService extends IWindowManager.Stub
         displayContent.layoutNeeded = true;
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
-        mTempConfiguration.setToDefaults();
-        mTempConfiguration.updateFrom(mGlobalConfiguration);
+        mTempConfiguration.setTo(mGlobalConfiguration);
         computeScreenConfigurationLocked(mTempConfiguration);
         configChanged |= mGlobalConfiguration.diff(mTempConfiguration) != 0;
 
