@@ -37,7 +37,7 @@ import java.util.Arrays;
  *
  * @hide PROPOSED_NAN_API
  */
-public class SubscribeConfig implements Parcelable {
+public final class SubscribeConfig implements Parcelable {
     /** @hide */
     @IntDef({
             SUBSCRIBE_TYPE_PASSIVE, SUBSCRIBE_TYPE_ACTIVE })
