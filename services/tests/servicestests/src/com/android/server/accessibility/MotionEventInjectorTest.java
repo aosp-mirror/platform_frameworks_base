@@ -92,7 +92,12 @@ public class MotionEventInjectorTest {
 
     @Before
     public void setUp() {
-        mMessageCapturingHandler = new MessageCapturingHandler();
+        mMessageCapturingHandler = new MessageCapturingHandler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                return mMotionEventInjector.handleMessage(msg);
+            }
+        });
         mMotionEventInjector = new MotionEventInjector(mMessageCapturingHandler);
         mClickList.add(
                 MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, CLICK_X, CLICK_Y_START, 0));
@@ -499,50 +504,6 @@ public class MotionEventInjectorTest {
             Log.e(LOG_TAG, "event.getX() = " + event.getX() + ", expected " + mX);
             Log.e(LOG_TAG, "event.getY() = " + event.getY() + ", expected " + mY);
             return false;
-        }
-    }
-
-    private class MessageCapturingHandler extends Handler {
-        List<Pair<Message, Long>> timedMessages = new ArrayList<>();
-
-        @Override
-        public boolean sendMessageAtTime(Message message, long uptimeMillis) {
-            timedMessages.add(new Pair<>(Message.obtain(message), uptimeMillis));
-            return super.sendMessageAtTime(message, uptimeMillis);
-        }
-
-        void sendOneMessage() {
-            Message message = timedMessages.remove(0).first;
-            removeMessages(message.what, message.obj);
-            mMotionEventInjector.handleMessage(message);
-            removeStaleMessages();
-        }
-
-        void sendAllMessages() {
-            while (!timedMessages.isEmpty()) {
-                sendOneMessage();
-            }
-        }
-
-        void sendLastMessage() {
-            Message message = timedMessages.remove(timedMessages.size() - 1).first;
-            removeMessages(message.what, message.obj);
-            mMotionEventInjector.handleMessage(message);
-            removeStaleMessages();
-        }
-
-        boolean hasMessages() {
-            removeStaleMessages();
-            return !timedMessages.isEmpty();
-        }
-
-        private void removeStaleMessages() {
-            for (int i = 0; i < timedMessages.size(); i++) {
-                Message message = timedMessages.get(i).first;
-                if (!hasMessages(message.what, message.obj)) {
-                    timedMessages.remove(i--);
-                }
-            }
         }
     }
 }

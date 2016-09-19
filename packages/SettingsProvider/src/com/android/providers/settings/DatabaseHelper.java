@@ -1310,10 +1310,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 loadFractionSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                         R.fraction.def_accessibility_display_magnification_scale, 1);
                 stmt.close();
-                stmt = db.compileStatement("INSERT INTO secure(name,value) VALUES(?,?);");
-                loadBooleanSetting(stmt,
-                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
-                        R.bool.def_accessibility_display_magnification_auto_update);
 
                 db.setTransactionSuccessful();
             } finally {
@@ -2507,10 +2503,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
             loadFractionSetting(stmt, Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                     R.fraction.def_accessibility_display_magnification_scale, 1);
-
-            loadBooleanSetting(stmt,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_AUTO_UPDATE,
-                    R.bool.def_accessibility_display_magnification_auto_update);
 
             loadBooleanSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
                     R.bool.def_user_setup_complete);
