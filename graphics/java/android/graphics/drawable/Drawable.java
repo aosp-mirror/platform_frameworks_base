@@ -573,6 +573,12 @@ public abstract class Drawable {
      * </p>
      */
     public void setColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
+        if (getColorFilter() instanceof PorterDuffColorFilter) {
+            PorterDuffColorFilter existing = (PorterDuffColorFilter) getColorFilter();
+            if (existing.getColor() == color && existing.getMode() == mode) {
+                return;
+            }
+        }
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
