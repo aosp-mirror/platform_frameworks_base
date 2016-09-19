@@ -27,6 +27,7 @@ import android.location.Location;
 import android.media.ExifInterface;
 import android.media.Image;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Size;
 
 import java.io.IOException;
@@ -89,17 +90,33 @@ public final class DngCreator implements AutoCloseable {
             throw new IllegalArgumentException("Null argument to DngCreator constructor");
         }
 
-        // Find current time
+        // Find current time in milliseconds since 1970
         long currentTime = System.currentTimeMillis();
+        // Assume that sensor timestamp has that timebase to start
+        long timeOffset = 0;
 
-        // Find boot time
-        long bootTimeMillis = currentTime - SystemClock.elapsedRealtime();
+        int timestampSource = characteristics.get(
+                CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE);
+
+        if (timestampSource == CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME) {
+            // This means the same timebase as SystemClock.elapsedRealtime(),
+            // which is CLOCK_BOOTTIME
+            timeOffset = currentTime - SystemClock.elapsedRealtime();
+        } else if (timestampSource == CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN) {
+            // This means the same timebase as System.currentTimeMillis(),
+            // which is CLOCK_MONOTONIC
+            timeOffset = currentTime - SystemClock.uptimeMillis();
+        } else {
+            // Unexpected time source - treat as CLOCK_MONOTONIC
+            Log.w(TAG, "Sensor timestamp source is unexpected: " + timestampSource);
+            timeOffset = currentTime - SystemClock.uptimeMillis();
+        }
 
         // Find capture time (nanos since boot)
         Long timestamp = metadata.get(CaptureResult.SENSOR_TIMESTAMP);
         long captureTime = currentTime;
         if (timestamp != null) {
-            captureTime = timestamp / 1000000 + bootTimeMillis;
+            captureTime = timestamp / 1000000 + timeOffset;
         }
 
         // Format for metadata
