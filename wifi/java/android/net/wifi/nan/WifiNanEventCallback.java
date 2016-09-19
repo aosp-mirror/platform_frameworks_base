@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base class for NAN events callbacks. Should be extended by applications and set when calling
- * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)}. These are callbacks
+ * {@link WifiNanManager#connect(android.os.Handler, WifiNanEventCallback)}. These are callbacks
  * applying to the NAN connection as a whole - not to specific publish or subscribe sessions -
  * for that see {@link WifiNanSessionCallback}.
  *
@@ -46,7 +46,7 @@ public class WifiNanEventCallback {
 
     /**
      * Indicates that a {@link ConfigRequest} passed in
-     * {@link WifiNanManager#connect(android.os.Looper, ConfigRequest, WifiNanEventCallback)}
+     * {@link WifiNanManager#connect(android.os.Handler, ConfigRequest, WifiNanEventCallback)}
      * couldn't be applied since other connections already exist with an incompatible
      * configurations. Failure reason flag for {@link WifiNanEventCallback#onConnectFail(int)}.
      */
@@ -60,7 +60,7 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN connect operation
-     * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)}
+     * {@link WifiNanManager#connect(android.os.Handler, WifiNanEventCallback)}
      * is completed and that we can now start discovery sessions or connections.
      */
     public void onConnectSuccess() {
@@ -69,7 +69,7 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN connect operation
-     * {@link WifiNanManager#connect(android.os.Looper, WifiNanEventCallback)} failed.
+     * {@link WifiNanManager#connect(android.os.Handler, WifiNanEventCallback)} failed.
      *
      * @param reason Failure reason code, see
      *            {@code WifiNanEventCallback.REASON_*}.
@@ -91,7 +91,7 @@ public class WifiNanEventCallback {
      * <p>
      *     This callback is only called if the NAN connection enables it using
      *     {@link ConfigRequest.Builder#setEnableIdentityChangeCallback(boolean)} in
-     *     {@link WifiNanManager#connect(android.os.Looper, ConfigRequest, WifiNanEventCallback)}
+     *     {@link WifiNanManager#connect(android.os.Handler, ConfigRequest, WifiNanEventCallback)}
      *     . It is disabled by default since it may result in additional wake-ups of the host -
      *     increasing power.
      *
