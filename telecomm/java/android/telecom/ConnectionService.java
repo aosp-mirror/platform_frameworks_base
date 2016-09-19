@@ -1079,7 +1079,7 @@ public abstract class ConnectionService extends Service {
      *
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
-     * @param request Details about the incoming call.
+     * @param request Details about the outgoing call.
      * @return The {@code Connection} object to satisfy this call, or {@code null} to
      *         not handle the call.
      */
