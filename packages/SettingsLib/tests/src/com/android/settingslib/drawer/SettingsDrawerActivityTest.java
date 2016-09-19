@@ -16,11 +16,9 @@
 
 package com.android.settingslib.drawer;
 
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-
+import android.app.Instrumentation;
+import android.content.Intent;
+import android.support.test.InstrumentationRegistry;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.pm.UserInfo;
@@ -30,14 +28,27 @@ import android.os.UserManager;
 import android.support.test.filters.SmallTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+
 import com.android.settingslib.drawer.SettingsDrawerActivity;
 import com.android.settingslib.drawer.Tile;
+import com.android.settingslib.R;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -96,6 +107,38 @@ public class SettingsDrawerActivityTest {
         verify(mUserManager, times(2)).getUserInfo(REMOVED_USER.getIdentifier());
     }
 
+    @Test
+    public void startActivityWithNoExtra_showNoHamburgerMenu() {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        instrumentation.startActivitySync(new Intent(instrumentation.getTargetContext(),
+                TestActivity.class));
+
+        onView(withContentDescription(R.string.content_description_menu_button))
+                .check(doesNotExist());
+    }
+
+    @Test
+    public void startActivityWithExtraToHideMenu_showNoHamburgerMenu() {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
+                .putExtra(TestActivity.EXTRA_SHOW_MENU, false);
+        instrumentation.startActivitySync(intent);
+
+        onView(withContentDescription(R.string.content_description_menu_button))
+                .check(doesNotExist());
+    }
+
+    @Test
+    public void startActivityWithExtraToShowMenu_showHamburgerMenu() {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Intent intent = new Intent(instrumentation.getTargetContext(), TestActivity.class)
+                .putExtra(TestActivity.EXTRA_SHOW_MENU, true);
+        instrumentation.startActivitySync(intent);
+
+        onView(withContentDescription(R.string.content_description_menu_button))
+                .check(matches(isDisplayed()));
+    }
+
     /**
      * Test Activity in this test.
      *
@@ -103,5 +146,4 @@ public class SettingsDrawerActivityTest {
      * AndroidManifest.xml
      */
     public static class TestActivity extends SettingsDrawerActivity {}
-
 }
