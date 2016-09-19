@@ -194,7 +194,10 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
     manifestAction["uses-configuration"];
     manifestAction["uses-feature"];
     manifestAction["supports-screens"];
+
     manifestAction["compatible-screens"];
+    manifestAction["compatible-screens"]["screen"];
+
     manifestAction["supports-gl-texture"];
 
     // Application actions.
