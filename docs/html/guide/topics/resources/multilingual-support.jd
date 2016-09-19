@@ -88,15 +88,17 @@ today.</p>
 
 <h2 id="postN">Improvements to Resource-Resolution Strategy</h2>
 <p>Android 7.0 (API level 24) brings more robust resource resolution, and
- finds better fallbacks automatically. However, to speed up resolution and
- improve
+ finds better fallbacks automatically.
+ However, to speed up resolution and improve
  maintainability, you should store resources in the most common parent dialect.
- For example, if you were storing Spanish resources in the {@code es-US}
- directory
- before, move them into the {@code es-419} directory, which contains Latin
- American Spanish.
- Similarly, if you have resource strings in a folder named {@code en-GB}, rename
- the folder to {@code en-001} (international English), because the most common
+ For example, if you were storing Spanish resources
+ in the {@code values-es-rUS} directory
+ before, move them into the {@code values-b+es+419} directory,
+ which contains Latin American Spanish.
+ Similarly, if you have resource strings in a
+ directory named {@code values-en-rGB}, rename
+ the directory to {@code values-b+en+001} (International
+ English), because the most common
  parent for <code>en-GB</code> strings is {@code en-001}.
  The following examples explain why these practices improve performance and
 reliability of resource resolution.</p>
