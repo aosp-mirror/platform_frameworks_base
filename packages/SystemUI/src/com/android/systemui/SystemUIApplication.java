@@ -29,7 +29,11 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.systemui.plugins.OverlayPlugin;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -183,6 +187,18 @@ public class SystemUIApplication extends Application {
                 mServices[i].onBootCompleted();
             }
         }
+        PluginManager.getInstance(this).addPluginListener(OverlayPlugin.ACTION,
+                new PluginListener<OverlayPlugin>() {
+            @Override
+            public void onPluginConnected(OverlayPlugin plugin) {
+                PhoneStatusBar phoneStatusBar = getComponent(PhoneStatusBar.class);
+                if (phoneStatusBar != null) {
+                    plugin.setup(phoneStatusBar.getStatusBarWindow(),
+                            phoneStatusBar.getNavigationBarView());
+                }
+            }
+        }, OverlayPlugin.VERSION, true /* Allow multiple plugins */);
+
         mServicesStarted = true;
     }
 

@@ -43,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -52,7 +53,7 @@ import com.android.systemui.statusbar.policy.DeadZone;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-public class NavigationBarView extends LinearLayout {
+public class NavigationBarView extends FrameLayout {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 

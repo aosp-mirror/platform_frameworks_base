@@ -34,6 +34,7 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
     frameworks/base/packages/SystemUI/res \
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
+    SystemUIPluginLib \
     Keyguard \
     android-support-v7-recyclerview \
     android-support-v7-preference \
