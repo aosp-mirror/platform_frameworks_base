@@ -78,6 +78,8 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
+    void snoozeNotificationFromListener(in INotificationListener token, String key, long until);
+
     void requestBindListener(in ComponentName component);
     void requestUnbindListener(in INotificationListener token);
     void requestBindProvider(in ComponentName component);

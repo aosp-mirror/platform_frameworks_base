@@ -436,6 +436,7 @@
 
     <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />
     <protected-broadcast android:name="EventConditionProvider.EVALUATE" />
+    <protected-broadcast android:name="SnoozeHelper.EVALUATE" />
     <protected-broadcast android:name="wifi_scan_available" />
 
     <protected-broadcast android:name="action.cne.started" />
