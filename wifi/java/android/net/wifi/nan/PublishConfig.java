@@ -37,7 +37,7 @@ import java.util.Arrays;
  *
  * @hide PROPOSED_NAN_API
  */
-public class PublishConfig implements Parcelable {
+public final class PublishConfig implements Parcelable {
     /** @hide */
     @IntDef({
             PUBLISH_TYPE_UNSOLICITED, PUBLISH_TYPE_SOLICITED })

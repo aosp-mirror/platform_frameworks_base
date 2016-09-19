@@ -30,7 +30,7 @@ import android.os.Parcelable;
  *
  * @hide PROPOSED_NAN_API
  */
-public class ConfigRequest implements Parcelable {
+public final class ConfigRequest implements Parcelable {
     /**
      * Lower range of possible cluster ID.
      *
