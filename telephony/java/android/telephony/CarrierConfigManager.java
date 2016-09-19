@@ -661,6 +661,13 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
 
     /**
+     * APN types that user is not allowed to modify
+     * @hide
+     */
+    public static final String KEY_READ_ONLY_APN_TYPES_STRING_ARRAY =
+            "read_only_apn_types_string_array";
+
+    /**
      * Boolean indicating if intent for emergency call state changes should be broadcast
      * @hide
      */
@@ -1012,6 +1019,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
+        sDefaults.putStringArray(KEY_READ_ONLY_APN_TYPES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_SEVERE_WHEN_EXTREME_DISABLED_BOOL, true);
