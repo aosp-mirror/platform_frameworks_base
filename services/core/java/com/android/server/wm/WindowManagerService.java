@@ -8869,6 +8869,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
+                    // TODO(multi-display): Show watermarks on secondary displays.
                     mWatermark = new Watermark(getDefaultDisplayContentLocked().getDisplay(),
                             mRealDisplayMetrics, mFxSession, toks);
                 }

@@ -325,6 +325,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // The token is not closing nor opening, so even if there is an animation set, that
                 // doesn't mean that it goes through the normal app transition cycle so we have
                 // to inform the docked controller about visibility change.
+                // TODO(multi-display): notify docked divider on all displays where visibility was
+                // affected.
                 mService.getDefaultDisplayContentLocked().getDockedDividerController()
                         .notifyAppVisibilityChanged();
             }

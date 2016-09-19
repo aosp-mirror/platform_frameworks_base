@@ -1715,6 +1715,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     if (ar != null && mCompatModePackages.getPackageNotifyUnsupportedZoomLocked(
                             ar.packageName)) {
+                        // TODO(multi-display): Show dialog on appropriate display.
                         mUnsupportedDisplaySizeDialog = new UnsupportedDisplaySizeDialog(
                                 ActivityManagerService.this, mContext, ar.info.applicationInfo);
                         mUnsupportedDisplaySizeDialog.show();

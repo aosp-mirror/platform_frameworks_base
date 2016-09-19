@@ -303,6 +303,7 @@ class WindowSurfacePlacer {
         mSustainedPerformanceModeCurrent = false;
         mService.mTransactionSequence++;
 
+        // TODO(multi-display): Perform same actions on all displays.
         final DisplayContent defaultDisplay = mService.getDefaultDisplayContentLocked();
         final DisplayInfo defaultInfo = defaultDisplay.getDisplayInfo();
         final int defaultDw = defaultInfo.logicalWidth;
