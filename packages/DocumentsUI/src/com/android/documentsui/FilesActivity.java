@@ -60,12 +60,6 @@ public class FilesActivity extends BaseActivity {
 
     public static final String TAG = "FilesActivity";
 
-    // See comments where this const is referenced for details.
-    private static final int DRAWER_NO_FIDDLE_DELAY = 1500;
-
-    // Track the time we opened the drawer in response to back being pressed.
-    // We use the time gap to figure out whether to close app or reopen the drawer.
-    private long mDrawerLastFiddled;
     private DocumentClipper mClipper;
 
     public FilesActivity() {
@@ -393,39 +387,6 @@ public class FilesActivity extends BaseActivity {
             default:
                 return super.onKeyShortcut(keyCode, event);
         }
-    }
-
-    // Do some "do what a I want" drawer fiddling, but don't
-    // do it if user already hit back recently and we recently
-    // did some fiddling.
-    @Override
-    boolean onBeforePopDir() {
-        int size = mState.stack.size();
-
-        if (mDrawer.isPresent()
-                && (System.currentTimeMillis() - mDrawerLastFiddled) > DRAWER_NO_FIDDLE_DELAY) {
-            // Close drawer if it is open.
-            if (mDrawer.isOpen()) {
-                mDrawer.setOpen(false);
-                mDrawerLastFiddled = System.currentTimeMillis();
-                return true;
-            }
-
-            final Intent intent = getIntent();
-            final boolean launchedExternally = intent != null && intent.getData() != null
-                    && mState.action == State.ACTION_BROWSE;
-
-            // Open the Close drawer if it is closed and we're at the top of a root, but only when
-            // not launched by another app.
-            if (size <= 1 && !launchedExternally) {
-                mDrawer.setOpen(true);
-                // Remember so we don't just close it again if back is pressed again.
-                mDrawerLastFiddled = System.currentTimeMillis();
-                return true;
-            }
-        }
-
-        return false;
     }
 
     // Turns out only DocumentsActivity was ever calling saveStackBlocking.
