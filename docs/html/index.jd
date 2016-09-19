@@ -63,6 +63,40 @@ nonavpage=true
   </div><!-- end .wrap -->
 </div><!-- end .dac-actions -->
 
+
+<section class="dac-expand dac-hero" style="background-color:#FFF0B4;">
+  <div class="wrap" style="max-width:1000px;margin-top:0;overflow:auto">
+    <div class="col-7of16 col-push-8of16 dac-hero-figure">
+      <a href="/studio/index.html">
+        <img class="dac-hero-image" style="padding-top:24px"
+          src="/studio/images/hero_image_studio_2-2_2x.png">
+      </a>
+    </div>
+    <div class="col-7of16 col-pull-6of16">
+        <h1 class="dac-hero-title" style="color:#004d40">Android Studio 2.2!</h1>
+<p class="dac-hero-description" style="color:#004d40">The latest update is
+packed with over a dozen new features, like a rewritten layout editor with the
+new constraint layout, support for Android 7.0 Nougat, Espresso test recording,
+enhanced Jack compiler / Java 8 support, expanded C++ support with CMake and
+NDK-Build, and much more!</p>
+<p class="dac-hero-description" style="color:#004d40">Android Studio 2.2
+helps you code faster and smarter.</p>
+
+<p style="margin-top:24px">
+   <a class="dac-hero-cta" href="/studio/index.html" style="color:#004d40">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get Android Studio 2.2
+    </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
+   <a class="dac-hero-cta" href="/studio/releases/index.html" style="color:#004d40">
+    <span class="dac-sprite dac-auto-chevron"></span>
+    See the release notes</a>
+</p>
+    </div>
+  </div>
+</section>
+
+
 <section class="dac-section dac-light" id="build-apps"><div class="wrap">
   <h1 class="dac-section-title">Build Beautiful Apps</h1>
   <div class="dac-section-subtitle">
