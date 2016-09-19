@@ -6965,9 +6965,11 @@ i
         <attr name="icon" />
         <!-- The key to store the Preference value. -->
         <attr name="key" format="string" />
-        <!-- The title for the Preference in a PreferenceActivity screen. -->
+        <!-- The title for the Preference. In API 25 and earlier, this value is read as a
+         plain string with styling information stripped. -->
         <attr name="title" />
-        <!-- The summary for the Preference in a PreferenceActivity screen. -->
+        <!-- The summary for the Preference. In API 25 and earlier, this value is read as a
+         plain string with styling information stripped. -->
         <attr name="summary" />
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
              specified, the default ordering will be alphabetic. -->
