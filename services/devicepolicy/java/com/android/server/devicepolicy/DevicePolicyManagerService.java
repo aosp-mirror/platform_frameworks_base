@@ -3010,8 +3010,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalStateException(e);
         }
         if (ai == null) {
-            throw new IllegalStateException("Couldn't find package to remove admin "
-                    + packageName + " " + userHandle);
+            throw new IllegalStateException("Couldn't find package: "
+                    + packageName + " on user " + userHandle);
         }
         return (ai.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
     }
