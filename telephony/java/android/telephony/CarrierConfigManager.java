@@ -286,13 +286,23 @@ public class CarrierConfigManager {
             "carrier_wfc_supports_wifi_only_bool";
 
     /**
-     * Default WFC_IMS_mode 0: WIFI_ONLY
-     *                      1: CELLULAR_PREFERRED
-     *                      2: WIFI_PREFERRED
+     * Default WFC_IMS_MODE for home network   0: WIFI_ONLY
+     *                                         1: CELLULAR_PREFERRED
+     *                                         2: WIFI_PREFERRED
      * @hide
      */
     public static final String KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT =
             "carrier_default_wfc_ims_mode_int";
+
+    /**
+     * Default WFC_IMS_MODE for roaming
+     * See {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} for valid values.
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT =
+            "carrier_default_wfc_ims_roaming_mode_int";
+
     /**
      * Default WFC_IMS_enabled: true VoWiFi by default is on
      *                          false VoWiFi by default is off
@@ -957,6 +967,18 @@ public class CarrierConfigManager {
      */
     public static final String FILTERED_CNAP_NAMES_STRING_ARRAY = "filtered_cnap_names_string_array";
 
+    /**
+     * Determine whether user can change Wi-Fi Calling preference in roaming.
+     * {@code false} - roaming preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT} is
+     *                 the same as home preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT}
+     *                 and cannot be changed.
+     * {@code true}  - roaming preference can be changed by user independently.
+     *
+     * @hide
+     */
+    public static final String KEY_EDITABLE_WFC_ROAMING_MODE_BOOL =
+            "editable_wfc_roaming_mode_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -979,6 +1001,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_PROMOTE_WFC_ON_CALL_FAIL_BOOL, false);
         sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2);
+        sDefaults.putInt(KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
         sDefaults.putBoolean(KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, true);
@@ -1129,6 +1152,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(FILTERED_CNAP_NAMES_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
     }
 
     /**
