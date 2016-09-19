@@ -586,13 +586,13 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     }
 
     void forceWindowsScaleable(boolean force) {
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         try {
             for (int i = mChildren.size() - 1; i >= 0; i--) {
                 mChildren.get(i).forceWindowsScaleableInTransaction(force);
             }
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
         }
     }
 

@@ -95,7 +95,7 @@ public class DimLayer {
     }
 
     private void constructSurface(WindowManagerService service) {
-        SurfaceControl.openTransaction();
+        service.openSurfaceTransaction();
         try {
             if (DEBUG_SURFACE_TRACE) {
                 mDimSurface = new WindowSurfaceController.SurfaceTrace(service.mFxSession,
@@ -116,7 +116,7 @@ public class DimLayer {
         } catch (Exception e) {
             Slog.e(TAG_WM, "Exception creating Dim surface", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            service.closeSurfaceTransaction();
         }
     }
 
@@ -227,12 +227,12 @@ public class DimLayer {
         mBounds.set(bounds);
         if (isDimming() && !mLastBounds.equals(bounds)) {
             try {
-                SurfaceControl.openTransaction();
+                mService.openSurfaceTransaction();
                 adjustBounds();
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Failure setting size", e);
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
             }
         }
     }

@@ -893,6 +893,31 @@ public class WindowManagerService extends IWindowManager.Stub
     // current configuration.
     private final DisplayContentList mReconfigureOnConfigurationChanged = new DisplayContentList();
 
+    // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
+    // instances will be replaced with an instance that writes a binary representation of all
+    // commands to mSurfaceTraceFd.
+    boolean mSurfaceTraceEnabled;
+    ParcelFileDescriptor mSurfaceTraceFd;
+    RemoteEventTrace mRemoteEventTrace;
+
+    void openSurfaceTransaction() {
+        synchronized (mWindowMap) {
+            if (mSurfaceTraceEnabled) {
+                mRemoteEventTrace.openSurfaceTransaction();
+            }
+            SurfaceControl.openTransaction();
+        }
+    }
+
+    void closeSurfaceTransaction() {
+        synchronized (mWindowMap) {
+            if (mSurfaceTraceEnabled) {
+                mRemoteEventTrace.closeSurfaceTransaction();
+            }
+            SurfaceControl.closeTransaction();
+        }
+    }
+
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -1065,11 +1090,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        SurfaceControl.openTransaction();
+        openSurfaceTransaction();
         try {
             createWatermarkInTransaction();
         } finally {
-            SurfaceControl.closeTransaction();
+            closeSurfaceTransaction();
         }
 
         showEmulatorDisplayOverlayIfNeeded();
@@ -1935,6 +1960,44 @@ public class WindowManagerService extends IWindowManager.Stub
         return false;
     }
 
+    @Override
+    public void enableSurfaceTrace(ParcelFileDescriptor pfd) {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
+            throw new SecurityException("Only shell can call enableSurfaceTrace");
+        }
+        final FileDescriptor fd = pfd.getFileDescriptor();
+
+        synchronized (mWindowMap) {
+            if (mSurfaceTraceEnabled) {
+                disableSurfaceTrace();
+            }
+            mSurfaceTraceEnabled = true;
+            mRemoteEventTrace = new RemoteEventTrace(this, fd);
+            mSurfaceTraceFd = pfd;
+            for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+                DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+                dc.enableSurfaceTrace(fd);
+            }
+        }
+    }
+
+    @Override
+    public void disableSurfaceTrace() {
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID &&
+            callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Only shell can call disableSurfaceTrace");
+        }
+        mSurfaceTraceEnabled = false;
+        mRemoteEventTrace = null;
+        mSurfaceTraceFd = null;
+        for (int displayNdx = mDisplayContents.size() - 1; displayNdx >= 0; --displayNdx) {
+            DisplayContent dc = mDisplayContents.valueAt(displayNdx);
+            dc.disableSurfaceTrace();
+        }
+    }
+
     /**
      * Set mScreenCaptureDisabled for specific user
      */
@@ -2196,7 +2259,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Slog.i(TAG_WM, ">>> OPEN TRANSACTION repositionChild");
                     }
 
-                    SurfaceControl.openTransaction();
+                    openSurfaceTransaction();
 
                     try {
 
@@ -2210,7 +2273,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
 
                     } finally {
-                        SurfaceControl.closeTransaction();
+                        closeSurfaceTransaction();
                         if (SHOW_TRANSACTIONS) {
                             Slog.i(TAG_WM, "<<< CLOSE TRANSACTION repositionChild");
                         }
@@ -4971,7 +5034,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                     ">>> OPEN TRANSACTION showCircularMask(visible=" + visible + ")");
-            SurfaceControl.openTransaction();
+            openSurfaceTransaction();
             try {
                 if (visible) {
                     // TODO(multi-display): support multiple displays
@@ -4994,7 +5057,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mCircularDisplayMask = null;
                 }
             } finally {
-                SurfaceControl.closeTransaction();
+                closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION showCircularMask(visible=" + visible + ")");
             }
@@ -5006,7 +5069,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                     ">>> OPEN TRANSACTION showEmulatorDisplayOverlay");
-            SurfaceControl.openTransaction();
+            openSurfaceTransaction();
             try {
                 if (mEmulatorDisplayOverlay == null) {
                     mEmulatorDisplayOverlay = new EmulatorDisplayOverlay(
@@ -5019,7 +5082,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 mEmulatorDisplayOverlay.setVisibility(true);
             } finally {
-                SurfaceControl.closeTransaction();
+                closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
                         "<<< CLOSE TRANSACTION showEmulatorDisplayOverlay");
             }
@@ -5061,6 +5124,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (SHOW_VERBOSE_TRANSACTIONS) Slog.i(TAG_WM,
                     ">>> OPEN TRANSACTION showStrictModeViolation");
+            // TODO: Modify this to use the surface trace once it is not going crazy.
+            // b/31532461
             SurfaceControl.openTransaction();
             try {
                 // TODO(multi-display): support multiple displays
@@ -5701,7 +5766,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (SHOW_TRANSACTIONS) {
                 Slog.i(TAG_WM, ">>> OPEN TRANSACTION setRotationUnchecked");
             }
-            SurfaceControl.openTransaction();
+            openSurfaceTransaction();
         }
         try {
             // NOTE: We disable the rotation in the emulator because
@@ -5726,7 +5791,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
-                SurfaceControl.closeTransaction();
+                closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) {
                     Slog.i(TAG_WM, "<<< CLOSE TRANSACTION setRotationUnchecked");
                 }
@@ -8666,7 +8731,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // TODO(multidisplay): rotation on main screen only.
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure);
+                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure, this);
             mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
         }
     }

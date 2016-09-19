@@ -465,7 +465,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
-        SurfaceControl.openTransaction();
+        mService.openSurfaceTransaction();
         final TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(targetStackId);
         final TaskStack dockedStack = mDisplayContent.getDockedStackLocked();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
@@ -482,7 +482,7 @@ public class DockedStackDividerController implements DimLayerUser {
         if (!visibleAndValid) {
             mDimLayer.hide();
         }
-        SurfaceControl.closeTransaction();
+        mService.closeSurfaceTransaction();
     }
 
     /**

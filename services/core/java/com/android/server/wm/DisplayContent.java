@@ -55,6 +55,7 @@ import android.view.Surface;
 import android.view.animation.Animation;
 import com.android.internal.util.FastPrintWriter;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -1176,6 +1177,20 @@ class DisplayContent {
         void reset() {
             searchDone = false;
             taskForResize = null;
+        }
+    }
+
+    void enableSurfaceTrace(FileDescriptor fd) {
+        for (int i = mWindows.size()  - 1; i >= 0; i--) {
+            final WindowState win = mWindows.get(i);
+            win.mWinAnimator.enableSurfaceTrace(fd);
+        }
+    }
+
+    void disableSurfaceTrace() {
+        for (int i = mWindows.size()  - 1; i >= 0; i--) {
+            final WindowState win = mWindows.get(i);
+            win.mWinAnimator.disableSurfaceTrace();
         }
     }
 }

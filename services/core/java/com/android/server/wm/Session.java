@@ -346,7 +346,7 @@ final class Session extends IWindowSession.Stub
             final SurfaceControl surfaceControl = mService.mDragState.mSurfaceControl;
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, ">>> OPEN TRANSACTION performDrag");
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             try {
                 surfaceControl.setPosition(touchX - thumbCenterX,
                         touchY - thumbCenterY);
@@ -354,7 +354,7 @@ final class Session extends IWindowSession.Stub
                 surfaceControl.setLayerStack(display.getLayerStack());
                 surfaceControl.show();
             } finally {
-                SurfaceControl.closeTransaction();
+                mService.closeSurfaceTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                         TAG_WM, "<<< CLOSE TRANSACTION performDrag");
             }

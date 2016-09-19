@@ -29,6 +29,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IRemoteCallback;
+import android.os.ParcelFileDescriptor;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
@@ -254,6 +255,13 @@ interface IWindowManager
      * Set whether screen capture is disabled for all windows of a specific user
      */
     void setScreenCaptureDisabled(int userId, boolean disabled);
+
+    /**
+     * Testing and debugging infrastructure for writing surface events
+     * to given FD. See RemoteSurfaceTrace.java or Wm.java for format.
+     */
+    void enableSurfaceTrace(in ParcelFileDescriptor fd);
+    void disableSurfaceTrace();
 
     /**
      * Cancels the window transitions for the given task.

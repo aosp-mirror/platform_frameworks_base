@@ -30,6 +30,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.AppTransitionAnimationSpec;
@@ -609,5 +610,13 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public Bitmap screenshotWallpaper() throws RemoteException {
         return null;
+    }
+
+    @Override
+    public void enableSurfaceTrace(ParcelFileDescriptor fd) throws RemoteException {
+    }
+
+    @Override
+    public void disableSurfaceTrace() throws RemoteException {
     }
 }

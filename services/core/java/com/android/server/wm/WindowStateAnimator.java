@@ -70,6 +70,7 @@ import android.view.animation.Transformation;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.io.FileDescriptor;
 
 /**
  * Keep track of animations and surface operations for a single WindowState.
@@ -1580,7 +1581,7 @@ class WindowStateAnimator {
 
         try {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
-            SurfaceControl.openTransaction();
+            mService.openSurfaceTransaction();
             mSurfaceController.setPositionInTransaction(mWin.mFrame.left + left,
                     mWin.mFrame.top + top, false);
             calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
@@ -1589,7 +1590,7 @@ class WindowStateAnimator {
             Slog.w(TAG, "Error positioning surface of " + mWin
                     + " pos=(" + left + "," + top + ")", e);
         } finally {
-            SurfaceControl.closeTransaction();
+            mService.closeSurfaceTransaction();
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setWallpaperOffset");
         }
@@ -2004,6 +2005,22 @@ class WindowStateAnimator {
                     DtDx * w.mVScale,
                     DsDy * w.mHScale,
                     DtDy * w.mVScale, false);
+        }
+    }
+
+    void enableSurfaceTrace(FileDescriptor fd) {
+        if (mSurfaceController != null) {
+            mSurfaceController.installRemoteTrace(fd);
+        }
+    }
+
+    void disableSurfaceTrace() {
+        if (mSurfaceController != null) {
+            try {
+                mSurfaceController.removeRemoteTrace();
+            } catch (ClassCastException e) {
+                Slog.e(TAG, "Disable surface trace for " + this + " but its not enabled");
+            }
         }
     }
 }
