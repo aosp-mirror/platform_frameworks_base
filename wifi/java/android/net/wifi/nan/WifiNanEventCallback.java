@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
  * Base class for NAN events callbacks. Should be extended by applications and set when calling
  * {@link WifiNanManager#connect(android.os.Handler, WifiNanEventCallback)}. These are callbacks
  * applying to the NAN connection as a whole - not to specific publish or subscribe sessions -
- * for that see {@link WifiNanSessionCallback}.
+ * for that see {@link WifiNanDiscoverySessionCallback}.
  *
  * @hide PROPOSED_NAN_API
  */

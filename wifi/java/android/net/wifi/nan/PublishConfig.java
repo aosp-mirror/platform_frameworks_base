@@ -32,8 +32,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback)} or updated using
- * {@link WifiNanPublishSession#updatePublish(PublishConfig)}.
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or updated using
+ * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -318,12 +318,13 @@ public final class PublishConfig implements Parcelable {
          * Sets the number of times an unsolicited (configured using
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be broadcast. When the count is reached an event will be
-         * generated for {@link WifiNanSessionCallback#onSessionTerminated(int)}
-         * with {@link WifiNanSessionCallback#TERMINATE_REASON_DONE} [unless
+         * generated for {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}
+         * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
          * {@link #setEnableTerminateNotification(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     called.
          *
          * @param publishCount Number of publish packets to broadcast.
          *
@@ -343,12 +344,13 @@ public final class PublishConfig implements Parcelable {
          * {@link PublishConfig.Builder#setPublishType(int)}) publish session
          * will be alive - broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with
-         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}  [unless
+         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} with
+         * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
          * {@link #setEnableTerminateNotification(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
          *
@@ -365,7 +367,7 @@ public final class PublishConfig implements Parcelable {
 
         /**
          * Configure whether a publish terminate notification
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} is reported
+         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the
