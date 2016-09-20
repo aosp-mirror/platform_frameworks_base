@@ -34,8 +34,9 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 
 /**
  * This class provides a way to scan the Wifi universe around the device
@@ -822,6 +823,22 @@ public class WifiScanner {
         mAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key);
     }
 
+    /**
+     * Retrieve the most recent scan results from a single scan request.
+     * {@hide}
+     */
+    public List<ScanResult> getSingleScanResults() {
+        validateChannel();
+        Message reply = mAsyncChannel.sendMessageSynchronously(CMD_GET_SINGLE_SCAN_RESULTS, 0);
+        if (reply.what == WifiScanner.CMD_OP_SUCCEEDED) {
+            return Arrays.asList(((ParcelableScanResults) reply.obj).getResults());
+        }
+        OperationResult result = (OperationResult) reply.obj;
+        Log.e(TAG, "Error retrieving SingleScan results reason: " + result.reason
+                + " description: " + result.description);
+        return new ArrayList<ScanResult>();
+    }
+
     private void startPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings, int key) {
         // Bundle up both the settings and send it across.
         Bundle pnoParams = new Bundle();
@@ -1201,6 +1218,8 @@ public class WifiScanner {
     public static final int CMD_REGISTER_SCAN_LISTENER      = BASE + 27;
     /** @hide */
     public static final int CMD_DEREGISTER_SCAN_LISTENER    = BASE + 28;
+    /** @hide */
+    public static final int CMD_GET_SINGLE_SCAN_RESULTS     = BASE + 29;
 
     private Context mContext;
     private IWifiScanner mService;
