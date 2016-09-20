@@ -68,7 +68,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     int mRotation;
 
     // Whether mBounds is fullscreen
-    private boolean mFullscreen = true;
+    private boolean mFillsParent = true;
 
     /**
      * Contains configurations settings that are different from the parent configuration due to
@@ -220,14 +220,14 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (bounds != null && Configuration.EMPTY.equals(overrideConfig)) {
             throw new IllegalArgumentException("non null bounds, but empty configuration");
         }
-        boolean oldFullscreen = mFullscreen;
+        boolean oldFullscreen = mFillsParent;
         int rotation = Surface.ROTATION_0;
         final DisplayContent displayContent = mStack.getDisplayContent();
         if (displayContent != null) {
             displayContent.getLogicalDisplayRect(mTmpRect);
             rotation = displayContent.getDisplayInfo().rotation;
-            mFullscreen = bounds == null;
-            if (mFullscreen) {
+            mFillsParent = bounds == null;
+            if (mFillsParent) {
                 bounds = mTmpRect;
             }
         }
@@ -236,7 +236,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return BOUNDS_CHANGE_NONE;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFillsParent && mRotation == rotation) {
             return BOUNDS_CHANGE_NONE;
         }
 
@@ -254,7 +254,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (displayContent != null) {
             displayContent.mDimLayerController.updateDimLayer(this);
         }
-        mOverrideConfig = mFullscreen ? Configuration.EMPTY : overrideConfig;
+        mOverrideConfig = mFillsParent ? Configuration.EMPTY : overrideConfig;
         return boundsChange;
     }
 
@@ -354,7 +354,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
     /** Return true if the current bound can get outputted to the rest of the system as-is. */
     private boolean useCurrentBounds() {
         final DisplayContent displayContent = mStack.getDisplayContent();
-        return mFullscreen
+        return mFillsParent
                 || !StackId.isTaskResizeableByDockedStack(mStack.mStackId)
                 || displayContent == null
                 || displayContent.getDockedStackVisibleForUserLocked() != null;
@@ -432,7 +432,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
                 return;
             }
 
-            if (!mFullscreen) {
+            if (!mFillsParent) {
                 // When minimizing the docked stack when going home, we don't adjust the task bounds
                 // so we need to intersect the task bounds with the stack bounds here.
                 //
@@ -483,7 +483,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         if (displayContent == null) {
             return;
         }
-        if (mFullscreen) {
+        if (mFillsParent) {
             setBounds(null, Configuration.EMPTY);
             return;
         }
@@ -572,7 +572,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     boolean isFullscreen() {
         if (useCurrentBounds()) {
-            return mFullscreen;
+            return mFillsParent;
         }
         // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
         // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
@@ -638,7 +638,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
 
     @Override
     boolean fillsParent() {
-        return mFullscreen || !StackId.isTaskResizeAllowed(mStack.mStackId);
+        return mFillsParent || !StackId.isTaskResizeAllowed(mStack.mStackId);
     }
 
     @Override
@@ -659,7 +659,7 @@ class Task extends WindowContainer<AppWindowToken> implements DimLayer.DimLayerU
         final String doublePrefix = prefix + "  ";
 
         pw.println(prefix + "taskId=" + mTaskId);
-        pw.println(doublePrefix + "mFullscreen=" + mFullscreen);
+        pw.println(doublePrefix + "mFillsParent=" + mFillsParent);
         pw.println(doublePrefix + "mBounds=" + mBounds.toShortString());
         pw.println(doublePrefix + "mdr=" + mDeferRemoval);
         pw.println(doublePrefix + "appTokens=" + mChildren);
