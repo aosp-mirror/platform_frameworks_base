@@ -71,21 +71,6 @@ const hidl_string *EphemeralStorage::allocTemporaryString(
     return s;
 }
 
-#define DEFINE_ALLOC_ARRAY_METHODS(Suffix,Type,NewType)                        \
-const Type *EphemeralStorage::allocTemporary ## Suffix ## Array(               \
-        JNIEnv *env, Type ## Array arrayObj) {                                 \
-    Type ## Array obj = (Type ## Array)env->NewGlobalRef(arrayObj);            \
-    const Type *val = env->Get ## NewType ## ArrayElements(obj, NULL);         \
-                                                                               \
-    Item item;                                                                 \
-    item.mType = TYPE_ ## Suffix ## _ARRAY;                                    \
-    item.mObj = obj;                                                           \
-    item.mPtr = (void *)val;                                                   \
-    mItems.push_back(item);                                                    \
-                                                                               \
-    return val;                                                                \
-}
-
 #define DEFINE_ALLOC_VECTOR_METHODS(Suffix,Type,NewType)                       \
 const hidl_vec<Type> *EphemeralStorage::allocTemporary ## Suffix ## Vector(    \
         JNIEnv *env, Type ## Array arrayObj) {                                 \
@@ -106,13 +91,6 @@ const hidl_vec<Type> *EphemeralStorage::allocTemporary ## Suffix ## Vector(    \
                                                                                \
     return vec;                                                                \
 }
-
-DEFINE_ALLOC_ARRAY_METHODS(Int8,jbyte,Byte)
-DEFINE_ALLOC_ARRAY_METHODS(Int16,jshort,Short)
-DEFINE_ALLOC_ARRAY_METHODS(Int32,jint,Int)
-DEFINE_ALLOC_ARRAY_METHODS(Int64,jlong,Long)
-DEFINE_ALLOC_ARRAY_METHODS(Float,jfloat,Float)
-DEFINE_ALLOC_ARRAY_METHODS(Double,jdouble,Double)
 
 DEFINE_ALLOC_VECTOR_METHODS(Int8,jbyte,Byte)
 DEFINE_ALLOC_VECTOR_METHODS(Int16,jshort,Short)
