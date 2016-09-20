@@ -185,25 +185,25 @@ public class TransitionManager {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
         if (!sPendingTransitions.contains(sceneRoot)) {
-            sPendingTransitions.add(sceneRoot);
+            if (transition == null) {
+                scene.enter();
+            } else {
+                sPendingTransitions.add(sceneRoot);
 
-            Transition transitionClone = null;
-            if (transition != null) {
-                transitionClone = transition.clone();
+                Transition transitionClone = transition.clone();
                 transitionClone.setSceneRoot(sceneRoot);
+
+                Scene oldScene = Scene.getCurrentScene(sceneRoot);
+                if (oldScene != null && oldScene.isCreatedFromLayoutResource()) {
+                    transitionClone.setCanRemoveViews(true);
+                }
+
+                sceneChangeSetup(sceneRoot, transitionClone);
+
+                scene.enter();
+
+                sceneChangeRunTransition(sceneRoot, transitionClone);
             }
-
-            Scene oldScene = Scene.getCurrentScene(sceneRoot);
-            if (oldScene != null && transitionClone != null &&
-                    oldScene.isCreatedFromLayoutResource()) {
-                transitionClone.setCanRemoveViews(true);
-            }
-
-            sceneChangeSetup(sceneRoot, transitionClone);
-
-            scene.enter();
-
-            sceneChangeRunTransition(sceneRoot, transitionClone);
         }
     }
 
