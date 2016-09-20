@@ -564,10 +564,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         allDrawnExcludingSaved = false;
     }
 
-    @Override
-    void removeWindow(WindowState win) {
-        super.removeWindow(win);
-
+    void postWindowRemoveStartingWindowCleanup(WindowState win) {
         // TODO: Something smells about the code below...Is there a better way?
         if (startingWindow == win) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Notify removed startingWindow " + win);
@@ -933,7 +930,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mService.mWindowsChanged = true;
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                     "Removing starting " + tStartingWindow + " from " + fromToken);
-            fromToken.removeWindow(tStartingWindow);
+            fromToken.removeChild(tStartingWindow);
+            fromToken.postWindowRemoveStartingWindowCleanup(tStartingWindow);
             addWindow(tStartingWindow);
 
             // Propagate other interesting state between the tokens. If the old token is displayed,

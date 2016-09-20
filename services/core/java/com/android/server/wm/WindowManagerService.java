@@ -2061,7 +2061,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowToken token = win.mToken;
         final AppWindowToken atoken = win.mAppToken;
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Removing " + win + " from " + token);
-        token.removeWindow(win);
+        // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty()) {
             if (!token.explicit) {
                 mTokenMap.remove(token.token);
@@ -2074,7 +2074,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (atoken != null) {
-            atoken.removeWindow(win);
+            atoken.postWindowRemoveStartingWindowCleanup(win);
         }
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {
