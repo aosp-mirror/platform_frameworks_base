@@ -2459,6 +2459,105 @@ message MetricsEvent {
     // OPEN: SUW > Fingerprint > Dialog to confirm skip fingerprint setup entirely.
     DIALOG_FINGERPRINT_SKIP_SETUP = 573;
 
+    // OPEN: Settings > Proxy Selector error dialog
+    DIALOG_PROXY_SELECTOR_ERROR = 574;
+
+    // OPEN: Settings > Wifi > P2P Settings > Disconnect dialog
+    DIALOG_WIFI_P2P_DISCONNECT = 575;
+
+    // OPEN: Settings > Wifi > P2P Settings > Cancel connection dialog
+    DIALOG_WIFI_P2P_CANCEL_CONNECT = 576;
+
+    // OPEN: Settings > Wifi > P2P Settings > Rename dialog
+    DIALOG_WIFI_P2P_RENAME = 577;
+
+    // OPEN: Settings > Wifi > P2P Settings > Forget group dialog
+    DIALOG_WIFI_P2P_DELETE_GROUP = 578;
+
+    // OPEN: Settings > APN > Restore default dialog
+    DIALOG_APN_RESTORE_DEFAULT = 579;
+
+    // OPEN: Settings > Dream > When to dream dialog
+    DIALOG_DREAM_START_DELAY = 580;
+
+    // OPEN: Settings > Encryption interstitial accessibility warning dialog
+    DIALOG_ENCRYPTION_INTERSTITIAL_ACCESSIBILITY = 581;
+
+    // OPEN: Settings > Tether > AP setting dialog
+    DIALOG_AP_SETTINGS = 582;
+
+    // OPEN: Settings > Acessibility > Enable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_ENABLE = 583;
+
+    // OPEN: Settings > Acessibility > Disable accessiblity service dialog
+    DIALOG_ACCESSIBILITY_SERVICE_DISABLE = 584;
+
+    // OPEN: Settings > Account > Remove account dialog
+    DIALOG_ACCOUNT_SYNC_REMOVE = 585;
+
+    // OPEN: Settings > Account > Remove account failed dialog
+    DIALOG_ACCOUNT_SYNC_FAILED_REMOVAL = 586;
+
+    // OPEN: Settings > Account > Cannot do onetime sync dialog
+    DIALOG_ACCOUNT_SYNC_CANNOT_ONETIME_SYNC = 587;
+
+    // OPEN: Settings > Display > Night light > Set start time dialog
+    DIALOG_NIGHT_DISPLAY_SET_START_TIME = 588;
+
+    // OPEN: Settings > Display > Night light > Set end time dialog
+    DIALOG_NIGHT_DISPLAY_SET_END_TIME = 589;
+
+    // OPEN: Settings > User > Edit info dialog
+    DIALOG_USER_EDIT = 590;
+
+    // OPEN: Settings > User > Confirm remove dialog
+    DIALOG_USER_REMOVE = 591;
+
+    // OPEN: Settings > User > Enable calling dialog
+    DIALOG_USER_ENABLE_CALLING = 592;
+
+    // OPEN: Settings > User > Enable calling and sms dialog
+    DIALOG_USER_ENABLE_CALLING_AND_SMS = 593;
+
+    // OPEN: Settings > User > Cannot manage device message dialog
+    DIALOG_USER_CANNOT_MANAGE = 594;
+
+    // OPEN: Settings > User > Add user dialog
+    DIALOG_USER_ADD = 595;
+
+    // OPEN: Settings > User > Setup user dialog
+    DIALOG_USER_SETUP = 596;
+
+    // OPEN: Settings > User > Setup profile dialog
+    DIALOG_USER_SETUP_PROFILE = 597;
+
+    // OPEN: Settings > User > Choose user type dialog
+    DIALOG_USER_CHOOSE_TYPE = 598;
+
+    // OPEN: Settings > User > Need lockscreen dialog
+    DIALOG_USER_NEED_LOCKSCREEN = 599;
+
+    // OPEN: Settings > User > Confirm exit guest mode dialog
+    DIALOG_USER_CONFIRM_EXIT_GUEST = 600;
+
+    // OPEN: Settings > User > Edit user profile dialog
+    DIALOG_USER_EDIT_PROFILE = 601;
+
+    // OPEN: Settings > Wifi > Saved AP > Edit dialog
+    DIALOG_WIFI_SAVED_AP_EDIT = 602;
+
+    // OPEN: Settings > Wifi > Edit AP dialog
+    DIALOG_WIFI_AP_EDIT = 603;
+
+    // OPEN: Settings > Wifi > PBC Config dialog
+    DIALOG_WIFI_PBC = 604;
+
+    // OPEN: Settings > Wifi > Display pin dialog
+    DIALOG_WIFI_PIN = 605;
+
+    // OPEN: Settings > Wifi > Write config to NFC dialog
+    DIALOG_WIFI_WRITE_NFC = 606;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
