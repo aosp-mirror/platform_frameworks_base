@@ -1483,9 +1483,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * at this point.  If you want to do work once the activity itself is
      * created, see {@link #onActivityCreated(Bundle)}.
      *
-     * <p>If your app's <code>targetSdkVersion</code> is 23 or lower, child fragments
-     * being restored from the savedInstanceState are restored after <code>onCreate</code>
-     * returns. When targeting N or above and running on an N or newer platform version
+     * <p>If your app's <code>targetSdkVersion</code> is {@link android.os.Build.VERSION_CODES#M}
+     * or lower, child fragments being restored from the savedInstanceState are restored after
+     * <code>onCreate</code> returns. When targeting {@link android.os.Build.VERSION_CODES#N} or
+     * above and running on an N or newer platform version
      * they are restored by <code>Fragment.onCreate</code>.</p>
      *
      * @param savedInstanceState If the fragment is being re-created from
