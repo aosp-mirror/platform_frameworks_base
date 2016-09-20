@@ -26,6 +26,7 @@
 #include <SkDrawFilter.h>
 #include <SkGraphics.h>
 #include <SkImage.h>
+#include <SkImagePriv.h>
 #include <SkRSXform.h>
 #include <SkShader.h>
 #include <SkTemplates.h>
@@ -594,10 +595,13 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
     if (paint) {
         tmpPaint = *paint;
     }
-    SkShader* shader = SkShader::CreateBitmapShader(bitmap,
-                                                    SkShader::kClamp_TileMode,
-                                                    SkShader::kClamp_TileMode);
-    SkSafeUnref(tmpPaint.setShader(shader));
+    sk_sp<SkShader> shader = SkMakeBitmapShader(bitmap,
+                                                SkShader::kClamp_TileMode,
+                                                SkShader::kClamp_TileMode,
+                                                nullptr,
+                                                kNever_SkCopyPixelsMode,
+                                                nullptr);
+    tmpPaint.setShader(std::move(shader));
 
     mCanvas->drawVertices(SkCanvas::kTriangles_VertexMode, ptCount, (SkPoint*)vertices,
                          texs, (const SkColor*)colors, NULL, indices,
