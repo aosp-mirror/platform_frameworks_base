@@ -57,23 +57,23 @@ public class WifiNanSession {
         mClientId = clientId;
         mTerminated = false;
 
-        mCloseGuard.open("disconnect");
+        mCloseGuard.open("destroy");
     }
 
     /**
-     * Disconnect from the Wi-Fi NAN service and, if no other applications are connected to NAN,
-     * also disconnect from the NAN cluster. This method destroys all outstanding operations -
-     * i.e. all publish and subscribes are terminated, and any outstanding data-links are
-     * shut-down. However, it is good practice to terminate these discovery sessions and
-     * connections explicitly before a disconnect.
+     * Destroy the Wi-Fi NAN service session and, if no other applications are attached to NAN,
+     * also disable NAN. This method destroys all outstanding operations - i.e. all publish and
+     * subscribes are terminated, and any outstanding data-links are shut-down. However, it is
+     * good practice to destroy these discovery sessions and connections explicitly before a
+     * session-wide destroy.
      * <p>
-     * An application may re-connect after a disconnect using
-     * {@link WifiNanManager#connect(Handler, WifiNanEventCallback)} .
+     * An application may re-attach after a destroy using
+     * {@link WifiNanManager#attach(Handler, WifiNanEventCallback)} .
      */
-    public void disconnect() {
+    public void destroy() {
         WifiNanManager mgr = mMgr.get();
         if (mgr == null) {
-            Log.w(TAG, "disconnect: called post GC on WifiNanManager");
+            Log.w(TAG, "destroy: called post GC on WifiNanManager");
             return;
         }
         mgr.disconnect(mClientId, mBinder);
@@ -88,7 +88,7 @@ public class WifiNanSession {
         try {
             if (!mTerminated) {
                 mCloseGuard.warnIfOpen();
-                disconnect();
+                destroy();
             }
         } finally {
             super.finalize();
@@ -103,7 +103,7 @@ public class WifiNanSession {
      *     <li>{@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
      *     is called when the publish session is created and provides a handle to the session.
      *     Further operations on the publish session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)} is called if the
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)} is called if the
      *     publish operation failed.
      * </ul>
      * <p>
@@ -111,7 +111,7 @@ public class WifiNanSession {
      * on the {@code callback} object. The resulting publish session can be modified using
      * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
      * <p>
-     *      An application must use the {@link WifiNanDiscoveryBaseSession#terminate()} to
+     *      An application must use the {@link WifiNanDiscoveryBaseSession#destroy()} to
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      *
@@ -142,7 +142,7 @@ public class WifiNanSession {
      *     <li>{@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
      *     is called when the subscribe session is created and provides a handle to the session.
      *     Further operations on the subscribe session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)} is called if the
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)} is called if the
      *     subscribe operation failed.
      * </ul>
      * <p>
@@ -150,7 +150,7 @@ public class WifiNanSession {
      * on the {@code callback} object. The resulting subscribe session can be modified using
      * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
      * <p>
-     *      An application must use the {@link WifiNanDiscoveryBaseSession#terminate()} to
+     *      An application must use the {@link WifiNanDiscoveryBaseSession#destroy()} to
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      *

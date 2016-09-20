@@ -17,6 +17,7 @@
 package android.net.wifi.nan;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.wifi.RttManager;
 import android.util.Log;
 
@@ -35,7 +36,7 @@ import java.lang.ref.WeakReference;
  *     <li>Creating a network-specifier when requesting a NAN connection:
  *     {@link #createNetworkSpecifier(int, int, byte[])}.
  * </ul>
- * The {@link #terminate()} method must be called to terminate discovery sessions once they are
+ * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.
  *
  * @hide PROPOSED_NAN_API
@@ -79,24 +80,24 @@ public class WifiNanDiscoveryBaseSession {
         mClientId = clientId;
         mSessionId = sessionId;
 
-        mCloseGuard.open("terminate");
+        mCloseGuard.open("destroy");
     }
 
     /**
-     * Terminate the publish or subscribe session - free any resources, and stop
+     * Destroy the publish or subscribe session - free any resources, and stop
      * transmitting packets on-air (for an active session) or listening for
      * matches (for a passive session). The session may not be used for any
-     * additional operations after termination.
+     * additional operations after its destruction.
      * <p>
      *     This operation must be done on a session which is no longer needed. Otherwise system
-     *     resources will continue to be utilized until the application terminates. The only
+     *     resources will continue to be utilized until the application exits. The only
      *     exception is a session for which we received a termination callback,
      *     {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}.
      */
-    public void terminate() {
+    public void destroy() {
         WifiNanManager mgr = mMgr.get();
         if (mgr == null) {
-            Log.w(TAG, "terminate: called post GC on WifiNanManager");
+            Log.w(TAG, "destroy: called post GC on WifiNanManager");
             return;
         }
         mgr.terminateSession(mClientId, mSessionId);
@@ -127,7 +128,7 @@ public class WifiNanDiscoveryBaseSession {
         try {
             if (!mTerminated) {
                 mCloseGuard.warnIfOpen();
-                terminate();
+                destroy();
             }
         } finally {
             super.finalize();
@@ -137,20 +138,21 @@ public class WifiNanDiscoveryBaseSession {
     /**
      * Sends a message to the specified destination. NAN messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} event.
+     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])} event.
      * <p>
      *     NAN messages are not guaranteed delivery. Callbacks on
      *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendSuccess(int)}, or transmission failed
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFail(int, int)}.
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
      *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} or
-     *            {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
+     *            {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])}
+     *               or
+     *               {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
      * @param message The message to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
@@ -179,13 +181,13 @@ public class WifiNanDiscoveryBaseSession {
     /**
      * Sends a message to the specified destination. NAN messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
-     * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} event.
+     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])} event.
      * <p>
      *     NAN messages are not guaranteed delivery. Callbacks on
      *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendSuccess(int)}, or transmission failed
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFail(int, int)}.
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
      *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}.
@@ -193,8 +195,9 @@ public class WifiNanDiscoveryBaseSession {
      * 0.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} or
-     *            {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
+     *            {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])}
+     *               or
+     *               {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
      * @param message The message to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
@@ -207,7 +210,7 @@ public class WifiNanDiscoveryBaseSession {
 
     /**
      * Start a ranging operation with the specified peers. The peer IDs are obtained from an
-     * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} or
+     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])} or
      * {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} operation - can only
      * range devices which are part of an ongoing discovery session.
      *
@@ -250,7 +253,7 @@ public class WifiNanDiscoveryBaseSession {
      * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
      * {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
      * @param peerId The peer ID obtained through
-     * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])} or
+     * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])} or
      * {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}. On a RESPONDER this
      *              value is used to gate the acceptance of a connection request from only that
      *              peer. A RESPONDER may specified a 0 - indicating that it will accept
