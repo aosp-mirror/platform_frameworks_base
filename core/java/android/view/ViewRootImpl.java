@@ -5524,7 +5524,7 @@ public final class ViewRootImpl implements ViewParent,
                 // A direct EXITED event means that the window manager knows we've just crossed
                 // a window boundary, so the current drag target within this one must have
                 // just been exited. Send the EXITED notification to the current drag view, if any.
-                if (mTargetSdkVersion < Build.VERSION_CODES.N) {
+                if (View.sCascadedDragDrop) {
                     mView.dispatchDragEnterExitInPreN(event);
                 }
                 setDragFocus(null, event);
@@ -5644,7 +5644,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void setDragFocus(View newDragTarget, DragEvent event) {
-        if (mCurrentDragView != newDragTarget && mTargetSdkVersion >= Build.VERSION_CODES.N) {
+        if (mCurrentDragView != newDragTarget && !View.sCascadedDragDrop) {
             // Send EXITED and ENTERED notifications to the old and new drag focus views.
 
             final float tx = event.mX;
