@@ -41,7 +41,6 @@ import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.InstrumentationRegistry;
 
@@ -106,20 +105,21 @@ public class EditTextLongTextPerfTest {
     }
 
     @Test
-    @UiThreadTest
-    public void testEditText() {
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        final EditText editText = setupEditText();
-        final KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER);
-        final int steps = 100;
-        while (state.keepRunning()) {
-            for (int i = 0; i < steps; i++) {
-                int offset = (editText.getText().length() * i) / steps;
-                editText.setSelection(offset);
-                editText.bringPointIntoView(offset);
-                editText.onKeyDown(keyEvent.getKeyCode(), keyEvent);
-                editText.updateDisplayListIfDirty();
+    public void testEditText() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            final EditText editText = setupEditText();
+            final KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER);
+            final int steps = 100;
+            while (state.keepRunning()) {
+                for (int i = 0; i < steps; i++) {
+                    int offset = (editText.getText().length() * i) / steps;
+                    editText.setSelection(offset);
+                    editText.bringPointIntoView(offset);
+                    editText.onKeyDown(keyEvent.getKeyCode(), keyEvent);
+                    editText.updateDisplayListIfDirty();
+                }
             }
-        }
+        });
     }
 }
