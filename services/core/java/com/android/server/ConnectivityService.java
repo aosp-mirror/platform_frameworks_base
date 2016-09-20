@@ -372,6 +372,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final int EVENT_SET_ACCEPT_UNVALIDATED = 28;
 
     /**
+     * used to specify whether a network should not be penalized when it becomes unvalidated.
+     */
+    private static final int EVENT_SET_AVOID_UNVALIDATED = 35;
+
+    /**
      * used to ask the user to confirm a connection to an unvalidated network.
      * obj  = network
      */
@@ -2712,6 +2717,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 accept ? 1 : 0, always ? 1: 0, network));
     }
 
+    @Override
+    public void setAvoidUnvalidated(Network network) {
+        enforceConnectivityInternalPermission();
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_AVOID_UNVALIDATED, network));
+    }
+
     private void handleSetAcceptUnvalidated(Network network, boolean accept, boolean always) {
         if (DBG) log("handleSetAcceptUnvalidated network=" + network +
                 " accept=" + accept + " always=" + always);
@@ -2752,6 +2763,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     }
 
+    private void handleSetAvoidUnvalidated(Network network) {
+        NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+        if (nai == null || nai.lastValidated) {
+            // Nothing to do. The network either disconnected or revalidated.
+            return;
+        }
+        if (!nai.avoidUnvalidated) {
+            int oldScore = nai.getCurrentScore();
+            nai.avoidUnvalidated = true;
+            rematchAllNetworksAndRequests(nai, oldScore);
+            sendUpdatedScoreToFactories(nai);
+        }
+    }
+
     private void scheduleUnvalidatedPrompt(NetworkAgentInfo nai) {
         if (VDBG) log("scheduleUnvalidatedPrompt " + nai.network);
         mHandler.sendMessageDelayed(
@@ -2759,28 +2784,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 PROMPT_UNVALIDATED_DELAY_MS);
     }
 
-    private boolean mAvoidBadWifi;
+    private boolean mAvoidBadWifi = true;
 
     public boolean avoidBadWifi() {
         return mAvoidBadWifi;
     }
 
     @VisibleForTesting
-    public boolean updateAvoidBadWifi() {
-        // There are two modes: either we always automatically avoid unvalidated wifi, or we show a
-        // dialog and don't switch to it. The behaviour is controlled by the NETWORK_AVOID_BAD_WIFI
-        // setting. If the setting has no value, then the value is taken from the config value,
-        // which can be changed via OEM/carrier overlays.
-        //
-        // The only valid values for NETWORK_AVOID_BAD_WIFI are null and unset. Currently, the unit
-        // test uses 0 in order to avoid having to mock out fetching the carrier setting.
-        int defaultAvoidBadWifi =
-            mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi);
-        int avoid = Settings.Global.getInt(mContext.getContentResolver(),
-            Settings.Global.NETWORK_AVOID_BAD_WIFI, defaultAvoidBadWifi);
+    /** Whether the device or carrier configuration disables avoiding bad wifi by default. */
+    public boolean configRestrictsAvoidBadWifi() {
+        return mContext.getResources().getInteger(R.integer.config_networkAvoidBadWifi) == 0;
+    }
+
+    /** Whether we should display a notification when wifi becomes unvalidated. */
+    public boolean shouldNotifyWifiUnvalidated() {
+        return configRestrictsAvoidBadWifi() &&
+                Settings.Global.getString(mContext.getContentResolver(),
+                        Settings.Global.NETWORK_AVOID_BAD_WIFI) == null;
+    }
+
+    private boolean updateAvoidBadWifi() {
+        boolean settingAvoidBadWifi = "1".equals(Settings.Global.getString(
+                mContext.getContentResolver(), Settings.Global.NETWORK_AVOID_BAD_WIFI));
 
         boolean prev = mAvoidBadWifi;
-        mAvoidBadWifi = (avoid == 1);
+        mAvoidBadWifi = settingAvoidBadWifi || !configRestrictsAvoidBadWifi();
         return mAvoidBadWifi != prev;
     }
 
@@ -2833,7 +2861,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkCapabilities nc = nai.networkCapabilities;
         if (DBG) log("handleNetworkUnvalidated " + nai.name() + " cap=" + nc);
 
-        if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && !avoidBadWifi()) {
+        if (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && shouldNotifyWifiUnvalidated()) {
             showValidationNotification(nai, NotificationType.LOST_INTERNET);
         }
     }
@@ -2909,6 +2937,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 case EVENT_SET_ACCEPT_UNVALIDATED: {
                     handleSetAcceptUnvalidated((Network) msg.obj, msg.arg1 != 0, msg.arg2 != 0);
+                    break;
+                }
+                case EVENT_SET_AVOID_UNVALIDATED: {
+                    handleSetAvoidUnvalidated((Network) msg.obj);
                     break;
                 }
                 case EVENT_PROMPT_UNVALIDATED: {
