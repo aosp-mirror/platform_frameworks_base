@@ -459,71 +459,75 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         if (!calledFromValidUser()) {
             return null;
         }
+        final int subtypeHashCode;
+        final SpellCheckerInfo sci;
+        final Locale systemLocale;
         synchronized (mSpellCheckerMap) {
-            final int subtypeHashCode =
+            subtypeHashCode =
                     mSettings.getSelectedSpellCheckerSubtype(SpellCheckerSubtype.SUBTYPE_ID_NONE);
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellCheckerSubtype: " + subtypeHashCode);
             }
-            final SpellCheckerInfo sci = getCurrentSpellChecker(null);
-            if (sci == null || sci.getSubtypeCount() == 0) {
-                if (DBG) {
-                    Slog.w(TAG, "Subtype not found.");
-                }
-                return null;
-            }
-            if (subtypeHashCode == SpellCheckerSubtype.SUBTYPE_ID_NONE
-                    && !allowImplicitlySelectedSubtype) {
-                return null;
-            }
-            String candidateLocale = null;
-            if (subtypeHashCode == 0) {
-                // Spell checker language settings == "auto"
-                final InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-                if (imm != null) {
-                    final InputMethodSubtype currentInputMethodSubtype =
-                            imm.getCurrentInputMethodSubtype();
-                    if (currentInputMethodSubtype != null) {
-                        final String localeString = currentInputMethodSubtype.getLocale();
-                        if (!TextUtils.isEmpty(localeString)) {
-                            // 1. Use keyboard locale if available in the spell checker
-                            candidateLocale = localeString;
-                        }
-                    }
-                }
-                if (candidateLocale == null) {
-                    // 2. Use System locale if available in the spell checker
-                    candidateLocale = mContext.getResources().getConfiguration().locale.toString();
-                }
-            }
-            SpellCheckerSubtype candidate = null;
-            for (int i = 0; i < sci.getSubtypeCount(); ++i) {
-                final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
-                if (subtypeHashCode == 0) {
-                    final String scsLocale = scs.getLocale();
-                    if (candidateLocale.equals(scsLocale)) {
-                        return scs;
-                    } else if (candidate == null) {
-                        if (candidateLocale.length() >= 2 && scsLocale.length() >= 2
-                                && candidateLocale.startsWith(scsLocale)) {
-                            // Fall back to the applicable language
-                            candidate = scs;
-                        }
-                    }
-                } else if (scs.hashCode() == subtypeHashCode) {
-                    if (DBG) {
-                        Slog.w(TAG, "Return subtype " + scs.hashCode() + ", input= " + locale
-                                + ", " + scs.getLocale());
-                    }
-                    // 3. Use the user specified spell check language
-                    return scs;
-                }
-            }
-            // 4. Fall back to the applicable language and return it if not null
-            // 5. Simply just return it even if it's null which means we could find no suitable
-            // spell check languages
-            return candidate;
+            sci = getCurrentSpellChecker(null);
+            systemLocale = mContext.getResources().getConfiguration().locale;
         }
+        if (sci == null || sci.getSubtypeCount() == 0) {
+            if (DBG) {
+                Slog.w(TAG, "Subtype not found.");
+            }
+            return null;
+        }
+        if (subtypeHashCode == SpellCheckerSubtype.SUBTYPE_ID_NONE
+                && !allowImplicitlySelectedSubtype) {
+            return null;
+        }
+        String candidateLocale = null;
+        if (subtypeHashCode == 0) {
+            // Spell checker language settings == "auto"
+            final InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
+            if (imm != null) {
+                final InputMethodSubtype currentInputMethodSubtype =
+                        imm.getCurrentInputMethodSubtype();
+                if (currentInputMethodSubtype != null) {
+                    final String localeString = currentInputMethodSubtype.getLocale();
+                    if (!TextUtils.isEmpty(localeString)) {
+                        // 1. Use keyboard locale if available in the spell checker
+                        candidateLocale = localeString;
+                    }
+                }
+            }
+            if (candidateLocale == null) {
+                // 2. Use System locale if available in the spell checker
+                candidateLocale = systemLocale.toString();
+            }
+        }
+        SpellCheckerSubtype candidate = null;
+        for (int i = 0; i < sci.getSubtypeCount(); ++i) {
+            final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
+            if (subtypeHashCode == 0) {
+                final String scsLocale = scs.getLocale();
+                if (candidateLocale.equals(scsLocale)) {
+                    return scs;
+                } else if (candidate == null) {
+                    if (candidateLocale.length() >= 2 && scsLocale.length() >= 2
+                            && candidateLocale.startsWith(scsLocale)) {
+                        // Fall back to the applicable language
+                        candidate = scs;
+                    }
+                }
+            } else if (scs.hashCode() == subtypeHashCode) {
+                if (DBG) {
+                    Slog.w(TAG, "Return subtype " + scs.hashCode() + ", input= " + locale
+                            + ", " + scs.getLocale());
+                }
+                // 3. Use the user specified spell check language
+                return scs;
+            }
+        }
+        // 4. Fall back to the applicable language and return it if not null
+        // 5. Simply just return it even if it's null which means we could find no suitable
+        // spell check languages
+        return candidate;
     }
 
     @Override
