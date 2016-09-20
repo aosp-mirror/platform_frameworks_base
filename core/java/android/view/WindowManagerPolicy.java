@@ -1306,6 +1306,16 @@ public interface WindowManagerPolicy {
     public int adjustSystemUiVisibilityLw(int visibility);
 
     /**
+     * Called by System UI to notify of changes to the visibility of Recents.
+     */
+    public void setRecentsVisibilityLw(boolean visible);
+
+    /**
+     * Called by System UI to notify of changes to the visibility of PIP.
+     */
+    public void setTvPipVisibilityLw(boolean visible);
+
+    /**
      * Specifies whether there is an on-screen navigation bar separate from the status bar.
      */
     public boolean hasNavigationBar();

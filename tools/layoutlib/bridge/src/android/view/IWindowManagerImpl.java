@@ -460,6 +460,16 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void setRecentsVisibility(boolean visible) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void setTvPipVisibility(boolean visible) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void stopAppFreezingScreen(IBinder arg0, boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
     }

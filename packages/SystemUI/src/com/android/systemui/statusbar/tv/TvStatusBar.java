@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.tv;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
@@ -35,16 +34,6 @@ import com.android.systemui.tv.pip.PipManager;
  */
 
 public class TvStatusBar extends BaseStatusBar {
-
-    /**
-     * Tracking calls to View.setSystemUiVisibility().
-     */
-    int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
-
-    /**
-     * Last value sent to window manager.
-     */
-    private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
 
     @Override
     public void setIcon(String slot, StatusBarIcon icon) {
@@ -222,40 +211,6 @@ public class TvStatusBar extends BaseStatusBar {
     public void start() {
         super.start();
         putComponent(TvStatusBar.class, this);
-    }
-
-    /**
-     * Updates the visibility of the picture-in-picture.
-     */
-    public void updatePipVisibility(boolean visible) {
-        if (visible) {
-            mSystemUiVisibility |= View.TV_PICTURE_IN_PICTURE_VISIBLE;
-        } else {
-            mSystemUiVisibility &= ~View.TV_PICTURE_IN_PICTURE_VISIBLE;
-        }
-        notifyUiVisibilityChanged(mSystemUiVisibility);
-    }
-
-    /**
-     * Updates the visibility of the Recents
-     */
-    public void updateRecentsVisibility(boolean visible) {
-        if (visible) {
-            mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
-        } else {
-            mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
-        }
-        notifyUiVisibilityChanged(mSystemUiVisibility);
-    }
-
-    private void notifyUiVisibilityChanged(int vis) {
-        try {
-            if (mLastDispatchedSystemUiVisibility != vis) {
-                mWindowManagerService.statusBarVisibilityChanged(vis);
-                mLastDispatchedSystemUiVisibility = vis;
-            }
-        } catch (RemoteException ex) {
-        }
     }
 
     @Override
