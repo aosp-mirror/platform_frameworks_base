@@ -886,13 +886,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // since they won't be notified through the app window animator.
     final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
-    // List of displays to reconfigure after configuration changes.
-    // Some of the information reported for a display is dependent on resources to do the right
-    // calculations. For example, {@link DisplayInfo#smallestNominalAppWidth} and company are
-    // dependent on the height and width of the status and nav bar which change depending on the
-    // current configuration.
-    private final DisplayContentList mReconfigureOnConfigurationChanged = new DisplayContentList();
-
     // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
     // instances will be replaced with an instance that writes a binary representation of all
     // commands to mSurfaceTraceFd.
@@ -3168,30 +3161,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
     }
+
     private int[] onConfigurationChanged() {
         mPolicy.onConfigurationChanged();
 
-        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
-        if (!mReconfigureOnConfigurationChanged.contains(defaultDisplayContent)) {
-            // The default display size information is heavily dependent on the resources in the
-            // current configuration, so we need to reconfigure it everytime the configuration
-            // changes. See {@link PhoneWindowManager#setInitialDisplaySize}...sigh...
-            mReconfigureOnConfigurationChanged.add(defaultDisplayContent);
-        }
-        for (int i = mReconfigureOnConfigurationChanged.size() - 1; i >= 0; i--) {
-            reconfigureDisplayLocked(mReconfigureOnConfigurationChanged.remove(i));
+        mChangedStackList.clear();
+
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            displayContent.onConfigurationChanged(mChangedStackList);
         }
 
-        defaultDisplayContent.getDockedDividerController().onConfigurationChanged();
-        mChangedStackList.clear();
-        for (int stackNdx = mStackIdToStack.size() - 1; stackNdx >= 0; stackNdx--) {
-            final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
-            if (stack.onConfigurationChanged()) {
-                mChangedStackList.add(stack.mStackId);
-            }
-        }
-        return mChangedStackList.isEmpty() ?
-                null : ArrayUtils.convertToIntArray(mChangedStackList);
+        return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
     }
 
     @Override
@@ -8130,9 +8112,7 @@ public class WindowManagerService extends IWindowManager.Stub
         reconfigureDisplayLocked(displayContent);
     }
 
-    // displayContent must not be null
-    private void reconfigureDisplayLocked(DisplayContent displayContent) {
-        // TODO: Multidisplay: for now only use with default display.
+    void reconfigureDisplayLocked(@NonNull DisplayContent displayContent) {
         if (!mDisplayReady) {
             return;
         }
@@ -8148,9 +8128,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mWaitingForConfig = true;
             startFreezingDisplayLocked(false, 0, 0);
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-            if (!mReconfigureOnConfigurationChanged.contains(displayContent)) {
-                mReconfigureOnConfigurationChanged.add(displayContent);
-            }
         }
 
         mWindowPlacerLocked.performSurfacePlacement();

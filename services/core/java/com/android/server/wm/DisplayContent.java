@@ -40,6 +40,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -60,6 +61,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
 }
@@ -210,6 +212,23 @@ class DisplayContent {
             }
         }
         return null;
+    }
+
+    /** Callback used to notify about configuration changes. */
+    void onConfigurationChanged(@NonNull List<Integer> changedStackList) {
+        // The display size information is heavily dependent on the resources in the current
+        // configuration, so we need to reconfigure it every time the configuration changes.
+        // See {@link PhoneWindowManager#setInitialDisplaySize}...sigh...
+        mService.reconfigureDisplayLocked(this);
+
+        getDockedDividerController().onConfigurationChanged();
+
+        for (int i = 0; i < mStacks.size(); i++) {
+            final TaskStack stack = mStacks.get(i);
+            if (stack.onConfigurationChanged()) {
+                changedStackList.add(stack.mStackId);
+            }
+        }
     }
 
     void checkAppWindowsReadyToShow() {
