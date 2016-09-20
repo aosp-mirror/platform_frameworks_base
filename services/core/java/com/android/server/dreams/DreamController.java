@@ -26,6 +26,7 @@ import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
 import android.os.SystemClock;
@@ -116,19 +117,19 @@ final class DreamController {
     }
 
     public void startDream(Binder token, ComponentName name,
-            boolean isTest, boolean canDoze, int userId) {
+            boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
         stopDream(true /*immediate*/);
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
         try {
-            // Close the notification shade. Don't need to send to all, but better to be explicit.
+            // Close the notification shade. No need to send to all, but better to be explicit.
             mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
 
             Slog.i(TAG, "Starting dream: name=" + name
                     + ", isTest=" + isTest + ", canDoze=" + canDoze
                     + ", userId=" + userId);
 
-            mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
+            mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId, wakeLock);
 
             mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
@@ -230,6 +231,7 @@ final class DreamController {
             if (oldDream.mBound) {
                 mContext.unbindService(oldDream);
             }
+            oldDream.releaseWakeLockIfNeeded();
 
             try {
                 mIWindowManager.removeWindowToken(oldDream.mToken);
@@ -280,6 +282,7 @@ final class DreamController {
         public final boolean mCanDoze;
         public final int mUserId;
 
+        public PowerManager.WakeLock mWakeLock;
         public boolean mBound;
         public boolean mConnected;
         public IDreamService mService;
@@ -288,12 +291,17 @@ final class DreamController {
         public boolean mWakingGently;
 
         public DreamRecord(Binder token, ComponentName name,
-                boolean isTest, boolean canDoze, int userId) {
+                boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
             mToken = token;
             mName = name;
             mIsTest = isTest;
             mCanDoze = canDoze;
             mUserId  = userId;
+            mWakeLock = wakeLock;
+            // Hold the lock while we're waiting for the service to connect. Released either when
+            // DreamService connects (and is then responsible for keeping the device awake) or
+            // dreaming stops.
+            mWakeLock.acquire();
         }
 
         // May be called on any thread.
@@ -316,12 +324,23 @@ final class DreamController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mConnected = true;
-                    if (mCurrentDream == DreamRecord.this && mService == null) {
-                        attach(IDreamService.Stub.asInterface(service));
+                    try {
+                        mConnected = true;
+                        if (mCurrentDream == DreamRecord.this && mService == null) {
+                            attach(IDreamService.Stub.asInterface(service));
+                        }
+                    } finally {
+                        releaseWakeLockIfNeeded();
                     }
                 }
             });
+        }
+
+        private void releaseWakeLockIfNeeded() {
+            if (mWakeLock != null) {
+                mWakeLock.release();
+                mWakeLock = null;
+            }
         }
 
         // May be called on any thread.
