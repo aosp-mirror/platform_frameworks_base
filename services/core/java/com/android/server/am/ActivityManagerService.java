@@ -2291,6 +2291,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case VR_MODE_CHANGE_MSG: {
                 VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+                if (vrService == null) {
+                    break;
+                }
                 final ActivityRecord r = (ActivityRecord) msg.obj;
                 boolean vrMode;
                 ComponentName requestedPackage;
