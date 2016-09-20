@@ -284,6 +284,15 @@ public final class Display {
      */
     public static final int STATE_DOZE_SUSPEND = 4;
 
+    /**
+     * Display state: The display is on and optimized for VR mode.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     * @hide
+     */
+    public static final int STATE_VR = 5;
+
     /* The color mode constants defined below must be kept in sync with the ones in
      * system/graphics.h */
 
@@ -868,7 +877,8 @@ public final class Display {
      * Gets the state of the display, such as whether it is on or off.
      *
      * @return The state of the display: one of {@link #STATE_OFF}, {@link #STATE_ON},
-     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, or {@link #STATE_UNKNOWN}.
+     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, or
+     * {@link #STATE_UNKNOWN}.
      */
     public int getState() {
         synchronized (this) {
@@ -984,6 +994,8 @@ public final class Display {
                 return "DOZE";
             case STATE_DOZE_SUSPEND:
                 return "DOZE_SUSPEND";
+            case STATE_VR:
+                return "VR";
             default:
                 return Integer.toString(state);
         }

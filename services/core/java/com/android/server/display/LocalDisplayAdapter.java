@@ -471,6 +471,16 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             }
                         }
 
+                        // If the state change was from or to VR, then we need to tell the light
+                        // so that it can apply appropriate VR brightness settings. This should
+                        // happen prior to changing the brightness but also if there is no
+                        // brightness change at all.
+                        if ((state == Display.STATE_VR || currentState == Display.STATE_VR) &&
+                                currentState != state) {
+                            setVrMode(state == Display.STATE_VR);
+                        }
+
+
                         // Apply brightness changes given that we are in a non-suspended state.
                         if (brightnessChanged) {
                             setDisplayBrightness(brightness);
@@ -480,6 +490,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         if (state != currentState) {
                             setDisplayState(state);
                         }
+                    }
+
+                    private void setVrMode(boolean isVrEnabled) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "setVrMode("
+                                    + "id=" + displayId
+                                    + ", state=" + Display.stateToString(state) + ")");
+                        }
+                        mBacklight.setVrMode(isVrEnabled);
                     }
 
                     private void setDisplayState(int state) {
