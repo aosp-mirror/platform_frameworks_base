@@ -2065,7 +2065,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeepaliveTracker.dump(pw);
 
         pw.println();
+        dumpAvoidBadWifiSettings(pw);
 
+        pw.println();
         if (mInetLog != null && mInetLog.size() > 0) {
             pw.println();
             pw.println("Inet condition reports:");
@@ -2779,6 +2781,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
         boolean prev = mAvoidBadWifi;
         mAvoidBadWifi = settingAvoidBadWifi || !configRestrictsAvoidBadWifi();
         return mAvoidBadWifi != prev;
+    }
+
+    private void dumpAvoidBadWifiSettings(IndentingPrintWriter pw) {
+        boolean configRestrict = configRestrictsAvoidBadWifi();
+        if (!configRestrict) {
+            pw.println("Bad Wi-Fi avoidance: unrestricted");
+            return;
+        }
+
+        pw.println("Bad Wi-Fi avoidance: " + avoidBadWifi());
+        pw.increaseIndent();
+        pw.println("Config restrict:   " + configRestrict);
+
+        String value = Settings.Global.getString(
+                mContext.getContentResolver(), Settings.Global.NETWORK_AVOID_BAD_WIFI);
+        String description;
+        // Can't use a switch statement because strings are legal case labels, but null is not.
+        if ("0".equals(value)) {
+            description = "get stuck";
+        } else if (value == null) {
+            description = "prompt";
+        } else if ("1".equals(value)) {
+            description = "avoid";
+        } else {
+            description = value + " (?)";
+        }
+        pw.println("User setting:      " + description);
+        pw.println("Network overrides:");
+        pw.increaseIndent();
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (nai.avoidUnvalidated) {
+                pw.println(nai.name());
+            }
+        }
+        pw.decreaseIndent();
+        pw.decreaseIndent();
     }
 
     private void showValidationNotification(NetworkAgentInfo nai, NotificationType type) {
