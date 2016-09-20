@@ -593,6 +593,7 @@ public final class SystemServer {
                 false);
 
         boolean disableConsumerIr = SystemProperties.getBoolean("config.disable_consumerir", false);
+        boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
@@ -677,9 +678,11 @@ public final class SystemServer {
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
             traceEnd();
 
-            traceBeginAndSlog("StartVrManagerService");
-            mSystemServiceManager.startService(VrManagerService.class);
-            traceEnd();
+            if (!disableVrManager) {
+                traceBeginAndSlog("StartVrManagerService");
+                mSystemServiceManager.startService(VrManagerService.class);
+                traceEnd();
+            }
 
             mActivityManagerService.setWindowManager(wm);
 
