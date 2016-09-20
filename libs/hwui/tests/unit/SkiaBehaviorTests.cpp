@@ -17,8 +17,9 @@
 #include "tests/common/TestUtils.h"
 
 #include <gtest/gtest.h>
-#include <SkShader.h>
 #include <SkColorMatrixFilter.h>
+#include <SkImagePriv.h>
+#include <SkShader.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -29,10 +30,13 @@ using namespace android::uirenderer;
  */
 TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkBitmap origBitmap = TestUtils::createSkBitmap(1, 1);
-    SkAutoTUnref<SkShader> s(SkShader::CreateBitmapShader(
+    sk_sp<SkShader> s = SkMakeBitmapShader(
             origBitmap,
             SkShader::kClamp_TileMode,
-            SkShader::kRepeat_TileMode));
+            SkShader::kRepeat_TileMode,
+            nullptr,
+            kNever_SkCopyPixelsMode,
+            nullptr);
 
     SkBitmap bitmap;
     SkShader::TileMode xy[2];

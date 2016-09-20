@@ -1,5 +1,6 @@
 #include "GraphicsJNI.h"
 #include "SkGradientShader.h"
+#include "SkImagePriv.h"
 #include "SkShader.h"
 #include "SkXfermode.h"
 #include "core_jni_helpers.h"
@@ -94,12 +95,15 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jobject jbitmap,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
         GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     }
-    SkShader* s = SkShader::CreateBitmapShader(bitmap,
-                                        (SkShader::TileMode)tileModeX,
-                                        (SkShader::TileMode)tileModeY);
+    sk_sp<SkShader> s = SkMakeBitmapShader(bitmap,
+                                           (SkShader::TileMode)tileModeX,
+                                           (SkShader::TileMode)tileModeY,
+                                           nullptr,
+                                           kNever_SkCopyPixelsMode,
+                                           nullptr);
 
-    ThrowIAE_IfNull(env, s);
-    return reinterpret_cast<jlong>(s);
+    ThrowIAE_IfNull(env, s.get());
+    return reinterpret_cast<jlong>(s.release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
