@@ -1233,7 +1233,7 @@ public class Notification implements Parcelable
                     getIcon(),
                     title,
                     actionIntent, // safe to alias
-                    new Bundle(mExtras),
+                    mExtras == null ? new Bundle() : new Bundle(mExtras),
                     getRemoteInputs(),
                     getAllowGeneratedReplies());
         }
