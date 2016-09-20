@@ -7429,11 +7429,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int updateSystemUiVisibilityLw() {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
-        final WindowState win = mFocusedWindow != null ? mFocusedWindow
+        WindowState winCandidate = mFocusedWindow != null ? mFocusedWindow
                 : mTopFullscreenOpaqueWindowState;
-        if (win == null) {
+        if (winCandidate == null) {
             return 0;
         }
+        if (winCandidate.getAttrs().token == mImmersiveModeConfirmation.getWindowToken()) {
+            // The immersive mode confirmation should never affect the system bar visibility,
+            // otherwise it will unhide the navigation bar and hide itself.
+            winCandidate = isStatusBarKeyguard() ? mStatusBar : mTopFullscreenOpaqueWindowState;
+            if (winCandidate == null) {
+                return 0;
+            }
+        }
+        final WindowState win = winCandidate;
         if ((win.getAttrs().privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 && mHideLockScreen == true) {
             // We are updating at a point where the keyguard has gotten
             // focus, but we were last in a state where the top window is
