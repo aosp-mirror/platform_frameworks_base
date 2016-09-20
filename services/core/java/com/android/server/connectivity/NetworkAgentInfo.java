@@ -140,11 +140,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public boolean everValidated;
 
     // The result of the last validation attempt on this network (true if validated, false if not).
-    // This bit exists only because we never unvalidate a network once it's been validated, and that
-    // is because the network scoring and revalidation code does not (may not?) deal properly with
-    // networks becoming unvalidated.
-    // TODO: Fix the network scoring code, remove this, and rename everValidated to validated.
     public boolean lastValidated;
+
+    // If true, becoming unvalidated will lower the network's score. This is only meaningful if the
+    // system is configured not to do this for certain networks, e.g., if the
+    // config_networkAvoidBadWifi option is set to 0 and the user has not overridden that via
+    // Settings.Global.NETWORK_AVOID_BAD_WIFI.
+    public boolean avoidUnvalidated;
 
     // Whether a captive portal was ever detected on this network.
     // This is a sticky bit; once set it is never cleared.
@@ -426,8 +428,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Return true on devices configured to ignore score penalty for wifi networks
     // that become unvalidated (b/31075769).
     private boolean ignoreWifiUnvalidationPenalty() {
-        boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-        return isWifi && !mConnService.avoidBadWifi() && everValidated;
+        boolean isWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        boolean avoidBadWifi = mConnService.avoidBadWifi() || avoidUnvalidated;
+        return isWifi && !avoidBadWifi && everValidated;
     }
 
     // Get the current score for this Network.  This may be modified from what the
