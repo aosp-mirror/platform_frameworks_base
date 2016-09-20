@@ -4127,8 +4127,8 @@ METADATA['en'].collections = {
   "develop/landing/tools": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=ZOz_yr8Yxq8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
-      "https://www.youtube.com/watch?v=eOV2owswDkE&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=NbHsi3-uR8E&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=-SY5nkNVUn0&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
       "https://www.youtube.com/watch?v=StqAZ1OQbqA&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
       "https://www.youtube.com/watch?v=-SY5nkNVUn0&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
       "https://www.youtube.com/watch?v=4rI4tTd7-J8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
@@ -5568,7 +5568,7 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
     "https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
-    "http://android-developers.blogspot.com/2016/04/android-studio-2-0.html",
+    "https://android-developers.blogspot.com/2016/09/android-studio-2-2.html",
     "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
