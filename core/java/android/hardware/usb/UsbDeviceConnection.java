@@ -198,9 +198,10 @@ public class UsbDeviceConnection {
      * </p>
      *
      * @param endpoint the endpoint for this transaction
-     * @param buffer buffer for data to send or receive
+     * @param buffer buffer for data to send or receive; can be {@code null} to wait for next
+     *               transaction without reading data
      * @param length the length of the data to send or receive
-     * @param timeout in milliseconds
+     * @param timeout in milliseconds, 0 is infinite
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      */
@@ -217,7 +218,7 @@ public class UsbDeviceConnection {
      * @param buffer buffer for data to send or receive
      * @param offset the index of the first byte in the buffer to send or receive
      * @param length the length of the data to send or receive
-     * @param timeout in milliseconds
+     * @param timeout in milliseconds, 0 is infinite
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      */
@@ -269,7 +270,7 @@ public class UsbDeviceConnection {
 
     private static void checkBounds(byte[] buffer, int start, int length) {
         final int bufferLength = (buffer != null ? buffer.length : 0);
-        if (start < 0 || start + length > bufferLength) {
+        if (length < 0 || start < 0 || start + length > bufferLength) {
             throw new IllegalArgumentException("Buffer start or length out of bounds.");
         }
     }
