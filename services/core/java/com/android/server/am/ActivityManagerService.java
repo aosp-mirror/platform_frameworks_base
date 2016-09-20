@@ -1125,11 +1125,14 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     Configuration mGlobalConfiguration = new Configuration();
 
-    /**
-     * Current sequencing integer of the configuration, for skipping old
-     * configurations.
-     */
+    /** Current sequencing integer of the configuration, for skipping old configurations. */
     private int mConfigurationSeq;
+
+    /**
+     * Temp object used when global configuration is updated. It is also sent to outer world
+     * instead of {@link #mGlobalConfiguration} because we don't trust anyone...
+     */
+    private Configuration mTempGlobalConfig = new Configuration();
 
     boolean mSuppressResizeConfigChanges;
 
@@ -18836,6 +18839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         throw new SecurityException(msg);
     }
 
+    @Override
     public void updateConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");
@@ -18860,10 +18864,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void updateUserConfigurationLocked() {
-        Configuration configuration = new Configuration(mGlobalConfiguration);
+        final Configuration configuration = new Configuration(mGlobalConfiguration);
+        final int currentUserId = mUserController.getCurrentUserIdLocked();
         Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
-                mUserController.getCurrentUserIdLocked(), Settings.System.canWrite(mContext));
-        updateConfigurationLocked(configuration, null, false);
+                currentUserId, Settings.System.canWrite(mContext));
+        updateConfigurationLocked(configuration, null /* starting */, false /* initLocale */,
+                false /* persistent */, currentUserId, false /* deferResume */);
     }
 
     boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
@@ -18894,130 +18900,147 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
             boolean initLocale, boolean persistent, int userId, boolean deferResume) {
         int changes = 0;
+        boolean kept = true;
 
         if (mWindowManager != null) {
             mWindowManager.deferSurfaceLayout();
         }
-        if (values != null) {
-            Configuration newConfig = new Configuration(mGlobalConfiguration);
-            changes = newConfig.updateFrom(values);
-            if (changes != 0) {
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
-                        "Updating configuration to: " + values);
-
-                EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
-
-                if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
-                    final LocaleList locales = values.getLocales();
-                    int bestLocaleIndex = 0;
-                    if (locales.size() > 1) {
-                        if (mSupportedSystemLocales == null) {
-                            mSupportedSystemLocales =
-                                    Resources.getSystem().getAssets().getLocales();
-                        }
-                        bestLocaleIndex = Math.max(0,
-                                locales.getFirstMatchIndex(mSupportedSystemLocales));
-                    }
-                    SystemProperties.set("persist.sys.locale",
-                            locales.get(bestLocaleIndex).toLanguageTag());
-                    LocaleList.setDefault(locales, bestLocaleIndex);
-                    mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
-                            locales.get(bestLocaleIndex)));
-                }
-
-                mConfigurationSeq++;
-                if (mConfigurationSeq <= 0) {
-                    mConfigurationSeq = 1;
-                }
-                newConfig.seq = mConfigurationSeq;
-                mGlobalConfiguration = newConfig;
-                Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + newConfig);
-                mUsageStatsService.reportConfigurationChange(newConfig,
-                        mUserController.getCurrentUserIdLocked());
-                //mUsageStatsService.noteStartConfig(newConfig);
-
-                final Configuration configCopy = new Configuration(mGlobalConfiguration);
-
-                // TODO: If our config changes, should we auto dismiss any currently
-                // showing dialogs?
-                mShowDialogs = shouldShowDialogs(newConfig, mInVrMode);
-
-                AttributeCache ac = AttributeCache.instance();
-                if (ac != null) {
-                    ac.updateConfiguration(configCopy);
-                }
-
-                // Make sure all resources in our process are updated
-                // right now, so that anyone who is going to retrieve
-                // resource values after we return will be sure to get
-                // the new ones.  This is especially important during
-                // boot, where the first config change needs to guarantee
-                // all resources have that config before following boot
-                // code is executed.
-                mSystemThread.applyConfigurationToResources(configCopy);
-
-                if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
-                    Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
-                    msg.obj = new Configuration(configCopy);
-                    msg.arg1 = userId;
-                    mHandler.sendMessage(msg);
-                }
-
-                final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-                if (isDensityChange) {
-                    // Reset the unsupported display size dialog.
-                    mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
-
-                    killAllBackgroundProcessesExcept(Build.VERSION_CODES.N,
-                            ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
-                }
-
-                for (int i=mLruProcesses.size()-1; i>=0; i--) {
-                    ProcessRecord app = mLruProcesses.get(i);
-                    try {
-                        if (app.thread != null) {
-                            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                                    + app.processName + " new config " + mGlobalConfiguration);
-                            app.thread.scheduleConfigurationChanged(configCopy);
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-                Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_REPLACE_PENDING
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
-                        null, AppOpsManager.OP_NONE, null, false, false,
-                        MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-                if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
-                    intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
-                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                    if (!mProcessesReady) {
-                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                    }
-                    broadcastIntentLocked(null, null, intent,
-                            null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, Process.SYSTEM_UID, UserHandle.USER_ALL);
-                }
+        try {
+            if (values != null) {
+                changes = updateGlobalConfiguration(values, initLocale, persistent, userId,
+                        deferResume);
             }
-            // Update the configuration with WM first and check if any of the stacks need to be
-            // resized due to the configuration change. If so, resize the stacks now and do any
-            // relaunches if necessary. This way we don't need to relaunch again below in
-            // ensureActivityConfigurationLocked().
+
+            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
+        } finally {
             if (mWindowManager != null) {
-                final int[] resizedStacks =
-                        mWindowManager.setNewConfiguration(mGlobalConfiguration);
-                if (resizedStacks != null) {
-                    for (int stackId : resizedStacks) {
-                        final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
-                        mStackSupervisor.resizeStackLocked(
-                                stackId, newBounds, null, null, false, false, deferResume);
-                    }
+                mWindowManager.continueSurfaceLayout();
+            }
+        }
+        return kept;
+    }
+
+    /** Update default (global) configuration and notify listeners about changes. */
+    private int updateGlobalConfiguration(@NonNull Configuration values, boolean initLocale,
+            boolean persistent, int userId, boolean deferResume) {
+        mTempGlobalConfig.setTo(mGlobalConfiguration);
+        final int changes = mTempGlobalConfig.updateFrom(values);
+        if (changes == 0) {
+            return 0;
+        }
+
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
+                "Updating global configuration to: " + values);
+
+        EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
+
+        if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
+            final LocaleList locales = values.getLocales();
+            int bestLocaleIndex = 0;
+            if (locales.size() > 1) {
+                if (mSupportedSystemLocales == null) {
+                    mSupportedSystemLocales = Resources.getSystem().getAssets().getLocales();
+                }
+                bestLocaleIndex = Math.max(0, locales.getFirstMatchIndex(mSupportedSystemLocales));
+            }
+            SystemProperties.set("persist.sys.locale",
+                    locales.get(bestLocaleIndex).toLanguageTag());
+            LocaleList.setDefault(locales, bestLocaleIndex);
+            mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
+                    locales.get(bestLocaleIndex)));
+        }
+
+        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
+        mTempGlobalConfig.seq = mConfigurationSeq;
+
+        mGlobalConfiguration.setTo(mTempGlobalConfig);
+        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempGlobalConfig);
+        // TODO(multi-display): Update UsageEvents#Event to include displayId.
+        mUsageStatsService.reportConfigurationChange(mTempGlobalConfig,
+                mUserController.getCurrentUserIdLocked());
+
+        // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
+        mShowDialogs = shouldShowDialogs(mTempGlobalConfig, mInVrMode);
+
+        AttributeCache ac = AttributeCache.instance();
+        if (ac != null) {
+            ac.updateConfiguration(mTempGlobalConfig);
+        }
+
+        // Make sure all resources in our process are updated right now, so that anyone who is going
+        // to retrieve resource values after we return will be sure to get the new ones. This is
+        // especially important during boot, where the first config change needs to guarantee all
+        // resources have that config before following boot code is executed.
+        mSystemThread.applyConfigurationToResources(mTempGlobalConfig);
+
+        // We need another copy of global config because we're scheduling some calls instead of
+        // running them in place. We need to be sure that object we send will be handled unchanged.
+        final Configuration configCopy = new Configuration(mGlobalConfiguration);
+        if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
+            Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
+            msg.obj = configCopy;
+            msg.arg1 = userId;
+            mHandler.sendMessage(msg);
+        }
+
+        // TODO(multi-display): Clear also on secondary display density change?
+        final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
+        if (isDensityChange) {
+            // Reset the unsupported display size dialog.
+            mUiHandler.sendEmptyMessage(SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG);
+
+            killAllBackgroundProcessesExcept(Build.VERSION_CODES.N,
+                    ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        }
+
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+            ProcessRecord app = mLruProcesses.get(i);
+            try {
+                if (app.thread != null) {
+                    if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
+                            + app.processName + " new config " + configCopy);
+                    app.thread.scheduleConfigurationChanged(configCopy);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_REPLACE_PENDING
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
+                AppOpsManager.OP_NONE, null, false, false, MY_PID, Process.SYSTEM_UID,
+                UserHandle.USER_ALL);
+        if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
+            intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            if (!mProcessesReady) {
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            }
+            broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
+                    AppOpsManager.OP_NONE, null, false, false, MY_PID, Process.SYSTEM_UID,
+                    UserHandle.USER_ALL);
+        }
+
+        // Update the configuration with WM first and check if any of the stacks need to be resized
+        // due to the configuration change. If so, resize the stacks now and do any relaunches if
+        // necessary. This way we don't need to relaunch again afterwards in
+        // ensureActivityConfigurationLocked().
+        if (mWindowManager != null) {
+            final int[] resizedStacks =
+                    mWindowManager.setNewConfiguration(mTempGlobalConfig);
+            if (resizedStacks != null) {
+                for (int stackId : resizedStacks) {
+                    resizeStackWithBoundsFromWindowManager(stackId, deferResume);
                 }
             }
         }
 
+        return changes;
+    }
+
+    /** Applies latest configuration and/or visibility updates if needed. */
+    private boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
         boolean kept = true;
         final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
         // mainStack is null during startup.
@@ -19037,10 +19060,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                         !PRESERVE_WINDOWS);
             }
         }
-        if (mWindowManager != null) {
-            mWindowManager.continueSurfaceLayout();
-        }
+
         return kept;
+    }
+
+    /** Helper method that requests bounds from WM and applies them to stack. */
+    private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
+        final Rect newBounds = mWindowManager.getBoundsForNewConfiguration(stackId);
+        mStackSupervisor.resizeStackLocked(
+                stackId, newBounds, null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);
     }
 
     /**

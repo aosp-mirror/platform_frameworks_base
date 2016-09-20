@@ -1932,6 +1932,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
         // This method might be called before the policy has been fully initialized
         // or for other displays we don't care about.
+        // TODO(multi-display): Define policy for secondary displays.
         if (mContext == null || display.getDisplayId() != Display.DEFAULT_DISPLAY) {
             return;
         }
@@ -2027,6 +2028,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setDisplayOverscan(Display display, int left, int top, int right, int bottom) {
+        // TODO(multi-display): Define policy for secondary displays.
         if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
             mOverscanLeft = left;
             mOverscanTop = top;
@@ -2428,6 +2430,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void onConfigurationChanged() {
+        // TODO(multi-display): Define policy for secondary displays.
         final Resources res = mContext.getResources();
 
         mStatusBarHeight =
