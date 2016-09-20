@@ -235,7 +235,7 @@ separate subvalues. For example, the syntax for the CSV file is as follows:</p>
 
 <p>"<em>product_id</em>","<em>publish_state</em>","<em>purchase_type</em>","<em>autotranslate</em>
 ","<em>locale</em>; <em>title</em>; <em>description</em>","<em>autofill</em>","<em>country</em>;
-<em>price</em>"
+<em>price</em>", "<em>pricing_template_id</em>"
 </p>
 
 <p>Descriptions and usage details are provided below.</p>
@@ -316,8 +316,9 @@ separate subvalues. For example, the syntax for the CSV file is as follows:</p>
         <p>"true","<em>default_price_in_home_currency</em>"
       </li>
       <li>
-        <p>If <em>autofill</em> is set to <code>false</code>, you need to specify a <em>country</em>
-        and a <em>price</em> for each currency, and you must use the following syntax:</p>
+        <p>If <em>autofill</em> is set to <code>false</code>, you need to either specify the <em>pricing_template_id</em>
+        that is linked to the in-app product or specify a <em>country</em> and a <em>price</em> for each currency.
+        If you choose to specify countries and prices, you must use the following syntax:</p>
         <p>"false", "<em>home_country</em>; <em>default_price_in_home_currency</em>; <em>country_2</em>;
         <em>country_2_price</em>; <em>country_3</em>; <em>country_3_price</em>; ..."</p>
       </li>
@@ -335,11 +336,41 @@ separate subvalues. For example, the syntax for the CSV file is as follows:</p>
   </dd>
   <dt>price</dt>
   <dd>
+    <p>
+    If you use this value, you shouldn't specify a value for the <em>pricing_template_id</em>.
+    </p>
+    <p>
     This is equivalent to the Price in the In-app Products UI. The price must be specified in
     micro-units. To convert a currency value to micro-units, you multiply the real value by
     1,000,000.
     For example, if you want to sell an in-app item for $1.99, you specify <code>1990000</code> in the
     <em>price</em> field.
+    </p>
+  </dd>
+  <dt>pricing_template_id</dt>
+  <dd>
+  <p>
+    If you use this value, you should set <em>autofill</em> to
+    <code>false</code> and leave the <em>price</em> column empty.
+  </p>
+  <p>
+    This value represents the ID of the pricing template that you've linked to
+    the in-app product. This ID appears under a pricing template's name
+    on the <strong>Pricing template</strong> page. If an in-app product isn't
+    linked to a pricing template, its <em>pricing_template_id</em> value is
+    empty.
+  </p>
+  <p>
+    If you import a CSV file and choose to overwrite the product list, you can
+    update the links between in-app products and pricing templates by changing
+    the value of an in-app product's <em>pricing_template_id</em>. Leave the
+    value empty to unlink an in-app product from all pricing templates.
+  </p>
+  <p>
+    <strong>Note: </strong>You can link up to 100 app prices or in-app product
+    prices with a particular pricing template. Therefore, don't specify the same
+    <em>pricing_template_id</em> value in more than 100 rows of your CSV file.
+  </p>
   </dd>
 </dl>
 
@@ -432,8 +463,11 @@ with the <em>locale</em> field.</p>
 
 <p>
   When creating a pricing template, you provide new pricing information that you
-  can apply to paid apps and in-app products. To add a pricing template, do the
-  following:
+  can apply to paid apps and in-app products. You can link the prices of up to
+  100 apps and in-app products to a single pricing template.
+</p>
+</p>
+  To add a pricing template, do the following:
 </p>
 
 <ol>
