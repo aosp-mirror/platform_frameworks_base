@@ -75,7 +75,7 @@ nonavpage=true
     <div class="col-7of16 col-pull-6of16">
         <h1 class="dac-hero-title" style="color:#004d40">Android Studio 2.2!</h1>
 <p class="dac-hero-description" style="color:#004d40">The latest update is
-packed with over a dozen new features, like a rewritten layout editor with the
+packed with over 20 new features, like a rewritten layout editor with the
 new constraint layout, support for Android 7.0 Nougat, Espresso test recording,
 enhanced Jack compiler / Java 8 support, expanded C++ support with CMake and
 NDK-Build, and much more!</p>
