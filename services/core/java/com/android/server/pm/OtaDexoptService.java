@@ -172,6 +172,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             Log.i(TAG, "Cleaning up OTA Dexopt state.");
         }
         mDexoptCommands = null;
+        availableSpaceAfterDexopt = getAvailableSpace();
 
         performMetricsLogging();
     }
