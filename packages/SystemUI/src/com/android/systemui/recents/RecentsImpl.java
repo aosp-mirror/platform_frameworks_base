@@ -216,11 +216,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * {@link Recents#onBusEvent(RecentsVisibilityChangedEvent)}.
      */
     public void onVisibilityChanged(Context context, boolean visible) {
-        SystemUIApplication app = (SystemUIApplication) context;
-        PhoneStatusBar statusBar = app.getComponent(PhoneStatusBar.class);
-        if (statusBar != null) {
-            statusBar.updateRecentsVisibility(visible);
-        }
+        Recents.getSystemServices().setRecentsVisibility(visible);
     }
 
     /**

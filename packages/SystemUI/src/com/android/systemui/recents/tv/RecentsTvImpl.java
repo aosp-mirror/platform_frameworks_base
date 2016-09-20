@@ -140,10 +140,6 @@ public class RecentsTvImpl extends RecentsImpl{
 
     @Override
     public void onVisibilityChanged(Context context, boolean visible) {
-        SystemUIApplication app = (SystemUIApplication) context;
-        TvStatusBar statusBar = app.getComponent(TvStatusBar.class);
-        if (statusBar != null) {
-            statusBar.updateRecentsVisibility(visible);
-        }
+        Recents.getSystemServices().setRecentsVisibility(visible);
     }
 }
