@@ -51,7 +51,7 @@ review your mouse and keyboard interactions.
     &lt;!-- Some Chromebooks don't support touch. Although not essential,
          it's a good idea to explicitly include this declaration. --&gt;
     &lt;uses-feature android:name="android.hardware.touchscreen"
-                  required="false" /&gt;
+                  android:required="false" /&gt;
 &lt;/manifest&gt;
 </pre>
 
