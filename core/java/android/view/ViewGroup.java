@@ -1451,7 +1451,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             View target = findFrontmostDroppableChildAt(event.mX, event.mY, localPoint);
 
             if (target != mCurrentDragChild) {
-                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                if (sCascadedDragDrop) {
                     // For pre-Nougat apps, make sure that the whole hierarchy of views that contain
                     // the drag location is kept in the state between ENTERED and EXITED events.
                     // (Starting with N, only the innermost view will be in that state).
@@ -1494,10 +1494,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     event.mX = tx;
                     event.mY = ty;
 
-                    if (!event.mEventHandlerWasCalled && mIsInterestedInDrag) {
-                        // The child didn't invoke any event handler, but this view is interested in
-                        // drag, so the event goes to this view.
-                        retval = super.dispatchDragEvent(event);
+                    if (mIsInterestedInDrag) {
+                        final boolean eventWasConsumed;
+                        if (sCascadedDragDrop) {
+                            eventWasConsumed = retval;
+                        } else {
+                            eventWasConsumed = event.mEventHandlerWasCalled;
+                        }
+
+                        if (!eventWasConsumed) {
+                            retval = super.dispatchDragEvent(event);
+                        }
                     }
                 } else {
                     retval = super.dispatchDragEvent(event);
