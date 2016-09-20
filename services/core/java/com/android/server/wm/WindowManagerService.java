@@ -3859,6 +3859,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // If this is true we have updated our desired orientation, but not yet
+    // changed the real orientation our applied our screen rotation animation.
+    // For example, because a previous screen rotation was in progress.
+    boolean rotationNeedsUpdateLocked() {
+        int rotation = mPolicy.rotationForOrientationLw(mLastOrientation, mRotation);
+        boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
+                mLastOrientation, rotation);
+        if (mRotation == rotation && mAltOrientation == altOrientation) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public int[] setNewConfiguration(Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
