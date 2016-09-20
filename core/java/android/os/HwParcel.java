@@ -53,21 +53,13 @@ public class HwParcel {
     public native final void writeDouble(double val);
     public native final void writeString(String val);
 
-    public native final void writeBoolArray(int size, boolean[] val);
     public native final void writeBoolVector(boolean[] val);
-    public native final void writeInt8Array(int size, byte[] val);
     public native final void writeInt8Vector(byte[] val);
-    public native final void writeInt16Array(int size, short[] val);
     public native final void writeInt16Vector(short[] val);
-    public native final void writeInt32Array(int size, int[] val);
     public native final void writeInt32Vector(int[] val);
-    public native final void writeInt64Array(int size, long[] val);
     public native final void writeInt64Vector(long[] val);
-    public native final void writeFloatArray(int size, float[] val);
     public native final void writeFloatVector(float[] val);
-    public native final void writeDoubleArray(int size, double[] val);
     public native final void writeDoubleVector(double[] val);
-    public native final void writeStringArray(int size, String[] val);
     public native final void writeStringVector(String[] val);
 
     public native final void writeStrongBinder(IHwBinder binder);
@@ -82,21 +74,13 @@ public class HwParcel {
     public native final double readDouble();
     public native final String readString();
 
-    public native final boolean[] readBoolArray(int size);
     public native final boolean[] readBoolVector();
-    public native final byte[] readInt8Array(int size);
     public native final byte[] readInt8Vector();
-    public native final short[] readInt16Array(int size);
     public native final short[] readInt16Vector();
-    public native final int[] readInt32Array(int size);
     public native final int[] readInt32Vector();
-    public native final long[] readInt64Array(int size);
     public native final long[] readInt64Vector();
-    public native final float[] readFloatArray(int size);
     public native final float[] readFloatVector();
-    public native final double[] readDoubleArray(int size);
     public native final double[] readDoubleVector();
-    public native final String[] readStringArray(int size);
     public native final String[] readStringVector();
 
     public native final IHwBinder readStrongBinder();

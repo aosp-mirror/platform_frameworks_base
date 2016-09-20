@@ -26,9 +26,6 @@
 namespace android {
 
 #define DECLARE_ALLOC_METHODS(Suffix,Type)                          \
-    const Type *allocTemporary ## Suffix ## Array(                  \
-            JNIEnv *env, Type ## Array arrayObj);                   \
-                                                                    \
     const ::android::hardware::hidl_vec<Type> *                     \
     allocTemporary ## Suffix ## Vector(                             \
             JNIEnv *env, Type ## Array arrayObj);
