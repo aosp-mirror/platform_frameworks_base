@@ -2541,6 +2541,7 @@ com.android.internal.os.RuntimeInit
 com.android.internal.os.RuntimeInit$1
 com.android.internal.os.RuntimeInit$Arguments
 com.android.internal.os.RuntimeInit$UncaughtHandler
+com.android.internal.os.RoSystemProperties
 com.android.internal.os.SamplingProfilerIntegration
 com.android.internal.os.SomeArgs
 com.android.internal.os.Zygote

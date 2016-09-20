@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 
@@ -935,7 +936,7 @@ public class ActivityManager {
 
     /** @hide */
     public static boolean isLowRamDeviceStatic() {
-        return "true".equals(SystemProperties.get("ro.config.low_ram", "false"));
+        return RoSystemProperties.CONFIG_LOW_RAM;
     }
 
     /**

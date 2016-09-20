@@ -16,7 +16,13 @@
 
 package android.os;
 
+import android.util.Log;
+import android.util.MutableInt;
+
+import com.android.internal.annotations.GuardedBy;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -25,12 +31,44 @@ import java.util.ArrayList;
  *
  * {@hide}
  */
-public class SystemProperties
-{
+public class SystemProperties {
+    private static final String TAG = "SystemProperties";
+    private static final boolean TRACK_KEY_ACCESS = false;
+
     public static final int PROP_NAME_MAX = 31;
     public static final int PROP_VALUE_MAX = 91;
 
     private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
+
+    @GuardedBy("sRoReads")
+    private static final HashMap<String, MutableInt> sRoReads;
+    static {
+        if (TRACK_KEY_ACCESS) {
+            sRoReads = new HashMap<>();
+        } else {
+            sRoReads = null;
+        }
+    }
+
+    private static void onKeyAccess(String key) {
+        if (!TRACK_KEY_ACCESS) return;
+
+        if (key != null && key.startsWith("ro.")) {
+            synchronized (sRoReads) {
+                MutableInt numReads = sRoReads.getOrDefault(key, null);
+                if (numReads == null) {
+                    numReads = new MutableInt(0);
+                    sRoReads.put(key, numReads);
+                }
+                numReads.value++;
+                if (numReads.value > 3) {
+                    Log.d(TAG, "Repeated read (count=" + numReads.value
+                            + ") of a read-only system property '" + key + "'",
+                            new Exception());
+                }
+            }
+        }
+    }
 
     private static native String native_get(String key);
     private static native String native_get(String key, String def);
@@ -49,6 +87,7 @@ public class SystemProperties
         if (key.length() > PROP_NAME_MAX) {
             throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
     }
 
@@ -61,6 +100,7 @@ public class SystemProperties
         if (key.length() > PROP_NAME_MAX) {
             throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);
     }
 
@@ -76,6 +116,7 @@ public class SystemProperties
         if (key.length() > PROP_NAME_MAX) {
             throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_int(key, def);
     }
 
@@ -91,6 +132,7 @@ public class SystemProperties
         if (key.length() > PROP_NAME_MAX) {
             throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_long(key, def);
     }
 
@@ -111,6 +153,7 @@ public class SystemProperties
         if (key.length() > PROP_NAME_MAX) {
             throw new IllegalArgumentException("key.length > " + PROP_NAME_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
     }
 
@@ -127,6 +170,7 @@ public class SystemProperties
             throw new IllegalArgumentException("val.length > " +
                 PROP_VALUE_MAX);
         }
+        if (TRACK_KEY_ACCESS) onKeyAccess(key);
         native_set(key, val);
     }
 

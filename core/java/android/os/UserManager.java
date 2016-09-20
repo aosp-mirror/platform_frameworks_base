@@ -42,6 +42,7 @@ import android.telephony.TelephonyManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
+import com.android.internal.os.RoSystemProperties;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -745,7 +746,7 @@ public class UserManager {
      * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
      */
     public static boolean isSplitSystemUser() {
-        return SystemProperties.getBoolean("ro.fw.system_user_split", false);
+        return RoSystemProperties.FW_SYSTEM_USER_SPLIT;
     }
 
     /**
