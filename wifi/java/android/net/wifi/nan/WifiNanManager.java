@@ -58,8 +58,8 @@ import java.util.Arrays;
  * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
  * {@link #attach(Handler, WifiNanAttachCallback)}.
  * <li>Create discovery sessions (publish or subscribe sessions). Refer to
- * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} and
- * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}.
+ * {@link WifiNanSession#publish(Handler, PublishConfig, WifiNanDiscoverySessionCallback)} and
+ * {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}.
  * <li>Create a NAN network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a NAN connection with a peer. Refer to
@@ -85,8 +85,8 @@ import java.util.Arrays;
  *     device will actually disable NAN once the last application detaches.
  * <p>
  *     Once a NAN attach is confirmed use the
- *     {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
- *     {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} to
+ *     {@link WifiNanSession#publish(Handler, PublishConfig, WifiNanDiscoverySessionCallback)} or
+ *     {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)} to
  *     create publish or subscribe NAN discovery sessions. Events are called on the provided
  *     callback object {@link WifiNanDiscoverySessionCallback}. Specifically, the
  *     {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
@@ -332,9 +332,9 @@ public class WifiNanManager {
      * then this function will simply indicate success immediately using the same {@code
      * attachCallback}.
      *
-     * @param handler The Handler on whose thread to execute all callbacks related to the
-     *            attach request - including all sessions opened as part of this
-     *            attach. If a null is provided then the application's main thread will be used.
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * attachCallback} object. If a null is provided then the application's main thread will be
+     *                used.
      * @param attachCallback A callback for attach events, extended from
      * {@link WifiNanAttachCallback}.
      */
@@ -362,12 +362,13 @@ public class WifiNanManager {
      * requirements this listener will wake up the host at regular intervals causing higher power
      * consumption, do not use it unless the information is necessary (e.g. for OOB discovery).
      *
-     * @param handler The Handler on whose thread to execute all callbacks related to the
-     *            attach request - including all sessions opened as part of this
-     *            attach. If a null is provided then the application's main thread will be used.
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * attachCallback} and {@code identityChangedListener} objects. If a null is provided then the
+     *                application's main thread will be used.
      * @param attachCallback A callback for attach events, extended from
      * {@link WifiNanAttachCallback}.
-     * @param identityChangedListener A listener for changed identity.
+     * @param identityChangedListener A listener for changed identity, extended from
+     * {@link WifiNanIdentityChangedListener}.
      */
     public void attach(@Nullable Handler handler, @NonNull WifiNanAttachCallback attachCallback,
             @NonNull WifiNanIdentityChangedListener identityChangedListener) {
@@ -697,7 +698,7 @@ public class WifiNanManager {
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
                             attachCallback.onAttached(
-                                    new WifiNanSession(mgr, mBinder, mLooper, msg.arg1));
+                                    new WifiNanSession(mgr, mBinder, msg.arg1));
                             break;
                         case CALLBACK_CONNECT_FAIL:
                             mNanManager.clear();
