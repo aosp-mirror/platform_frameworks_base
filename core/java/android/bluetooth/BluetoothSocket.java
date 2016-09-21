@@ -191,6 +191,7 @@ public final class BluetoothSocket implements Closeable {
             as.close();
             throw new IOException("bt socket acept failed");
         }
+        as.mPfd = new ParcelFileDescriptor(fds[0]);
         as.mSocket = new LocalSocket(fds[0]);
         as.mSocketIS = as.mSocket.getInputStream();
         as.mSocketOS = as.mSocket.getOutputStream();
