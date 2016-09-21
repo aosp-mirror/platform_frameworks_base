@@ -40,7 +40,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -20881,6 +20880,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      */
     public boolean dispatchDragEvent(DragEvent event) {
+        event.mEventHandlerWasCalled = true;
+        if (event.mAction == DragEvent.ACTION_DRAG_LOCATION ||
+            event.mAction == DragEvent.ACTION_DROP) {
+            // About to deliver an event with coordinates to this view. Notify that now this view
+            // has drag focus. This will send exit/enter events as needed.
+            getViewRootImpl().setDragFocus(this, event);
+        }
+        return callDragEventHandler(event);
+    }
+
+    final boolean callDragEventHandler(DragEvent event) {
         ListenerInfo li = mListenerInfo;
         //noinspection SimplifiableIfStatement
         if (li != null && li.mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
