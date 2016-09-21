@@ -97,7 +97,7 @@ import java.util.Arrays;
  *     the session {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} and
  *     {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}. Sessions can also
  *     be used to send messages using the
- *     {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int)} APIs. When an application
+ *     {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])} APIs. When an application
  *     is finished with a discovery session it <b>must</b> terminate it using the
  *     {@link WifiNanDiscoveryBaseSession#destroy()} API.
  * <p>
