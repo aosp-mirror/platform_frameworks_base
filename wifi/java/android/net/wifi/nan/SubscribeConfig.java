@@ -32,8 +32,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback)} or
- * {@link WifiNanSubscribeSession#updateSubscribe(SubscribeConfig)}.
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} or
+ * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
  */
@@ -350,11 +350,12 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the number of times an active (
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will broadcast. When the count is reached an event will be
-         * generated for {@link WifiNanSessionCallback#onSessionTerminated(int)}
-         * with {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * generated for {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}
+         * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     called.
          *
          * @param subscribeCount Number of subscribe packets to broadcast.
          *
@@ -374,11 +375,12 @@ public final class SubscribeConfig implements Parcelable {
          * {@link SubscribeConfig.Builder#setSubscribeType(int)}) subscribe session
          * will be alive - i.e. broadcasting a packet. When the TTL is reached
          * an event will be generated for
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} with
-         * {@link WifiNanSessionCallback#TERMINATE_REASON_DONE}.
+         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} with
+         * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanSession#terminate()} is called.
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
          *
@@ -397,7 +399,7 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the match style of the subscription - how are matches from a
          * single match session (corresponding to the same publish action on the
          * peer) reported to the host (using the
-         * {@link WifiNanSessionCallback#onMatch(int, byte[], byte[])}
+         * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])}
          * ). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
          * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
@@ -417,7 +419,7 @@ public final class SubscribeConfig implements Parcelable {
 
         /**
          * Configure whether a subscribe terminate notification
-         * {@link WifiNanSessionCallback#onSessionTerminated(int)} is reported
+         * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} is reported
          * back to the callback.
          *
          * @param enable If true the terminate callback will be called when the
