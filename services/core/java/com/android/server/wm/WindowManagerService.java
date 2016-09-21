@@ -8869,6 +8869,32 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setRecentsVisibility(boolean visible) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold permission "
+                    + android.Manifest.permission.STATUS_BAR);
+        }
+
+        synchronized (mWindowMap) {
+            mPolicy.setRecentsVisibilityLw(visible);
+        }
+    }
+
+    @Override
+    public void setTvPipVisibility(boolean visible) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller does not hold permission "
+                    + android.Manifest.permission.STATUS_BAR);
+        }
+
+        synchronized (mWindowMap) {
+            mPolicy.setTvPipVisibilityLw(visible);
+        }
+    }
+
+    @Override
     public void statusBarVisibilityChanged(int visibility) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
