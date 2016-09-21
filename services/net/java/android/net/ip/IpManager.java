@@ -45,6 +45,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.net.NetlinkTracker;
@@ -395,6 +396,7 @@ public class IpManager extends StateMachine {
     private final WakeupMessage mProvisioningTimeoutAlarm;
     private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final LocalLog mLocalLog;
+    private final MessageHandlingLogger mMsgStateLogger;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
     private NetworkInterface mNetworkInterface;
@@ -482,6 +484,7 @@ public class IpManager extends StateMachine {
 
         setInitialState(mStoppedState);
         mLocalLog = new LocalLog(MAX_LOG_RECORDS);
+        mMsgStateLogger = new MessageHandlingLogger();
         super.start();
     }
 
@@ -591,9 +594,9 @@ public class IpManager extends StateMachine {
     @Override
     protected String getLogRecString(Message msg) {
         final String logLine = String.format(
-                "%s/%d %d %d %s",
+                "%s/%d %d %d %s [%s]",
                 mInterfaceName, mNetworkInterface == null ? -1 : mNetworkInterface.getIndex(),
-                msg.arg1, msg.arg2, Objects.toString(msg.obj));
+                msg.arg1, msg.arg2, Objects.toString(msg.obj), mMsgStateLogger);
 
         final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
         mLocalLog.log(richerLogLine);
@@ -601,6 +604,7 @@ public class IpManager extends StateMachine {
             Log.d(mTag, richerLogLine);
         }
 
+        mMsgStateLogger.reset();
         return logLine;
     }
 
@@ -609,7 +613,11 @@ public class IpManager extends StateMachine {
         // Don't log EVENT_NETLINK_LINKPROPERTIES_CHANGED. They can be noisy,
         // and we already log any LinkProperties change that results in an
         // invocation of IpManager.Callback#onLinkPropertiesChange().
-        return (msg.what != EVENT_NETLINK_LINKPROPERTIES_CHANGED);
+        final boolean shouldLog = (msg.what != EVENT_NETLINK_LINKPROPERTIES_CHANGED);
+        if (!shouldLog) {
+            mMsgStateLogger.reset();
+        }
+        return shouldLog;
     }
 
     private void getNetworkInterface() {
@@ -965,7 +973,6 @@ public class IpManager extends StateMachine {
         }
     }
 
-
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -1015,6 +1022,8 @@ public class IpManager extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
+
+            mMsgStateLogger.handled(this, getCurrentState());
             return HANDLED;
         }
     }
@@ -1031,6 +1040,13 @@ public class IpManager extends StateMachine {
         @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
+                case CMD_STOP:
+                    break;
+
+                case DhcpClient.CMD_CLEAR_LINKADDRESS:
+                    clearIPv4Address();
+                    break;
+
                 case DhcpClient.CMD_ON_QUIT:
                     mDhcpClient = null;
                     transitionTo(mStoppedState);
@@ -1039,6 +1055,8 @@ public class IpManager extends StateMachine {
                 default:
                     deferMessage(msg);
             }
+
+            mMsgStateLogger.handled(this, getCurrentState());
             return HANDLED;
         }
     }
@@ -1095,6 +1113,8 @@ public class IpManager extends StateMachine {
                     // is EVENT_NETLINK_LINKPROPERTIES_CHANGED (handled above).
                     deferMessage(msg);
             }
+
+            mMsgStateLogger.handled(this, getCurrentState());
             return HANDLED;
         }
 
@@ -1302,7 +1322,29 @@ public class IpManager extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
+
+            mMsgStateLogger.handled(this, getCurrentState());
             return HANDLED;
+        }
+    }
+
+    private static class MessageHandlingLogger {
+        public String processedInState;
+        public String receivedInState;
+
+        public void reset() {
+            processedInState = null;
+            receivedInState = null;
+        }
+
+        public void handled(State processedIn, IState receivedIn) {
+            processedInState = processedIn.getClass().getSimpleName();
+            receivedInState = receivedIn.getName();
+        }
+
+        public String toString() {
+            return String.format("rcvd_in=%s, proc_in=%s",
+                                 receivedInState, processedInState);
         }
     }
 }
