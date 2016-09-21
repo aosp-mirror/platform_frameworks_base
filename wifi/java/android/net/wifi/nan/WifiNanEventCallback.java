@@ -62,8 +62,11 @@ public class WifiNanEventCallback {
      * Called when NAN connect operation
      * {@link WifiNanManager#connect(android.os.Handler, WifiNanEventCallback)}
      * is completed and that we can now start discovery sessions or connections.
+     *
+     * @param session The NAN connection on which we can execute further NAN operations - e.g.
+     *                discovery, connections.
      */
-    public void onConnectSuccess() {
+    public void onConnectSuccess(WifiNanSession session) {
         /* empty */
     }
 

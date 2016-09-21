@@ -34,8 +34,8 @@ public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession 
     private static final String TAG = "WifiNanPublishDiscSsn";
 
     /** @hide */
-    public WifiNanPublishDiscoverySession(WifiNanManager manager, int sessionId) {
-        super(manager, sessionId);
+    public WifiNanPublishDiscoverySession(WifiNanManager manager, int clientId, int sessionId) {
+        super(manager, clientId, sessionId);
     }
 
     /**
@@ -64,7 +64,7 @@ public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession 
                 return;
             }
 
-            mgr.updatePublish(mSessionId, publishConfig);
+            mgr.updatePublish(mClientId, mSessionId, publishConfig);
         }
     }
 }

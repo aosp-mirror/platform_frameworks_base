@@ -38,7 +38,7 @@ interface IWifiNanManager
     boolean isUsageEnabled();
 
     // client API
-    int connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
+    void connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
             in ConfigRequest configRequest);
     void disconnect(int clientId, in IBinder binder);
 
@@ -48,10 +48,10 @@ interface IWifiNanManager
             in IWifiNanDiscoverySessionCallback callback);
 
     // session API
-    void updatePublish(int clientId, int sessionId, in PublishConfig publishConfig);
-    void updateSubscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
-    void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageId,
+    void updatePublish(int clientId, int discoverySessionId, in PublishConfig publishConfig);
+    void updateSubscribe(int clientId, int discoverySessionId, in SubscribeConfig subscribeConfig);
+    void sendMessage(int clientId, int discoverySessionId, int peerId, in byte[] message, int messageId,
         int retryCount);
-    void terminateSession(int clientId, int sessionId);
-    int startRanging(int clientId, int sessionId, in RttManager.ParcelableRttParams parms);
+    void terminateSession(int clientId, int discoverySessionId);
+    int startRanging(int clientId, int discoverySessionId, in RttManager.ParcelableRttParams parms);
 }
