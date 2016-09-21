@@ -891,7 +891,7 @@ mRowsDeleted = getContentResolver().delete(
     사용자 사전 제공자의 데이터 유형은 제공자의 계약 클래스
 {@link android.provider.UserDictionary.Words}의 참조 문서에 나열되어 있습니다(계약 클래스는
 <a href="#ContractClasses">계약 클래스</a> 섹션에 설명되어 있습니다).
-    @link android.database.Cursor#getType
+    {@link android.database.Cursor#getType
     Cursor.getType()}을 호출해서도 데이터 유형을 결정할 수 있습니다.
 </p>
 <p>
