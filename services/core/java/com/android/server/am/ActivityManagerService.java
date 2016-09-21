@@ -12026,27 +12026,29 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public void requestBugReport(int bugreportType) {
-        String service = null;
+        String extraOptions = null;
         switch (bugreportType) {
             case ActivityManager.BUGREPORT_OPTION_FULL:
-                service = "bugreport";
+                // Default options.
                 break;
             case ActivityManager.BUGREPORT_OPTION_INTERACTIVE:
-                service = "bugreportplus";
+                extraOptions = "bugreportplus";
                 break;
             case ActivityManager.BUGREPORT_OPTION_REMOTE:
-                service = "bugreportremote";
+                extraOptions = "bugreportremote";
                 break;
             case ActivityManager.BUGREPORT_OPTION_WEAR:
-                service = "bugreportwear";
+                extraOptions = "bugreportwear";
                 break;
-        }
-        if (service == null) {
-            throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
-                    + bugreportType);
+            default:
+                throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
+                        + bugreportType);
         }
         enforceCallingPermission(android.Manifest.permission.DUMP, "requestBugReport");
-        SystemProperties.set("ctl.start", service);
+        if (extraOptions != null) {
+            SystemProperties.set("dumpstate.options", extraOptions);
+        }
+        SystemProperties.set("ctl.start", "bugreport");
     }
 
     public static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
