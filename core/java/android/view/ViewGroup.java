@@ -154,6 +154,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     Transformation mInvalidationTransformation;
 
+    // Current frontmost child that can accept drag and lies under the drag location.
+    // Used only to generate ENTER/EXIT events for pre-Nougat aps.
+    private View mCurrentDragChild;
+
     // Metadata about the ongoing drag
     private DragEvent mCurrentDragStartEvent;
     private boolean mIsInterestedInDrag;
@@ -1356,6 +1360,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mLocalPoint;
     }
 
+    @Override
+    boolean dispatchDragEnterExitInPreN(DragEvent event) {
+        if (event.mAction == DragEvent.ACTION_DRAG_EXITED && mCurrentDragChild != null) {
+            // The drag exited a sub-tree of views; notify of the exit all descendants that are in
+            // entered state.
+            // We don't need this recursive delivery for ENTERED events because they get generated
+            // from the recursive delivery of LOCATION/DROP events, and hence, don't need their own
+            // recursion.
+            mCurrentDragChild.dispatchDragEnterExitInPreN(event);
+            mCurrentDragChild = null;
+        }
+        return mIsInterestedInDrag && super.dispatchDragEnterExitInPreN(event);
+    }
+
     // TODO: Write real docs
     @Override
     public boolean dispatchDragEvent(DragEvent event) {
@@ -1368,6 +1386,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         switch (event.mAction) {
         case DragEvent.ACTION_DRAG_STARTED: {
+            // Clear the state to recalculate which views we drag over.
+            mCurrentDragChild = null;
+
             // Set up our tracking of drag-started notifications
             mCurrentDragStartEvent = DragEvent.obtain(event);
             if (mChildrenInterestedInDrag == null) {
@@ -1412,8 +1433,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (child.dispatchDragEvent(event)) {
                         retval = true;
                     }
-                    child.mPrivateFlags2 &= ~View.DRAG_MASK;
-                    child.refreshDrawableState();
                 }
                 childrenInterestedInDrag.clear();
             }
@@ -1434,6 +1453,36 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         case DragEvent.ACTION_DROP: {
             // Find the [possibly new] drag target
             View target = findFrontmostDroppableChildAt(event.mX, event.mY, localPoint);
+
+            if (target != mCurrentDragChild) {
+                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                    // For pre-Nougat apps, make sure that the whole hierarchy of views that contain
+                    // the drag location is kept in the state between ENTERED and EXITED events.
+                    // (Starting with N, only the innermost view will be in that state).
+
+                    final int action = event.mAction;
+                    // Position should not be available for ACTION_DRAG_ENTERED and
+                    // ACTION_DRAG_EXITED.
+                    event.mX = 0;
+                    event.mY = 0;
+
+                    if (mCurrentDragChild != null) {
+                        event.mAction = DragEvent.ACTION_DRAG_EXITED;
+                        mCurrentDragChild.dispatchDragEnterExitInPreN(event);
+                    }
+
+                    if (target != null) {
+                        event.mAction = DragEvent.ACTION_DRAG_ENTERED;
+                        target.dispatchDragEnterExitInPreN(event);
+                    }
+
+                    event.mAction = action;
+                    event.mX = tx;
+                    event.mY = ty;
+                }
+                mCurrentDragChild = target;
+            }
+
             if (target == null && mIsInterestedInDrag) {
                 target = this;
             }

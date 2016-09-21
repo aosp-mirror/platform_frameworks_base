@@ -5528,6 +5528,9 @@ public final class ViewRootImpl implements ViewParent,
                 // A direct EXITED event means that the window manager knows we've just crossed
                 // a window boundary, so the current drag target within this one must have
                 // just been exited. Send the EXITED notification to the current drag view, if any.
+                if (mTargetSdkVersion < Build.VERSION_CODES.N) {
+                    mView.dispatchDragEnterExitInPreN(event);
+                }
                 setDragFocus(null, event);
             } else {
                 // For events with a [screen] location, translate into window coordinates
@@ -5648,7 +5651,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void setDragFocus(View newDragTarget, DragEvent event) {
-        if (mCurrentDragView != newDragTarget) {
+        if (mCurrentDragView != newDragTarget && mTargetSdkVersion >= Build.VERSION_CODES.N) {
             // Send EXITED and ENTERED notifications to the old and new drag focus views.
 
             final float tx = event.mX;
@@ -5661,23 +5664,19 @@ public final class ViewRootImpl implements ViewParent,
             if (mCurrentDragView != null) {
                 event.mAction = DragEvent.ACTION_DRAG_EXITED;
                 mCurrentDragView.callDragEventHandler(event);
-                mCurrentDragView.mPrivateFlags2 &= ~View.PFLAG2_DRAG_HOVERED;
-                mCurrentDragView.refreshDrawableState();
             }
-
-            mCurrentDragView = newDragTarget;
 
             if (newDragTarget != null) {
                 event.mAction = DragEvent.ACTION_DRAG_ENTERED;
                 newDragTarget.callDragEventHandler(event);
-                newDragTarget.mPrivateFlags2 |= View.PFLAG2_DRAG_HOVERED;
-                newDragTarget.refreshDrawableState();
             }
 
             event.mAction = action;
             event.mX = tx;
             event.mY = ty;
         }
+
+        mCurrentDragView = newDragTarget;
     }
 
     private AudioManager getAudioManager() {
