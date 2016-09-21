@@ -55,8 +55,8 @@ public class MetricsLoggerService extends SystemService {
             if (DBG) Log.d(TAG, "onBootPhase: PHASE_SYSTEM_SERVICES_READY");
             publishBinderService(ConnectivityMetricsLogger.CONNECTIVITY_METRICS_LOGGER_SERVICE,
                     mBinder);
-            mDnsListener = new DnsEventListenerService(getContext());
-            publishBinderService(mDnsListener.SERVICE_NAME, mDnsListener);
+            mNetdListener = new NetdEventListenerService(getContext());
+            publishBinderService(mNetdListener.SERVICE_NAME, mNetdListener);
         }
     }
 
@@ -91,7 +91,7 @@ public class MetricsLoggerService extends SystemService {
 
     private final ArrayDeque<ConnectivityMetricsEvent> mEvents = new ArrayDeque<>();
 
-    private DnsEventListenerService mDnsListener;
+    private NetdEventListenerService mNetdListener;
 
     private void enforceConnectivityInternalPermission() {
         getContext().enforceCallingOrSelfPermission(
@@ -223,7 +223,7 @@ public class MetricsLoggerService extends SystemService {
             }
 
             pw.println();
-            mDnsListener.dump(pw);
+            mNetdListener.dump(pw);
         }
 
         public long logEvent(ConnectivityMetricsEvent event) {

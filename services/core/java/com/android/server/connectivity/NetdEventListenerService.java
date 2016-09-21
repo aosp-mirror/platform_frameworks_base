@@ -22,7 +22,7 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkRequest;
-import android.net.metrics.IDnsEventListener;
+import android.net.metrics.INetdEventListener;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -35,13 +35,13 @@ import java.util.TreeMap;
 
 
 /**
- * Implementation of the IDnsEventListener interface.
+ * Implementation of the INetdEventListener interface.
  */
-public class DnsEventListenerService extends IDnsEventListener.Stub {
+public class NetdEventListenerService extends INetdEventListener.Stub {
 
-    public static final String SERVICE_NAME = "dns_listener";
+    public static final String SERVICE_NAME = "netd_listener";
 
-    private static final String TAG = DnsEventListenerService.class.getSimpleName();
+    private static final String TAG = NetdEventListenerService.class.getSimpleName();
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -106,7 +106,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onLost(Network network) {
-            synchronized (DnsEventListenerService.this) {
+            synchronized (NetdEventListenerService.this) {
                 DnsEventBatch batch = mEventBatches.remove(network.netId);
                 if (batch != null) {
                     batch.logAndClear();
@@ -115,7 +115,7 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
         }
     };
 
-    public DnsEventListenerService(Context context) {
+    public NetdEventListenerService(Context context) {
         // We are started when boot is complete, so ConnectivityService should already be running.
         final NetworkRequest request = new NetworkRequest.Builder()
             .clearCapabilities()
