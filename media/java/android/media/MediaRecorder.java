@@ -389,8 +389,8 @@ public class MediaRecorder
         /** @hide Stream over a socket, limited to a single stream */
         public static final int OUTPUT_FORMAT_RTP_AVP = 7;
 
-        /** @hide H.264/AAC data encapsulated in MPEG2/TS */
-        public static final int OUTPUT_FORMAT_MPEG2TS = 8;
+        /** H.264/AAC data encapsulated in MPEG2/TS */
+        public static final int MPEG_2_TS = 8;
 
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
