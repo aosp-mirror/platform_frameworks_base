@@ -2961,6 +2961,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_CONFIGURE_NETWORK_AVOID_BAD_WIFI: {
                     if (updateAvoidBadWifi()) {
                         rematchAllNetworksAndRequests(null, 0);
+                        for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
+                            if (nai.networkCapabilities.hasTransport(
+                                    NetworkCapabilities.TRANSPORT_WIFI)) {
+                                sendUpdatedScoreToFactories(nai);
+                            }
+                        }
                     }
                     break;
                 }
