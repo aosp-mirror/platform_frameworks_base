@@ -16,6 +16,8 @@
 
 package com.android.server.accounts;
 
+import static android.database.sqlite.SQLiteDatabase.deleteDatabase;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,7 +26,7 @@ import android.accounts.Account;
 import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
 import android.app.AppOpsManager;
-import android.app.Notification;
+import android.app.INotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,15 +40,13 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
-import android.test.mock.MockPackageManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
-
-import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -55,29 +55,38 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class AccountManagerServiceTest extends AndroidTestCase {
     private static final String TAG = AccountManagerServiceTest.class.getSimpleName();
 
-    static final String PREN_DB = "pren.db";
-    static final String DE_DB = "de.db";
-    static final String CE_DB = "ce.db";
+    private static final String PREN_DB = "pren.db";
+    private static final String DE_DB = "de.db";
+    private static final String CE_DB = "ce.db";
     private AccountManagerService mAms;
+    private TestInjector mTestInjector;
 
     @Override
     protected void setUp() throws Exception {
         Context realTestContext = getContext();
-        Context mockContext = new MyMockContext(realTestContext);
+        MyMockContext mockContext = new MyMockContext(realTestContext);
         setContext(mockContext);
-        mAms = createAccountManagerService(mockContext, realTestContext);
+        mTestInjector = new TestInjector(realTestContext, mockContext);
+        mAms = new AccountManagerService(mTestInjector);
     }
 
     @Override
     protected void tearDown() throws Exception {
-        SQLiteDatabase.deleteDatabase(new File(mAms.getCeDatabaseName(UserHandle.USER_SYSTEM)));
-        SQLiteDatabase.deleteDatabase(new File(mAms.getDeDatabaseName(UserHandle.USER_SYSTEM)));
-        SQLiteDatabase.deleteDatabase(new File(mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM)));
-        LocalServices.removeServiceForTest(AccountManagerInternal.class);
+        // Let async logging tasks finish, otherwise they may crash due to db being removed
+        CountDownLatch cdl = new CountDownLatch(1);
+        mAms.mHandler.post(() -> {
+            deleteDatabase(new File(mTestInjector.getCeDatabaseName(UserHandle.USER_SYSTEM)));
+            deleteDatabase(new File(mTestInjector.getDeDatabaseName(UserHandle.USER_SYSTEM)));
+            deleteDatabase(new File(mTestInjector.getPreNDatabaseName(UserHandle.USER_SYSTEM)));
+            cdl.countDown();
+        });
+        cdl.await(1, TimeUnit.SECONDS);
         super.tearDown();
     }
 
@@ -230,7 +239,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         Context originalContext = ((MyMockContext)getContext()).mTestContext;
         // create a separate instance of AMS. It initially assumes that user0 is locked
-        AccountManagerService ams2 = createAccountManagerService(getContext(), originalContext);
+        AccountManagerService ams2 = new AccountManagerService(mTestInjector);
 
         // Verify that account can be removed when user is locked
         ams2.removeAccountInternal(a1);
@@ -239,7 +248,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals("Only a2 should be returned", a2, accounts[0]);
 
         // Verify that CE db file is unchanged and still has 2 accounts
-        String ceDatabaseName = mAms.getCeDatabaseName(UserHandle.USER_SYSTEM);
+        String ceDatabaseName = mTestInjector.getCeDatabaseName(UserHandle.USER_SYSTEM);
         int accountsNumber = readNumberOfAccountsFromDbFile(originalContext, ceDatabaseName);
         assertEquals("CE database should still have 2 accounts", 2, accountsNumber);
 
@@ -254,7 +263,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
     @SmallTest
     public void testPreNDatabaseMigration() throws Exception {
-        String preNDatabaseName = mAms.getPreNDatabaseName(UserHandle.USER_SYSTEM);
+        String preNDatabaseName = mTestInjector.getPreNDatabaseName(UserHandle.USER_SYSTEM);
         Context originalContext = ((MyMockContext) getContext()).mTestContext;
         PreNTestDatabaseHelper.createV4Database(originalContext, preNDatabaseName);
         // Assert that database was created with 1 account
@@ -275,8 +284,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 new File(preNDatabaseName).exists());
 
         // Verify that ce/de files are present
-        String deDatabaseName = mAms.getDeDatabaseName(UserHandle.USER_SYSTEM);
-        String ceDatabaseName = mAms.getCeDatabaseName(UserHandle.USER_SYSTEM);
+        String deDatabaseName = mTestInjector.getDeDatabaseName(UserHandle.USER_SYSTEM);
+        String ceDatabaseName = mTestInjector.getCeDatabaseName(UserHandle.USER_SYSTEM);
         assertTrue("DE database file should be created at " + deDatabaseName,
                 new File(deDatabaseName).exists());
         assertTrue("CE database file should be created at " + ceDatabaseName,
@@ -289,13 +298,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             assertTrue(cursor.moveToNext());
             return cursor.getInt(0);
         }
-    }
-
-    private AccountManagerService createAccountManagerService(Context mockContext,
-            Context realContext) {
-        LocalServices.removeServiceForTest(AccountManagerInternal.class);
-        return new MyAccountManagerService(mockContext,
-                new MyMockPackageManager(), new MockAccountAuthenticatorCache(), realContext);
     }
 
     private void unlockSystemUser() {
@@ -366,6 +368,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             this.mAppOpsManager = mock(AppOpsManager.class);
             this.mUserManager = mock(UserManager.class);
             this.mPackageManager = mock(PackageManager.class);
+            when(mPackageManager.checkSignatures(anyInt(), anyInt()))
+                    .thenReturn(PackageManager.SIGNATURE_MATCH);
             final UserInfo ui = new UserInfo(UserHandle.USER_SYSTEM, "user0", 0);
             when(mUserManager.getUserInfo(eq(ui.id))).thenReturn(ui);
         }
@@ -378,6 +382,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         @Override
         public PackageManager getPackageManager() {
             return mPackageManager;
+        }
+
+        @Override
+        public String getPackageName() {
+            return mTestContext.getPackageName();
         }
 
         @Override
@@ -427,47 +436,45 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         }
     }
 
-    static class MyMockPackageManager extends MockPackageManager {
-        @Override
-        public int checkSignatures(final int uid1, final int uid2) {
-            return PackageManager.SIGNATURE_MATCH;
+    static class TestInjector extends AccountManagerService.Injector {
+        private Context mRealContext;
+        TestInjector(Context realContext, MyMockContext mockContext) {
+            super(mockContext);
+            mRealContext = realContext;
         }
 
         @Override
-        public void addOnPermissionsChangeListener(
-                OnPermissionsChangedListener listener) {
-        }
-    }
-
-    static class MyAccountManagerService extends AccountManagerService {
-        private Context mRealTestContext;
-        MyAccountManagerService(Context context, PackageManager packageManager,
-                IAccountAuthenticatorCache authenticatorCache, Context realTestContext) {
-            super(context, packageManager, authenticatorCache);
-            this.mRealTestContext = realTestContext;
+        Looper getMessageHandlerLooper() {
+            return Looper.getMainLooper();
         }
 
         @Override
-        protected void installNotification(final int notificationId, final Notification n, UserHandle user) {
+        void addLocalService(AccountManagerInternal service) {
         }
 
         @Override
-        protected void cancelNotification(final int id, UserHandle user) {
+        IAccountAuthenticatorCache getAccountAuthenticatorCache() {
+            return new MockAccountAuthenticatorCache();
         }
 
         @Override
         protected String getCeDatabaseName(int userId) {
-            return new File(mRealTestContext.getCacheDir(), CE_DB).getPath();
+            return new File(mRealContext.getCacheDir(), CE_DB).getPath();
         }
 
         @Override
         protected String getDeDatabaseName(int userId) {
-            return new File(mRealTestContext.getCacheDir(), DE_DB).getPath();
+            return new File(mRealContext.getCacheDir(), DE_DB).getPath();
         }
 
         @Override
         String getPreNDatabaseName(int userId) {
-            return new File(mRealTestContext.getCacheDir(), PREN_DB).getPath();
+            return new File(mRealContext.getCacheDir(), PREN_DB).getPath();
+        }
+
+        @Override
+        INotificationManager getNotificationManager() {
+            return mock(INotificationManager.class);
         }
     }
 }
