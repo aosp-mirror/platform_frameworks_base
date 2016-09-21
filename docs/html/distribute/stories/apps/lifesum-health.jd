@@ -1,0 +1,60 @@
+page.title=Lifesum Doubles Retention of Google Fit Users Following Integration on Android
+page.metaDescription=Lifesum integrates Google Fit into their app.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/lifesum.png
+page.timestamp=null
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure">
+  <img src="{@docRoot}images/distribute/stories/lifesum-icon.png" />
+</div>
+
+<p>
+  <a class="external-link" href="https://play.google.com/store/apps/details?id=com.sillens.shapeupclub">
+  Lifesum</a> is a health and fitness app from Sweden that was launched on Android in 2012.
+  Since then, the app has had more than five million installs on Android, and Lifesum collaborated
+  with Google for the launch of <a class="external-link" href="http://www.google.com/fit/">
+  Google Fit</a> in 2014. Google Fit soon became a key component of user activity outside the
+  app and has enabled Lifesum to scale partner integrations, accelerate development cycle, and
+  increase user satisfaction and engagement.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  Lifesum integrated Google Fit APIs to gather more insightful data, leading to a shift in
+  focus from simply gathering large amounts of user data to actual analysis of it. Google Fit has
+  also made direct integrations with partners much easier to scale and sometimes even
+  unnecessary, and has largely reduced app development time. Lifesum used findings from the
+  integration to launch their second app, <em>Movesum</em>, a step-counter app that imports steps
+  and calories and displays the information in a fun way. Thanks to the integration, the app was
+  developed in just two weeks.
+</p>
+
+<h3>Results</h3>
+
+<p>
+  Lifesum’s users now actively request integration with Google Fit, resulting in an improvement
+  in the app's ratings and reviews on the Google Play store. Engagement is also much higher for
+  Google Fit-connected users, whose <strong>retention rate is twice that of other Android
+  users</strong>. User retention on Android is 5-10% better than on other platforms.
+</p>
+
+<p>
+  Joakim Hammer, Android developer at Lifesum, says "Google Fit is our infrastructure for
+  integrating with other apps. It's great for the user as it increases the trustworthiness of the
+  data. Personally, it’s been a great experience leading the integration. The implementation was
+  fast and easy, and it has helped us with everything from product development and user
+  engagement, to partnerships."
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about <a class="external-link" href="https://developers.google.com/fit/">
+  The Google Fit SDK</a>.
+</p>
