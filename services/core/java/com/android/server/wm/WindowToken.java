@@ -91,8 +91,10 @@ class WindowToken extends WindowContainer<WindowState> {
             final WindowState win = mChildren.get(i);
             if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM, "removeAllWindows: removing win=" + win);
             win.removeIfPossible();
+            if (mChildren.contains(win)) {
+                removeChild(win);
+            }
         }
-        mChildren.clear();
     }
 
     void setExiting() {
@@ -198,11 +200,6 @@ class WindowToken extends WindowContainer<WindowState> {
             }
         }
         return null;
-    }
-
-    @CallSuper
-    void removeWindow(WindowState win) {
-        mChildren.remove(win);
     }
 
     /** Returns true if the token windows list is empty. */
