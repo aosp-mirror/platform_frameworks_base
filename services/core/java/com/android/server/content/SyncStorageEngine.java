@@ -211,6 +211,12 @@ public class SyncStorageEngine extends Handler {
 
     public static class AuthorityInfo {
         // Legal values of getIsSyncable
+
+        /**
+         * The syncable state is undefined.
+         */
+        public static final int UNDEFINED = -2;
+
         /**
          * Default state for a newly installed adapter. An uninitialized adapter will receive an
          * initialization sync which are governed by a different set of rules to that of regular

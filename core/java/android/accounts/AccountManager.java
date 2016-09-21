@@ -18,7 +18,6 @@ package android.accounts;
 
 import static android.Manifest.permission.GET_ACCOUNTS;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
@@ -180,6 +179,14 @@ public class AccountManager {
     public static final String KEY_ACCOUNT_TYPE = "accountType";
 
     /**
+     * Bundle key used for the {@link IAccountAccessTracker} account access tracker
+     * used for noting the account was accessed when unmarshalled from a parcel.
+     *
+     * @hide
+     */
+    public static final String KEY_ACCOUNT_ACCESS_TRACKER = "accountAccessTracker";
+
+    /**
      * Bundle key used for the auth token value in results
      * from {@link #getAuthToken} and friends.
      */
@@ -264,13 +271,13 @@ public class AccountManager {
     public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
 
     /**
-     * Token for the special case where a UID has access only to an account
-     * but no authenticator specific auth tokens.
+     * Token type for the special case where a UID has access only to an account
+     * but no authenticator specific auth token types.
      *
      * @hide
      */
-    public static final String ACCOUNT_ACCESS_TOKEN =
-            "com.android.abbfd278-af8b-415d-af8b-7571d5dab133";
+    public static final String ACCOUNT_ACCESS_TOKEN_TYPE =
+            "com.android.AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE";
 
     private final Context mContext;
     private final IAccountManager mService;
@@ -919,7 +926,9 @@ public class AccountManager {
             public Account bundleToResult(Bundle bundle) throws AuthenticatorException {
                 String name = bundle.getString(KEY_ACCOUNT_NAME);
                 String type = bundle.getString(KEY_ACCOUNT_TYPE);
-                return new Account(name, type);
+                IAccountAccessTracker tracker = IAccountAccessTracker.Stub.asInterface(
+                        bundle.getBinder(KEY_ACCOUNT_ACCESS_TRACKER));
+                return new Account(name, type, tracker);
             }
         }.start();
     }
@@ -2379,6 +2388,7 @@ public class AccountManager {
                                     result.putString(KEY_ACCOUNT_NAME, null);
                                     result.putString(KEY_ACCOUNT_TYPE, null);
                                     result.putString(KEY_AUTHTOKEN, null);
+                                    result.putBinder(KEY_ACCOUNT_ACCESS_TRACKER, null);
                                     try {
                                         mResponse.onResult(result);
                                     } catch (RemoteException e) {
@@ -2404,9 +2414,13 @@ public class AccountManager {
                                         public void onResult(Bundle value) throws RemoteException {
                                             Account account = new Account(
                                                     value.getString(KEY_ACCOUNT_NAME),
-                                                    value.getString(KEY_ACCOUNT_TYPE));
-                                            mFuture = getAuthToken(account, mAuthTokenType, mLoginOptions,
-                                                    mActivity, mMyCallback, mHandler);
+                                                    value.getString(KEY_ACCOUNT_TYPE),
+                                                    IAccountAccessTracker.Stub.asInterface(
+                                                            value.getBinder(
+                                                                    KEY_ACCOUNT_ACCESS_TRACKER)));
+                                            mFuture = getAuthToken(account, mAuthTokenType,
+                                                    mLoginOptions,  mActivity, mMyCallback,
+                                                    mHandler);
                                         }
 
                                         @Override
@@ -2453,7 +2467,9 @@ public class AccountManager {
                         setException(new AuthenticatorException("account not in result"));
                         return;
                     }
-                    final Account account = new Account(accountName, accountType);
+                    final IAccountAccessTracker tracker = IAccountAccessTracker.Stub.asInterface(
+                            result.getBinder(KEY_ACCOUNT_ACCESS_TRACKER));
+                    final Account account = new Account(accountName, accountType, tracker);
                     mNumAccounts = 1;
                     getAuthToken(account, mAuthTokenType, null /* options */, mActivity,
                             mMyCallback, mHandler);

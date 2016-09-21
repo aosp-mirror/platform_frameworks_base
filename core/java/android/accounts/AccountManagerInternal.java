@@ -28,6 +28,21 @@ import android.os.RemoteCallback;
 public abstract class AccountManagerInternal {
 
     /**
+     * Listener for explicit UID account access grant changes.
+     */
+    public interface OnAppPermissionChangeListener {
+
+        /**
+         * Called when the explicit grant state for a given UID to
+         * access an account changes.
+         *
+         * @param account The account
+         * @param uid The UID for which the grant changed
+         */
+        public void onAppPermissionChanged(Account account, int uid);
+    }
+
+    /**
      * Requests that a given package is given access to an account.
      * The provided callback will be invoked with a {@link android.os.Bundle}
      * containing the result which will be a boolean value mapped to the
@@ -38,7 +53,24 @@ public abstract class AccountManagerInternal {
      * @param userId Concrete user id for which to request.
      * @param callback A callback for receiving the result.
      */
-    public abstract void requestAccountAccess(@NonNull  Account account,
+    public abstract void requestAccountAccess(@NonNull Account account,
             @NonNull String packageName, @IntRange(from = 0) int userId,
             @NonNull RemoteCallback callback);
+
+    /**
+     * Check whether the given UID has access to the account.
+     *
+     * @param account The account
+     * @param uid The UID
+     * @return Whether the UID can access the account
+     */
+    public abstract boolean hasAccountAccess(@NonNull Account account, @IntRange(from = 0) int uid);
+
+    /**
+     * Adds a listener for explicit UID account access grant changes.
+     *
+     * @param listener The listener
+     */
+    public abstract void addOnAppPermissionChangeListener(
+            @NonNull OnAppPermissionChangeListener listener);
 }

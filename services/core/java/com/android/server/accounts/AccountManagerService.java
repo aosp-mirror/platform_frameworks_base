@@ -26,12 +26,14 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.GrantCredentialsPermissionActivity;
+import android.accounts.IAccountAccessTracker;
 import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
 import android.accounts.IAccountManager;
 import android.accounts.IAccountManagerResponse;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
@@ -120,11 +122,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -285,7 +287,7 @@ public class AccountManagerService
         private final Object cacheLock = new Object();
         /** protected by the {@link #cacheLock} */
         private final HashMap<String, Account[]> accountCache =
-                new LinkedHashMap<String, Account[]>();
+                new LinkedHashMap<>();
         /** protected by the {@link #cacheLock} */
         private final Map<Account, Map<String, String>> userDataCache = new HashMap<>();
         /** protected by the {@link #cacheLock} */
@@ -337,6 +339,8 @@ public class AccountManagerService
 
     private final SparseArray<UserAccounts> mUsers = new SparseArray<>();
     private final SparseBooleanArray mLocalUnlockedUsers = new SparseBooleanArray();
+    private CopyOnWriteArrayList<AccountManagerInternal.OnAppPermissionChangeListener>
+            mAppPermissionChangeListeners = new CopyOnWriteArrayList<>();
 
     private static AtomicReference<AccountManagerService> sThis = new AtomicReference<>();
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
@@ -560,7 +564,7 @@ public class AccountManagerService
         if (!checkAccess || hasAccountAccess(account, packageName,
                 UserHandle.getUserHandleForUid(uid))) {
             cancelNotification(getCredentialPermissionNotificationId(account,
-                    AccountManager.ACCOUNT_ACCESS_TOKEN, uid), packageName,
+                    AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid), packageName,
                     UserHandle.getUserHandleForUid(uid));
         }
     }
@@ -1196,7 +1200,8 @@ public class AccountManagerService
                     final ArrayList<String> accountNames = cur.getValue();
                     final Account[] accountsForType = new Account[accountNames.size()];
                     for (int i = 0; i < accountsForType.length; i++) {
-                        accountsForType[i] = new Account(accountNames.get(i), accountType);
+                        accountsForType[i] = new Account(accountNames.get(i), accountType,
+                                new AccountAccessTracker());
                     }
                     accounts.accountCache.put(accountType, accountsForType);
                 }
@@ -1977,6 +1982,8 @@ public class AccountManagerService
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
+            result.putBinder(AccountManager.KEY_ACCOUNT_ACCESS_TRACKER,
+                    resultingAccount.getAccessTracker().asBinder());
             try {
                 response.onResult(result);
             } catch (RemoteException e) {
@@ -2324,7 +2331,7 @@ public class AccountManagerService
                 for (Pair<Pair<Account, String>, Integer> key
                         : accounts.credentialsPermissionNotificationIds.keySet()) {
                     if (account.equals(key.first.first)
-                            && AccountManager.ACCOUNT_ACCESS_TOKEN.equals(key.first.second)) {
+                            && AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE.equals(key.first.second)) {
                         final int uid = (Integer) key.second;
                         mHandler.post(() -> cancelAccountAccessRequestNotificationIfNeeded(
                                 account, uid, false));
@@ -3887,20 +3894,34 @@ public class AccountManagerService
         Preconditions.checkArgumentInRange(userId, 0, Integer.MAX_VALUE, "user must be concrete");
 
         try {
-
             final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
-            // Use null token which means any token. Having a token means the package
-            // is trusted by the authenticator, hence it is fine to access the account.
-            if (permissionIsGranted(account, null, uid, userId)) {
-                return true;
-            }
-            // In addition to the permissions required to get an auth token we also allow
-            // the account to be accessed by holders of the get accounts permissions.
-            return checkUidPermission(Manifest.permission.GET_ACCOUNTS_PRIVILEGED, uid, packageName)
-                    || checkUidPermission(Manifest.permission.GET_ACCOUNTS, uid, packageName);
+            return hasAccountAccess(account, packageName, uid);
         } catch (NameNotFoundException e) {
             return false;
         }
+    }
+
+    private boolean hasAccountAccess(@NonNull Account account, @Nullable String packageName,
+            int uid) {
+        if (packageName == null) {
+            String[] packageNames = mPackageManager.getPackagesForUid(uid);
+            if (ArrayUtils.isEmpty(packageNames)) {
+                return false;
+            }
+            // For app op checks related to permissions all packages in the UID
+            // have the same app op state, so doesn't matter which one we pick.
+            packageName = packageNames[0];
+        }
+
+        // Use null token which means any token. Having a token means the package
+        // is trusted by the authenticator, hence it is fine to access the account.
+        if (permissionIsGranted(account, null, uid, UserHandle.getUserId(uid))) {
+            return true;
+        }
+        // In addition to the permissions required to get an auth token we also allow
+        // the account to be accessed by holders of the get accounts permissions.
+        return checkUidPermission(Manifest.permission.GET_ACCOUNTS_PRIVILEGED, uid, packageName)
+                || checkUidPermission(Manifest.permission.GET_ACCOUNTS, uid, packageName);
     }
 
     private boolean checkUidPermission(String permission, int uid, String opPackageName) {
@@ -3978,7 +3999,7 @@ public class AccountManagerService
 
             private void handleAuthenticatorResponse(boolean accessGranted) throws RemoteException {
                 cancelNotification(getCredentialPermissionNotificationId(account,
-                        AccountManager.ACCOUNT_ACCESS_TOKEN, uid), packageName,
+                        AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid), packageName,
                         UserHandle.getUserHandleForUid(uid));
                 if (callback != null) {
                     Bundle result = new Bundle();
@@ -3986,7 +4007,7 @@ public class AccountManagerService
                     callback.sendResult(result);
                 }
             }
-        }), AccountManager.ACCOUNT_ACCESS_TOKEN, false);
+        }), AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, false);
     }
 
     @Override
@@ -5939,6 +5960,12 @@ public class AccountManagerService
 
             cancelAccountAccessRequestNotificationIfNeeded(account, uid, true);
         }
+
+        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+        for (AccountManagerInternal.OnAppPermissionChangeListener listener
+                : mAppPermissionChangeListeners) {
+            mHandler.post(() -> listener.onAppPermissionChanged(account, uid));
+        }
     }
 
     /**
@@ -5968,8 +5995,15 @@ public class AccountManagerService
             } finally {
                 db.endTransaction();
             }
+
             cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
                     new UserHandle(accounts.userId));
+        }
+
+        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+        for (AccountManagerInternal.OnAppPermissionChangeListener listener
+                : mAppPermissionChangeListeners) {
+            mHandler.post(() -> listener.onAppPermissionChanged(account, uid));
         }
     }
 
@@ -6009,7 +6043,7 @@ public class AccountManagerService
         if (accountsForType != null) {
             System.arraycopy(accountsForType, 0, newAccountsForType, 0, oldLength);
         }
-        newAccountsForType[oldLength] = account;
+        newAccountsForType[oldLength] = new Account(account, new AccountAccessTracker());
         accounts.accountCache.put(account.type, newAccountsForType);
     }
 
@@ -6626,6 +6660,33 @@ public class AccountManagerService
         }
     }
 
+    private final class AccountAccessTracker extends IAccountAccessTracker.Stub {
+        @Override
+        public void onAccountAccessed() throws RemoteException {
+            final int uid = Binder.getCallingUid();
+            if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
+                return;
+            }
+            final int userId = UserHandle.getCallingUserId();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                for (Account account : getAccounts(userId, mContext.getOpPackageName())) {
+                    IAccountAccessTracker accountTracker = account.getAccessTracker();
+                    if (accountTracker != null && asBinder() == accountTracker.asBinder()) {
+                        // An app just accessed the account. At this point it knows about
+                        // it and there is not need to hide this account from the app.
+                        if (!hasAccountAccess(account, null, uid)) {
+                            updateAppPermission(account, AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE,
+                                    uid, true);
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
     private final class AccountManagerInternalImpl extends AccountManagerInternal {
         @Override
         public void requestAccountAccess(@NonNull Account account, @NonNull String packageName,
@@ -6647,7 +6708,8 @@ public class AccountManagerService
                 return;
             }
 
-            if (hasAccountAccess(account, packageName, new UserHandle(userId))) {
+            if (AccountManagerService.this.hasAccountAccess(account, packageName,
+                    new UserHandle(userId))) {
                 Bundle result = new Bundle();
                 result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
                 callback.sendResult(result);
@@ -6663,7 +6725,22 @@ public class AccountManagerService
             }
 
             Intent intent = newRequestAccountAccessIntent(account, packageName, uid, callback);
-            doNotification(mUsers.get(userId), account, null, intent, packageName, userId);
+            final UserAccounts userAccounts;
+            synchronized (mUsers) {
+                userAccounts = mUsers.get(userId);
+            }
+            doNotification(userAccounts, account, null, intent, packageName, userId);
+        }
+
+        @Override
+        public void addOnAppPermissionChangeListener(OnAppPermissionChangeListener listener) {
+            // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+            mAppPermissionChangeListeners.add(listener);
+        }
+
+        @Override
+        public boolean hasAccountAccess(@NonNull Account account, @IntRange(from = 0) int uid) {
+            return AccountManagerService.this.hasAccountAccess(account, null, uid);
         }
     }
 }
