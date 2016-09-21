@@ -23,7 +23,7 @@ package android.net.wifi.nan;
  */
 oneway interface IWifiNanDiscoverySessionCallback
 {
-    void onSessionStarted(int sessionId);
+    void onSessionStarted(int discoverySessionId);
     void onSessionConfigSuccess();
     void onSessionConfigFail(int reason);
     void onSessionTerminated(int reason);

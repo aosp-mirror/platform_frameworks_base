@@ -36,8 +36,8 @@ public class WifiNanSubscribeDiscoverySession extends WifiNanDiscoveryBaseSessio
     /**
      * {@hide}
      */
-    public WifiNanSubscribeDiscoverySession(WifiNanManager manager, int sessionId) {
-        super(manager, sessionId);
+    public WifiNanSubscribeDiscoverySession(WifiNanManager manager, int clientId, int sessionId) {
+        super(manager, clientId, sessionId);
     }
 
     /**
@@ -67,7 +67,7 @@ public class WifiNanSubscribeDiscoverySession extends WifiNanDiscoveryBaseSessio
                 return;
             }
 
-            mgr.updateSubscribe(mSessionId, subscribeConfig);
+            mgr.updateSubscribe(mClientId, mSessionId, subscribeConfig);
         }
     }
 }
