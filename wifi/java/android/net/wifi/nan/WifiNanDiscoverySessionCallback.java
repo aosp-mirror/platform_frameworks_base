@@ -26,8 +26,9 @@ import java.lang.annotation.RetentionPolicy;
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are set when a
  * publish or subscribe session is created using
- * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
- * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} .
+ * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+ * or
+ * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)} .
  * <p>
  * A single callback is set at session creation - it cannot be replaced.
  *
@@ -36,51 +37,10 @@ import java.lang.annotation.RetentionPolicy;
 public class WifiNanDiscoverySessionCallback {
     /** @hide */
     @IntDef({
-            REASON_NO_RESOURCES, REASON_INVALID_ARGS, REASON_NO_MATCH_SESSION,
-            REASON_TX_FAIL, REASON_OTHER })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SessionReasonCodes {
-    }
-
-    /** @hide */
-    @IntDef({
             TERMINATE_REASON_DONE, TERMINATE_REASON_FAIL })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SessionTerminateCodes {
     }
-
-    /**
-     * Indicates no resources to execute the requested operation.
-     * Failure reason flag for {@link WifiNanDiscoverySessionCallback} callbacks.
-     */
-    public static final int REASON_NO_RESOURCES = 0;
-
-    /**
-     * Indicates invalid argument in the requested operation.
-     * Failure reason flag for {@link WifiNanDiscoverySessionCallback} callbacks.
-     */
-    public static final int REASON_INVALID_ARGS = 1;
-
-    /**
-     * Indicates a message is transmitted without a match (a discovery) or received message
-     * from peer occurring first.
-     * Failure reason flag for {@link WifiNanDiscoverySessionCallback} callbacks.
-     */
-    public static final int REASON_NO_MATCH_SESSION = 2;
-
-    /**
-     * Indicates transmission failure: this may be due to local transmission
-     * failure or to no ACK received - remote device didn't receive the
-     * sent message. Failure reason flag for
-     * {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)} callback.
-     */
-    public static final int REASON_TX_FAIL = 3;
-
-    /**
-     * Indicates an unspecified error occurred during the operation.
-     * Failure reason flag for {@link WifiNanDiscoverySessionCallback} callbacks.
-     */
-    public static final int REASON_OTHER = 4;
 
     /**
      * Indicates that publish or subscribe session is done - all the
@@ -100,7 +60,8 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a publish operation is started successfully in response to a
-     * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} operation.
+     * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+     * operation.
      *
      * @param session The {@link WifiNanPublishDiscoverySession} used to control the
      *            discovery session.
@@ -111,7 +72,8 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a subscribe operation is started successfully in response to a
-     * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} operation.
+     * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
+     * operation.
      *
      * @param session The {@link WifiNanSubscribeDiscoverySession} used to control the
      *            discovery session.
@@ -132,19 +94,17 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a publish or subscribe discovery session cannot be created:
-     * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
-     * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)},
+     * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+     * or
+     * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)},
      * or when a configuration update fails:
      * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} or
      * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
      * <p>
      *     For discovery session updates failure leaves the session running with its previous
      *     configuration - the discovery session is not terminated.
-     *
-     * @param reason The failure reason using
-     *            {@code WifiNanDiscoverySessionCallback.REASON_*} codes.
      */
-    public void onSessionConfigFailed(@SessionReasonCodes int reason) {
+    public void onSessionConfigFailed() {
         /* empty */
     }
 
@@ -177,12 +137,12 @@ public class WifiNanDiscoverySessionCallback {
     }
 
     /**
-     * Called in response to {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int)}
+     * Called in response to {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])}
      * when a message is transmitted successfully - i.e. when it was received successfully by the
      * peer (corresponds to an ACK being received).
      * <p>
      * Note that either this callback or
-     * {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)} will be
+     * {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int)} will be
      * received - never both.
      *
      * @param messageId The arbitrary message ID specified when sending the message.
@@ -194,7 +154,7 @@ public class WifiNanDiscoverySessionCallback {
     /**
      * Called when message transmission fails - when no ACK is received from the peer.
      * Retries when ACKs are not received are done by hardware, MAC, and in the NAN stack (using
-     * the {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int, int)} method) - this
+     * the {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[], int)} method) - this
      * event is received after all retries are exhausted.
      * <p>
      * Note that either this callback or
@@ -202,18 +162,15 @@ public class WifiNanDiscoverySessionCallback {
      * - never both.
      *
      * @param messageId The arbitrary message ID specified when sending the message.
-     * @param reason The failure reason using
-     *            {@code WifiNanDiscoverySessionCallback.REASON_*} codes.
      */
-    public void onMessageSendFailed(@SuppressWarnings("unused") int messageId,
-            @SessionReasonCodes int reason) {
+    public void onMessageSendFailed(@SuppressWarnings("unused") int messageId) {
         /* empty */
     }
 
     /**
      * Called when a message is received from a discovery session peer - in response to the
-     * peer's {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int)} or
-     * {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int, int)}.
+     * peer's {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])} or
+     * {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[], int)}.
      *
      * @param peerId The ID of the peer sending the message.
      * @param message A byte array containing the message.
