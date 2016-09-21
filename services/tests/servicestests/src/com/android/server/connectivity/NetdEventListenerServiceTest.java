@@ -20,7 +20,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.metrics.DnsEvent;
-import android.net.metrics.IDnsEventListener;
+import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 
 import junit.framework.TestCase;
@@ -47,12 +47,12 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
-public class DnsEventListenerServiceTest extends TestCase {
+public class NetdEventListenerServiceTest extends TestCase {
 
-    // TODO: read from DnsEventListenerService after this constant is read from system property
+    // TODO: read from NetdEventListenerService after this constant is read from system property
     static final int BATCH_SIZE = 100;
-    static final int EVENT_TYPE = IDnsEventListener.EVENT_GETADDRINFO;
-    // TODO: read from IDnsEventListener
+    static final int EVENT_TYPE = INetdEventListener.EVENT_GETADDRINFO;
+    // TODO: read from INetdEventListener
     static final int RETURN_CODE = 1;
 
     static final byte[] EVENT_TYPES  = new byte[BATCH_SIZE];
@@ -66,7 +66,7 @@ public class DnsEventListenerServiceTest extends TestCase {
         }
     }
 
-    DnsEventListenerService mDnsService;
+    NetdEventListenerService mNetdService;
 
     @Mock ConnectivityManager mCm;
     @Mock IpConnectivityLog mLog;
@@ -77,7 +77,7 @@ public class DnsEventListenerServiceTest extends TestCase {
         MockitoAnnotations.initMocks(this);
         mCallbackCaptor = ArgumentCaptor.forClass(NetworkCallback.class);
         mEvCaptor = ArgumentCaptor.forClass(DnsEvent.class);
-        mDnsService = new DnsEventListenerService(mCm, mLog);
+        mNetdService = new NetdEventListenerService(mCm, mLog);
 
         verify(mCm, times(1)).registerNetworkCallback(any(), mCallbackCaptor.capture());
     }
@@ -131,7 +131,7 @@ public class DnsEventListenerServiceTest extends TestCase {
         new Thread() {
             public void run() {
                 while (System.currentTimeMillis() < stop) {
-                    mDnsService.dump(pw);
+                    mNetdService.dump(pw);
                 }
             }
         }.start();
@@ -158,7 +158,7 @@ public class DnsEventListenerServiceTest extends TestCase {
 
     void log(int netId, int[] latencies) {
         for (int l : latencies) {
-            mDnsService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l);
+            mNetdService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l);
         }
     }
 
