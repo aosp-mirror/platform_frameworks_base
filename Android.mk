@@ -221,6 +221,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IBatteryPropertiesListener.aidl \
 	core/java/android/os/IBatteryPropertiesRegistrar.aidl \
 	core/java/android/os/ICancellationSignal.aidl \
+	core/java/android/os/IDeviceIdentifiersPolicyService.aidl \
 	core/java/android/os/IDeviceIdleController.aidl \
 	core/java/android/os/IHardwarePropertiesManager.aidl \
 	core/java/android/os/IMaintenanceActivityListener.aidl \

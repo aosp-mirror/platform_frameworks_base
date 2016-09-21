@@ -16,7 +16,10 @@
 
 package android.os;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -98,8 +101,35 @@ public class Build {
      */
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
-    /** A hardware serial number, if available.  Alphanumeric only, case-insensitive. */
-    public static final String SERIAL = getString("ro.serialno");
+    /**
+     * A hardware serial number, if available. Alphanumeric only, case-insensitive.
+     * For apps targeting SDK higher than {@link Build.VERSION_CODES#N_MR1} this
+     * field is set to {@link Build#UNKNOWN}.
+     *
+     * @deprecated Use {@link #getSerial()} instead.
+     **/
+    @Deprecated
+    // IMPORTANT: This field should be initialized via a function call to
+    // prevent its value being inlined in the app during compilation because
+    // we will later set it to the value based on the app's target SDK.
+    public static final String SERIAL = getString("no.such.thing");
+
+    /**
+     * Gets the hardware serial, if available. Requires holding the {@link
+     * android.Manifest.permission#READ_PHONE_STATE} permission.
+     * @return The serial if specified.
+     */
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public static String getSerial() {
+        IDeviceIdentifiersPolicyService service = IDeviceIdentifiersPolicyService.Stub
+                .asInterface(ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE));
+        try {
+            return service.getSerial();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return UNKNOWN;
+    }
 
     /**
      * An ordered list of ABIs supported by this device. The most preferred ABI is the first
