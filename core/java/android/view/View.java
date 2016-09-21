@@ -830,6 +830,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected static boolean sPreserveMarginParamsInLayoutParamConversion;
 
     /**
+     * Prior to N, when drag enters into child of a view that has already received an
+     * ACTION_DRAG_ENTERED event, the parent doesn't get a ACTION_DRAG_EXITED event.
+     * ACTION_DRAG_LOCATION and ACTION_DROP were delivered to the parent of a view that returned
+     * false from its event handler for these events.
+     * Starting from N, the parent will get ACTION_DRAG_EXITED event before the child gets its
+     * ACTION_DRAG_ENTERED. ACTION_DRAG_LOCATION and ACTION_DROP are never propagated to the parent.
+     * sCascadedDragDrop is true for pre-N apps for backwards compatibility implementation.
+     */
+    static boolean sCascadedDragDrop;
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -4066,6 +4077,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Prior to N, we would drop margins in LayoutParam conversions. The fix triggers bugs
             // in apps so we target check it to avoid breaking existing apps.
             sPreserveMarginParamsInLayoutParamConversion = targetSdkVersion >= N;
+
+            sCascadedDragDrop = targetSdkVersion < N;
 
             sCompatibilityDone = true;
         }
