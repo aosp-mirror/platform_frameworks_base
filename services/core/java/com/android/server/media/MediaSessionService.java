@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -761,6 +762,13 @@ public class MediaSessionService extends SystemService implements Monitor {
                     // activities which is undesirable while setup is in progress.
                     Slog.i(TAG, "Not dispatching media key event because user "
                             + "setup is in progress.");
+                    return;
+                }
+                if (isGlobalPriorityActive() && uid != Process.SYSTEM_UID) {
+                    // Prevent dispatching key event through reflection while the global priority
+                    // session is active.
+                    Slog.i(TAG, "Only the system can dispatch media key event "
+                            + "to the global priority session.");
                     return;
                 }
 
