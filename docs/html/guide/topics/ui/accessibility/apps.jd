@@ -298,7 +298,7 @@ then the {@link android.view.View#dispatchPopulateAccessibilityEvent
 dispatchPopulateAccessibilityEvent()} method for each child of this view. In order to support
 accessibility services on revisions of Android <em>prior</em> to 4.0 (API Level 14) you
 <em>must</em> override this method and populate {@link
-android.view.accessibility.AccessibilityRecord#getText} with descriptive text for your custom
+android.view.accessibility.AccessibilityEvent#getText} with descriptive text for your custom
 view, which is spoken by accessibility services, such as TalkBack.</dd>
 
   <dt>{@link android.view.View#onPopulateAccessibilityEvent onPopulateAccessibilityEvent()}</dt>

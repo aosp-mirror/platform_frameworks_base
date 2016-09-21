@@ -134,8 +134,8 @@ mBuilder.setContentIntent(resultPendingIntent);</pre>
 <ul>
 <li>Get an instance of {@link android.app.NotificationManager}.</li>
 
-<li>Use the {@link android.app.NotificationManager#notify(String, int, Notification)} method to issue the
-notification. When you call {@link android.app.NotificationManager#notify(String, int, Notification)}, specify a notification ID.
+<li>Use the {@link android.app.NotificationManager#notify notify()} method to issue the
+notification. When you call {@link android.app.NotificationManager#notify notify()}, specify a notification ID.
 You can use this ID to update the notification later on. This is described in more detail in
 <a href="managing.html">Managing Notifications</a>.</li>
 
