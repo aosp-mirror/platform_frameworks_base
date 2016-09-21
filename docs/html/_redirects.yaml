@@ -1282,3 +1282,6 @@ redirects:
 - from: /preview/features/data-saver.html
   to: /training/basics/network-ops/data-saver.html
 
+# Temporary redirect
+- from: /ndk/guides/cmake.html
+  to: https://sites.google.com/a/android.com/tools/tech-docs/external-c-builds#TOC-CMake-Variables-List
