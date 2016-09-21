@@ -65,19 +65,36 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
- * This class uses {@link android.animation.ObjectAnimator} and
- * {@link android.animation.AnimatorSet} to animate the properties of a
- * {@link android.graphics.drawable.VectorDrawable} to create an animated drawable.
+ * This class animates properties of a {@link android.graphics.drawable.VectorDrawable} with
+ * animations defined using {@link android.animation.ObjectAnimator} or
+ * {@link android.animation.AnimatorSet}.
  * <p>
- * AnimatedVectorDrawable are normally defined as 3 separate XML files.
+ * Starting from API 25, AnimatedVectorDrawable runs on RenderThread (as opposed to on UI thread for
+ * earlier APIs). This means animations in AnimatedVectorDrawable can remain smooth even when there
+ * is heavy workload on the UI thread. Note: If the UI thread is unresponsive, RenderThread may
+ * continue animating until the UI thread is capable of pushing another frame. Therefore, it is not
+ * possible to precisely coordinate a RenderThread-enabled AnimatedVectorDrawable with UI thread
+ * animations. Additionally,
+ * {@link android.graphics.drawable.Animatable2.AnimationCallback#onAnimationEnd(Drawable)} will be
+ * called the frame after the AnimatedVectorDrawable finishes on the RenderThread.
  * </p>
  * <p>
- * First is the XML file for {@link android.graphics.drawable.VectorDrawable}.
- * Note that we allow the animation to happen on the group's attributes and path's
- * attributes, which requires they are uniquely named in this XML file. Groups
- * and paths without animations do not need names.
+ * AnimatedVectorDrawable can be defined in either <a href="#ThreeXML">three separate XML files</a>,
+ * or <a href="#OneXML">one XML</a>.
  * </p>
- * <li>Here is a simple VectorDrawable in this vectordrawable.xml file.
+ * <a name="ThreeXML"></a>
+ * <h3>Define an AnimatedVectorDrawable in three separate XML files</h3>
+ * <ul>
+ * <a name="VDExample"></a>
+ * <li><h4>XML for the VectorDrawable containing properties to be animated</h4>
+ * <p>
+ * Animations can be performed on both group and path attributes, which requires groups and paths to
+ * have unique names in the same VectorDrawable. Groups and paths without animations do not need to
+ * be named.
+ * </p>
+ * Below is an example of a VectorDrawable defined in vectordrawable.xml. This VectorDrawable is
+ * referred to by its file name (not including file suffix) in the
+ * <a href="AVDExample">AnimatedVectorDrawable XML example</a>.
  * <pre>
  * &lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
  *     android:height=&quot;64dp&quot;
@@ -96,17 +113,20 @@ import java.util.ArrayList;
  *     &lt;/group&gt;
  * &lt;/vector&gt;
  * </pre></li>
+ *
+ * <a name="AVDExample"></a>
+ * <li><h4>XML for AnimatedVectorDrawable</h4>
  * <p>
- * Second is the AnimatedVectorDrawable's XML file, which defines the target
- * VectorDrawable, the target paths and groups to animate, the properties of the
- * path and group to animate and the animations defined as the ObjectAnimators
- * or AnimatorSets.
+ * An AnimatedVectorDrawable element has a VectorDrawable attribute, and one or more target
+ * element(s). The target elements can be the path or group to be animated. Each target element
+ * contains a name attribute that references a property (of a path or a group) to animate, and an
+ * animation attribute that points to an ObjectAnimator or an AnimatorSet.
  * </p>
- * <li>Here is a simple AnimatedVectorDrawable defined in this avd.xml file.
- * Note how we use the names to refer to the groups and paths in the vectordrawable.xml.
+ * The following code sample defines an AnimatedVectorDrawable. Note that the names refer to the
+ * groups and paths in the <a href="#VDExample">VectorDrawable XML above</a>.
  * <pre>
  * &lt;animated-vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
- *   android:drawable=&quot;@drawable/vectordrawable&quot; &gt;
+ *     android:drawable=&quot;@drawable/vectordrawable&quot; &gt;
  *     &lt;target
  *         android:name=&quot;rotationGroup&quot;
  *         android:animation=&quot;@anim/rotation&quot; /&gt;
@@ -114,39 +134,43 @@ import java.util.ArrayList;
  *         android:name=&quot;v&quot;
  *         android:animation=&quot;@anim/path_morph&quot; /&gt;
  * &lt;/animated-vector&gt;
- * </pre></li>
+ * </pre>
+ * </li>
+ *
+ * <li><h4>XML for Animations defined using ObjectAnimator or AnimatorSet</h4>
  * <p>
- * Last is the Animator XML file, which is the same as a normal ObjectAnimator
- * or AnimatorSet.
- * To complete this example, here are the 2 animator files used in avd.xml:
- * rotation.xml and path_morph.xml.
+ * From the previous <a href="#AVDExample">example of AnimatedVectorDrawable</a>, two animations
+ * were used: rotation.xml and path_morph.xml.
  * </p>
- * <li>Here is the rotation.xml, which will rotate the target group for 360 degrees.
+ * rotation.xml rotates the target group from 0 degree to 360 degrees over 6000ms:
  * <pre>
  * &lt;objectAnimator
  *     android:duration=&quot;6000&quot;
  *     android:propertyName=&quot;rotation&quot;
  *     android:valueFrom=&quot;0&quot;
  *     android:valueTo=&quot;360&quot; /&gt;
- * </pre></li>
- * <li>Here is the path_morph.xml, which will morph the path from one shape to
- * the other. Note that the paths must be compatible for morphing.
- * In more details, the paths should have exact same length of commands , and
- * exact same length of parameters for each commands.
- * Note that the path strings are better stored in strings.xml for reusing.
+ * </pre>
+ *
+ * path_morph.xml morphs the path from one shape into the other. Note that the paths must be
+ * compatible for morphing. Specifically, the paths must have the same commands, in the same order,
+ * and must have the same number of parameters for each command. It is recommended to store path
+ * strings as string resources for reuse.
  * <pre>
  * &lt;set xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
  *     &lt;objectAnimator
  *         android:duration=&quot;3000&quot;
  *         android:propertyName=&quot;pathData&quot;
- *         android:valueFrom=&quot;M300,70 l 0,-70 70,70 0,0   -70,70z&quot;
+ *         android:valueFrom=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot;
  *         android:valueTo=&quot;M300,70 l 0,-70 70,0  0,140 -70,0 z&quot;
  *         android:valueType=&quot;pathType&quot;/&gt;
  * &lt;/set&gt;
- * </pre></li>
+ * </pre>
+ * </ul>
+ * <a name="OneXML"></a>
+ * <h3>Define an AnimatedVectorDrawable all in one XML file</h3>
  * <p>
- * Since AAPT tool is now supporting a new format which can bundle several related XML files into
- * one, we can merge the previous example into one XML file, like this:
+ * Since the AAPT tool supports a new format that bundles several related XML files together, we can
+ * merge the XML files from the previous examples into one XML file:
  * </p>
  * <pre>
  * &lt;animated-vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
@@ -185,7 +209,7 @@ import java.util.ArrayList;
  *                 &lt;objectAnimator
  *                     android:duration=&quot;3000&quot;
  *                     android:propertyName=&quot;pathData&quot;
- *                     android:valueFrom=&quot;M300,70 l 0,-70 70,70 0,0   -70,70z&quot;
+ *                     android:valueFrom=&quot;M300,70 l 0,-70 70,70 0,0 -70,70z&quot;
  *                     android:valueTo=&quot;M300,70 l 0,-70 70,0  0,140 -70,0 z&quot;
  *                     android:valueType=&quot;pathType&quot;/&gt;
  *             &lt;/set&gt;
@@ -286,6 +310,17 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         return super.getChangingConfigurations() | mAnimatedVectorState.getChangingConfigurations();
     }
 
+    /**
+     * Draws the AnimatedVectorDrawable into the given canvas.
+     * <p>
+     * <strong>Note:</strong> Calling this method with a software canvas when the
+     * AnimatedVectorDrawable is being animated on RenderThread (for API 25 and later) may yield
+     * outdated result, as the UI thread is not guaranteed to be in sync with RenderThread on
+     * VectorDrawable's property changes during RenderThread animations.
+     * </p>
+     *
+     * @param canvas The canvas to draw into
+     */
     @Override
     public void draw(Canvas canvas) {
         if (!canvas.isHardwareAccelerated() && mAnimatorSet instanceof VectorDrawableAnimatorRT) {
@@ -321,9 +356,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     /**
-     * AnimatedVectorDrawable is running on render thread now. Therefore, if the root alpha is being
-     * animated, then the root alpha value we get from this call could be out of sync with alpha
-     * value used in the render thread. Otherwise, the root alpha should be always the same value.
+     * For API 25 and later, AnimatedVectorDrawable runs on RenderThread. Therefore, when the
+     * root alpha is being animated, this getter does not guarantee to return an up-to-date alpha
+     * value.
      *
      * @return the containing vector drawable's root alpha value.
      */
@@ -1495,7 +1530,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             } else {
                 addPendingAction(START_ANIMATION);
             }
-
         }
 
         @Override
