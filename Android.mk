@@ -63,6 +63,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/accessibilityservice/IAccessibilityServiceClient.aidl \
 	core/java/android/accounts/IAccountManager.aidl \
 	core/java/android/accounts/IAccountManagerResponse.aidl \
+	core/java/android/accounts/IAccountAccessTracker.aidl \
 	core/java/android/accounts/IAccountAuthenticator.aidl \
 	core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	core/java/android/app/IActivityContainer.aidl \
