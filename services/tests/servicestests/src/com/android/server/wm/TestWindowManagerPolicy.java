@@ -730,4 +730,14 @@ public class TestWindowManagerPolicy implements WindowManagerPolicy {
     public boolean shouldRotateSeamlessly(int oldRotation, int newRotation) {
         return false;
     }
+
+    @Override
+    public void setTvPipVisibilityLw(boolean visible) {
+
+    }
+
+    @Override
+    public void setRecentsVisibilityLw(boolean visible) {
+
+   }
 }
