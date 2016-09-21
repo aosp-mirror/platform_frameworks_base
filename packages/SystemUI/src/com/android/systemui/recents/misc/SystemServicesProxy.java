@@ -70,6 +70,7 @@ import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDockedStackListener;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.view.WindowManagerGlobal;
@@ -121,6 +122,7 @@ public class SystemServicesProxy {
     IPackageManager mIpm;
     AssistUtils mAssistUtils;
     WindowManager mWm;
+    IWindowManager mIwm;
     UserManager mUm;
     Display mDisplay;
     String mRecentsPackage;
@@ -208,6 +210,7 @@ public class SystemServicesProxy {
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mIwm = WindowManagerGlobal.getWindowManagerService();
         mUm = UserManager.get(context);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
@@ -1094,6 +1097,28 @@ public class SystemServicesProxy {
                             scaleUp);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
+        }
+    }
+
+    /**
+     * Updates the visibility of recents.
+     */
+    public void setRecentsVisibility(boolean visible) {
+        try {
+            mIwm.setRecentsVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
+        }
+    }
+
+    /**
+     * Updates the visibility of the picture-in-picture.
+     */
+    public void setTvPipVisibility(boolean visible) {
+        try {
+            mIwm.setTvPipVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
         }
     }
 
