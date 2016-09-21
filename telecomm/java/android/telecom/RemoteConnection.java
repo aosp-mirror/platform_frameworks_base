@@ -638,7 +638,12 @@ public final class RemoteConnection {
         mConnectionCapabilities = connection.getConnectionCapabilities();
         mConnectionProperties = connection.getConnectionProperties();
         mVideoState = connection.getVideoState();
-        mVideoProvider = new RemoteConnection.VideoProvider(connection.getVideoProvider());
+        IVideoProvider videoProvider = connection.getVideoProvider();
+        if (videoProvider != null) {
+            mVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+        } else {
+            mVideoProvider = null;
+        }
         mIsVoipAudioMode = connection.getIsVoipAudioMode();
         mStatusHints = connection.getStatusHints();
         mAddress = connection.getHandle();
