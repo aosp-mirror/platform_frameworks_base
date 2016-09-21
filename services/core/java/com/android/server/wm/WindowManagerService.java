@@ -3790,7 +3790,11 @@ public class WindowManagerService extends IWindowManager.Stub
         Configuration config = null;
 
         if (updateOrientationFromAppTokensLocked(false)) {
-            if (freezeThisOneIfNeeded != null) {
+            // If we changed the orientation but mOrientationChangeComplete is
+            // already true, we used seamless rotation, and we don't need
+            // to freeze the screen.
+            if (freezeThisOneIfNeeded != null &&
+                    !mWindowPlacerLocked.mOrientationChangeComplete) {
                 AppWindowToken atoken = findAppWindowToken(freezeThisOneIfNeeded);
                 if (atoken != null) {
                     startAppFreezingScreenLocked(atoken);
