@@ -104,6 +104,8 @@ import javax.net.ssl.SSLEngine;
  *
  * SSLSocket sslSocket = (SSLSocket) sslContext.getSocketFactory().createSocket(...);
  * }</pre>
+ *
+ * @removed This class is removed because it does not work with TLS 1.3.
  */
 public abstract class PskKeyManager implements PSKKeyManager {
     // IMPLEMENTATION DETAILS: This class exists only because the default implemenetation of the
