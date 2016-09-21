@@ -2034,8 +2034,10 @@ public class AccountManagerService
             /*
              * Database transaction was successful. Clean up cached
              * data associated with the account in the user profile.
+             * The account is now being tracked for remote access.
              */
-            insertAccountIntoCacheLocked(accounts, renamedAccount);
+            renamedAccount = insertAccountIntoCacheLocked(accounts, renamedAccount);
+
             /*
              * Extract the data and token caches before removing the
              * old account to preserve the user data associated with
@@ -6027,16 +6029,22 @@ public class AccountManagerService
 
     /**
      * This assumes that the caller has already checked that the account is not already present.
+     * IMPORTANT: The account being inserted will begin to be tracked for access in remote
+     * processes and if you will return this account to apps you should return the result.
+     * @return The inserted account which is a new instance that is being tracked.
      */
-    private void insertAccountIntoCacheLocked(UserAccounts accounts, Account account) {
+    private Account insertAccountIntoCacheLocked(UserAccounts accounts, Account account) {
         Account[] accountsForType = accounts.accountCache.get(account.type);
         int oldLength = (accountsForType != null) ? accountsForType.length : 0;
         Account[] newAccountsForType = new Account[oldLength + 1];
         if (accountsForType != null) {
             System.arraycopy(accountsForType, 0, newAccountsForType, 0, oldLength);
         }
-        newAccountsForType[oldLength] = new Account(account, new AccountAccessTracker());
+        IAccountAccessTracker accessTracker = account.getAccessTracker() != null
+                ? account.getAccessTracker() : new AccountAccessTracker();
+        newAccountsForType[oldLength] = new Account(account, accessTracker);
         accounts.accountCache.put(account.type, newAccountsForType);
+        return newAccountsForType[oldLength];
     }
 
     private Account[] filterSharedAccounts(UserAccounts userAccounts, Account[] unfiltered,
