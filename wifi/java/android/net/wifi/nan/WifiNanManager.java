@@ -56,11 +56,11 @@ import java.util.Arrays;
  * The class provides access to:
  * <ul>
  * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
- * {@link #attach(Handler, WifiNanEventCallback)}. <li>Create discovery sessions (publish or
- * subscribe sessions). Refer to
+ * {@link #attach(Handler, WifiNanAttachCallback)}.
+ * <li>Create discovery sessions (publish or subscribe sessions). Refer to
  * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} and
- * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}. <li>Create
- * a NAN network specifier to be used with
+ * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}.
+ * <li>Create a NAN network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a NAN connection with a peer. Refer to
  * {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])} and
@@ -73,13 +73,13 @@ import java.util.Arrays;
  *     Note that this broadcast is not sticky - you should register for it and then check the
  *     above API to avoid a race condition.
  * <p>
- *     An application must use {@link #attach(Handler, WifiNanEventCallback)} to initialize a NAN
+ *     An application must use {@link #attach(Handler, WifiNanAttachCallback)} to initialize a NAN
  *     cluster - before making any other NAN operation. NAN cluster membership is a device-wide
  *     operation - the API guarantees that the device is in a cluster or joins a NAN cluster (or
  *     starts one if none can be found). Information about attach success (or failure) are
- *     returned in callbacks of {@link WifiNanEventCallback}. Proceed with NAN discovery or
+ *     returned in callbacks of {@link WifiNanAttachCallback}. Proceed with NAN discovery or
  *     connection setup only after receiving confirmation that NAN attach succeeded -
- *     {@link WifiNanEventCallback#onAttached(WifiNanSession)}. When an application is
+ *     {@link WifiNanAttachCallback#onAttached(WifiNanSession)}. When an application is
  *     finished using NAN it <b>must</b> use the {@link WifiNanSession#destroy()} API
  *     to indicate to the NAN service that the device may detach from the NAN cluster. The
  *     device will actually disable NAN once the last application detaches.
@@ -321,50 +321,67 @@ public class WifiNanManager {
     }
 
     /**
-     * Attach to the Wi-Fi NAN service - enabling the application to create discovery session or
-     * create connection to peers. The device will attach to an existing cluster if it can find
+     * Attach to the Wi-Fi NAN service - enabling the application to create discovery sessions or
+     * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
-     * (e.g. successful attach to a cluster) are provided to the {@code callback} object.
+     * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
      * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
      * Wi-Fi NAN object.
      * <p>
      * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
-     * than this function will simply indicate success immediately.
+     * then this function will simply indicate success immediately using the same {@code
+     * attachCallback}.
      *
      * @param handler The Handler on whose thread to execute all callbacks related to the
      *            attach request - including all sessions opened as part of this
      *            attach. If a null is provided then the application's main thread will be used.
-     * @param callback A callback extended from {@link WifiNanEventCallback}.
+     * @param attachCallback A callback for attach events, extended from
+     * {@link WifiNanAttachCallback}.
      */
-    public void attach(@Nullable Handler handler, @NonNull WifiNanEventCallback callback) {
-        attach(handler, null, callback);
+    public void attach(@Nullable Handler handler, @NonNull WifiNanAttachCallback attachCallback) {
+        attach(handler, null, attachCallback, null);
     }
 
     /**
-     * Attach to the Wi-Fi NAN service - enabling the application to create discovery session or
-     * create connection to peers. The device will attach to an existing cluster if it can find
+     * Attach to the Wi-Fi NAN service - enabling the application to create discovery sessions or
+     * create connections to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
-     * (e.g. successful attach to a cluster) are provided to the {@code callback} object.
+     * (e.g. successful attach to a cluster) are provided to the {@code attachCallback} object.
      * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
-     * Wi-Fi NAN object. Allows requesting a specific configuration using
-     * {@link ConfigRequest}. If not necessary (default configuration should usually work) use
-     * the {@link #attach(Handler, WifiNanEventCallback)} method instead.
+     * Wi-Fi NAN object.
      * <p>
      * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
-     * than this function will simply indicate success immediately.
+     * then this function will simply indicate success immediately using the same {@code
+     * attachCallback}.
+     * <p>
+     * This version of the API attaches a listener to receive the MAC address of the NAN interface
+     * on startup and whenever it is updated (it is randomized at regular intervals for privacy).
+     * The application must have the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+     * permission to execute this attach request. Otherwise, use the
+     * {@link #attach(Handler, WifiNanAttachCallback)} version. Note that aside from permission
+     * requirements this listener will wake up the host at regular intervals causing higher power
+     * consumption, do not use it unless the information is necessary (e.g. for OOB discovery).
      *
      * @param handler The Handler on whose thread to execute all callbacks related to the
      *            attach request - including all sessions opened as part of this
      *            attach. If a null is provided then the application's main thread will be used.
-     * @param configRequest The requested NAN configuration.
-     * @param callback A callback extended from {@link WifiNanEventCallback}.
+     * @param attachCallback A callback for attach events, extended from
+     * {@link WifiNanAttachCallback}.
+     * @param identityChangedListener A listener for changed identity.
      */
-    public void attach(@Nullable Handler handler, @Nullable ConfigRequest configRequest,
-            @NonNull WifiNanEventCallback callback) {
+    public void attach(@Nullable Handler handler, @NonNull WifiNanAttachCallback attachCallback,
+            @NonNull WifiNanIdentityChangedListener identityChangedListener) {
+        attach(handler, null, attachCallback, identityChangedListener);
+    }
+
+    /** @hide */
+    public void attach(Handler handler, ConfigRequest configRequest,
+            WifiNanAttachCallback attachCallback,
+            WifiNanIdentityChangedListener identityChangedListener) {
         if (VDBG) {
-            Log.v(TAG,
-                    "attach(): handler=" + handler + ", callback=" + callback + ", configRequest="
-                            + configRequest);
+            Log.v(TAG, "attach(): handler=" + handler + ", callback=" + attachCallback
+                    + ", configRequest=" + configRequest + ", identityChangedListener="
+                    + identityChangedListener);
         }
 
         synchronized (mLock) {
@@ -373,8 +390,9 @@ public class WifiNanManager {
             try {
                 Binder binder = new Binder();
                 mService.connect(binder, mContext.getOpPackageName(),
-                        new WifiNanEventCallbackProxy(this, looper, binder, callback),
-                        configRequest);
+                        new WifiNanEventCallbackProxy(this, looper, binder, attachCallback,
+                                identityChangedListener), configRequest,
+                        identityChangedListener != null);
             } catch (RemoteException e) {
                 e.rethrowAsRuntimeException();
             }
@@ -650,13 +668,14 @@ public class WifiNanManager {
         }
 
         /**
-         * Constructs a {@link WifiNanEventCallback} using the specified looper.
+         * Constructs a {@link WifiNanAttachCallback} using the specified looper.
          * All callbacks will delivered on the thread of the specified looper.
          *
          * @param looper The looper on which to execute the callbacks.
          */
         WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper, Binder binder,
-                final WifiNanEventCallback originalCallback) {
+                final WifiNanAttachCallback attachCallback,
+                final WifiNanIdentityChangedListener identityChangedListener) {
             mNanManager = new WeakReference<>(mgr);
             mLooper = looper;
             mBinder = binder;
@@ -677,15 +696,15 @@ public class WifiNanManager {
 
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
-                            originalCallback.onAttached(
+                            attachCallback.onAttached(
                                     new WifiNanSession(mgr, mBinder, mLooper, msg.arg1));
                             break;
                         case CALLBACK_CONNECT_FAIL:
                             mNanManager.clear();
-                            originalCallback.onAttachFailed(msg.arg1);
+                            attachCallback.onAttachFailed(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
-                            originalCallback.onIdentityChanged((byte[]) msg.obj);
+                            identityChangedListener.onIdentityChanged((byte[]) msg.obj);
                             break;
                         case CALLBACK_RANGING_SUCCESS: {
                             RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
