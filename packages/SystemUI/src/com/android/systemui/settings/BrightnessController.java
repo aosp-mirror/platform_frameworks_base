@@ -229,6 +229,7 @@ public class BrightnessController implements ToggleSlider.Listener {
                         break;
                     case MSG_DETACH_LISTENER:
                         mControl.setOnChangedListener(null);
+                        break;
                     default:
                         super.handleMessage(msg);
                 }
