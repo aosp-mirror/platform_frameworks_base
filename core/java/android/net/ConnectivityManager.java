@@ -3241,6 +3241,27 @@ public class ConnectivityManager {
     }
 
     /**
+     * Informs the system to penalize {@code network}'s score when it becomes unvalidated. This is
+     * only meaningful if the system is configured not to penalize such networks, e.g., if the
+     * {@code config_networkAvoidBadWifi} configuration variable is set to 0 and the {@code
+     * NETWORK_AVOID_BAD_WIFI setting is unset}.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}
+     *
+     * @param network The network to accept.
+     *
+     * @hide
+     */
+    public void setAvoidUnvalidated(Network network) {
+        try {
+            mService.setAvoidUnvalidated(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Resets all connectivity manager settings back to factory defaults.
      * @hide
      */
