@@ -4044,6 +4044,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MEDIA_RECORD:
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                ITelephony telephonyService = getTelephonyService();
+                if (telephonyService != null) {
+                    try {
+                        if (!telephonyService.isIdle()) {
+                            // When phone is ringing or in-call, pass all media keys to it.
+                            result &= ~ACTION_PASS_TO_USER;
+                        }
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "ITelephony threw RemoteException", ex);
+                    }
+                }
+
                 if ((result & ACTION_PASS_TO_USER) == 0) {
                     // Only do this if we would otherwise not pass it to the user. In that
                     // case, the PhoneWindow class will do the same thing, except it will
