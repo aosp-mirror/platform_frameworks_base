@@ -466,10 +466,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         displayName = FileUtils.buildValidFatFilename(displayName);
 
         final File before = getFileForDocId(docId);
-        final File after = new File(before.getParentFile(), displayName);
-        if (after.exists()) {
-            throw new IllegalStateException("Already exists " + after);
-        }
+        final File after = FileUtils.buildUniqueFile(before.getParentFile(), displayName);
         if (!before.renameTo(after)) {
             throw new IllegalStateException("Failed to rename to " + after);
         }
