@@ -108,5 +108,9 @@
         <attr name="enableAutoSizing" format="boolean" />
         <attr name="itemHeight" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="PluginInflateContainer">
+        <attr name="viewType" format="string" />
+    </declare-styleable>
 </resources>
 
