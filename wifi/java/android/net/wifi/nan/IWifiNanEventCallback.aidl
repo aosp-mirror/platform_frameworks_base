@@ -26,7 +26,7 @@ import android.net.wifi.RttManager;
  */
 oneway interface IWifiNanEventCallback
 {
-    void onConnectSuccess();
+    void onConnectSuccess(int clientId);
     void onConnectFail(int reason);
     void onIdentityChanged(in byte[] mac);
 
