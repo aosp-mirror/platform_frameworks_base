@@ -43,7 +43,7 @@
     </permission>
 
     <permission name="android.permission.BLUETOOTH_STACK" >
-        <group gid="net_bt_stack" />
+        <group gid="bluetooth" />
         <group gid="wakelock" />
     </permission>
 
