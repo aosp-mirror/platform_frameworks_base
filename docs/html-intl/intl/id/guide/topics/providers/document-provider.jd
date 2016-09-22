@@ -1,0 +1,916 @@
+page.title=Storage Access Framework
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini
+ <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle">
+        <span class="more">tampilkan maksimal</span>
+        <span class="less" style="display:none">tampilkan minimal</span></a></h2>
+<ol id="toc44" class="hide-nested">
+    <li>
+        <a href="#overview">Ikhtisar</a>
+    </li>
+    <li>
+        <a href="#flow">Arus Kontrol</a>
+    </li>
+    <li>
+        <a href="#client">Menulis Aplikasi Klien</a>
+        <ol>
+        <li><a href="#search">Mencari dokumen</a></li>
+        <li><a href="#process">Memproses hasil</a></li>
+        <li><a href="#metadata">Memeriksa metadata dokumen</a></li>
+        <li><a href="#open">Membuka dokumen</a></li>
+        <li><a href="#create">Membuat dokumen baru</a></li>
+        <li><a href="#delete">Menghapus dokumen</a></li>
+        <li><a href="#edit">Mengedit dokumen</a></li>
+        <li><a href="#permissions">Mempertahankan izin</a></li>
+        </ol>
+    </li>
+    <li><a href="#custom">Menulis Penyedia Dokumen Custom</a>
+        <ol>
+        <li><a href="#manifest">Manifes</a></li>
+        <li><a href="#contract">Kontrak</a></li>
+        <li><a href="#subclass">Subkelas DocumentsProvider</a></li>
+        <li><a href="#security">Keamanan</a></li>
+        </ol>
+    </li>
+
+</ol>
+<h2>Kelas-kelas utama</h2>
+<ol>
+    <li>{@link android.provider.DocumentsProvider}</li>
+    <li>{@link android.provider.DocumentsContract}</li>
+</ol>
+
+<h2>Video</h2>
+
+<ol>
+    <li><a href="http://www.youtube.com/watch?v=zxHVeXbK1P4">
+DevBytes: Android 4.4 Storage Access Framework: Penyedia</a></li>
+     <li><a href="http://www.youtube.com/watch?v=UFj9AEz0DHQ">
+DevBytes: Android 4.4 Storage Access Framework: Klien</a></li>
+</ol>
+
+
+<h2>Contoh Kode</h2>
+
+<ol>
+    <li><a href="{@docRoot}samples/StorageProvider/index.html">
+Penyedia Penyimpanan</a></li>
+     <li><a href="{@docRoot}samples/StorageClient/index.html">
+Klien Penyimpanan</a></li>
+</ol>
+
+<h2>Lihat Juga</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Dasar-Dasar Penyedia Konten
+        </a>
+    </li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Android 4.4 (API level 19) memperkenalkan Storage Access Framework (SAF, Kerangka Kerja Akses Penyimpanan). SAF
+ memudahkan pengguna menyusuri dan membuka dokumen, gambar, dan file lainnya
+di semua penyedia penyimpanan dokumen pilihannya. UI standar yang mudah digunakan
+memungkinkan pengguna menyusuri file dan mengakses yang terbaru dengan cara konsisten di antara berbagai aplikasi dan penyedia.</p>
+
+<p>Layanan penyimpanan cloud atau lokal bisa dilibatkan dalam ekosistem ini dengan mengimplementasikan sebuah
+{@link android.provider.DocumentsProvider} yang membungkus layanannya. Aplikasi klien
+yang memerlukan akses ke dokumen sebuah penyedia bisa berintegrasi dengan SAF cukup dengan beberapa
+baris kode.</p>
+
+<p>SAF terdiri dari berikut ini:</p>
+
+<ul>
+<li><strong>Penyedia dokumen</strong>&mdash;Penyedia konten yang memungkinkan
+layanan penyimpanan (seperti Google Drive) untuk menampilkan file yang dikelolanya. Penyedia dokumen
+diimplementasikan sebagai subkelas dari kelas {@link android.provider.DocumentsProvider}.
+Skema penyedia dokumen berdasarkan hierarki file biasa,
+walaupun cara penyedia dokumen Anda secara fisik menyimpan data adalah terserah Anda.
+Platform Android terdiri dari beberapa penyedia dokumen bawaan, seperti
+Downloads, Images, dan Videos.</li>
+
+<li><strong>Aplikasi klien</strong>&mdash;Aplikasi custom yang memanggil intent
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} dan/atau
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT} dan menerima
+file yang dihasilkan penyedia dokumen.</li>
+
+<li><strong>Picker</strong>&mdash;UI sistem yang memungkinkan pengguna mengakses dokumen dari semua
+penyedia dokumen yang memenuhi kriteria pencarian aplikasi klien.</li>
+</ul>
+
+<p>Beberapa fitur yang disediakan oleh SAF adalah sebagai berikut:</p>
+<ul>
+<li>Memungkinkan pengguna menyusuri konten dari semua penyedia dokumen, bukan hanya satu aplikasi.</li>
+<li>Memungkinkan aplikasi Anda memiliki akses jangka panjang dan tetap ke
+ dokumen yang dimiliki oleh penyedia dokumen. Melalui akses ini pengguna bisa menambah, mengedit,
+ menyimpan, dan menghapus file pada penyedia.</li>
+<li>Mendukung banyak akun pengguna dan akar jangka pendek seperti penyedia penyimpanan
+USB, yang hanya muncul jika drive itu dipasang. </li>
+</ul>
+
+<h2 id ="overview">Ikhtisar</h2>
+
+<p>SAF berpusat di seputar penyedia konten yang merupakan
+subkelas dari kelas {@link android.provider.DocumentsProvider}. Dalam <em>penyedia dokumen</em>, data
+distrukturkan sebagai hierarki file biasa:</p>
+<p><img src="{@docRoot}images/providers/storage_datamodel.png" alt="data model" /></p>
+<p class="img-caption"><strong>Gambar 1.</strong> Model data penyedia dokumen. Root menunjuk ke satu Document,
+yang nanti memulai pemekaran seluruh pohon.</p>
+
+<p>Perhatikan yang berikut ini:</p>
+<ul>
+
+<li>Setiap penyedia dokumen melaporkan satu atau beberapa
+"akar" yang merupakan titik awal penyusuran pohon dokumen.
+Masing-masing akar memiliki sebuah {@link android.provider.DocumentsContract.Root#COLUMN_ROOT_ID} yang unik,
+dan menunjuk ke satu dokumen (satu direktori)
+yang mewakili konten di bawah akar itu.
+Akar sengaja dibuat dinamis untuk mendukung kasus penggunaan seperti multiakun,
+perangkat penyimpanan USB jangka pendek, atau masuk/keluar pengguna.</li>
+
+<li>Di bawah tiap akar terdapat satu dokumen. Dokumen itu menunjuk ke dokumen-dokumen 1-ke-<em>N</em>,
+yang nanti masing-masing bisa menunjuk ke dokumen 1-ke-<em>N</em>. </li>
+
+<li>Tiap backend penyimpanan memunculkan
+masing-masing file dan direktori dengan mengacunya lewat sebuah
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} yang unik.
+ID dokumen harus unik dan tidak berubah setelah dibuat, karena ID ini digunakan untuk
+URI persisten yang diberikan pada saat reboot perangkat.</li>
+
+
+<li>Dokumen bisa berupa file yang bisa dibuka (dengan tipe MIME tertentu), atau
+direktori yang berisi dokumen tambahan (dengan tipe MIME
+{@link android.provider.DocumentsContract.Document#MIME_TYPE_DIR}).</li>
+
+<li>Tiap dokumen bisa mempunyai kemampuan berbeda, sebagaimana yang dijelaskan oleh
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS}.
+Misalnya, {@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_WRITE},
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE}, dan
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_THUMBNAIL}.
+{@link android.provider.DocumentsContract.Document#COLUMN_DOCUMENT_ID} yang sama bisa
+dimasukkan dalam beberapa direktori.</li>
+</ul>
+
+<h2 id="flow">Arus Kontrol</h2>
+<p>Seperti dinyatakan di atas, model data penyedia dokumen dibuat berdasarkan hierarki file
+biasa. Akan tetapi, Anda bisa menyimpan secara fisik data dengan cara apa pun yang disukai,
+selama data bisa diakses melalui API {@link android.provider.DocumentsProvider}. Misalnya, Anda
+bisa menggunakan penyimpanan cloud berbasis tag untuk data Anda.</p>
+
+<p>Gambar 2 menampilkan contoh cara aplikasi foto bisa menggunakan SAF
+untuk mengakses data tersimpan:</p>
+<p><img src="{@docRoot}images/providers/storage_dataflow.png" alt="app" /></p>
+
+<p class="img-caption"><strong>Gambar 2.</strong> Arus Storage Access Framework</p>
+
+<p>Perhatikan yang berikut ini:</p>
+<ul>
+
+<li>Di SAF, penyedia dan klien tidak berinteraksi
+secara langsung. Klien meminta izin untuk berinteraksi
+dengan file (yakni, membaca, mengedit, membuat, atau menghapus file).</li>
+
+<li>Interaksi dimulai bila sebuah aplikasi (dalam contoh ini adalah aplikasi foto) mengeluarkan intent
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} atau {@link android.content.Intent#ACTION_CREATE_DOCUMENT}. Intent bisa berisi filter
+untuk mempersempit kriteria&mdash;misalnya, "beri saya semua file yang bisa dibuka
+yang memiliki tipe MIME 'gambar'".</li>
+
+<li>Setelah intent dibuat, picker sistem akan pergi ke setiap penyedia yang terdaftar
+dan menunjukkan kepada pengguna akar konten yang cocok.</li>
+
+<li>Picker memberi pengguna antarmuka standar untuk mengakses dokumen,
+walaupun penyedia dokumen dasar bisa sangat berbeda. Misalnya, gambar 2
+menunjukkan penyedia Google Drive, penyedia USB, dan penyedia cloud.</li>
+</ul>
+
+<p>Gambar 3 menunjukkan picker yang di digunakan pengguna mencari gambar telah memilih
+akun Google Drive:</p>
+
+<p><img src="{@docRoot}images/providers/storage_picker.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Gambar 3.</strong> Picker</p>
+
+<p>Bila pengguna memilih Google Drive, gambar-gambar akan ditampilkan, seperti yang ditampilkan dalam
+gambar 4. Dari titik itu, pengguna bisa berinteraksi dengan gambar dengan cara apa pun
+yang didukung oleh penyedia dan aplikasi klien.
+
+<p><img src="{@docRoot}images/providers/storage_photos.png" width="340" alt="picker" style="border:2px solid #ddd" /></p>
+
+<p class="img-caption"><strong>Gambar 4.</strong> Gambar</p>
+
+<h2 id="client">Menulis Aplikasi Klien</h2>
+
+<p>Pada Android 4.3 dan yang lebih rendah, jika Anda ingin aplikasi mengambil file dari
+aplikasi lain, aplikasi Anda harus memanggil intent seperti {@link android.content.Intent#ACTION_PICK}
+atau {@link android.content.Intent#ACTION_GET_CONTENT}. Pengguna nanti harus memilih
+satu aplikasi yang akan digunakan untuk mengambil file dan aplikasi yang dipilih harus menyediakan antarmuka pengguna
+bagi untuk menyusuri dan mengambil dari file yang tersedia. </p>
+
+<p>Pada Android 4.4 dan yang lebih tinggi, Anda mempunyai opsi tambahan dalam menggunakan intent
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT},
+yang menampilkan UI picker yang dikontrol oleh sistem yang memungkinkan pengguna
+menyusuri semua file yang disediakan aplikasi lain. Dari satu UI ini, pengguna
+bisa mengambil file dari aplikasi apa saja yang didukung.</p>
+
+<p>{@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+tidak dimaksudkan untuk menjadi pengganti {@link android.content.Intent#ACTION_GET_CONTENT}.
+Yang harus Anda gunakan bergantung pada kebutuhan aplikasi:</p>
+
+<ul>
+<li>Gunakan {@link android.content.Intent#ACTION_GET_CONTENT} jika Anda ingin aplikasi
+cuma membaca/mengimpor data. Dengan pendekatan ini, aplikasi akan mengimpor salinan data,
+misalnya file gambar.</li>
+
+<li>Gunakan {@link android.content.Intent#ACTION_OPEN_DOCUMENT} jika Anda ingin aplikasi
+memiliki akses jangka panjang dan jangka pendek ke dokumen yang dimiliki oleh penyedia
+dokumen. Contohnya adalah aplikasi pengeditan foto yang memungkinkan pengguna mengedit
+gambar yang tersimpan dalam penyedia dokumen. </li>
+
+</ul>
+
+
+<p>Bagian ini menjelaskan cara menulis aplikasi klien berdasarkan
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} dan
+intent {@link android.content.Intent#ACTION_CREATE_DOCUMENT}.</p>
+
+
+<h3 id="search">Mencari dokumen</h3>
+
+<p>
+Cuplikan berikut menggunakan {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+untuk mencari penyedia dokumen yang
+berisi file gambar:</p>
+
+<pre>private static final int READ_REQUEST_CODE = 42;
+...
+/**
+ * Fires an intent to spin up the &quot;file chooser&quot; UI and select an image.
+ */
+public void performFileSearch() {
+
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+    // browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones)
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only images, using the image MIME data type.
+    // If one wanted to search for ogg vorbis files, the type would be &quot;audio/ogg&quot;.
+    // To search for all documents available via installed storage providers,
+    // it would be &quot;*/*&quot;.
+    intent.setType(&quot;image/*&quot;);
+
+    startActivityForResult(intent, READ_REQUEST_CODE);
+}</pre>
+
+<p>Perhatikan yang berikut ini:</p>
+<ul>
+<li>Saat aplikasi mengeluarkan intent {@link android.content.Intent#ACTION_OPEN_DOCUMENT}
+, aplikasi akan menjalankan picker yang menampilkan semua penyedia dokumen yang cocok.</li>
+
+<li>Menambahkan kategori {@link android.content.Intent#CATEGORY_OPENABLE} ke
+intent akan menyaring hasil agar hanya menampilkan dokumen yang bisa dibuka, seperti file gambar.</li>
+
+<li>Pernyataan {@code intent.setType("image/*")} menyaring lebih jauh agar hanya
+menampilkan dokumen yang memiliki tipe data MIME gambar.</li>
+</ul>
+
+<h3 id="results">Memproses Hasil</h3>
+
+<p>Setelah pengguna memilih dokumen di picker,
+{@link android.app.Activity#onActivityResult onActivityResult()} akan dipanggil.
+URI yang menunjuk ke dokumen yang dipilih dimasukkan dalam parameter {@code resultData}
+. Ekstrak URI dengan {@link android.content.Intent#getData getData()}.
+Setelah mendapatkannya, Anda bisa menggunakannya untuk mengambil dokumen yang diinginkan pengguna. Misalnya
+:</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode,
+        Intent resultData) {
+
+    // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+    // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+    // response to some other intent, and the code below shouldn't run at all.
+
+    if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        // The document selected by the user won't be returned in the intent.
+        // Instead, a URI to that document will be contained in the return intent
+        // provided to this method as a parameter.
+        // Pull that URI using resultData.getData().
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            Log.i(TAG, "Uri: " + uri.toString());
+            showImage(uri);
+        }
+    }
+}
+</pre>
+
+<h3 id="metadata">Memeriksa metadata dokumen</h3>
+
+<p>Setelah Anda memiliki URI untuk dokumen, Anda akan mendapatkan akses ke metadatanya. Cuplikan
+ini memegang metadata sebuah dokumen yang disebutkan oleh URI, dan mencatatnya:</p>
+
+<pre>public void dumpImageMetaData(Uri uri) {
+
+    // The query, since it only applies to a single document, will only return
+    // one row. There's no need to filter, sort, or select fields, since we want
+    // all fields for one document.
+    Cursor cursor = getActivity().getContentResolver()
+            .query(uri, null, null, null, null, null);
+
+    try {
+    // moveToFirst() returns false if the cursor has 0 rows.  Very handy for
+    // &quot;if there's anything to look at, look at it&quot; conditionals.
+        if (cursor != null &amp;&amp; cursor.moveToFirst()) {
+
+            // Note it's called &quot;Display Name&quot;.  This is
+            // provider-specific, and might not necessarily be the file name.
+            String displayName = cursor.getString(
+                    cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            Log.i(TAG, &quot;Display Name: &quot; + displayName);
+
+            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+            // If the size is unknown, the value stored is null.  But since an
+            // int can't be null in Java, the behavior is implementation-specific,
+            // which is just a fancy term for &quot;unpredictable&quot;.  So as
+            // a rule, check if it's null before assigning to an int.  This will
+            // happen often:  The storage API allows for remote files, whose
+            // size might not be locally known.
+            String size = null;
+            if (!cursor.isNull(sizeIndex)) {
+                // Technically the column stores an int, but cursor.getString()
+                // will do the conversion automatically.
+                size = cursor.getString(sizeIndex);
+            } else {
+                size = &quot;Unknown&quot;;
+            }
+            Log.i(TAG, &quot;Size: &quot; + size);
+        }
+    } finally {
+        cursor.close();
+    }
+}
+</pre>
+
+<h3 id="open-client">Membuka dokumen</h3>
+
+<p>Setelah mendapatkan URI dokumen, Anda bisa membuka dokumen atau melakukan apa saja
+yang diinginkan padanya.</p>
+
+<h4>Bitmap</h4>
+
+<p>Berikut ini adalah contoh cara membuka {@link android.graphics.Bitmap}:</p>
+
+<pre>private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+    ParcelFileDescriptor parcelFileDescriptor =
+            getContentResolver().openFileDescriptor(uri, "r");
+    FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+    Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+    parcelFileDescriptor.close();
+    return image;
+}
+</pre>
+
+<p>Perhatikan bahwa Anda tidak boleh melakukan operasi ini pada thread UI. Lakukan hal ini di latar belakang
+, dengan menggunakan {@link android.os.AsyncTask}. Setelah membuka bitmap, Anda
+bisa menampilkannya dalam {@link android.widget.ImageView}.
+</p>
+
+<h4>Mendapatkan InputStream</h4>
+
+<p>Berikut ini adalah contoh cara mendapatkan {@link java.io.InputStream} dari URI. Dalam cuplikan ini
+, baris-baris file dibaca ke dalam sebuah string:</p>
+
+<pre>private String readTextFromUri(Uri uri) throws IOException {
+    InputStream inputStream = getContentResolver().openInputStream(uri);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+            inputStream));
+    StringBuilder stringBuilder = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+        stringBuilder.append(line);
+    }
+    fileInputStream.close();
+    parcelFileDescriptor.close();
+    return stringBuilder.toString();
+}
+</pre>
+
+<h3 id="create">Membuat dokumen baru</h3>
+
+<p>Aplikasi Anda bisa membuat dokumen baru dalam penyedia dokumen dengan menggunakan intent
+{@link android.content.Intent#ACTION_CREATE_DOCUMENT}
+. Untuk membuat file, Anda memberikan satu tipe MIME dan satu nama file pada intent, dan
+menjalankannya dengan kode permintaan yang unik. Selebihnya akan diurus untuk Anda:</p>
+
+
+<pre>
+// Here are some examples of how you might call this method.
+// The first parameter is the MIME type, and the second parameter is the name
+// of the file you are creating:
+//
+// createFile("text/plain", "foobar.txt");
+// createFile("image/png", "mypicture.png");
+
+// Unique request code.
+private static final int WRITE_REQUEST_CODE = 43;
+...
+private void createFile(String mimeType, String fileName) {
+    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as
+    // a file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Create a file with the requested MIME type.
+    intent.setType(mimeType);
+    intent.putExtra(Intent.EXTRA_TITLE, fileName);
+    startActivityForResult(intent, WRITE_REQUEST_CODE);
+}
+</pre>
+
+<p>Setelah membuat dokumen baru, Anda bisa mendapatkan URI-nya dalam
+{@link android.app.Activity#onActivityResult onActivityResult()}, sehingga Anda
+bisa terus menulis ke dokumen itu.</p>
+
+<h3 id="delete">Menghapus dokumen</h3>
+
+<p>Jika Anda memiliki URI dokumen dan
+{@link android.provider.DocumentsContract.Document#COLUMN_FLAGS Document.COLUMN_FLAGS}
+ dokumen berisi
+{@link android.provider.DocumentsContract.Document#FLAG_SUPPORTS_DELETE SUPPORTS_DELETE},
+Anda bisa menghapus dokumen tersebut. Misalnya:</p>
+
+<pre>
+DocumentsContract.deleteDocument(getContentResolver(), uri);
+</pre>
+
+<h3 id="edit">Mengedit dokumen</h3>
+
+<p>Anda bisa menggunakan SAF untuk mengedit dokumen teks langsung di tempatnya.
+Cuplikan ini memicu
+intent {@link android.content.Intent#ACTION_OPEN_DOCUMENT} dan menggunakan
+kategori {@link android.content.Intent#CATEGORY_OPENABLE} untuk menampilkan
+dokumen yang bisa dibuka saja. Ini akan menyaring lebih jauh untuk menampilkan file teks saja:</p>
+
+<pre>
+private static final int EDIT_REQUEST_CODE = 44;
+/**
+ * Open a file for writing and append some text to it.
+ */
+ private void editDocument() {
+    // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's
+    // file browser.
+    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+    // Filter to only show results that can be &quot;opened&quot;, such as a
+    // file (as opposed to a list of contacts or timezones).
+    intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+    // Filter to show only text files.
+    intent.setType(&quot;text/plain&quot;);
+
+    startActivityForResult(intent, EDIT_REQUEST_CODE);
+}
+</pre>
+
+<p>Berikutnya, dari {@link android.app.Activity#onActivityResult onActivityResult()}
+(lihat <a href="#results">Memproses hasil</a>) Anda bisa memanggil kode untuk mengedit.
+Cuplikan berikut mendapatkan {@link java.io.FileOutputStream}
+dari {@link android.content.ContentResolver}. Secara default, snipet menggunakan mode “tulis”.
+Inilah praktik terbaik untuk meminta jumlah akses minimum yang Anda perlukan, jadi jangan meminta
+baca/tulis jika yang Anda perlukan hanyalah tulis:</p>
+
+<pre>private void alterDocument(Uri uri) {
+    try {
+        ParcelFileDescriptor pfd = getActivity().getContentResolver().
+                openFileDescriptor(uri, "w");
+        FileOutputStream fileOutputStream =
+                new FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(("Overwritten by MyCloud at " +
+                System.currentTimeMillis() + "\n").getBytes());
+        // Let the document provider know you're done by closing the stream.
+        fileOutputStream.close();
+        pfd.close();
+    } catch (FileNotFoundException e) {
+        e.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}</pre>
+
+<h3 id="permissions">Mempertahankan izin</h3>
+
+<p>Bila aplikasi Anda membuka file untuk membaca atau menulis, sistem akan memberi
+aplikasi Anda izin URI untuk file itu. Pemberian ini berlaku hingga perangkat pengguna di-restart.
+Namun anggaplah aplikasi Anda adalah aplikasi pengeditan gambar, dan Anda ingin pengguna bisa
+mengakses 5 gambar terakhir yang dieditnya, langsung dari aplikasi Anda. Jika perangkat pengguna telah
+di-restart, maka Anda harus mengirim pengguna kembali ke picker sistem untuk menemukan
+file, hal ini jelas tidak ideal.</p>
+
+<p>Untuk mencegah terjadinya hal ini, Anda bisa mempertahankan izin yang diberikan
+sistem ke aplikasi Anda. Secara efektif, aplikasi Anda akan "mengambil" pemberian izin URI yang bisa dipertahankan
+yang ditawarkan oleh sistem. Hal ini memberi pengguna akses kontinu ke file
+melalui aplikasi Anda, sekalipun perangkat telah di-restart:</p>
+
+
+<pre>final int takeFlags = intent.getFlags()
+            &amp; (Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+// Check for the freshest data.
+getContentResolver().takePersistableUriPermission(uri, takeFlags);</pre>
+
+<p>Ada satu langkah akhir. Anda mungkin telah menyimpan
+URI terbaru yang diakses aplikasi, namun URI itu mungkin tidak lagi valid,&mdash;aplikasi lain
+mungkin telah menghapus atau memodifikasi dokumen. Karena itu, Anda harus selalu memanggil
+{@code getContentResolver().takePersistableUriPermission()} untuk memeriksa
+data terbaru.</p>
+
+<h2 id="custom">Menulis Penyedia Dokumen Custom</h2>
+
+<p>
+Jika Anda sedang mengembangkan aplikasi yang menyediakan layanan penyimpanan untuk file (misalnya
+layanan penyimpanan cloud), Anda bisa menyediakan file melalui
+SAF dengan menulis penyedia dokumen custom.  Bagian ini menjelaskan
+caranya.</p>
+
+
+<h3 id="manifest">Manifes</h3>
+
+<p>Untuk mengimplementasikan penyedia dokumen custom, tambahkan yang berikut ini ke manifes aplikasi
+Anda:</p>
+<ul>
+
+<li>Target berupa API level 19 atau yang lebih tinggi.</li>
+
+<li>Elemen <code>&lt;provider&gt;</code> yang mendeklarasikan penyedia penyimpanan custom
+Anda. </li>
+
+<li>Nama penyedia Anda, yaitu nama kelasnya, termasuk nama paket.
+Misalnya: <code>com.example.android.storageprovider.MyCloudProvider</code>.</li>
+
+<li>Nama otoritas Anda, yaitu nama paket Anda (dalam contoh ini,
+<code>com.example.android.storageprovider</code>) plus tipe penyedia konten
+(<code>documents</code>). Misalnya, {@code com.example.android.storageprovider.documents}.</li>
+
+<li>Atribut <code>android:exported</code> yang diatur ke <code>&quot;true&quot;</code>.
+Anda harus mengekspor penyedia sehingga aplikasi lain bisa membacanya.</li>
+
+<li>Atribut <code>android:grantUriPermissions</code> yang diatur ke
+<code>&quot;true&quot;</code>. Pengaturan ini memungkinkan sistem memberi aplikasi lain akses
+ke konten dalam penyedia Anda. Untuk pembahasan cara mempertahankan pemberian bagi
+dokumen tertentu, lihat <a href="#permissions">Mempertahankan izin</a>.</li>
+
+<li>Izin {@code MANAGE_DOCUMENTS}. Secara default, penyedia tersedia
+bagi siapa saja. Menambahkan izin ini akan membatasi penyedia Anda pada sistem.
+Pembatasan ini penting untuk keamanan.</li>
+
+<li>Atribut {@code android:enabled} yang diatur ke nilai boolean didefinisikan dalam file
+sumber daya. Tujuan atribut ini adalah menonaktifkan penyedia pada perangkat yang menjalankan Android 4.3 atau yang lebih rendah.
+Misalnya, {@code android:enabled="@bool/atLeastKitKat"}. Selain
+memasukkan atribut ini dalam manifes, Anda perlu melakukan hal-hal berikut:
+<ul>
+<li>Dalam file sumber daya {@code bool.xml} Anda di bawah {@code res/values/}, tambahkan
+baris ini: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Dalam file sumber daya {@code bool.xml} Anda di bawah {@code res/values-v19/}, tambahkan
+baris ini: <pre>&lt;bool name=&quot;atLeastKitKat&quot;&gt;true&lt;/bool&gt;</pre></li>
+</ul></li>
+
+<li>Sebuah filter intent berisi tindakan
+{@code android.content.action.DOCUMENTS_PROVIDER}, agar penyedia Anda
+muncul dalam picker saat sistem mencari penyedia.</li>
+
+</ul>
+<p>Berikut ini adalah kutipan contoh manifes berisi penyedia yang:</p>
+
+<pre>&lt;manifest... &gt;
+    ...
+    &lt;uses-sdk
+        android:minSdkVersion=&quot;19&quot;
+        android:targetSdkVersion=&quot;19&quot; /&gt;
+        ....
+        &lt;provider
+            android:name=&quot;com.example.android.storageprovider.MyCloudProvider&quot;
+            android:authorities=&quot;com.example.android.storageprovider.documents&quot;
+            android:grantUriPermissions=&quot;true&quot;
+            android:exported=&quot;true&quot;
+            android:permission=&quot;android.permission.MANAGE_DOCUMENTS&quot;
+            android:enabled=&quot;&#64;bool/atLeastKitKat&quot;&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name=&quot;android.content.action.DOCUMENTS_PROVIDER&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/provider&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</pre>
+
+<h4 id="43">Mendukung perangkat yang menjalankan Android 4.3 dan yang lebih rendah</h4>
+
+<p>Intent
+{@link android.content.Intent#ACTION_OPEN_DOCUMENT} hanya tersedia
+pada perangkat yang menjalankan Android 4.4 dan yang lebih tinggi.
+Jika ingin aplikasi Anda mendukung {@link android.content.Intent#ACTION_GET_CONTENT}
+untuk mengakomodasi perangkat yang menjalankan Android 4.3 dan yang lebih rendah, Anda harus
+menonaktifkan filter inten {@link android.content.Intent#ACTION_GET_CONTENT} dalam
+manifes untuk perangkat yang menjalankan Android 4.4 atau yang lebih tinggi. Penyedia
+dokumen dan {@link android.content.Intent#ACTION_GET_CONTENT} harus dianggap
+saling eksklusif. Jika Anda mendukung keduanya sekaligus, aplikasi Anda akan
+muncul dua kali dalam UI picker sistem, yang menawarkan dua cara mengakses
+data tersimpan Anda. Hal ini akan membingungkan pengguna.</p>
+
+<p>Berikut ini adalah cara yang disarankan untuk menonaktifkan
+filter intent {@link android.content.Intent#ACTION_GET_CONTENT} untuk perangkat
+yang menjalankan Android versi 4.4 atau yang lebih tinggi:</p>
+
+<ol>
+<li>Dalam file sumber daya {@code bool.xml} Anda di bawah {@code res/values/}, tambahkan
+baris ini: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;true&lt;/bool&gt;</pre></li>
+
+<li>Dalam file sumber daya {@code bool.xml} Anda di bawah {@code res/values-v19/}, tambahkan
+baris ini: <pre>&lt;bool name=&quot;atMostJellyBeanMR2&quot;&gt;false&lt;/bool&gt;</pre></li>
+
+<li>Tambahkan
+<a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">alias
+aktivitas</a> untuk menonaktifkan filter intent {@link android.content.Intent#ACTION_GET_CONTENT}
+bagi versi 4.4 (API level 19) dan yang lebih tinggi. Misalnya:
+
+<pre>
+&lt;!-- This activity alias is added so that GET_CONTENT intent-filter
+     can be disabled for builds on API level 19 and higher. --&gt;
+&lt;activity-alias android:name=&quot;com.android.example.app.MyPicker&quot;
+        android:targetActivity=&quot;com.android.example.app.MyActivity&quot;
+        ...
+        android:enabled=&quot;@bool/atMostJellyBeanMR2&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.GET_CONTENT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.OPENABLE&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;image/*&quot; /&gt;
+        &lt;data android:mimeType=&quot;video/*&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</pre>
+</li>
+</ol>
+<h3 id="contract">Kontrak</h3>
+
+<p>Biasanya bila Anda menulis penyedia konten custom, salah satu tugas adalah
+mengimplementasikan kelas kontrak, seperti dijelaskan dalam panduan pengembang
+<a href="{@docRoot}guide/topics/providers/content-provider-creating.html#ContractClass">
+Penyedia Konten</a>. Kelas kontrak adalah kelas {@code public final}
+yang berisi definisi konstanta untuk URI, nama kolom, tipe MIME, dan
+metadata lain yang berkenaan dengan penyedia. SAF
+menyediakan kelas-kelas kontrak ini untuk Anda, jadi Anda tidak perlu menulisnya
+sendiri:</p>
+
+<ul>
+   <li>{@link android.provider.DocumentsContract.Document}</li>
+   <li>{@link android.provider.DocumentsContract.Root}</li>
+</ul>
+
+<p>Misalnya, berikut ini adalah kolom-kolom yang bisa Anda hasilkan di kursor bila
+penyedia dokumen Anda membuat query dokumen atau akar:</p>
+
+<pre>private static final String[] DEFAULT_ROOT_PROJECTION =
+        new String[]{Root.COLUMN_ROOT_ID, Root.COLUMN_MIME_TYPES,
+        Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
+        Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+        Root.COLUMN_AVAILABLE_BYTES,};
+private static final String[] DEFAULT_DOCUMENT_PROJECTION = new
+        String[]{Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE,
+        Document.COLUMN_DISPLAY_NAME, Document.COLUMN_LAST_MODIFIED,
+        Document.COLUMN_FLAGS, Document.COLUMN_SIZE,};
+</pre>
+
+<h3 id="subclass">Subkelas DocumentsProvider</h3>
+
+<p>Langkah berikutnya dalam menulis penyedia dokumen custom adalah menjadikan
+kelas abstrak sebagai subkelas {@link android.provider.DocumentsProvider}. Setidaknya, Anda perlu
+ mengimplementasikan metode berikut:</p>
+
+<ul>
+<li>{@link android.provider.DocumentsProvider#queryRoots queryRoots()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}</li>
+
+<li>{@link android.provider.DocumentsProvider#queryDocument queryDocument()}</li>
+
+<li>{@link android.provider.DocumentsProvider#openDocument openDocument()}</li>
+</ul>
+
+<p>Hanya inilah metode yang diwajibkan kepada Anda secara ketat untuk diimplementasikan, namun ada
+banyak lagi yang mungkin Anda inginkan. Lihat {@link android.provider.DocumentsProvider}
+untuk detailnya.</p>
+
+<h4 id="queryRoots">Mengimplementasikan queryRoots</h4>
+
+<p>Implementasi {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} oleh Anda harus menghasilkan {@link android.database.Cursor} yang menunjuk ke semua
+direktori akar penyedia dokumen, dengan menggunakan kolom-kolom yang didefinisikan dalam
+{@link android.provider.DocumentsContract.Root}.</p>
+
+<p>Dalam cuplikan berikut, parameter {@code projection} mewakili bidang-bidang
+tertentu yang ingin didapatkan kembali oleh pemanggil. Cuplikan ini membuat kursor baru
+dan menambahkan satu baris ke satu akar&mdash; kursor, satu direktori level atas, seperti
+Downloads atau Images.  Kebanyakan penyedia hanya mempunyai satu akar. Anda bisa mempunyai lebih dari satu,
+misalnya, jika ada banyak akun pengguna. Dalam hal itu, cukup tambahkan sebuah
+baris kedua ke kursor.</p>
+
+<pre>
+&#64;Override
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+
+    // Create a cursor with either the requested fields, or the default
+    // projection if "projection" is null.
+    final MatrixCursor result =
+            new MatrixCursor(resolveRootProjection(projection));
+
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+    }
+
+    // It's possible to have multiple roots (e.g. for multiple accounts in the
+    // same app) -- just add multiple cursor rows.
+    // Construct one row for a root called &quot;MyCloud&quot;.
+    final MatrixCursor.RowBuilder row = result.newRow();
+    row.add(Root.COLUMN_ROOT_ID, ROOT);
+    row.add(Root.COLUMN_SUMMARY, getContext().getString(R.string.root_summary));
+
+    // FLAG_SUPPORTS_CREATE means at least one directory under the root supports
+    // creating documents. FLAG_SUPPORTS_RECENTS means your application's most
+    // recently used documents will show up in the &quot;Recents&quot; category.
+    // FLAG_SUPPORTS_SEARCH allows users to search all documents the application
+    // shares.
+    row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE |
+            Root.FLAG_SUPPORTS_RECENTS |
+            Root.FLAG_SUPPORTS_SEARCH);
+
+    // COLUMN_TITLE is the root title (e.g. Gallery, Drive).
+    row.add(Root.COLUMN_TITLE, getContext().getString(R.string.title));
+
+    // This document id cannot change once it's shared.
+    row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(mBaseDir));
+
+    // The child MIME types are used to filter the roots and only present to the
+    //  user roots that contain the desired type somewhere in their file hierarchy.
+    row.add(Root.COLUMN_MIME_TYPES, getChildMimeTypes(mBaseDir));
+    row.add(Root.COLUMN_AVAILABLE_BYTES, mBaseDir.getFreeSpace());
+    row.add(Root.COLUMN_ICON, R.drawable.ic_launcher);
+
+    return result;
+}</pre>
+
+<h4 id="queryChildDocuments">Mengimplementasikan queryChildDocuments</h4>
+
+<p>Implementasi
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()}
+oleh Anda harus menghasilkan {@link android.database.Cursor} yang menunjuk ke semua file dalam
+direktori yang ditentukan, dengan menggunakan kolom-kolom yang didefinisikan dalam
+{@link android.provider.DocumentsContract.Document}.</p>
+
+<p>Metode ini akan dipanggil bila Anda memilih akar aplikasi dalam picker UI.
+Metode mengambil dokumen anak dari direktori di bawah akar.  Metode ini bisa dipanggil pada level apa saja dalam
+hierarki file, bukan hanya akar. Cuplikan ini
+membuat kursor baru dengan kolom-kolom yang diminta, lalu menambahkan informasi tentang
+setiap anak langsung dalam direktori induk ke kursor.
+Satu anak bisa berupa gambar, direktori lain&mdash;file apa saja:</p>
+
+<pre>&#64;Override
+public Cursor queryChildDocuments(String parentDocumentId, String[] projection,
+                              String sortOrder) throws FileNotFoundException {
+
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    final File parent = getFileForDocId(parentDocumentId);
+    for (File file : parent.listFiles()) {
+        // Adds the file's display name, MIME type, size, and so on.
+        includeFile(result, null, file);
+    }
+    return result;
+}
+</pre>
+
+<h4 id="queryDocument">Mengimplementasikan queryDocument</h4>
+
+<p>Implementasi
+{@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+oleh Anda harus menghasilkan {@link android.database.Cursor} yang menunjuk ke file yang disebutkan,
+dengan menggunakan kolom-kolom yang didefinisikan dalam {@link android.provider.DocumentsContract.Document}.
+</p>
+
+<p>Metode {@link android.provider.DocumentsProvider#queryDocument queryDocument()}
+menghasilkan informasi yang sama yang diteruskan dalam
+{@link android.provider.DocumentsProvider#queryChildDocuments queryChildDocuments()},
+namun untuk file tertentu:</p>
+
+
+<pre>&#64;Override
+public Cursor queryDocument(String documentId, String[] projection) throws
+        FileNotFoundException {
+
+    // Create a cursor with the requested projection, or the default projection.
+    final MatrixCursor result = new
+            MatrixCursor(resolveDocumentProjection(projection));
+    includeFile(result, documentId, null);
+    return result;
+}
+</pre>
+
+<h4 id="openDocument">Mengimplementasikan openDocument</h4>
+
+<p>Anda harus mengimplementasikan {@link android.provider.DocumentsProvider#openDocument
+openDocument()} untuk menghasilkan {@link android.os.ParcelFileDescriptor} yang mewakili
+file yang disebutkan. Aplikasi lain bisa menggunakan {@link android.os.ParcelFileDescriptor}
+yang dihasilkan untuk mengalirkan data. Sistem memanggil metode ini setelah pengguna memilih file
+dan aplikasi klien meminta akses ke file itu dengan memanggil
+{@link android.content.ContentResolver#openFileDescriptor openFileDescriptor()}.
+Misalnya:</p>
+
+<pre>&#64;Override
+public ParcelFileDescriptor openDocument(final String documentId,
+                                         final String mode,
+                                         CancellationSignal signal) throws
+        FileNotFoundException {
+    Log.v(TAG, &quot;openDocument, mode: &quot; + mode);
+    // It's OK to do network operations in this method to download the document,
+    // as long as you periodically check the CancellationSignal. If you have an
+    // extremely large file to transfer from the network, a better solution may
+    // be pipes or sockets (see ParcelFileDescriptor for helper methods).
+
+    final File file = getFileForDocId(documentId);
+
+    final boolean isWrite = (mode.indexOf('w') != -1);
+    if(isWrite) {
+        // Attach a close listener if the document is opened in write mode.
+        try {
+            Handler handler = new Handler(getContext().getMainLooper());
+            return ParcelFileDescriptor.open(file, accessMode, handler,
+                        new ParcelFileDescriptor.OnCloseListener() {
+                &#64;Override
+                public void onClose(IOException e) {
+
+                    // Update the file with the cloud server. The client is done
+                    // writing.
+                    Log.i(TAG, &quot;A file with id &quot; +
+                    documentId + &quot; has been closed!
+                    Time to &quot; +
+                    &quot;update the server.&quot;);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new FileNotFoundException(&quot;Failed to open document with id &quot;
+            + documentId + &quot; and mode &quot; + mode);
+        }
+    } else {
+        return ParcelFileDescriptor.open(file, accessMode);
+    }
+}
+</pre>
+
+<h3 id="security">Keamanan</h3>
+
+<p>Anggaplah penyedia dokumen Anda sebuah layanan penyimpanan cloud yang dilindungi kata sandi
+dan Anda ingin memastikan bahwa pengguna sudah login sebelum Anda mulai berbagi file mereka.
+Apakah yang harus dilakukan aplikasi Anda jika pengguna tidak login?  Solusinya adalah menghasilkan
+akar nol dalam implementasi {@link android.provider.DocumentsProvider#queryRoots
+queryRoots()} Anda. Yakni, sebuah kursor akar kosong:</p>
+
+<pre>
+public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+...
+    // If user is not logged in, return an empty root cursor.  This removes our
+    // provider from the list entirely.
+    if (!isUserLoggedIn()) {
+        return result;
+}
+</pre>
+
+<p>Langkah lainnya adalah memanggil {@code getContentResolver().notifyChange()}.
+Ingat {@link android.provider.DocumentsContract}?  Kita menggunakannya untuk membuat
+URI ini. Cuplikan berikut memberi tahu sistem untuk membuat query akar penyedia dokumen Anda
+kapan saja status login pengguna berubah. Jika pengguna tidak
+login, panggilan ke {@link android.provider.DocumentsProvider#queryRoots queryRoots()} akan menghasilkan
+kursor kosong, seperti yang ditampilkan di atas. Cara ini akan memastikan bahwa dokumen penyedia hanya
+tersedia jika pengguna login ke penyedia itu.</p>
+
+<pre>private void onLoginButtonClick() {
+    loginOrLogout();
+    getContentResolver().notifyChange(DocumentsContract
+            .buildRootsUri(AUTHORITY), null);
+}
+</pre>

@@ -1,0 +1,1031 @@
+page.title=Menu
+parent.title=Antarmuka Pengguna
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#xml">Mendefinisikan Menu dalam XML</a></li>
+  <li><a href="#options-menu">Membuat Menu Opsi</a>
+    <ol>
+      <li><a href="#RespondingOptionsMenu">Menangani kejadian klik</a></li>
+      <li><a href="#ChangingTheMenu">Mengubah item menu saat runtime</a></li>
+    </ol>
+  </li>
+  <li><a href="#context-menu">Membuat Menu Kontekstual</a>
+    <ol>
+      <li><a href="#FloatingContextMenu">Membuat menu konteks mengambang</a></li>
+      <li><a href="#CAB">Menggunakan mode tindakan kontekstual</a></li>
+    </ol>
+  </li>
+  <li><a href="#PopupMenu">Membuat Menu Popup</a>
+    <ol>
+      <li><a href="#PopupEvents">Menangani kejadian klik</a></li>
+    </ol>
+  </li>
+  <li><a href="#groups">Membuat Grup Menu</a>
+    <ol>
+      <li><a href="#checkable">Menggunakan item menu yang bisa diberi tanda cek</a></li>
+    </ol>
+  </li>
+  <li><a href="#intents">Menambahkan Item Menu Berdasarkan Intent</a>
+    <ol>
+      <li><a href="#AllowingToAdd">Memungkinkan aktivitas Anda ditambahkan ke menu lain</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Kelas-kelas utama</h2>
+  <ol>
+    <li>{@link android.view.Menu}</li>
+    <li>{@link android.view.MenuItem}</li>
+    <li>{@link android.view.ContextMenu}</li>
+    <li>{@link android.view.ActionMode}</li>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action-Bar</a></li>
+    <li><a href="{@docRoot}guide/topics/resources/menu-resource.html">Sumber Daya Menu</a></li>
+    <li><a href="http://android-developers.blogspot.com/2012/01/say-goodbye-to-menu-button.html">Ucapkan
+Selamat Tinggal pada Tombol Menu</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Menu adalah komponen antarmuka pengguna yang lazim dalam banyak tipe aplikasi. Untuk menyediakan pengalaman pengguna yang sudah akrab
+dan konsisten, Anda harus menggunakan API {@link android.view.Menu} untuk menyajikan
+tindakan dan opsi lain dalam aktivitas kepada pengguna.</p>
+
+<p>Mulai dengan Android 3.0 (API level 11), perangkat berbasis Android tidak perlu lagi
+menyediakan tombol <em>Menu</em> tersendiri. Dengan perubahan ini, aplikasi Android harus bermigrasi dari
+dependensi pada panel menu 6 item biasa, dan sebagai ganti menyediakan action-bar untuk menyajikan
+berbagai tindakan pengguna yang lazim.</p>
+
+<p>Walaupun desain dan pengalaman pengguna untuk sebagian item menu telah berubah, semantik untuk mendefinisikan
+serangkaian tindakan dan opsi masih berdasarkan pada API {@link android.view.Menu}. Panduan ini
+menampilkan cara membuat tiga tipe dasar penyajian menu atau tindakan pada semua
+versi Android:</p>
+
+<dl>
+  <dt><strong>Menu opsi dan action-bar</strong></dt>
+    <dd><a href="#options-menu">Menu opsi</a> adalah kumpulan item menu utama untuk suatu
+aktivitas. Inilah tempat Anda harus menempatkan tindakan yang berdampak global pada aplikasi, seperti
+"Cari", "Tulis email", dan "Pengaturan".
+  <p>Jika Anda mengembangkan aplikasi untuk Android 2.3 atau yang lebih rendah, pengguna bisa
+menampilkan panel menu opsi dengan menekan tombol <em>Menu</em>.</p>
+  <p>Pada Android 3.0 dan yang lebih tinggi, item menu opsi disajikan melalui <a href="{@docRoot}guide/topics/ui/actionbar.html">action-bar</a> sebagai kombinasi item tindakan
+di layar dan opsi overflow. Mulai dengan Android 3.0, tombol <em>Menu</em> dihilangkan (sebagian
+perangkat
+tidak memilikinya), sehingga Anda harus bermigrasi ke penggunaan action-bar untuk menyediakan akses ke tindakan dan
+opsi lainnya.</p>
+  <p>Lihat bagian tentang <a href="#options-menu">Membuat Menu Opsi</a>.</p>
+    </dd>
+
+  <dt><strong>Menu konteks dan mode tindakan kontekstual</strong></dt>
+
+   <dd>Menu konteks adalah <a href="#FloatingContextMenu">menu mengambang</a> yang muncul saat
+pengguna mengklik lama pada suatu elemen. Menu ini menyediakan tindakan yang memengaruhi konten atau
+bingkai konteks yang dipilih.
+  <p>Saat mengembangkan aplikasi untuk Android 3.0 dan yang lebih tinggi, sebagai gantinya Anda harus menggunakan <a href="#CAB">mode tindakan kontekstual</a> untuk memungkinkan tindakan pada konten yang dipilih. Mode ini menampilkan
+item tindakan yang memengaruhi konten yang dipilih dalam baris di bagian atas layar dan memungkinkan pengguna
+memilih beberapa item sekaligus.</p>
+  <p>Lihat bagian tentang <a href="#context-menu">Membuat Menu Kontekstual</a>.</p>
+</dd>
+
+  <dt><strong>Menu popup</strong></dt>
+    <dd>Menu popup menampilkan daftar item secara vertikal yang dipasang pada tampilan yang
+memanggil menu. Ini cocok untuk menyediakan kelebihan tindakan yang terkait dengan konten tertentu atau
+untuk menyediakan opsi bagi bagian kedua dari suatu perintah. Tindakan di menu popup
+<strong>tidak</strong> boleh memengaruhi secara langsung konten yang bersangkutan&mdash;yang diperuntukkan bagi
+tindakan kontekstual. Melainkan, menu popup adalah untuk tindakan tambahan yang terkait dengan wilayah konten dalam
+aktivitas Anda.
+  <p>Lihat bagian tentang <a href="#PopupMenu">Membuat Menu Popup</a>.</p>
+</dd>
+</dl>
+
+
+
+<h2 id="xml">Mendefinisikan Menu dalam XML</h2>
+
+<p>Untuk semua tipe menu, Android menyediakan sebuah format XML standar untuk mendefinisikan item menu.
+Sebagai ganti membuat menu dalam kode aktivitas, Anda harus mendefinisikan menu dan semua itemnya dalam
+<a href="{@docRoot}guide/topics/resources/menu-resource.html">sumber daya menu</a> XML. Anda kemudian bisa
+memekarkan sumber daya menu (memuatnya sebagai objek {@link android.view.Menu}) dalam aktivitas atau
+fragmen.</p>
+
+<p>Menggunakan sumber daya menu adalah praktik yang baik karena beberapa alasan:</p>
+<ul>
+  <li>Memvisualisasikan struktur menu dalam XML menjadi lebih mudah.</li>
+  <li>Cara ini memisahkan konten untuk menu dari kode perilaku aplikasi Anda.</li>
+  <li>Cara ini memungkinkan Anda membuat konfigurasi menu alternatif untuk berbagai versi platform,
+ukuran layar, dan konfigurasi lainnya dengan memanfaatkan kerangka kerja <a href="{@docRoot}guide/topics/resources/index.html">sumber daya aplikasi</a>.</li>
+</ul>
+
+<p>Untuk mendefinisikan menu, buatlah sebuah file XML dalam direktori <code>res/menu/</code>
+proyek dan buat menu dengan elemen-elemen berikut:</p>
+<dl>
+  <dt><code>&lt;menu></code></dt>
+    <dd>Mendefinisikan {@link android.view.Menu}, yang merupakan sebuah kontainer untuk item menu. Elemen
+<code>&lt;menu></code> harus menjadi simpul akar untuk file dan bisa menampung salah satu atau beberapa dari elemen
+<code>&lt;item></code> dan <code>&lt;group></code>.</dd>
+
+  <dt><code>&lt;item></code></dt>
+    <dd>Membuat {@link android.view.MenuItem}, yang mewakili satu item menu. Elemen ini
+bisa berisi elemen <code>&lt;menu></code> tersarang guna untuk membuat submenu.</dd>
+
+  <dt><code>&lt;group></code></dt>
+    <dd>Kontainer opsional tak terlihat untuk elemen-elemen {@code &lt;item&gt;}. Kontainer ini memungkinkan Anda
+mengelompokkan item menu untuk berbagi properti seperti status aktif dan visibilitas. Untuk informasi
+selengkapnya, lihat bagian tentang <a href="#groups">Membuat Grup Menu</a>.</dd>
+</dl>
+
+
+<p>Berikut ini adalah contoh menu bernama <code>game_menu.xml</code>:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/new_game"
+          android:icon="@drawable/ic_new_game"
+          android:title="@string/new_game"
+          android:showAsAction="ifRoom"/&gt;
+    &lt;item android:id="@+id/help"
+          android:icon="@drawable/ic_help"
+          android:title="@string/help" /&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Elemen <code>&lt;item></code> mendukung beberapa atribut yang bisa Anda gunakan untuk mendefinisikan penampilan dan perilaku
+item. Item menu di atas mencakup atribut berikut:</p>
+
+<dl>
+  <dt>{@code android:id}</dt>
+    <dd>ID sumber daya unik bagi item, yang memungkinkan aplikasi mengenali item
+bila pengguna memilihnya.</dd>
+  <dt>{@code android:icon}</dt>
+    <dd>Acuan ke drawable untuk digunakan sebagai ikon item.</dd>
+  <dt>{@code android:title}</dt>
+    <dd>Acuan ke string untuk digunakan sebagai judul item.</dd>
+  <dt>{@code android:showAsAction}</dt>
+    <dd>Menetapkan waktu dan cara item ini muncul sebagai item tindakan di <a href="{@docRoot}guide/topics/ui/actionbar.html">action-bar</a>.</dd>
+</dl>
+
+<p>Ini adalah atribut-atribut terpenting yang harus Anda gunakan, namun banyak lagi yang tersedia.
+Untuk informasi tentang semua atribut yang didukung, lihat dokumen <a href="{@docRoot}guide/topics/resources/menu-resource.html">Sumber Daya Menu</a>.</p>
+
+<p>Anda bisa menambahkan submenu ke sebuah item di menu (kecuali submenu) apa saja dengan menambahkan elemen {@code &lt;menu&gt;}
+sebagai anak {@code &lt;item&gt;}. Submenu berguna saat aplikasi Anda memiliki banyak
+fungsi yang bisa ditata ke dalam topik-topik, seperti item dalam sebuah baris menu aplikasi PC (File,
+Edit, Lihat, dsb.). Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/file"
+          android:title="@string/file" &gt;
+        &lt;!-- "file" submenu --&gt;
+        &lt;menu&gt;
+            &lt;item android:id="@+id/create_new"
+                  android:title="@string/create_new" /&gt;
+            &lt;item android:id="@+id/open"
+                  android:title="@string/open" /&gt;
+        &lt;/menu&gt;
+    &lt;/item&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Untuk menggunakan menu dalam aktivitas, Anda perlu memekarkan sumber daya menu (mengonversi sumber daya XML
+menjadi objek yang bisa diprogram) dengan menggunakan {@link android.view.MenuInflater#inflate(int,Menu)
+MenuInflater.inflate()}. Di bagian berikut, Anda akan melihat cara memekarkan menu untuk tiap
+tipe menu.</p>
+
+
+
+<h2 id="options-menu">Membuat Menu Opsi</h2>
+
+<div class="figure" style="width:200px;margin:0">
+  <img src="{@docRoot}images/options_menu.png" height="333" alt="" />
+  <p class="img-caption"><strong>Gambar 1.</strong> Menu opsi di
+Browser, pada Android 2.3.</p>
+</div>
+
+<p>Menu opsi adalah tempat Anda harus menyertakan tindakan dan opsi lain yang relevan dengan
+konteks aktivitas saat ini, seperti "Cari", "Tulis email", dan "Pengaturan".</p>
+
+<p>Tempat item dalam menu opsi muncul di layar bergantung pada versi aplikasi yang Anda
+kembangkan:</p>
+
+<ul>
+  <li>Jika Anda mengembangkan aplikasi untuk <strong>Android 2.3.x (API level 10) atau
+yang lebih rendah</strong>, konten menu opsi muncul pada bagian bawah layar bila pengguna
+menekan tombol <em>Menu</em>, seperti yang ditampilkan dalam gambar 1. Bila dibuka, bagian yang terlihat pertama adalah
+menu
+ikon, yang menampung hingga enam item menu. Jika menu Anda menyertakan lebih dari enam item, Android akan meletakkan
+item keenam dan sisanya ke dalam menu kelebihan, yang bisa dibuka pengguna dengan memilih
+<em>More</em>.</li>
+
+  <li>Jika Anda mengembangkan aplikasi untuk <strong>Android 3.0 (API level 11) dan
+yang lebih tinggi</strong>, item menu opsi tersedia dalam <a href="{@docRoot}guide/topics/ui/actionbar.html">action-bar</a>. Secara default, sistem
+meletakkan semua item dalam kelebihan tindakan, yang bisa ditampilkan pengguna dengan ikon kelebihan tindakan di
+sisi kanan action-bar (atau dengan menekan tombol <em>Menu</em> perangkat, jika tersedia). Untuk
+mengaktifkan
+akses cepat ke tindakan penting, Anda bisa mempromosikan beberapa item agar muncul pada action-bar dengan menambahkan
+{@code android:showAsAction="ifRoom"} ke elemen-elemen {@code &lt;item&gt;} yang bersangkutan (lihat gambar
+2). <p>Untuk informasi selengkapnya tentang item tindakan dan perilaku action-bar lainnya, lihat panduan <a href="{@docRoot}guide/topics/ui/actionbar.html">Action-Bar</a>. </p>
+<p class="note"><strong>Catatan:</strong> Sekalipun Anda <em>tidak</em> mengembangkan aplikasi untuk Android 3.0 atau
+yang lebih tinggi, Anda bisa membuat layout action-bar sendiri untuk mendapatkan efek serupa. Untuk contoh cara
+mendukung versi Android yang lebih lama dengan action-bar, lihat contoh <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">Kompatibilitas Action-Bar</a>
+.</p>
+</li>
+</ul>
+
+<img src="{@docRoot}images/ui/actionbar.png" alt="" />
+<p class="img-caption"><strong>Gambar 2.</strong> Action-bar dari aplikasi <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>, yang menampilkan
+tab-tab navigasi dan item tindakan kamera (plus tombol kelebihan tindakan).</p>
+
+<p>Anda bisa mendeklarasikan item untuk menu opsi dari subkelas {@link android.app.Activity}
+atau subkelas {@link android.app.Fragment}. Jika aktivitas maupun fragmen Anda
+mendeklarasikan item menu opsi, keduanya akan dikombinasikan dalam UI. Item aktivitas akan muncul
+lebih dahulu, diikuti oleh item tiap fragmen sesuai dengan urutan penambahan fragmen ke
+aktivitas. Jika perlu, Anda bisa menyusun ulang item menu dengan atribut {@code android:orderInCategory}
+dalam setiap {@code &lt;item&gt;} yang perlu Anda pindahkan.</p>
+
+<p>Untuk menetapkan menu opsi suatu aktivitas, kesampingkan {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragmen-fragmen menyediakan
+callback {@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()} sendiri). Dalam metode ini
+, Anda bisa memekarkan sumber daya menu (<a href="#xml">yang didefinisikan dalam XML</a>) menjadi {@link
+android.view.Menu} yang disediakan dalam callback. Misalnya:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = {@link android.app.Activity#getMenuInflater()};
+    inflater.inflate(R.menu.game_menu, menu);
+    return true;
+}
+</pre>
+
+<p>Anda juga bisa menambahkan item menu dengan menggunakan {@link android.view.Menu#add(int,int,int,int)
+add()} dan mengambil item dengan {@link android.view.Menu#findItem findItem()} untuk merevisi propertinya
+dengan API {@link android.view.MenuItem}.</p>
+
+<p>Jika Anda mengembangkan aplikasi untuk Android 2.3.x dan yang lebih rendah, sistem akan memanggil {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} untuk membuat menu opsi
+bila pengguna membuka menu untuk pertama kali. Jika Anda mengembangkan aplikasi untuk Android 3.0 dan yang lebih tinggi,
+sistem akan memanggil {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} saat
+memulai aktivitas, untuk menampilkan item menu pada action-bar.</p>
+
+
+
+<h3 id="RespondingOptionsMenu">Menangani kejadian klik</h3>
+
+<p>Bila pengguna memilih item dari menu opsi (termasuk item tindakan dalam action-bar),
+sistem akan memanggil metode {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()} aktivitas Anda. Metode ini meneruskan {@link android.view.MenuItem} yang dipilih. Anda
+bisa mengidentifikasi item dengan memanggil {@link android.view.MenuItem#getItemId()}, yang menghasilkan
+ID unik untuk item menu itu (yang didefinisikan oleh atribut {@code android:id} dalam sumber daya menu atau dengan
+integer yang diberikan ke metode {@link android.view.Menu#add(int,int,int,int) add()}). Anda bisa mencocokkan
+ID ini dengan item menu yang diketahui untuk melakukan tindakan yang sesuai. Misalnya:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle item selection
+    switch (item.getItemId()) {
+        case R.id.new_game:
+            newGame();
+            return true;
+        case R.id.help:
+            showHelp();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Bila Anda berhasil menangani sebuah item menu, kembalikan {@code true}. Jika tidak menangani item menu
+, Anda harus memanggil implementasi superkelas {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} (implementasi default
+menghasilkan false).</p>
+
+<p>Jika aktivitas Anda menyertakan fragmen, sistem akan memanggil lebih dahulu {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} untuk aktivitas, kemudian
+untuk setiap fragmen (sesuai dengan urutan penambahan fragmen) hingga satu fragmen mengembalikan
+{@code true} atau semua fragmen telah dipanggil.</p>
+
+<p class="note"><strong>Tip:</strong> Android 3.0 menambahkan kemampuan mendefinisikan perilaku on-click
+untuk item menu dalam XML, dengan menggunakan atribut {@code android:onClick}. Nilai atribut
+harus berupa nama metode yang didefinisikan aktivitas dengan menggunakan menu. Metode
+harus bersifat publik dan menerima satu parameter {@link android.view.MenuItem}&mdash;bila sistem
+memanggilnya, metode ini akan meneruskan item menu yang dipilih. Untuk informasi selengkapnya dan contoh, lihat dokumen <a href="{@docRoot}guide/topics/resources/menu-resource.html">Sumber Daya Menu</a>.</p>
+
+<p class="note"><strong>Tip:</strong> Jika aplikasi Anda berisi banyak aktivitas dan
+sebagian menyediakan menu opsi yang sama, pertimbangkan untuk membuat
+aktivitas yang tidak mengimplementasikan apa-apa kecuali metode {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} dan {@link android.app.Activity#onOptionsItemSelected(MenuItem)
+onOptionsItemSelected()}. Kemudian perluas kelas ini untuk setiap aktivitas yang harus menggunakan
+menu opsi yang sama. Dengan begini, Anda bisa mengelola satu set kode untuk menangani tindakan menu
+dan setiap kelas turunan mewarisi perilaku menu.
+Jika ingin menambahkan item menu ke salah satu aktivitas turunan,
+kesampingkan {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()} dalam aktivitas itu. Panggil {@code super.onCreateOptionsMenu(menu)} agar
+item menu asli dibuat, kemudian tambahkan item menu yang baru dengan {@link
+android.view.Menu#add(int,int,int,int) menu.add()}. Anda juga bisa mengesampingkan
+perilaku superkelas untuk setiap item menu.</p>
+
+
+<h3 id="ChangingTheMenu">Mengubah item menu saat runtime</h3>
+
+<p>Setelah sistem memanggil {@link android.app.Activity#onCreateOptionsMenu(Menu)
+onCreateOptionsMenu()}, sistem akan mempertahankan instance {@link android.view.Menu} yang Anda tempatkan dan
+tidak akan memanggil {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()}
+lagi kecuali menu diinvalidkan karena suatu alasan. Akan tetapi, Anda harus menggunakan {@link
+android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} hanya untuk membuat
+status menu awal dan tidak untuk membuat perubahan selama daur hidup aktivitas.</p>
+
+<p>Jika Anda ingin mengubah menu opsi berdasarkan
+kejadian yang terjadi selama daur hidup aktivitas, Anda bisa melakukannya dalam metode
+{@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}. Metode ini
+meneruskan objek {@link android.view.Menu} sebagaimana adanya saat ini sehingga Anda bisa mengubahnya,
+seperti menambah, menghapus, atau menonaktifkan item. (Fragmen juga menyediakan callback {@link
+android.app.Fragment#onPrepareOptionsMenu onPrepareOptionsMenu()}.)</p>
+
+<p>Pada Android 2.3.x dan yang lebih rendah, sistem akan memanggil {@link
+android.app.Activity#onPrepareOptionsMenu(Menu)
+onPrepareOptionsMenu()} setiap kali pengguna membuka menu opsi (menekan tombol <em>Menu</em>
+).</p>
+
+<p>Pada Android 3.0 dan yang lebih tinggi, menu opsi dianggap sebagai selalu terbuka saat item menu
+ditampilkan pada action-bar. Bila ada kejadian dan Anda ingin melakukan pembaruan menu, Anda harus
+memanggil {@link android.app.Activity#invalidateOptionsMenu invalidateOptionsMenu()} untuk meminta
+sistem memanggil {@link android.app.Activity#onPrepareOptionsMenu(Menu) onPrepareOptionsMenu()}.</p>
+
+<p class="note"><strong>Catatan:</strong>
+Anda tidak boleh mengubah item dalam menu opsi berdasarkan {@link android.view.View} yang saat ini
+difokus. Saat dalam mode sentuh (bila pengguna tidak sedang menggunakan trackball atau d-pad), tampilan
+tidak bisa mengambil fokus, sehingga Anda tidak boleh menggunakan fokus sebagai dasar untuk mengubah
+item dalam menu opsi. Jika Anda ingin menyediakan item menu yang peka konteks pada {@link
+android.view.View}, gunakan <a href="#context-menu">Menu Konteks</a>.</p>
+
+
+
+
+<h2 id="context-menu">Membuat Menu Kontekstual</h2>
+
+<div class="figure" style="width:420px;margin-top:-1em">
+  <img src="{@docRoot}images/ui/menu-context.png" alt="" />
+  <p class="img-caption"><strong>Gambar 3.</strong> Cuplikan layar menu konteks mengambang (kiri)
+dan action-bar kontekstual (kanan).</p>
+</div>
+
+<p>Menu kontekstual menawarkan tindakan yang memengaruhi item atau bingkai konteks tertentu dalam UI. Anda
+bisa menyediakan menu konteks untuk setiap tampilan, tetapi menu ini paling sering digunakan untuk item pada {@link
+android.widget.ListView}, {@link android.widget.GridView}, atau kumpulan tampilan lainnya yang bisa digunakan
+pengguna untuk melakukan tindakan langsung pada setiap item.</p>
+
+<p>Ada dua cara menyediakan tindakan kontekstual:</p>
+<ul>
+  <li>Dalam <a href="#FloatingContextMenu">menu konteks mengambang</a>. Menu muncul sebagai
+daftar item menu mengambang (serupa dengan dialog) bila pengguna mengklik lama (menekan dan
+menahan) pada tampilan yang mendeklarasikan dukungan bagi menu konteks. Pengguna bisa melakukan
+tindakan kontekstual pada satu item untuk setiap kalinya.</li>
+
+  <li>Dalam <a href="#CAB">mode tindakan kontekstual</a>. Mode ini adalah implementasi sistem
+{@link android.view.ActionMode} yang menampilkan <em>action-bar kontekstual</em> di bagian atas
+layar dengan item tindakan yang memengaruhi item(-item) yang dipilih. Bila mode ini aktif, pengguna
+bisa melakukan tindakan pada beberapa item sekaligus (jika aplikasi Anda mengizinkannya).</li>
+</ul>
+
+<p class="note"><strong>Catatan:</strong> Mode tindakan kontekstual tersedia pada Android 3.0 (API
+level 11) dan yang lebih tinggi dan merupakan teknik yang lebih disukai untuk menampilkan tindakan kontekstual bila
+tersedia. Jika aplikasi Anda mendukung versi yang lebih rendah daripada 3.0, maka Anda harus mundur ke
+menu konteks mengambang pada perangkat-perangkat itu.</p>
+
+
+<h3 id="FloatingContextMenu">Membuat menu konteks mengambang</h3>
+
+<p>Untuk menyediakan menu konteks mengambang:</p>
+<ol>
+  <li>Daftarkan {@link android.view.View} ke menu konteks yang harus dikaitkan dengan
+memanggil {@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()} dan teruskan
+{@link android.view.View} ke menu itu.
+  <p>Jika aktivitas Anda menggunakan {@link android.widget.ListView} atau {@link android.widget.GridView} dan
+Anda ingin setiap item untuk menyediakan menu konteks yang sama, daftarkan semua item ke menu konteks dengan
+meneruskan {@link android.widget.ListView} atau {@link android.widget.GridView} ke {@link
+android.app.Activity#registerForContextMenu(View) registerForContextMenu()}.</p>
+</li>
+
+  <li>Implementasikan metode {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+dalam {@link android.app.Activity} atau {@link android.app.Fragment} Anda.
+  <p>Bila tampilan yang terdaftar menerima kejadian klik-lama, sistem akan memanggil metode {@link
+android.view.View.OnCreateContextMenuListener#onCreateContextMenu onCreateContextMenu()}
+Anda. Inilah tempat Anda mendefinisikan item menu, biasanya dengan memekarkan sumber daya menu. Misalnya:
+</p>
+<pre>
+&#64;Override
+public void onCreateContextMenu(ContextMenu menu, View v,
+                                ContextMenuInfo menuInfo) {
+    super.onCreateContextMenu(menu, v, menuInfo);
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.context_menu, menu);
+}
+</pre>
+
+<p>{@link android.view.MenuInflater} memungkinkan Anda untuk memekarkan menu konteks <a href="{@docRoot}guide/topics/resources/menu-resource.html">sumber daya menu</a>. Parameter metode callback
+menyertakan {@link android.view.View}
+yang dipilih pengguna dan objek {@link android.view.ContextMenu.ContextMenuInfo} yang menyediakan
+informasi tambahan tentang item yang dipilih. Jika aktivitas Anda memiliki beberapa tampilan yang masing-masingnya menyediakan
+menu konteks berbeda, Anda bisa menggunakan parameter ini untuk menentukan menu konteks yang harus
+dimekarkan.</p>
+</li>
+
+<li>Implementasikan {@link android.app.Activity#onContextItemSelected(MenuItem)
+onContextItemSelected()}.
+  <p>Bila pengguna memilih item menu, sistem akan memanggil metode ini sehingga Anda bisa melakukan
+tindakan yang sesuai. Misalnya:</p>
+
+<pre>
+&#64;Override
+public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+        case R.id.edit:
+            editNote(info.id);
+            return true;
+        case R.id.delete:
+            deleteNote(info.id);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+    }
+}
+</pre>
+
+<p>Metode {@link android.view.MenuItem#getItemId()} melakukan query ID untuk
+item menu yang dipilih, yang harus Anda tetapkan ke setiap item menu dalam XML dengan menggunakan atribut {@code
+android:id}, seperti yang ditampilkan di bagian tentang <a href="#xml">Mendefinisikan Menu dalam
+XML</a>.</p>
+
+<p>Bila Anda berhasil menangani sebuah item menu, kembalikan {@code true}. Jika tidak menangani item menu,
+Anda harus meneruskan item menu ke implementasi superkelas. Jika aktivitas Anda menyertakan fragmen,
+aktivitas akan menerima callback ini lebih dahulu. Dengan memanggil superkelas bila tidak ditangani, sistem
+meneruskan kejadian ke metode callback di setiap fragmen, satu per satu (sesuai dengan urutan
+penambahan fragmen) hingga {@code true} atau {@code false} dikembalikan. (Implementasi default
+untuk {@link android.app.Activity} dan {@code android.app.Fragment} mengembalikan {@code
+false}, sehingga Anda harus selalu memanggil superkelas bila tidak ditangani.)</p>
+</li>
+</ol>
+
+
+<h3 id="CAB">Menggunakan mode tindakan kontekstual</h3>
+
+<p>Mode tindakan kontekstual adalah implementasi sistem {@link android.view.ActionMode} yang
+memfokuskan interaksi pengguna pada upaya melakukan tindakan kontekstual. Bila seorang
+pengguna mengaktifkan mode ini dengan memilih item, <em>action-bar kontekstual</em> akan muncul di bagian atas
+layar untuk menampilkan tindakan yang bisa dilakukan pengguna pada item yang dipilih saat ini. Selagi mode ini
+diaktifkan, pengguna bisa memilih beberapa item (jika Anda mengizinkan), membatalkan pilihan item, dan melanjutkan
+penelusuran dalam aktivitas (sebanyak yang ingin Anda izinkan). Mode tindakan dinonaktifkan
+dan action-bar kontekstual menghilang bila pengguna membatalkan pilihan semua item, menekan tombol BACK,
+atau memilih tindakan <em>Done</em> di sisi kiri action-bar.</p>
+
+<p class="note"><strong>Catatan:</strong> Action-bar kontekstual tidak harus
+terkait dengan <a href="{@docRoot}guide/topics/ui/actionbar.html">action-bar</a>. Action-bar ini beroperasi
+secara independen, walaupun action-bar kontekstual secara visual mengambil alih
+posisi action-bar.</p>
+
+<p>Jika Anda mengembangkan aplikasi untuk Android 3.0 (API level 11) atau yang lebih tinggi, Anda
+biasanya harus menggunakan mode tindakan kontekstual untuk menampilkan tindakan kontekstual, sebagai ganti <a href="#FloatingContextMenu">menu konteks mengambang</a>.</p>
+
+<p>Untuk tampilan yang menyediakan tindakan kontekstual, Anda biasanya harus memanggil mode tindakan kontekstual
+pada salah satu dari dua kejadian (atau keduanya):</p>
+<ul>
+  <li>Pengguna mengklik-lama pada tampilan.</li>
+  <li>Pengguna memilih kotak cek atau komponen UI yang serupa dalam tampilan.</li>
+</ul>
+
+<p>Cara aplikasi memanggil mode tindakan kontekstual dan mendefinisikan perilaku setiap
+tindakan bergantung pada desain Anda. Pada dasarnya ada dua desain:</p>
+<ul>
+  <li>Untuk tindakan kontekstual pada tampilan individual dan tak didukung.</li>
+  <li>Untuk tindakan kontekstual batch pada grup item dalam {@link
+android.widget.ListView} atau {@link android.widget.GridView} (memungkinkan pengguna memilih beberapa
+item dan melakukan tindakan pada semua item itu).</li>
+</ul>
+
+<p>Bagian berikut ini menjelaskan penyiapan yang diperlukan untuk setiap skenario.</p>
+
+
+<h4 id="CABforViews">Mengaktifkan mode tindakan kontekstual untuk tampilan individual</h4>
+
+<p>Jika Anda ingin memanggil mode tindakan kontekstual hanya bila pengguna memilih
+tampilan tertentu, Anda harus:</p>
+<ol>
+  <li>Mengimplementasikan antarmuka {@link android.view.ActionMode.Callback}. Dalam metode callback-nya, Anda
+bisa menetapkan tindakan untuk action-bar kontekstual, merespons kejadian klik pada item tindakan, dan
+menangani kejadian daur hidup lainnya untuk mode tindakan itu.</li>
+  <li>Memanggil {@link android.app.Activity#startActionMode startActionMode()} bila Anda ingin menampilkan
+action-bar (seperti saat pengguna mengklik-lama pada tampilan).</li>
+</ol>
+
+<p>Misalnya:</p>
+
+<ol>
+  <li>Implementasikan antarmuka {@link android.view.ActionMode.Callback ActionMode.Callback}:
+<pre>
+private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+    // Called when the action mode is created; startActionMode() was called
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate a menu resource providing context menu items
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+        return true;
+    }
+
+    // Called each time the action mode is shown. Always called after onCreateActionMode, but
+    // may be called multiple times if the mode is invalidated.
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false; // Return false if nothing is done
+    }
+
+    // Called when the user selects a contextual menu item
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_share:
+                shareCurrentItem();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when the user exits the action mode
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        mActionMode = null;
+    }
+};
+</pre>
+
+<p>Perhatikan bahwa kejadian callback ini hampir persis sama dengan callback untuk <a href="#options-menu">menu opsi</a>, hanya saja setiap callback ini juga meneruskan objek {@link
+android.view.ActionMode} yang terkait dengan kejadian. Anda bisa menggunakan API {@link
+android.view.ActionMode} untuk membuat berbagai perubahan pada CAB, seperti merevisi judul dan
+subjudul dengan {@link android.view.ActionMode#setTitle setTitle()} dan {@link
+android.view.ActionMode#setSubtitle setSubtitle()} (berguna untuk menunjukkan jumlah item
+yang dipilih).</p>
+
+<p>Juga perhatikan bahwa contoh di atas mengatur variabel {@code mActionMode} ke nol bila
+mode tindakan dimusnahkan. Dalam langkah berikutnya, Anda akan melihat cara variabel diinisialisasi dan kegunaan menyimpan
+variabel anggota dalam aktivitas atau fragmen.</p>
+</li>
+
+  <li>Panggil {@link android.app.Activity#startActionMode startActionMode()} untuk mengaktifkan
+mode tindakan kontekstual bila sesuai, seperti saat merespons klik-lama pada {@link
+android.view.View}:</p>
+
+<pre>
+someView.setOnLongClickListener(new View.OnLongClickListener() {
+    // Called when the user long-clicks on someView
+    public boolean onLongClick(View view) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        return true;
+    }
+});
+</pre>
+
+<p>Bila Anda memanggil {@link android.app.Activity#startActionMode startActionMode()}, sistem akan mengembalikan
+{@link android.view.ActionMode} yang dibuat. Dengan menyimpannya dalam variabel anggota, Anda bisa
+membuat perubahan ke action-bar kontekstual sebagai respons terhadap kejadian lainnya. Dalam contoh di atas,
+{@link android.view.ActionMode} digunakan untuk memastikan bahwa instance {@link android.view.ActionMode}
+tidak dibuat kembali jika sudah aktif, dengan memeriksa apakah anggota bernilai nol sebelum memulai
+mode tindakan.</p>
+</li>
+</ol>
+
+
+
+<h4 id="CABforListView">Mengaktifkan tindakan kontekstual batch dalam ListView atau GridView</h4>
+
+<p>Jika Anda memiliki sekumpulan item dalam {@link android.widget.ListView} atau {@link
+android.widget.GridView} (atau ekstensi {@link android.widget.AbsListView} lainnya) dan ingin
+mengizinkan pengguna melakukan tindakan batch, Anda harus:</p>
+
+<ul>
+  <li>Mengimplementasikan antarmuka {@link android.widget.AbsListView.MultiChoiceModeListener} dan mengaturnya
+untuk grup tampilan dengan {@link android.widget.AbsListView#setMultiChoiceModeListener
+setMultiChoiceModeListener()}. Dalam metode callback listener, Anda bisa menetapkan tindakan
+untuk action-bar kontekstual, merespons kejadian klik pada item tindakan, dan menangani callback lainnya
+yang diwarisi dari antarmuka {@link android.view.ActionMode.Callback}.</li>
+
+  <li>Panggil {@link android.widget.AbsListView#setChoiceMode setChoiceMode()} dengan argumen {@link
+android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.</li>
+</ul>
+
+<p>Misalnya:</p>
+
+<pre>
+ListView listView = getListView();
+listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+
+    &#64;Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position,
+                                          long id, boolean checked) {
+        // Here you can do something when items are selected/de-selected,
+        // such as update the title in the CAB
+    }
+
+    &#64;Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        // Respond to clicks on the actions in the CAB
+        switch (item.getItemId()) {
+            case R.id.menu_delete:
+                deleteSelectedItems();
+                mode.finish(); // Action picked, so close the CAB
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    &#64;Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        // Inflate the menu for the CAB
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.context, menu);
+        return true;
+    }
+
+    &#64;Override
+    public void onDestroyActionMode(ActionMode mode) {
+        // Here you can make any necessary updates to the activity when
+        // the CAB is removed. By default, selected items are deselected/unchecked.
+    }
+
+    &#64;Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        // Here you can perform updates to the CAB due to
+        // an {@link android.view.ActionMode#invalidate} request
+        return false;
+    }
+});
+</pre>
+
+<p>Demikian saja. Kini bila pengguna memilih item dengan klik-lama, sistem akan memanggil metode {@link
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
+dan menampilkan action-bar kontekstual bersama tindakan yang ditetapkan. Saat
+action-bar kontekstual terlihat, pengguna bisa memilih item tambahan.</p>
+
+<p>Dalam beberapa kasus di mana tindakan kontekstual menyediakan item tindakan umum, Anda mungkin
+ingin menambahkan kotak cek atau elemen UI serupa yang memungkinkan pengguna memilih item, karena pengguna
+mungkin tidak menemukan perilaku klik-lama. Bila pengguna memilih kotak cek itu, Anda
+bisa memanggil mode tindakan kontekstual dengan mengatur item daftar yang bersangkutan ke
+status diberi tanda cek dengan {@link android.widget.AbsListView#setItemChecked setItemChecked()}.</p>
+
+
+
+
+<h2 id="PopupMenu">Membuat Menu Popup</h2>
+
+<div class="figure" style="width:220px">
+<img src="{@docRoot}images/ui/popupmenu.png" alt="" />
+<p><strong>Gambar 4.</strong> Menu popup dalam aplikasi Gmail, dikaitkan pada
+tombol kelebihan di sudut kanan atas.</p>
+</div>
+
+<p>{@link android.widget.PopupMenu} adalah menu modal yang dikaitkan pada {@link android.view.View}.
+Menu ini muncul di bawah tampilan jangkar jika ada ruang, atau di atas tampilan jika tidak ada. Menu ini berguna untuk:</p>
+<ul>
+  <li>Menyediakan menu bergaya kelebihan (overflow) untuk tindakan yang <em>berkaitan dengan</em> konten tertentu (seperti
+header email Gmail, yang ditampilkan dalam gambar 4).
+    <p class="note"><strong>Catatan:</strong> Ini tidak sama dengan menu konteks, yang umumnya
+untuk tindakan yang <em>memengaruhi</em> konten yang dipilih. Untuk tindakan yang memengaruhi
+konten yang dipilih, gunakan <a href="#CAB">mode tindakan kontekstual</a> atau <a href="#FloatingContextMenu">menu konteks mengambang</a>.</p></li>
+  <li>Menyediakan bagian kedua dari kalimat perintah (seperti tombol bertanda "Tambah"
+yang menghasilkan menu popup dengan berbagai opsi "Tambah").</li>
+  <li>Menyediakan daftar menurun yang serupa dengan {@link android.widget.Spinner} yang tidak mempertahankan
+pilihan persisten.</li>
+</ul>
+
+
+<p class="note"><strong>Catatan:</strong> {@link android.widget.PopupMenu} tersedia dengan API
+level 11 dan yang lebih tinggi.</p>
+
+<p>Jika Anda <a href="#xml">mendefinisikan menu dalam XML</a>, berikut ini adalah cara Anda menampilkan menu popup:</p>
+<ol>
+  <li>Buat instance {@link android.widget.PopupMenu} bersama konstruktornya, yang mengambil
+aplikasi saat ini {@link android.content.Context} dan {@link android.view.View} yang akan menjadi tempat mengaitkan
+menu.</li>
+  <li>Gunakan {@link android.view.MenuInflater} untuk memekarkan sumber daya menu Anda ke dalam objek {@link
+android.view.Menu} yang dikembalikan oleh {@link
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. Pada API level 14 ke atas, Anda bisa menggunakan
+{@link android.widget.PopupMenu#inflate PopupMenu.inflate()} sebagai gantinya.</li>
+  <li>Panggil {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
+</ol>
+
+<p>Misalnya, berikut ini adalah tombol dengan atribut {@link android.R.attr#onClick android:onClick}
+yang menampilkan menu popup:</p>
+
+<pre>
+&lt;ImageButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/ic_overflow_holo_dark"
+    android:contentDescription="@string/descr_overflow_button"
+    android:onClick="showPopup" />
+</pre>
+
+<p>Aktivitas nanti bisa menampilkan menu popup seperti ini:</p>
+
+<pre>
+public void showPopup(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+    MenuInflater inflater = popup.getMenuInflater();
+    inflater.inflate(R.menu.actions, popup.getMenu());
+    popup.show();
+}
+</pre>
+
+<p>Dalam API level 14 dan yang lebih tinggi, Anda bisa menggabungkan dua baris yang memekarkan menu dengan {@link
+android.widget.PopupMenu#inflate PopupMenu.inflate()}.</p>
+
+<p>Menu akan menghilang bila pengguna memilih item atau menyentuh di luar
+area menu. Anda bisa mendengarkan kejadian menghilangkan dengan menggunakan {@link
+android.widget.PopupMenu.OnDismissListener}.</p>
+
+<h3 id="PopupEvents">Menangani kejadian klik</h3>
+
+<p>Untuk melakukan suatu
+tindakan bila pengguna memilih item menu, Anda harus mengimplementasikan antarmuka {@link
+android.widget.PopupMenu.OnMenuItemClickListener} dan mendaftarkannya pada {@link
+android.widget.PopupMenu} dengan memanggil {@link android.widget.PopupMenu#setOnMenuItemClickListener
+setOnMenuItemclickListener()}. Bila pengguna memilih item, sistem akan memanggil callback {@link
+android.widget.PopupMenu.OnMenuItemClickListener#onMenuItemClick onMenuItemClick()} dalam
+antarmuka Anda.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+public void showMenu(View v) {
+    PopupMenu popup = new PopupMenu(this, v);
+
+    // This activity implements OnMenuItemClickListener
+    popup.setOnMenuItemClickListener(this);
+    popup.inflate(R.menu.actions);
+    popup.show();
+}
+
+&#64;Override
+public boolean onMenuItemClick(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.archive:
+            archive(item);
+            return true;
+        case R.id.delete:
+            delete(item);
+            return true;
+        default:
+            return false;
+    }
+}
+</pre>
+
+
+<h2 id="groups">Membuat Grup Menu</h2>
+
+<p>Grup menu adalah sekumpulan item menu yang sama-sama memiliki ciri (trait) tertentu. Dengan grup, Anda
+bisa:</p>
+<ul>
+  <li>Menampilkan atau menyembunyikan semua item dengan {@link android.view.Menu#setGroupVisible(int,boolean)
+setGroupVisible()}</li>
+  <li>Mengaktifkan atau mennonaktifkan semua item dengan {@link android.view.Menu#setGroupEnabled(int,boolean)
+setGroupEnabled()}</li>
+  <li>Menetapkan apakah semua item bisa diberi tanda cek dengan {@link
+android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</li>
+</ul>
+
+<p>Anda bisa membuat grup dengan menyarangkan elemen-elemen {@code &lt;item&gt;} dalam elemen {@code &lt;group&gt;}
+dalam sumber daya menu atau dengan menetapkan ID grup dengan metode {@link
+android.view.Menu#add(int,int,int,int) add()}.</p>
+
+<p>Berikut ini adalah contoh sumber daya menu yang berisi sebuah grup:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:id="@+id/menu_save"
+          android:icon="@drawable/menu_save"
+          android:title="@string/menu_save" /&gt;
+    &lt;!-- menu group --&gt;
+    &lt;group android:id="@+id/group_delete"&gt;
+        &lt;item android:id="@+id/menu_archive"
+              android:title="@string/menu_archive" /&gt;
+        &lt;item android:id="@+id/menu_delete"
+              android:title="@string/menu_delete" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Item yang berada dalam grup akan muncul pada level yang sama dengan item pertama&mdash;ketiga item
+dalam menu adalah bersaudara. Akan tetapi, Anda bisa memodifikasi ciri kedua
+item dalam grup dengan mengacu ID grup dan menggunakan metode yang tercantum di atas. Sistem
+juga tidak akan memisahkan item yang telah dikelompokkan. Misalnya, jika Anda mendeklarasikan {@code
+android:showAsAction="ifRoom"} untuk tiap item, item tersebut akan muncul dalam
+action-bar atau dalam kelebihan tindakan.</p>
+
+
+<h3 id="checkable">Menggunakan item menu yang bisa diberi tanda cek</h3>
+
+<div class="figure" style="width:200px">
+  <img src="{@docRoot}images/radio_buttons.png" height="333" alt="" />
+  <p class="img-caption"><strong>Gambar 5.</strong> Cuplikan layar submenu dengan
+item yang bisa diberi tanda cek.</p>
+</div>
+
+<p>Menu bisa digunakan sebagai antarmuka untuk mengaktifkan dan menonaktifkan opsi, menggunakan kotak cek untuk
+opsi mandiri, atau tombol radio untuk grup
+opsi yang saling eksklusif. Gambar 5 menampilkan submenu dengan item yang bisa diberi tanda cek dengan
+tombol radio.</p>
+
+<p class="note"><strong>Catatan:</strong> Item menu dalam Icon Menu (dari menu opsi) tidak bisa
+menampilkan kotak cek atau tombol radio. Jika Anda memilih untuk membuat item dalam Icon Menu yang bisa diberi tanda cek,
+Anda harus menandai status diberi tanda cek secara manual dengan menukar ikon dan/atau teks
+tiap kali statusnya berubah.</p>
+
+<p>Anda bisa mendefinisikan perilaku yang bisa diberi tanda cek untuk tiap item menu dengan menggunakan atribut {@code
+android:checkable} dalam elemen {@code &lt;item&gt;}, atau untuk seluruh grup dengan
+atribut {@code android:checkableBehavior} dalam elemen {@code &lt;group&gt;}. Misalnya
+, semua item dalam grup menu ini bisa diberi tanda cek dengan tombol radio:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;group android:checkableBehavior="single"&gt;
+        &lt;item android:id="@+id/red"
+              android:title="@string/red" /&gt;
+        &lt;item android:id="@+id/blue"
+              android:title="@string/blue" /&gt;
+    &lt;/group&gt;
+&lt;/menu&gt;
+</pre>
+
+<p>Atribut {@code android:checkableBehavior} menerima:
+<dl>
+  <dt>{@code single}</dt>
+    <dd>Hanya satu item dari grup ini yang bisa diberi tanda cek (tombol radio)</dd>
+  <dt>{@code all}</dt>
+    <dd>Semua item bisa diberi tanda cek (kotak cek)</dd>
+  <dt>{@code none}</dt>
+    <dd>Tidak ada item yang bisa diberi tanda cek</dd>
+</dl>
+
+<p>Anda bisa menerapkan status diberi tanda cek default pada suatu item dengan menggunakan atribut {@code android:checked} dalam
+elemen {@code &lt;item&gt;} dan mengubahnya dalam kode dengan metode {@link
+android.view.MenuItem#setChecked(boolean) setChecked()}.</p>
+
+<p>Bila item yang bisa diberi tanda cek dipilih, sistem akan memanggil metode callback setiap item yang dipilih
+(seperti {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}). Di sinilah
+Anda harus mengatur status kotak cek itu, karena kotak cek atau tombol radio tidak
+mengubah statusnya secara otomatis. Anda bisa melakukan query status saat ini suatu item (seperti sebelum
+pengguna memilihnya) dengan {@link android.view.MenuItem#isChecked()} kemudian mengatur status diberi tanda cek dengan
+{@link android.view.MenuItem#setChecked(boolean) setChecked()}. Misalnya:</p>
+
+<pre>
+&#64;Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+        case R.id.vibrate:
+        case R.id.dont_vibrate:
+            if (item.isChecked()) item.setChecked(false);
+            else item.setChecked(true);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+    }
+}
+</pre>
+
+<p>Jika Anda tidak mengatur status diberi tanda cek dengan cara ini, maka status item (kotak cek atau
+tombol radio) yang terlihat tidak akan
+berubah bila pengguna memilihnya. Bila Anda telah mengatur status, aktivitas akan menjaga status diberi tanda cek
+suatu item sehingga bila nanti pengguna membuka menu, status diberi tanda cek yang Anda
+atur akan terlihat.</p>
+
+<p class="note"><strong>Catatan:</strong>
+Item menu yang bisa diberi tanda cek dimaksudkan untuk digunakan hanya atas dasar per sesi dan tidak disimpan setelah
+aplikasi dimusnahkan. Jika Anda memiliki pengaturan aplikasi yang ingin disimpan untuk pengguna,
+Anda harus menyimpan data dengan menggunakan <a href="{@docRoot}guide/topics/data/data-storage.html#pref">Shared Preferences</a>.</p>
+
+
+
+<h2 id="intents">Menambahkan Item Menu Berdasarkan Intent</h2>
+
+<p>Kadang-kadang Anda ingin supaya item menu menjalankan aktivitas dengan menggunakan {@link android.content.Intent}
+(baik aktivitas berada dalam aplikasi Anda maupun di aplikasi lain). Bila Anda mengetahui intent
+yang ingin digunakan dan memiliki item menu tertentu yang harus memulai intent, Anda bisa mengeksekusi
+intent dengan {@link android.app.Activity#startActivity(Intent) startActivity()} selama
+metode callback bila-item-dipilih yang sesuai (seperti callback {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}).</p>
+
+<p>Akan tetapi, jika Anda tidak yakin apakah perangkat pengguna
+berisi aplikasi yang menangani intent, maka menambahkan item menu yang memanggilnya bisa mengakibatkan
+item menu tidak berfungsi, karena intent tidak bisa diterjemahkan menjadi
+aktivitas. Untuk mengatasi hal ini, Android memungkinkan Anda menambahkan item menu secara dinamis ke menu
+bila Android menemukan aktivitas pada perangkat yang menangani intent Anda.</p>
+
+<p>Untuk menambahkan item menu berdasarkan aktivitas tersedia yang menerima intent:</p>
+<ol>
+  <li>Definisikan
+intent dengan kategori {@link android.content.Intent#CATEGORY_ALTERNATIVE} dan/atau
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE}, plus kebutuhan lainnya.</li>
+  <li>Panggil {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+Menu.addIntentOptions()}. Android kemudian akan mencari setiap aplikasi yang bisa melakukan intent
+dan menambahkannya ke menu Anda.</li>
+</ol>
+
+<p>Jika tidak ada aplikasi terinstal
+yang memenuhi intent, maka tidak ada item menu yang ditambahkan.</p>
+
+<p class="note"><strong>Catatan:</strong>
+{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} digunakan untuk menangani
+elemen yang saat ini dipilih pada layar. Jadi, metode hanya digunakan saat membuat Menu dalam {@link
+android.app.Activity#onCreateContextMenu(ContextMenu,View,ContextMenuInfo)
+onCreateContextMenu()}.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+&#64;Override
+public boolean onCreateOptionsMenu(Menu menu){
+    super.onCreateOptionsMenu(menu);
+
+    // Create an Intent that describes the requirements to fulfill, to be included
+    // in our menu. The offering app must include a category value of Intent.CATEGORY_ALTERNATIVE.
+    Intent intent = new Intent(null, dataUri);
+    intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
+
+    // Search and populate the menu with acceptable offering applications.
+    menu.addIntentOptions(
+         R.id.intent_group,  // Menu group to which new items will be added
+         0,      // Unique item ID (none)
+         0,      // Order for the items (none)
+         this.getComponentName(),   // The current activity name
+         null,   // Specific items to place first (none)
+         intent, // Intent created above that describes our requirements
+         0,      // Additional flags to control items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
+
+    return true;
+}</pre>
+
+<p>Untuk setiap aktivitas yang diketahui menyediakan filter intent yang cocok dengan intent yang didefinisikan, item menu
+akan ditambahkan, menggunakan nilai dalam filter intent <code>android:label</code> sebagai
+judul item menu dan ikon aplikasi sebagai ikon item menu. Metode
+{@link android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()} mengembalikan jumlah item menu yang ditambahkan.</p>
+
+<p class="note"><strong>Catatan:</strong> Bila Anda memanggil {@link
+android.view.Menu#addIntentOptions(int,int,int,ComponentName,Intent[],Intent,int,MenuItem[])
+addIntentOptions()}, metode ini akan mengesampingkan setiap dan semua item menu menurut grup menu yang ditetapkan dalam argumen
+pertama.</p>
+
+
+<h3 id="AllowingToAdd">Memungkinkan aktivitas Anda ditambahkan ke menu lain</h3>
+
+<p>Anda juga bisa menawarkan layanan aktivitas Anda pada aplikasi lainnya, sehingga
+aplikasi Anda bisa disertakan dalam menu aplikasi lain (membalik peran yang dijelaskan di atas).</p>
+
+<p>Agar bisa dimasukkan dalam menu aplikasi lain, Anda perlu mendefinisikan
+filter intent seperti biasa, tetapi pastikan menyertakan nilai-nilai {@link android.content.Intent#CATEGORY_ALTERNATIVE}
+dan/atau {@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE} untuk
+kategori filter intent. Misalnya:</p>
+<pre>
+&lt;intent-filter label="&#64;string/resize_image">
+    ...
+    &lt;category android:name="android.intent.category.ALTERNATIVE" />
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+    ...
+&lt;/intent-filter>
+</pre>
+
+<p>Baca selengkapnya tentang penulisan filter intent dalam dokumen
+<a href="/guide/components/intents-filters.html">Intent dan Filter Intent</a>.</p>
+
+<p>Untuk contoh aplikasi yang menggunakan teknik ini, lihat contoh kode
+<a href="{@docRoot}resources/samples/NotePad/src/com/example/android/notepad/NoteEditor.html">Note
+Pad</a>.</p>
