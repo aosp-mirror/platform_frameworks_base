@@ -55,11 +55,11 @@ trainingnavtop=true
 <p>
     To retrieve all the details for a contact, search the
     {@link android.provider.ContactsContract.Data} table for any rows that contain the contact's
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY}. This column is available in
+    {@link android.provider.ContactsContract.Data#LOOKUP_KEY}. This column is available in
     the {@link android.provider.ContactsContract.Data} table, because the Contacts
     Provider makes an implicit join between the {@link android.provider.ContactsContract.Contacts}
     table and the {@link android.provider.ContactsContract.Data} table. The
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} column is described
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY} column is described
     in more detail in the <a href="retrieve-names.html">Retrieving Contact Names</a> lesson.
 </p>
 <p class="note">
@@ -85,9 +85,9 @@ trainingnavtop=true
     the data is in different columns depending on the data type.
     To ensure you get all the possible columns for all possible data types, you need to add all the
     column names to your projection. Always retrieve
-    {@link android.provider.BaseColumns#_ID Data._ID} if you're binding the result
+    {@link android.provider.ContactsContract.Data#_ID Data._ID} if you're binding the result
     {@link android.database.Cursor} to a {@link android.widget.ListView}; otherwise, the binding
-    won't work. Also retrieve {@link android.provider.ContactsContract.DataColumns#MIMETYPE Data.MIMETYPE}
+    won't work. Also retrieve {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}
     so you can identify the data type of each row you retrieve. For example:
 </p>
 <pre>
@@ -128,7 +128,7 @@ trainingnavtop=true
 <p>
     Define a constant for your selection clause, an array to hold selection arguments, and a
     variable to hold the selection value. Use
-    the {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY Contacts.LOOKUP_KEY} column to
+    the {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY} column to
     find the contact. For example:
 </p>
 <pre>
@@ -153,7 +153,7 @@ trainingnavtop=true
 <p>
     Define the sort order you want in the resulting {@link android.database.Cursor}. To
     keep all rows for a particular data type together, sort by
-    {@link android.provider.ContactsContract.DataColumns#MIMETYPE Data.MIMETYPE}. This query argument
+    {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}. This query argument
     groups all email rows together, all phone rows together, and so forth. For example:
 </p>
 <pre>
@@ -299,7 +299,7 @@ public class DetailsFragment extends Fragment implements
     </dt>
     <dd>
         Modify the selection text to search for the
-        {@link android.provider.ContactsContract.DataColumns#MIMETYPE MIMETYPE} value that's specific to
+        {@link android.provider.ContactsContract.Data#MIMETYPE MIMETYPE} value that's specific to
         your data type.
     </dd>
     <dt>
@@ -307,7 +307,7 @@ public class DetailsFragment extends Fragment implements
     </dt>
     <dd>
         Since you're only selecting a single detail type, don't group the returned
-        {@link android.database.Cursor} by {@link android.provider.ContactsContract.DataColumns#MIMETYPE
+        {@link android.database.Cursor} by {@link android.provider.ContactsContract.Data#MIMETYPE
         Data.MIMETYPE}.
     </dd>
 </dl>
@@ -344,9 +344,9 @@ public class DetailsFragment extends Fragment implements
 <h3>Define selection criteria</h3>
 <p>
     Define a search text expression that retrieves rows for a specific contact's
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} and the
-    {@link android.provider.ContactsContract.DataColumns#MIMETYPE Data.MIMETYPE} of the details you
-    want. Enclose the {@link android.provider.ContactsContract.DataColumns#MIMETYPE MIMETYPE} value in
+    {@link android.provider.ContactsContract.Data#LOOKUP_KEY} and the
+    {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE} of the details you
+    want. Enclose the {@link android.provider.ContactsContract.Data#MIMETYPE MIMETYPE} value in
     single quotes by concatenating a "<code>'</code>" (single-quote) character to the start and end
     of the constant; otherwise, the provider interprets the constant as a variable name rather
     than as a string value. You don't need to use a placeholder for this value, because you're
@@ -368,10 +368,10 @@ public class DetailsFragment extends Fragment implements
 <h3>Define a sort order</h3>
 <p>
     Define a sort order for the returned {@link android.database.Cursor}. Since you're retrieving a
-    specific data type, omit the sort on {@link android.provider.ContactsContract.DataColumns#MIMETYPE}.
+    specific data type, omit the sort on {@link android.provider.ContactsContract.Data#MIMETYPE}.
     Instead, if the type of detail data you're searching includes a subtype, sort on it.
     For example, for email data you can sort on
-    {@link android.provider.ContactsContract.CommonDataKinds.CommonColumns#TYPE Email.TYPE}:
+    {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE Email.TYPE}:
 </p>
 <pre>
     private static final String SORT_ORDER = Email.TYPE + " ASC ";

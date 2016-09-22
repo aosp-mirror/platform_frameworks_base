@@ -278,9 +278,9 @@ private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
 
 <div class="sidebox-wrapper"> <div class="sidebox"> <h3>Why must you include
 ACCOUNT_TYPE?</h3> <p>If you query on a {@link
-android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
 Calendars.ACCOUNT_NAME}, you must also include
-{@link android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
 in the selection. That is because a given account is
 only considered unique given both its <code>ACCOUNT_NAME</code> and its
 <code>ACCOUNT_TYPE</code>. The <code>ACCOUNT_TYPE</code> is the string corresponding to the

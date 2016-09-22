@@ -81,7 +81,7 @@ public void onCreate(Bundle savedInstanceState) {
   <p>After the {@code main.xml} layout is set for the content view, the
 {@link android.widget.GridView} is captured from the layout with {@link
 android.app.Activity#findViewById(int)}. The {@link
-android.widget.AdapterView#setAdapter(T) setAdapter()} method then sets a custom adapter ({@code
+android.widget.GridView#setAdapter(T) setAdapter()} method then sets a custom adapter ({@code
 ImageAdapter}) as the source for all items to be displayed in the grid. The {@code ImageAdapter} is
 created in the next step.</p>
 <p>To do something when an item in the grid is clicked, the {@link
@@ -170,7 +170,7 @@ the height and width for the View&mdash;this ensures that, no matter the size of
 image is resized and cropped to fit in these dimensions, as appropriate.</li>
   <li>{@link android.widget.ImageView#setScaleType(ImageView.ScaleType)} declares that images should
 be cropped toward the center (if necessary).</li>
-  <li>{@link android.view.View#setPadding(int,int,int,int)} defines the padding for all
+  <li>{@link android.widget.ImageView#setPadding(int,int,int,int)} defines the padding for all
 sides. (Note that, if the images have different aspect-ratios, then less
 padding will cause more cropping of the image if it does not match
 the dimensions given to the ImageView.)</li>

@@ -60,7 +60,7 @@ Java-style naming convention &mdash; for example,
 <dt><a name="rsrc"></a>{@code android:resource}</dt>
 <dd>A reference to a resource.  The ID of the resource is the value assigned
 to the item.  The ID can be retrieved from the meta-data Bundle by the
-{@link android.os.BaseBundle#getInt Bundle.getInt()} method.</dd>
+{@link android.os.Bundle#getInt Bundle.getInt()} method.</dd>
 
 <dt><a name="val"></a>{@code android:value}</dt>
 <dd>The value assigned to the item.  The data types that can be assigned as values and the Bundle methods that  components use to retrieve those values are listed in the following table:
@@ -72,17 +72,17 @@ to the item.  The ID can be retrieved from the meta-data Bundle by the
 </tr><tr>
   <td>String value, using double backslashes ({@code \\}) to escape characters
       &mdash; such as "{@code \\n}" and "{@code \\uxxxxx}" for a Unicode character.</td>
-  <td>{@link android.os.BaseBundle#getString(String) getString()}</td>
+  <td>{@link android.os.Bundle#getString(String) getString()}</td>
 </tr><tr>
   <td>Integer value, such as "{@code 100}"</td>
-  <td>{@link android.os.BaseBundle#getInt(String) getInt()}</td>
+  <td>{@link android.os.Bundle#getInt(String) getInt()}</td>
 </tr><tr>
   <td>Boolean value, either "{@code true}" or "{@code false}"</td>
-  <td>{@link android.os.BaseBundle#getBoolean(String) getBoolean()}</td>
+  <td>{@link android.os.Bundle#getBoolean(String) getBoolean()}</td>
 </tr><tr>
   <td>Color value, in the form "{@code #rgb}", "{@code #argb}",
       "{@code #rrggbb}", or "{@code #aarrggbb}"</td>
-  <td>{@link android.os.BaseBundle#getInt(String) getInt()}</td>
+  <td>{@link android.os.Bundle#getInt(String) getInt()}</td>
 </tr><tr>
   <td>Float value, such as "{@code 1.23}"</td>
   <td>{@link android.os.Bundle#getFloat(String) getFloat()}</td>
