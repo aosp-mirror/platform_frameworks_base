@@ -14,29 +14,31 @@ page.image=images/cards/card-nyc_2x.jpg
     <ol>
       <li>
         <a href="#connectivity-action">Restrictions on CONNECTIVITY_ACTION</a>
-      </li>
+        <ul>
+          <li>
+            <a href="#sched-jobs">Scheduling Network Jobs on Unmetered
+            Connections</a>
+          </li>
 
-      <li>
-        <a href="#sched-jobs">Scheduling Network Jobs on Unmetered
-        Connections</a>
-      </li>
-
-      <li>
-        <a href="#monitor-conn">Monitoring Network Connectivity While the App
-        is Running</a>
+          <li>
+            <a href="#monitor-conn">Monitoring Network Connectivity While the
+            App is Running</a>
+          </li>
+        </ul>
       </li>
 
       <li>
         <a href="#media-broadcasts">Restrictions on NEW_PICTURE and
         NEW_VIDEO</a>
-      </li>
+        <ul>
+          <li>
+            <a href="#new-jobinfo">New JobInfo methods</a>
+          </li>
 
-      <li>
-        <a href="#new-jobinfo">New JobInfo methods</a>
-      </li>
-
-      <li>
-        <a href="#new-jobparam">New JobParameter Methods</a>
+          <li>
+            <a href="#new-jobparam">New JobParameter Methods</a>
+          </li>
+        </ul>
       </li>
 
       <li>
@@ -54,12 +56,12 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>
-  To alleviate this issue, Android N applies the following
+  To alleviate this issue, Android 7.0 (API level 24) applies the following
   restrictions:
 </p>
 
 <ul>
-  <li>Apps targeting the Preview do not receive {@link
+  <li>Apps targeting Android 7.0 (API level 24) do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
   register to receive them in their manifest. Apps that are running can still
   listen for {@code CONNECTIVITY_CHANGE} on their main thread by registering a
@@ -70,16 +72,16 @@ page.image=images/cards/card-nyc_2x.jpg
   <li>Apps cannot send or receive {@link
   android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
   android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This optimization
-  affects all apps, not only those targeting the Preview.
+  affects all apps, not only those targeting Android 7.0 (API level 24).
   </li>
 </ul>
 
 <p>
-  If your app uses any of these intents, you should remove dependencies on
-  them as soon as possible so that you can target Android N devices properly.
-  The Android framework provides several solutions to mitigate the need for
-  these implicit broadcasts. For example, {@link android.app.job.JobScheduler}
-  and <a href=
+  If your app uses any of these intents, you should remove dependencies on them
+  as soon as possible so that you can target devices running Android 7.0
+  properly. The Android framework provides several solutions to mitigate the
+  need for these implicit broadcasts. For example, {@link
+  android.app.job.JobScheduler} and <a href=
   "https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
   {@code GcmNetworkManager}</a> provide robust mechanisms to schedule network
   operations when specified conditions, such as a connection to an unmetered
@@ -101,7 +103,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </h2>
 
 <p>
-  Apps targeting the Android N do not receive {@link
+  Apps targeting Android 7.0 (API level 24) do not receive {@link
   android.net.ConnectivityManager#CONNECTIVITY_ACTION} broadcasts if they
   register to receive them in their manifest, and processes that depend on this
   broadcast will not start. This could pose a problem for apps that want
@@ -212,7 +214,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  To trigger jobs on content URI changes, Android N extends
+  To trigger jobs on content URI changes, Android 7.0 (API level 24) extends
   the {@link android.app.job.JobInfo} API with the following methods:
 </p>
 
@@ -287,7 +289,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  Android N also extends {@link android.app.job.JobParameters} to
+  Android 7.0 (API level 24) also extends {@link android.app.job.JobParameters} to
   allow your app to receive useful information about what content authorities
   and URIs triggered the job:
 </p>
@@ -361,13 +363,13 @@ public boolean onStartJob(JobParameters params) {
   conditions, can improve performance and user experience. Removing
   dependencies on background services and statically-registered implicit
   broadcast receivers can help your app run better on such devices. Although
-  Android N takes steps to reduce some of these issues, it is
+  Android 7.0 (API level 24) takes steps to reduce some of these issues, it is
   recommended that you optimize your app to run without the use of these
   background processes entirely.
 </p>
 
 <p>
-  Android N introduces some additional <a href=
+  Android 7.0 (API level 24) introduces some additional <a href=
   "{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> commands that
   you can use to test app behavior with those background processes disabled:
 </p>
@@ -379,7 +381,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set &lt;package_name&gt; RUN_IN_BACKGROUND ignore}
+{@code $ adb shell cmd appops set <package_name> RUN_IN_BACKGROUND ignore}
 </pre>
   </li>
 
@@ -389,7 +391,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set &lt;package_name&gt; RUN_IN_BACKGROUND allow}
+{@code $ adb shell cmd appops set <package_name> RUN_IN_BACKGROUND allow}
 </pre>
   </li>
 </ul>
