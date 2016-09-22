@@ -109,6 +109,7 @@ import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -4807,7 +4808,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (!mSystemReady) {
             return true;
         }
-        return Secure.getInt(mContext.getContentResolver(), Secure.WEB_ACTION_ENABLED, 1) == 0;
+        // we can't get a content resolver until the system is ready; these checks must happen last
+        final ContentResolver resolver = mContext.getContentResolver();
+        if (Global.getInt(resolver, Global.ENABLE_EPHEMERAL_FEATURE, 1) == 0) {
+            return true;
+        }
+        return Secure.getInt(resolver, Secure.WEB_ACTION_ENABLED, 1) == 0;
     }
 
     private boolean isEphemeralAllowed(
