@@ -20,9 +20,11 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
 import android.app.StatusBarManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -32,9 +34,15 @@ import android.graphics.drawable.Drawable;
 import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ActionMode;
+import android.view.GestureDetector;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -75,6 +83,12 @@ public class StatusBarWindowView extends FrameLayout {
     private PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
     private FalsingManager mFalsingManager;
+    private Handler mHandler = new Handler();
+    private SettingsObserver mSettingsObserver;
+
+    private boolean mDoubleTapToSleepEnabled;
+    private int mStatusBarHeaderHeight;
+    private GestureDetector mDoubleTapGesture;
 
     // Implements the floating action mode for TextView's Cut/Copy/Past menu. Normally provided by
     // DecorView, but since this is a special window we have to roll our own.
@@ -89,6 +103,9 @@ public class StatusBarWindowView extends FrameLayout {
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mFalsingManager = FalsingManager.getInstance(context);
+        mStatusBarHeaderHeight = context
+                .getResources().getDimensionPixelSize(R.dimen.status_bar_header_height);
+        mSettingsObserver = new SettingsObserver(mHandler);
     }
 
     @Override
@@ -173,6 +190,21 @@ public class StatusBarWindowView extends FrameLayout {
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
 
+        mSettingsObserver.observe();
+        mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                Log.d(TAG, "Gesture!!");
+                if(pm != null)
+                    pm.goToSleep(e.getEventTime());
+                else
+                    Log.d(TAG, "getSystemService returned null PowerManager");
+
+                return true;
+            }
+        });
+
         // We need to ensure that our window doesn't suffer from overdraw which would normally
         // occur if our window is translucent. Since we are drawing the whole window anyway with
         // the scrim, we don't need the window to be cleared in the beginning.
@@ -186,6 +218,12 @@ public class StatusBarWindowView extends FrameLayout {
         } else {
             setWillNotDraw(!DEBUG);
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mSettingsObserver.unobserve();
     }
 
     @Override
@@ -244,6 +282,11 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
+        if (mDoubleTapToSleepEnabled
+                && ev.getY() < mStatusBarHeaderHeight) {
+            if (DEBUG) Log.w(TAG, "logging double tap gesture");
+            mDoubleTapGesture.onTouchEvent(ev);
+        }
         if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
                 && mService.getBarState() == StatusBarState.KEYGUARD
@@ -674,5 +717,38 @@ public class StatusBarWindowView extends FrameLayout {
         }
     };
 
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE), false, this, UserHandle.USER_ALL);
+            update();
+        }
+
+        void unobserve() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            mDoubleTapToSleepEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 1, UserHandle.USER_CURRENT) == 1;
+        }
+    }
 }
 
