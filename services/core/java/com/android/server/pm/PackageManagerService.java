@@ -19845,8 +19845,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
         final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
 
-        boolean restoreconNeeded = false;
-
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
@@ -19856,8 +19854,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         "Yikes, someone asked us to reconcile CE storage while " + userId
                                 + " was still locked; this would have caused massive data loss!");
             }
-
-            restoreconNeeded |= SELinuxMMAC.isRestoreconNeeded(ceDir);
 
             final File[] files = FileUtils.listFilesOrEmpty(ceDir);
             for (File file : files) {
@@ -19876,8 +19872,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
         if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
-            restoreconNeeded |= SELinuxMMAC.isRestoreconNeeded(deDir);
-
             final File[] files = FileUtils.listFilesOrEmpty(deDir);
             for (File file : files) {
                 final String packageName = file.getName();
@@ -19912,29 +19906,19 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
 
             if (ps.getInstalled(userId)) {
-                prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
+                prepareAppDataLIF(ps.pkg, userId, flags);
 
                 if (migrateAppData && maybeMigrateAppDataLIF(ps.pkg, userId)) {
                     // We may have just shuffled around app data directories, so
                     // prepare them one more time
-                    prepareAppDataLIF(ps.pkg, userId, flags, restoreconNeeded);
+                    prepareAppDataLIF(ps.pkg, userId, flags);
                 }
 
                 preparedCount++;
             }
         }
 
-        if (restoreconNeeded) {
-            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-                SELinuxMMAC.setRestoreconDone(ceDir);
-            }
-            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
-                SELinuxMMAC.setRestoreconDone(deDir);
-            }
-        }
-
-        Slog.v(TAG, "reconcileAppsData finished " + preparedCount
-                + " packages; restoreconNeeded was " + restoreconNeeded);
+        Slog.v(TAG, "reconcileAppsData finished " + preparedCount + " packages");
     }
 
     /**
@@ -19969,9 +19953,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
 
             if (ps.getInstalled(user.id)) {
-                // Whenever an app changes, force a restorecon of its data
                 // TODO: when user data is locked, mark that we're still dirty
-                prepareAppDataLIF(pkg, user.id, flags, true);
+                prepareAppDataLIF(pkg, user.id, flags);
             }
         }
     }
@@ -19984,24 +19967,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
      */
-    private void prepareAppDataLIF(PackageParser.Package pkg, int userId, int flags,
-            boolean restoreconNeeded) {
+    private void prepareAppDataLIF(PackageParser.Package pkg, int userId, int flags) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        prepareAppDataLeafLIF(pkg, userId, flags, restoreconNeeded);
+        prepareAppDataLeafLIF(pkg, userId, flags);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
-            prepareAppDataLeafLIF(pkg.childPackages.get(i), userId, flags, restoreconNeeded);
+            prepareAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
         }
     }
 
-    private void prepareAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags,
-            boolean restoreconNeeded) {
+    private void prepareAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
         if (DEBUG_APP_DATA) {
             Slog.v(TAG, "prepareAppData for " + pkg.packageName + " u" + userId + " 0x"
-                    + Integer.toHexString(flags) + (restoreconNeeded ? " restoreconNeeded" : ""));
+                    + Integer.toHexString(flags));
         }
 
         final String volumeUuid = pkg.volumeUuid;
@@ -20028,15 +20009,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             } else {
                 Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
-            }
-        }
-
-        if (restoreconNeeded) {
-            try {
-                mInstaller.restoreconAppData(volumeUuid, packageName, userId, flags, appId,
-                        app.seinfo);
-            } catch (InstallerException e) {
-                Slog.e(TAG, "Failed to restorecon for " + packageName + ": " + e);
             }
         }
 
