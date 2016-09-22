@@ -298,6 +298,32 @@ static int wall_clock_rtc()
     return -1;
 }
 
+static void log_timerfd_create_error(clockid_t id)
+{
+    if (errno == EINVAL) {
+        switch (id) {
+        case CLOCK_REALTIME_ALARM:
+        case CLOCK_BOOTTIME_ALARM:
+            ALOGE("kernel missing required commits:");
+            ALOGE("https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=6cffe00f7d4e24679eae6b7aae4caaf915288256");
+            ALOGE("https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=11ffa9d6065f344a9bd769a2452f26f2f671e5f8");
+            LOG_ALWAYS_FATAL("kernel does not support timerfd_create() with alarm timers");
+            break;
+
+        case CLOCK_BOOTTIME:
+            ALOGE("kernel missing required commit:");
+            ALOGE("https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=4a2378a943f09907fb1ae35c15de917f60289c14");
+            LOG_ALWAYS_FATAL("kernel does not support timerfd_create(CLOCK_BOOTTIME)");
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    ALOGE("timerfd_create(%u) failed: %s", id, strerror(errno));
+}
+
 static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
 {
     int epollfd;
@@ -313,8 +339,7 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
     for (size_t i = 0; i < fds.size(); i++) {
         fds[i] = timerfd_create(android_alarm_to_clockid[i], 0);
         if (fds[i] < 0) {
-            ALOGE("timerfd_create(%u) failed: %s",  android_alarm_to_clockid[i],
-                    strerror(errno));
+            log_timerfd_create_error(android_alarm_to_clockid[i]);
             close(epollfd);
             for (size_t j = 0; j < i; j++) {
                 close(fds[j]);
