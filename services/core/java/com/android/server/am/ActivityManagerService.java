@@ -6497,6 +6497,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.debugging = false;
         app.cached = false;
         app.killedByAm = false;
+        app.killed = false;
+
 
         // We carefully use the same state that PackageManager uses for
         // filtering, since we use this flag to decide if we need to install
