@@ -14,12 +14,8 @@
 
 // SSIZE: mingw does not have signed size_t == ssize_t.
 #if !defined(_WIN32)
-#  define ZD "%zd"
-#  define ZD_TYPE ssize_t
 #  define SSIZE(x) x
 #else
-#  define ZD "%ld"
-#  define ZD_TYPE long
 #  define SSIZE(x) (signed size_t)x
 #endif
 
