@@ -1,0 +1,658 @@
+page.title=Layanan Terikat
+parent.title=Layanan
+parent.link=services.html
+@jd:body
+
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#Basics">Dasar-Dasar</a></li>
+  <li><a href="#Creating">Membuat Layanan Terikat</a>
+    <ol>
+      <li><a href="#Binder">Memperluas kelas Binder</a></li>
+      <li><a href="#Messenger">Menggunakan Messenger</a></li>
+    </ol>
+  </li>
+  <li><a href="#Binding">Mengikat ke Layanan</a></li>
+  <li><a href="#Lifecycle">Mengelola Daur Hidup Layanan Terikat</a></li>
+</ol>
+
+<h2>Kelas-kelas utama</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.content.ServiceConnection}</li>
+  <li>{@link android.os.IBinder}</li>
+</ol>
+
+<h2>Contoh</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+      RemoteService}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Lihat juga</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/services.html">Layanan</a></li>
+</ol>
+</div>
+
+
+<p>Layanan terikat adalah server di antarmuka klien-server. Layanan terikat memungkinkan komponen-komponen
+(seperti aktivitas) untuk diikat ke layanan, mengirim permintaan, menerima respons, dan bahkan melakukan
+komunikasi antarproses (IPC). Layanan terikat biasanya hidup hanya saat melayani
+komponen aplikasi lain dan tidak berjalan di latar belakang terus-menerus.</p>
+
+<p>Dokumen ini menampilkan cara membuat layanan terikat, termasuk cara mengikat
+ke layanan dari komponen aplikasi lain. Akan tetapi, Anda juga harus mengacu dokumen <a href="{@docRoot}guide/components/services.html">Layanan</a> untuk
+informasi tambahan tentang layanan secara umum, seperti cara menyampaikan pemberitahuan dari layanan, mengatur
+layanan agar berjalan di latar depan, dan lain-lain.</p>
+
+
+<h2 id="Basics">Dasar-Dasar</h2>
+
+<p>Layanan terikat adalah implementasi kelas {@link android.app.Service} yang memungkinkan
+aplikasi lain diikat padanya dan berinteraksi dengannya. Untuk menyediakan pengikatan bagi sebuah
+layanan, Anda harus mengimplementasikan metode callback {@link android.app.Service#onBind onBind()}. Metode ini
+menghasilkan objek {@link android.os.IBinder} yang mendefinisikan antarmuka pemprograman yang
+bisa digunakan klien untuk berinteraksi dengan layanan.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Mengikat ke Layanan yang Sudah Dimulai</h3>
+
+<p>Seperti dibahas dalam dokumen <a href="{@docRoot}guide/components/services.html">Layanan</a>
+, Anda bisa membuat layanan yang dimulai sekaligus diikat. Yakni, layanan bisa
+dimulai dengan memanggil {@link android.content.Context#startService startService()}, yang memungkinkan
+layanan berjalan terus-menerus, dan juga membolehkan klien untuk mengikat ke layanan dengan memanggil {@link
+android.content.Context#bindService bindService()}.
+  <p>Jika Anda mengizinkan layanan dimulai dan diikat, lalu ketika layanan telah
+dimulai, sistem <em>tidak</em> menghapus layanan ketika semua klien melepas ikatan. Sebagai gantinya, Anda harus
+menghentikan layanan secara eksplisit, dengan memanggil {@link android.app.Service#stopSelf stopSelf()} atau {@link
+android.content.Context#stopService stopService()}.</p>
+
+<p>Walaupun Anda biasanya harus mengimplementasikan {@link android.app.Service#onBind onBind()}
+<em>atau</em> {@link android.app.Service#onStartCommand onStartCommand()}, kadang-kadang perlu
+mengimplementasikan keduanya. Misalnya, sebuah pemutar musik bisa merasakan manfaatnya karena layanannya boleh berjalan
+terus-menerus dan juga menyediakan pengikatan. Dengan cara ini, sebuah aktivitas bisa memulai layanan untuk memutar beberapa
+lagu dan musik terus dimainkan sekalipun pengguna meninggalkan aplikasi. Lalu, bila pengguna
+kembali ke aplikasi, aktivitas bisa mengikat ke layanan untuk mendapatkan kembali kontrol atas pemutaran.</p>
+
+<p>Pastikan membaca bagian tentang <a href="#Lifecycle">Mengelola Daur Hidup Layanan
+Terikat</a>, untuk informasi selengkapnya tentang daur hidup layanan saat menambahkan pengikatan ke
+layanan yang sudah dimulai.</p>
+</div>
+</div>
+
+<p>Klien bisa mengikat ke layanan dengan memanggil {@link android.content.Context#bindService
+bindService()}. Bila itu dilakukan, klien harus menyediakan implementasi {@link
+android.content.ServiceConnection}, yang memantau koneksi dengan layanan. Metode {@link
+android.content.Context#bindService bindService()} kembali dengan serta-merta tanpa sebuah nilai, namun
+bila sistem Android membuat koneksi antara klien
+dan layanan, sistem akan memanggil {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} pada {@link
+android.content.ServiceConnection} untuk mengirim {@link android.os.IBinder} yang
+bisa digunakan klien untuk berkomunikasi dengan layanan.</p>
+
+<p>Beberapa klien bisa terhubung ke layanan dengan serentak. Akan tetapi, sistem akan memanggil metode
+{@link android.app.Service#onBind onBind()} layanan Anda untuk mengambil {@link android.os.IBinder} hanya
+bila klien pertama mengikat. Sistem lalu memberikan {@link android.os.IBinder} yang sama ke setiap
+klien tambahan yang mengikat, tanpa memanggil {@link android.app.Service#onBind onBind()} lagi.</p>
+
+<p>Bila klien terakhir melepas ikatan dari layanan, sistem akan menghapus layanan (kecuali jika
+layanan juga dimulai oleh {@link android.content.Context#startService startService()}).</p>
+
+<p>Bila Anda mengimplementasikan layanan terikat, yang terpenting adalah mendefinisikan antarmuka
+yang dihasilkan metode callback {@link android.app.Service#onBind onBind()} Anda. Ada sedikit
+cara mendefinisikan antarmuka {@link android.os.IBinder} layanan Anda dan bagian berikut
+akan membahas masing-masing teknik.</p>
+
+
+
+<h2 id="Creating">Membuat Layanan Terikat</h2>
+
+<p>Saat membuat layanan yang menyediakan pengikatan, Anda harus menyediakan {@link android.os.IBinder}
+yang menyediakan antarmuka pemrograman yang bisa digunakan klien untuk berinteraksi dengan layanan. Ada
+tiga cara untuk mendefinisikan antarmuka:</p>
+
+<dl>
+  <dt><a href="#Binder">Memperluas kelas Binder</a></dt>
+  <dd>Jika layanan Anda bersifat privat untuk aplikasi Anda sendiri dan berjalan dalam proses yang sama dengan klien
+(biasanya), Anda harus membuat antarmuka dengan memperluas kelas {@link android.os.Binder}
+dan menghasilkan instance dari
+{@link android.app.Service#onBind onBind()}. Klien akan menerima {@link android.os.Binder} dan
+bisa menggunakannya untuk mengakses langsung metode publik yang tersedia dalam implementasi {@link android.os.Binder}
+atau bahkan {@link android.app.Service}.
+  <p>Inilah teknik yang lebih disukai bila layanan Anda sekadar pekerja latar belakang untuk aplikasi Anda
+sendiri. Satu-satunya alasan tidak membuat antarmuka dengan cara ini adalah karena
+layanan Anda akan digunakan oleh aplikasi lain atau pada proses-proses terpisah.</dd>
+
+  <dt><a href="#Messenger">Menggunakan Messenger</a></dt>
+  <dd>Jika antarmuka Anda perlu bekerja lintas proses, Anda bisa membuat
+antarmuka untuk layanan dengan {@link android.os.Messenger}. Dengan cara ini, layanan
+mendefinisikan {@link android.os.Handler} yang akan merespons aneka tipe objek {@link
+android.os.Message}. {@link android.os.Handler}
+ini adalah dasar bagi {@link android.os.Messenger} yang nanti bisa berbagi {@link android.os.IBinder}
+dengan klien, sehingga memungkinkan klien mengirim perintah ke layanan dengan menggunakan objek {@link
+android.os.Message}. Selain itu, klien bisa mendefinisikan sendiri {@link android.os.Messenger}
+sehingga layanan bisa mengirim balik pesan.
+  <p>Inilah cara termudah melakukan komunikasi antarproses (IPC), karena {@link
+android.os.Messenger} akan mengantre semua permintaan ke dalam satu thread sehingga Anda tidak perlu mendesain
+layanan agar thread-safe.</p>
+  </dd>
+
+  <dt>Menggunakan AIDL</dt>
+  <dd>AIDL (Android Interface Definition Language) melakukan semua pekerjaan untuk mengurai objek menjadi
+primitif yang bisa dipahami dan diarahkan oleh sistem operasi ke berbagai proses untuk melakukan
+IPC. Teknik sebelumnya, dengan menggunakan {@link android.os.Messenger}, sebenarnya berdasarkan AIDL sebagai
+struktur yang mendasarinya. Seperti disebutkan di atas, {@link android.os.Messenger} membuat antrean
+semua permintaan klien dalam satu thread, sehingga layanan akan menerima permintaan satu per satu. Akan tetapi,
+jika ingin layanan Anda menangani beberapa permintaan sekaligus, Anda bisa menggunakan AIDL
+secara langsung. Dalam hal ini, layanan Anda harus mampu multi-thread dan dibuat thread-safe.
+  <p>Untuk menggunakan AIDL secara langsung, Anda harus
+membuat file {@code .aidl} yang mendefinisikan antarmuka pemrograman. Alat Android SDK menggunakan
+file ini untuk menghasilkan kelas abstrak yang mengimplementasikan antarmuka dan menangani IPC, yang nanti
+bisa Anda perluas dalam layanan.</p>
+  </dd>
+</dl>
+
+  <p class="note"><strong>Catatan:</strong> Umumnya aplikasi <strong>tidak boleh</strong> menggunakan AIDL untuk
+membuat layanan terikat, karena hal itu mungkin memerlukan kemampuan multi-thread dan
+bisa mengakibatkan implementasi yang lebih rumit. Dengan demikian, AIDL tidak cocok untuk sebagian besar aplikasi
+dan dokumen ini tidak membahas cara menggunakannya untuk layanan Anda. Jika Anda yakin perlu
+menggunakan AIDL secara langsung, lihat dokumen <a href="{@docRoot}guide/components/aidl.html">AIDL</a>
+.</p>
+
+
+
+
+<h3 id="Binder">Memperluas kelas Binder</h3>
+
+<p>Jika layanan Anda hanya digunakan oleh aplikasi lokal dan tidak perlu bekerja lintas proses,
+maka Anda bisa mengimplementasikan kelas {@link android.os.Binder} Anda sendiri yang memberi klien Anda
+akses langsung ke metode publik dalam layanan.</p>
+
+<p class="note"><strong>Catatan:</strong> Hal ini hanya berhasil jika klien dan layanan berada dalam
+aplikasi dan proses yang sama, suatu kondisi yang paling umum. Misalnya, cara ini sangat cocok untuk sebuah aplikasi musik
+yang perlu mengikat aktivitas ke layanannya sendiri, yakni memutar musik di
+latar belakang.</p>
+
+<p>Berikut cara menyiapkannya:</p>
+<ol>
+  <li>Dalam layanan Anda, buat sebuah instance {@link android.os.Binder} yang:
+    <ul>
+      <li>berisi metode publik yang bisa dipanggil klien</li>
+      <li>menghasilkan instance {@link android.app.Service} saat ini, yang memiliki metode publik yang
+bisa dipanggil klien</li>
+      <li>atau, menghasilkan instance kelas lain yang host-nya di layanan dengan metode publik yang
+bisa dipanggil klien</li>
+    </ul>
+  <li>Hasilkan instance {@link android.os.Binder} ini dari metode callback {@link
+android.app.Service#onBind onBind()}.</li>
+  <li>Di klien, terima {@link android.os.Binder} dari metode callback {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()} dan
+buat panggilan ke layanan terikat dengan menggunakan metode yang disediakan.</li>
+</ol>
+
+<p class="note"><strong>Catatan:</strong> Alasan layanan dan klien harus berada dalam aplikasi yang sama
+adalah agar klien bisa mengkonversi objek yang dihasilkan dan memanggil API-nya dengan benar. Layanan
+dan klien juga harus berada dalam proses yang sama, karena teknik ini tidak melakukan
+pengarahan (marshalling) apa pun untuk lintas proses.</p>
+
+<p>Misalnya, berikut ini adalah layanan yang memberi klien akses ke metode-metode dalam layanan melalui
+implementasi {@link android.os.Binder}:</p>
+
+<pre>
+public class LocalService extends Service {
+    // Binder given to clients
+    private final IBinder mBinder = new LocalBinder();
+    // Random number generator
+    private final Random mGenerator = new Random();
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocalService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return LocalService.this;
+        }
+    }
+
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    /** method for clients */
+    public int getRandomNumber() {
+      return mGenerator.nextInt(100);
+    }
+}
+</pre>
+
+<p>{@code LocalBinder} menyediakan {@code getService()} metode bagi klien untuk mengambil
+instance {@code LocalService} saat ini. Cara ini memungkinkan klien memanggil metode publik dalam
+layanan. Misalnya, klien bisa memanggil {@code getRandomNumber()} dari layanan.</p>
+
+<p>Berikut ini adalah aktivitas yang mengikat ke {@code LocalService} dan memanggil {@code getRandomNumber()}
+bila tombol diklik:</p>
+
+<pre>
+public class BindingActivity extends Activity {
+    LocalService mService;
+    boolean mBound = false;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    /** Called when a button is clicked (the button in the layout file attaches to
+      * this method with the android:onClick attribute) */
+    public void onButtonClick(View v) {
+        if (mBound) {
+            // Call a method from the LocalService.
+            // However, if this call were something that might hang, then this request should
+            // occur in a separate thread to avoid slowing down the activity performance.
+            int num = mService.getRandomNumber();
+            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        &#64;Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        &#64;Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+}
+</pre>
+
+<p>Contoh di atas menampilkan cara klien mengikat ke layanan dengan menggunakan implementasi
+{@link android.content.ServiceConnection} dan callback {@link
+android.content.ServiceConnection#onServiceConnected onServiceConnected()}. Bagian
+berikut menyediakan informasi selengkapnya tentang proses pengikatan ke layanan.</p>
+
+<p class="note"><strong>Catatan:</strong> Contoh di atas tidak secara eksplisit melepas ikatan dari layanan,
+namun semua klien harus melepas ikatan pada waktu yang tepat (seperti saat aktivitas sedang jeda).</p>
+
+<p>Untuk contoh kode selengkapnya, lihat kelas <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+LocalService.java}</a> dan kelas <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalServiceActivities.html">{@code
+LocalServiceActivities.java}</a> dalam <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h3 id="Messenger">Menggunakan Messenger</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>Dibandingkan dengan AIDL</h4>
+  <p>Bila Anda perlu melakukan IPC, menggunakan {@link android.os.Messenger} untuk antarmuka
+lebih sederhana daripada mengimplementasikannya dengan AIDL, karena {@link android.os.Messenger} mengantre
+semua panggilan ke layanan, sementara antarmuka AIDL murni mengirim permintaan serentak ke
+layanan, yang nanti harus menangani multi-threading.</p>
+  <p>Untuk sebagian besar aplikasi, layanan tidak perlu melakukan multi-threading, jadi dengan menggunakan {@link
+android.os.Messenger} memungkinkan layanan menangani panggilan satu per satu. Jika
+layanan harus multi-thread, Anda harus menggunakan <a href="{@docRoot}guide/components/aidl.html">AIDL</a> untuk mendefinisikan antarmuka.</p>
+</div>
+</div>
+
+<p>Jika layanan perlu berkomunikasi dengan proses jauh, Anda bisa menggunakan
+{@link android.os.Messenger} untuk menyediakan antarmuka bagi layanan Anda. Teknik ini memungkinkan
+Anda melakukan komunikasi antarproses (IPC) tanpa harus menggunakan AIDL.</p>
+
+<p>Berikut ini rangkuman cara menggunakan {@link android.os.Messenger}:</p>
+
+<ul>
+  <li>Layanan mengimplementasikan {@link android.os.Handler} yang menerima callback untuk tiap
+panggilan dari klien.</li>
+  <li>{@link android.os.Handler} digunakan untuk membuat objek {@link android.os.Messenger}
+(yang merupakan acuan ke {@link android.os.Handler}).</li>
+  <li>{@link android.os.Messenger} membuat {@link android.os.IBinder} yang
+dikembalikan layanan ke klien dari {@link android.app.Service#onBind onBind()}.</li>
+  <li>Klien menggunakan {@link android.os.IBinder} untuk membuat instance {@link android.os.Messenger}
+(yang mengacu {@link android.os.Handler} layanan), yang digunakan klien untuk mengirim
+objek {@link android.os.Message} ke layanan.</li>
+  <li>Layanan menerima setiap {@link android.os.Message} dalam {@link
+android.os.Handler}&mdash;secara spesifik, dalam metode {@link android.os.Handler#handleMessage
+handleMessage()}.</li>
+</ul>
+
+
+<p>Dengan cara ini, tidak ada "metode" untuk dipanggil klien pada layanan. Sebagai gantinya,
+klien mengirim "pesan" (objek-objek {@link android.os.Message}) yang diterima layanan dalam
+{@link android.os.Handler}-nya.</p>
+
+<p>Berikut ini contoh layanan sederhana yang menggunakan antarmuka {@link android.os.Messenger}:</p>
+
+<pre>
+public class MessengerService extends Service {
+    /** Command to the service to display a message */
+    static final int MSG_SAY_HELLO = 1;
+
+    /**
+     * Handler of incoming messages from clients.
+     */
+    class IncomingHandler extends Handler {
+        &#64;Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_SAY_HELLO:
+                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    /**
+     * Target we publish for clients to send messages to IncomingHandler.
+     */
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    /**
+     * When binding to the service, we return an interface to our messenger
+     * for sending messages to the service.
+     */
+    &#64;Override
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
+    }
+}
+</pre>
+
+<p>Perhatikan bahwa metode {@link android.os.Handler#handleMessage handleMessage()} dalam
+{@link android.os.Handler} adalah tempat layanan menerima {@link android.os.Message}
+yang masuk dan memutuskan aksi yang harus dilakukan, berdasarkan anggota {@link android.os.Message#what}.</p>
+
+<p>Klien tinggal membuat {@link android.os.Messenger} berdasarkan {@link
+android.os.IBinder} yang dihasilkan layanan dan mengirim pesan menggunakan {@link
+android.os.Messenger#send send()}. Misalnya, berikut ini adalah aktivitas sederhana yang mengikat ke
+layanan dan mengirim pesan {@code MSG_SAY_HELLO} ke layanan:</p>
+
+<pre>
+public class ActivityMessenger extends Activity {
+    /** Messenger for communicating with the service. */
+    Messenger mService = null;
+
+    /** Flag indicating whether we have called bind on the service. */
+    boolean mBound;
+
+    /**
+     * Class for interacting with the main interface of the service.
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the object we can use to
+            // interact with the service.  We are communicating with the
+            // service using a Messenger, so here we get a client-side
+            // representation of that from the raw IBinder object.
+            mService = new Messenger(service);
+            mBound = true;
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            mService = null;
+            mBound = false;
+        }
+    };
+
+    public void sayHello(View v) {
+        if (!mBound) return;
+        // Create and send a message to the service, using a supported 'what' value
+        Message msg = Message.obtain(null, MessengerService.MSG_SAY_HELLO, 0, 0);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+    }
+
+    &#64;Override
+    protected void onStart() {
+        super.onStart();
+        // Bind to the service
+        bindService(new Intent(this, MessengerService.class), mConnection,
+            Context.BIND_AUTO_CREATE);
+    }
+
+    &#64;Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+}
+</pre>
+
+<p>Perhatikan bahwa contoh ini tidak menampilkan cara layanan merespons klien. Jika ingin
+layanan merespons, Anda juga perlu membuat {@link android.os.Messenger} di klien. Lalu
+saat menerima callback {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, klien akan mengirim {@link android.os.Message} ke layanan yang berisi
+{@link android.os.Messenger} klien dalam parameter {@link android.os.Message#replyTo}
+metode {@link android.os.Messenger#send send()}.</p>
+
+<p>Anda bisa melihat contoh cara menyediakan pertukaran pesan dua arah dalam contoh <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerService.html">{@code
+MessengerService.java}</a> (layanan) dan <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/MessengerServiceActivities.html">{@code
+MessengerServiceActivities.java}</a> (klien).</p>
+
+
+
+
+
+<h2 id="Binding">Mengikat ke Layanan</h2>
+
+<p>Komponen-komponen aplikasi (klien) bisa mengikat ke layanan dengan memanggil
+{@link android.content.Context#bindService bindService()}. Sistem Android
+lalu memanggil metode {@link android.app.Service#onBind
+onBind()} layanan, yang menghasilkan {@link android.os.IBinder} untuk berinteraksi dengan layanan.</p>
+
+<p>Pengikatan ini bersifat asinkron. {@link android.content.Context#bindService
+bindService()} segera kembali dan <em>tidak</em> mengembalikan {@link android.os.IBinder} ke
+klien. Untuk menerima {@link android.os.IBinder}, klien harus membuat instance {@link
+android.content.ServiceConnection} dan meneruskannya ke {@link android.content.Context#bindService
+bindService()}. {@link android.content.ServiceConnection} berisi metode callback yang
+dipanggil sistem untuk mengirim {@link android.os.IBinder}.</p>
+
+<p class="note"><strong>Catatan:</strong> Hanya aktivitas, layanan, dan penyedia konten yang bisa mengikat
+ke layanan yang&mdash;Anda <strong>tidak bisa</strong> ikat ke layanan dari penerima siaran.</p>
+
+<p>Jadi, untuk mengikat ke layanan dari klien, Anda harus: </p>
+<ol>
+  <li>Mengimplementasikan {@link android.content.ServiceConnection}.
+    <p>Implementasi Anda harus mengesampingkan dua metode callback:</p>
+    <dl>
+      <dt>{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}</dt>
+        <dd>Sistem memanggil ini untuk mengirim {@link android.os.IBinder} yang dihasilkan oleh
+metode {@link android.app.Service#onBind onBind()} layanan.</dd>
+      <dt>{@link android.content.ServiceConnection#onServiceDisconnected
+onServiceDisconnected()}</dt>
+        <dd>Sistem Android memanggil ini bila koneksi ke layanan putus
+tanpa terduga, seperti ketika layanan mengalami crash atau dimatikan. Ini <em>tidak</em> dipanggil ketika
+klien melepas ikatan.</dd>
+    </dl>
+  </li>
+  <li>Panggil {@link
+android.content.Context#bindService bindService()}, dengan meneruskan implementasi {@link
+android.content.ServiceConnection}. </li>
+  <li>Bila sistem memanggil metode callback {@link android.content.ServiceConnection#onServiceConnected
+onServiceConnected()}, Anda bisa mulai membuat panggilan ke layanan, dengan menggunakan
+metode yang didefinisikan oleh antarmuka.</li>
+  <li>Untuk memutus koneksi dari layanan, panggil {@link
+android.content.Context#unbindService unbindService()}.
+    <p>Bila telah dimusnahkan (destroyed), klien Anda akan melepas ikatan dari layanan, namun Anda harus selalu melepas ikatan
+bila sudah selesai berinteraksi dengan layanan atau bila aktivitas Anda sedang jeda sehingga layanan bisa
+dimatikan saat tidak sedang digunakan. (Waktu yang tepat untuk mengikat dan melepas ikatan dibahas
+selengkapnya di bawah ini.)</p>
+  </li>
+</ol>
+
+<p>Misalnya, cuplikan berikut menghubungkan klien ke layanan yang dibuat di atas dengan
+<a href="#Binder">memperluas kelas Binder</a>, sehingga tinggal mengkonversi
+{@link android.os.IBinder} yang dihasilkan ke kelas {@code LocalService} dan meminta instance {@code
+LocalService}:</p>
+
+<pre>
+LocalService mService;
+private ServiceConnection mConnection = new ServiceConnection() {
+    // Called when the connection with the service is established
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        // Because we have bound to an explicit
+        // service that is running in our own process, we can
+        // cast its IBinder to a concrete class and directly access it.
+        LocalBinder binder = (LocalBinder) service;
+        mService = binder.getService();
+        mBound = true;
+    }
+
+    // Called when the connection with the service disconnects unexpectedly
+    public void onServiceDisconnected(ComponentName className) {
+        Log.e(TAG, "onServiceDisconnected");
+        mBound = false;
+    }
+};
+</pre>
+
+<p>Dengan {@link android.content.ServiceConnection} ini, klien bisa mengikat ke layanan dengan meneruskannya
+ke {@link android.content.Context#bindService bindService()}. Misalnya:</p>
+
+<pre>
+Intent intent = new Intent(this, LocalService.class);
+bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+</pre>
+
+<ul>
+  <li>Parameter pertama {@link android.content.Context#bindService bindService()} adalah sebuah
+{@link android.content.Intent} yang secara eksplisit menyebutkan layanan yang akan diikat (walaupun intent
+boleh implisit).</li>
+<li>Parameter kedua adalah objek {@link android.content.ServiceConnection}.</li>
+<li>Parameter ketiga adalah tanda (flag) yang menunjukkan opsi pengikatan. Tanda ini biasanya harus {@link
+android.content.Context#BIND_AUTO_CREATE} agar dapat membuat layanan jika belum hidup.
+Nilai-nilai lain yang memungkinkan adalah {@link android.content.Context#BIND_DEBUG_UNBIND}
+dan {@link android.content.Context#BIND_NOT_FOREGROUND}, atau {@code 0} untuk tidak satu pun.</li>
+</ul>
+
+
+<h3>Catatan tambahan</h3>
+
+<p>Berikut ini beberapa catatan penting tentang mengikat ke layanan:</p>
+<ul>
+  <li>Anda harus selalu menjebak eksepsi {@link android.os.DeadObjectException}, yang dilontarkan
+bila koneksi terputus. Inilah satu-satunya eksepsi yang dilontarkan oleh metode jauh.</li>
+  <li>Objek adalah acuan yang dihitung lintas proses. </li>
+  <li>Anda biasanya harus memasangkan pengikatan dan pelepasan ikatan selama
+memasangkan momen membuat dan menghapus daur hidup klien. Misalnya:
+    <ul>
+      <li>Jika Anda hanya perlu berinteraksi dengan layanan saat aktivitas terlihat, Anda
+harus mengikat selama {@link android.app.Activity#onStart onStart()} dan melepas ikatan selama {@link
+android.app.Activity#onStop onStop()}.</li>
+      <li>Jika Anda ingin aktivitas menerima tanggapan bahkan saat dihentikan di
+latar belakang, Anda bisa mengikat selama {@link android.app.Activity#onCreate onCreate()} dan melepas ikatan
+selama {@link android.app.Activity#onDestroy onDestroy()}. Berhati-hatilah karena hal ini menyiratkan aktivitas
+Anda perlu menggunakan layanan selama dijalankan (sekalipun di latar belakang), jadi jika
+layanan berada dalam proses lain, Anda meningkatkan bobot proses dan semakin besar
+kemungkinan sistem akan mematikannya.</li>
+    </ul>
+    <p class="note"><strong>Catatan:</strong> Anda biasanya <strong>tidak</strong> boleh mengikat dan melepas ikatan
+selama {@link android.app.Activity#onResume onResume()} aktivitas Anda dan {@link
+android.app.Activity#onPause onPause()}, karena callback ini terjadi pada setiap transisi daur hidup
+dan Anda harus menjaga pemrosesan yang terjadi pada transisi ini tetap minim. Juga, jika
+banyak aktivitas dalam aplikasi Anda mengikat ke layanan yang sama dan ada transisi antara
+dua aktivitas, layanan bisa dimusnahkan dan dibuat lagi sambil aktivitas saat ini melepas ikatan
+(selama jeda) sebelum aktivitas berikutnya mengikat (selama lanjutkan). (Transisi aktivitas ini untuk cara
+aktivitas mengoordinasikan daur hidupnya dijelaskan dalam dokumen <a href="{@docRoot}guide/components/activities.html#CoordinatingActivities">Aktivitas</a>
+.)</p>
+</ul>
+
+<p>Untuk contoh kode selengkapnya, yang menampilkan cara mengikat ke layanan, lihat kelas <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">{@code
+RemoteService.java}</a> dalam <a href="{@docRoot}resources/samples/ApiDemos/index.html">ApiDemos</a>.</p>
+
+
+
+
+
+<h2 id="Lifecycle">Mengelola Daur Hidup Layanan Terikat</h2>
+
+<p>Bila layanan dilepas ikatannya dari semua klien, sistem Android akan menghapusnya (kecuali jika layanan juga
+dimulai dengan {@link android.app.Service#onStartCommand onStartCommand()}). Dengan demikian, Anda tidak harus
+mengelola daur hidup layanan jika layanan itu murni sebuah layanan
+terikat&mdash;yang dikelola sistem Android untuk Anda berdasarkan apakah layanan terikat ke klien atau tidak.</p>
+
+<p>Akan tetapi, Jika Anda memilih untuk mengimplementasikan metode callback {@link android.app.Service#onStartCommand
+onStartCommand()}, maka Anda harus menghentikan layanan secara eksplisit, karena layanan
+sekarang dianggap telah <em>dimulai</em>. Dalam hal ini, layanan akan berjalan hingga layanan
+menghentikan dirinya sendiri dengan {@link android.app.Service#stopSelf()} atau panggilan komponen lain {@link
+android.content.Context#stopService stopService()}, terlepas dari apakah layanan terikat ke
+klien atau tidak.</p>
+
+<p>Selain itu, jika layanan Anda telah dimulai dan menerima pengikatan, maka saat sistem memanggil
+metode {@link android.app.Service#onUnbind onUnbind()}, Anda bisa memilih untuk mengembalikan
+{@code true} jika ingin menerima panggilan ke {@link android.app.Service#onRebind
+onRebind()} bila nanti klien mengikat ke layanan (sebagai ganti menerima panggilan ke {@link
+android.app.Service#onBind onBind()}). {@link android.app.Service#onRebind
+onRebind()} akan menghasilkan void, namun klien tetap menerima {@link android.os.IBinder} dalam callback
+{@link android.content.ServiceConnection#onServiceConnected onServiceConnected()}.
+Di bawah ini adalah gambar 1 yang mengilustrasikan logika untuk jenis daur hidup ini.</p>
+
+
+<img src="{@docRoot}images/fundamentals/service_binding_tree_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Daur hidup untuk layanan yang dimulai
+dan juga memungkinkan pengikatan.</p>
+
+
+<p>Untuk informasi selengkapnya tentang daur hidup layanan yang telah dimulai, lihat dokumen <a href="{@docRoot}guide/components/services.html#Lifecycle">Layanan</a>.</p>
+
+
+
+

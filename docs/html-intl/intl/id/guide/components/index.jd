@@ -1,0 +1,57 @@
+page.title=Komponen Aplikasi
+page.landing=true
+page.landing.intro=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent.
+page.metaDescription=Kerangka kerja aplikasi Android memungkinkan Anda membuat aplikasi yang kaya dan inovatif menggunakan seperangkat komponen yang dapat digunakan kembali. Bagian ini menjelaskan cara membangun komponen yang mendefinisikan blok pembangun aplikasi Anda dan cara menghubungkannya bersama menggunakan intent.
+page.landing.image=images/develop/app_components.png
+page.image=images/develop/app_components.png
+
+@jd:body
+
+<div class="landing-docs">
+
+  <div class="col-6">
+    <h3>Artikel Blog</h3>
+
+    <a href="http://android-developers.blogspot.com/2012/05/using-dialogfragments.html">
+      <h4>Menggunakan DialogFragments</h4>
+      <p>Dalam posting ini, saya akan menunjukkan cara menggunakan DialogFragments dengan pustaka dukungan v4 (untuk kompatibilitas mundur pada perangkat sebelum Honeycomb) untuk menunjukkan dialog edit sederhana dan mengembalikan hasil ke Aktivitas pemanggil menggunakan antarmuka.</p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+      <h4>Fragmen Untuk Semua</h4>
+      <p>Hari ini kami telah merilis pustaka statis yang memperlihatkan API Fragment yang sama (serta LoaderManager baru dan beberapa kelas lain) agar aplikasi yang kompatibel dengan Android 1.6 atau yang lebih baru bisa menggunakan fragmen untuk membuat antarmuka pengguna yang kompatibel dengan tablet. </p>
+    </a>
+
+    <a href="http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html">
+      <h4>Multithreading untuk Kinerja</h4>
+      <p>Praktik yang baik dalam membuat aplikasi yang responsif adalah memastikan thread UI utama Anda
+melakukan pekerjaan minimum. Setiap tugas yang berpotensi lama dan dapat membuat aplikasi mogok harus
+ditangani di thread berbeda.</p>
+    </a>
+  </div>
+
+  <div class="col-6">
+    <h3>Pelatihan</h3>
+
+    <a href="http://developer.android.com/training/basics/activity-lifecycle/index.html">
+      <h4>Mengelola Daur Hidup Aktivitas</h4>
+      <p>Bagian ini menjelaskan pentingnya metode callback daur hidup yang diterima setiap instance Aktivitas
+dan cara menggunakannya sehingga aktivitas Anda melakukan yang diharapkan pengguna dan tidak menghabiskan sumber daya sistem
+saat aktivitas tidak membutuhkannya.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/basics/fragments/index.html">
+      <h4>Membangun UI Dinamis dengan Fragmen</h4>
+      <p>Bagian ini menunjukkan kepada Anda cara membuat pengalaman pengguna yang dinamis dengan fragmen dan mengoptimalkan
+pengalaman pengguna aplikasi Anda dengan berbagai ukuran layar, sekaligus terus mendukung
+perangkat yang menjalankan versi sebelumnya, sesudah versi Android 1.6.</p>
+    </a>
+
+    <a href="http://developer.android.com/training/sharing/index.html">
+      <h4>Berbagi Konten</h4>
+      <p>Bagian ini membahas beberapa cara umum untuk mengirim dan menerima konten antar
+aplikasi menggunakan API Intent dan objek ActionProvider.</p>
+    </a>
+  </div>
+
+</div>

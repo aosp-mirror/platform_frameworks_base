@@ -1,0 +1,492 @@
+page.title=Layout
+page.tags=view,viewgroup
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#write">Tulis XML</a></li>
+  <li><a href="#load">Muat Sumber Daya XML</a></li>
+  <li><a href="#attributes">Atribut</a>
+    <ol>
+      <li><a href="#id">ID</a></li>
+      <li><a href="#layout-params">Parameter Layout</a></li>
+    </ol>
+  </li>
+  <li><a href="#Position">Posisi Layout</a></li>
+  <li><a href="#SizePaddingMargins">Ukuran, Pengisi, dan Margin</a></li>
+  <li><a href="#CommonLayouts">Layout Umum</a></li>
+  <li><a href="#AdapterViews">Membangun Layout dengan Adaptor</a>
+    <ol>
+      <li><a href="#FillingTheLayout">Mengisi tampilan adaptor dengan data</a></li>
+      <li><a href="#HandlingUserSelections">Menangani kejadian klik</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>Kelas-kelas utama</h2>
+  <ol>
+    <li>{@link android.view.View}</li>
+    <li>{@link android.view.ViewGroup}</li>
+    <li>{@link android.view.ViewGroup.LayoutParams}</li>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/firstapp/building-ui.html">Membangun Antarmuka Pengguna
+Sederhana</a></li> </div>
+</div>
+
+<p>Layout mendefinisikan struktur visual untuk antarmuka pengguna, seperti UI sebuah <a href="{@docRoot}guide/components/activities.html">aktivitas</a> atau <a href="{@docRoot}guide/topics/appwidgets/index.html">widget aplikasi</a>.
+Anda dapat mendeklarasikan layout dengan dua cara:</p>
+<ul>
+<li><strong>Deklarasikan elemen UI dalam XML</strong>. Android menyediakan sebuah kosakata XML
+sederhana yang sesuai dengan kelas dan subkelas View, seperti halnya untuk widget dan layout.</li>
+<li><strong>Buat instance elemen layout saat runtime</strong>. Aplikasi Anda
+bisa membuat objek View dan ViewGroup (dan memanipulasi propertinya) lewat program. </li>
+</ul>
+
+<p>Kerangka kerja Android memberi Anda fleksibilitas untuk menggunakan salah satu atau kedua metode ini guna mendeklarasikan dan mengelola UI aplikasi Anda. Misalnya, Anda bisa mendeklarasikan layout default aplikasi Anda dalam XML, termasuk elemen-elemen layar yang akan muncul di dalamnya dan di propertinya. Anda nanti bisa menambahkan kode dalam aplikasi yang akan memodifikasi status objek layar, termasuk yang dideklarasikan dalam XML, saat runtime. </p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <ul>
+  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
+  Plugin for Eclipse</a> menawarkan preview layout XML &mdash;
+ Anda dengan file XML yang dibuka, pilih tab <strong>Layout</strong>.</li>
+  <li>Anda juga harus mencoba alat
+  <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a>,
+ untuk merunut layout &mdash; alat ini akan menampilkan nilai-nilai properti layout,
+  menggambar bentuk kerangka dengan indikator pengisi/margin, dan tampilan yang dirender penuh selagi
+  Anda merunut pada emulator atau perangkat.</li>
+  <li>Alat <a href="{@docRoot}tools/debugging/debugging-ui.html#layoutopt">layoutopt</a> memungkinkan
+  Anda menganalisis layout dan hierarki dengan untuk mengetahui ketidakefisienan atau masalah lainnya.</li>
+</div>
+</div>
+
+<p>Keuntungan mendeklarasikan UI dalam XML adalah karena hal ini memungkinkan Anda memisahkan penampilan aplikasi dari kode yang mengontrol perilakunya dengan lebih baik. Keterangan UI Anda bersifat eksternal bagi kode aplikasi Anda, yang berarti bahwa Anda bisa memodifikasi atau menyesuaikannya tanpa harus memodifikasi dan mengompilasi ulang kode sumber. Misalnya, Anda bisa membuat layout XML untuk berbagai orientasi layar, berbagai ukuran layar perangkat, dan berbagai bahasa. Selain itu, mendeklarasikan layout dalam XML akan mempermudah Anda memvisualisasikan struktur UI, sehingga lebih mudah merunut masalahnya. Karena itu, dokumen ini berfokus pada upaya mengajari Anda cara mendeklarasikan layout dalam XML. Jika Anda
+tertarik dalam membuat instance objek View saat runtime, lihat referensi kelas {@link android.view.ViewGroup} dan
+{@link android.view.View}.</p>
+
+<p>Secara umum, kosakata XML untuk mendeklarasikan elemen UI mengikuti dengan sangat mirip struktur serta penamaan kelas dan metode, dengan nama elemen dipadankan dengan nama kelas dan nama atribut dipadankan dengan metode. Sebenarnya, pemadanan ini kerap kali begitu jelas sehingga Anda bisa menebak atribut XML yang berpadanan dengan sebuah metode kelas, atau menebak kelas yang berpadanan dengan sebuah elemen XML. Akan tetapi, perhatikan bahwa tidak semua kosakata identik. Dalam beberapa kasus, ada sedikit perbedaan penamaan. Misalnya
+, elemen EditText memiliki atribut <code>text</code> yang berpadanan dengan
+<code>EditText.setText()</code>. </p>
+
+<p class="note"><strong>Tip:</strong> Ketahui selengkapnya berbagai tipe layout dalam <a href="{@docRoot}guide/topics/ui/layout-objects.html">Objek
+Layout Umum</a>. Ada juga sekumpulan tutorial tentang cara membangun berbagai layout dalam panduan tutorial
+<a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a>.</p>
+
+<h2 id="write">Tulis XML</h2>
+
+<p>Dengan menggunakan kosakata XML Android, Anda bisa mendesain secara cepat layout UI dan elemen layar yang dimuatnya, sama dengan cara membuat halaman web dalam HTML &mdash; dengan serangkaian elemen tersarang. </p>
+
+<p>Tiap file layout harus berisi persis satu elemen akar, yang harus berupa sebuah objek View atau ViewGroup. Setelah mendefinisikan elemen akar, Anda bisa menambahkan objek atau widget layout tambahan sebagai elemen anak untuk membangun hierarki View yang mendefinisikan layout Anda secara bertahap. Misalnya, inilah layout XML yang menggunakan {@link android.widget.LinearLayout}
+vertikal untuk menyimpan {@link android.widget.TextView} dan {@link android.widget.Button}:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hello, I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello, I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Setelah Anda mendeklarasikan layout dalam XML, simpanlah file dengan ekstensi <code>.xml</code>,
+dalam direktori <code>res/layout/</code> proyek Android, sehingga nanti bisa dikompilasi dengan benar. </p>
+
+<p>Informasi selengkapnya tentang sintaks untuk file XML layout tersedia dalam dokumen <a href="{@docRoot}guide/topics/resources/layout-resource.html">Sumber Daya Layout</a>.</p>
+
+<h2 id="load">Muat Sumber Daya XML</h2>
+
+<p>Saat mengompilasi aplikasi, masing-masing file layout XML akan dikompilasi dalam sebuah sumber daya
+{@link android.view.View}. Anda harus memuat sumber daya layout dari kode aplikasi, dalam implementasi
+callback {@link android.app.Activity#onCreate(android.os.Bundle) Activity.onCreate()}.
+Lakukan dengan memanggil <code>{@link android.app.Activity#setContentView(int) setContentView()}</code>,
+dengan meneruskan acuan ke sumber daya layout berupa:
+<code>R.layout.<em>layout_file_name</em></code>.
+Misalnya, jika XML layout Anda disimpan sebagai <code>main_layout.xml</code>, Anda akan memuatnya
+untuk Activity seperti ini:</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main_layout);
+}
+</pre>
+
+<p>Metode callback <code>onCreate()</code> dalam Activity dipanggil oleh kerangka kerja Android saat
+Activity Anda dijalankan (lihat diskusi tentang daur hidup, dalam dokumen
+<a href="{@docRoot}guide/components/activities.html#Lifecycle">Aktivitas</a>
+).</p>
+
+
+<h2 id="attributes">Atribut</h2>
+
+<p>Setiap objek View dan ViewGroup mendukung variasi atribut XML-nya sendiri.
+Sebagian atribut bersifat spesifik untuk objek View (misalnya, TextView mendukung atribut <code>textSize</code>
+), namun atribut ini juga diwarisi oleh sembarang objek View yang dapat memperluas kelas ini.
+Sebagian atribut bersifat umum untuk semua objek View, karena diwarisi dari kelas View akar (seperti
+atribut <code>id</code>). Dan, atribut lain dianggap sebagai "parameter layout" yaitu
+atribut yang menjelaskan orientasi layout tertentu dari objek View, seperti yang didefinisikan oleh objek ViewGroup induk
+dari objek itu.</p>
+
+<h3 id="id">ID</h3>
+
+<p>Objek View apa saja dapat memiliki ID integer yang dikaitkan dengannya, untuk mengidentifikasi secara unik View dalam pohon.
+Bila aplikasi dikompilasi, ID ini akan diacu sebagai integer, namun ID biasanya
+ditetapkan dalam file XML layout sebagai string, dalam atribut <code>id</code>.
+Ini atribut XML yang umum untuk semua objek View
+(yang didefinisikan oleh kelas {@link android.view.View}) dan Anda akan sering sekali menggunakannya.
+Sintaks untuk ID dalam tag XML adalah:</p>
+<pre>android:id="&#64;+id/my_button"</pre>
+
+<p>Simbol "at" (@) pada awal string menunjukkan parser XML harus mengurai dan memperluas
+ID string selebihnya dan mengenalinya sebagai ID sumber daya. Simbol tanda tambah (+) berarti ini nama sumber daya baru yang harus
+dibuat dan ditambahkan ke sumber daya kita (dalam file <code>R.java</code>). Ada sejumlah sumber daya ID lain yang
+ditawarkan oleh kerangka kerja Android. Saat mengacu sebuah ID sumber daya Android, Anda tidak memerlukan simbol tanda tambah,
+namun harus menambahkan namespace paket <code>android</code>, sehingga:</p>
+<pre>android:id="&#64;android:id/empty"</pre>
+<p>Dengan namespace paket <code>android</code> yang tersedia, kita sekarang mengacu ID dari kelas sumber daya <code>android.R</code>
+, daripada kelas sumber daya lokal.</p>
+
+<p>Untuk membuat tampilan dan mengacunya dari aplikasi, pola yang umum adalah:</p>
+<ol>
+  <li>Mendefinisikan tampilan/widget dalam file layout dan memberinya ID unik:
+<pre>
+&lt;Button android:id="&#64;+id/my_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#64;string/my_button_text"/>
+</pre>
+  </li>
+  <li>Kemudian buat instance objek tampilan dan tangkap instance itu dari layout
+(biasanya dalam metode <code>{@link android.app.Activity#onCreate(Bundle) onCreate()}</code>):
+<pre>
+Button myButton = (Button) findViewById(R.id.my_button);
+</pre>
+  </li>
+</ol>
+<p>Mendefinisikan ID untuk objek tampilan adalah penting saat membuat {@link android.widget.RelativeLayout}.
+Dalam layout relatif, tampilan saudara bisa mendefinisikan layout secara relatif terhadap tampilan saudara lainnya,
+yang diacu melalui ID unik.</p>
+<p>ID tidak perlu unik di seluruh pohon, namun harus
+unik di bagian pohon yang Anda cari (yang mungkin sering kali seluruh pohon, jadi lebih baik
+benar-benar unik bila memungkinkan).</p>
+
+
+<h3 id="layout-params">Parameter Layout</h3>
+
+<p>Atribut layout XML bernama <code>layout_<em>something</em></code> mendefinisikan
+parameter layout View yang cocok untuk ViewGroup tempatnya berada.</p>
+
+<p>Setiap kelas ViewGroup mengimplementasikan kelas tersarang yang memperluas {@link
+android.view.ViewGroup.LayoutParams}. Subkelas ini
+berisi tipe properti yang mendefinisikan ukuran dan posisi masing-masing tampilan anak, sebagaimana
+mestinya untuk grup tampilan. Seperti yang bisa Anda lihat dalam gambar 1,
+grup tampilan induk mendefinisikan parameter layout untuk masing-masing tampilan anak (termasuk grup tampilan anak).</p>
+
+<img src="{@docRoot}images/layoutparams.png" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Visualisasi hierarki tampilan dengan parameter layout
+yang dikaitkan dengan tiap tampilan.</p>
+
+<p>Perhatikan bahwa setiap subkelas LayoutParams memiliki sintaksnya sendiri untuk menetapkan
+nilai-nilai. Tiap elemen anak harus mendefinisikan LayoutParams yang semestinya bagi induknya,
+meskipun elemen itu bisa juga mendefinisikan LayoutParams untuk anak-anaknya sendiri. </p>
+
+<p>Semua grup tampilan berisi lebar dan tinggi (<code>layout_width</code> dan
+<code>layout_height</code>), dan masing-masing tampilan harus mendefinisikannya. Banyak
+LayoutParams yang juga menyertakan margin dan border opsional. <p>
+
+<p>Anda bisa menetapkan lebar dan tinggi dengan ukuran persis, meskipun Anda mungkin
+tidak ingin sering-sering melakukannya. Lebih sering, Anda akan menggunakan salah satu konstanta ini untuk
+mengatur lebar atau tinggi: </p>
+
+<ul>
+  <li><var>wrap_content</var> memberi tahu tampilan Anda agar menyesuaikan sendiri ukurannya dengan dimensi
+yang dibutuhkan oleh isinya.</li>
+  <li><var>match_parent</var> (bernama <var>fill_parent</var> sebelum API Level 8)
+memberi tahu tampilan Anda agar menjadi sebesar yang diperbolehkan oleh grup tampilan induknya.</li>
+</ul>
+
+<p>Secara umum, menetapkan lebar dan tinggi layout dengan satuan mutlak seperti
+piksel tidaklah disarankan. Melainkan dengan menggunakan ukuran relatif seperti
+satuan piksel yang tidak bergantung pada kerapatan (<var>dp</var>), <var>wrap_content</var>, atau
+<var>match_parent</var>, adalah sebuah pendekatan yang lebih baik, karena membantu memastikan bahwa
+aplikasi Anda akan ditampilkan dengan benar pada berbagai ukuran layar perangkat.
+Tipe ukuran yang diterima didefinisikan dalam dokumen
+<a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">
+Sumber Daya yang Tersedia</a>.</p>
+
+
+<h2 id="Position">Posisi Layout</h2>
+   <p>
+   Geometri tampilan adalah persegi panjang. Sebuah tampilan memiliki lokasi,
+   yang dinyatakan berupa sepasang koordinat <em>kiri</em> dan <em>atas</em>, dan
+   dua dimensi, yang dinyatakan berupa lebar dan tinggi. Satuan untuk lokasi
+   dan dimensi adalah piksel.
+   </p>
+
+   <p>
+   Lokasi tampilan dapat diambil dengan memanggil metode
+   {@link android.view.View#getLeft()} dan {@link android.view.View#getTop()}. Metode terdahulu menghasilkan koordinat kiri, atau X,
+   persegi panjang yang mewakili tampilan. Metode selanjutnya menghasilkan koordinat
+   atas, atau Y, persegi panjang yang mewakili tampilan. Kedua metode ini
+   menghasilkan lokasi tampilan relatif terhadap induknya. Misalnya,
+   bila <code>getLeft()</code> menghasilkan 20, berarti tampilan berlokasi 20 piksel ke
+   kanan dari tepi kiri induk langsungnya.
+   </p>
+
+   <p>
+   Selain itu, beberapa metode praktis ditawarkan untuk menghindari komputasi yang tidak perlu,
+   yakni {@link android.view.View#getRight()} dan {@link android.view.View#getBottom()}.
+   Kedua metode ini menghasilkan koordinat tepi kanan dan bawah
+   persegi panjang yang mewakili tampilan. Misalnya, memanggil {@link android.view.View#getRight()}
+   serupa dengan komputasi berikut: <code>getLeft() + getWidth()</code>.
+   </p>
+
+
+<h2 id="SizePaddingMargins">Ukuran, Pengisi, dan Margin</h2>
+   <p>
+   Ukuran tampilan dinyatakan dengan lebar dan tinggi. Tampilan sebenarnya
+   memiliki dua pasang nilai lebar dan tinggi.
+   </p>
+
+   <p>
+   Sepasang pertama disebut <em>lebar terukur</em> dan
+   <em>tinggi terukur</em>. Dimensi ini mendefinisikan seberapa besar tampilan yang diinginkan
+   dalam induknya. Dimensi
+   terukur bisa diperoleh dengan memanggil {@link android.view.View#getMeasuredWidth()}
+   dan {@link android.view.View#getMeasuredHeight()}.
+   </p>
+
+   <p>
+   Sepasang kedua cukup disebut dengan <em>lebar</em> dan <em>tinggi</em>, atau
+   kadang-kadang <em>lebar penggambaran</em> dan <em>tinggi penggambaran</em>. Dimensi-dimensi ini
+   mendefinisikan ukuran tampilan sebenarnya pada layar, saat digambar dan
+   setelah layout. Nilai-nilai ini mungkin, namun tidak harus, berbeda dengan
+   lebar dan tinggi terukur. Lebar dan tinggi bisa diperoleh dengan memanggil
+   {@link android.view.View#getWidth()} dan {@link android.view.View#getHeight()}.
+   </p>
+
+   <p>
+   Untuk mengukur dimensinya, tampilan akan memperhitungkan pengisinya (padding). Pengisi
+   dinyatakan dalam piksel untuk bagian kiri, atas, kanan, dan bawah tampilan.
+   Pengisi bisa digunakan untuk meng-offset isi tampilan dengan
+   piksel dalam jumlah tertentu. Misalnya, pengisi kiri sebesar 2 akan mendorong isi tampilan sebanyak
+   2 piksel ke kanan dari tepi kiri. Pengisi bisa diatur menggunakan
+   metode {@link android.view.View#setPadding(int, int, int, int)} dan diketahui dengan memanggil
+   {@link android.view.View#getPaddingLeft()}, {@link android.view.View#getPaddingTop()},
+   {@link android.view.View#getPaddingRight()}, dan {@link android.view.View#getPaddingBottom()}.
+   </p>
+
+   <p>
+   Meskipun bisa mendefinisikan pengisi, tampilan tidak menyediakan dukungan untuk
+   margin. Akan tetapi, grup tampilan menyediakan dukungan tersebut. Lihat
+   {@link android.view.ViewGroup} dan
+   {@link android.view.ViewGroup.MarginLayoutParams} untuk informasi lebih jauh.
+   </p>
+
+   <p>Untuk informasi selengkapnya tentang dimensi, lihat
+   <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Nilai-Nilai Dimensi</a>.
+   </p>
+
+
+
+
+
+
+<style type="text/css">
+div.layout {
+  float:left;
+  width:200px;
+  margin:0 0 20px 20px;
+}
+div.layout.first {
+  margin-left:0;
+  clear:left;
+}
+</style>
+
+
+
+
+<h2 id="CommonLayouts">Layout Umum</h2>
+
+<p>Tiap subkelas dari kelas {@link android.view.ViewGroup} menyediakan cara unik untuk menampilkan
+tampilan yang Anda sarangkan di dalamnya. Di bawah ini adalah beberapa tipe layout lebih umum yang dibuat
+ke dalam platform Android.</p>
+
+<p class="note"><strong>Catatan:</strong> Walaupun Anda bisa menyarangkan satu atau beberapa layout dalam
+layout lain untuk mendapatkan desain UI, Anda harus berusaha menjaga hierarki layout sedangkal
+mungkin. Layout Anda akan digambar lebih cepat jika memiliki layout tersarang yang lebih sedikit (hierarki tampilan yang melebar
+lebih baik daripada hierarki tampilan yang dalam).</p>
+
+<!--
+<h2 id="framelayout">FrameLayout</h2>
+<p>{@link android.widget.FrameLayout FrameLayout} is the simplest type of layout
+object. It's basically a blank space on your screen that you can
+later fill with a single object &mdash; for example, a picture that you'll swap in and out.
+All child elements of the FrameLayout are pinned to the top left corner of the screen; you cannot
+specify a different location for a child view. Subsequent child views will simply be drawn over
+previous ones,
+partially or totally obscuring them (unless the newer object is transparent).
+</p>
+-->
+
+
+<div class="layout first">
+  <h4><a href="layout/linear.html">Layout Linier</a></h4>
+  <a href="layout/linear.html"><img src="{@docRoot}images/ui/linearlayout-small.png" alt="" /></a>
+  <p>Layout yang mengatur anak-anaknya menjadi satu baris horizontal atau vertikal. Layout ini
+  akan membuat scrollbar jika panjang jendela melebihi panjang layar.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/relative.html">Layout Relatif</a></h4>
+  <a href="layout/relative.html"><img src="{@docRoot}images/ui/relativelayout-small.png" alt="" /></a>
+  <p>Memungkinkan Anda menentukan lokasi objek anak relatif terhadap satu sama lain (anak A di
+kiri anak B) atau terhadap induk (disejajarkan dengan atas induknya).</p>
+</div>
+
+<div class="layout">
+  <h4><a href="{@docRoot}guide/webapps/webview.html">Tampilan Web</a></h4>
+  <a href="{@docRoot}guide/webapps/webview.html"><img src="{@docRoot}images/ui/webview-small.png" alt="" /></a>
+  <p>Menampilkan halaman web.</p>
+</div>
+
+
+
+
+<h2 id="AdapterViews" style="clear:left">Membangun Layout dengan Adaptor</h2>
+
+<p>Bila isi layout bersifat dinamis atau tidak dipastikan sebelumnya, Anda bisa menggunakan layout yang menjadi
+subkelas {@link android.widget.AdapterView} untuk mengisi layout dengan tampilan saat runtime.
+Subkelas dari kelas {@link android.widget.AdapterView} menggunakan {@link android.widget.Adapter} untuk
+mengikat data ke layoutnya. {@link android.widget.Adapter} berfungsi sebagai penghubung antara sumber data
+dan layout{@link android.widget.AdapterView}&mdash;{@link android.widget.Adapter}
+menarik data (dari suatu sumber seperti larik (array) atau query database) dan mengubah setiap entri
+menjadi tampilan yang bisa ditambahkan ke dalam layout {@link android.widget.AdapterView}.</p>
+
+<p>Layout umum yang didukung oleh adaptor meliputi:</p>
+
+<div class="layout first">
+  <h4><a href="layout/listview.html">Tampilan Daftar</a></h4>
+  <a href="layout/listview.html"><img src="{@docRoot}images/ui/listview-small.png" alt="" /></a>
+  <p>Menampilkan daftar kolom tunggal yang bergulir.</p>
+</div>
+
+<div class="layout">
+  <h4><a href="layout/gridview.html">Tampilan Petak</a></h4>
+  <a href="layout/gridview.html"><img src="{@docRoot}images/ui/gridview-small.png" alt="" /></a>
+  <p>Menampilkan petak bergulir yang terdiri atas kolom dan baris.</p>
+</div>
+
+
+
+<h3 id="FillingTheLayout" style="clear:left">Mengisi tampilan adaptor dengan data</h3>
+
+<p>Anda bisa mengisi {@link android.widget.AdapterView} seperti {@link android.widget.ListView} atau
+{@link android.widget.GridView} dengan mengikat instance {@link android.widget.AdapterView} ke
+{@link android.widget.Adapter}, yang akan mengambil data dari sumber eksternal dan membuat {@link
+android.view.View} yang mewakili tiap entri data.</p>
+
+<p>Android menyediakan beberapa subkelas {@link android.widget.Adapter} yang berguna untuk
+menarik berbagai jenis data dan membangun tampilan untuk {@link android.widget.AdapterView}. Dua
+ adaptor yang paling umum adalah:</p>
+
+<dl>
+  <dt>{@link android.widget.ArrayAdapter}</dt>
+    <dd>Gunakan adaptor ini bila sumber data Anda berupa larik. Secara default, {@link
+android.widget.ArrayAdapter} akan membuat tampilan untuk tiap elemen larik dengan memanggil {@link
+java.lang.Object#toString()} pada tiap elemen dan menempatkan isinya dalam {@link
+android.widget.TextView}.
+      <p>Misalnya, jika Anda memiliki satu larik string yang ingin ditampilkan dalam {@link
+android.widget.ListView}, buatlah {@link android.widget.ArrayAdapter} baru dengan konstruktor
+untuk menentukan layout setiap string dan larik string:</p>
+<pre>
+ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
+        android.R.layout.simple_list_item_1, myStringArray);
+</pre>
+<p>Argumen-argumen untuk konstruktor ini adalah:</p>
+<ul>
+  <li>{@link android.content.Context} aplikasi Anda</li>
+  <li>Layout yang berisi {@link android.widget.TextView} untuk tiap string dalam larik</li>
+  <li>Larik string</li>
+</ul>
+<p>Kemudian tinggal panggil
+{@link android.widget.ListView#setAdapter setAdapter()} pada {@link android.widget.ListView} Anda:</p>
+<pre>
+ListView listView = (ListView) findViewById(R.id.listview);
+listView.setAdapter(adapter);
+</pre>
+
+      <p>Untuk menyesuaikan penampilan setiap item, Anda bisa mengesampingkan metode {@link
+java.lang.Object#toString()} bagi objek dalam larik Anda. Atau, untuk membuat tampilan tiap
+elemen selain {@link android.widget.TextView} (misalnya, jika Anda menginginkan
+{@link android.widget.ImageView} bagi setiap item larik), perluas kelas {@link
+android.widget.ArrayAdapter} dan kesampingkan {@link android.widget.ArrayAdapter#getView
+getView()} agar memberikan tipe tampilan yang Anda inginkan bagi tiap item.</p>
+
+</dd>
+
+  <dt>{@link android.widget.SimpleCursorAdapter}</dt>
+    <dd>Gunakan adaptor ini bila data Anda berasal dari {@link android.database.Cursor}. Saat
+menggunakan {@link android.widget.SimpleCursorAdapter}, Anda harus menentukan layout yang akan digunakan untuk tiap
+baris dalam {@link android.database.Cursor} dan di kolom mana di {@link android.database.Cursor}
+harus memasukkan tampilan layout. Misalnya, jika Anda ingin untuk membuat daftar
+nama orang dan nomor telepon, Anda bisa melakukan query yang menghasilkan {@link
+android.database.Cursor} yang berisi satu baris untuk tiap orang dan kolom-kolom untuk nama dan
+nomor. Selanjutnya Anda membuat larik string yang menentukan kolom dari {@link
+android.database.Cursor} yang Anda inginkan dalam layout untuk setiap hasil dan larik integer yang menentukan
+tampilan yang sesuai untuk menempatkan masing-masing kolom:</p>
+<pre>
+String[] fromColumns = {ContactsContract.Data.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+int[] toViews = {R.id.display_name, R.id.phone_number};
+</pre>
+<p>Bila Anda membuat instance {@link android.widget.SimpleCursorAdapter}, teruskan layout yang akan digunakan untuk
+setiap hasil, {@link android.database.Cursor} yang berisi hasil tersebut, dan dua larik ini:</p>
+<pre>
+SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+        R.layout.person_name_and_number, cursor, fromColumns, toViews, 0);
+ListView listView = getListView();
+listView.setAdapter(adapter);
+</pre>
+<p>{@link android.widget.SimpleCursorAdapter} kemudian membuat tampilan untuk tiap baris dalam
+{@link android.database.Cursor} dengan layout yang disediakan dengan memasukkan setiap item {@code
+fromColumns} ke dalam tampilan {@code toViews} yang sesuai.</p></dd>
+</dl>
+
+
+<p>Jika, selama aplikasi berjalan, Anda mengubah data sumber yang dibaca oleh
+adaptor, maka Anda harus memanggil {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. Hal ini akan
+memberi tahu tampilan yang bersangkutan bahwa data telah berubah dan tampilan harus memperbarui dirinya sendiri.</p>
+
+
+
+<h3 id="HandlingUserSelections">Menangani kejadian klik</h3>
+
+<p>Anda bisa merespons kejadian klik pada setiap item dalam {@link android.widget.AdapterView} dengan
+menerapkan antarmuka {@link android.widget.AdapterView.OnItemClickListener}. Misalnya:</p>
+
+<pre>
+// Create a message handling object as an anonymous class.
+private OnItemClickListener mMessageClickedHandler = new OnItemClickListener() {
+    public void onItemClick(AdapterView parent, View v, int position, long id) {
+        // Do something in response to the click
+    }
+};
+
+listView.setOnItemClickListener(mMessageClickedHandler);
+</pre>
+
+
+

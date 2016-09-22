@@ -1,0 +1,411 @@
+page.title=Proses dan Thread
+page.tags=daur hidup,latar belakang
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+<li><a href="#Processes">Proses</a>
+  <ol>
+    <li><a href="#Lifecycle">Daur hidup proses</a></li>
+  </ol>
+</li>
+<li><a href="#Threads">Thread</a>
+  <ol>
+    <li><a href="#WorkerThreads">Thread pekerja</a></li>
+    <li><a href="#ThreadSafe">Metode thread-safe</a></li>
+  </ol>
+</li>
+<li><a href="#IPC">Komunikasi antarproses</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Bila komponen aplikasi dimulai dan tidak ada komponen aplikasi lain yang
+berjalan, sistem Android akan memulai proses Linux baru untuk aplikasi dengan satu thread
+eksekusi. Secara default, semua komponen aplikasi yang sama berjalan dalam proses dan
+thread yang sama (disebut thread "utama"). Jika komponen aplikasi dimulai dan sudah ada
+proses untuk aplikasi itu (karena komponen lain dari aplikasi itu sudah ada), maka komponen
+akan dimulai dalam proses itu dan menggunakan thread eksekusi yang sama. Akan tetapi, Anda bisa
+mengatur komponen berbeda di aplikasi agar berjalan di proses terpisah, dan Anda bisa membuat thread tambahan untuk
+setiap proses.</p>
+
+<p>Dokumen ini membahas cara kerja proses dan thread di aplikasi Android.</p>
+
+
+<h2 id="Processes">Proses</h2>
+
+<p>Secara default, semua komponen aplikasi yang sama berjalan dalam proses yang sama dan kebanyakan
+aplikasi tidak boleh mengubah ini. Akan tetapi, jika Anda merasa perlu mengontrol proses milik
+komponen tertentu, Anda dapat melakukannya dalam file manifes.</p>
+
+<p>Entri manifes untuk setiap tipe elemen komponen&mdash;<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code
+&lt;service&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/receiver-element.html">{@code
+&lt;receiver&gt;}</a>, dan <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code
+&lt;provider&gt;}</a>&mdash;mendukung atribut {@code android:process} yang bisa menetapkan
+dalam proses mana komponen harus dijalankan. Anda bisa mengatur atribut ini agar setiap komponen
+berjalan dalam prosesnya sendiri atau agar beberapa komponen menggunakan proses yang sama sementara yang lainnya tidak.  Anda juga bisa mengatur
+{@code android:process} agar komponen aplikasi yang berbeda berjalan dalam proses yang sama
+&mdash;sepanjang aplikasi menggunakan ID Linux yang sama dan ditandatangani
+dengan sertifikat yang sama.</p>
+
+<p>Elemen <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+&lt;application&gt;}</a> juga mendukung atribut {@code android:process}, untuk mengatur
+nilai default yang berlaku bagi semua komponen.</p>
+
+<p>Android bisa memutuskan untuk mematikan proses pada waktu tertentu, bila memori tinggal sedikit dan diperlukan oleh
+proses lain yang lebih mendesak untuk melayani pengguna. Komponen
+aplikasi yang berjalan dalam proses yang dimatikan maka sebagai konsekuensinya juga akan dimusnahkan.  Proses dimulai
+kembali untuk komponen itu bila ada lagi pekerjaan untuk mereka lakukan.</p>
+
+<p>Saat memutuskan proses yang akan dimatikan, sistem Android akan mempertimbangkan kepentingan relatifnya bagi
+pengguna.  Misalnya, sistem lebih mudah menghentikan proses yang menjadi host aktivitas yang tidak
+ lagi terlihat di layar, dibandingkan dengan proses yang menjadi host aktivitas yang terlihat. Karena itu, keputusan
+untuk menghentikan proses bergantung pada keadaan komponen yang berjalan dalam proses tersebut. Aturan
+yang digunakan untuk menentukan proses yang akan dihentikan dibahas di bawah ini. </p>
+
+
+<h3 id="Lifecycle">Daur hidup proses</h3>
+
+<p>Sistem Android mencoba mempertahankan proses aplikasi selama mungkin, namun
+pada akhirnya perlu menghapus proses lama untuk mengambil kembali memori bagi proses baru atau yang lebih penting.  Untuk
+menentukan proses yang akan
+dipertahankan dan yang harus dimatikan, sistem menempatkan setiap proses ke dalam "hierarki prioritas" berdasarkan
+komponen yang berjalan dalam proses dan status komponen tersebut.  Proses yang memiliki
+prioritas terendah akan dimatikan terlebih dahulu, kemudian yang terendah berikutnya, dan seterusnya, jika perlu
+untuk memulihkan sumber daya sistem.</p>
+
+<p>Ada lima tingkatan dalam hierarki prioritas. Daftar berikut berisi beberapa
+tipe proses berdasarkan urutan prioritas (proses pertama adalah yang <em>terpenting</em> dan
+<em>dimatikan terakhir</em>):</p>
+
+<ol>
+  <li><b>Proses latar depan</b>
+    <p>Proses yang diperlukan untuk aktivitas yang sedang dilakukan pengguna.  Proses
+dianggap berada di latar depan jika salah satu kondisi berikut terpenuhi:</p>
+
+      <ul>
+        <li>Proses menjadi host {@link android.app.Activity} yang berinteraksi dengan pengguna dengan metode ({@link
+android.app.Activity}{@link android.app.Activity#onResume onResume()} telah
+dipanggil).</li>
+
+        <li>Proses menjadi host {@link android.app.Service} yang terikat dengan aktivitas yang sedang berinteraksi dengan
+pengguna.</li>
+
+        <li>Proses menjadi host {@link android.app.Service} yang berjalan "di latar depan"&mdash;
+layanan telah memanggil{@link android.app.Service#startForeground startForeground()}.
+
+        <li>Proses menjadi host {@link android.app.Service} yang menjalankan salah satu callback
+daur hidupnya ({@link android.app.Service#onCreate onCreate()}, {@link android.app.Service#onStart
+onStart()}, atau {@link android.app.Service#onDestroy onDestroy()}).</li>
+
+        <li>Proses menjadi host {@link android.content.BroadcastReceiver} yang menjalankan metode {@link
+        android.content.BroadcastReceiver#onReceive onReceive()}-nya.</li>
+    </ul>
+
+    <p>Secara umum, hanya ada beberapa proses latar depan pada waktu yang diberikan.  Proses dimatikan hanya sebagai
+upaya terakhir&mdash; jika memori hampir habis sehingga semuanya tidak bisa terus berjalan.  Pada umumnya, pada
+titik itu, perangkat dalam keadaan memory paging, sehingga menghentikan beberapa proses latar depan
+diperlukan agar antarmuka pengguna tetap responsif.</p></li>
+
+  <li><b>Proses yang terlihat</b>
+    <p>Proses yang tidak memiliki komponen latar depan, namun masih bisa
+memengaruhi apa yang dilihat pengguna di layar. Proses dianggap terlihat jika salah satu kondisi
+berikut terpenuhi:</p>
+
+      <ul>
+        <li>Proses ini menjadi host {@link android.app.Activity} yang tidak berada di latar depan, namun masih
+terlihat oleh penggunanya (metode {@link android.app.Activity#onPause onPause()} telah dipanggil).
+Ini bisa terjadi, misalnya, jika aktivitas latar depan memulai dialog, sehingga
+aktivitas sebelumnya terlihat berada di belakangnya.</li>
+
+        <li>Proses menjadi host {@link android.app.Service} yang terikat dengan aktivitas yang terlihat (atau latar
+depan)</li>
+      </ul>
+
+      <p>Proses yang terlihat dianggap sangat penting dan tidak akan dimatikan kecuali jika hal itu
+diperlukan agar semua proses latar depan tetap berjalan. </p>
+    </li>
+
+  <li><b>Proses layanan</b>
+    <p>Proses yang menjalankan layanan yang telah dimulai dengan metode {@link
+android.content.Context#startService startService()} dan tidak termasuk dalam salah satu dari dua kategori
+yang lebih tinggi. Walaupun proses pelayanan tidak langsung terkait dengan semua yang dilihat oleh pengguna, proses ini
+umumnya melakukan hal-hal yang dipedulikan pengguna (seperti memutar musik di latar belakang
+atau mengunduh data di jaringan), jadi sistem membuat proses tetap berjalan kecuali memori tidak cukup untuk
+mempertahankannya bersama semua proses latar depan dan proses yang terlihat. </p>
+  </li>
+
+  <li><b>Proses latar belakang</b>
+    <p>Proses yang menampung aktivitas yang saat ini tidak terlihat oleh pengguna (metode
+{@link android.app.Activity#onStop onStop()} aktivitas telah dipanggil). Proses ini tidak memiliki dampak
+langsung pada pengalaman pengguna, dan sistem bisa menghentikannya kapan saja untuk memperoleh kembali memori bagi
+proses latar depan, proses yang terlihat,
+atau proses layanan. Biasanya ada banyak proses latar belakang yang berjalan, sehingga disimpan
+dalam daftar LRU (least recently used atau paling sedikit digunakan) untuk memastikan bahwa proses dengan aktivitas yang paling baru
+terlihat oleh pengguna sebagai yang terakhir untuk dimatikan. Jika aktivitas mengimplementasikan metode
+ daur hidupnya dengan benar, dan menyimpan statusnya saat ini, menghentikan prosesnya tidak akan memiliki efek
+yang terlihat pada pengalaman pengguna, karena ketika pengguna kembali ke aktivitas, aktivitas itu memulihkan
+semua statusnya yang terlihat. Lihat dokumen <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Aktivitas</a>
+ untuk mendapatkan informasi tentang menyimpan dan memulihkan status.</p>
+  </li>
+
+  <li><b>Proses kosong</b>
+    <p>Sebuah proses yang tidak berisi komponen aplikasi aktif apa pun.  Alasan satu-satunya mempertahankan proses
+seperti ini tetap hidup adalah untuk keperluan caching, meningkatkan waktu mulai (startup) bila
+nanti komponen perlu dijalankan di dalamnya.  Sistem sering menghentikan proses ini untuk menyeimbangkan sumber
+daya sistem secara keseluruhan antara proses cache dan cache kernel yang mendasarinya.</p>
+  </li>
+</ol>
+
+
+  <p>Android sebisa mungkin memeringkat proses setinggi
+mungkin, berdasarkan prioritas komponen yang sedang aktif dalam proses.  Misalnya, jika suatu proses menjadi host sebuah layanan dan
+aktivitas yang terlihat, proses akan diperingkat sebagai proses yang terlihat, bukan sebagai proses layanan.</p>
+
+  <p>Selain itu, peringkat proses dapat meningkat karena adanya proses lain yang bergantung padanya
+&mdash;proses yang melayani proses lain tidak bisa diperingkat lebih rendah daripada proses yang
+sedang dilayaninya. Misalnya, jika penyedia konten dalam proses A melayani klien dalam proses B, atau
+jika layanan dalam proses A terikat dengan komponen dalam proses B, proses A selalu dipertimbangkan sebagai paling rendah
+prioritasnya dibandingkan dengan proses B.</p>
+
+  <p>Karena proses yang menjalankan layanan diperingkat lebih tinggi daripada aktivitas latar belakang,
+aktivitas yang memulai operasi yang berjalan lama mungkin lebih baik memulai <a href="{@docRoot}guide/components/services.html">layanan</a> untuk operasi itu, daripada hanya
+membuat thread pekerja&mdash;khususnya jika operasi mungkin akan berlangsung lebih lama daripada aktivitas.
+ Misalnya, aktivitas yang mengunggah gambar ke situs web harus memulai layanan
+untuk mengunggah sehingga unggahan bisa terus berjalan di latar belakang meskipun pengguna meninggalkan aktivitas tersebut.
+Menggunakan layanan akan memastikan operasi paling tidak memiliki prioritas "proses layanan",
+apa pun yang terjadi pada aktivitas. Ini menjadi alasan yang sama yang membuat penerima siaran harus
+menjalankan layanan daripada hanya menempatkan operasi yang menghabiskan waktu di thread.</p>
+
+
+
+
+<h2 id="Threads">Thread</h2>
+
+<p>Bila aplikasi diluncurkan, sistem akan membuat thread eksekusi untuk aplikasi tersebut, yang diberi nama,
+"main". Thread ini sangat penting karena bertugas mengirim kejadian ke widget
+antarmuka pengguna yang sesuai, termasuk kejadian menggambar. Ini juga merupakan thread yang
+membuat aplikasi berinteraksi dengan komponen dari Android UI toolkit (komponen dari paket {@link
+android.widget} dan {@link android.view}). Karena itu, thread 'main' juga terkadang
+disebut thread UI.</p>
+
+<p>Sistem ini <em>tidak</em> membuat thread terpisah untuk setiap instance komponen. Semua
+komponen yang berjalan di proses yang sama akan dibuat instance-nya dalam thread UI, dan sistem akan memanggil
+setiap komponen yang dikirim dari thread itu. Akibatnya, metode yang merespons callback sistem
+ (seperti {@link android.view.View#onKeyDown onKeyDown()} untuk melaporkan tindakan pengguna atau metode callback daur hidup)
+ selalu berjalan di thread UI proses.</p>
+
+<p>Misalnya saat pengguna menyentuh tombol pada layar, thread UI aplikasi akan mengirim kejadian
+sentuh ke widget, yang selanjutnya menetapkan status ditekan dan mengirim permintaan yang tidak divalidasi ke
+antrean kejadian. Thread UI akan menghapus antrean permintaan dan memberi tahu widget bahwa widget harus menggambar
+dirinya sendiri.</p>
+
+<p>Saat aplikasi melakukan pekerjaan intensif sebagai respons terhadap interaksi pengguna, model
+thread tunggal ini bisa menghasilkan kinerja yang buruk kecuali jika Anda mengimplementasikan aplikasi dengan benar. Khususnya jika
+ semua terjadi di thread UI, melakukan operasi yang panjang seperti akses ke jaringan atau query
+database akan memblokir seluruh UI. Bila thread diblokir, tidak ada kejadian yang bisa dikirim,
+termasuk kejadian menggambar. Dari sudut pandang pengguna, aplikasi
+tampak mogok (hang). Lebih buruk lagi, jika thread UI diblokir selama lebih dari beberapa detik
+(saat ini sekitar 5 detik) pengguna akan ditampilkan dialog "<a href="http://developer.android.com/guide/practices/responsiveness.html">aplikasi tidak
+merespons</a>" (ANR) yang populer karena reputasi buruknya. Pengguna nanti bisa memutuskan untuk keluar dari aplikasi dan menghapus aplikasi
+jika mereka tidak suka.</p>
+
+<p>Selain itu, toolkit Android UI <em>bukan</em> thread-safe. Jadi, Anda tidak harus memanipulasi
+UI dari thread pekerja&mdash;Anda harus melakukan semua manipulasi pada antarmuka pengguna dari thread
+UI. Sehingga hanya ada dua aturan untuk model thread tunggal Android:</p>
+
+<ol>
+<li>Jangan memblokir thread UI
+<li>Jangan mengakses toolkit Android UI dari luar thread UI
+</ol>
+
+<h3 id="WorkerThreads">Thread pekerja</h3>
+
+<p>Karena model thread tunggal yang dijelaskan di atas, Anda dilarang memblokir thread
+UI demi daya respons UI aplikasi. Jika memiliki operasi untuk dijalankan
+yang tidak seketika, Anda harus memastikan untuk melakukannya di thread terpisah (thread "latar belakang" atau
+thread "pekerja").</p>
+
+<p>Misalnya, berikut ini beberapa kode untuk listener klik yang mengunduh gambar dari
+thread terpisah dan menampilkannya dalam {@link android.widget.ImageView}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            Bitmap b = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.setImageBitmap(b);
+        }
+    }).start();
+}
+</pre>
+
+<p>Awalnya hal ini tampak bekerja dengan baik, karena menciptakan thread baru untuk menangani
+operasi jaringan. Akan tetapi, hal tersebut melanggar aturan kedua model thread tunggal: <em>jangan mengakses
+ toolkit Android UI dari luar thread UI</em>&mdash;sampel ini memodifikasi {@link
+android.widget.ImageView} dari thread pekerja sebagai ganti thread UI. Ini bisa
+mengakibatkan perilaku yang tidak terdefinisi dan tidak diharapkan, yang bisa menyulitkan dan menghabiskan waktu untuk melacaknya.</p>
+
+<p>Untuk memperbaiki masalah ini, Android menawarkan beberapa cara untuk mengakses thread UI dari
+thread lainnya. Berikut ini daftar metode yang bisa membantu:</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable)
+Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable,
+long)}</li>
+</ul>
+
+<p>Misalnya, Anda bisa memperbaiki kode di atas dengan menggunakan metode {@link
+android.view.View#post(java.lang.Runnable) View.post(Runnable)}:</p>
+
+<pre>
+public void onClick(View v) {
+    new Thread(new Runnable() {
+        public void run() {
+            final Bitmap bitmap = loadImageFromNetwork("http://example.com/image.png");
+            mImageView.post(new Runnable() {
+                public void run() {
+                    mImageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }).start();
+}
+</pre>
+
+<p>Kini implementasi ini thread-safe: operasi jaringan dilakukan terpisah dari thread
+ sementara {@link android.widget.ImageView} dimanipulasi dari thread UI.</p>
+
+<p>Akan tetapi, karena operasi semakin kompleks, jenis kode seperti ini bisa semakin rumit
+dan sulit dipertahankan. Untuk menangani interaksi yang lebih kompleks dengan thread pekerja, Anda bisa mempertimbangkan
+ penggunaan {@link android.os.Handler}di thread pekerja, untuk memproses pesan yang dikirim dari
+ thread UI. Mungkin solusi terbaiknya adalah memperpanjang kelas {@link android.os.AsyncTask},
+yang akan menyederhanakan eksekusi tugas-tugas thread pekerja yang perlu berinteraksi dengan UI.</p>
+
+
+<h4 id="AsyncTask">Menggunakan AsyncTask</h4>
+
+<p>Dengan {@link android.os.AsyncTask}, Anda bisa melakukan pekerjaan asinkron pada antarmuka
+pengguna. AsyncTask memblokir operasi di thread pekerja kemudian mempublikasikan hasilnya
+di thread UI, tanpa mengharuskan Anda untuk menangani sendiri thread dan/atau handler sendiri.</p>
+
+<p>Untuk menggunakannya, Anda harus menempatkan {@link android.os.AsyncTask} sebagai subkelas dan mengimplementasikan metode callback {@link
+android.os.AsyncTask#doInBackground doInBackground()} yang berjalan di kumpulan
+thread latar belakang. Untuk memperbarui UI, Anda harus mengimplementasikan {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}, yang memberikan hasil dari {@link
+android.os.AsyncTask#doInBackground doInBackground()} dan berjalan di thread UI, jadi Anda bisa
+memperbarui UI dengan aman. Selanjutnya Anda bisa menjalankan tugas dengan memanggil {@link android.os.AsyncTask#execute execute()}
+dari thread UI.</p>
+
+<p>Misalnya, Anda bisa mengimplementasikan contoh sebelumnya menggunakan {@link android.os.AsyncTask} dengan cara
+ini:</p>
+
+<pre>
+public void onClick(View v) {
+    new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;String, Void, Bitmap&gt; {
+    /** The system calls this to perform work in a worker thread and
+      * delivers it the parameters given to AsyncTask.execute() */
+    protected Bitmap doInBackground(String... urls) {
+        return loadImageFromNetwork(urls[0]);
+    }
+
+    /** The system calls this to perform work in the UI thread and delivers
+      * the result from doInBackground() */
+    protected void onPostExecute(Bitmap result) {
+        mImageView.setImageBitmap(result);
+    }
+}
+</pre>
+
+<p>Kini UI aman dan kode jadi lebih sederhana, karena memisahkan pekerjaan ke
+dalam bagian-bagian yang harus dilakukan pada thread pekerja dan thread UI.</p>
+
+<p>Anda harus membaca acuan {@link android.os.AsyncTask} untuk memahami sepenuhnya
+cara menggunakan kelas ini, namun berikut ini ikhtisar singkat cara kerjanya:</p>
+
+<ul>
+<li>Anda bisa menetapkan tipe parameter, nilai kemajuan, dan nilai
+ akhir tugas, dengan menggunakan generik</li>
+<li>Metode {@link android.os.AsyncTask#doInBackground doInBackground()} berjalan secara otomatis pada
+thread pekerja</li>
+<li>{@link android.os.AsyncTask#onPreExecute onPreExecute()}, {@link
+android.os.AsyncTask#onPostExecute onPostExecute()}, dan {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} semuanya dipanggil pada thread UI</li>
+<li>Nilai yang dikembalikan oleh {@link android.os.AsyncTask#doInBackground doInBackground()} akan dikirim ke
+{@link android.os.AsyncTask#onPostExecute onPostExecute()}</li>
+<li>Anda bisa memangil {@link android.os.AsyncTask#publishProgress publishProgress()} setiap saat di {@link
+android.os.AsyncTask#doInBackground doInBackground()} untuk mengeksekusi {@link
+android.os.AsyncTask#onProgressUpdate onProgressUpdate()} pada thread UI</li>
+<li>Anda bisa membatalkan tugas ini kapan saja, dari thread mana saja</li>
+</ul>
+
+<p class="caution"><strong>Perhatian:</strong> Masalah lain yang mungkin Anda temui saat menggunakan
+thread pekerja adalah restart tak terduga dalam aktivitas karena <a href="{@docRoot}guide/topics/resources/runtime-changes.html">perubahan konfigurasi runtime</a>
+ (seperti saat pengguna mengubah orientasi layar), yang bisa memusnahkan thread pekerja. Untuk
+melihat cara mempertahankan tugas selama restart ini dan cara membatalkan
+tugas dengan benar saat aktivitas dimusnahkan, lihat kode sumber untuk aplikasi sampel <a href="http://code.google.com/p/shelves/">Shelves</a>.</p>
+
+
+<h3 id="ThreadSafe">Metode thread-safe</h3>
+
+<p> Dalam beberapa situasi, metode yang Anda implementasikan bisa dipanggil dari lebih dari satu thread,
+dan karena itu harus ditulis agar menjadi thread-safe. </p>
+
+<p>Ini terutama terjadi untuk metode yang bisa dipanggil dari jauh &mdash;seperti metode dalam <a href="{@docRoot}guide/components/bound-services.html">layanan terikat</a>. Bila sebuah panggilan pada
+metode yang dijalankan dalam {@link android.os.IBinder} berasal dari proses yang sama di mana
+{@link android.os.IBinder IBinder} berjalan, metode ini akan dieksekusi di thread pemanggil.
+Akan tetapi, bila panggilan berasal proses lain, metode akan dieksekusi dalam thread yang dipilih dari
+ kumpulan (pool) thread yang dipertahankan sistem dalam proses yang sama seperti{@link android.os.IBinder
+IBinder} (tidak dieksekusi dalam thread UI proses).  Misalnya, karena metode
+{@link android.app.Service#onBind onBind()} layanan akan dipanggil dari thread UI
+proses layanan, metode yang diimplementasikan dalam objek yang dikembalikan {@link android.app.Service#onBind
+onBind()} (misalnya, subkelas yang mengimplementasikan metode RPC) akan dipanggil dari thread
+di pool. Karena layanan bisa memiliki lebih dari satu klien, maka lebih dari satu pool thread bisa melibatkan
+ metode {@link android.os.IBinder IBinder} yang sama sekaligus. Metode {@link android.os.IBinder
+IBinder} karenanya harus diimplementasikan sebagai thread-safe.</p>
+
+<p> Penyedia konten juga bisa menerima permintaan data yang berasal dalam proses lain.
+Meskipun kelas {@link android.content.ContentResolver} dan {@link android.content.ContentProvider}
+ menyembunyikan detail cara komunikasi antarproses dikelola, metode {@link
+android.content.ContentProvider} yang merespons permintaan itu&mdash;metode {@link
+android.content.ContentProvider#query query()}, {@link android.content.ContentProvider#insert
+insert()}, {@link android.content.ContentProvider#delete delete()}, {@link
+android.content.ContentProvider#update update()}, dan {@link android.content.ContentProvider#getType
+getType()}&mdash; dipanggil dari pool thread pada proses penyedia konten, bukan thread UI
+untuk proses tersebut.  Mengingat metode ini bisa dipanggil dari thread mana pun
+sekaligus, metode-metode ini juga harus diimplementasikan sebagai thread-safe. </p>
+
+
+<h2 id="IPC">Komunikasi Antarproses</h2>
+
+<p>Android menawarkan mekanisme komunikasi antarproses (IPC) menggunakan panggilan prosedur jauh
+ (RPC), yang mana metode ini dipanggil oleh aktivitas atau komponen aplikasi lain, namun dieksekusi dari
+jauh (di proses lain), bersama hasil yang dikembalikan ke
+pemanggil. Ini mengharuskan penguraian panggilan metode dan datanya ke tingkat yang bisa
+dipahami sistem operasi, mentransmisikannya dari proses lokal dan ruang alamat untuk proses jauh
+dan ruang proses, kemudian merakit kembali dan menetapkannya kembali di sana.  Nilai-nilai yang dikembalikan
+akan ditransmisikan dalam arah berlawanan.  Android menyediakan semua kode untuk melakukan transaksi IPC
+ ini, sehingga Anda bisa fokus pada pendefinisian dan implementasi antarmuka pemrograman RPC. </p>
+
+<p>Untuk melakukan IPC, aplikasi Anda harus diikat ke layanan, dengan menggunakan {@link
+android.content.Context#bindService bindService()}. Untuk informasi selengkapnya, lihat panduan pengembang <a href="{@docRoot}guide/components/services.html">Layanan</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For information about how to perform work in the background for an indefinite period of time
+(without a user interface), continue with the <b><a
+href="{@docRoot}guide/components/services.html">Services</a></b> document.</p>
+-->
