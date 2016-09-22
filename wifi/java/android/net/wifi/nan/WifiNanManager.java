@@ -63,7 +63,7 @@ import java.util.Arrays;
  * <li>Create a NAN network specifier to be used with
  * {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}
  * to set-up a NAN connection with a peer. Refer to
- * {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])} and
+ * {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])} and
  * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])}.
  * </ul>
  * <p>
@@ -86,8 +86,8 @@ import java.util.Arrays;
  * <p>
  *     Once a NAN attach is confirmed use the
  *     {@link WifiNanSession#publish(Handler, PublishConfig, WifiNanDiscoverySessionCallback)} or
- *     {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)} to
- *     create publish or subscribe NAN discovery sessions. Events are called on the provided
+ *     {@link WifiNanSession#subscribe(Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
+ *     to create publish or subscribe NAN discovery sessions. Events are called on the provided
  *     callback object {@link WifiNanDiscoverySessionCallback}. Specifically, the
  *     {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
  *     and
@@ -97,8 +97,8 @@ import java.util.Arrays;
  *     the session {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} and
  *     {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}. Sessions can also
  *     be used to send messages using the
- *     {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])} APIs. When an application
- *     is finished with a discovery session it <b>must</b> terminate it using the
+ *     {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[])} APIs. When an
+ *     application is finished with a discovery session it <b>must</b> terminate it using the
  *     {@link WifiNanDiscoveryBaseSession#destroy()} API.
  * <p>
  *    Creating connections between NAN devices is managed by the standard
@@ -109,7 +109,7 @@ import java.util.Arrays;
  *        {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_NAN}.
  *        <li>{@link NetworkRequest.Builder#setNetworkSpecifier(String)} using
  *        {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])} or
- *        {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])}.
+ *        {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
  *    </ul>
  *
  * @hide PROPOSED_NAN_API
@@ -217,7 +217,7 @@ public class WifiNanManager {
      * Connection creation role is that of INITIATOR. Used to create a network specifier string
      * when requesting a NAN network.
      *
-     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])
+     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
      * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
@@ -226,7 +226,7 @@ public class WifiNanManager {
      * Connection creation role is that of RESPONDER. Used to create a network specifier string
      * when requesting a NAN network.
      *
-     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])
+     * @see WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])
      * @see WifiNanSession#createNetworkSpecifier(int, byte[], byte[])
      */
     public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
@@ -459,16 +459,17 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public void sendMessage(int clientId, int sessionId, int peerId, byte[] message, int messageId,
-            int retryCount) {
+    public void sendMessage(int clientId, int sessionId, Object peerHandle, byte[] message,
+            int messageId, int retryCount) {
         if (VDBG) {
-            Log.v(TAG,
-                    "sendMessage(): clientId=" + clientId + ", sessionId=" + sessionId + ", peerId="
-                            + peerId + ", messageId=" + messageId + ", retryCount=" + retryCount);
+            Log.v(TAG, "sendMessage(): clientId=" + clientId + ", sessionId=" + sessionId
+                    + ", peerHandle=" + peerHandle + ", messageId=" + messageId + ", retryCount="
+                    + retryCount);
         }
 
         try {
-            mService.sendMessage(clientId, sessionId, peerId, message, messageId, retryCount);
+            mService.sendMessage(clientId, sessionId, (Integer) peerHandle, message, messageId,
+                    retryCount);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -496,19 +497,19 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public String createNetworkSpecifier(int clientId, int role, int sessionId, int peerId,
+    public String createNetworkSpecifier(int clientId, int role, int sessionId, Object peerHandle,
             byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
-                    + ", peerId=" + peerId + ", token=" + token);
+                    + ", peerHandle=" + peerHandle + ", token=" + token);
         }
 
         int type;
-        if (token != null && peerId != 0) {
+        if (token != null && peerHandle != null) {
             type = NETWORK_SPECIFIER_TYPE_1A;
-        } else if (token == null && peerId != 0) {
+        } else if (token == null && peerHandle != null) {
             type = NETWORK_SPECIFIER_TYPE_1B;
-        } else if (token != null && peerId == 0) {
+        } else if (token != null && peerHandle == null) {
             type = NETWORK_SPECIFIER_TYPE_1C;
         } else {
             type = NETWORK_SPECIFIER_TYPE_1D;
@@ -525,10 +526,10 @@ public class WifiNanManager {
                 throw new IllegalArgumentException(
                         "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
             }
-            if (peerId == 0) {
+            if (peerHandle == null) {
                 throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer ID (value of 0) - not permitted on "
-                                + "INITIATOR");
+                        "createNetworkSpecifier: Invalid peer handle (value of null) - not "
+                                + "permitted on INITIATOR");
             }
         }
 
@@ -539,8 +540,8 @@ public class WifiNanManager {
             json.put(NETWORK_SPECIFIER_KEY_ROLE, role);
             json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
             json.put(NETWORK_SPECIFIER_KEY_SESSION_ID, sessionId);
-            if (peerId != 0) {
-                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, peerId);
+            if (peerHandle != null) {
+                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, (Integer) peerHandle);
             }
             if (token != null) {
                 json.put(NETWORK_SPECIFIER_KEY_TOKEN,
@@ -554,8 +555,8 @@ public class WifiNanManager {
     }
 
     /** @hide */
-    public String createNetworkSpecifier(int clientId, @DataPathRole int role, @Nullable byte[] peer,
-            @Nullable byte[] token) {
+    public String createNetworkSpecifier(int clientId, @DataPathRole int role,
+            @Nullable byte[] peer, @Nullable byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", token=" + token);
         }
@@ -845,7 +846,7 @@ public class WifiNanManager {
                             break;
                         case CALLBACK_MATCH:
                             mOriginalCallback.onServiceDiscovered(
-                                    msg.arg1,
+                                    Integer.valueOf(msg.arg1),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
                             break;
@@ -856,7 +857,8 @@ public class WifiNanManager {
                             mOriginalCallback.onMessageSendFailed(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
-                            mOriginalCallback.onMessageReceived(msg.arg1, (byte[]) msg.obj);
+                            mOriginalCallback.onMessageReceived(Integer.valueOf(msg.arg1),
+                                    (byte[]) msg.obj);
                             break;
                     }
                 }
