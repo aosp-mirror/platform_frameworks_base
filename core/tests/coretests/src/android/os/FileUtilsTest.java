@@ -297,6 +297,20 @@ public class FileUtilsTest extends AndroidTestCase {
                 FileUtils.buildUniqueFile(mTarget, "image/jpeg", "test.jpg"));
     }
 
+    public void testBuildUniqueFile_mimeless() throws Exception {
+        assertNameEquals("test.jpg", FileUtils.buildUniqueFile(mTarget, "test.jpg"));
+        new File(mTarget, "test.jpg").createNewFile();
+        assertNameEquals("test (1).jpg", FileUtils.buildUniqueFile(mTarget, "test.jpg"));
+
+        assertNameEquals("test", FileUtils.buildUniqueFile(mTarget, "test"));
+        new File(mTarget, "test").createNewFile();
+        assertNameEquals("test (1)", FileUtils.buildUniqueFile(mTarget, "test"));
+
+        assertNameEquals("test.foo.bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
+        new File(mTarget, "test.foo.bar").createNewFile();
+        assertNameEquals("test.foo (1).bar", FileUtils.buildUniqueFile(mTarget, "test.foo.bar"));
+    }
+
     private static void assertNameEquals(String expected, File actual) {
         assertEquals(expected, actual.getName());
     }
