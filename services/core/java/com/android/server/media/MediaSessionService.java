@@ -701,7 +701,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             if (isGlobalPriorityActive() && uid != Process.SYSTEM_UID) {
                 // Prevent dispatching key event through reflection while the global priority
                 // session is active.
-                Slog.i(TAG, "Only the system can dispatch media key event "
+                Log.w(TAG, "Only the system can dispatch media key event "
                         + "to the global priority session.");
                 return;
             }
