@@ -182,8 +182,8 @@ certain implicit intents.
 </p>
 
 <p>
-  For more information about background optimizations in N and how to adapt your app,
-  see <a href=
+  For more information about background optimizations in Android 7.0 (API level
+  24) and how to adapt your app, see <a href=
   "{@docRoot}preview/features/background-optimization.html">Background
   Optimizations</a>.
 </p>
@@ -427,12 +427,13 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
   released apps, a set of libraries that see significant use—such as
   <code>libandroid_runtime.so</code>, <code>libcutils.so</code>,
   <code>libcrypto.so</code>, and <code>libssl.so</code>—are temporarily
-  accessible on N for apps targeting API level 23 or lower. If your app loads
-  one of these libraries, logcat generates a warning and a toast appears on the
-  target device to notify you. If you see these warnings, you should update
-  your app to either include its own copy of those libraries or only use the
-  public NDK APIs. Future releases of the Android platform may restrict the use
-  of private libraries altogether and cause your app to crash.
+  accessible on Android 7.0 (API level 24) for apps targeting API level 23 or
+  lower. If your app loads one of these libraries, logcat generates a warning
+  and a toast appears on the target device to notify you. If you see these
+  warnings, you should update your app to either include its own copy of those
+  libraries or only use the public NDK APIs. Future releases of the Android
+  platform may restrict the use of private libraries altogether and cause your
+  app to crash.
 </p>
 
 <p>
@@ -441,9 +442,9 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
   <code>System.loadLibrary</code> and <code>dlopen(3)</code> both return
   <code>NULL</code>, and may cause your app to crash. You should review your
   app code to remove use of private platform APIs and thoroughly test your apps
-  using a preview device or emulator. If you are unsure whether your app uses
-  private libraries, you can <a href="#ndk-errors">check logcat</a> to identify
-  the runtime error.
+  using a device or emulator running Android 7.0 (API level 24). If you are
+  unsure whether your app uses private libraries, you can <a href=
+  "#ndk-errors">check logcat</a> to identify the runtime error.
 </p>
 
 <p>
@@ -454,11 +455,6 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 
 <table id="ndk-table">
   <col width="15%">
-  <col width="15%">
-  <col width="15%">
-  <col width="20%">
-  <col width="20%">
-  <col width="20%">
   <tr>
     <th scope="col">
       Libraries
@@ -470,10 +466,7 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
       Runtime access via dynamic linker
     </th>
     <th scope="col">
-      N Developer Preview behavior
-    </th>
-    <th scope="col">
-      Final N Release behavior
+      Android 7.0 (API level 24) behavior
     </th>
     <th scope="col">
       Future Android platform behavior
@@ -500,10 +493,6 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
   <td style="background-color:#DCEDC8">
     Works as expected
   </td>
-
-  <td style="background-color:#DCEDC8">
-    Works as expected
-  </td>
 </tr>
 
 <tr>
@@ -517,11 +506,6 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 
   <td style="background-color:#FFF9C4">
     Temporarily accessible
-  </td>
-
-  <td style="background-color:#FFF9C4">
-      Works as expected, but you receive a logcat warning and a message on the
-      target device.
   </td>
 
   <td style="background-color:#FFF9C4">
@@ -553,10 +537,6 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
   <td style="background-color:#ffcdd2">
     Runtime error
   </td>
-
-  <td style="background-color:#ffcdd2">
-    Runtime error
-  </td>
 </tr>
 
 <tr>
@@ -570,10 +550,6 @@ see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a
 
   <td style="background-color:#ffcdd2">
     Restricted
-  </td>
-
-  <td style="background-color:#ffcdd2">
-    Runtime error
   </td>
 
   <td style="background-color:#ffcdd2">
@@ -699,8 +675,8 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
 <ul>
   <li>You must install a delegated certificate installer before the DPC can set
-  it. For both profile and device-owner apps targeting the N SDK, you should
-  install the delegated certificate installer before the device policy
+  it. For both profile and device-owner apps targeting Android 7.0 (API level 24),
+  you should install the delegated certificate installer before the device policy
   controller (DPC) calls
   <code>DevicePolicyManager.setCertInstallerPackage()</code>. If the installer
   is not already installed, the system throws an
@@ -747,12 +723,13 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   DER-encoded format under a .crt or .cer file extension.
   </li>
 
-  <li>Starting in Android 7.0, fingerprint enrollment and storage are managed per user.
-  If a profile owner’s Device Policy Client (DPC) targets pre-N on an N device,
-  the user is still able to set fingerprint on the device, but work
-  applications cannot access device fingerprint. When the DPC targets N and
-  above, the user can set fingerprint specifically for work profile by going to
-  <strong>Settings &gt; Security &gt; Work profile security</strong>.
+  <li>Starting in Android 7.0, fingerprint enrollment and storage are managed
+  per user. If a profile owner’s Device Policy Client (DPC) targets API level
+  23 (or lower) on a device running Android 7.0 (API level 24), the user is
+  still able to set fingerprint on the device, but work applications cannot
+  access device fingerprint. When the DPC targets API level 24 and above, the user can set
+  fingerprint specifically for work profile by going to <strong>Settings &gt;
+  Security &gt; Work profile security</strong>.
   </li>
 
   <li>A new encryption status <code>ENCRYPTION_STATUS_ACTIVE_PER_USER</code> is
@@ -822,8 +799,9 @@ when killing the app manually via DDMS.
 </p>
 
 <p>
-Apps targeting N and above are not automatically killed on density changes;
-however, they may still respond poorly to configuration changes.
+  Apps targeting Android 7.0 (API level 24) and above are not automatically
+  killed on density changes; however, they may still respond poorly to
+  configuration changes.
 </p>
 </li>
 

@@ -45,7 +45,7 @@ next.link=xml.html
 </p>
 
 <p>
-  The N Developer Preview extends the {@link android.net.ConnectivityManager}
+  Android 7.0 (API level 24) extends the {@link android.net.ConnectivityManager}
   API to provide apps with a way to <a href="#status">retrieve the user’s Data
   Saver preferences</a> and <a href="#monitor-changes">monitor preference
   changes</a>. It is considered good practice for apps to check whether the
@@ -58,7 +58,7 @@ next.link=xml.html
 </h2>
 
 <p>
-  In the N Developer Preview, apps can use the {@link
+  In Android 7.0 (API level 24), apps can use the {@link
   android.net.ConnectivityManager} API to determine what data usage
   restrictions are being applied. The {@code getRestrictBackgroundStatus()}
   method returns one of the following values:
