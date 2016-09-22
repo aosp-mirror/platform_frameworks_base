@@ -20697,8 +20697,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 isInteraction = nowElapsed > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
             }
         } else {
-            isInteraction = app.curProcState
-                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            // If the app was being forced to the foreground, by say a Toast, then
+            // no need to treat it as an interaction
+            isInteraction = app.forcingToForeground == null
+                    && app.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             app.fgInteractionTime = 0;
         }
         if (isInteraction && (!app.reportedInteraction
