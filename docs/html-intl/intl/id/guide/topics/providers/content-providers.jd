@@ -1,0 +1,108 @@
+page.title=Penyedia konten
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<!-- In this document -->
+<h2>Topik</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Dasar-Dasar Penyedia Konten</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        Membuat Penyedia Konten</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Penyedia Kalender</a>
+    </li>
+    <li>
+        <a href="{@docRoot}guide/topics/providers/contacts-provider.html">Penyedia Kontak</a>
+    </li>
+</ol>
+
+    <!-- Related Samples -->
+<h2>Contoh-Contoh Terkait</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/ContactManager/index.html">
+            Aplikasi Contact Manager</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        "Kursor (Orang)"
+        </a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        "Kursor (Telepon)"</a>
+        </li>
+        <li>
+            <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+            Contoh Adaptor Sinkronisasi</a>
+        </li>
+    </ol>
+</div>
+</div>
+<p>
+    Penyedia konten mengelola akses ke set data terstruktur. Penyedia ini membungkus
+ data, dan menyediakan mekanisme untuk mendefinisikan keamanan data. Penyedia konten adalah antarmuka
+ standar yang menghubungkan data dalam satu proses dengan kode yang berjalan dalam proses lain.
+</p>
+<p>
+    Bila Anda ingin mengakses data di penyedia konten, Anda menggunakan
+ {@link android.content.ContentResolver} objek dalam
+ {@link android.content.Context} aplikasi untuk berkomunikasi dengan penyedia sebagai klien.
+    Objek {@link android.content.ContentResolver} berkomunikasi dengan objek penyedia, yakni
+ instance kelas yang mengimplementasikan {@link android.content.ContentProvider}. Objek penyedia
+ menerima permintaan data dari klien, melakukan tindakan yang diminta, dan
+ mengembalikan hasilnya.
+</p>
+<p>
+    Anda tidak perlu mengembangkan penyedia sendiri jika tidak bermaksud untuk berbagi data dengan
+ aplikasi lain. Akan tetapi, Anda memerlukan penyedia buatan sendiri untuk menyediakan saran pencarian custom
+ dalam aplikasi Anda sendiri. Anda juga memerlukan penyedia sendiri jika ingin menyalin dan
+menempelkan data atau file yang kompleks dari aplikasi Anda ke aplikasi lain.
+</p>
+<p>
+    Android sendiri berisi penyedia konten yang mengelola data seperti informasi audio, video, gambar, dan
+ kontak pribadi. Anda bisa melihat sebagian informasi ini tercantum dalam dokumentasi
+ acuan untuk paket
+ <code><a href="{@docRoot}reference/android/provider/package-summary.html">android.provider</a>
+    </code>. Dengan beberapa batasan, semua penyedia ini bisa diakses oleh aplikasi Android
+ apa saja.
+</p><p>
+    Topik-topik berikut menjelaskan penyedia konten secara lebih detail:
+</p>
+<dl>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Dasar-Dasar Penyedia Konten</a></strong>
+    </dt>
+    <dd>
+        Cara mengakses data di penyedia konten bila data disusun dalam tabel.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+        Membuat Penyedia Konten</a></strong>
+    </dt>
+    <dd>
+        Cara membuat penyedia konten sendiri.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+        Penyedia Kalender</a></strong>
+    </dt>
+    <dd>
+        Cara mengakses Penyedia Kalender yang merupakan bagian dari platform Android.
+    </dd>
+    <dt>
+        <strong><a href="{@docRoot}guide/topics/providers/contacts-provider.html">
+        Penyedia Kontak</a></strong>
+    </dt>
+    <dd>
+        Cara mengakses Penyedia Kontak yang merupakan bagian dari platform Android.
+    </dd>
+</dl>

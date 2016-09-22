@@ -1,0 +1,103 @@
+page.title=Ikhtisar Sumber Daya
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Topik</h2>
+  <ol>
+    <li><a href="providing-resources.html">Menyediakan Sumber Daya</a></li>
+    <li><a href="accessing-resources.html">Mengakses Sumber Daya</a></li>
+    <li><a href="runtime-changes.html">Menangani Perubahan Runtime</a></li>
+    <li><a href="localization.html">Pelokalan</a></li>
+  </ol>
+
+  <h2>Acuan</h2>
+  <ol>
+    <li><a href="available-resources.html">Tipe Sumber Daya</a></li>
+  </ol>
+</div>
+</div>
+
+
+<p>Anda harus selalu mengeksternalkan sumber daya seperti gambar dan string dari kode
+aplikasi, agar Anda bisa memeliharanya secara independen. Mengeksternalkan
+sumber daya juga membuat Anda dapat menyediakan sumber daya alternatif yang mendukung konfigurasi
+perangkat tertentu seperti bahasa atau ukuran layar yang berbeda, yang semakin penting
+seiring semakin banyak tersedianya perangkat berbasis Android dengan konfigurasi berbeda. Untuk
+memberikan kompatibilitas dengan konfigurasi berbeda, Anda harus menata sumber daya dalam
+direktori {@code res/} proyek Anda, menggunakan berbagai subdirektori yang mengelompokkan sumber daya menurut tipe
+dan konfigurasinya.</p>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram1.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Gambar 1.</strong> Dua perangkat berbeda, masing-masing menggunakan layout default
+(aplikasi tidak menyediakan layout alternatif).</p>
+</div>
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Gambar 2.</strong> Dua perangkat berbeda, masing-masing menggunakan layout berbeda yang tersedia untuk
+ukuran layar berbeda.</p>
+</div>
+
+<p>Bagi setiap tipe sumber daya, Anda bisa menetapkan sumber daya <em>default</em> dan sumber daya
+<em>alternatif</em> untuk aplikasi Anda:</p>
+<ul>
+  <li>Sumber daya default adalah sumber daya yang harus digunakan apa pun
+konfigurasi perangkatnya atau jika tidak ada sumber daya alternatif yang sesuai
+dengan konfigurasi saat ini.</li>
+  <li>Sumber daya alternatif adalah sumber daya yang Anda desain untuk digunakan dengan
+konfigurasi tertentu. Untuk menetapkan bahwa satu kelompok sumber daya ditujukan bagi konfigurasi tertentu,
+tambahkan qualifier konfigurasi yang sesuai ke nama direktori.</li>
+</ul>
+
+<p>Misalnya, walaupun layout
+UI default Anda disimpan dalam direktori {@code res/layout/}, Anda dapat menetapkan layout berbeda
+untuk digunakan saat layar dalam orientasi lanskap, dengan menyimpannya dalam direktori {@code res/layout-land/}
+. Android secara otomatis memberlakukan sumber daya yang sesuai dengan mencocokkan konfigurasi perangkat
+saat ini dengan nama direktori sumber daya.</p>
+
+<p>Gambar 1 mengilustrasikan cara sistem memberlakukan layout yang sama untuk
+dua perangkat berbeda saat sumber daya alternatif tidak tersedia. Gambar 2 menunjukkan
+aplikasi yang sama saat menambahkan sumber daya layout alternatif untuk layar yang lebih besar.</p>
+
+<p>Dokumen-dokumen berikut berisi panduan lengkap mengenai cara menata sumber daya aplikasi,
+menetapkan sumber daya alternatif, mengaksesnya dalam aplikasi, dan banyak lagi:</p>
+
+<dl>
+  <dt><strong><a href="providing-resources.html">Menyediakan Sumber Daya</a></strong></dt>
+  <dd>Jenis sumber daya yang dapat Anda sediakan dalam aplikasi, tempat menyimpannya, dan cara membuat sumber daya
+alternatif untuk konfigurasi perangkat tertentu.</dd>
+  <dt><strong><a href="accessing-resources.html">Mengakses Sumber Daya</a></strong></dt>
+  <dd>Cara menggunakan sumber daya yang telah Anda sediakan, baik dengan mengacunya dari kode
+aplikasi Anda atau dari sumber daya XML lainnya.</dd>
+  <dt><strong><a href="runtime-changes.html">Menangani Perubahan Runtime</a></strong></dt>
+  <dd>Cara mengelola perubahan konfigurasi yang terjadi saat Aktivitas Anda berjalan.</dd>
+  <dt><strong><a href="localization.html">Pelokalan</a></strong></dt>
+  <dd>Panduan dari pengalaman untuk melokalkan aplikasi menggunakan sumber daya alternatif. Walaupun ini
+hanya satu penggunaan tertentu dari sumber daya alternatif, hal ini sangat penting dalam meraih pengguna lebih
+banyak.</dd>
+  <dt><strong><a href="available-resources.html">Tipe Sumber Daya</a></strong></dt>
+  <dd>Acuan dari berbagai tipe sumber daya yang dapat Anda sediakan, menjelaskan elemen-elemen XML,
+atribut, dan sintaksnya. Misalnya, acuan ini menunjukkan kepada Anda cara membuat sumber daya untuk
+menu aplikasi, drawable, animasi, dan lainnya.</dd>
+</dl>
+
+<!--
+<h2>Raw Assets</h2>
+
+<p>An alternative to saving files in {@code res/} is to save files in the {@code
+assets/} directory. This should only be necessary if you need direct access to original files and
+directories by name. Files saved in the {@code assets/} directory will not be given a resource
+ID, so you can't reference them through the {@code R} class or from XML resources. Instead, you can
+query data in the {@code assets/} directory like an ordinary file system, search through the
+directory and
+read raw data using {@link android.content.res.AssetManager}. For example, this can be more useful
+when dealing with textures for a game. However, if you only need to read raw data from a file
+(such as a video or audio file), then you should save files into the {@code res/raw/} directory and
+then read a stream of bytes using {@link android.content.res.Resources#openRawResource(int)}. This
+is uncommon, but if you need direct access to original files in {@code assets/}, refer to the {@link
+android.content.res.AssetManager} documentation.</p>
+-->

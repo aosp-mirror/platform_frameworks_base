@@ -1,0 +1,494 @@
+page.title=Aktivitas
+parent.title=Loader
+parent.link=activities.html
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Dalam dokumen ini</h2>
+    <ol>
+    <li><a href="#summary">Rangkuman Loader API</a></li>
+    <li><a href="#app">Menggunakan Loader dalam Aplikasi</a>
+      <ol>
+        <li><a href="#requirements"></a></li>
+        <li><a href="#starting">Memulai Loader</a></li>
+        <li><a href="#restarting">Me-restart Loader</a></li>
+        <li><a href="#callback">Menggunakan Callback LoaderManager</a></li>
+      </ol>
+    </li>
+    <li><a href="#example">Contoh</a>
+       <ol>
+         <li><a href="#more_examples">Contoh Selengkapnya</a></li>
+        </ol>
+    </li>
+  </ol>
+
+  <h2>Kelas-kelas utama</h2>
+    <ol>
+      <li>{@link android.app.LoaderManager}</li>
+      <li>{@link android.content.Loader}</li>
+
+    </ol>
+
+    <h2>Contoh-contoh terkait</h2>
+   <ol>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a></li>
+     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a></li>
+   </ol>
+  </div>
+</div>
+
+<p>Diperkenalkan di Android 3.0, loader memudahkan pemuatan data asinkron
+dalam aktivitas atau fragmen. Loader memiliki karakteristik ini:</p>
+  <ul>
+    <li>Loader tersedia untuk setiap {@link android.app.Activity} dan {@link
+android.app.Fragment}.</li>
+    <li>Loader menyediakan pemuatan data asinkron.</li>
+    <li>Loader memantau sumber data mereka dan memberikan hasil baru bila
+konten berubah.</li>
+    <li>Loader secara otomatis menghubungkan kembali ke kursor loader lalu saat
+dibuat kembali setelah perubahan konfigurasi. Karena itu, loader tidak perlu melakukan query ulang
+datanya.</li>
+  </ul>
+
+<h2 id="summary">Rangkuman Loader API</h2>
+
+<p>Ada beberapa kelas dan antarmuka yang mungkin dilibatkan dalam menggunakan
+loader pada aplikasi. Semuanya dirangkum dalam tabel ini:</p>
+
+<table>
+  <tr>
+    <th>Kelas/Antarmuka</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager}</td>
+    <td>Kelas abstrak yang dikaitkan dengan {@link android.app.Activity} atau
+{@link android.app.Fragment} untuk mengelola satu atau beberapa instance {@link
+android.content.Loader}. Ini membantu aplikasi mengelola
+operasi berjalan lebih lama bersamaan dengan daur hidup {@link android.app.Activity}
+atau {@link android.app.Fragment}; penggunaan paling umumnya adalah dengan
+{@link android.content.CursorLoader}, akan tetapi aplikasi bebas menulis loader-nya
+ sendiri untuk memuat tipe data lainnya.
+    <br />
+    <br />
+    Hanya ada satu {@link android.app.LoaderManager} per aktivitas atau fragmen. Namun {@link android.app.LoaderManager} bisa memiliki
+beberapa loader.</td>
+  </tr>
+  <tr>
+    <td>{@link android.app.LoaderManager.LoaderCallbacks}</td>
+    <td>Antarmuka callback untuk klien berinteraksi dengan {@link
+android.app.LoaderManager}. Misalnya, Anda menggunakan metode callback {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+untuk membuat loader baru.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.Loader}</td>
+    <td>Kelas abstrak yang melakukan pemuatan data asinkron. Ini
+adalah kelas dasar untuk loader. Biasanya Anda akan menggunakan {@link
+android.content.CursorLoader}, namun Anda bisa menerapkan subkelas sendiri. Selagi
+loader aktif, loader harus memantau sumber datanya dan memberikan hasil
+baru bila konten berubah. </td>
+  </tr>
+  <tr>
+    <td>{@link android.content.AsyncTaskLoader}</td>
+    <td>Loader abstrak yang menyediakan {@link android.os.AsyncTask} untuk melakukan pekerjaan.</td>
+  </tr>
+  <tr>
+    <td>{@link android.content.CursorLoader}</td>
+    <td>Subkelas {@link android.content.AsyncTaskLoader} yang meng-query
+{@link android.content.ContentResolver} dan mengembalikan {@link
+android.database.Cursor}. Kelas ini mengimplementasikan protokol {@link
+android.content.Loader} dengan cara standar untuk query kursor,
+yang dibuat berdasarkan {@link android.content.AsyncTaskLoader} untuk melakukan query kursor
+pada thread latar belakang agar tidak memblokir UI aplikasi. Menggunakan loader
+ini merupakan cara terbaik untuk memuat data secara asinkron dari {@link
+android.content.ContentProvider}, sebagai ganti melakukan query terkelola melalui
+fragmen atau API aktivitas.</td>
+  </tr>
+</table>
+
+<p>Kelas dan antarmuka dalam tabel di atas merupakan komponen
+esensial yang akan Anda gunakan untuk mengimplementasikan loader dalam aplikasi Anda. Anda tidak memerlukan semuanya
+untuk setiap loader yang dibuat, namun Anda akan selalu memerlukan acuan ke {@link
+android.app.LoaderManager} untuk memulai loader dan implementasi
+kelas {@link android.content.Loader} seperti {@link
+android.content.CursorLoader}. Bagian berikut ini menunjukkan kepada Anda cara menggunakan
+kelas dan antarmuka ini dalam aplikasi.</p>
+
+<h2 id ="app">Menggunakan Loader dalam Aplikasi</h2>
+<p>Bagian ini menjelaskan cara menggunakan loader dalam aplikasi Android. Aplikasi
+yang menggunakan loader biasanya berisi yang berikut ini:</p>
+<ul>
+  <li>{@link android.app.Activity} atau {@link android.app.Fragment}.</li>
+  <li>Instance {@link android.app.LoaderManager}.</li>
+  <li>{@link android.content.CursorLoader} akan memuat data yang didukung oleh {@link
+android.content.ContentProvider}. Atau, Anda dapat mengimplementasikan subkelas sendiri
+ dari {@link android.content.Loader} atau {@link android.content.AsyncTaskLoader} untuk
+memuat data dari beberapa sumber lain.</li>
+  <li>Implementasi untuk {@link android.app.LoaderManager.LoaderCallbacks}.
+Di sinilah Anda membuat loader baru dan mengelola acuan bagi loader
+yang ada.</li>
+<li>Cara menampilkan data loader, seperti {@link
+android.widget.SimpleCursorAdapter}.</li>
+  <li>Sumber data, seperti {@link android.content.ContentProvider}, saat menggunakan
+{@link android.content.CursorLoader}.</li>
+</ul>
+<h3 id="starting">Memulai Loader</h3>
+
+<p>{@link android.app.LoaderManager} mengelola satu atau beberapa instance {@link
+android.content.Loader} dalam {@link android.app.Activity} atau
+{@link android.app.Fragment}. Hanya ada satu {@link
+android.app.LoaderManager} per aktivitas atau fragmen.</p>
+
+<p>Anda biasanya
+memulai {@link android.content.Loader} dalam metode {@link
+android.app.Activity#onCreate onCreate()} aktivitas, atau dalam metode
+{@link android.app.Fragment#onActivityCreated onActivityCreated()} fragmen. Anda
+melakukannya dengan cara berikut ini:</p>
+
+<pre>// Prepare the loader.  Either re-connect with an existing one,
+// or start a new one.
+getLoaderManager().initLoader(0, null, this);</pre>
+
+<p>Metode {@link android.app.LoaderManager#initLoader initLoader()} mengambil
+parameter berikut:</p>
+<ul>
+  <li>ID unik yang mengidentifikasi loader. Dalam contoh ini, ID-nya adalah 0.</li>
+<li>Argumen opsional untuk dipasok ke loader
+pada saat pembuatan (dalam contoh ini <code>null</code>).</li>
+
+<li>Implementasi {@link android.app.LoaderManager.LoaderCallbacks}, yang
+akan dipanggil {@link android.app.LoaderManager} untuk melaporkan kejadian loader. Dalam contoh
+ini, kelas lokal mengimplementasikan antarmuka {@link
+android.app.LoaderManager.LoaderCallbacks}, sehingga meneruskan acuan
+ke dirinya sendiri, {@code this}.</li>
+</ul>
+<p>Panggilan {@link android.app.LoaderManager#initLoader initLoader()} memastikan bahwa loader
+telah dimulai dan aktif. Ia memiliki dua kemungkinan hasil:</p>
+<ul>
+  <li>Jika loader yang disebutkan oleh ID sudah ada, loader yang dibuat terakhir akan digunakan
+kembali.</li>
+  <li>Jika loader yang disebutkan oleh ID <em>tidak</em> ada,
+{@link android.app.LoaderManager#initLoader initLoader()} akan memicu metode
+{@link android.app.LoaderManager.LoaderCallbacks} {@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}.
+Di sinilah Anda mengimplementasikan kode untuk membuat instance dan mengembalikan loader baru.
+Untuk diskusi selengkapnya, lihat bagian <a href="#onCreateLoader">onCreateLoader</a>.</li>
+</ul>
+<p>Dalam hal ini, implementasi {@link android.app.LoaderManager.LoaderCallbacks}
+yang ditentukan akan dikaitkan dengan loader, dan akan dipanggil bila
+status loader berubah.  Jika saat panggilan ini status pemanggil sudah
+dimulai, dan loader yang diminta sudah ada dan telah menghasilkan
+datanya, maka sistem segera memanggil {@link
+android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+(selama {@link android.app.LoaderManager#initLoader initLoader()}),
+sehingga Anda harus siap bila hal ini terjadi. Lihat <a href="#onLoadFinished">
+onLoadFinished</a> untuk diskusi selengkapnya mengenai callback ini</p>
+
+<p>Perhatikan bahwa metode {@link android.app.LoaderManager#initLoader initLoader()}
+mengembalikan {@link android.content.Loader} yang dibuat, namun Anda tidak
+perlu menangkap acuan ke sana. {@link android.app.LoaderManager} mengelola
+masa hidup loader secara otomatis. {@link android.app.LoaderManager}
+memulai dan menghentikan pemuatan jika perlu, dan menjaga status loader
+dan konten terkaitnya. Seperti yang tersirat di sini, Anda akan jarang berinteraksi dengan loader
+secara langsung (meskipun misalnya menggunakan metode loader untuk menyempurnakan perilaku
+loader, lihat contoh <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a>).
+Anda paling sering akan menggunakan metode {@link
+android.app.LoaderManager.LoaderCallbacks} untuk mengintervensi proses
+pemuatan saat terjadi kejadian tertentu. Untuk diskusi selengkapnya mengenai topik ini, lihat <a href="#callback">Menggunakan Callback LoaderManager</a>.</p>
+
+<h3 id="restarting">Me-restart Loader</h3>
+
+<p>Bila Anda menggunakan {@link android.app.LoaderManager#initLoader initLoader()}, seperti
+ditampilkan di atas, loader yang ada akan digunakan dengan ID yang ditetapkan jika ada.
+Jika tidak ada, ID akan dibuat. Namun kadang-kadang Anda perlu membuang data lama
+dan mulai dari awal.</p>
+
+<p>Untuk membuang data lama, gunakan {@link
+android.app.LoaderManager#restartLoader restartLoader()}. Misalnya, implementasi
+{@link android.widget.SearchView.OnQueryTextListener} ini akan me-restart
+bila query pengguna berubah. Loader perlu di-restart
+agar dapat menggunakan filter pencarian yang telah direvisi untuk melakukan query baru:</p>
+
+<pre>
+public boolean onQueryTextChanged(String newText) {
+    // Called when the action bar search text has changed.  Update
+    // the search filter, and restart the loader to do a new query
+    // with this filter.
+    mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+    getLoaderManager().restartLoader(0, null, this);
+    return true;
+}</pre>
+
+<h3 id="callback">Menggunakan Callback LoaderManager</h3>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} adalah antarmuka callback
+yang memungkinkan klien berinteraksi dengan {@link android.app.LoaderManager}. </p>
+<p>Loader, khususnya {@link android.content.CursorLoader}, diharapkan
+mempertahankan datanya setelah dihentikan. Ini memungkinkan aplikasi mempertahankan
+datanya di aktivitas atau metode {@link android.app.Activity#onStop
+onStop()} fragmen dan {@link android.app.Activity#onStart onStart()}, sehingga
+bila pengguna kembali ke aplikasi, mereka tidak harus menunggu data
+dimuat kembali. Anda menggunakan metode {@link android.app.LoaderManager.LoaderCallbacks}
+untuk mengetahui waktu membuat loader baru, dan memberi tahu aplikasi kapan
+berhenti menggunakan data loader.</p>
+
+<p>{@link android.app.LoaderManager.LoaderCallbacks} berisi metode
+ini:</p>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()} —
+Membuat instance dan mengembalikan {@link android.content.Loader} baru untuk ID yang diberikan.
+</li></ul>
+<ul>
+  <li> {@link android.app.LoaderManager.LoaderCallbacks#onLoadFinished onLoadFinished()}
+— Dipanggil bila loader yang dibuat sebelumnya selesai dimuat.
+</li></ul>
+<ul>
+  <li>{@link android.app.LoaderManager.LoaderCallbacks#onLoaderReset onLoaderReset()}
+    — Dipanggil bila loader yang dibuat sebelumnya sedang di-reset, sehingga datanya
+tidak tersedia.
+</li>
+</ul>
+<p>Metode ini dijelaskan lebih detail dalam bagian berikutnya.</p>
+
+<h4 id ="onCreateLoader">onCreateLoader</h4>
+
+<p>Saat Anda mencoba mengakses loader (misalnya, melalui {@link
+android.app.LoaderManager#initLoader initLoader()}), ia akan memeriksa untuk mengetahui adanya
+loader yang ditetapkan oleh ID. Jika tidak ada, ia akan memicu metode {@link
+android.app.LoaderManager.LoaderCallbacks} {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}. Di
+sinilah Anda membuat loader baru. Biasanya ini adalah {@link
+android.content.CursorLoader}, namun Anda bisa mengimplementasikan sendiri subkelas {@link
+android.content.Loader}. </p>
+
+<p>Dalam contoh ini, metode callback {@link
+android.app.LoaderManager.LoaderCallbacks#onCreateLoader onCreateLoader()}
+ akan membuat {@link android.content.CursorLoader}. Anda harus membuat
+{@link android.content.CursorLoader} menggunakan metode konstruktornya, yang
+memerlukan set informasi lengkap untuk melakukan query ke {@link
+android.content.ContentProvider}. Secara khusus, ia memerlukan:</p>
+<ul>
+  <li><em>uri</em> — URI untuk konten yang akan diambil. </li>
+  <li><em>projection</em> — Daftar berisi kolom yang akan dikembalikan. Meneruskan
+<code>null</code> akan mengembalikan semua kolom, jadi tidak efisien. </li>
+  <li><em>selection</em> — Filter yang mendeklarasikan baris yang akan dikembalikan,
+diformat sebagai klausa SQL WHERE (tidak termasuk WHERE itu sendiri). Meneruskan
+<code>null</code> akan mengembalikan semua baris untuk URI yang diberikan. </li>
+  <li><em>selectionArgs</em> — Anda dapat menyertakan ?s dalam pilihan, yang akan
+digantikan dengan nilai dari <em>selectionArgs</em>, agar muncul dalam
+pilihan. Nilai-nilai akan diikat sebagai String. </li>
+  <li><em>sortOrder</em> — Cara menyusun baris, diformat sebagai klausa SQL
+ORDER BY (tidak termasuk ORDER BY itu sendiri). Meneruskan <code>null</code> akan
+menggunakan urutan sortir default, yang mungkin tidak berurutan.</li>
+</ul>
+<p>Misalnya:</p>
+<pre>
+ // If non-null, this is the current filter the user has provided.
+String mCurFilter;
+...
+public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+    // This is called when a new Loader needs to be created.  This
+    // sample only has one Loader, so we don't care about the ID.
+    // First, pick the base URI to use depending on whether we are
+    // currently filtering.
+    Uri baseUri;
+    if (mCurFilter != null) {
+        baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                  Uri.encode(mCurFilter));
+    } else {
+        baseUri = Contacts.CONTENT_URI;
+    }
+
+    // Now create and return a CursorLoader that will take care of
+    // creating a Cursor for the data being displayed.
+    String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+            + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+            + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+    return new CursorLoader(getActivity(), baseUri,
+            CONTACTS_SUMMARY_PROJECTION, select, null,
+            Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+}</pre>
+<h4 id="onLoadFinished">onLoadFinished</h4>
+
+<p>Metode ini dipanggil bila loader yang dibuat sebelumnya selesai dimuat.
+Metode ini dijamin dipanggil sebelum pelepasan data terakhir
+yang disediakan untuk loader ini.  Di titik ini Anda harus menyingkirkan semua penggunaan
+data lama (karena akan segera dilepas), namun jangan melepas sendiri
+data tersebut karena loader memilikinya dan akan menanganinya.</p>
+
+
+<p>Loader akan melepas data setelah mengetahui bahwa aplikasi tidak
+lagi menggunakannya.  Misalnya, jika data adalah kursor dari {@link
+android.content.CursorLoader}, Anda tidak boleh memanggil {@link
+android.database.Cursor#close close()} sendiri. Jika kursor ditempatkan
+dalam {@link android.widget.CursorAdapter}, Anda harus menggunakan metode {@link
+android.widget.SimpleCursorAdapter#swapCursor swapCursor()} agar
+{@link android.database.Cursor} lama tidak ditutup. Misalnya:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.<br
+/>SimpleCursorAdapter mAdapter;
+...
+
+public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+    // Swap the new cursor in.  (The framework will take care of closing the
+    // old cursor once we return.)
+    mAdapter.swapCursor(data);
+}</pre>
+
+<h4 id="onLoaderReset">onLoaderReset</h4>
+
+<p>Metode ini dipanggil bila loader yang dibuat sebelumnya sedang di-reset, sehingga datanya
+tidak tersedia. Callback ini memungkinkan Anda mengetahui
+kapan data akan dilepas sehingga dapat menghapus acuannya ke callback.  </p>
+<p>Implementasi ini memanggil
+{@link android.widget.SimpleCursorAdapter#swapCursor swapCursor()}
+dengan nilai <code>null</code>:</p>
+
+<pre>
+// This is the Adapter being used to display the list's data.
+SimpleCursorAdapter mAdapter;
+...
+
+public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+    // This is called when the last Cursor provided to onLoadFinished()
+    // above is about to be closed.  We need to make sure we are no
+    // longer using it.
+    mAdapter.swapCursor(null);
+}</pre>
+
+
+<h2 id="example">Contoh</h2>
+
+<p>Sebagai contoh, berikut ini adalah implementasi penuh {@link
+android.app.Fragment} yang menampilkan {@link android.widget.ListView} berisi
+hasil query terhadap penyedia konten kontak. Ia menggunakan {@link
+android.content.CursorLoader} untuk mengelola query pada penyedia.</p>
+
+<p>Agar aplikasi dapat mengakses kontak pengguna, seperti yang ditampilkan dalam contoh ini,
+manifesnya harus menyertakan izin
+{@link android.Manifest.permission#READ_CONTACTS READ_CONTACTS}.</p>
+
+<pre>
+public static class CursorLoaderListFragment extends ListFragment
+        implements OnQueryTextListener, LoaderManager.LoaderCallbacks&lt;Cursor&gt; {
+
+    // This is the Adapter being used to display the list's data.
+    SimpleCursorAdapter mAdapter;
+
+    // If non-null, this is the current filter the user has provided.
+    String mCurFilter;
+
+    @Override public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Give some text to display if there is no data.  In a real
+        // application this would come from a resource.
+        setEmptyText(&quot;No phone numbers&quot;);
+
+        // We have a menu item to show in action bar.
+        setHasOptionsMenu(true);
+
+        // Create an empty adapter we will use to display the loaded data.
+        mAdapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_2, null,
+                new String[] { Contacts.DISPLAY_NAME, Contacts.CONTACT_STATUS },
+                new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+        setListAdapter(mAdapter);
+
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Place an action bar item for searching.
+        MenuItem item = menu.add(&quot;Search&quot;);
+        item.setIcon(android.R.drawable.ic_menu_search);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        SearchView sv = new SearchView(getActivity());
+        sv.setOnQueryTextListener(this);
+        item.setActionView(sv);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        // Called when the action bar search text has changed.  Update
+        // the search filter, and restart the loader to do a new query
+        // with this filter.
+        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+        getLoaderManager().restartLoader(0, null, this);
+        return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(String query) {
+        // Don't care about this.
+        return true;
+    }
+
+    @Override public void onListItemClick(ListView l, View v, int position, long id) {
+        // Insert desired behavior here.
+        Log.i(&quot;FragmentComplexList&quot;, &quot;Item clicked: &quot; + id);
+    }
+
+    // These are the Contacts rows that we will retrieve.
+    static final String[] CONTACTS_SUMMARY_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.DISPLAY_NAME,
+        Contacts.CONTACT_STATUS,
+        Contacts.CONTACT_PRESENCE,
+        Contacts.PHOTO_ID,
+        Contacts.LOOKUP_KEY,
+    };
+    public Loader&lt;Cursor&gt; onCreateLoader(int id, Bundle args) {
+        // This is called when a new Loader needs to be created.  This
+        // sample only has one Loader, so we don't care about the ID.
+        // First, pick the base URI to use depending on whether we are
+        // currently filtering.
+        Uri baseUri;
+        if (mCurFilter != null) {
+            baseUri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+                    Uri.encode(mCurFilter));
+        } else {
+            baseUri = Contacts.CONTENT_URI;
+        }
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        String select = &quot;((&quot; + Contacts.DISPLAY_NAME + &quot; NOTNULL) AND (&quot;
+                + Contacts.HAS_PHONE_NUMBER + &quot;=1) AND (&quot;
+                + Contacts.DISPLAY_NAME + &quot; != '' ))&quot;;
+        return new CursorLoader(getActivity(), baseUri,
+                CONTACTS_SUMMARY_PROJECTION, select, null,
+                Contacts.DISPLAY_NAME + &quot; COLLATE LOCALIZED ASC&quot;);
+    }
+
+    public void onLoadFinished(Loader&lt;Cursor&gt; loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+    }
+
+    public void onLoaderReset(Loader&lt;Cursor&gt; loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+    }
+}</pre>
+<h3 id="more_examples">Contoh Selengkapnya</h3>
+
+<p>Ada beberapa contoh berbeda dalam <strong>ApiDemos</strong> yang
+mengilustrasikan cara menggunakan loader:</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.html">
+LoaderCursor</a> — Versi lengkap dari
+cuplikan yang ditampilkan di atas.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> — Contoh cara penggunaan throttling untuk
+mengurangi jumlah query dari penyedia konten saat datanya berubah.</li>
+</ul>
+
+<p>Untuk informasi tentang mengunduh dan menginstal contoh SDK, lihat <a href="http://developer.android.com/resources/samples/get.html"> Mendapatkan
+Contoh</a>. </p>
+

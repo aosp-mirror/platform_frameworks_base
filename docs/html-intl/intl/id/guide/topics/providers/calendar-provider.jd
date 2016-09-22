@@ -1,0 +1,1184 @@
+page.title=Penyedia Kalender
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+    <h2>Dalam dokumen ini</h2>
+    <ol>
+  <li><a href="#overview">Dasar-Dasar</a></li>
+  <li><a href="#manifest">Izin Pengguna</a></li>
+  <li><a href="#calendar">Tabel kalender</a>
+<ol>
+      <li><a href="#query">Membuat query kalender</a></li>
+      <li><a href="#modify-calendar">Memodifikasi kalender</a></li>
+      <li><a href="#insert-calendar">Menyisipkan kalender</a></li>
+    </ol>
+  </li>
+  <li><a href="#events">Tabel Events</a>
+<ol>
+      <li><a href="#add-event">Menambahkan Kejadian</a></li>
+      <li><a href="#update-event">Memperbarui Kejadian</a></li>
+      <li><a href="#delete-event">Menghapus Kejadian</a></li>
+    </ol>
+  </li>
+  <li><a href="#attendees">Tabel peserta</a>
+<ol>
+      <li><a href="#add-attendees">Menambahkan Peserta</a></li>
+    </ol>
+  </li>
+  <li><a href="#reminders">Tabel pengingat</a>
+<ol>
+      <li><a href="#add-reminders">Menambahkan Pengingat</a></li>
+    </ol>
+  </li>
+  <li><a href="#instances">Tabel Instances</a>
+  <ol>
+      <li><a href="#query-instances">Membuat query tabel Instance</a></li>
+  </ol></li>
+  <li><a href="#intents">Intent Kalender</a>
+  <ol>
+      <li><a href="#intent-insert">Menggunakan intent untuk menyisipkan kejadian</a></li>
+      <li><a href="#intent-edit">Menggunakan intent untuk mengedit kejadian</a></li>
+      <li><a href="#intent-view">Menggunakan intent untuk menampilkan data kalender</a></li>
+    </ol>
+  </li>
+
+  <li><a href="#sync-adapter">Adaptor Sinkronisasi</a></li>
+</ol>
+
+    <h2>Kelas-kelas utama</h2>
+    <ol>
+      <li>{@link android.provider.CalendarContract.Calendars}</li>
+      <li>{@link android.provider.CalendarContract.Events}</li>
+      <li>{@link android.provider.CalendarContract.Attendees}</li>
+      <li>{@link android.provider.CalendarContract.Reminders}</li>
+    </ol>
+</div>
+</div>
+
+<p>Penyedia Kalender adalah repository untuk kejadian kalender seorang pengguna. API
+Penyedia Kalender memungkinkan Anda melakukan query, menyisipkan, memperbarui, dan menghapus
+pada kalender, kejadian, peserta, pengingat, dan seterusnya.</p>
+
+
+<p>API Penyedia Kalender bisa digunakan oleh aplikasi dan adaptor sinkronisasi. Aturannya
+bervariasi menurut tipe program yang membuat panggilan. Dokumen ini
+terutama berfokus pada penggunaan API Penyedia Kalender sebagai sebuah aplikasi. Untuk
+pembahasan ragam adaptor sinkronisasi, lihat
+<a href="#sync-adapter">Adaptor Sinkronisasi</a>.</p>
+
+
+<p>Biasanya, untuk membaca atau menulis data kalender, manifes aplikasi harus
+berisi izin yang sesuai, yang dijelaskan dalam <a href="#manifest">Izin
+Pengguna</a>. Untuk mempermudah dilakukannya operasi umum,
+Penyedia Kalender menyediakan satu set intent, seperti dijelaskan dalam <a href="#intents">Intent
+Kalender</a>. Semua intent ini membawa pengguna ke aplikasi Kalender untuk menyisipkan, menampilkan,
+dan mengedit kejadian. Pengguna berinteraksi dengan aplikasi Kalender kemudian
+kembali ke aplikasi semula. Jadi, aplikasi Anda tidak perlu meminta izin,
+juga tidak perlu menyediakan antarmuka pengguna untuk menampilkan atau membuat kejadian.</p>
+
+<h2 id="overview">Dasar-Dasar</h2>
+
+<p><a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia konten</a> menyimpan data dan menjadikannya bisa diakses oleh
+aplikasi. Penyedia konten yang ditawarkan oleh platform Android (termasuk Penyedia Kalender) biasanya mengekspos data sebagai satu set tabel berdasarkan
+model database relasional, dengan tiap baris berupa record dan tiap kolom berupa data
+yang memiliki tipe dan arti tertentu. Melalui API Penyedia Kalender, aplikasi
+dan adaptor sinkronisasi bisa mendapatkan akses baca/tulis ke tabel-tabel database yang menyimpan
+data kalender seorang pengguna.</p>
+
+<p>Setiap penyedia konten membuka sebuah URI publik (yang dibungkus sebagai objek
+{@link android.net.Uri}
+) yang mengidentifikasikan set datanya secara unik.  Penyedia konten yang mengontrol
+ beberapa set data (beberapa tabel) mengekspos URI terpisah untuk tiap set.  Semua
+URI untuk penyedia diawali dengan string "content://".  String ini
+mengidentifikasi data sebagai dikontrol oleh penyedia konten. Penyedia Kalender
+mendefinisikan konstanta untuk URI masing-masing kelas (tabel). URI ini
+memiliki format <code><em>&lt;class&gt;</em>.CONTENT_URI</code>. Misalnya,
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.</p>
+
+<p>Gambar 1 menampilkan representasi grafis model data Penyedia Kalender. Gambar ini menampilkan
+tabel dan bidang utama yang saling berkaitan.</p>
+
+<img src="{@docRoot}images/providers/datamodel.png" alt="Calendar Provider Data Model" />
+<p class="img-caption"><strong>Gambar 1.</strong> Model data Penyedia Kalender.</p>
+
+<p>Seorang pengguna bisa memiliki beberapa kalender, dan kalender yang berbeda bisa dikaitkan dengan tipe akun yang berbeda (Google Calendar, Exchange, dan seterusnya).</p>
+
+<p>{@link android.provider.CalendarContract} mendefinisikan model data dari informasi yang terkait dengan kalender dan kejadian. Data ini disimpan di sejumlah tabel, yang dicantumkan di bawah ini.</p>
+
+<table>
+  <tr>
+    <th>Tabel (Kelas)</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td><p>{@link android.provider.CalendarContract.Calendars}</p></td>
+
+    <td>Tabel ini menyimpan
+informasi khusus kalender. Tiap baris dalam tabel ini berisi data untuk
+satu kalender, seperti nama, warna, informasi sinkronisasi, dan seterusnya.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Events}</td>
+
+    <td>Tabel ini menyimpan
+informasi khusus kejadian. Tiap baris dalam tabel ini berisi informasi untuk satu
+kejadian&mdash;misalnya, judul kejadian, lokasi, waktu mulai, waktu
+selesai, dan seterusnya. Kejadian bisa terjadi satu kali atau bisa berulang beberapa kali. Peserta,
+pengingat, dan properti perluasan disimpan dalam tabel terpisah.
+Masing-masing memiliki sebuah {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+yang mengacu {@link android.provider.BaseColumns#_ID} dalam tabel Events.</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances}</td>
+
+    <td>Tabel ini menyimpan
+waktu mulai dan waktu selesai setiap bentuk kejadian. Tiap baris dalam tabel ini
+mewakili satu bentuk kejadian. Untuk kejadian satu kali ada pemetaan 1:1
+antara instance dan kejadian. Untuk kejadian berulang, beberapa baris akan dibuat
+secara otomatis yang sesuai dengan beberapa kejadian itu.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Attendees}</td>
+
+    <td>Tabel ini menyimpan
+informasi peserta (tamu) kejadian. Tiap baris mewakili satu tamu
+kejadian. Ini menetapkan tipe tamu dan respons kehadiran tamu
+untuk kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Reminders}</td>
+
+    <td>Tabel ini menyimpan
+data peringatan/pemberitahuan. Tiap baris mewakili satu peringatan untuk sebuah kejadian. Sebuah
+kejadian bisa memiliki beberapa pengingat. Jumlah maksimum pengingat per kejadian
+ditetapkan dalam
+{@link android.provider.CalendarContract.CalendarColumns#MAX_REMINDERS},
+yang diatur oleh adaptor sinkronisasi yang
+memiliki kalender yang diberikan. Pengingat ditetapkan dalam menit sebelum kejadian
+dan memiliki metode yang menentukan cara pengguna akan diperingatkan.</td>
+  </tr>
+
+</table>
+
+<p>API Penyedia Kalender didesain agar luwes dan tangguh. Sementara itu
+, Anda perlu memberikan pengalaman pengguna akhir yang baik dan
+melindungi integritas kalender dan datanya. Untuk mencapainya, berikut ini adalah
+beberapa hal yang harus diingat saat menggunakan API ini:</p>
+
+<ul>
+
+<li><strong>Menyisipkan, memperbarui, dan menampilkan kejadian kalender.</strong> Untuk menyisipkan, mengubah, dan membaca kejadian secara langsung dari Penyedia Kalender, Anda memerlukan <a href="#manifest">izin</a> yang sesuai. Akan tetapi, jika Anda tidak sedang membuat aplikasi atau adaptor sinkronisasi kalender berfitur lengkap, maka tidak perlu meminta izin. Sebagai gantinya, Anda bisa menggunakan intent yang didukung oleh aplikasi Kalender Android untuk menyerahkan operasi baca dan tulis ke aplikasi itu. Bila menggunakan intent, aplikasi Anda akan mengirim pengguna ke aplikasi Kalender untuk melakukan operasi yang diinginkan
+dalam sebuah formulir yang sudah diisi. Setelah operasi selesai, formulir dikembalikan ke aplikasi Anda.
+Dengan mendesain aplikasi untuk melakukan operasi umum melalui Kalender,
+Anda akan memberi pengguna sebuah antarmuka pengguna yang konsisten dan tangguh. Inilah
+pendekatan yang disarankan. Untuk informasi selengkapnya, lihat <a href="#intents">Intent
+Kalender</a>.</p>
+
+
+<li><strong>Adaptor sinkronisasi.</strong> Adaptor sinkronisasi menyinkronkan data kalender
+pada perangkat pengguna dengan server atau sumber data lain. Dalam tabel
+{@link android.provider.CalendarContract.Calendars} dan
+{@link android.provider.CalendarContract.Events},
+ada kolom yang dicadangkan untuk digunakan adaptor sinkronisasi.
+Penyedia dan aplikasi tidak boleh memodifikasinya. Sebenarnya, tabel-tabel itu tidak
+terlihat kecuali jika diakses sebagai adaptor sinkronisasi. Untuk informasi selengkapnya tentang
+adaptor sinkronisasi, lihat <a href="#sync-adapter">Adaptor Sinkronisasi</a>.</li>
+
+</ul>
+
+
+<h2 id="manifest">Izin Pengguna</h2>
+
+<p>Untuk membaca data kalender, aplikasi harus menyertakan izin {@link
+android.Manifest.permission#READ_CALENDAR} dalam file manifesnya. File
+harus menyertakan izin {@link android.Manifest.permission#WRITE_CALENDAR}
+untuk menghapus, menyisipkan, atau memperbarui data kalender:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;...&gt;
+    &lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.READ_CALENDAR&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_CALENDAR&quot; /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+
+<h2 id="calendar">Tabel Kalender</h2>
+
+<p>Tabel {@link android.provider.CalendarContract.Calendars} berisi data
+untuk tiap kalender. Kolom-kolom
+berikut ini bisa ditulisi oleh aplikasi maupun <a href="#sync-adapter">adaptor sinkronisasi</a>.
+Untuk mengetahui daftar lengkap bidang-bidang yang didukung, lihat
+acuan {@link android.provider.CalendarContract.Calendars}.</p>
+<table>
+  <tr>
+    <th>Konstanta</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#NAME}</td>
+    <td>Nama kalender.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#CALENDAR_DISPLAY_NAME}</td>
+    <td>Nama kalender ini yang ditampilkan kepada pengguna.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Calendars#VISIBLE}</td>
+
+    <td>Sebuah boolean yang menunjukkan apakah kalender dipilih untuk ditampilkan. Nilai
+0 menunjukkan bahwa kejadian yang terkait dengan kalender ini tidak boleh
+ditampilkan.  Nilai 1 menunjukkan bahwa kejadian yang terkait dengan kalender ini harus
+ditampilkan. Nilai ini memengaruhi pembuatan baris dalam tabel {@link
+android.provider.CalendarContract.Instances}.</td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.CalendarColumns#SYNC_EVENTS}</td>
+
+    <td>Sebuah boolean yang menunjukkan apakah kalender harus disinkronkan dan apakah
+kejadiannya harus disimpan pada perangkat. Nilai 0 berarti jangan menyinkronkan kalender ini atau
+simpan kejadiannya pada perangkat.  Nilai 1 berarti menyinkronkan kejadian untuk kalender ini
+dan simpan kejadiannya pada perangkat.</td>
+  </tr>
+</table>
+
+<h3 id="query">Membuat query kalender</h3>
+
+<p>Berikut ini adalah contoh yang menampilkan cara mendapatkan kalender yang dimiliki oleh
+pengguna tertentu. Untuk memudahkan, dalam contoh ini, operasi query ditampilkan dalam
+thread antarmuka pengguna ("thread utama"). Dalam praktiknya, hal ini harus dilakukan dalam
+thread asinkron, sebagai ganti pada thread utama. Untuk diskusi selengkapnya, lihat
+<a href="{@docRoot}guide/components/loaders.html">Loader</a>. Jika Anda tidak sekadar
+membaca data melainkan memodifikasinya, lihat {@link android.content.AsyncQueryHandler}.
+</p>
+
+
+<pre>
+// Projection array. Creating indices for this array instead of doing
+// dynamic lookups improves performance.
+public static final String[] EVENT_PROJECTION = new String[] {
+    Calendars._ID,                           // 0
+    Calendars.ACCOUNT_NAME,                  // 1
+    Calendars.CALENDAR_DISPLAY_NAME,         // 2
+    Calendars.OWNER_ACCOUNT                  // 3
+};
+
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;</pre>
+
+
+<div class="sidebox-wrapper"> <div class="sidebox"> <h3>Mengapa Anda harus menyertakan
+ACCOUNT_TYPE?</h3> <p>Jika Anda membuat query pada {@link
+android.provider.CalendarContract.Calendars#ACCOUNT_NAME
+Calendars.ACCOUNT_NAME}, Anda juga harus menyertakan
+{@link android.provider.CalendarContract.Calendars#ACCOUNT_TYPE Calendars.ACCOUNT_TYPE}
+dalam pemilihan. Itu karena akun yang bersangkutan
+hanya dianggap unik mengingat <code>ACCOUNT_NAME</code> dan
+<code>ACCOUNT_TYPE</code>-nya. <code>ACCOUNT_TYPE</code> adalah string yang sesuai dengan
+autentikator akun yang digunakan bila akun didaftarkan dengan
+{@link android.accounts.AccountManager}. Ada juga sebuah tipe akun khusus yang disebut {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} untuk kalender
+yang tidak terkait dengan akun perangkat. Akun {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL} tidak
+disinkronkan.</p> </div> </div>
+
+
+<p> Di bagian berikutnya pada contoh ini, Anda akan membuat query. Pemilihan
+akan menetapkan kriteria untuk query. Dalam contoh ini, query mencari
+kalender yang memiliki <code>ACCOUNT_NAME</code>
+"sampleuser@google.com", <code>ACCOUNT_TYPE</code>
+"com.google", dan <code>OWNER_ACCOUNT</code>
+"sampleuser@google.com". Jika Anda ingin melihat semua kalender yang
+telah ditampilkan pengguna, bukan hanya kalender yang dimiliki pengguna, hilangkan <code>OWNER_ACCOUNT</code>.
+Query tersebut akan menghasilkan objek {@link android.database.Cursor}
+yang bisa Anda gunakan untuk menyusuri set hasil yang dikembalikan oleh
+query database. Untuk diskusi selengkapnya tentang penggunaan query dalam penyedia konten,
+lihat <a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia Kalender</a>.</p>
+
+
+<pre>// Run query
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+Uri uri = Calendars.CONTENT_URI;
+String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
+                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                        + Calendars.OWNER_ACCOUNT + " = ?))";
+String[] selectionArgs = new String[] {"sampleuser@gmail.com", "com.google",
+        "sampleuser@gmail.com"};
+// Submit the query and get a Cursor object back.
+cur = cr.query(uri, EVENT_PROJECTION, selection, selectionArgs, null);</pre>
+
+<p>Bagian berikutnya ini menggunakan kursor untuk merunut set hasil. Bagian ini menggunakan
+konstanta yang disiapkan pada awal contoh ini untuk menghasilkan nilai-nilai
+bagi tiap bidang.</p>
+
+<pre>// Use the cursor to step through the returned records
+while (cur.moveToNext()) {
+    long calID = 0;
+    String displayName = null;
+    String accountName = null;
+    String ownerName = null;
+
+    // Get the field values
+    calID = cur.getLong(PROJECTION_ID_INDEX);
+    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
+    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
+    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
+
+    // Do something with the values...
+
+   ...
+}
+</pre>
+
+<h3 id="modify-calendar">Memodifikasi kalender</h3>
+
+<p>Untuk melakukan pembaruan kalender, Anda bisa menyediakan {@link
+android.provider.BaseColumns#_ID} kalender itu baik sebagai ID yang ditambahkan ke
+URI
+
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+atau sebagai item pemilihan pertama. Pemilihan
+harus diawali dengan <code>&quot;_id=?&quot;</code>, dan
+<code>selectionArg</code> pertama harus berupa {@link
+android.provider.BaseColumns#_ID} kalender.
+Anda juga bisa melakukan pembaruan dengan menuliskan kode ID dalam URI. Contoh ini mengubah
+nama tampilan kalender dengan pendekatan
+({@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+:</p>
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long calID = 2;
+ContentValues values = new ContentValues();
+// The new display name for the calendar
+values.put(Calendars.CALENDAR_DISPLAY_NAME, &quot;Trevor's Calendar&quot;);
+Uri updateUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);</pre>
+
+<h3 id="insert-calendar">Menyisipkan kalender</h2>
+
+<p>Kalender didesain untuk dikelola terutama oleh sebuah adaptor sinkronisasi, sehingga Anda
+hanya boleh menyisipkan kalender baru sebagai adaptor sinkronisasi. Biasanya,
+aplikasi hanya bisa membuat perubahan semu pada kalender, misalnya mengubah nama tampilan. Jika
+perlu membuat sebuah kalender lokal, aplikasi bisa melakukannya dengan melakukan
+penyisipan kalender sebagai adaptor sinkronisasi, menggunakan {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} dari {@link
+android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}.
+{@link android.provider.CalendarContract#ACCOUNT_TYPE_LOCAL}
+adalah sebuah tipe akun khusus untuk kalender yang tidak
+terkait dengan akun perangkat. Kalender tipe ini tidak disinkronkan dengan server. Untuk
+diskusi tentang adaptor sinkronisasi, lihat <a href="#sync-adapter">Adaptor Sinkronisasi</a>.</p>
+
+<h2 id="events">Tabel Events</h2>
+
+<p>Tabel {@link android.provider.CalendarContract.Events} berisi detail
+untuk tiap kejadian. Untuk menambah, memperbarui, atau menghapus kejadian, aplikasi harus
+menyertakan izin {@link android.Manifest.permission#WRITE_CALENDAR} dalam
+<a href="#manifest">file manifesnya</a>.</p>
+
+<p>Kolom-kolom Events berikut ini bisa ditulis oleh aplikasi maupun
+adaptor sinkronisasi. Untuk mengetahui daftar lengkap bidang-bidang yang didukung, lihat acuan {@link
+android.provider.CalendarContract.Events}.</p>
+
+<table>
+  <tr>
+    <th>Konstanta</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#CALENDAR_ID}</td>
+    <td>{@link android.provider.BaseColumns#_ID} kalender yang dimiliki kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ORGANIZER}</td>
+    <td>Email pengatur (pemilik) kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE}</td>
+    <td>Judul kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION}</td>
+    <td>Tempat kejadian. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION}</td>
+    <td>Keterangan kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTSTART}</td>
+    <td>Waktu mulai kejadian dalam milidetik UTC sejak waktu patokan. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DTEND}</td>
+    <td>Waktu selesai kejadian dalam milidetik UTC sejak waktu patokan. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}</td>
+    <td>Zona waktu kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_END_TIMEZONE}</td>
+    <td>Zona waktu untuk waktu selesai kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DURATION}</td>
+
+    <td>Durasi kejadian dalam format <a href="http://tools.ietf.org/html/rfc5545#section-3.8.2.5">RFC5545</a>.
+Misalnya, nilai <code>&quot;PT1H&quot;</code> menyatakan bahwa kejadian
+akan berlangsung satu jam, dan nilai <code>&quot;P2W&quot;</code> menunjukkan
+durasi 2 minggu. </td>
+
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#ALL_DAY}</td>
+
+    <td>Nilai 1 menunjukkan kejadian ini memakan waktu sehari penuh, seperti yang didefinisikan oleh
+zona waktu lokal. Nilai 0 menunjukkan kejadian adalah kejadian biasa yang mungkin dimulai
+dan selesai pada sembarang waktu selama suatu hari.</td>
+
+
+  </tr>
+
+
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RRULE}</td>
+
+    <td>Aturan perulangan untuk format kejadian. Misalnya,
+<code>&quot;FREQ=WEEKLY;COUNT=10;WKST=SU&quot;</code>. Anda bisa menemukan
+contoh selengkapnya <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.3">di sini</a>.</td>
+
+  </tr>
+
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#RDATE}</td>
+    <td>Tanggal perulangan kejadian.
+    Anda biasanya menggunakan {@link android.provider.CalendarContract.EventsColumns#RDATE}
+    bersama dengan {@link android.provider.CalendarContract.EventsColumns#RRULE}
+    untuk mendefinisikan satu set agregat
+kejadian berulang. Untuk diskusi selengkapnya, lihat <a href="http://tools.ietf.org/html/rfc5545#section-3.8.5.2">Spesifikasi RFC5545</a>.</td>
+</tr>
+
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY}</td>
+
+    <td>Jika kejadian ini dihitung sebagai waktu sibuk atau waktu bebas yang bisa
+dijadwalkan. </td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_MODIFY}</td>
+    <td>Apakah tamu bisa memodifikasi kejadian atau tidak. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_INVITE_OTHERS}</td>
+    <td>Apakah tamu bisa mengundang tamu lain atau tidak. </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#GUESTS_CAN_SEE_GUESTS}</td>
+    <td>Apakah tamu bisa membaca daftar peserta atau tidak.</td>
+  </tr>
+</table>
+
+<h3 id="add-event">Menambahkan Kejadian</h3>
+
+<p>Bila aplikasi Anda menyisipkan kejadian baru, sebaiknya Anda menggunakan
+Intent {@link android.content.Intent#ACTION_INSERT INSERT}, seperti dijelaskan dalam <a href="#intent-insert">Menggunakan intent untuk menyisipkan kejadian</a>. Akan tetapi, jika
+perlu, Anda bisa menyisipkan kejadian secara langsung. Bagian ini menjelaskan
+caranya.</p>
+
+
+<p>Berikut ini adalah aturan untuk menyisipkan kejadian baru: </p>
+<ul>
+
+  <li>Anda harus menyertakan {@link
+android.provider.CalendarContract.EventsColumns#CALENDAR_ID} dan {@link
+android.provider.CalendarContract.EventsColumns#DTSTART}.</li>
+
+<li>Anda harus menyertakan {@link
+android.provider.CalendarContract.EventsColumns#EVENT_TIMEZONE}. Untuk mendapatkan daftar
+ID zona waktu yang diinstal pada sistem, gunakan {@link
+java.util.TimeZone#getAvailableIDs()}. Perhatikan bahwa aturan ini tidak berlaku jika
+Anda menyisipkan kejadian melalui Intent {@link
+android.content.Intent#ACTION_INSERT INSERT}, yang dijelaskan dalam <a href="#intent-insert">Menggunakan intent untuk menyisipkan kejadian</a>&mdash;dalam
+skenario itu, sebuah zona waktu default akan diberikan.</li>
+
+  <li>Untuk kejadian tidak-berulang, Anda harus menyertakan {@link
+android.provider.CalendarContract.EventsColumns#DTEND}. </li>
+
+
+  <li>Untuk kejadian berulang, Anda harus menyertakan sebuah {@link
+android.provider.CalendarContract.EventsColumns#DURATION} selain {@link
+android.provider.CalendarContract.EventsColumns#RRULE} atau {@link
+android.provider.CalendarContract.EventsColumns#RDATE}. Perhatikan bahwa aturan ini tidak berlaku jika
+Anda menyisipkan kejadian melalui Intent {@link
+android.content.Intent#ACTION_INSERT INSERT}, yang dijelaskan dalam <a href="#intent-insert">Menggunakan intent untuk menyisipkan kejadian</a>&mdash;dalam
+skenario itu, Anda bisa menggunakan {@link
+android.provider.CalendarContract.EventsColumns#RRULE} bersama {@link android.provider.CalendarContract.EventsColumns#DTSTART} dan {@link android.provider.CalendarContract.EventsColumns#DTEND}, dan aplikasi Calendar
+akan mengubahnya menjadi durasi secara otomatis.</li>
+
+</ul>
+
+<p>Berikut ini adalah contoh penyisipan kejadian. Penyisipan ini dilakukan dalam thread UI
+demi kemudahan. Dalam praktiknya, penyisipan dan pembaruan harus dilakukan di
+thread asinkron untuk memindahkan tindakan ke dalam thread latar belakang. Untuk
+informasi selengkapnya, lihat {@link android.content.AsyncQueryHandler}.</p>
+
+
+<pre>
+long calID = 3;
+long startMillis = 0;
+long endMillis = 0;
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 9, 14, 7, 30);
+startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 9, 14, 8, 45);
+endMillis = endTime.getTimeInMillis();
+...
+
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Events.DTSTART, startMillis);
+values.put(Events.DTEND, endMillis);
+values.put(Events.TITLE, &quot;Jazzercise&quot;);
+values.put(Events.DESCRIPTION, &quot;Group workout&quot;);
+values.put(Events.CALENDAR_ID, calID);
+values.put(Events.EVENT_TIMEZONE, "America/Los_Angeles");
+Uri uri = cr.insert(Events.CONTENT_URI, values);
+
+// get the event ID that is the last element in the Uri
+long eventID = Long.parseLong(uri.getLastPathSegment());
+//
+// ... do something with event ID
+//
+//</pre>
+
+<p class="note"><strong>Catatan:</strong> Perhatikan cara contoh ini menangkap ID kejadian
+setelah kejadian dibuat. Inilah cara termudah untuk mendapatkan ID kejadian. Anda akan sering
+memerlukan ID kejadian untuk melakukan operasi kalender lainnya&mdash;misalnya, untuk menambahkan
+peserta atau pengingat ke kejadian.</p>
+
+
+<h3 id="update-event">Memperbarui Kejadian</h3>
+
+<p>Bila aplikasi Anda ingin memperbolehkan pengguna mengedit kejadian, sebaiknya
+gunakan Intent {@link android.content.Intent#ACTION_EDIT EDIT}, seperti
+dijelaskan dalam <a href="#intent-edit">Menggunakan intent untuk mengedit kejadian</a>.
+Akan tetapi, jika perlu, Anda bisa mengedit kejadian secara langsung. Untuk melakukan pembaruan
+suatu kejadian, Anda bisa memberikan <code>_ID</code>
+kejadian itu sebagai ID yang ditambahkan ke URI ({@link
+android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()})
+atau sebagai item pemilihan pertama.
+Pemilihan harus dimulai dengan <code>&quot;_id=?&quot;</code>, dan
+<code>selectionArg</code> yang pertama harus berupa <code>_ID</code> kejadian. Anda juga bisa
+melakukan pembaruan dengan menggunakan pemilihan tanpa ID. Berikut ini adalah contoh pembaruan
+kejadian. Contoh ini mengubah judul kejadian dengan pendekatan
+{@link android.content.ContentUris#withAppendedId(android.net.Uri,long) withAppendedId()}
+:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 188;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri updateUri = null;
+// The new title for the event
+values.put(Events.TITLE, &quot;Kickboxing&quot;);
+updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().update(updateUri, values, null, null);
+Log.i(DEBUG_TAG, &quot;Rows updated: &quot; + rows);  </pre>
+
+<h3 id="delete-event">Menghapus Kejadian</h3>
+
+<p>Anda bisa menghapus kejadian dengan {@link
+android.provider.BaseColumns#_ID} sebagai ID yang ditambahkan pada URI, atau dengan
+pemilihan standar. Jika Anda menggunakan ID yang ditambahkan, Anda tidak bisa melakukan pemilihan.
+Ada dua versi penghapusan: sebagai aplikasi dan sebagai adaptor sinkronisasi. Penghapusan
+aplikasi mengatur kolom yang <em>dihapus</em> ke 1. Flag ini yang memberi tahu
+adaptor sinkronisasi bahwa baris telah dihapus dan bahwa penghapusan ini harus
+diberitahukan ke server. Penghapusan adaptor sinkronisasi menghapus kejadian dari
+database bersama semua data terkaitnya. Berikut ini adalah contoh aplikasi
+yang menghapus kejadian melalui {@link android.provider.BaseColumns#_ID}-nya:</p>
+
+
+<pre>private static final String DEBUG_TAG = "MyActivity";
+...
+long eventID = 201;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+Uri deleteUri = null;
+deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+int rows = getContentResolver().delete(deleteUri, null, null);
+Log.i(DEBUG_TAG, &quot;Rows deleted: &quot; + rows);
+</pre>
+
+<h2 id="attendees">Tabel Peserta</h2>
+
+<p>Tiap baris tabel {@link android.provider.CalendarContract.Attendees}
+mewakili satu peserta atau tamu dari sebuah kejadian. Memanggil
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()}
+akan menghasilkan daftar peserta untuk
+kejadian dengan {@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} yang diberikan.
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} ini
+harus cocok dengan {@link
+android.provider.BaseColumns#_ID} kejadian tertentu.</p>
+
+<p>Tabel berikut mencantumkan
+bidang-bidang yang bisa ditulis. Saat menyisipkan peserta baru, Anda harus menyertakan semuanya
+kecuali <code>ATTENDEE_NAME</code>.
+</p>
+
+
+<table>
+  <tr>
+    <th>Konstanta</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}</td>
+    <td>ID kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_NAME}</td>
+    <td>Nama peserta.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_EMAIL}</td>
+    <td>Alamat email peserta.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_RELATIONSHIP}</td>
+    <td><p>Hubungan peserta dengan kejadian. Salah satu dari:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ATTENDEE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_ORGANIZER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_PERFORMER}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#RELATIONSHIP_SPEAKER}</li>
+    </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_TYPE}</td>
+    <td><p>Tipe peserta. Salah satu dari: </p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_REQUIRED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#TYPE_OPTIONAL}</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS}</td>
+    <td><p>Status kehadiran peserta. Salah satu dari:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_ACCEPTED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_DECLINED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_INVITED}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_NONE}</li>
+        <li>{@link android.provider.CalendarContract.AttendeesColumns#ATTENDEE_STATUS_TENTATIVE}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-attendees">Menambahkan Peserta</h3>
+
+<p>Berikut ini adalah contoh yang menambahkan satu peserta ke kejadian. Perhatikan bahwa
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID}
+diperlukan:</p>
+
+<pre>
+long eventID = 202;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Attendees.ATTENDEE_NAME, &quot;Trevor&quot;);
+values.put(Attendees.ATTENDEE_EMAIL, &quot;trevor@example.com&quot;);
+values.put(Attendees.ATTENDEE_RELATIONSHIP, Attendees.RELATIONSHIP_ATTENDEE);
+values.put(Attendees.ATTENDEE_TYPE, Attendees.TYPE_OPTIONAL);
+values.put(Attendees.ATTENDEE_STATUS, Attendees.ATTENDEE_STATUS_INVITED);
+values.put(Attendees.EVENT_ID, eventID);
+Uri uri = cr.insert(Attendees.CONTENT_URI, values);
+</pre>
+
+<h2 id="reminders">Tabel Pengingat</h2>
+
+<p>Tiap baris tabel {@link android.provider.CalendarContract.Reminders}
+mewakili satu pengingat untuk sebuah kejadian. Memanggil
+{@link android.provider.CalendarContract.Reminders#query(android.content.ContentResolver, long, java.lang.String[]) query()} akan menghasilkan daftar pengingat untuk
+kejadian dengan
+{@link android.provider.CalendarContract.AttendeesColumns#EVENT_ID} yang diberikan.</p>
+
+
+<p>Tabel berikut mencantumkan bidang-bidang yang bisa ditulis untuk pengingat. Semua bidang harus
+disertakan saat menyisipkan pengingat baru. Perhatikan bahwa adaptor sinkronisasi menetapkan
+tipe pengingat yang didukungnya dalam tabel {@link
+android.provider.CalendarContract.Calendars}. Lihat
+{@link android.provider.CalendarContract.CalendarColumns#ALLOWED_REMINDERS}
+untuk detailnya.</p>
+
+
+<table>
+  <tr>
+    <th>Konstanta</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#EVENT_ID}</td>
+    <td>ID kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#MINUTES}</td>
+    <td>Menit yang ditunggu untuk memicu kejadian pengingat.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.RemindersColumns#METHOD}</td>
+    <td><p>Metode alarm, seperti yang diatur pada server. Salah satu dari:</p>
+      <ul>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_ALERT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_DEFAULT}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_EMAIL}</li>
+        <li>{@link android.provider.CalendarContract.RemindersColumns#METHOD_SMS}</li>
+    </ul></td>
+  </tr>
+</table>
+
+<h3 id="add-reminders">Menambahkan Pengingat</h3>
+
+<p>Contoh ini menambahkan pengingat ke kejadian. Pengingat dipicu 15
+menit sebelum kejadian.</p>
+<pre>
+long eventID = 221;
+...
+ContentResolver cr = getContentResolver();
+ContentValues values = new ContentValues();
+values.put(Reminders.MINUTES, 15);
+values.put(Reminders.EVENT_ID, eventID);
+values.put(Reminders.METHOD, Reminders.METHOD_ALERT);
+Uri uri = cr.insert(Reminders.CONTENT_URI, values);</pre>
+
+<h2 id="instances">Tabel Instances</h2>
+
+<p>Tabel
+{@link android.provider.CalendarContract.Instances} menyimpan
+waktu mulai dan waktu selesai kejadian. Tiap baris dalam tabel ini
+mewakili satu bentuk kejadian. Tabel instance tidak bisa ditulis dan hanya
+menyediakan sebuah cara untuk membuat query kejadian. </p>
+
+<p>Tabel berikut mencantumkan beberapa bidang yang bisa Anda query untuk suatu instance. Perhatikan
+bahwa zona waktu didefinisikan oleh
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_TYPE}
+dan
+{@link android.provider.CalendarContract.CalendarCache#KEY_TIMEZONE_INSTANCES}.</p>
+
+
+<table>
+  <tr>
+    <th>Konstanta</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#BEGIN}</td>
+    <td>Waktu mulai instance, dalam milidetik UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END}</td>
+    <td>Waktu selesai instance, dalam milidetik UTC.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_DAY}</td>
+
+    <td>Hari selesai Julian dari instance, relatif terhadap
+zona waktu Kalender.
+
+</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#END_MINUTE}</td>
+
+    <td>Menit selesai dari instance yang diukur dari tengah malam di zona waktu
+Kalender.</td>
+
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#EVENT_ID}</td>
+    <td>Kejadian <code>_ID</code> untuk instance ini.</td>
+  </tr>
+    <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_DAY}</td>
+    <td>Hari mulai Julian dari instance, relatif terhadap zona waktu Kalender.
+ </td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.Instances#START_MINUTE}</td>
+
+    <td>Menit mulai dari instance yang diukur dari tengah malam, relatif terhadap
+zona waktu Kalender.
+</td>
+
+  </tr>
+
+</table>
+
+<h3 id="query-instances">Membuat query tabel Instance</h3>
+
+<p>Untuk membuat query tabel Instances, Anda perlu menetapkan rentang waktu query
+dalam URI. Dalam contoh ini, {@link android.provider.CalendarContract.Instances}
+mendapatkan akses ke bidang {@link
+android.provider.CalendarContract.EventsColumns#TITLE} melalui
+implementasi antarmuka {@link android.provider.CalendarContract.EventsColumns}-nya.
+Dengan kata lain, {@link
+android.provider.CalendarContract.EventsColumns#TITLE} dihasilkan melalui
+tampilan database, bukan melalui query terhadap tabel {@link
+android.provider.CalendarContract.Instances} mentah.</p>
+
+<pre>
+private static final String DEBUG_TAG = "MyActivity";
+public static final String[] INSTANCE_PROJECTION = new String[] {
+    Instances.EVENT_ID,      // 0
+    Instances.BEGIN,         // 1
+    Instances.TITLE          // 2
+  };
+
+// The indices for the projection array above.
+private static final int PROJECTION_ID_INDEX = 0;
+private static final int PROJECTION_BEGIN_INDEX = 1;
+private static final int PROJECTION_TITLE_INDEX = 2;
+...
+
+// Specify the date range you want to search for recurring
+// event instances
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2011, 9, 23, 8, 0);
+long startMillis = beginTime.getTimeInMillis();
+Calendar endTime = Calendar.getInstance();
+endTime.set(2011, 10, 24, 8, 0);
+long endMillis = endTime.getTimeInMillis();
+
+Cursor cur = null;
+ContentResolver cr = getContentResolver();
+
+// The ID of the recurring event whose instances you are searching
+// for in the Instances table
+String selection = Instances.EVENT_ID + " = ?";
+String[] selectionArgs = new String[] {"207"};
+
+// Construct the query with the desired date range.
+Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
+ContentUris.appendId(builder, startMillis);
+ContentUris.appendId(builder, endMillis);
+
+// Submit the query
+cur =  cr.query(builder.build(),
+    INSTANCE_PROJECTION,
+    selection,
+    selectionArgs,
+    null);
+
+while (cur.moveToNext()) {
+    String title = null;
+    long eventID = 0;
+    long beginVal = 0;
+
+    // Get the field values
+    eventID = cur.getLong(PROJECTION_ID_INDEX);
+    beginVal = cur.getLong(PROJECTION_BEGIN_INDEX);
+    title = cur.getString(PROJECTION_TITLE_INDEX);
+
+    // Do something with the values.
+    Log.i(DEBUG_TAG, "Event:  " + title);
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(beginVal);
+    DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+    Log.i(DEBUG_TAG, "Date: " + formatter.format(calendar.getTime()));
+    }
+ }</pre>
+
+<h2 id="intents">Intent Kalender</h2>
+<p>Aplikasi Anda tidak memerlukan <a href="#manifest">izin</a> untuk membaca dan menulis data kalender. Sebagai gantinya, aplikasi bisa menggunakan intent yang didukung oleh aplikasi Kalender Android untuk menyerahkan operasi baca dan tulis ke aplikasi itu. Tabel berikut mencantumkan intent yang didukung oleh Penyedia Kalender:</p>
+<table>
+  <tr>
+    <th>Tindakan</th>
+    <th>URI</th>
+
+    <th>Keterangan</th>
+    <th>Ekstra</th>
+  </tr>
+  <tr>
+    <td><br>
+    {@link android.content.Intent#ACTION_VIEW VIEW} <br></td>
+    <td><p><code>content://com.android.calendar/time/&lt;ms_since_epoch&gt;</code></p>
+    Anda juga bisa mengacu ke URI dengan
+{@link android.provider.CalendarContract#CONTENT_URI CalendarContract.CONTENT_URI}.
+Untuk contoh yang menggunakan intent ini, lihat <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Menggunakan intent untuk menampilkan data kalender</a>.
+
+    </td>
+    <td>Membuka kalender pada waktu yang ditetapkan oleh <code>&lt;ms_since_epoch&gt;</code>.</td>
+    <td>Tidak ada.</td>
+  </tr>
+  <tr>
+    <td><p>{@link android.content.Intent#ACTION_VIEW VIEW} </p>
+
+     </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+
+    Anda juga bisa mengacu ke URI dengan
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
+Untuk contoh yang menggunakan intent ini, lihat <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-view">Menggunakan intent untuk menampilkan data kalender</a>.
+
+    </td>
+    <td>Menampilkan kejadian yang ditetapkan oleh <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} </td>
+    <td><p><code>content://com.android.calendar/events/&lt;event_id&gt;</code></p>
+
+  Anda juga bisa mengacu ke URI dengan
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
+Untuk contoh penggunaan intent ini, lihat <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-edit">Menggunakan intent untuk mengedit kejadian</a>.
+
+
+    </td>
+    <td>Mengedit kejadian yang ditetapkan oleh <code>&lt;event_id&gt;</code>.</td>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME CalendarContract.EXTRA_EVENT_BEGIN_TIME}<br>
+      <br>
+      <br>
+    {@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME CalendarContract.EXTRA_EVENT_END_TIME}</td>
+  </tr>
+
+  <tr>
+    <td>{@link android.content.Intent#ACTION_EDIT EDIT} <br>
+    <br>
+    {@link android.content.Intent#ACTION_INSERT INSERT} </td>
+    <td><p><code>content://com.android.calendar/events</code></p>
+
+   Anda juga bisa mengacu ke URI dengan
+{@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}.
+Untuk contoh penggunaan intent ini, lihat <a href="{@docRoot}guide/topics/providers/calendar-provider.html#intent-insert">Menggunakan intent untuk menyisipkan kejadian</a>.
+
+    </td>
+
+    <td>Membuat sebuah kejadian.</td>
+    <td>Ekstra apa saja yang tercantum dalam tabel di bawah.</td>
+  </tr>
+</table>
+
+<p>Tabel berikut mencantumkan ekstra intent yang didukung oleh Penyedia Kalender:
+</p>
+<table>
+  <tr>
+    <th>Ekstra Intent</th>
+    <th>Keterangan</th>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#TITLE Events.TITLE}</td>
+    <td>Nama kejadian.</td>
+  </tr>
+  <tr>
+
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME}</td>
+    <td>Waktu mulai kejadian dalam milidetik sejak waktu patokan.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME}</td>
+
+    <td>Waktu selesai kejadian dalam milidetik sejak waktu patokan.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract#EXTRA_EVENT_ALL_DAY
+CalendarContract.EXTRA_EVENT_ALL_DAY}</td>
+
+    <td>Sebuah boolean yang menunjukkan bahwa kejadian sehari penuh. Nilai bisa
+<code>true</code> atau <code>false</code>.</td> </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#EVENT_LOCATION
+Events.EVENT_LOCATION}</td>
+
+    <td>Lokasi kejadian.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#DESCRIPTION
+Events.DESCRIPTION}</td>
+
+    <td>Keterangan kejadian.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}</td>
+    <td>Alamat email mereka yang harus diundang berupa daftar yang dipisahkan koma.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#RRULE Events.RRULE}</td>
+    <td>Aturan perulangan kejadian.</td>
+  </tr>
+  <tr>
+    <td>
+    {@link android.provider.CalendarContract.EventsColumns#ACCESS_LEVEL
+Events.ACCESS_LEVEL}</td>
+
+    <td>Apakah kejadian bersifat privat atau publik.</td>
+  </tr>
+  <tr>
+    <td>{@link android.provider.CalendarContract.EventsColumns#AVAILABILITY
+Events.AVAILABILITY}</td>
+
+    <td>Jika kejadian ini dihitung sebagai waktu sibuk atau waktu bebas yang bisa dijadwalkan.</td>
+
+</table>
+<p>Bagian berikut menjelaskan cara menggunakan semua intent ini.</p>
+
+
+<h3 id="intent-insert">Menggunakan intent untuk menyisipkan kejadian</h3>
+
+<p>Penggunaan Intent {@link android.content.Intent#ACTION_INSERT INSERT}
+akan memungkinkan aplikasi Anda menyerahkan tugas penyisipan kejadian ke Kalender itu sendiri.
+Dengan pendekatan ini, aplikasi Anda bahkan tidak perlu menyertakan izin {@link
+android.Manifest.permission#WRITE_CALENDAR} dalam <a href="#manifest">file manifesnya</a>.</p>
+
+
+<p>Bila pengguna menjalankan aplikasi yang menggunakan pendekatan ini, aplikasi akan mengirim
+izin ke Kalender untuk menyelesaikan penambahan kejadian. Intent {@link
+android.content.Intent#ACTION_INSERT INSERT} menggunakan bidang-bidang ekstra
+untuk mengisi formulir lebih dahulu dengan detail kejadian dalam Kalender. Pengguna nanti bisa
+membatalkan kejadian, mengedit formulir sebagaimana diperlukan, atau menyimpan kejadian ke
+kalender mereka.</p>
+
+
+
+<p>Berikut ini adalah cuplikan kode yang menjadwalkan kejadian pada tanggal 19 Januari 2012, yang berjalan
+dari 7:30 pagi hingga 8:30 pagi Perhatikan hal-hal berikut tentang cuplikan kode ini:</p>
+
+<ul>
+  <li>Cuplikan kode ini menetapkan {@link android.provider.CalendarContract.Events#CONTENT_URI Events.CONTENT_URI}
+  sebagai URI-nya.</li>
+
+  <li>Cuplikan kode ini menggunakan bidang-bidang ekstra {@link
+android.provider.CalendarContract#EXTRA_EVENT_BEGIN_TIME
+CalendarContract.EXTRA_EVENT_BEGIN_TIME} dan {@link
+android.provider.CalendarContract#EXTRA_EVENT_END_TIME
+CalendarContract.EXTRA_EVENT_END_TIME} untuk mengisi dahulu formulir
+dengan waktu kejadian. Nilai-nilai untuk waktu ini harus dalam milidetik UTC
+sejak waktu patokan.</li>
+
+  <li>Cuplikan kode ini menggunakan bidang ekstra {@link android.content.Intent#EXTRA_EMAIL Intent.EXTRA_EMAIL}
+untuk memberikan daftar undangan yang dipisah koma, yang ditetapkan melalui alamat email.</li>
+
+</ul>
+<pre>
+Calendar beginTime = Calendar.getInstance();
+beginTime.set(2012, 0, 19, 7, 30);
+Calendar endTime = Calendar.getInstance();
+endTime.set(2012, 0, 19, 8, 30);
+Intent intent = new Intent(Intent.ACTION_INSERT)
+        .setData(Events.CONTENT_URI)
+        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+        .putExtra(Events.TITLE, &quot;Yoga&quot;)
+        .putExtra(Events.DESCRIPTION, &quot;Group class&quot;)
+        .putExtra(Events.EVENT_LOCATION, &quot;The gym&quot;)
+        .putExtra(Events.AVAILABILITY, Events.AVAILABILITY_BUSY)
+        .putExtra(Intent.EXTRA_EMAIL, &quot;rowan@example.com,trevor@example.com&quot;);
+startActivity(intent);
+</pre>
+
+<h3 id="intent-edit">Menggunakan intent untuk mengedit kejadian</h3>
+
+<p>Anda bisa memperbarui kejadian secara langsung, seperti dijelaskan dalam <a href="#update-event">Memperbarui kejadian</a>. Namun penggunaan Intent {@link
+android.content.Intent#ACTION_EDIT EDIT} memungkinkan aplikasi yang
+tidak memiliki izin untuk menyerahkan pengeditan kejadian ke aplikasi Kalender.
+Bila pengguna selesai mengedit kejadian dalam Kalender, pengguna akan dikembalikan ke
+aplikasi semula.</p> <p>Berikut ini adalah contoh intent yang mengatur
+judul baru bagi kejadian yang ditetapkan dan memungkinkan pengguna mengedit kejadian dalam Kalender.</p>
+
+
+<pre>long eventID = 208;
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_EDIT)
+    .setData(uri)
+    .putExtra(Events.TITLE, &quot;My New Title&quot;);
+startActivity(intent);</pre>
+
+<h3 id="intent-view">Menggunakan intent untuk menampilkan data kalender</h3>
+<p>Penyedia Kalender menyediakan dua cara menggunakan Intent {@link android.content.Intent#ACTION_VIEW VIEW}:</p>
+<ul>
+  <li>Untuk membuka Kalender pada tanggal tertentu.</li>
+  <li>Untuk menampilkan sebuah kejadian.</li>
+
+</ul>
+<p>Berikut ini adalah contoh yang menampilkan cara membuka Kalender pada tanggal tertentu:</p>
+<pre>// A date-time specified in milliseconds since the epoch.
+long startMillis;
+...
+Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+builder.appendPath(&quot;time&quot;);
+ContentUris.appendId(builder, startMillis);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+    .setData(builder.build());
+startActivity(intent);</pre>
+
+<p>Berikut ini adalah contoh yang menampilkan cara membuka kejadian untuk menampilkan:</p>
+<pre>long eventID = 208;
+...
+Uri uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+Intent intent = new Intent(Intent.ACTION_VIEW)
+   .setData(uri);
+startActivity(intent);
+</pre>
+
+
+<h2 id="sync-adapter">Adaptor Sinkronisasi</h2>
+
+
+<p>Hanya ada perbedaan kecil dalam cara aplikasi dan adaptor sinkronisasi
+mengakses Penyedia Kalender:</p>
+
+<ul>
+  <li>Adaptor sinkronisasi perlu menetapkan bahwa dirinya sebuah adaptor sinkronisasi dengan mengatur {@link android.provider.CalendarContract#CALLER_IS_SYNCADAPTER} ke <code>true</code>.</li>
+
+
+  <li>Adaptor sinkronisasi perlu memberikan {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_NAME} dan {@link
+android.provider.CalendarContract.SyncColumns#ACCOUNT_TYPE} sebagai parameter query dalam URI. </li>
+
+  <li>Adaptor sinkronisasi memiliki akses tulis ke lebih banyak kolom daripada aplikasi atau widget.
+  Misalnya, aplikasi hanya bisa mengubah sedikit karakteristik kalender,
+  misalnya nama, nama tampilan, pengaturan visibilitas, dan apakah kalender
+  disinkronkan atau tidak. Sebagai perbandingan, adaptor sinkronisasi bisa mengakses bukan hanya kolom-kolom itu, namun banyak kolom lainnya,
+  misalnya warna kalender, zona waktu, tingkat akses, lokasi, dan seterusnya.
+Akan tetapi, adaptor sinkronisasi dibatasi pada <code>ACCOUNT_NAME</code> dan
+<code>ACCOUNT_TYPE</code> yang ditetapkannya.</li> </ul>
+
+<p>Berikut ini adalah metode pembantu yang bisa Anda gunakan untuk menghasilkan URI bagi penggunaan dengan adaptor sinkronisasi:</p>
+<pre> static Uri asSyncAdapter(Uri uri, String account, String accountType) {
+    return uri.buildUpon()
+        .appendQueryParameter(android.provider.CalendarContract.CALLER_IS_SYNCADAPTER,&quot;true&quot;)
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, account)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, accountType).build();
+ }
+</pre>
+<p>Untuk contoh implementasi adaptor sinkronisasi (yang tidak terkait secara khusus dengan Kalender), lihat
+<a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">SampleSyncAdapter</a>.

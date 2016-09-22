@@ -1,0 +1,126 @@
+page.title=Bekerja dengan Drawable
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#DrawableTint">Mewarnai Sumber Daya Drawable</a></li>
+  <li><a href="#ColorExtract">Mengekstrak Warna Mencolok dari Gambar</a></li>
+  <li><a href="#VectorDrawables">Membuat Drawable Vektor</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Kemampuan berikut untuk drawable membantu Anda mengimplementasikan desain bahan dalam aplikasi Anda:</p>
+
+<ul>
+<li>Pewarnaan drawable</li>
+<li>Ekstraksi warna mencolok</li>
+<li>Drawable vektor</li>
+</ul>
+
+<p>Pelajaran ini menampilkan cara menggunakan fitur-fitur ini dalam aplikasi Anda.</p>
+
+
+<h2 id="DrawableTint">Mewarnai Sumber Daya Drawable</h2>
+
+<p>Dengan Android 5.0 (API level 21) ke atas, Anda bisa mewarnai bitmap dan sembilan-tambalan yang didefinisikan sebagai
+alpha-mask. Anda bisa mewarnainya dengan sumber daya warna atau atribut tema yang mencocokkan ke
+sumber daya warna (misalnya, <code>?android:attr/colorPrimary</code>). Biasanya, Anda membuat aset ini
+hanya sekali dan mewarnainya secara otomatis agar cocok dengan tema Anda.</p>
+
+<p>Anda bisa menerapkan warna ke objek {@link android.graphics.drawable.BitmapDrawable} atau {@link
+android.graphics.drawable.NinePatchDrawable} dengan metode {@code setTint()}. Anda juga bisa
+mengatur warna dan mode dalam layout dengan atribut <code>android:tint</code> dan
+<code>android:tintMode</code>.</p>
+
+
+<h2 id="ColorExtract">Mengekstrak Warna Mencolok dari Gambar</h2>
+
+<p>Android Support Library r21 ke atas menyertakan kelas {@link
+android.support.v7.graphics.Palette}, yang memungkinkan Anda mengekstrak warna mencolok dari gambar.
+Kelas ini mengekstrak warna mencolok berikut:</p>
+
+<ul>
+<li>Menyala</li>
+<li>Menyala pekat</li>
+<li>Menyala pucat</li>
+<li>Pudar</li>
+<li>Pudar pekat</li>
+<li>Pudar pucat</li>
+</ul>
+
+<p>Untuk mengekstrak warna-warna ini, teruskan objek {@link android.graphics.Bitmap} ke
+metode statis {@link android.support.v7.graphics.Palette#generate Palette.generate()} dalam
+thread latar belakang tempat Anda memuat gambar. Jika Anda tidak bisa menggunakan thread itu, panggil metode
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} dan
+sediakan listener sebagai gantinya.</p>
+
+<p>Anda bisa mengambil warna mencolok dari gambar dengan metode getter di kelas
+<code>Palette</code>, misalnya <code>Palette.getVibrantColor</code>.</p>
+
+<p>Untuk menggunakan kelas {@link android.support.v7.graphics.Palette} dalam proyek Anda, tambahkan
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a> berikut ke
+modul aplikasi Anda:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>Untuk informasi selengkapnya, lihat referensi API untuk kelas {@link android.support.v7.graphics.Palette}.
+</p>
+
+
+<h2 id="VectorDrawables">Membuat Drawable Vektor</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>Video</h3>
+    <p>Grafis Vektor Android</p>
+</div>
+</a>
+
+<p>Di Android 5.0 (API Level 21) ke atas, Anda bisa mendefinisikan drawable vektor, yang berubah skala tanpa
+kehilangan definisi. Anda hanya memerlukan satu file aset per gambar vektor, bukan file aset untuk
+setiap densitas layar seperti pada gambar bitmap. Untuk membuat gambar vektor, Anda mendefinisikan detail
+bentuknya dalam sebuah elemen XML <code>&lt;vector&gt;</code>.</p>
+
+<p>Contoh berikut mendefinisikan gambar vektor berbentuk hati:</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Gambar vektor direpresentasikan di Android sebagai objek {@link android.graphics.drawable.VectorDrawable}.
+ Untuk informasi selengkapnya tentang sintaks <code>pathData</code>, lihat <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">Referensi Path SVG</a>. Untuk informasi selengkapnya
+tentang menganimasikan properti drawable vektor, lihat
+<a href="{@docRoot}training/material/animations.html#AnimVector">Menganimasikan Drawable Vektor</a>.</p>

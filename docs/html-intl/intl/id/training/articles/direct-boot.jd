@@ -1,0 +1,181 @@
+page.title=Direct Boot
+page.keywords=pratinjau,sdk,direct boot
+page.tags=androidn
+page.image=images/cards/card-nyc_2x.jpg
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#run">Meminta Akses untuk Berjalan Selama Direct Boot</a></li>
+    <li><a href="#access">Mengakses Penyimpanan yang Dienkripsi dengan Perangkat</a></li>
+    <li><a href="#notification">Mendapatkan Pemberitahuan saat Pengguna Membuka Kunci</a></li>
+    <li><a href="#migrating">Migrasi Data yang Ada</a></li>
+    <li><a href="#testing">Menguji Aplikasi Peka Enkripsi Anda</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Android N berjalan dalam mode <i>Direct Boot</i> yang aman
+bila perangkat telah dihidupkan namun pengguna tidak membuka
+kunci perangkat. Untuk mendukung hal ini, sistem menyediakan dua lokasi penyimpanan untuk data:</p>
+
+<ul>
+<li><i>Penyimpanan yang dienkripsi dengan kredensial</i>, yang merupakan lokasi penyimpanan default
+dan hanya tersedia setelah pengguna membuka kunci perangkat.</li>
+<li><i>Penyimpanan yang dienkripsi dengan perangkat</i>, yang merupakan lokasi penyimpanan yang tersedia
+selama mode Direct Boot dan setelah pengguna membuka kunci perangkat.</li>
+</ul>
+
+<p>Secara default, aplikasi tidak berjalan selama mode Direct Boot.
+Jika aplikasi Anda perlu melakukan tindakan selama mode Direct Boot, Anda bisa mendaftarkan
+komponen aplikasi yang harus dijalankan selama mode ini. Beberapa kasus penggunaan umum
+untuk aplikasi yang perlu dijalankan selama mode Direct Boot antara lain:</p>
+
+<ul>
+<li>Aplikasi yang telah menjadwalkan pemberitahuan, seperti aplikasi
+beker.</li>
+<li>Aplikasi yang menyediakan pemberitahuan pengguna yang penting, seperti aplikasi SMS.</li>
+<li>Aplikasi yang menyediakan layanan aksesibilitas, seperti TalkBack.</li>
+</ul>
+
+<p>Jika aplikasi Anda perlu mengakses data saat dijalankan dalam mode Direct Boot, gunakan
+penyimpanan yang dienkripsi dengan perangkat. Penyimpanan yang dienkripsi dengan perangkat berisi data
+yang dienkripsi dengan kunci yang hanya tersedia setelah perangkat melakukan
+booting yang berhasil diverifikasi.</p>
+
+<p>Untuk data yang harus dienkripsi dengan kunci yang dikaitkan dengan kredensial
+pengguna, seperti PIN atau kata sandi, gunakan penyimpanan yang dienkripsi dengan kredensial.
+Penyimpanan yang dienkripsi dengan kredensial hanya tersedia setelah pengguna berhasil
+membuka kunci perangkat, hingga saat pengguna menghidupkan ulang perangkat lagi. Jika
+pengguna mengaktifkan layar kunci setelah membuka kunci perangkat, hal ini tidak akan mengunci
+penyimpanan yang dienkripsi dengan kredensial.</p>
+
+<h2 id="run">Meminta Akses untuk Berjalan Selama Direct Boot</h2>
+
+<p>Aplikasi harus mendaftarkan komponennya pada sistem agar
+bisa berjalan selama mode Direct Boot atau mengakses
+penyimpanan yang dienkripsi dengan perangkat. Aplikasi mendaftar pada sistem dengan menandai komponen sebagai
+<i>peka enkripsi</i>. Untuk menandai komponen Anda sebagai peka enkripsi, setel atribut
+<code>android:directBootAware</code> ke true dalam manifes Anda.<p>
+
+<p>Komponen yang peka enkripsi bisa mendaftar untuk menerima pesan siaran
+<code>LOCKED_BOOT_COMPLETED</code> dari
+sistem bila perangkat telah dihidupkan ulang. Pada tahap ini
+penyimpanan yang dienkripsi dengan perangkat akan tersedia, dan komponen Anda bisa mengeksekusi tugas-tugas yang perlu
+dijalankan selama mode Direct Boot, seperti memicu alarm yang terjadwal.</p>
+
+<p>Cuplikan kode berikut adalah contoh cara mendaftarkan
+{@link android.content.BroadcastReceiver} sebagai peka enkripsi, dan menambahkan sebuah
+filter intent untuk <code>LOCKED_BOOT_COMPLETED</code>, dalam manifes aplikasi:</p>
+
+<pre>
+&lt;receiver
+  android:directBootAware="true" &gt;
+  ...
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</pre>
+
+<p>Setelah pengguna membuka kunci perangkat, semua komponen bisa mengakses
+penyimpanan yang dienkripsi dengan perangkat serta penyimpanan yang dienkripsi dengan kredensial.</p>
+
+<h2 id="access">Mengakses Penyimpanan yang Dienkripsi dengan Perangkat</h2>
+
+<p>Untuk mengakses penyimpanan yang dienkripsi dengan perangkat, buat instance
+{@link android.content.Context} kedua dengan memanggil
+<code>Context.createDeviceProtectedStorageContext()</code>. Semua panggilan
+API penyimpanan yang dibuat menggunakan konteks ini mengakses penyimpanan yang dienkripsi dengan perangkat. Contoh
+berikut mengakses penyimpanan yang dienkripsi dengan perangkat dan membuka file data aplikasi
+yang ada:</p>
+
+<pre>
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
+// Access appDataFilename that lives in device encrypted storage
+FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
+// Use inStream to read content...
+</pre>
+
+<p>Gunakan penyimpanan yang dienkripsi dengan perangkat hanya untuk
+informasi yang harus bisa diakses selama mode Direct Boot.
+Jangan gunakan penyimpanan yang dienkripsi dengan perangkat sebagai penyimpanan terenkripsi serba guna.
+Untuk informasi pengguna yang bersifat pribadi, atau data terenkripsi yang tidak diperlukan selama
+mode Direct Boot, gunakan penyimpanan yang dienkripsi dengan kredensial.</p>
+
+<h2 id="notification">Mendapatkan Pemberitahuan saat Pengguna Membuka Kunci</h2>
+
+<p>Setelah pengguna membuka kunci perangkat setelah restart, aplikasi Anda bisa beralih untuk
+mengakses penyimpanan yang dienkripsi dengan kredensial dan menggunakan layanan sistem biasa yang
+bergantung pada kredensial pengguna.</p>
+
+<p>Agar diberi tahu bila pengguna membuka kunci perangkat setelah boot ulang,
+daftarkan {@link android.content.BroadcastReceiver} dari komponen yang berjalan
+untuk mendengarkan pesan <code>ACTION_USER_UNLOCKED</code>. Atau, Anda bisa
+menerima pesan {@link android.content.Intent#ACTION_BOOT_COMPLETED
+ACTION_BOOT_COMPLETED} yang ada, yang sekarang menunjukkan bahwa perangkat telah dihidupkan dan
+pengguna telah membuka kunci perangkat.</p>
+
+<p>Anda bisa langsung kueri apakah pengguna telah membuka kunci perangkat dengan memanggil
+<code>UserManager.isUserUnlocked()</code>.</p>
+
+<h2 id="migrating">Migrasi Data yang Ada</h2>
+
+<p>Jika pengguna memperbarui perangkat mereka untuk menggunakan mode Direct Boot,
+data Anda yang ada mungkin perlu dipindahkan ke penyimpanan yang dienkripsi dengan perangkat. Gunakan
+<code>Context.moveSharedPreferencesFrom()</code> dan
+<code>Context.moveDatabaseFrom()</code> untuk memindahkan data preferensi dan
+basis data antara penyimpanan yang dienkripsi dengan kredensial dan penyimpanan yang dienkripsi dengan perangkat.</p>
+
+<p>Pertimbangkan dengan baik saat memutuskan data apa yang akan dipindahkan dari
+penyimpanan yang dienkripsi dengan kredensial ke penyimpanan yang dienkripsi dengan perangkat. Anda sebaiknya tidak memindahkan
+informasi pengguna yang bersifat rahasia, seperti kata sandi atau token otorisasi, ke
+penyimpanan yang dienkripsi dengan perangkat. Dalam beberapa skenario, Anda mungkin perlu mengelola
+set data terpisah pada dua tempat penyimpanan yang dienkripsi.</p>
+
+<h2 id="testing">Menguji Aplikasi Peka Enkripsi Anda</h2>
+
+<p>Uji aplikasi peka enkripsi Anda menggunakan mode Direct Boot baru. Ada
+dua cara untuk mengaktifkan Direct Boot.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Mengaktifkan Direct Boot
+akan menghapus semua data pengguna pada perangkat.</p>
+
+<p>Pada perangkat yang didukung dengan Android N terpasang, aktifkan
+Direct Boot dengan melakukan salah satu hal berikut:</p>
+
+<ul>
+<li>Pada perangkat, aktifkan <b>Developer options</b> jika Anda belum melakukannya dengan
+masuk ke <b>Settings &gt; About phone</b>, dan menyentuh <b>Build number</b>
+tujuh kali. Setelah layar Developer options terbuka, masuk ke
+<b>Settings &gt; Developer options</b> dan pilih
+<b>Convert to file encryption</b>.</li>
+<li>Gunakan perintah shell adb berikut untuk mengaktifkan mode Direct Boot:
+<pre class="no-pretty-print">
+$ adb reboot-bootloader
+$ fastboot --wipe-and-use-fbe
+</pre>
+</li>
+</ul>
+
+<p>Mode emulasi Direct Boot juga tersedia, jika Anda perlu mengganti
+mode pada perangkat pengujian. Mode emulasi sebaiknya hanya digunakan selama
+pengembangan dan bisa menyebabkan kehilangan data. Untuk mengaktifkan mode emulasi Direct Boot,
+setel pola kunci pada perangkat, pilih "No thanks" jika ditanya mengenai
+layar start-up aman saat menetapkan pola kunci, kemudian gunakan
+perintah shell adb berikut:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe true
+</pre>
+
+<p>Untuk menonaktifkan mode emulasi Direct Boot, gunakan perintah berikut:</p>
+
+<pre class="no-pretty-print">
+$ adb shell sm set-emulate-fbe false
+</pre>
+
+<p>Menggunakan perintah ini akan menyebabkan perangkat melakukan boot ulang.</p>

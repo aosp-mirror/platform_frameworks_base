@@ -1,0 +1,517 @@
+page.title=Manifes Aplikasi
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+<li><a href="#filestruct">Struktur File Manifes</a></li>
+<li><a href="#filec">Konvensi File</a>
+<li><a href="#filef">Fitur File</a>
+	<ol>
+	<li><a href="#ifs">Filter Intent</a></li>
+	<li><a href="#iconlabel">Ikon dan Label</a></li>
+	<li><a href="#perms">Izin</a></li>
+	<li><a href="#libs">Pustaka</a></li>
+	</ol></li>
+</ol>
+</div>
+</div>
+
+<p>
+  Setiap aplikasi harus memiliki file AndroidManifest.xml (bernama persis seperti ini) di direktori akar.
+ <span itemprop="description">File manifes
+ menyediakan informasi penting tentang aplikasi ke sistem Android,
+ informasi yang harus dimiliki sistem agar bisa menjalankan setiap kode
+aplikasi.</span> Di antaranya, manifes melakukan hal berikut ini:
+</p>
+
+<ul>
+<li>Menamai paket Java untuk aplikasi.
+Nama paket berfungsi sebagai identifier unik untuk aplikasi.</li>
+
+<li>Menjelaskan berbagai komponen aplikasi&mdash;aktivitas,
+ layanan, penerima siaran, dan penyedia konten
+yang membentuk aplikasi.  Menamai kelas yang mengimplementasikan setiap komponen dan
+mempublikasikan kemampuannya (misalnya, pesan {@link android.content.Intent
+Intent} mana yang bisa ditanganinya).  Deklarasi ini memberi tahu sistem Android mengenai
+komponennya dan dalam kondisi apa bisa diluncurkan.</li>
+
+<li>Menentukan proses yang akan menjadi host komponen aplikasi.</li>
+
+<li>Mendeklarasikan izin aplikasi mana yang harus dimiliki untuk
+mengakses bagian yang dilindungi pada API dan berinteraksi dengan aplikasi lain.</li>
+
+<li>Juga mendeklarasikan izin lain yang harus dimiliki untuk
+untuk berinteraksi dengan komponen aplikasi.</li>
+
+<li>Mencantumkan daftar kelas {@link android.app.Instrumentation} yang memberikan
+profil dan informasi lain saat aplikasi berjalan.  Deklarasi ini
+hanya ada di manifes saat aplikasi dibuat dan diuji;
+ deklarasi dihapus sebelum aplikasi dipublikasikan.</li>
+
+<li>Mendeklarasikan tingkat minimum API Android yang diperlukan
+aplikasi.</li>
+
+<li>Mencantumkan daftar pustaka yang harus ditautkan aplikasi.</li>
+</ul>
+
+
+<h2 id="filestruct">Struktur File Manifes</h2>
+
+<p>
+Diagram di bawah ini menampilkan struktur umum file manifes dan setiap
+elemen yang bisa ditampungnya.  Setiap elemen, bersama
+atributnya, didokumentasikan secara lengkap dalam file terpisah.  Untuk melihat
+informasi terperinci tentang setiap elemen, klik nama elemen dalam diagram,
+dalam daftar abjad elemen yang mengikuti diagram, atau penyebutan nama
+elemen lainnya.
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk /&gt;</a>
+    <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration /&gt;</a>  <!-- ##api level 3## -->
+    <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens /&gt;</a>  <!-- ##api level 4## -->
+    <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">&lt;compatible-screens /&gt;</a>  <!-- ##api level 9## -->
+    <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture /&gt;</a>  <!-- ##api level 11## -->
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category /&gt;</a>
+                <a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;/activity&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;/activity-alias&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data/&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;/service&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a> . . . <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;/intent-filter&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;/receiver&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data /&gt;</a>
+            <a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a>
+        <a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;/provider&gt;</a>
+
+        <a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library /&gt;</a>
+
+    <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;/application&gt;</a>
+
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;/manifest&gt;</a>
+</pre>
+
+<p>
+Semua elemen yang bisa muncul dalam file manifes tercantum di bawah ini
+dalam urutan abjad.  Ini adalah satu-satunya elemen legal; Anda tidak bisa
+menambahkan elemen atau atribut sendiri.
+</p>
+
+<p style="margin-left: 2em">
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/category-element.html">&lt;category&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/instrumentation-element.html">&lt;instrumentation&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code>  <!-- ##api level 3## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></code>  <!-- ##api level 4## -->
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></code>
+</p>
+
+
+
+
+<h2 id="filec">Konvensi File</h2>
+
+<p>
+Sebagian konvensi dan aturan berlaku secara umum untuk semua elemen
+dan atribut di manifes:
+</p>
+
+<dl>
+<dt><b>Elemen</b></dt>
+<dd>Hanya elemen
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> dan
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+yang diwajibkan, masing-masing harus ada dan hanya boleh terjadi sekali.
+Umumnya elemen lain bisa terjadi berkali-kali atau sama sekali tidak terjadi &mdash; meskipun
+setidaknya sebagian dari elemen itu harus ada untuk agar manifes mencapai sesuatu yang
+berarti.
+
+<p>
+Jika elemen tidak berisi apa pun, berarti elemen itu berisi elemen lain.
+Semua nilai diatur melalui atribut, bukan sebagai data karakter dalam elemen.
+</p>
+
+<p>
+Elemen yang sama tingkatan umumnya tidak diurutkan.  Misalnya, elemen
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>, dan
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>
+bisa dicampur dalam urutan apa pun.  (Elemen
+<code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>
+ merupakan eksepsi untuk aturan ini:  Elemen ini harus mengikuti
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ini aliasnya.)
+</p></dd>
+
+<dt><b>Atribut</b></dt>
+<dd>Secara formal, semua atribut opsional.  Akan tetapi, ada sebagian
+yang harus ditetapkan agar elemen bisa mencapai tujuannya.  Gunakan
+dokumentasi sebagai panduan.  Bagi atribut yang benar-benar opsional, ini menyebutkan
+nilai default atau menyatakan apa yang terjadi jika tidak ada spesifikasi.
+
+<p>Selain untuk beberapa atribut elemen akar
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>,
+ semua nama atribut dimulai dengan awalan {@code android:} &mdash;
+misalnya, {@code android:alwaysRetainTaskState}.  Karena awalan ini universal, dokumentasi umumnya meniadakannya saat mengacu atribut
+dengan nama.
+</p></dd>
+
+<dt><b>Mendeklarasikan nama kelas</b></dt>
+<dd>Banyak elemen berhubungan dengan objek Java, termasuk elemen
+aplikasi itu sendiri (elemen
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+) dan aktivitas komponen &mdash; utamanya
+(<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>),
+layanan
+(<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>),
+penerima siaran
+(<code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>),
+dan penyedia konten
+(<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>).
+
+<p>
+Jika mendefinisikan subkelas, seperti yang selalu Anda definisikan untuk kelas komponen
+({@link android.app.Activity}, {@link android.app.Service},
+{@link android.content.BroadcastReceiver}, dan {@link android.content.ContentProvider}),
+subkelas dideklarasikan melalui atribut {@code name}.  Nama harus menyertakan tujuan
+paket lengkap.
+Misalnya, subkelas {@link android.app.Service} mungkin dideklarasikan sebagai berikut:
+</p>
+
+<pre>&lt;manifest . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name="com.example.project.SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+Akan tetapi, sebagai shorthand, jika karakter pertama string adalah titik,
+string akan ditambahkan ke nama paket aplikasi (seperti yang ditetapkan dalam elemen
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
+ melalui atribut
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a></code>
+).  Penetapan berikut sama dengan di atas:
+</p>
+
+<pre>&lt;manifest package="com.example.project" . . . &gt;
+    &lt;application . . . &gt;
+        &lt;service android:name=".SecretService" . . . &gt;
+            . . .
+        &lt;/service&gt;
+        . . .
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+Saat memulai komponen, Android akan membuat instance subkelas yang diberi nama.
+Jika subkelas tidak ditetapkan, maka akak dibuat instance kelas dasar.
+</p></dd>
+
+<dt><b>Banyak nilai</b></dt>
+<dd>Jika lebih dari satu nilai yang dapat ditetapkan, elemen ini hampir selalu
+diulangi, bukan menampilkan daftar banyak nilai dalam satu elemen.
+Misalnya, filter intent dapat mencantumkan beberapa tindakan:
+
+<pre>&lt;intent-filter . . . &gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;action android:name="android.intent.action.DELETE" /&gt;
+    . . .
+&lt;/intent-filter&gt;</pre></dd>
+
+<dt><b>Nilai sumber daya</b></dt>
+<dd>Beberapa atribut memiliki nilai yang bisa ditampilkan kepada pengguna &mdash; misalnya
+, label dan ikon aktivitas.  Nilai atribut ini
+harus dilokalkan dan karenanya ditetapkan dari sumber daya atau tema.  Nilai sumber
+daya dinyatakan dalam format berikut,</p>
+
+<p style="margin-left: 2em">{@code @[<i>package</i>:]<i>type</i>:<i>name</i>}</p>
+
+<p>
+dalam hal ini nama <i>package</i> boleh dihilangkan jika sumber daya ada dalam paket yang sama dengan
+dengan aplikasi, <i>type</i> adalah tipe sumber daya &mdash; seperti "string" atau
+"drawable" &mdash; dan <i>name</i> adalah nama yang mengidentifikasi sumber daya tertentu.
+Misalnya:
+</p>
+
+<pre>&lt;activity android:icon="@drawable/smallPic" . . . &gt</pre>
+
+<p>
+Nilai tema diekspresikan dengan cara yang sama, namun dengan awal '{@code ?}'
+dan bukan '{@code @}':
+</p>
+
+<p style="margin-left: 2em">{@code ?[<i>package</i>:]<i>type</i>:<i>name</i>}
+</p></dd>
+
+<dt><b>Nilai-nilai string</b></dt>
+<dd>Bila nilai atribut adalah string, dua garis miring kiri ('{@code \\}')
+harus digunakan untuk meninggalkan karakter &mdash; misalnya, '{@code \\n}' untuk
+baris baru atau '{@code \\uxxxx}' untuk karakter Unicode.</dd>
+</dl>
+
+
+<h2 id="filef">Fitur File</h2>
+
+<p>
+Bagian berikut menjelaskan cara menerapkan sebagian fitur Android
+dalam file manifest.
+</p>
+
+
+<h3 id="ifs">Filter Intent</h3>
+
+<p>
+Komponen inti dari aplikasi (aktivitasnya, layanannya, dan penerima
+siaran) diaktifkan oleh <i>intent</i>.  Intent adalah
+sekumpulan informasi (objek {@link android.content.Intent}) yang menjelaskan
+tindakan yang diinginkan &mdash; termasuk data yang akan ditindaklanjuti, kategori
+komponen yang harus melakukan tindakan, dan petunjuk terkait lainnya.
+Android mencari komponen yang sesuai untuk merespons intent, meluncurkan
+instance komponen baru jika diperlukan, dan meneruskannya ke
+objek Intent.
+</p>
+
+<p>
+Komponen mengiklankan kemampuannya &mdash; jenis intent yang bisa diresponsnya
+ &mdash; melalui <i>filter intent</i>.  Karena sistem Android
+harus mempelajari intent yang dapat ditangani komponen sebelum meluncurkan komponen,
+filter intent ditetapkan dalam manifes sebagai elemen
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+.  Sebuah komponen dapat memiliki filter dalam jumlah berapa saja, masing-masing menjelaskan
+kemampuan yang berbeda.
+</p>
+
+<p>
+Intent yang secara eksplisit menamai komponen target akan mengaktifkan komponen itu;
+filter tidak berperan.  Namun intent yang tidak menetapkan target
+dengan nama dapat mengaktifkan komponen hanya jika dapat melewati salah satu filter
+komponen.
+</p>
+
+<p>
+Untuk informasi tentang cara objek Intent diuji terhadap filter intent,
+lihat dokumen terpisah,
+<a href="{@docRoot}guide/components/intents-filters.html">Intent
+dan Filter Intent</a>.
+</p>
+
+
+<h3 id="iconlabel">Ikon dan Label</h3>
+
+<p>
+Sejumlah elemen memiliki atribut {@code icon} dan {@code label} untuk
+ikon kecil dan label teks yang bisa ditampilkan kepada pengguna.  Sebagian ada juga yang memiliki atribut
+{@code description}untuk teks penjelasan yang lebih panjang yang juga bisa
+ditampilkan pada layar.  Misalnya, elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+ memiliki ketiga atribut ini, jadi saat pengguna ditanya apakah akan
+memberi izin bagi aplikasi yang memintanya, ikon yang mewakili
+izin, nama izin, dan keterangan yang
+mengikutinya bisa ditampilkan kepada pengguna.
+</p>
+
+<p>
+Dalam setiap kasus, ikon dan label yang ditetapkan dalam elemen yang memuatnya menjadi
+{@code icon} default dan pengaturan {@code label} untuk semua subelemen kontainer ini.
+Karena itu, ikon dan label yang ditetapkan dalam elemen
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+adalah ikon dan label default untuk setiap komponen aplikasi.
+Demikian pula, ikon dan label yang ditetapkan untuk komponen &mdash; misalnya, elemen
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+&mdash; adalah pengaturan default untuk setiap elemen komponen
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+.  Jika elemen
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+menetapkan label, namun suatu aktivitas dan filter intent-nya tidak menetapkan label,
+maka label aplikasi akan dianggap sama-sama sebagai label aktvitas dan
+filter intent.
+</p>
+
+<p>
+Ikon dan label yang ditetapkan untuk filter intent digunakan untuk mewakili komponen
+kapan saja komponen ditampilkan kepada pengguna saat memenuhi fungsi yang
+diiklankan oleh filter.  Misalnya, filter dengan pengaturan
+"{@code android.intent.action.MAIN}" dan
+"{@code android.intent.category.LAUNCHER}" mengiklankan aktivitas
+sebagai aktivitas yang memulai aplikasi&mdash;, yaitu
+sebagai salah satu aktivitas yang harus ditampilkan dalam launcher aplikasi.  Ikon dan label yang
+diatur dalam filter karenanya adalah ikon dan label yang ditampilkan dalam launcher.
+</p>
+
+
+<h3 id="perms">Izin</h3>
+
+<p>
+Sebuah <i>izin</i> adalah pembatasan yang membatasi akses ke bagian
+kode atau ke data pada perangkat.   Pembatasan diberlakukan untuk melindungi data dan kode
+penting yang bisa disalahgunakan untuk mengganggu atau merusak pengalaman pengguna.
+</p>
+
+<p>
+Setiap izin diidentifikasi melalui label yang unik.  Sering kali, label menunjukkan
+tindakan yang dibatasi.  Misalnya, berikut ini adalah beberapa izin yang didefinisikan
+oleh Android:
+</p>
+
+<p style="margin-left: 2em">{@code android.permission.CALL_EMERGENCY_NUMBERS}
+<br/>{@code android.permission.READ_OWNER_DATA}
+<br/>{@code android.permission.SET_WALLPAPER}
+<br/>{@code android.permission.DEVICE_POWER}</p>
+
+<p>
+Sebuah fitur bisa dilindungi paling banyak oleh satu izin.
+</p>
+
+<p>
+Jika aplikasi memerlukan akses ke fitur yang dilindungi oleh izin,
+aplikasi harus mendeklarasikan bahwa aplikasi memerlukan izin itu dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+ dalam manifes.  Kemudian, bila aplikasi telah diinstal pada
+perangkat, installer akan menentukan apakah izin yang diminta akan diberikan atau tidak
+dengan memeriksa otoritas yang menandatangani
+sertifikat aplikasi dan, dalam beberapa kasus, bertanya pada pengguna.
+Jika izin diberikan, aplikasi tersebut bisa menggunakan
+fitur yang dilindungi.  Jika tidak, upaya aplikasi untuk mengakses fitur tersebut akan gagal
+tanpa ada pemberitahuan apa pun kepada pengguna.
+</p>
+
+<p>
+Aplikasi juga bisa melindungi komponennya sendiri (aktivitas, layanan,
+penerima siaran, dan penyedia konten) dengan izin.  Aplikasi bisa menerapkan
+izin mana pun yang didefinisikan oleh Android (tercantum dalam
+{@link android.Manifest.permission android.Manifest.permission}) atau dideklarasikan
+oleh aplikasi lain.  Atau aplikasi bisa mendefinisikannya sendiri.  Izin baru dideklarasikan
+dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+.  Misalnya, aktivitas dapat dilindungi sebagai berikut:
+</p>
+
+<pre>
+&lt;manifest . . . &gt;
+    &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
+    &lt;uses-permission android:name="com.example.project.DEBIT_ACCT" /&gt;
+    . . .
+    &lt;application . . .&gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
+                  android:permission="com.example.project.DEBIT_ACCT"
+                  . . . &gt;
+            . . .
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>
+Perhatikan, dalam contoh ini izin {@code DEBIT_ACCT} tidak hanya
+dideklarasikan dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+, penggunaannya juga diminta dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+.  Penggunaannya harus diminta agar komponen
+aplikasi lainnya bisa menjalankan aktivitas yang dilindungi, meskipun perlindungan itu
+diberlakukan oleh aplikasi itu sendiri.
+</p>
+
+<p>
+Dalam contoh yang sama, jika atribut {@code permission} ditetapkan
+untuk izin yang dideklarasikan di tempat lain
+lain (seperti {@code android.permission.CALL_EMERGENCY_NUMBERS}, maka atribut
+tidak perlu mendeklarasikannya lagi dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+.  Akan tetapi, penggunaannya masih perlu dengan
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>.
+</p>
+
+<p>
+Elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></code>
+mendeklarasikan namespace untuk grup izin yang akan didefinisikan dalam
+kode.  Dan
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+mendefinisikan label untuk seperangkat izin (yang sama-sama dideklarasikan dalam manifes dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+dan yang dideklarasikan di tempat lain).  Ini hanya memengaruhi cara izin
+dikelompokkan saat ditampilkan kepada pengguna.  Elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></code>
+ tidak menetapkan izin mana dimiliki grup;
+elemen hanya memberi nama grup.  Izin ditempatkan dalam grup
+dengan memberikan nama grup ke elemen
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></code>
+ melalui atribut
+<code><a href="{@docRoot}guide/topics/manifest/permission-element.html#pgroup">permissionGroup</a></code>
+.
+</p>
+
+
+<h3 id="libs">Pustaka</h3>
+
+<p>
+Setiap aplikasi ditautkan dengan pustaka default Android, yang
+menyertakan paket dasar untuk membangun aplikasi (dengan kelas umum
+seperti Activity, Service, Intent, View, Button, Application, ContentProvider,
+dan sebagainya).
+</p>
+
+<p>
+Akan tetapi, sebagian paket berada dalam pustakanya sendiri.  Jika aplikasi Anda
+menggunakan kode salah satu paket ini, aplikasi secara eksplisit meminta untuk ditautkan dengan
+paket tersebut.  Manifes harus berisi elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></code> yang
+terpisah untuk menamai setiap pustaka.  (Nama pustaka bisa ditemukan
+dalam dokumentasi paket.)
+</p>
