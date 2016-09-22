@@ -1,0 +1,979 @@
+page.title=Pemberitahuan
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#Design">Pertimbangan Desain</a></li>
+  <li><a href="#CreateNotification">Membuat Pemberitahuan</a>
+    <ol>
+      <li><a href="#Required">Isi pemberitahuan yang diperlukan</a></li>
+      <li><a href="#Optional">Isi dan pengaturan pemberitahuan opsional</a></li>
+      <li><a href="#Actions">Tindakan pemberitahuan</a></li>
+      <li><a href="#Priority">Prioritas pemberitahuan</a></li>
+      <li><a href="#SimpleNotification">Membuat pemberitahuan sederhana</a></li>
+      <li><a href="#ApplyStyle">Menerapkan layout yang diperluas pada pemberitahuan</a></li>
+      <li><a href="#Compatibility">Menangani kompatibilitas</a></li>
+    </ol>
+  </li>
+  <li><a href="#Managing">Mengelola Pemberitahuan</a>
+    <ol>
+      <li><a href="#Updating">Memperbarui pemberitahuan</a></li>
+      <li><a href="#Removing">Menghapus pemberitahuan</a></li>
+    </ol>
+  </li>
+  <li><a href="#NotificationResponse">Mempertahankan Navigasi saat Memulai Aktivitas</a>
+    <ol>
+      <li><a href="#DirectEntry">Menyiapkan PendingIntent aktivitas biasa</a></li>
+      <li><a href="#ExtendedNotification">Menyiapkan PendingIntent aktivitas khusus</a></li>
+    </ol>
+  </li>
+  <li><a href="#Progress">Menampilkan Kemajuan dalam Pemberitahuan</a>
+    <ol>
+      <li><a href="#FixedProgress">Menampilkan indikator kemajuan berdurasi tetap</a></li>
+      <li><a href="#ActivityIndicator">Menampilkan indikator aktivitas berlanjut</a></li>
+    </ol>
+  </li>
+  <li><a href="#metadata">Metadata Pemberitahuan</a></li>
+  <li><a href="#Heads-up">Pemberitahuan Pendahuluan</a></li>
+  <li><a href="#lockscreenNotification">Pemberitahuan Layar Kunci</a></li>
+    <ol>
+      <li><a href="#visibility">Mengatur Visibilitas</a></li>
+      <li><a href="#controllingMedia">Mengontrol Pemutaran Media pada Layar Kunci</a></li>
+    </ol>
+  <li><a href="#CustomNotification">Layout Pemberitahuan Custom</a></li>
+</ol>
+
+    <h2>Kelas-kelas utama</h2>
+    <ol>
+        <li>{@link android.app.NotificationManager}</li>
+        <li>{@link android.support.v4.app.NotificationCompat}</li>
+    </ol>
+    <h2>Video</h2>
+    <ol>
+        <li>
+            <a href="http://www.youtube.com/watch?v=Yc8YrVc47TI&amp;feature=player_detailpage#t=1672s">
+            Pemberitahuan di 4.1</a>
+        </li>
+    </ol>
+<h2>Lihat juga</h2>
+<ol>
+    <li>
+        <a href="{@docRoot}design/patterns/notifications.html">Desain Android: Pemberitahuan</a>
+    </li>
+</ol>
+</div>
+</div>
+<p>
+    Pemberitahuan adalah pesan yang bisa Anda tampilkan kepada pengguna di luar
+    UI normal aplikasi. Bila Anda memberi tahu sistem untuk mengeluarkan pemberitahuan, pemberitahuan akan muncul lebih dahulu sebagai ikon dalam
+    <strong>area pemberitahuan</strong>. Untuk melihat detail pemberitahuan, pengguna membuka
+    <strong>laci pemberitahuan</strong>. Baik area pemberitahuan maupun laci pemberitahuan
+    adalah area-area yang dikontrol sistem yang bisa dilihat pengguna kapan saja.
+</p>
+<img id="figure1" src="{@docRoot}images/ui/notifications/notification_area.png" height="" alt="" />
+<p class="img-caption">
+    <strong>Gambar 1.</strong> Pemberitahuan di area pemberitahuan.
+</p>
+<img id="figure2" src="{@docRoot}images/ui/notifications/notification_drawer.png" width="280px" alt="" />
+<p class="img-caption">
+    <strong>Gambar 2.</strong> Pemberitahuan di laci pemberitahuan.
+</p>
+
+<p class="note"><strong>Catatan:</strong> Kecuali disebutkan, panduan ini mengacu pada
+kelas {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}
+dalam <a href="{@docRoot}tools/support-library/index.html">Support Library</a> versi 4.
+Kelas {@link android.app.Notification.Builder Notification.Builder} telah ditambahkan pada Android
+3.0 (API level 11).</p>
+
+<h2 id="Design">Pertimbangan Desain</h2>
+
+<p>Pemberitahuan, sebagai bagian penting dari antarmuka pengguna Android, memiliki panduan desainnya sendiri.
+Perubahan desain materi yang diperkenalkan dalam Android 5.0 (API level 21) adalah sangat
+penting, dan Anda harus meninjau pelatihan <a href="{@docRoot}training/material/index.html">Desain Bahan</a>
+untuk informasi selengkapnya. Untuk mengetahui cara mendesain pemberitahuan dan interaksinya, bacalah panduan desain
+<a href="{@docRoot}design/patterns/notifications.html">Pemberitahuan</a>.</p>
+
+<h2 id="CreateNotification">Membuat Pemberitahuan</h2>
+
+<p>Anda menetapkan informasi dan tindakan UI bagi pemberitahuan dalam
+objek {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+Untuk membuat pemberitahuan itu sendiri, panggil
+{@link android.support.v4.app.NotificationCompat.Builder#build NotificationCompat.Builder.build()},
+yang akan mengembalikan objek {@link android.app.Notification} berisi spesifikasi Anda. Untuk mengeluarkan
+pemberitahuan, Anda meneruskan objek {@link android.app.Notification} ke sistem dengan memanggil
+{@link android.app.NotificationManager#notify NotificationManager.notify()}.</p>
+
+<h3 id="Required">Isi pemberitahuan yang diperlukan</h3>
+<p>
+    Objek {@link android.app.Notification} <em>harus</em> berisi yang berikut ini:
+</p>
+<ul>
+    <li>
+        Ikon kecil, yang diatur dengan
+        {@link android.support.v4.app.NotificationCompat.Builder#setSmallIcon setSmallIcon()}
+    </li>
+    <li>
+        Judul, yang diatur dengan
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()}
+    </li>
+    <li>
+        Teks detail, yang diatur dengan
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentText setContentText()}
+    </li>
+</ul>
+<h3 id="Optional">Isi dan pengaturan pemberitahuan opsional</h3>
+<p>
+    Semua isi dan pengaturan pemberitahuan lainnya bersifat opsional. Untuk mengetahui selengkapnya tentang semua itu,
+    lihat dokumentasi acuan untuk {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Actions">Tindakan pemberitahuan</h3>
+<p>
+    Walaupun bersifat opsional, Anda harus menambahkan setidaknya satu tindakan pada pemberitahuan.
+    Tindakan memungkinkan pengguna beralih langsung dari pemberitahuan ke
+    {@link android.app.Activity} dalam aplikasi Anda, tempat pengguna bisa melihat satu atau beberapa kejadian
+    atau melakukan pekerjaan lebih jauh.
+</p>
+<p>
+    Pemberitahuan bisa menyediakan beberapa tindakan sekaligus. Anda harus selalu mendefinisikan tindakan yang
+    akan diaktifkan bila pengguna mengklik pemberitahuan; biasanya tindakan ini akan membuka
+    {@link android.app.Activity} dalam aplikasi Anda. Anda juga bisa menambahkan tombol pada pemberitahuan
+    yang melakukan tindakan tambahan seperti mendiamkan alarm atau segera merespons
+    pesan teks; fitur ini tersedia mulai Android 4.1. Jika menggunakan tombol tindakan tambahan, Anda
+    juga harus membuat fungsionalitasnya tersedia dalam {@link android.app.Activity} di aplikasi Anda; lihat
+    bagian <a href="#Compatibility">Menangani kompatibilitas</a> untuk detail selengkapnya.
+</p>
+<p>
+    Dalam {@link android.app.Notification}, tindakan itu sendiri didefinisikan oleh
+    {@link android.app.PendingIntent} berisi
+    {@link android.content.Intent} yang memulai
+    {@link android.app.Activity} dalam aplikasi Anda. Untuk mengaitkan
+    {@link android.app.PendingIntent} dengan gestur, panggil metode
+    {@link android.support.v4.app.NotificationCompat.Builder} yang sesuai. Misalnya, jika ingin memulai
+    {@link android.app.Activity} bila pengguna mengklik teks pemberitahuan pada
+    laci pemberitahuan, tambahkan {@link android.app.PendingIntent} dengan memanggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent setContentIntent()}.
+</p>
+<p>
+    Memulai {@link android.app.Activity} bila pengguna mengklik pemberitahuan adalah
+    skenario tindakan yang paling umum. Anda juga bisa memulai {@link android.app.Activity} bila pengguna
+    menghilangkan pemberitahuan. Dalam Android 4.1 dan yang lebih baru, Anda bisa memulai
+    {@link android.app.Activity} dari tombol tindakan. Untuk mengetahui selengkapnya, bacalah panduan acuan untuk
+    {@link android.support.v4.app.NotificationCompat.Builder}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Priority">Prioritas pemberitahuan</h3>
+<p>
+    Jika diinginkan, Anda bisa mengatur prioritas pemberitahuan. Prioritas berfungsi
+    sebagai petunjuk bagi UI perangkat tentang cara menampilkan pemberitahuan.
+    Untuk mengatur prioritas pemberitahuan, panggil {@link
+    android.support.v4.app.NotificationCompat.Builder#setPriority(int)
+    NotificationCompat.Builder.setPriority()} dan teruskan salah satu konstanta prioritas {@link
+    android.support.v4.app.NotificationCompat}. Ada
+    lima level prioritas, mulai dari {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MIN} (-2) hingga {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_MAX} (2); jika tidak diatur,
+    prioritas default akan ditetapkan {@link
+    android.support.v4.app.NotificationCompat#PRIORITY_DEFAULT} (0).
+</p>
+<p> Untuk informasi tentang mengatur level prioritas, lihat "Mengatur
+    dan mengelola prioritas pemberitahuan dengan benar" dalam panduan
+Desain <a href="{@docRoot}design/patterns/notifications.html">Pemberitahuan</a>.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="SimpleNotification">Membuat pemberitahuan sederhana</h3>
+<p>
+    Cuplikan berikut mengilustrasikan pemberitahuan sederhana yang menetapkan aktivitas untuk dibuka bila
+    pengguna mengklik pemberitahuan. Perhatikan bahwa kode ini membuat
+    objek {@link android.support.v4.app.TaskStackBuilder} dan menggunakannya untuk membuat
+    {@link android.app.PendingIntent} untuk tindakan. Pola ini dijelaskan secara lebih detail
+    di bagian <a href="#NotificationResponse">
+    Mempertahankan Navigasi saat Memulai Aktivitas</a>:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder =
+        new NotificationCompat.Builder(this)
+        .setSmallIcon(R.drawable.notification_icon)
+        .setContentTitle("My notification")
+        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+Intent resultIntent = new Intent(this, ResultActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(
+            0,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        );
+mBuilder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+mNotificationManager.notify(mId, mBuilder.build());
+</pre>
+<p>Demikian saja. Pengguna Anda kini telah diberi tahu.</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ApplyStyle">Menerapkan layout yang diperluas pada pemberitahuan</h3>
+<p>
+    Agar pemberitahuan muncul dalam tampilan yang diperluas, buat dahulu
+    objek {@link android.support.v4.app.NotificationCompat.Builder} dengan opsi tampilan normal
+    yang Anda inginkan. Berikutnya, panggil {@link android.support.v4.app.NotificationCompat.Builder#setStyle
+    Builder.setStyle()}  dengan objek layout yang diperluas sebagai argumennya.
+</p>
+<p>
+    Ingatlah bahwa pemberitahuan yang diperluas tidak tersedia pada platform-platform sebelum Android 4.1. Untuk
+    mengetahui cara menangani pemberitahuan untuk Android 4.1 dan untuk platform-platform sebelumnya, bacalah
+    bagian <a href="#Compatibility">Menangani kompatibilitas</a>.
+</p>
+<p>
+    Misalnya, cuplikan kode berikut memperagakan cara mengubah pemberitahuan yang dibuat
+    dalam cuplikan sebelumnya untuk menggunakan layout yang diperluas:
+</p>
+<pre>
+NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+    .setSmallIcon(R.drawable.notification_icon)
+    .setContentTitle("Event tracker")
+    .setContentText("Events received")
+NotificationCompat.InboxStyle inboxStyle =
+        new NotificationCompat.InboxStyle();
+String[] events = new String[6];
+// Sets a title for the Inbox in expanded layout
+inboxStyle.setBigContentTitle("Event tracker details:");
+...
+// Moves events into the expanded layout
+for (int i=0; i &lt; events.length; i++) {
+
+    inboxStyle.addLine(events[i]);
+}
+// Moves the expanded layout object into the notification object.
+mBuilder.setStyle(inBoxStyle);
+...
+// Issue the notification here.
+</pre>
+
+<h3 id="Compatibility">Menangani kompatibilitas</h3>
+
+<p>
+    Tidak semua fitur pemberitahuan tersedia untuk versi tertentu, walaupun
+    metode untuk mengaturnya ada dalam kelas pustaka dukungan
+    {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder}.
+    Misalnya, tombol tindakan, yang bergantung pada pemberitahuan yang diperluas, hanya muncul pada Android
+    4.1 dan lebih tinggi, karena pemberitahuan yang diperluas itu sendiri hanya tersedia pada
+    Android 4.1 dan yang lebih tinggi.
+</p>
+<p>
+    Untuk memastikan kompatibilitas terbaik, buatlah pemberitahuan dengan
+    {@link android.support.v4.app.NotificationCompat NotificationCompat} dan subkelasnya,
+    khususnya {@link android.support.v4.app.NotificationCompat.Builder
+    NotificationCompat.Builder}. Selain itu, ikutilah proses ini bila Anda mengimplementasikan pemberitahuan:
+</p>
+<ol>
+    <li>
+        Sediakan semua fungsionalitas pemberitahuan kepada semua pengguna, terlepas dari versi
+        yang mereka gunakan. Caranya, pastikan semua fungsionalitas tersedia dari
+        {@link android.app.Activity} dalam aplikasi Anda. Anda mungkin perlu menambahkan sebuah
+        {@link android.app.Activity} baru untuk melakukannya.
+        <p>
+            Misalnya, jika Anda ingin menggunakan
+            {@link android.support.v4.app.NotificationCompat.Builder#addAction addAction()} untuk
+            menyediakan kontrol yang menghentikan dan memulai pemutaran media, implementasikan dahulu
+            kontrol ini pada {@link android.app.Activity} dalam aplikasi Anda.
+        </p>
+    </li>
+    <li>
+        Pastikan semua pengguna bisa memperoleh fungsionalitas dalam {@link android.app.Activity},
+        dengan memulainya bila pengguna mengklik pemberitahuan. Caranya,
+        buatlah {@link android.app.PendingIntent}
+        untuk {@link android.app.Activity}. Panggil
+        {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+        setContentIntent()} untuk menambahkan {@link android.app.PendingIntent} pada pemberitahuan.
+    </li>
+    <li>
+        Kini tambahkan fitur pemberitahuan diperluas yang ingin Anda gunakan pada pemberitahuan. Ingatlah
+        bahwa setiap fungsionalitas yang Anda tambahkan juga harus tersedia dalam {@link android.app.Activity}
+        yang akan dimulai bila pengguna mengklik pemberitahuan.
+    </li>
+</ol>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Managing">Mengelola Pemberitahuan</h2>
+<p>
+    Bila perlu mengeluarkan pemberitahuan beberapa kali untuk tipe kejadian yang sama,
+hindari membuat pemberitahuan yang sama sekali baru. Sebagai gantinya, Anda harus mempertimbangkan untuk memperbarui
+    pemberitahuan sebelumnya, baik dengan mengubah sebagian nilainya atau dengan menambahkan nilai, atau keduanya.
+</p>
+<p>
+    Misalnya, Gmail akan memberi tahu pengguna bila ada email baru dengan menambah hitungan
+    pesan tidak terbaca dan dengan menambahkan rangkuman tiap email ke pemberitahuan. Ini disebut dengan
+    "stacking" (menumpuk) pemberitahuan; hal ini dijelaskan lebih detail dalam panduan
+    Desain <a href="{@docRoot}design/patterns/notifications.html">Pemberitahuan</a>.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Fitur Gmail ini mensyaratkan layout "kotak masuk" diperluas, yang merupakan
+    bagian dari fitur pemberitahuan diperluas yang tersedia mulai Android 4.1.
+</p>
+<p>
+    Bagian berikut menjelaskan cara memperbarui pemberitahuan dan cara menghapusnya.
+</p>
+<h3 id="Updating">Memperbarui pemberitahuan</h3>
+<p>
+    Untuk menyiapkan pemberitahuan agar bisa diperbarui, keluarkan pemberitahuan bersama ID pemberitahuan dengan
+    memanggil {@link android.app.NotificationManager#notify(int, android.app.Notification) NotificationManager.notify()}.
+    Untuk memperbarui pemberitahuan ini setelah Anda
+    mengeluarkan, memperbarui, atau membuat objek {@link android.support.v4.app.NotificationCompat.Builder},
+    buat objek {@link android.app.Notification} darinya, dan keluarkan
+    {@link android.app.Notification} bersama ID yang sama dengan yang Anda gunakan sebelumnya. Jika
+    pemberitahuan sebelumnya tetap terlihat, sistem akan memperbaruinya dari konten
+    objek {@link android.app.Notification}. Jika pemberitahuan sebelumnya telah dihilangkan, sebuah
+    pemberitahuan baru akan dibuat.
+</p>
+<p>
+    Cuplikan berikut memperagakan pemberitahuan yang diperbarui untuk mencerminkan
+    jumlah kejadian yang telah terjadi. Cuplikan ini menumpuk pemberitahuan, yang menampilkan rangkuman:
+</p>
+<pre>
+mNotificationManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Sets an ID for the notification, so it can be updated
+int notifyID = 1;
+mNotifyBuilder = new NotificationCompat.Builder(this)
+    .setContentTitle("New Message")
+    .setContentText("You've received new messages.")
+    .setSmallIcon(R.drawable.ic_notify_status)
+numMessages = 0;
+// Start of a loop that processes data and then notifies the user
+...
+    mNotifyBuilder.setContentText(currentText)
+        .setNumber(++numMessages);
+    // Because the ID remains unchanged, the existing notification is
+    // updated.
+    mNotificationManager.notify(
+            notifyID,
+            mNotifyBuilder.build());
+...
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="Removing">Menghapus pemberitahuan</h3>
+<p>
+    Pemberitahuan tetap terlihat hingga salah satu kejadian berikut terjadi:
+</p>
+<ul>
+    <li>
+        Pengguna menghilangkan pemberitahuan satu per satu atau dengan menggunakan "Clear All" (jika
+        pemberitahuan bisa dihapus).
+    </li>
+    <li>
+        Pengguna mengklik pemberitahuan, dan Anda memanggil
+        {@link android.support.v4.app.NotificationCompat.Builder#setAutoCancel setAutoCancel()} bila
+        Anda telah membuat pemberitahuan.
+    </li>
+    <li>
+        Anda memanggil {@link android.app.NotificationManager#cancel(int) cancel()} untuk
+        ID pemberitahuan tertentu. Metode ini juga menghapus pemberitahuan yang berjalan.
+    </li>
+    <li>
+        Anda memanggil {@link android.app.NotificationManager#cancelAll() cancelAll()}, yang menghapus
+        semua pemberitahuan yang dikeluarkan sebelumnya.
+    </li>
+</ul>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="NotificationResponse">Mempertahankan Navigasi saat Memulai Aktivitas</h2>
+<p>
+    Bila memulai {@link android.app.Activity} dari pemberitahuan, Anda harus mempertahankan
+    pengalaman navigasi yang diharapkan pengguna. Mengklik <i>Back</i> harus membawa pengguna kembali melalui
+    aliran pekerjaan normal aplikasi ke layar Home, dan mengklik <i>Recents</i> harus menampilkan
+    {@link android.app.Activity} sebagai tugas terpisah. Untuk mempertahankan pengalaman navigasi, Anda
+    harus memulai {@link android.app.Activity} dalam tugas baru. Cara menyiapkan
+    {@link android.app.PendingIntent} untuk memberi Anda tugas baru bergantung pada sifat
+    {@link android.app.Activity} yang Anda mulai. Ada dua situasi umum:
+</p>
+<dl>
+    <dt>
+        Aktivitas rutin
+    </dt>
+    <dd>
+        Anda memulai {@link android.app.Activity} yang merupakan bagian dari aliran pekerjaan normal
+        aplikasi. Dalam situasi ini, siapkan {@link android.app.PendingIntent} untuk
+        memulai tugas baru, dan sediakan {@link android.app.PendingIntent} bersama back-stack
+        yang meniru perilaku <i>Back</i> biasa.
+        <p>
+            Pemberitahuan dari aplikasi Gmail memperagakan hal ini. Bila Anda mengklik pemberitahuan untuk
+            satu pesan email, Anda akan melihat pesan itu sendiri. Menyentuh <b>Back</b> akan membawa Anda
+            kembali melalui Gmail ke layar Home, persis seperti jika memasuki Gmail dari
+            layar Home bukannya memasukinya dari pemberitahuan.
+        </p>
+        <p>
+            Hal ini terjadi terlepas dari aplikasi tempat Anda berada saat menyentuh
+            pemberitahuan. Misalnya, jika Anda dalam Gmail sedang menulis pesan, dan Anda mengklik
+            pemberitahuan untuk satu email, Anda akan segera dibawa ke email itu. Menyentuh <i>Back</i>
+            akan membawa Anda ke kotak masuk kemudian layar Home, bukannya membawa Anda ke
+            pesan yang sedang ditulis.
+        </p>
+    </dd>
+    <dt>
+        Aktivitas khusus
+    </dt>
+    <dd>
+        Pengguna hanya melihat {@link android.app.Activity} ini jika dimulai dari pemberitahuan.
+        Dalam beberapa hal, {@link android.app.Activity} akan memperluas pemberitahuan dengan menyediakan
+        informasi yang akan sulit untuk ditampilkan dalam pemberitahuan itu sendiri. Untuk situasi ini,
+        siapkan {@link android.app.PendingIntent} untuk dimulai dalam tugas baru. Tidak perlu
+        membuat back-stack, karena {@link android.app.Activity} yang dimulai bukan bagian dari
+        aliran aktivitas aplikasi. Mengklik <i>Back</i> tetap akan membawa pengguna ke
+        layar Home.
+    </dd>
+</dl>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="DirectEntry">Menyiapkan PendingIntent aktivitas biasa</h3>
+<p>
+    Untuk menyiapkan {@link android.app.PendingIntent} yang memulai entri langsung
+    {@link android.app.Activity}, ikuti langkah-langkah ini:
+</p>
+<ol>
+    <li>
+        Definisikan hierarki {@link android.app.Activity} aplikasi Anda dalam manifes.
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Tambahkan dukungan untuk Android 4.0.3 dan yang terdahulu. Caranya, tetapkan induk
+                {@link android.app.Activity} yang Anda mulai dengan menambahkan elemen
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
+                sebagai anak
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>.
+                <p>
+                    Untuk elemen ini, atur
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a>="android.support.PARENT_ACTIVITY"</code>.
+                    Atur
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#val">android:value</a>="&lt;parent_activity_name&gt;"</code>
+                    dengan <code>&lt;parent_activity_name&gt;</code> sebagai nilai
+<code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html#nm">android:name</a></code>
+                    untuk elemen induk
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+. Lihat XML berikut sebagai contoh.
+                </p>
+            </li>
+            <li>
+                Juga tambahkan dukungan untuk Android 4.1 dan yang lebih baru. Caranya, tambahkan atribut
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">android:parentActivityName</a></code>
+                 pada elemen
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+                dari {@link android.app.Activity} yang Anda mulai.
+            </li>
+        </ol>
+        <p>
+            XML akhir akan terlihat seperti ini:
+        </p>
+<pre>
+&lt;activity
+    android:name=".MainActivity"
+    android:label="&#64;string/app_name" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;activity
+    android:name=".ResultActivity"
+    android:parentActivityName=".MainActivity"&gt;
+    &lt;meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value=".MainActivity"/&gt;
+&lt;/activity&gt;
+</pre>
+    </li>
+    <li>
+        Buat back-stack berdasarkan {@link android.content.Intent} yang memulai
+        {@link android.app.Activity}:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Buat {@link android.content.Intent} untuk memulai {@link android.app.Activity}.
+            </li>
+            <li>
+                Buat stack-builder (pembangun tumpukan) dengan memanggil {@link android.app.TaskStackBuilder#create
+                TaskStackBuilder.create()}.
+            </li>
+            <li>
+                Tambahkan back-stack ke stack-builder dengan memanggil
+                {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}.
+                Untuk setiap {@link android.app.Activity} dalam hierarki yang telah Anda definisikan dalam
+                manifes, back-stack berisi objek {@link android.content.Intent} yang
+                memulai {@link android.app.Activity}. Metode ini juga menambahkan flag yang memulai
+                back-stack dalam tugas baru.
+                <p class="note">
+                    <strong>Catatan:</strong> Walaupun argumen untuk
+                    {@link android.support.v4.app.TaskStackBuilder#addParentStack addParentStack()}
+                    adalah acuan ke {@link android.app.Activity} yang dimulai, panggilan metode
+                    tidak akan menambahkan {@link android.content.Intent} yang memulai
+                    {@link android.app.Activity}. Sebagai gantinya, hal itu ditangani dalam langkah berikutnya.
+                </p>
+            </li>
+            <li>
+                Tambahkan {@link android.content.Intent} yang memulai {@link android.app.Activity}
+                dari pemberitahuan, dengan memanggil
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+                Teruskan {@link android.content.Intent} yang Anda buat dalam langkah pertama sebagai
+                argumen ke
+                {@link android.support.v4.app.TaskStackBuilder#addNextIntent addNextIntent()}.
+            </li>
+            <li>
+                Jika perlu, tambahkan argumen ke objek {@link android.content.Intent} pada
+                back-stack dengan memanggil {@link android.support.v4.app.TaskStackBuilder#editIntentAt
+                TaskStackBuilder.editIntentAt()}. Kadang-kadang perlu memastikan apakah
+                {@link android.app.Activity} target menampilkan data bermakna saat pengguna menelusurinya
+                dengan menggunakan <i>Back</i>.
+            </li>
+            <li>
+                Dapatkan {@link android.app.PendingIntent} untuk back-stack ini dengan memanggil
+                {@link android.support.v4.app.TaskStackBuilder#getPendingIntent getPendingIntent()}.
+                Anda nanti bisa menggunakan {@link android.app.PendingIntent} ini sebagai argumen untuk
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+     </li>
+</ol>
+<p>
+    Cuplikan kode berikut memperagakan prosesnya:
+</p>
+<pre>
+...
+Intent resultIntent = new Intent(this, ResultActivity.class);
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack
+stackBuilder.addParentStack(ResultActivity.class);
+// Adds the Intent to the top of the stack
+stackBuilder.addNextIntent(resultIntent);
+// Gets a PendingIntent containing the entire back stack
+PendingIntent resultPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+...
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+builder.setContentIntent(resultPendingIntent);
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mNotificationManager.notify(id, builder.build());
+</pre>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ExtendedNotification">Menyiapkan PendingIntent aktivitas khusus</h3>
+<p>
+    Bagian berikut menjelaskan cara menyiapkan aktivitas khusus
+    {@link android.app.PendingIntent}.
+</p>
+<p>
+    {@link android.app.Activity} khusus tidak memerlukan back-stack, sehingga Anda tidak perlu
+    mendefinisikan hierarki {@link android.app.Activity}-nya dalam manifes, dan Anda tidak perlu
+    memanggil
+    {@link android.support.v4.app.TaskStackBuilder#addParentStack  addParentStack()} untuk membuat
+    back-stack. Sebagai gantinya, gunakan manifes untuk menyiapkan opsi tugas {@link android.app.Activity},
+    dan buat {@link android.app.PendingIntent} dengan memanggil
+    {@link android.app.PendingIntent#getActivity getActivity()}:
+</p>
+<ol>
+    <li>
+        Dalam manifes, tambahkan atribut berikut pada elemen
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+        untuk {@link android.app.Activity}
+        <dl>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">android:name</a>="<i>activityclass</i>"</code>
+            </dt>
+            <dd>
+                Nama kelas mutlak (fully qualified) aktivitas.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">android:taskAffinity</a>=""</code>
+            </dt>
+            <dd>
+                Dikombinasikan dengan flag
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                yang Anda atur dalam kode, ini memastikan bahwa {@link android.app.Activity} ini tidak
+                masuk ke dalam tugas default aplikasi. Setiap tugas yang ada yang memiliki
+                afinitas default aplikasi tidak terpengaruh.
+            </dd>
+            <dt>
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">android:excludeFromRecents</a>="true"</code>
+            </dt>
+            <dd>
+                Mengecualikan tugas baru dari <i>Recents</i>, sehingga pengguna tidak bisa tanpa sengaja
+                mengarahkan kembali.
+            </dd>
+        </dl>
+        <p>
+            Cuplikan ini menampilkan elemen:
+        </p>
+<pre>
+&lt;activity
+    android:name=".ResultActivity"
+...
+    android:launchMode="singleTask"
+    android:taskAffinity=""
+    android:excludeFromRecents="true"&gt;
+&lt;/activity&gt;
+...
+</pre>
+    </li>
+    <li>
+        Buat dan keluarkan pemberitahuan:
+        <ol style="list-style-type: lower-alpha;">
+            <li>
+                Buat {@link android.content.Intent} yang memulai
+                {@link android.app.Activity}.
+            </li>
+            <li>
+                Atur {@link android.app.Activity} untuk dimulai dalam tugas kosong yang baru dengan memanggil
+                {@link android.content.Intent#setFlags setFlags()} dengan flag
+                {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK FLAG_ACTIVITY_NEW_TASK}
+                dan
+                {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TASK FLAG_ACTIVITY_CLEAR_TASK}.
+            </li>
+            <li>
+                Atur setiap opsi lain yang Anda perlukan untuk {@link android.content.Intent}.
+            </li>
+            <li>
+                Buat {@link android.app.PendingIntent} dari {@link android.content.Intent}
+                dengan memanggil {@link android.app.PendingIntent#getActivity getActivity()}.
+                Anda nanti bisa menggunakan {@link android.app.PendingIntent} ini sebagai argumen untuk
+                {@link android.support.v4.app.NotificationCompat.Builder#setContentIntent
+                setContentIntent()}.
+            </li>
+        </ol>
+    <p>
+        Cuplikan kode berikut memperagakan prosesnya:
+    </p>
+<pre>
+// Instantiate a Builder object.
+NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+// Creates an Intent for the Activity
+Intent notifyIntent =
+        new Intent(this, ResultActivity.class);
+// Sets the Activity to start in a new, empty task
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// Creates the PendingIntent
+PendingIntent notifyPendingIntent =
+        PendingIntent.getActivity(
+        this,
+        0,
+        notifyIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// Puts the PendingIntent into the notification builder
+builder.setContentIntent(notifyPendingIntent);
+// Notifications are issued by sending them to the
+// NotificationManager system service.
+NotificationManager mNotificationManager =
+    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// Builds an anonymous Notification object from the builder, and
+// passes it to the NotificationManager
+mNotificationManager.notify(id, builder.build());
+</pre>
+    </li>
+</ol>
+<!-- ------------------------------------------------------------------------------------------ -->
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="Progress">Menampilkan Kemajuan dalam Pemberitahuan</h2>
+<p>
+    Pemberitahuan bisa menyertakan indikator kemajuan beranimasi yang menampilkan status
+operasi yang berjalan kepada pengguna. Jika Anda bisa memperkirakan lamanya operasi berlangsung dan berapa banyak
+    yang sudah selesai pada suatu waktu, gunakan bentuk indikator yang "pasti"
+    (baris kemajuan). Jika Anda tidak bisa memperkirakan lamanya operasi, gunakan
+    bentuk indikator "tidak pasti" (indikator aktivitas).
+</p>
+<p>
+    Indikator kemajuan ditampilkan bersama implementasi platform
+    kelas {@link android.widget.ProgressBar}.
+</p>
+<p>
+    Untuk menggunakan indikator kemajuan pada platform mulai dari Android 4.0, panggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}. Untuk
+    versi sebelumnya, Anda harus membuat layout pemberitahuan custom sendiri yang
+menyertakan tampilan {@link android.widget.ProgressBar}.
+</p>
+<p>
+    Bagian berikut ini menjelaskan cara menampilkan kemajuan dalam pemberitahuan dengan menggunakan
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="FixedProgress">Menampilkan indikator kemajuan berdurasi tetap</h3>
+<p>
+    Untuk menampilkan baris kemajuan pasti, tambahkan baris itu ke pemberitahuan dengan memanggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(max, progress, false)}, kemudian keluarkan pemberitahuan. Selagi operasi berlangsung,
+    tambah <code>progress</code>, dan perbarui pemberitahuan. Di akhir operasi,
+    <code>progress</code> harus sama dengan <code>max</code>. Satu cara umum memanggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()}
+    adalah mengatur <code>max</code> ke 100, kemudian tambah <code>progress</code> sebagai
+     nilai "persen selesai"untuk operasi itu.
+</p>
+<p>
+    Anda bisa membiarkan baris kemajuan ditampilkan saat operasi selesai, atau menghilangkannya. Dalam
+    hal apa pun, ingatlah memperbarui teks pemberitahuan untuk menampilkan bahwa operasi telah selesai.
+    Untuk menghapus baris kemajuan, panggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
+    setProgress(0, 0, false)}. Misalnya:
+</p>
+<pre>
+...
+mNotifyManager =
+        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+mBuilder = new NotificationCompat.Builder(this);
+mBuilder.setContentTitle("Picture Download")
+    .setContentText("Download in progress")
+    .setSmallIcon(R.drawable.ic_notification);
+// Start a lengthy operation in a background thread
+new Thread(
+    new Runnable() {
+        &#64;Override
+        public void run() {
+            int incr;
+            // Do the "lengthy" operation 20 times
+            for (incr = 0; incr &lt;= 100; incr+=5) {
+                    // Sets the progress indicator to a max value, the
+                    // current completion percentage, and "determinate"
+                    // state
+                    mBuilder.setProgress(100, incr, false);
+                    // Displays the progress bar for the first time.
+                    mNotifyManager.notify(0, mBuilder.build());
+                        // Sleeps the thread, simulating an operation
+                        // that takes time
+                        try {
+                            // Sleep for 5 seconds
+                            Thread.sleep(5*1000);
+                        } catch (InterruptedException e) {
+                            Log.d(TAG, "sleep failure");
+                        }
+            }
+            // When the loop is finished, updates the notification
+            mBuilder.setContentText("Download complete")
+            // Removes the progress bar
+                    .setProgress(0,0,false);
+            mNotifyManager.notify(ID, mBuilder.build());
+        }
+    }
+// Starts the thread by calling the run() method in its Runnable
+).start();
+</pre>
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h3 id="ActivityIndicator">Menampilkan indikator aktivitas berlanjut</h3>
+<p>
+    Untuk menampilkan indikator aktivitas tidak pasti, tambahkan aktivitas ke pemberitahuan dengan
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, true)}
+    (dua argumen pertama akan diabaikan), dan keluarkan pemberitahuan. Hasilnya adalah indikator
+    yang memiliki gaya yang sama dengan baris kemajuan, hanya saja animasinya terus berjalan.
+</p>
+<p>
+    Keluarkan pemberitahuan di awal operasi. Animasi akan berjalan hingga Anda
+    memodifikasi pemberitahuan. Bila operasi selesai, panggil
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)}
+    kemudian perbarui pemberitahuan untuk menghapus indikator aktivitas.
+    Selalu lakukan ini; jika makan animasi akan terus berjalan sekalipun operasi telah selesai. Juga
+    ingatlah mengubah teks pemberitahuan untuk menunjukkan bahwa operasi telah selesai.
+</p>
+<p>
+    Untuk melihat cara kerja indikator aktivitas, lihat cuplikan terdahulu. Cari lokasi baris-baris berikut:
+</p>
+<pre>
+// Sets the progress indicator to a max value, the current completion
+// percentage, and "determinate" state
+mBuilder.setProgress(100, incr, false);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+<p>
+    Ganti baris yang telah Anda temukan dengan baris berikut:
+</p>
+<pre>
+ // Sets an activity indicator for an operation of indeterminate length
+mBuilder.setProgress(0, 0, true);
+// Issues the notification
+mNotifyManager.notify(0, mBuilder.build());
+</pre>
+
+<h2 id="metadata">Metadata Pemberitahuan</h2>
+
+<p>Pemberitahuan dapat disortir sesuai metadata yang Anda tetapkan dengan
+metode {@link android.support.v4.app.NotificationCompat.Builder} berikut:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setCategory(java.lang.String) setCategory()}
+    memberi tahu sistem cara menangani pemberitahuan aplikasi Anda bila perangkat berada dalam mode Priority
+    (misalnya, jika pemberitahuan menyatakan suatu panggilan masuk, pesan instan, atau alarm).</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#setPriority(int) setPriority()} menyebabkan
+    pemberitahuan dengan bidang prioritas diatur ke {@code PRIORITY_MAX} atau {@code PRIORITY_HIGH}
+    muncul dalam jendela kecil mengambang jika pemberitahuan juga memiliki suara atau getaran.</li>
+    <li>{@link android.support.v4.app.NotificationCompat.Builder#addPerson(java.lang.String) addPerson()}
+    memungkinkan Anda menambahkan daftar orang ke pemberitahuan. Aplikasi Anda bisa menggunakannya untuk memberi isyarat pada
+    sistem bahwa sistem harus mengelompokkan bersama pemberitahuan dari orang-orang yang ditetapkan, atau memberi peringkat lebih penting pada pemberitahuan
+    untuk orang-orang ini.</li>
+</ul>
+
+<div class="figure" style="width:230px">
+  <img src="{@docRoot}images/ui/notifications/heads-up.png" alt="" width="" height="" id="figure3" />
+  <p class="img-caption">
+    <strong>Gambar 3.</strong> Aktivitas layar penuh yang menampilkan pemberitahuan pendahuluan
+  </p>
+</div>
+
+<h2 id="Heads-up">Pemberitahuan Pendahuluan</h2>
+
+<p>Dengan Android 5.0 (API level 21), pemberitahuan bisa muncul dalam jendela kecil mengambang
+(yang disebut juga dengan <em>pemberitahuan pendahuluan</em>) saat perangkat aktif
+(yakni, perangkat dibuka kuncinya dan layarnya menyala). Pemberitahuan ini
+muncul seperti bentuk ringkas pemberitahuan Anda, hanya saja
+pemberitahuan pendahuluan juga menampilkan tombol tindakan. Pengguna bisa menindaklanjuti atau mengabaikan,
+pemberitahuan pendahuluan tanpa meninggalkan aplikasi saat ini.</p>
+
+<p>Contoh-contoh kondisi yang dapat memicu pemberitahuan pendahuluan antara lain:</p>
+
+<ul>
+  <li>Aktivitas pengguna berada dalam mode layar penuh (aplikasi menggunakan
+{@link android.app.Notification#fullScreenIntent}), atau</li>
+  <li>Pemberitahuan memiliki prioritas tinggi dan menggunakan nada dering atau
+    getaran</li>
+</ul>
+
+<h2 id="lockscreenNotification">Pemberitahuan Layar Kunci</h2>
+
+<p>Dengan rilis Android 5.0 (API level 21), pemberitahuan kini dapat muncul pada
+layar kunci. Aplikasi Anda bisa menggunakan fungsionalitas ini untuk menyediakan kontrol pemutaran media dan
+tindakan umum lainnya. Pengguna bisa memilih lewat Settings apakah akan menampilkan pemberitahuan pada layar kunci, dan
+Anda bisa mendesain apakah pemberitahuan aplikasi akan terlihat pada layar kunci.</p>
+
+<h3 id="visibility">Mengatur Visibilitas</h3>
+
+<p>Aplikasi Anda bisa mengatur level detail terlihat pada pemberitahuan yang ditampilkan di
+layar kunci aman. Anda memanggil {@link android.support.v4.app.NotificationCompat.Builder#setVisibility(int) setVisibility()}
+dan menetapkan salah satu nilai berikut:</p>
+
+<ul>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC} menampilkan isi lengkap
+    pemberitahuan.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_SECRET} tidak menampilkan bagian apa pun dari
+    pemberitahuan ini pada layar kunci.</li>
+    <li>{@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} menampilkan informasi dasar,
+    misalnya ikon dan judul isi pemberitahuan, namun menyembunyikan isi lengkap pemberitahuan.</li>
+</ul>
+
+<p>Bila {@link android.support.v4.app.NotificationCompat#VISIBILITY_PRIVATE} telah diatur, Anda juga bisa
+menyediakan versi alternatif isi pemberitahuan yang menyembunyikan detail tertentu. Misalnya,
+aplikasi SMS dapat menampilkan pemberitahuan yang menampilkan <em>Anda memiliki 3 pesan teks baru</em>, namun menyembunyikan
+isi dan pengirim pesan. Untuk menyediakan pemberitahuan alternatif ini, buat dahulu pemberitahuan
+pengganti menggunakan {@link android.support.v4.app.NotificationCompat.Builder}. Bila Anda membuat
+objek pemberitahuan privat, lampirkan pemberitahuan pengganti melalui metode
+{@link android.support.v4.app.NotificationCompat.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}
+.</p>
+
+<h3 id="controllingMedia">Mengontrol Pemutaran Media pada Layar Kunci</h3>
+
+<p>Dalam Android 5.0 (API level 21) layar kunci tidak lagi menampilkan kontrol media
+berdasarkan {@link android.media.RemoteControlClient}, yang sekarang telah dihilangkan. Sebagai gantinya, gunakan
+template {@link android.app.Notification.MediaStyle} dengan metode
+{@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+, yang mengubah tindakan menjadi ikon yang bisa diklik.</p>
+
+<p class="note"><strong>Catatan:</strong> Template dan metode {@link android.app.Notification.Builder#addAction(android.app.Notification.Action) addAction()}
+tidak disertakan dalam pustaka dukungan, sehingga fitur-fitur ini berjalan pada Android 5.0 dan yang lebih tinggi
+saja.</p>
+
+<p>Untuk menampilkan kontrol pemutaran media di layar kunci dalam Android 5.0, atur visibilitas
+ke {@link android.support.v4.app.NotificationCompat#VISIBILITY_PUBLIC}, seperti dijelaskan di atas. Kemudian tambahkan
+tindakan dan atur template {@link android.app.Notification.MediaStyle}, seperti dijelaskan dalam contoh kode
+berikut:</p>
+
+<pre>
+Notification notification = new Notification.Builder(context)
+    // Show controls on lock screen even when user hides sensitive content.
+    .setVisibility(Notification.VISIBILITY_PUBLIC)
+    .setSmallIcon(R.drawable.ic_stat_player)
+    // Add media control buttons that invoke intents in your media service
+    .addAction(R.drawable.ic_prev, "Previous", prevPendingIntent) // #0
+    .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)  // #1
+    .addAction(R.drawable.ic_next, "Next", nextPendingIntent)     // #2
+    // Apply the media style template
+    .setStyle(new Notification.MediaStyle()
+    .setShowActionsInCompactView(1 /* #1: pause button */)
+    .setMediaSession(mMediaSession.getSessionToken())
+    .setContentTitle("Wonderful music")
+    .setContentText("My Awesome Band")
+    .setLargeIcon(albumArtBitmap)
+    .build();
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Dihilangkannya {@link android.media.RemoteControlClient}
+memiliki implikasi lebih jauh untuk mengontrol media. Lihat
+<a href="{@docRoot}about/versions/android-5.0.html#MediaPlaybackControl">Kontrol Pemutaran Media</a>
+untuk informasi selengkapnya tentang API baru untuk mengelola sesi media dan mengontrol pemutaran.</p>
+
+
+<!-- ------------------------------------------------------------------------------------------ -->
+<h2 id="CustomNotification">Layout Pemberitahuan Custom</h2>
+<p>
+    Kerangka kerja pemberitahuan memungkinkan Anda mendefinisikan layout pemberitahuan custom, yang
+    mendefinisikan penampilan pemberitahuan dalam objek {@link android.widget.RemoteViews}.
+    Pemberitahuan dengan layout custom serupa pemberitahuan normal, namun dibuat berdasarkan
+    {@link android.widget.RemoteViews} yang didefinisikan dalam file layout XML.
+</p>
+<p>
+    Tinggi yang tersedia untuk layout pemberitahuan custom bergantung pada tampilan pemberitahuan. Layout
+    tampilan normal dibatasi hingga 64 dp, dan layout tampilan yang diperluas dibatasi hingga 256 dp.
+</p>
+<p>
+    Untuk mendefinisikan layout pemberitahuan custom, mulailah dengan membuat instance
+    objek {@link android.widget.RemoteViews} yang memekarkan file layout XML. Kemudian,
+    sebagai ganti memanggil metode seperti
+    {@link android.support.v4.app.NotificationCompat.Builder#setContentTitle setContentTitle()},
+    panggil {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Untuk mengatur
+    detail isi pemberitahuan custom, gunakan metode dalam
+    {@link android.widget.RemoteViews} untuk mengatur nilai anak tampilan:
+</p>
+<ol>
+    <li>
+        Buat layout XML untuk pemberitahuan di file terpisah. Anda bisa menggunakan nama file
+apa saja yang diinginkan, namun Anda harus menggunakan ekstensi <code>.xml</code>
+    </li>
+    <li>
+        Dalam aplikasi Anda, gunakan metode {@link android.widget.RemoteViews} untuk mendefinisikan
+        ikon dan teks pemberitahuan. Masukkan objek {@link android.widget.RemoteViews} ini ke dalam
+        {@link android.support.v4.app.NotificationCompat.Builder} Anda dengan memanggil
+        {@link android.support.v4.app.NotificationCompat.Builder#setContent setContent()}. Hindari
+        mengatur {@link android.graphics.drawable.Drawable} latar belakang pada
+        objek {@link android.widget.RemoteViews} Anda, karena warna teks bisa menjadi tidak terbaca.
+    </li>
+</ol>
+<p>
+    Kelas {@link android.widget.RemoteViews} juga menyertakan metode yang bisa Anda gunakan untuk
+    menambahkan {@link android.widget.Chronometer} atau {@link android.widget.ProgressBar}
+dengan mudah ke layout pemberitahuan Anda. Untuk informasi selengkapnya tentang cara membuat layout custom
+    pemberitahuan Anda, lihat dokumentasi acuan {@link android.widget.RemoteViews}.
+</p>
+<p class="caution">
+    <strong>Perhatian:</strong> Bila Anda menggunakan layout pemberitahuan custom, berhati-hatilah
+    untuk memastikan bahwa layout custom itu bekerja pada berbagai orientasi dan resolusi perangkat. Walaupun
+    berlaku bagi semua layout View, nasihat ini khususnya penting untuk pemberitahuan karena
+    ruang di laci pemberitahuan sangat terbatas. Jangan buat layout custom terlalu
+    kompleks, dan pastikan mengujinya di berbagai konfigurasi.
+</p>
+<!-- ------------------------------------------------------------------------------------------ -->
+<h4>Menggunakan sumber daya gaya untuk teks pemberitahuan custom</h4>
+<p>
+    Selalu gunakan sumber daya gaya untuk teks pemberitahuan custom. Warna latar belakang
+    pemberitahuan bisa bervariasi di berbagai perangkat dan versi, dan menggunakan sumber daya gaya
+    membantu Anda menangani hal ini. Mulai Android 2.3, sistem mendefinisikan sebuah gaya untuk
+    teks layout pemberitahuan standar. Jika Anda menggunakan gaya yang sama dalam aplikasi yang menargetkan Android
+    2.3 atau yang lebih tinggi, Anda akan memastikan bahwa teks terlihat pada latar belakang tampilan.
+</p>

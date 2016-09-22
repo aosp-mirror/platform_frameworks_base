@@ -1,0 +1,266 @@
+page.title=Membuat Daftar dan Kartu
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#RecyclerView">Membuat Daftar</a></li>
+  <li><a href="#CardView">Membuat Kartu</a></li>
+  <li><a href="#Dependencies">Menambahkan Dependensi</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Untuk membuat daftar dan kartu yang kompleks dengan gaya desain bahan di aplikasi, Anda bisa menggunakan widget
+{@link android.support.v7.widget.RecyclerView} dan {@link android.support.v7.widget.CardView}.
+</p>
+
+
+<h2 id="RecyclerView">Membuat Daftar</h2>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} adalah
+versi {@link android.widget.ListView} yang lebih maju dan fleksibel. Widget ini adalah kontainer untuk menampilkan set data
+besar yang bisa digulir secara sangat efisien dengan mempertahankan tampilan dalam jumlah terbatas. Gunakan
+widget {@link android.support.v7.widget.RecyclerView} bila Anda memiliki kumpulan data dengan elemen
+yang berubah saat runtime berdasarkan tindakan pengguna atau kejadian jaringan.</p>
+
+<p>Kelas {@link android.support.v7.widget.RecyclerView} menyederhanakan penampilan dan penanganan
+set data yang besar dengan menyediakan:</p>
+
+<ul>
+  <li>Pengelola layout untuk memosisikan item</li>
+  <li>Animasi default untuk operasi item umum, misalnya penghapusan atau penambahan item</li>
+</ul>
+
+<p>Anda juga memiliki keluwesan untuk mendefinisikan pengelola layout custom dan animasi untuk widget {@link
+android.support.v7.widget.RecyclerView}.</p>
+
+<img src="{@docRoot}training/material/images/RecyclerView.png" alt="" width="550" height="106" />
+<p class="img-caption">
+<strong>Gambar 1</strong>. Widget <code>RecyclerView</code>.
+</p>
+
+<p>Untuk menggunakan widget {@link android.support.v7.widget.RecyclerView}, Anda harus menetapkan
+adaptor dan pengelola layout. Untuk membuat adaptor, perluas kelas {@link
+android.support.v7.widget.RecyclerView.Adapter RecyclerView.Adapter}. Detail
+implementasi bergantung pada detail set data Anda dan tipe tampilan. Untuk informasi selengkapnya,
+ lihat <a href="#RVExamples">contoh-contoh</a> di bawah.</p>
+
+<div style="float:right">
+<img src="{@docRoot}design/material/images/list_mail.png" alt="" width="250" height="426" />
+<p class="img-caption" style="margin-left:8px">
+<strong>Gambar 2</strong> - Daftar berisi <code>RecyclerView</code>.
+</p>
+</div>
+
+<p><strong>Pengelola layout</strong> memosisikan tampilan item dalam {@link
+android.support.v7.widget.RecyclerView} dan menentukan waktu untuk menggunakan ulang tampilan item yang tidak
+lagi terlihat oleh pengguna. Untuk menggunakan ulang (atau <em>mendaur ulang</em>) tampilan, pengelola layout bisa meminta
+adaptor untuk mengganti konten tampilan dengan elemen lain dalam dataset. Mendaur ulang
+tampilan dengan cara ini akan meningkatkan kinerja karena menghindari pembuatan tampilan yang tidak diperlukan atau
+melakukan pencarian {@link android.app.Activity#findViewById findViewById()} yang mahal.</p>
+
+<p>{@link android.support.v7.widget.RecyclerView} menyediakan semua pengelola layout bawaan ini:</p>
+
+<ul>
+<li>{@link android.support.v7.widget.LinearLayoutManager} menampilkan item dalam
+daftar gulir vertikal atau horizontal.</li>
+<li>{@link android.support.v7.widget.GridLayoutManager} menampilkan item dalam petak.</li>
+<li>{@link android.support.v7.widget.StaggeredGridLayoutManager} menampilkan item dalam petak zigzag.</li>
+</ul>
+
+<p>Untuk membuat pengelola layout custom, perluas kelas {@link
+android.support.v7.widget.RecyclerView.LayoutManager RecyclerView.LayoutManager}.</p>
+
+<h3>Animasi</h3>
+
+<p>Animasi untuk menambahkan dan menghapus item diaktifkan secara default di {@link
+android.support.v7.widget.RecyclerView}. Untuk menyesuaikan animasi ini, perluas kelas
+{@link android.support.v7.widget.RecyclerView.ItemAnimator RecyclerView.ItemAnimator}dan gunakan
+metode {@link android.support.v7.widget.RecyclerView#setItemAnimator RecyclerView.setItemAnimator()}.
+</p>
+
+<h3 id="RVExamples">Contoh</h3>
+
+<p>Contoh kode berikut memperagakan cara menambahkan
+{@link android.support.v7.widget.RecyclerView} ke layout:</p>
+
+<pre>
+&lt;!-- A RecyclerView with some commonly used attributes -->
+&lt;android.support.v7.widget.RecyclerView
+    android:id="@+id/my_recycler_view"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>
+</pre>
+
+<p>Begitu Anda menambahkan widget {@link android.support.v7.widget.RecyclerView} ke layout,
+dapatkan pengatur atau handle objek itu, hubungkan dengan pengelola layout, dan sertakan adaptor untuk data
+yang akan ditampilkan:</p>
+
+<pre>
+public class MyActivity extends Activity {
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+    }
+    ...
+}
+</pre>
+
+<p>Adaptor menyediakan akses ke item dataset Anda, membuat tampilan untuk item, dan
+mengganti konten sebagian tampilan dengan item data baru bila item semula tidak lagi
+terlihat. Contoh kode berikut menampilkan implementasi sederhana untuk sebuah dataset yang terdiri dari
+larik string yang ditampilkan dengan menggunakan widget {@link android.widget.TextView}:</p>
+
+<pre>
+public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.ViewHolder> {
+    private String[] mDataset;
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView mTextView;
+        public ViewHolder(TextView v) {
+            super(v);
+            mTextView = v;
+        }
+    }
+
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(String[] myDataset) {
+        mDataset = myDataset;
+    }
+
+    // Create new views (invoked by the layout manager)
+    &#64;Override
+    public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+        // create a new view
+        View v = LayoutInflater.from(parent.getContext())
+                               .inflate(R.layout.my_text_view, parent, false);
+        // set the view's size, margins, paddings and layout parameters
+        ...
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
+    }
+
+    // Replace the contents of a view (invoked by the layout manager)
+    &#64;Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        // - get element from your dataset at this position
+        // - replace the contents of the view with that element
+        holder.mTextView.setText(mDataset[position]);
+
+    }
+
+    // Return the size of your dataset (invoked by the layout manager)
+    &#64;Override
+    public int getItemCount() {
+        return mDataset.length;
+    }
+}
+</pre>
+
+
+<div style="float:right;margin-top:15px;margin-left:30px">
+<img src="{@docRoot}design/material/images/card_travel.png" alt="" width="225" height="383">
+<p class="img-caption" style="margin-left:12px">
+<strong>Gambar 3</strong>. Contoh kartu.
+</p>
+</div>
+
+<h2 id="CardView">Membuat Kartu</h2>
+
+<p>{@link android.support.v7.widget.CardView} memperluas kelas {@link android.widget.FrameLayout}
+dan memungkinkan Anda menampilkan informasi dalam kartu yang memiliki tampilan konsisten lintas platform. Widget {@link
+android.support.v7.widget.CardView} bisa memiliki bayangan dan sudut membulat.</p>
+
+<p>Untuk membuat kartu dengan bayangan, gunakan atribut <code>card_view:cardElevation</code>.
+{@link android.support.v7.widget.CardView} menggunakan elevasi nyata dan bayangan dinamis pada Android 5.0
+(API level 21) ke atas dan memundurkan ke implementasi bayangan terprogram pada versi terdahulu.
+Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/compatibility.html">Mempertahankan
+Kompatibilitas</a>.</p>
+
+<p>Gunakan properti-properti ini untuk menyesuaikan penampilan
+widget {@link android.support.v7.widget.CardView}:</p>
+
+<ul>
+  <li>Untuk mengatur radius sudut pada layout Anda, gunakan atribut <code>card_view:cardCornerRadius</code>.
+</li>
+  <li>Untuk mengatur radius sudut dalam kode Anda, gunakan metode <code>CardView.setRadius</code>.</li>
+  <li>Untuk mengatur warna latar belakang kartu, gunakan atribut <code>card_view:cardBackgroundColor</code>.
+</li>
+</ul>
+
+<p>Contoh kode berikut menampilkan cara menyertakan widget {@link android.support.v7.widget.CardView}
+dalam layout:</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    ... >
+    &lt;!-- A CardView that contains a TextView -->
+    &lt;android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        card_view:cardCornerRadius="4dp">
+
+        &lt;TextView
+            android:id="@+id/info_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    &lt;/android.support.v7.widget.CardView>
+&lt;/LinearLayout>
+</pre>
+
+<p>Untuk informasi selengkapnya, lihat referensi API untuk {@link android.support.v7.widget.CardView}.</p>
+
+
+<h2 id="Dependencies">Menambahkan Dependensi</h2>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} dan {@link android.support.v7.widget.CardView}
+adalah bagian dari <a href="{@docRoot}tools/support-library/features.html#v7">v7 Support
+Library</a>. Untuk menggunakan widget dalam proyek Anda, tambahkan
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a> ini ke
+modul aplikasi Anda:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>

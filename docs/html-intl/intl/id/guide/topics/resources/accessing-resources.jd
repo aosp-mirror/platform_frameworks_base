@@ -1,0 +1,337 @@
+page.title=Mengakses Sumber Daya
+parent.title=Sumber Daya Aplikasi
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Tampilan Cepat</h2>
+  <ul>
+    <li>Sumber daya bisa diacu dari kode dengan menggunakan integer dari {@code R.java}, seperti
+{@code R.drawable.myimage}</li>
+    <li>Sumber daya bisa diacu dari sumber daya dengan menggunakan sintaks XML khusus, seperti {@code
+&#64;drawable/myimage}</li>
+    <li>Anda juga bisa mengakses sumber daya aplikasi Anda dengan berbagai metode di
+{@link android.content.res.Resources}</li>
+  </ul>
+
+  <h2>Kelas-Kelas Utama</h2>
+  <ol>
+    <li>{@link android.content.res.Resources}</li>
+  </ol>
+
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#ResourcesFromCode">Mengakses Sumber Daya dari Kode</a></li>
+    <li><a href="#ResourcesFromXml">Mengakses Sumber Daya dari XML</a>
+      <ol>
+        <li><a href="#ReferencesToThemeAttributes">Mengacu atribut gaya</a></li>
+      </ol>
+    </li>
+    <li><a href="#PlatformResources">Mengakses Sumber Daya Platform</a></li>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="providing-resources.html">Menyediakan Sumber Daya</a></li>
+    <li><a href="available-resources.html">Tipe Sumber Daya</a></li>
+  </ol>
+</div>
+</div>
+
+
+
+
+<p>Setelah Anda menyediakan sumber daya dalam aplikasi Anda (yang dibicarakan di <a href="providing-resources.html">Menyediakan Sumber Daya</a>), Anda bisa menerapkannya dengan
+mengacu ID sumber dayanya. Semua ID sumber daya didefinisikan di kelas {@code R} proyek Anda, yang
+dihasilkan oleh alat {@code aapt} secara otomatis.</p>
+
+<p>Bila aplikasi Anda dikompilasi, {@code aapt} akan membuat kelas {@code R}, yang berisi
+ID sumber daya untuk semua sumber daya dalam direktori {@code
+res/} Anda. Untuk masing-masing tipe sumber daya, ada subkelas {@code R} (misalnya,
+{@code R.drawable} untuk semua sumber daya yang bisa ditarik), dan untuk masing-masing sumber daya dari tipe itu, ada satu integer statis
+ (misalnya, {@code R.drawable.icon}). Integer ini adalah ID sumber daya yang bisa Anda gunakan
+untuk mengambil sumber daya Anda.</p>
+
+<p>Walaupun kelas {@code R} adalah tempat menyebutkan ID sumber daya, Anda tidak perlu
+melihat ke sana untuk menemukan ID sumber daya. ID sumber daya selalu terdiri dari:</p>
+<ul>
+  <li><em>Tipe sumber daya</em>: Masing-masing sumber daya dikelompokkan menjadi "tipe", misalnya {@code
+string}, {@code drawable}, dan {@code layout}. Untuk mengetahui selengkapnya tentang berbagai tipe, lihat <a href="available-resources.html">Tipe Sumber Daya</a>.
+  </li>
+  <li><em>Nama sumber daya</em>, bisa berupa: nama file,
+tidak termasuk ekstensi; atau nilai dalam atribut {@code android:name} XML, jika
+sumber daya itu sebuah nilai sederhana (misalnya sebuah string).</li>
+</ul>
+
+<p>Ada dua cara untuk mengakses sumber daya:</p>
+<ul>
+  <li><strong>Dalam kode:</strong> Menggunakan integer statis dari subkelas dari kelas {@code R}
+, misalnya:
+    <pre class="classic no-pretty-print">R.string.hello</pre>
+    <p>{@code string} adalah tipe sumber daya dan {@code hello} adalah nama sumber daya. Ada banyak
+API Android yang bisa mengakses sumber daya Anda bila Anda menyediakan ID sumber daya dengan format ini. Lihat
+<a href="#ResourcesFromCode">Mengakses Sumber Daya dalam Kode</a>.</p>
+  </li>
+  <li><strong>Dalam XML:</strong> Menggunakan sebuah sintaks XML khusus yang juga berkaitan dengan
+ID sumber daya yang didefinisikan dalam kelas {@code R}, misalnya:
+    <pre class="classic no-pretty-print">&#64;string/hello</pre>
+    <p>{@code string} adalah tipe sumber daya dan {@code hello} adalah nama sumber daya. Anda bisa menggunakan
+sintaks ini dalam sumber daya XML di mana saja Anda ingin menyediakan sebuah nilai dalam sebuah sumber daya. Lihat <a href="#ResourcesFromXml">Mengakses Sumber Daya dari XML</a>.</p>
+  </li>
+</ul>
+
+
+
+<h2 id="ResourcesFromCode">Mengakses Sumber Daya dalam Kode </h2>
+
+<p>Anda bisa menggunakan sumber daya dalam kode dengan menyalurkan ID sumber daya sebagai sebuah parameter metode. Misalnya,
+ Anda bisa mengatur sebuah {@link android.widget.ImageView} agar menggunakan sumber daya{@code res/drawable/myimage.png}
+dengan menggunakan {@link android.widget.ImageView#setImageResource(int) setImageResource()}:</p>
+<pre>
+ImageView imageView = (ImageView) findViewById(R.id.myimageview);
+imageView.setImageResource(<strong>R.drawable.myimage</strong>);
+</pre>
+
+<p>Anda juga bisa mengambil tiap sumber daya dengan menggunakan berbagai metode di {@link
+android.content.res.Resources}, di mana Anda bisa mendapatkan instance
+ {@link android.content.Context#getResources()}.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Akses ke File Asli</h2>
+
+<p>Walaupun tidak lazim, Anda mungkin perlu mengakses file dan direktori asli Anda. Jika demikian, maka
+menyimpan file Anda di {@code res/} tidak akan berhasil, karena satu-satunya cara untuk membaca sebuah sumber daya dari
+{@code res/} adalah dengan ID sumber daya. Sebagai gantinya, Anda bisa menyimpan sumber daya dalam direktori
+{@code assets/}.</p>
+<p>File yang tersimpan di direktori {@code assets/} <em>tidak</em> diberi ID
+sumber daya, sehingga Anda tidak bisa mengacunya melalui kelas {@code R} atau dari sumber daya XML. Sebagai gantinya, Anda bisa melakukan
+query file di direktori {@code assets/} seperti sebuah sistem file biasa dan membaca data mentah dengan menggunakan
+{@link android.content.res.AssetManager}.</p>
+<p>Akan tetapi, jika yang Anda butuhkan hanya kemampuan membaca data mentah (misalnya sebuah file video atau audio),
+maka simpanlah file itu di direktori {@code res/raw/} dan baca aliran byte dengan menggunakan {@link
+android.content.res.Resources#openRawResource(int) openRawResource()}.</p>
+
+</div>
+</div>
+
+
+<h3>Sintaks</h3>
+
+<p>Inilah sintaks untuk mengacu sumber daya dalam kode:</p>
+
+<pre class="classic no-pretty-print">
+[<em>&lt;package_name&gt;</em>.]R.<em>&lt;resource_type&gt;</em>.<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li><em> {@code &lt;package_name&gt;}</em>adalah nama paket yang di dalamnya terdapat sumber daya (tidak
+dibutuhkan bila mengacu sumber daya dari paket Anda sendiri).</li>
+  <li><em>{@code &lt;resource_type&gt;}</em> adalah subkelas {@code R} untuk tipe sumber daya.</li>
+  <li><em>{@code &lt;resource_name&gt;}</em> bisa berupa nama file sumber daya
+tanpa ekstensi atau nilai atribut {@code android:name} dalam elemen XML (untuk nilai
+sederhana).</li>
+</ul>
+<p>Lihat <a href="available-resources.html">Tipe Sumber Daya</a> untuk
+informasi selengkapnya tentang masing-masing tipe sumber daya dan cara mengacunya.</p>
+
+
+<h3>Kasus penggunaan</h3>
+
+<p>Ada banyak metode yang menerima parameter ID sumber daya dan Anda bisa mengambil sumber daya dengan menggunakan
+metode di {@link android.content.res.Resources}. Anda bisa mengambil instance {@link
+android.content.res.Resources} dengan {@link android.content.Context#getResources
+Context.getResources()}.</p>
+
+
+<p>Berikut adalah beberapa contoh cara mengakses sumber daya dalam kode:</p>
+
+<pre>
+// Load a background for the current screen from a drawable resource
+{@link android.app.Activity#getWindow()}.{@link
+android.view.Window#setBackgroundDrawableResource(int)
+setBackgroundDrawableResource}(<strong>R.drawable.my_background_image</strong>) ;
+
+// Set the Activity title by getting a string from the Resources object, because
+//  this method requires a CharSequence rather than a resource ID
+{@link android.app.Activity#getWindow()}.{@link android.view.Window#setTitle(CharSequence)
+setTitle}(getResources().{@link android.content.res.Resources#getText(int)
+getText}(<strong>R.string.main_title</strong>));
+
+// Load a custom layout for the current screen
+{@link android.app.Activity#setContentView(int)
+setContentView}(<strong>R.layout.main_screen</strong>);
+
+// Set a slide in animation by getting an Animation from the Resources object
+mFlipper.{@link android.widget.ViewAnimator#setInAnimation(Animation)
+setInAnimation}(AnimationUtils.loadAnimation(this,
+        <strong>R.anim.hyperspace_in</strong>));
+
+// Set the text on a TextView object using a resource ID
+TextView msgTextView = (TextView) findViewById(<strong>R.id.msg</strong>);
+msgTextView.{@link android.widget.TextView#setText(int)
+setText}(<strong>R.string.hello_message</strong>);
+</pre>
+
+
+<p class="caution"><strong>Perhatian:</strong> Anda tidak boleh memodifikasi file {@code
+R.java} secara manual&mdash;, ini dihasilkan oleh alat {@code aapt} bila proyek Anda telah
+dikompilasi. Perubahan apa pun akan ditimpa bila nanti Anda mengompilasi.</p>
+
+
+
+<h2 id="ResourcesFromXml">Mengakses Sumber Daya dari XML</h2>
+
+<p>Anda bisa mendefinisikan nilai untuk beberapa atribut dan elemen XML dengan menggunakan
+acuan ke sumber daya yang ada. Anda akan sering melakukannya saat membuat file layout, untuk
+memasok string dan gambar bagi widget Anda.</p>
+
+<p>Misalnya, jika Anda menambahkan sebuah {@link android.widget.Button} ke layout, Anda harus menggunakan
+sebuah <a href="string-resource.html">sumber daya string</a> bagi teks tombolnya:</p>
+
+<pre>
+&lt;Button
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="<strong>@string/submit</strong>" /&gt;
+</pre>
+
+
+<h3>Sintaks</h3>
+
+<p>Berikut adalah sintaks untuk mengacu sumber daya di sumber daya XML:</p>
+
+<pre class="classic no-pretty-print">
+&#64;[<em>&lt;package_name&gt;</em>:]<em>&lt;resource_type&gt;</em>/<em>&lt;resource_name&gt;</em>
+</pre>
+
+<ul>
+  <li>{@code &lt;package_name&gt;} adalah nama paket yang di dalamnya terdapat sumber daya (tidak
+dibutuhkan bila mengacu sumber daya dari paket yang sama)</li>
+  <li>{@code &lt;resource_type&gt;} adalah subkelas
+{@code R} untuk tipe sumber daya</li>
+  <li>{@code &lt;resource_name&gt;} bisa berupa nama file sumber daya
+tanpa ekstensi atau nilai atribut {@code android:name} dalam elemen XML (untuk nilai
+sederhana).</li>
+</ul>
+
+<p>Lihat <a href="available-resources.html">Tipe Sumber Daya</a> untuk
+informasi selengkapnya tentang masing-masing tipe sumber daya dan cara mengacunya.</p>
+
+
+<h3>Kasus penggunaan</h3>
+
+<p>Dalam beberapa kasus, Anda harus menggunakan sumber daya untuk suatu nilai dalam XML (misalnya, untuk menerapkan gambar yang bisa ditarik
+pada widget), namun Anda juga bisa menggunakan sumber daya di XML mana saja yang menerima nilai sederhana. Misalnya, jika
+Anda mempunyai file sumber daya berikut yang berisi <a href="more-resources.html#Color">sumber daya warna</a> dan <a href="string-resource.html">sumber daya string</a>:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+   &lt;color name="opaque_red">#f00&lt;/color>
+   &lt;string name="hello">Hello!&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>Anda bisa menggunakan sumber daya ini dalam file layout berikut untuk mengatur warna teks dan
+string teks:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;color/opaque_red</strong>&quot;
+    android:text=&quot;<strong>&#64;string/hello</strong>&quot; /&gt;
+</pre>
+
+<p>Dalam hal ini, Anda tidak perlu menyebutkan nama paket dalam sumber daya acuan karena
+sumber daya berasal dari paket Anda sendiri. Untuk
+mengacu sumber daya sistem, Anda perlu memasukkan nama paketnya. Misalnya:</p>
+
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;EditText xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:textColor=&quot;<strong>&#64;android:color/secondary_text_dark</strong>&quot;
+    android:text=&quot;&#64;string/hello&quot; /&gt;
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Anda harus menggunakan sumber daya string sepanjang
+waktu, sehingga aplikasi Anda bisa dilokalkan untuk bahasa lain.
+Untuk informasi tentang cara menciptakan
+sumber daya alternatif (seperti string lokal), lihat <a href="providing-resources.html#AlternativeResources">Menyediakan Sumber Daya Alternatif
+</a>. Untuk panduan lengkap melokalkan aplikasi Anda ke bahasa lain,
+lihat <a href="localization.html">Pelokalan</a>.</p>
+
+<p>Anda bahkan bisa menggunakan sumber daya dalam XML untuk membuat alias. Misalnya, Anda bisa membuat
+sumber daya yang bisa ditarik yang merupakan alias bagi sumber daya yang bisa ditarik lainnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/other_drawable" />
+</pre>
+
+<p>Hal ini terdengar berlebihan, namun bisa sangat berguna saat menggunakan sumber daya alternatif. Baca selengkapnya tentang
+<a href="providing-resources.html#AliasResources">Membuat sumber daya alias</a>.</p>
+
+
+
+<h3 id="ReferencesToThemeAttributes">Mengacu atribut gaya</h3>
+
+<p>Sumber daya atribut gaya memungkinkan Anda mengacu nilai
+suatu atribut dalam tema yang diterapkan saat ini. Dengan mengacu sebuah atribut gaya memungkinkan Anda
+menyesuaikan tampilan elemen UI dengan mengatur gayanya agar cocok dengan beragam variasi standar yang dipasok oleh
+tema saat ini, sebagai ganti memasok nilai yang ditanamkan (hard-coded). Mengacu sebuah atribut gaya
+pada dasarnya adalah "gunakan gaya yang didefinisikan oleh atribut ini, dalam tema saat ini".</p>
+
+<p>Untuk mengacu sebuah atribut gaya, sintaks namanya hampir sama dengan format sumber daya normal
+, namun sebagai ganti simbol @ ({@code @}), gunakan sebuah tanda tanya ({@code ?}), dan
+porsi tipe sumber daya bersifat opsional. Sebagai contoh:</p>
+
+<pre class="classic">
+?[<em>&lt;package_name&gt;</em>:][<em>&lt;resource_type&gt;</em>/]<em>&lt;resource_name&gt;</em>
+</pre>
+
+<p>Misalnya, begini cara Anda mengacu suatu atribut untuk mengatur warna teks agar cocok dengan
+warna teks "utama" tema sistem:</p>
+
+<pre>
+&lt;EditText id=&quot;text&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:textColor=&quot;<strong>?android:textColorSecondary</strong>&quot;
+    android:text=&quot;&#64;string/hello_world&quot; /&gt;
+</pre>
+
+<p>Di sini, atribut {@code android:textColor} menyebutkan nama atribut gaya
+dalam tema saat ini. Android kini menggunakan nilai yang diterapkan pada atribut gaya {@code android:textColorSecondary}
+sebagai nilai untuk {@code android:textColor} dalam widget ini. Karena alat sumber daya
+mengetahui bahwa atribut sumber daya diharapkan dalam konteks ini,
+maka Anda tidak perlu menyatakan tipenyanya secara eksplisit (yang akan berupa
+<code>?android:attr/textColorSecondary</code>)&mdash;Anda bisa mengecualikan tipe {@code attr}.</p>
+
+
+
+
+<h2 id="PlatformResources">Mengakses Sumber Daya Platform</h2>
+
+<p>Android berisi sejumlah sumber daya standar, seperti gaya, tema, dan layout. Untuk
+mengakses semua sumber daya ini, tetapkan acuan sumber daya Anda dengan nama paket
+<code>android</code>. Misalnya, Android menyediakan sumber daya layout yang bisa Anda gunakan untuk
+item daftar dalam{@link android.widget.ListAdapter}:</p>
+
+<pre>
+{@link android.app.ListActivity#setListAdapter(ListAdapter)
+setListAdapter}(new {@link
+android.widget.ArrayAdapter}&lt;String&gt;(this, <strong>android.R.layout.simple_list_item_1</strong>, myarray));
+</pre>
+
+<p>Dalam contoh ini, {@link android.R.layout#simple_list_item_1} adalah sumber daya layout yang didefinisikan oleh
+platform untuk item di {@link android.widget.ListView}. Anda bisa menggunakannya sebagai ganti menciptakan
+layout sendiri untuk item daftar. Untuk informasi selengkapnya, lihat panduan pengembang
+<a href="{@docRoot}guide/topics/ui/layout/listview.html">List View</a>.</p>
+

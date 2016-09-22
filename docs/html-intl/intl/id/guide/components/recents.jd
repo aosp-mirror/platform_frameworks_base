@@ -1,0 +1,256 @@
+page.title=Layar Ikhtisar
+page.tags="recents","overview"
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#adding">Menambahkan Tugas ke Layar Ikhtisar</a>
+      <ol>
+        <li><a href="#flag-new-doc">Menggunakan flag Intent untuk menambahkan tugas</a></li>
+        <li><a href="#attr-doclaunch">Menggunakan atribut Aktivitas untuk menambahkan tugas</a></li>
+      </ol>
+    </li>
+    <li><a href="#removing">Menghapus Tugas</a>
+      <ol>
+        <li><a href="#apptask-remove">Menggunakan kelas AppTask untuk menghapus tugas</a></li>
+        <li><a href="#retain-finished">Mempertahankan tugas yang telah selesai</a></li>
+      </ol>
+    </li>
+  </ol>
+
+  <h2>Kelas-kelas utama</h2>
+  <ol>
+    <li>{@link android.app.ActivityManager.AppTask}</li>
+    <li>{@link android.content.Intent}</li>
+  </ol>
+
+  <h2>Kode contoh</h2>
+  <ol>
+    <li><a href="{@docRoot}samples/DocumentCentricApps/index.html">Aplikasi yang berorientasi dokumen</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Layar ikhtisar (juga disebut sebagai layar terbaru, daftar tugas terbaru, atau aplikasi terbaru)
+UI tingkat sistem yang mencantumkan <a href="{@docRoot}guide/components/activities.html">
+aktivitas</a> dan <a href="{@docRoot}guide/components/tasks-and-back-stack.html">tugas</a> yang baru saja diakses. Pengguna
+bisa menyusuri daftar ini dan memilih satu tugas untuk dilanjutkan, atau pengguna bisa menghapus tugas dari
+daftar dengan gerakan mengusap. Dengan dirilisnya Android 5.0 (API level 21), beberapa instance aktivitas yang
+sama yang berisi dokumen berbeda dapat muncul sebagai tugas di layar ikhtisar. Misalnya,
+Google Drive mungkin memiliki satu tugas untuk setiap beberapa dokumen Google. Setiap dokumen muncul sebagai
+tugas dalam layar ikhtisar.</p>
+
+<img src="{@docRoot}images/components/recents.png" alt="" width="284" />
+<p class="img-caption"><strong>Gambar 1.</strong> Layar ikhtisar menampilkan tiga dokumen
+Google Drive, masing-masing dinyatakan sebagai tugas terpisah.</p>
+
+<p>Biasanya Anda harus mengizinkan sistem mendefinisikan cara menyatakan tugas dan
+aktivitas di layar ikhtisar, dan Anda tidak perlu memodifikasi perilaku ini.
+Akan tetapi, aplikasi Anda dapat menentukan cara dan waktu munculnya aktivitas di layar ikhtisar. Kelas
+{@link android.app.ActivityManager.AppTask} memungkinkan Anda mengelola tugas, dan flag
+ aktivitas kelas {@link android.content.Intent} memungkinkan Anda menentukan kapan aktivitas ditambahkan atau dihapus dari
+layar ikhtisar. Selain itu, atribut <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code> memungkinkan Anda menetapkan perilaku di manifes.</p>
+
+<h2 id="adding">Menambahkan Tugas ke Layar Ikhtisar</h2>
+
+<p>Penggunaan flag kelas {@link android.content.Intent} untuk menambahkan tugas memberi kontrol lebih besar
+atas waktu dan cara dokumen dibuka atau dibuka kembali di layar ikhtisar. Bila menggunakan atribut
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, Anda dapat memilih antara selalu membuka dokumen dalam tugas baru atau menggunakan kembali tugas
+yang ada untuk dokumen tersebut.</p>
+
+<h3 id="flag-new-doc">Menggunakan flag Intent untuk menambahkan tugas</h3>
+
+<p>Bila membuat dokumen baru untuk aktivitas, Anda memanggil metode
+{@link android.app.ActivityManager.AppTask#startActivity(android.content.Context, android.content.Intent, android.os.Bundle) startActivity()}
+ dari kelas {@link android.app.ActivityManager.AppTask}, dengan meneruskannya ke intent yang
+menjalankan aktivitas tersebut. Untuk menyisipkan jeda logis agar sistem memperlakukan aktivitas Anda sebagai tugas
+baru di layar ikhtisar, teruskan flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+dalam metode {@link android.content.Intent#addFlags(int) addFlags()} dari {@link android.content.Intent}
+yang memulai aktivitas itu.</p>
+
+<p class="note"><strong>Catatan:</strong> Flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+menggantikan flag {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET},
+yang tidak digunakan lagi pada Android 5.0 (API level 21).</p>
+
+<p>Jika Anda menetapkan flag {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK} saat membuat
+dokumen baru, sistem akan selalu membuat tugas baru dengan aktivitas target sebagai akar.
+Dengan pengaturan ini, dokumen yang sama dapat dibuka di lebih dari satu tugas. Kode berikut memperagakan
+cara aktivitas utama melakukannya:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+public void createNewDocument(View view) {
+      final Intent newDocumentIntent = newDocumentIntent();
+      if (useMultipleTasks) {
+          newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+      }
+      startActivity(newDocumentIntent);
+  }
+
+  private Intent newDocumentIntent() {
+      boolean useMultipleTasks = mCheckbox.isChecked();
+      final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+      newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+      newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+      return newDocumentIntent;
+  }
+
+  private static int incrementAndGet() {
+      Log.d(TAG, "incrementAndGet(): " + mDocumentCounter);
+      return mDocumentCounter++;
+  }
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Aktivitas yang dimulai dengan flag {@code FLAG_ACTIVITY_NEW_DOCUMENT}
+ harus telah menetapkan nilai atribut {@code android:launchMode="standard"} (default) dalam
+manifes.</p>
+
+<p>Bila aktivitas utama memulai aktivitas baru, sistem akan mencari tugas yang intent
+-nya cocok dengan nama komponen intent dalam tugas-tugas yang sudah ada dan mencari aktivitas dalam data Intent. Jika tugas
+tidak ditemukan, atau intent ada dalam flag {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+, tugas baru akan dibuat dengan aktivitas tersebut sebagai akarnya. Jika ditemukan, sistem akan
+mengedepankan tugas itu dan meneruskan intent baru ke {@link android.app.Activity#onNewIntent onNewIntent()}.
+Aktivitas baru akan mendapatkan intent dan membuat dokumen baru di layar ikhtisar, seperti dalam
+contoh berikut:</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_new_document);
+    mDocumentCount = getIntent()
+            .getIntExtra(DocumentCentricActivity.KEY_EXTRA_NEW_DOCUMENT_COUNTER, 0);
+    mDocumentCounterTextView = (TextView) findViewById(
+            R.id.hello_new_document_text_view);
+    setDocumentCounterText(R.string.hello_new_document_counter);
+}
+
+&#64;Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    /* If FLAG_ACTIVITY_MULTIPLE_TASK has not been used, this activity
+    is reused to create a new document.
+     */
+    setDocumentCounterText(R.string.reusing_document_counter);
+}
+</pre>
+
+
+<h3 id="#attr-doclaunch">Menggunakan atribut Aktivitas untuk menambahkan tugas</h3>
+
+<p>Aktivitas juga dapat menetapkan dalam manifesnya agar selalu dimulai ke dalam tugas baru dengan menggunakan
+atribut <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#dlmode">
+{@code android:documentLaunchMode}</a>. Atribut ini memiliki empat nilai yang menghasilkan efek berikut
+bila pengguna membuka dokumen dengan aplikasi:</p>
+
+<dl>
+  <dt>"{@code intoExisting}"</dt>
+  <dd>Aktivitas menggunakan kembali tugas yang ada untuk dokumen tersebut. Ini sama dengan mengatur flag
+ {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} <em>tanpa</em> mengatur flag
+ {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, seperti dijelaskan dalam
+ <a href="#flag-new-doc">Menggunakan flag Intent untuk menambahkan tugas</a>, di atas.</dd>
+
+  <dt>"{@code always}"</dt>
+  <dd>Aktivitas ini membuat tugas baru untuk dokumen, meski dokumen sudah dibuka. Menggunakan
+ nilai ini sama dengan menetapkan flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+ maupun {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}.</dd>
+
+  <dt>"{@code none”}"</dt>
+  <dd>Aktivitas ini tidak membuat tugas baru untuk dokumen. Layar ikhtisar memperlakukan
+ aktivitas seperti itu secara default: satu tugas ditampilkan untuk aplikasi, yang
+dilanjutkan dari aktivitas apa pun yang terakhir dipanggil pengguna.</dd>
+
+  <dt>"{@code never}"</dt>
+  <dd>Aktivitas ini tidak membuat tugas baru untuk dokumen. Mengatur nilai ini akan mengesampingkan
+ perilaku flag {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}
+ dan {@link android.content.Intent#FLAG_ACTIVITY_MULTIPLE_TASK}, jika salah satunya ditetapkan di
+intent, dan layar ikhtisar menampilkan satu tugas untuk aplikasi, yang dilanjutkan dari
+ aktivitas apa pun yang terakhir dipanggil pengguna.</dd>
+</dl>
+
+<p class="note"><strong>Catatan:</strong> Untuk nilai selain {@code none} dan {@code never},
+aktivitas harus didefinisikan dengan {@code launchMode="standard"}. Jika atribut ini tidak ditetapkan, maka
+{@code documentLaunchMode="none"} akan digunakan.</p>
+
+<h2 id="removing">Menghapus Tugas</h2>
+
+<p>Secara default, tugas dokumen secara otomatis dihapus dari layar ikhtisar bila aktivitasnya
+selesai. Anda bisa mengesampingkan perilaku ini dengan kelas {@link android.app.ActivityManager.AppTask},
+dengan flag {@link android.content.Intent} atau atribut <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">
+&lt;activity&gt;</a></code>.</p>
+
+<p>Kapan saja Anda bisa mengecualikan tugas dari layar ikhtisar secara keseluruhan dengan menetapkan atribut
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+, <a href="{@docRoot}guide/topics/manifest/activity-element.html#exclude">
+{@code android:excludeFromRecents}</a> hingga {@code true}.</p>
+
+<p>Anda bisa menetapkan jumlah maksimum tugas yang dapat disertakan aplikasi Anda dalam layar ikhtisar dengan menetapkan
+atribut <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#maxrecents">{@code android:maxRecents}
+</a> ke satu nilai integer. Nilai default-nya adalah 16. Bila telah mencapai jumlah maksimum, tugas yang terakhir
+digunakan akan dihapus dari layar ikhtisar. Nilai maksimum {@code android:maxRecents}
+ adalah 50 (25 pada perangkat dengan memori sedikit); nilai yang kurang dari 1 tidak berlaku.</p>
+
+<h3 id="#apptask-remove">Menggunakan kelas AppTask untuk menghapus tugas</h3>
+
+<p>Dalam aktivitas yang membuat tugas baru di layar ikhtisar, Anda bisa
+menetapkan kapan menghapus tugas dan menyelesaikan semua aktivitas yang terkait dengannya
+dengan memanggil metode {@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+NewDocumentActivity.java</a></p>
+<pre>
+public void onRemoveFromRecents(View view) {
+    // The document is no longer needed; remove its task.
+    finishAndRemoveTask();
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Penggunaan metode
+{@link android.app.ActivityManager.AppTask#finishAndRemoveTask() finishAndRemoveTask()}
+akan mengesampingkan penggunaan tag {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, seperti
+dibahas di bawah ini.</p>
+
+<h3 id="#retain-finished">Mempertahankan tugas yang telah selesai</h3>
+
+<p>Jika Anda ingin mempertahankan tugas di layar ikhtisar, sekalipun aktivitas sudah selesai, teruskan
+flag {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS} dalam metode
+{@link android.content.Intent#addFlags(int) addFlags()} dari Intent yang memulai aktivitas itu.</p>
+
+<p class="code-caption"><a href="{@docRoot}samples/DocumentCentricApps/index.html">
+DocumentCentricActivity.java</a></p>
+<pre>
+private Intent newDocumentIntent() {
+    final Intent newDocumentIntent = new Intent(this, NewDocumentActivity.class);
+    newDocumentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+      android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
+    newDocumentIntent.putExtra(KEY_EXTRA_NEW_DOCUMENT_COUNTER, incrementAndGet());
+    return newDocumentIntent;
+}
+</pre>
+
+<p>Untuk memperoleh efek yang sama, tetapkan atribut
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+ <a href="{@docRoot}guide/topics/manifest/activity-element.html#autoremrecents">
+{@code android:autoRemoveFromRecents}</a> hingga {@code false}. Nilai default-nya adalah {@code true}
+untuk aktivitas dokumen, dan {@code false} untuk aktivitas biasa. Penggunaan atribut ini akan mengesampingkan flag
+{@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}, yang telah dibahas sebelumnya.</p>
+
+
+
+
+
+
+

@@ -1,0 +1,812 @@
+page.title=Fragmen
+parent.title=Aktivitas
+parent.link=activities.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#Design">Filosofi Desain</a></li>
+    <li><a href="#Creating">Membuat Fragmen</a>
+      <ol>
+        <li><a href="#UI">Menambahkan antarmuka pengguna</a></li>
+        <li><a href="#Adding">Menambahkan fragmen ke aktivitas</a></li>
+      </ol>
+    </li>
+    <li><a href="#Managing">Mengelola Fragmen</a></li>
+    <li><a href="#Transactions">Melakukan Transaksi Fragmen</a></li>
+    <li><a href="#CommunicatingWithActivity">Berkomunikasi dengan Aktivitas</a>
+      <ol>
+        <li><a href="#EventCallbacks">Membuat callback kejadian pada aktivitas</a></li>
+        <li><a href="#ActionBar">Menambahkan item ke Action-Bar</a></li>
+      </ol>
+    </li>
+    <li><a href="#Lifecycle">Menangani Daur Hidup Fragmen</a>
+      <ol>
+        <li><a href="#CoordinatingWithActivity">Mengoordinasi dengan daur hidup aktivitas</a></li>
+      </ol>
+    </li>
+    <li><a href="#Example">Contoh</a></li>
+  </ol>
+
+  <h2>Kelas-kelas utama</h2>
+  <ol>
+    <li>{@link android.app.Fragment}</li>
+    <li>{@link android.app.FragmentManager}</li>
+    <li>{@link android.app.FragmentTransaction}</li>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="{@docRoot}training/basics/fragments/index.html">Membangun UI Dinamis dengan Fragmen</a></li>
+    <li><a href="{@docRoot}guide/practices/tablets-and-handsets.html">Mendukung Tablet
+dan Handset</a></li>
+  </ol>
+</div>
+</div>
+
+<p>{@link android.app.Fragment} mewakili perilaku atau bagian dari antarmuka pengguna dalam
+{@link android.app.Activity}. Anda bisa mengombinasikan beberapa fragmen dalam satu aktivitas untuk membangun UI
+multipanel dan menggunakan kembali sebuah fragmen dalam beberapa aktivitas. Anda bisa menganggap fragmen sebagai bagian
+modular dari aktivitas, yang memiliki daur hidup sendiri, menerima kejadian input sendiri, dan
+yang bisa Anda tambahkan atau hapus saat aktivitas berjalan (semacam "sub aktivitas" yang
+bisa digunakan kembali dalam aktivitas berbeda).</p>
+
+<p>Fragmen harus selalu tertanam dalam aktivitas dan daur hidup fragmen secara langsung
+dipengaruhi oleh daur hidup aktivitas host-nya. Misalnya, saat aktivitas dihentikan sementara,
+semua fragmen di dalamnya juga dihentikan sementara, dan bila aktivitas dimusnahkan, semua fragmen juga demikian. Akan tetapi, saat
+aktivitas berjalan (dalam <a href="{@docRoot}guide/components/activities.html#Lifecycle">status daur hidup</a> <em>dilanjutkan</em>, Anda bisa
+memanipulasi setiap fragmen secara terpisah, seperti menambah atau menghapusnya. Saat melakukan transaksi
+fragmen, Anda juga bisa menambahkannya ke back-stack yang dikelola oleh aktivitas
+&mdash;setiap entri back-stack merupakan record transaksi fragmen yang
+terjadi. Dengan back-stack pengguna dapat membalikkan transaksi fragmen (mengarah mundur),
+dengan menekan tombol <em>Back</em>.</p>
+
+<p>Bila Anda menambahkan fragmen sebagai bagian dari layout aktivitas, fragmen itu berada dalam {@link
+android.view.ViewGroup} di hierarki tampilan aktivitas tersebut dan fragmen mendefinisikan
+layout
+tampilannya sendiri. Anda bisa menyisipkan fragmen ke dalam layout aktivitas dengan mendeklarasikan fragmen dalam file layout aktivitas
+, sebagai elemen {@code &lt;fragment&gt;}, atau dari kode aplikasi dengan menambahkannya ke
+ {@link android.view.ViewGroup} yang ada. Akan tetapi, fragmen tidak harus menjadi bagian dari
+layout aktivitas; Anda juga bisa menggunakan fragmen tanpa UI-nya sendiri sebagai pekerja tak terlihat untuk
+aktivitas tersebut.</p>
+
+<p>Dokumen ini menjelaskan cara membangun aplikasi menggunakan fragmen, termasuk
+cara fragmen mempertahankan statusnya bila ditambahkan ke back-stack aktivitas, berbagi
+kejadian dengan aktivitas, dan fragmen lain dalam aktivitas, berkontribusi pada action-bar
+aktivitas, dan lainnya.</p>
+
+
+<h2 id="Design">Filosofi Desain</h2>
+
+<p>Android memperkenalkan fragmen di Android 3.0 (API level 11), terutama untuk mendukung desain UI yang lebih
+dinamis dan fleksibel pada layar besar, seperti tablet. Karena
+layar tablet jauh lebih besar daripada layar handset, maka lebih banyak ruang untuk mengombinasikan dan
+bertukar komponen UI. Fragmen memungkinkan desain seperti itu tanpa perlu mengelola perubahan
+kompleks pada hierarki tampilan. Dengan membagi layout aktivitas menjadi beberapa fragmen, Anda bisa
+mengubah penampilan aktivitas saat runtime dan mempertahankan perubahan itu di back-stack
+yang dikelola oleh aktivitas.</p>
+
+<p>Misalnya, aplikasi berita bisa menggunakan satu fragmen untuk menampilkan daftar artikel di
+sebelah kiri dan fragmen lainnya untuk menampilkan artikel di sebelah kanan&mdash;kedua fragmen ini muncul di satu
+aktivitas, berdampingan, dan masing-masing fragmen memiliki serangkaian metode callback daur hidup dan menangani kejadian input
+penggunanya sendiri. Sehingga, sebagai ganti menggunakan satu aktivitas untuk memilih
+artikel dan aktivitas lainnya untuk membaca artikel, pengguna bisa memilih artikel dan membaca semuanya dalam
+aktivitas yang sama, sebagaimana diilustrasikan dalam layout tablet pada gambar 1.</p>
+
+<p>Anda harus mendesain masing-masing fragmen sebagai komponen aktivitas modular dan bisa digunakan kembali. Yakni, karena
+setiap fragmen mendefinisikan layoutnya dan perilakunya dengan callback daur hidupnya sendiri, Anda bisa memasukkan
+satu fragmen dalam banyak aktivitas, sehingga Anda harus mendesainnya untuk digunakan kembali dan mencegah
+memanipulasi satu fragmen dari fragmen lain secara langsung. Ini terutama penting karena dengan
+fragmen modular Anda bisa mengubah kombinasi fragmen untuk ukuran layar berbeda. Saat mendesain aplikasi
+untuk mendukung tablet maupun handset, Anda bisa menggunakan kembali fragmen dalam
+konfigurasi layout berbeda untuk mengoptimalkan pengalaman pengguna berdasarkan ruang layar yang tersedia. Misalnya
+, pada handset, fragmen mungkin perlu dipisahkan untuk menyediakan UI panel tunggal
+bila lebih dari satu yang tidak cocok dalam aktivitas yang sama.</p>
+
+<img src="{@docRoot}images/fundamentals/fragments.png" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Contoh cara dua modul UI yang didefinisikan oleh
+ fragmen bisa digabungkan ke dalam satu aktivitas untuk desain tablet, namun dipisahkan untuk
+desain handset.</p>
+
+<p>Misalnya&mdash;untuk melanjutkan contoh aplikasi berita&mdash; aplikasi bisa menanamkan
+dua fragmen dalam <em>Aktivitas A</em>, saat berjalan pada perangkat berukuran tablet. Akan tetapi, pada
+layar berukuran handset, ruang untuk kedua fragmen tidak cukup, sehingga <em>Aktivitas A</em> hanya
+menyertakan fragmen untuk daftar artikel, dan saat pengguna memilih artikel,
+<em>Aktivitas B</em> akan dimulai, termasuk fragmen kedua untuk membaca artikel. Sehingga, aplikasi mendukung
+tablet dan handset dengan menggunakan kembali fragmen dalam kombinasi berbeda, seperti diilustrasikan dalam
+gambar 1.</p>
+
+<p>Untuk informasi selengkapnya tentang mendesain aplikasi menggunakan kombinasi fragmen berbeda
+untuk konfigurasi layar berbeda, lihat panduan untuk <a href="{@docRoot}guide/practices/tablets-and-handsets.html">Mendukung Tablet dan Handset</a>.</p>
+
+
+
+<h2 id="Creating">Membuat Fragmen</h2>
+
+<div class="figure" style="width:327px">
+<img src="{@docRoot}images/fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Gambar 2.</strong> Daur hidup fragmen (saat
+ aktivitasnya berjalan).</p>
+</div>
+
+<p>Untuk membuat fragmen, Anda harus membuat subkelas {@link android.app.Fragment} (atau
+subkelasnya yang ada). Kelas {@link android.app.Fragment} memiliki kode yang mirip seperti
+{@link android.app.Activity}. Kelas ini memiliki metode callback yang serupa dengan aktivitas, seperti
+ {@link android.app.Fragment#onCreate onCreate()}, {@link android.app.Fragment#onStart onStart()},
+{@link android.app.Fragment#onPause onPause()}, dan {@link android.app.Fragment#onStop onStop()}. Sebenarnya
+, jika Anda mengkonversi aplikasi Android saat ini untuk menggunakan fragmen, Anda mungkin cukup memindahkan
+kode dari metode callback aktivitas ke masing-masing metode callback
+fragmen.</p>
+
+<p>Biasanya, Anda harus mengimplementasikan setidaknya metode daur hidup berikut ini:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onCreate onCreate()}</dt>
+  <dd>Sistem akan memanggilnya saat membuat fragmen. Dalam implementasi, Anda harus
+menginisialisasi komponen penting dari fragmen yang ingin dipertahankan saat fragmen
+dihentikan sementara atau dihentikan, kemudian dilanjutkan.</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+  <dd>Sistem akan memanggilnya saat fragmen menggambar antarmuka penggunanya
+untuk yang pertama kali. Untuk menggambar UI fragmen, Anda harus mengembalikan {@link android.view.View} dari metode
+ini yang menjadi akar layout fragmen. Hasil yang dikembalikan bisa berupa null jika
+fragmen tidak menyediakan UI.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>Sistem akan memanggil metode ini sebagai indikasi pertama bahwa pengguna sedang meninggalkan
+fragmen Anda (walau itu tidak selalu berarti fragmen sedang dimusnahkan). Inilah biasanya tempat Anda
+harus mengikat setiap perubahan yang harus dipertahankan selepas sesi pengguna saat ini (karena
+pengguna mungkin tidak kembali).</dd>
+</dl>
+
+<p>Kebanyakan aplikasi harus mengimplementasikan setidaknya tiga metode ini untuk setiap fragmen, namun ada
+beberapa metode callback lain yang juga harus Anda gunakan untuk menangani berbagai tahap
+daur hidup fragmen. Semua metode callback daur hidup akan dibahas secara lebih detail, di bagian
+tentang <a href="#Lifecycle">Menangani Daur Hidup Fragmen</a>.</p>
+
+
+<p>Ada juga beberapa subkelas yang mungkin ingin diperpanjang, sebagai ganti kelas basis {@link
+android.app.Fragment}:</p>
+
+<dl>
+  <dt>{@link android.app.DialogFragment}</dt>
+  <dd>Menampilkan dialog mengambang. Penggunaan kelas ini untuk membuat dialog merupakan alternatif yang baik dari
+penggunaan metode helper dialog di kelas {@link android.app.Activity}, karena Anda bisa
+menyatukan dialog fragmen ke dalam back-stack fragmen yang dikelola oleh aktivitas,
+sehingga pengguna bisa kembali ke fragmen yang ditinggalkan.</dd>
+
+  <dt>{@link android.app.ListFragment}</dt>
+  <dd>Menampilkan daftar item yang dikelola oleh adaptor (seperti {@link
+android.widget.SimpleCursorAdapter}), serupa dengan {@link android.app.ListActivity}. Menampilkan
+beberapa metode pengelolaan daftar tampilan seperti callback {@link
+android.app.ListFragment#onListItemClick(ListView,View,int,long) onListItemClick()} untuk
+menangani kejadian klik.</dd>
+
+  <dt>{@link android.preference.PreferenceFragment}</dt>
+  <dd>Menampilkan hierarki objek {@link android.preference.Preference} sebagai daftar, serupa dengan
+{@link android.preference.PreferenceActivity}. Hal ini berguna saat membuat aktivitas
+"pengaturan" untuk aplikasi Anda.</dd>
+</dl>
+
+
+<h3 id="UI">Menambahkan antarmuka pengguna</h3>
+
+<p>Fragmen biasanya digunakan sebagai bagian dari antarmuka pengguna aktivitas dan menyumbangkan
+layoutnya sendiri ke aktivitas.</p>
+
+<p>Untuk menyediakan layout fragmen, Anda harus mengimplementasikan metode callback {@link
+android.app.Fragment#onCreateView onCreateView()}, yang dipanggil sistem Android
+bila tiba saatnya fragmen menggambar layoutnya. Implementasi Anda atas metode ini harus mengembalikan
+{@link android.view.View} yang menjadi akar layout fragmen.</p>
+
+<p class="note"><strong>Catatan:</strong> Jika fragmen adalah subkelas {@link
+android.app.ListFragment}, implementasi default akan mengembalikan {@link android.widget.ListView} dari
+{@link android.app.Fragment#onCreateView onCreateView()}, sehingga Anda tidak perlu mengimplementasikannya.</p>
+
+<p>Untuk mengembalikan layout dari {@link
+android.app.Fragment#onCreateView onCreateView()}, Anda bisa memekarkannya dari <a href="{@docRoot}guide/topics/resources/layout-resource.html">sumber daya layout</a> yang didefinisikan di XML. Untuk
+membantu melakukannya, {@link android.app.Fragment#onCreateView onCreateView()} menyediakan objek
+{@link android.view.LayoutInflater}.</p>
+
+<p>Misalnya, ini adalah subkelas {@link android.app.Fragment} yang memuat layout dari file
+{@code example_fragment.xml}:</p>
+
+<pre>
+public static class ExampleFragment extends Fragment {
+    &#64;Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.example_fragment, container, false);
+    }
+}
+</pre>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Membuat layout</h3>
+  <p>Dalam contoh di atas, {@code R.layout.example_fragment} merupakan acuan ke sumber daya layout
+bernama {@code example_fragment.xml} yang tersimpan dalam sumber daya aplikasi. Untuk informasi tentang cara
+membuat layout di XML, lihat dokumentasi
+<a href="{@docRoot}guide/topics/ui/index.html">Antarmuka Pengguna</a>.</p>
+</div>
+</div>
+
+<p>Parameter {@code container} yang diteruskan ke {@link android.app.Fragment#onCreateView
+onCreateView()} adalah induk {@link android.view.ViewGroup} (dari layout aktivitas) tempat
+layout fragmen
+akan disisipkan. Parameter {@code savedInstanceState} adalah {@link android.os.Bundle} yang
+menyediakan data tentang instance fragmen sebelumnya, jika fragmen dilanjutkan
+(status pemulihan dibahas selengkapnya di bagian tentang <a href="#Lifecycle">Menangani
+Daur Hidup Fragmen</a>).</p>
+
+<p>Metode {@link android.view.LayoutInflater#inflate(int,ViewGroup,boolean) inflate()} membutuhkan
+tiga argumen:</p>
+<ul>
+  <li>ID sumber daya layout yang ingin dimekarkan.</li>
+  <li>{@link android.view.ViewGroup} akan menjadi induk dari layout yang dimekarkan. {@code
+container} perlu diteruskan agar sistem menerapkan parameter layout ke tampilan akar layout
+yang dimekarkan, yang ditetapkan dalam tampilan induk yang akan dituju.</li>
+  <li>Boolean yang menunjukkan apakah layout akan dimekarkan harus ditempelkan pada {@link
+android.view.ViewGroup} (parameter kedua) selama pemekaran. (Dalam hal ini, ini
+salah karena sistem sudah memasukkan layout yang dimekarkan ke dalam {@code
+container}&mdash;meneruskan benar akan membuat tampilan grup yang berlebihan dalam layout akhir.)</li>
+</ul>
+
+<p>Anda kini telah melihat cara membuat fragmen yang menyediakan layout. Berikutnya, Anda perlu menambahkan
+fragmen ke aktivitas.</p>
+
+
+
+<h3 id="Adding">Menambahkan fragmen ke aktivitas</h3>
+
+<p>Biasanya, fragmen berkontribusi pada sebagian UI ke aktivitas host, yang ditanamkan sebagai
+bagian dari hierarki tampilan keseluruhan aktivitas. Ada dua cara untuk menambahkan fragmen ke layout
+aktivitas:</p>
+
+<ul>
+  <li><b>Deklarasikan fragmen dalam file layout aktivitas.</b>
+<p>Dalam hal ini, Anda bisa
+menetapkan properti layout fragmen seakan-akan sebuah tampilan. Misalnya, berikut ini adalah file
+layout untuk aktivitas dengan dua fragmen:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+    &lt;fragment android:name="com.example.news.ArticleListFragment"
+            android:id="@+id/list"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+    &lt;fragment android:name="com.example.news.ArticleReaderFragment"
+            android:id="@+id/viewer"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+  <p>Atribut {@code android:name} dalam {@code &lt;fragment&gt;} menetapkan kelas {@link
+android.app.Fragment} untuk dibuat instance-nya dalam layout.</p>
+
+<p>Saat sistem membuat layout aktivitas, sistem membuat instance setiap fragmen sebagaimana yang ditetapkan dalam layout
+dan memanggil metode {@link android.app.Fragment#onCreateView onCreateView()} masing-masing,
+untuk mengambil setiap fragmen. Sistem akan menyisipkan {@link android.view.View} yang dikembalikan langsung oleh fragmen,
+ menggantikan elemen {@code &lt;fragment&gt;}.</p>
+
+<div class="note">
+  <p><strong>Catatan:</strong> Setiap fragmen memerlukan identifier
+unik yang bisa digunakan sistem untuk memulihkan fragmen jika aktivitas dimulai kembali (dan identifier yang bisa digunakan menangkap
+fragmen untuk melakukan transaksi, seperti menghapusnya). Ada tiga cara untuk memberikan
+ID bagi fragmen:</p>
+  <ul>
+    <li>Memberikan atribut {@code android:id} bersama ID unik.</li>
+    <li>Memberikan atribut {@code android:tag} bersama string unik.</li>
+    <li>Jika Anda tidak memberikan dua hal tersebut, sistem akan menggunakan ID
+tampilan kontainer.</li>
+  </ul>
+</div>
+  </li>
+
+  <li><b>Atau, secara programatis tambahkan fragmen ke {@link android.view.ViewGroup} yang ada.</b>
+<p>Kapan saja saat aktivitas berjalan, Anda bisa menambahkan fragmen ke layout aktivitas. Anda
+cukup menetapkan {@link
+android.view.ViewGroup} di tempat memasukkan fragmen.</p>
+  <p>Untuk membuat transaksi fragmen dalam aktivitas (seperti menambah, menghapus, atau mengganti
+fragmen), Anda harus menggunakan API dari {@link android.app.FragmentTransaction}. Anda bisa mengambil instance
+ {@link android.app.FragmentTransaction} dari {@link android.app.Activity} seperti ini:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>Selanjutnya Anda bisa menambahkan fragmen menggunakan metode {@link
+android.app.FragmentTransaction#add(int,Fragment) add()}, dengan menetapkan fragmen yang akan ditambahkan dan
+tampilan tempat menyisipkannya. Misalnya:</p>
+
+<pre>
+ExampleFragment fragment = new ExampleFragment();
+fragmentTransaction.add(R.id.fragment_container, fragment);
+fragmentTransaction.commit();
+</pre>
+
+  <p>Argumen pertama yang diteruskan ke {@link android.app.FragmentTransaction#add(int,Fragment) add()}
+ adalah {@link android.view.ViewGroup} tempat fragmen harus dimasukkan, yang ditetapkan oleh
+ID sumber daya, dan parameter kedua merupakan fragmen yang akan ditambahkan.</p>
+  <p>Setelah membuat perubahan dengan
+{@link android.app.FragmentTransaction}, Anda harus
+ memanggil {@link android.app.FragmentTransaction#commit} untuk menerapkan perubahan.</p>
+  </li>
+</ul>
+
+
+<h4 id="AddingWithoutUI">Menambahkan fragmen tanpa UI</h4>
+
+<p>Contoh di atas menampilkan cara menambahkan fragmen ke aktivitas untuk menyediakan UI. Akan tetapi,
+Anda juga bisa menggunakan fragmen untuk menyediakan perilaku latar belakang bagi aktivitas tanpa menampilkan UI
+tambahan.</p>
+
+<p>Untuk menambahkan fragmen tanpa UI, tambahkan fragmen dari aktivitas menggunakan {@link
+android.app.FragmentTransaction#add(Fragment,String)} (dengan menyediakan string unik "tag" untuk fragmen
+, bukan ID tampilan). Ini akan menambahkan fragmen, namun, karena tidak dikaitkan dengan tampilan
+dalam layout aktivitas, ini tidak akan menerima panggilan ke {@link
+android.app.Fragment#onCreateView onCreateView()}. Jadi Anda tidak perlu mengimplementasikan metode itu.</p>
+
+<p>Menyediakan tag string untuk fragmen tidak hanya untuk fragmen non-UI&mdash;Anda juga bisa
+menyediakan tag string untuk fragmen yang memiliki UI&mdash;namun jika fragmen tidak memiliki UI
+, maka tag string adalah satu-satunya cara untuk mengidentifikasinya. Jika Anda ingin mendapatkan fragmen dari
+aktivitas nantinya, Anda perlu menggunakan {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()}.</p>
+
+<p>Untuk contoh aktivitas yang menggunakan fragmen sebagai pekerja latar belakang, tanpa UI, lihat sampel {@code
+FragmentRetainInstance.java}, yang disertakan dalam sampel SDK (tersedia melalui
+Android SDK Manager) dan terletak di sistem Anda sebagai
+<code>&lt;sdk_root&gt;/APIDemos/app/src/main/java/com/example/android/apis/app/FragmentRetainInstance.java</code>.</p>
+
+
+
+<h2 id="Managing">Mengelola Fragmen</h2>
+
+<p>Untuk mengelola fragmen dalam aktivitas, Anda perlu menggunakan {@link android.app.FragmentManager}. Untuk
+mendapatkannya, panggil {@link android.app.Activity#getFragmentManager()} dari aktivitas Anda.</p>
+
+<p>Beberapa hal yang dapat Anda lakukan dengan {@link android.app.FragmentManager} antara lain:</p>
+
+<ul>
+  <li>Dapatkan fragmen yang ada di aktivitas dengan {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} (untuk fragmen yang menyediakan UI dalam
+layout aktivitas) atau {@link android.app.FragmentManager#findFragmentByTag
+findFragmentByTag()} (untuk fragmen yang menyediakan atau tidak menyediakan UI).</li>
+  <li>Tarik fragmen dari back-stack, dengan {@link
+android.app.FragmentManager#popBackStack()} (mensimulasikan perintah <em>Back</em> oleh pengguna).</li>
+  <li>Daftarkan listener untuk perubahan pada back-stack, dengan {@link
+android.app.FragmentManager#addOnBackStackChangedListener addOnBackStackChangedListener()}.</li>
+</ul>
+
+<p>Untuk informasi selengkapnya tentang metode ini dan hal lainnya, lihat dokumentasi kelas {@link
+android.app.FragmentManager}.</p>
+
+<p>Seperti yang ditunjukkan di bagian sebelumnya, Anda juga bisa menggunakan {@link android.app.FragmentManager}
+untuk membuka {@link android.app.FragmentTransaction}, sehingga Anda bisa melakukan transaksi, seperti
+menambah dan menghapus fragmen.</p>
+
+
+<h2 id="Transactions">Melakukan Transaksi Fragmen</h2>
+
+<p>Fitur menarik terkait penggunaan fragmen di aktivitas adalah kemampuan menambah, menghapus, mengganti,
+dan melakukan tindakan lain dengannya, sebagai respons atas interaksi pengguna. Setiap set perubahan
+yang Anda lakukan untuk aktivitas disebut transaksi dan Anda bisa melakukan transaksi menggunakan API di {@link
+android.app.FragmentTransaction}. Anda juga bisa menyimpan setiap transaksi ke back-stack yang dikelola
+aktivitas, sehingga pengguna bisa mengarah mundur melalui perubahan fragmen (mirip mengarah
+mundur melalui aktivitas).</p>
+
+<p>Anda bisa mengambil instance {@link android.app.FragmentTransaction} dari {@link
+android.app.FragmentManager} seperti ini:</p>
+
+<pre>
+FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
+</pre>
+
+<p>Setiap transaksi merupakan serangkaian perubahan yang ingin dilakukan pada waktu yang sama. Anda bisa
+mengatur semua perubahan yang ingin dilakukan untuk transaksi mana saja menggunakan metode seperti {@link
+android.app.FragmentTransaction#add add()}, {@link android.app.FragmentTransaction#remove remove()},
+dan {@link android.app.FragmentTransaction#replace replace()}. Kemudian, untuk menerapkan transaksi
+pada aktivitas, Anda harus memanggil {@link android.app.FragmentTransaction#commit()}.</p>
+</dl>
+
+<p>Akan tetapi, sebelum memanggil {@link
+android.app.FragmentTransaction#commit()}, Anda mungkin perlu memanggil {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, untuk menambahkan transaksi
+ke back-stack dari transaksi fragmen. Back-stack ini dikelola oleh aktivitas dan memungkinkan
+pengguna kembali ke status fragmen sebelumnya, dengan menekan tombol <em>Back</em>.</p>
+
+<p>Misalnya, berikut ini cara mengganti satu fragmen dengan yang fragmen yang lain, dan mempertahankan
+status sebelumnya di back-stack:</p>
+
+<pre>
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+</pre>
+
+<p>Dalam contoh ini, {@code newFragment} menggantikan fragmen apa saja (jika ada) yang saat ini berada dalam
+kontainer layout yang diidentifikasi oleh ID {@code R.id.fragment_container}. Dengan memanggil @link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, transaksi yang diganti
+disimpan ke back-stack sehingga pengguna bisa membalikkan transaksi dan mengembalikan fragmen
+sebelumnya dengan menekan tombol <em>Back</em>.</p>
+
+<p>Jika Anda menambahkan beberapa perubahan pada transaksi (seperti {@link
+android.app.FragmentTransaction#add add()} atau {@link android.app.FragmentTransaction#remove
+remove()}) dan panggil {@link
+android.app.FragmentTransaction#addToBackStack addToBackStack()}, maka semua perubahan akan diterapkan
+sebelum Anda memanggil {@link android.app.FragmentTransaction#commit commit()} akan ditambahkan ke
+back-stack sebagai satu transaksi dan tombol <em>Back</em> akan membalikannya semua.</p>
+
+<p>Urutan menambahkan perubahan pada {@link android.app.FragmentTransaction} tidak berpengaruh,
+kecuali:</p>
+<ul>
+  <li>Anda harus memanggil {@link android.app.FragmentTransaction#commit()} paling akhir</li>
+  <li>Jika Anda menambahkan beberapa fragmen ke kontainer yang sama, maka
+urutan penambahannya akan menentukan urutan munculnya dalam hierarki tampilan</li>
+</ul>
+
+<p>Jika Anda tidak memanggil {@link android.app.FragmentTransaction#addToBackStack(String)
+addToBackStack()} saat melakukan transaksi yang menghapus fragmen, maka fragmen itu
+akan dimusnahkan bila transaksi diikat dan pengguna tidak bisa mengarah kembali ke sana. Sedangkan, jika
+Anda memanggil {@link android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} saat
+menghapus fragmen, maka fragmen itu akan <em>dihentikan</em> dan akan dilanjutkan jika pengguna mengarah
+kembali.</p>
+
+<p class="note"><strong>Tip:</strong> Untuk setiap transaksi fragmen, Anda bisa menerapkan animasi
+transisi, dengan memanggil {@link android.app.FragmentTransaction#setTransition setTransition()} sebelum
+mengikatnya.</p>
+
+<p>Memanggil {@link android.app.FragmentTransaction#commit()} tidak akan langsung menjalankan
+transaksi. Namun sebuah jadwal akan dibuat untuk dijalankan pada thread UI aktivitas (thread "utama")
+begitu thread bisa melakukannya. Akan tetapi, jika perlu Anda bisa memanggil {@link
+android.app.FragmentManager#executePendingTransactions()} dari thread UI untuk segera
+mengeksekusi transaksi yang diserahkan oleh {@link android.app.FragmentTransaction#commit()}. Hal itu
+biasanya tidak perlu kecuali jika transaksi merupakan dependensi bagi pekerjaan dalam thread lain.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Anda bisa mengikat transaksi menggunakan {@link
+android.app.FragmentTransaction#commit commit()} hanya sebelum aktivitas <a href="{@docRoot}guide/components/activities.html#SavingActivityState">menyimpan
+statusnya</a> (saat pengguna meninggalkan aktivitas). Jika Anda mencoba mengikatnya setelah itu,
+eksepsi akan dilontarkan. Ini karena status setelah pengikatan bisa hilang jika aktivitas
+perlu dipulihkan. Untuk situasi yang memperbolehkan Anda meniadakan pengikatan (commit), gunakan {@link
+android.app.FragmentTransaction#commitAllowingStateLoss()}.</p>
+
+
+
+
+<h2 id="CommunicatingWithActivity">Berkomunikasi dengan Aktivitas</h2>
+
+<p>Meskipun {@link android.app.Fragment} diimplementasikan sebagai objek yang tidak bergantung pada
+{@link android.app.Activity} dan bisa digunakan dalam banyak aktivitas, instance tertentu
+dari fragmen secara langsung terkait dengan aktivitas yang dimuatnya.</p>
+
+<p>Khususnya, fragmen bisa mengakses instance {@link android.app.Activity} dengan {@link
+android.app.Fragment#getActivity()} dan dengan mudah melakukan tugas-tugas seperti mencari tampilan dalam
+ layout aktivitas:</p>
+
+<pre>
+View listView = {@link android.app.Fragment#getActivity()}.{@link android.app.Activity#findViewById findViewById}(R.id.list);
+</pre>
+
+<p>Demikian pula, aktivitas Anda bisa memanggil metode di fragmen dengan meminta acuan ke
+{@link android.app.Fragment} dari {@link android.app.FragmentManager}, menggunakan {@link
+android.app.FragmentManager#findFragmentById findFragmentById()} atau {@link
+android.app.FragmentManager#findFragmentByTag findFragmentByTag()}. Misalnya:</p>
+
+<pre>
+ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentById(R.id.example_fragment);
+</pre>
+
+
+<h3 id="EventCallbacks">Membuat callback kejadian pada aktivitas</h3>
+
+<p>Dalam beberapa kasus, Anda mungkin perlu fragmen untuk berbagi kejadian dengan aktivitas. Cara yang baik untuk melakukannya
+adalah mendefinisikan antarmuka callback di dalam fragmen dan mengharuskan aktivitas host
+mengimplementasikannya. Saat aktivitas menerima callback melalui antarmuka, aktivitas akan bisa berbagi informasi itu
+dengan fragmen lain dalam layout jika perlu.</p>
+
+<p>Misalnya, jika sebuah aplikasi berita memiliki dua fragmen dalam aktivitas&mdash;satu untuk menampilkan daftar
+artikel (fragmen A) dan satu lagi untuk menampilkan artikel (fragmen B)&mdash;maka fragmen A harus
+memberi tahu aktivitas bila item daftar dipilih sehingga aktivitas bisa memberi tahu fragmen B untuk menampilkan artikel. Dalam
+hal ini, antarmuka {@code OnArticleSelectedListener} dideklarasikan di dalam fragmen A:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+}
+</pre>
+
+<p>Selanjutnya aktivitas yang menjadi host fragmen akan mengimplementasikan antarmuka {@code OnArticleSelectedListener}
+ dan
+mengesampingkan {@code onArticleSelected()} untuk memberi tahu fragmen B mengenai kejadian dari fragmen A. Untuk memastikan
+bahwa aktivitas host mengimplementasikan antarmuka ini, metode callback fragmen A {@link
+android.app.Fragment#onAttach onAttach()} (yang dipanggil sistem saat menambahkan
+fragmen ke aktivitas) membuat instance {@code OnArticleSelectedListener} dengan
+membuat {@link android.app.Activity} yang diteruskan ke {@link android.app.Fragment#onAttach
+onAttach()}:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnArticleSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    ...
+}
+</pre>
+
+<p>Jika aktivitas belum mengimplementasikan antarmuka, maka fragmen akan melontarkan
+{@link java.lang.ClassCastException}.
+Jika berhasil, anggota {@code mListener} yang menyimpan acuan ke implementasi aktivitas
+{@code OnArticleSelectedListener}, sehingga fragmen A bisa berbagi kejadian dengan aktivitas, dengan memanggil metode
+yang didefinisikan oleh antarmuka {@code OnArticleSelectedListener}. Misalnya, jika fragmen A adalah
+ekstensi dari {@link android.app.ListFragment}, maka setiap kali
+pengguna mengklik item daftar, sistem akan memanggil {@link android.app.ListFragment#onListItemClick
+onListItemClick()} di fragmen, yang selanjutnya memanggil {@code onArticleSelected()} untuk berbagi
+kejadian dengan aktivitas:</p>
+
+<pre>
+public static class FragmentA extends ListFragment {
+    OnArticleSelectedListener mListener;
+    ...
+    &#64;Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.{@link android.content.ContentUris#withAppendedId withAppendedId}(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        mListener.onArticleSelected(noteUri);
+    }
+    ...
+}
+</pre>
+
+<p>Parameter {@code id} yang diteruskan ke {@link
+android.app.ListFragment#onListItemClick onListItemClick()} merupakan ID baris dari item yang diklik,
+yang digunakan aktivitas (atau fragmen lain) untuk mengambil artikel dari {@link
+android.content.ContentProvider} aplikasi.</p>
+
+<p><!--To see a complete implementation of this kind of callback interface, see the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad sample</a>. -->Informasi selengkapnya tentang
+menggunakan penyedia konten tersedia dalam dokumen <a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia Konten</a>.</p>
+
+
+
+<h3 id="ActionBar">Menambahkan item ke Action-Bar</h3>
+
+<p>Fragmen Anda bisa menyumbangkan item menu ke <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Menu Opsi</a> aktivitas (dan, konsekuensinya, <a href="{@docRoot}guide/topics/ui/actionbar.html">Action-Bar</a>) dengan mengimplementasikan
+{@link android.app.Fragment#onCreateOptionsMenu(Menu,MenuInflater) onCreateOptionsMenu()}. Agar
+metode ini bisa menerima panggilan, Anda harus memanggil {@link
+android.app.Fragment#setHasOptionsMenu(boolean) setHasOptionsMenu()} selama {@link
+android.app.Fragment#onCreate(Bundle) onCreate()}, untuk menunjukkan bahwa fragmen
+ingin menambahkan item ke Menu Opsi (jika tidak, fragmen tidak akan menerima panggilan ke
+{@link android.app.Fragment#onCreateOptionsMenu onCreateOptionsMenu()}).</p>
+
+<p>Setiap item yang selanjutnya Anda tambahkan ke Menu Opsi dari fragmen akan ditambahkan ke item menu
+yang ada. Fragmen juga menerima callback ke {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} bila item menu
+dipilih.</p>
+
+<p>Anda juga bisa mendaftarkan tampilan dalam layout fragmen untuk menyediakan menu konteks dengan memanggil {@link
+android.app.Fragment#registerForContextMenu(View) registerForContextMenu()}. Bila pengguna
+membuka menu konteks, fragmen akan menerima panggilan ke {@link
+android.app.Fragment#onCreateContextMenu(ContextMenu,View,ContextMenu.ContextMenuInfo)
+onCreateContextMenu()}. Bila pengguna memilih item, fragmen akan menerima panggilan ke @link
+android.app.Fragment#onContextItemSelected(MenuItem) onContextItemSelected()}.</p>
+
+<p class="note"><strong>Catatan:</strong> Walaupun fragmen menerima callback pada item yang dipilih
+untuk setiap item menu yang ditambahkannya, aktivitaslah yang pertama kali menerima masing-masing callback saat pengguna
+memilih item menu. Jika implementasi aktivitas dari callback bila-item-dipilih,
+tidak menangani item yang dipilih, maka kejadian akan diteruskan ke callback fragmen. Ini berlaku
+untuk Menu Opsi dan menu konteks.</p>
+
+<p>Untuk informasi selengkapnya tentang menu, lihat panduan pengembang <a href="{@docRoot}guide/topics/ui/menus.html">Menu</a> dan <a href="{@docRoot}guide/topics/ui/actionbar.html">Action-Bar</a>.</p>
+
+
+
+
+<h2 id="Lifecycle">Menangani Daur Hidup Fragmen</h2>
+
+<div class="figure" style="width:350px">
+<img src="{@docRoot}images/activity_fragment_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Gambar 3.</strong> Efek daur hidup aktivitas pada daur hidup
+fragmen.</p>
+</div>
+
+<p>Mengelola daur hidup fragmen mirip sekali dengan mengelola daur hidup aktivitas. Seperti
+aktivitas, fragmen bisa berada dalam tiga status:</p>
+
+<dl>
+  <dt><i>Dilanjutkan</i></dt>
+    <dd>Fragmen terlihat dalam aktivitas yang berjalan.</dd>
+
+  <dt><i>Dihentikan sementara</i></dt>
+    <dd>Aktivitas lain berada di latar depan dan memiliki fokus, namun aktivitas tempat fragmen berada
+masih terlihat (aktivitas latar depan sebagian terlihat atau tidak menutupi
+seluruh layar).</dd>
+
+  <dt><i>Dihentikan</i></dt>
+    <dd>Fragmen tidak terlihat. Aktivitas host telah dihentikan atau
+fragmen telah dihapus dari aktivitas namun ditambahkan ke back-stack. Fragmen yang dihentikan
+masih hidup (semua status dan informasi anggota masih disimpan oleh sistem). Akan tetapi, fragmen
+tidak terlihat lagi oleh pengguna dan akan dimatikan jika aktivitas dimatikan.</dd>
+</dl>
+
+<p>Seperti halnya aktivitas, Anda bisa mempertahankan status fragmen menggunakan {@link
+android.os.Bundle}, jika proses aktivitas dimatikan dan Anda harus memulihkan status
+fragmen bila aktivitas dibuat kembali. Anda bisa menyimpan status selama callback {@link
+android.app.Fragment#onSaveInstanceState onSaveInstanceState()} fragmen dan memulihkannya selama
+{@link android.app.Fragment#onCreate onCreate()}, {@link
+android.app.Fragment#onCreateView onCreateView()}, atau {@link
+android.app.Fragment#onActivityCreated onActivityCreated()}. Untuk informasi selengkapnya tentang menyimpan
+status, lihat dokumen <a href="{@docRoot}guide/components/activities.html#SavingActivityState">Aktivitas</a>
+.</p>
+
+<p>Perbedaan paling signifikan dalam daur hidup antara aktivitas dan fragmen ada
+pada cara penyimpanannya dalam back-stack masing-masing. Aktivitas ditempatkan ke back-stack aktivitas
+yang dikelola oleh sistem saat dihentikan, secara default (sehingga pengguna bisa mengarah kembali
+ke aktivitas dengan tombol <em>Back</em>, seperti yang dibahas dalam <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tugas dan Back-Stack</a>).
+Akan tetapi, fragmen yang ditempatkan ke back-stack dikelola oleh aktivitas host hanya saat
+Anda secara eksplisit meminta agar instance disimpan dengan memanggil {@link
+android.app.FragmentTransaction#addToBackStack(String) addToBackStack()} selama transaksi yang
+menghapus fragmen.</p>
+
+<p>Jika tidak, pengelolaan daur hidup fragmen mirip sekali dengan mengelola daur hidup
+aktivitas. Jadi, praktik yang sama untuk <a href="{@docRoot}guide/components/activities.html#Lifecycle">mengelola daur hidup
+aktivitas</a> juga berlaku untuk fragmen. Namun yang perlu juga Anda pahami adalah bagaimana hidup
+aktivitas memengaruhi hidup fragmen.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Jika Anda memerlukan objek {@link android.content.Context}
+ dalam {@link android.app.Fragment}, Anda bisa memanggil {@link android.app.Fragment#getActivity()}.
+Akan tetapi, berhati-hatilah memanggil {@link android.app.Fragment#getActivity()} hanya bila fragmen
+terkait dengan aktivitas. Bila fragmen belum terkait, atau terlepas selama akhir daur
+hidupnya, {@link android.app.Fragment#getActivity()} akan kembali nol.</p>
+
+
+<h3 id="CoordinatingWithActivity">Mengoordinasi dengan daur hidup aktivitas</h3>
+
+<p>Daur hidup aktivitas tempat fragmen berada akan memengaruhi langsung siklus hidup
+fragmen sedemikian rupa sehingga setiap callback daur hidup aktivitas menghasilkan callback yang sama untuk masing-masing
+fragmen. Misalnya, bila aktivitas menerima {@link android.app.Activity#onPause}, masing-masing
+fragmen dalam aktivitas akan menerima {@link android.app.Fragment#onPause}.</p>
+
+<p>Namun fragmen memiliki beberapa callback daur hidup ekstra, yang menangani interaksi
+unik dengan aktivitas untuk melakukan tindakan seperti membangun dan memusnahkan UI fragmen. Metode callback
+tambahan ini adalah:</p>
+
+<dl>
+  <dt>{@link android.app.Fragment#onAttach onAttach()}</dt>
+    <dd>Dipanggil bila fragmen telah dikaitkan dengan aktivitas ({@link
+android.app.Activity} diteruskan di sini).</dd>
+  <dt>{@link android.app.Fragment#onCreateView onCreateView()}</dt>
+    <dd>Dipanggil untuk membuat hierarki tampilan yang dikaitkan dengan fragmen.</dd>
+  <dt>{@link android.app.Fragment#onActivityCreated onActivityCreated()}</dt>
+    <dd>Dipanggil bila metode {@link android.app.Activity#onCreate
+onCreate()} aktivitas telah dikembalikan.</dd>
+  <dt>{@link android.app.Fragment#onDestroyView onDestroyView()}</dt>
+    <dd>Dipanggil bila hierarki tampilan yang terkait dengan fragmen dihapus.</dd>
+  <dt>{@link android.app.Fragment#onDetach onDetach()}</dt>
+    <dd>Dipanggil bila fragmen diputuskan dari aktivitas.</dd>
+</dl>
+
+<p>Aliran daur hidup fragmen, karena dipengaruhi oleh aktivitas host-nya, diilustrasikan oleh
+gambar 3. Dalam gambar ini, Anda bisa melihat bagaimana setiap status aktivitas menentukan
+metode callback mana yang mungkin diterima fragmen. Misalnya, saat aktivitas menerima call back {@link
+android.app.Activity#onCreate onCreate()}, fragmen dalam aktivitas akan menerima tidak lebih
+dari callback {@link android.app.Fragment#onActivityCreated onActivityCreated()}.</p>
+
+<p>Setelah status aktivitas diteruskan kembali, Anda bisa bebas menambah dan menghapus fragmen untuk
+aktivitas tersebut. Sehingga, hanya saat aktivitas berada dalam status dilanjutkan, daur hidup fragmen bisa
+berubah secara independen.</p>
+
+<p>Akan tetapi, saat aktivitas meninggalkan status dilanjutkan, fragmen akan kembali didorong
+melalui daur hidupnya oleh aktivitas.</p>
+
+
+
+
+<h2 id="Example">Contoh</h2>
+
+<p>Untuk merangkum semua yang telah dibahas dalam dokumen ini, berikut ini contoh aktivitas
+yang menggunakan dua fragmen untuk membuat layout dua panel. Aktivitas di bawah ini menyertakan satu fragmen untuk
+menampilkan daftar putar Shakespeare dan fragmen lainnya menampilkan rangkuman pemutaran bila dipilih dari
+daftar. Aktivitas ini juga menunjukkan cara menyediakan konfigurasi fragmen berbeda,
+berdasarkan konfigurasi layar.</p>
+
+<p class="note"><strong>Catatan:</strong> Kode sumber lengkap untuk aktivitas ini tersedia di
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+FragmentLayout.java}</a>.</p>
+
+<p>Aktivitas utama akan menerapkan layout seperti biasa, selama {@link
+android.app.Activity#onCreate onCreate()}:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java main}
+
+<p>Layout yang diterapkan adalah {@code fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout-land/fragment_layout.xml layout}
+
+<p>Dengan layout ini, sistem akan membuat instance {@code TitlesFragment} (yang mencantumkan
+judul) segera setelah aktivitas memuat layout, sementara {@link android.widget.FrameLayout}
+ (lokasi penempatan fragmen untuk menampilkan rangkuman pemutaran) menempati ruang di sisi kanan
+layar, namun pada awalnya masih kosong. Seperti yang akan Anda lihat di bawah ini, sampai pengguna memilih item
+dari daftar maka fragmen baru akan ditempatkan ke dalam {@link android.widget.FrameLayout}.</p>
+
+<p>Akan tetapi, tidak semua konfigurasi layar cukup lebar untuk menampilkan
+daftar putar dan rangkuman secara berdampingan. Sehingga, layout di atas hanya digunakan untuk konfigurasi
+layar mendatar, dengan menyimpannya di {@code res/layout-land/fragment_layout.xml}.</p>
+
+<p>Sehingga, bila layar berada dalam orientasi tegak, sistem akan menerapkan layout berikut, yang
+tersimpan di {@code res/layout/fragment_layout.xml}:</p>
+
+{@sample development/samples/ApiDemos/res/layout/fragment_layout.xml layout}
+
+<p>Layout ini hanya menyertakan {@code TitlesFragment}. Ini artinya saat perangkat berada dalam
+orientasi tegak, hanya judul daftar putar yang terlihat. Jadi, saat pengguna mengklik item
+daftar dalam konfigurasi ini, aplikasi akan memulai aktivitas baru untuk menampilkan rangkuman,
+sebagai ganti pemuatan fragmen kedua.</p>
+
+<p>Berikutnya, Anda bisa melihat bagaimana hal ini dilakukan dalam kelas fragmen. Pertama adalah {@code
+TitlesFragment}, yang menampilkan judul daftar putar Shakespeare. Fragmen ini membuat ekstensi {@link
+android.app.ListFragment} dan mengandalkannya itu untuk menangani sebagian besar pekerjaan tampilan daftar.</p>
+
+<p>Saat Anda memeriksa kode ini, perhatikan bahwa ada dua kemungkinan perilaku saat pengguna mengklik
+item daftar: bergantung pada layout mana yang aktif, bisa membuat dan menampilkan fragmen
+baru untuk menampilkan detail dalam aktivitas yang sama (menambahkan fragmen ke {@link
+android.widget.FrameLayout}), atau memulai aktivitas baru (tempat fragmen ditampilkan).</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java titles}
+
+<p>Fragmen kedua, {@code DetailsFragment} menampilkan rangkuman pemutaran untuk item yang dipilih dari
+daftar dari {@code TitlesFragment}:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java details}
+
+<p>Ingatlah dari kelas {@code TitlesFragment}, bahwa, jika pengguna mengklik item daftar dan
+layout saat ini <em>tidak</em> menyertakan tampilan {@code R.id.details} (yaitu tempat
+{@code DetailsFragment} berada), maka aplikasi memulai aktivitas {@code DetailsActivity}
+untuk menampilkan konten item.</p>
+
+<p>Berikut ini adalah {@code DetailsActivity}, yang hanya menanamkan {@code DetailsFragment} untuk menampilkan rangkuman pemutaran
+yang dipilih saat layar dalam orientasi tegak:</p>
+
+{@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
+details_activity}
+
+<p>Perhatikan bahwa aktivitas ini selesai sendiri jika konfigurasi mendatar, sehingga aktivitas utama
+bisa mengambil alih dan menampilkan {@code DetailsFragment} bersama {@code TitlesFragment}.
+Ini bisa terjadi jika pengguna memulai {@code DetailsActivity} saat dalam orientasi tegak, namun kemudian
+memutarnya menjadi mendatar (yang akan memulai lagi aktivitas saat ini).</p>
+
+
+<p>Untuk contoh lainnya mengenai penggunaan fragmen (dan file sumber lengkap untuk contoh ini),
+lihat aplikasi contoh Demo API yang tersedia di <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+ApiDemos</a> (bisa diunduh dari <a href="{@docRoot}resources/samples/get.html">Komponen contoh SDK</a>).</p>
+
+

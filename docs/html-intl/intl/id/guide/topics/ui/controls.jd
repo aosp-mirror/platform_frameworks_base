@@ -1,0 +1,90 @@
+page.title=Kontrol Input
+parent.title=Antarmuka Pengguna
+parent.link=index.html
+@jd:body
+
+<div class="figure" style="margin:0">
+  <img src="{@docRoot}images/ui/ui-controls.png" alt="" style="margin:0" />
+</div>
+
+<p>Kontrol input adalah komponen interaktif dalam antarmuka pengguna aplikasi Anda. Android menyediakan
+aneka ragam kontrol yang bisa Anda gunakan dalam UI, seperti tombol, bidang teks, bilah pencarian,
+kotak cek, tombol zoom, tombol toggle, dan masih banyak lagi.</p>
+
+<p>Menambahkan sebuah kontrol input ke UI adalah semudah menambahkan satu elemen XML ke <a href="{@docRoot}guide/topics/ui/declaring-layout.html">layout XML</a>. Misalnya, inilah sebuah
+layout dengan satu bidang teks dan satu tombol:</p>
+
+<pre style="clear:right">
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal">
+    &lt;EditText android:id="@+id/edit_message"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/edit_message" />
+    &lt;Button android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:onClick="sendMessage" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Tiap kontrol input mendukung satu set kejadian input sehingga Anda bisa menangani berbagai kejadian seperti saat
+pengguna memasukkan teks atau menyentuh tombol.</p>
+
+
+<h2 id="CommonControls">Kontrol Umum</h2>
+<p>Berikut adalah daftar beberapa kontrol umum yang bisa Anda gunakan dalam aplikasi. Ikuti tautan ini untuk mengetahui
+selengkapnya tentang penggunaannya masing-masing.</p>
+
+<p class="note"><strong>Catatan:</strong> Android menyediakan beberapa kontrol lain yang tidak tercantum
+di sini. Telusuri paket {@link android.widget} untuk mengetahui selengkapnya. Jika aplikasi Anda memerlukan
+semacam kontrol input tertentu, Anda bisa membangun <a href="{@docRoot}guide/topics/ui/custom-components.html">komponen custom</a> sendiri.</p>
+
+<table>
+    <tr>
+        <th scope="col">Tipe Kontrol</th>
+        <th scope="col">Keterangan</th>
+	<th scope="col">Kelas Terkait</th>
+    </tr>
+    <tr>
+        <td><a href="controls/button.html">Tombol</a></td>
+        <td>Tombol tekan yang bisa ditekan, atau diklik, oleh pengguna untuk melakukan suatu tindakan.</td>
+	<td>{@link android.widget.Button Button} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/text.html">Bidang teks</a></td>
+        <td>Bidang teks yang bisa diedit. Anda bisa menggunakan widget <code>AutoCompleteTextView</code> untuk membuat widget entri teks yang menyediakan saran pelengkapan otomatis</td>
+	<td>{@link android.widget.EditText EditText}, {@link android.widget.AutoCompleteTextView}</td>
+    </tr>
+    <tr>
+        <td><a href="controls/checkbox.html">Kotak cek</a></td>
+        <td>Switch aktif/nonaktif yang bisa diubah oleh pengguna. Anda harus menggunakan kotak cek saat menampilkan sekumpulan opsi yang bisa dipilih pengguna dan bila keduanya mungkin terjadi bersamaan.</td>
+	<td>{@link android.widget.CheckBox CheckBox} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/radiobutton.html">Tombol radio</a></td>
+        <td>Mirip dengan kotak cek, hanya saja cuma satu opsi yang bisa dipilih dalam kumpulan tersebut.</td>
+	<td>{@link android.widget.RadioGroup RadioGroup}
+	<br>{@link android.widget.RadioButton RadioButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/togglebutton.html" style="white-space:nowrap">Tombol toggle</a></td>
+        <td>Tombol aktif/nonaktif dengan indikator cahaya.</td>
+	<td>{@link android.widget.ToggleButton ToggleButton} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/spinner.html">Spinner</a></td>
+        <td>Daftar tarik-turun yang memungkinkan pengguna memilih salah satu dari serangkaian nilai.</td>
+	<td>{@link android.widget.Spinner Spinner} </td>
+    </tr>
+    <tr>
+        <td><a href="controls/pickers.html">Picker</a></td>
+        <td>Dialog bagi pengguna untuk memilih satu nilai dari satu kumpulan dengan menggunakan tombol naik/turun atau dengan gerakan mengusap. Gunakan widget <code>DatePicker</code>code&gt; untuk memasukkan nilai tanggal (bulan, hari, tahun) atau widget <code>TimePicker</code> untuk memasukkan nilai waktu (jam, menit, AM/PM), yang akan diformat secara otomatis untuk lokasi pengguna tersebut.</td>
+	<td>{@link android.widget.DatePicker}, {@link android.widget.TimePicker}</td>
+    </tr>
+</table>

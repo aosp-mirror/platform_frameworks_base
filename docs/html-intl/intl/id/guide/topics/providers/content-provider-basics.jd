@@ -1,0 +1,1196 @@
+page.title=Dasar-Dasar Penyedia Konten
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+<!-- In this document -->
+<h2>Dalam dokumen ini</h2>
+<ol>
+    <li>
+        <a href="#Basics">Ikhtisar</a>
+        <ol>
+            <li>
+                <a href="#ClientProvider">Mengakses penyedia</a>
+            </li>
+            <li>
+                <a href="#ContentURIs">URI Konten</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#SimpleQuery">Mengambil Data dari Penyedia</a>
+        <ol>
+            <li>
+                <a href="#RequestPermissions">Meminta izin akses baca</a>
+            </li>
+            <li>
+                <a href="#Query">Membuat query</a>
+            </li>
+            <li>
+                <a href="#DisplayResults">Menampilkan hasil query</a>
+            </li>
+            <li>
+                <a href="#GettingResults">Mendapatkan data dari hasil query</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#Permissions">Izin Penyedia Konten</a>
+    </li>
+    <li>
+        <a href="#Modifications">Menyisipkan, Memperbarui, dan Menghapus Data</a>
+        <ol>
+            <li>
+                <a href="#Inserting">Menyisipkan data</a>
+            </li>
+            <li>
+                <a href="#Updating">Memperbarui data</a>
+            </li>
+            <li>
+                <a href="#Deleting">Menghapus data</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#DataTypes">Tipe Data Penyedia</a>
+    </li>
+    <li>
+        <a href="#AltForms">Bentuk-Bentuk Alternatif Akses Penyedia</a>
+        <ol>
+            <li>
+                <a href="#Batch">Akses batch</a>
+            </li>
+            <li>
+                <a href="#Intents">Akses data melalui intent</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClasses">Kelas-kelas Kontrak</a>
+    </li>
+    <li>
+        <a href="#MIMETypeReference">Acuan Tipe MIME</a>
+    </li>
+</ol>
+
+    <!-- Key Classes -->
+<h2>Kelas-kelas utama</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.content.ContentResolver}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+
+    <!-- Related Samples -->
+<h2>Contoh-Contoh Terkait</h2>
+    <ol>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List2.html">
+        Kursor (Orang)</a>
+        </li>
+        <li>
+        <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List7.html">
+        Kursor (Telepon)</a>
+        </li>
+    </ol>
+
+    <!-- See also -->
+<h2>Lihat juga</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-creating.html">
+            Membuat Penyedia Konten</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Penyedia Kalender</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+    <!-- Intro paragraphs -->
+<p>
+    Penyedia konten mengelola akses ke repository data pusat. Penyedia
+    adalah bagian dari aplikasi Android, yang sering menyediakan UI-nya sendiri untuk menggunakan
+    data. Akan tetapi, penyedia konten terutama dimaksudkan untuk digunakan oleh
+    aplikasi lain, yang mengakses penyedia itu melalui objek klien penyedia. Bersama-sama, penyedia
+    dan klien penyedia menawarkan antarmuka standar yang konsisten ke data yang juga menangani
+    komunikasi antar-proses dan akses data aman.
+</p>
+<p>
+    Topik ini menerangkan dasar-dasar dari hal-hal berikut:
+</p>
+    <ul>
+        <li>Cara kerja penyedia konten.</li>
+        <li>API yang Anda gunakan untuk mengambil data dari penyedia konten.</li>
+        <li>API yang Anda gunakan untuk menyisipkan, memperbarui, atau menghapus data dalam penyedia konten.</li>
+        <li>Fitur API lainnya yang memudahkan kita menggunakan penyedia.</li>
+    </ul>
+
+    <!-- Basics -->
+<h2 id="Basics">Ikhtisar</h2>
+<p>
+    Penyedia konten menyajikan data ke aplikasi eksternal sebagai satu atau beberapa tabel yang
+    serupa dengan tabel-tabel yang ditemukan dalam database relasional. Sebuah baris mewakili instance beberapa tipe
+    data yang dikumpulkan penyedia, dan tiap kolom dalam baris mewakili sepotong
+    data yang dikumpulkan untuk sebuah instance.
+</p>
+<p>
+    Misalnya, salah satu penyedia bawaan di platform Android adalah kamus pengguna, yang
+    menyimpan ejaan kata-kata tidak-standar yang ingin disimpan pengguna. Tabel 1 mengilustrasikan
+    wujud data yang mungkin ada dalam tabel penyedia ini:
+</p>
+<p class="table-caption">
+    <strong>Tabel 1:</strong> Contoh tabel kamus pengguna.
+</p>
+<table id="table1" style="width: 50%;">
+    <tr>
+        <th style="width:20%" align="center" scope="col">word</th>
+        <th style="width:20%" align="center" scope="col">app id</th>
+        <th style="width:20%" align="center" scope="col">frequency</th>
+        <th style="width:20%" align="center" scope="col">locale</th>
+        <th style="width:20%" align="center" scope="col">_ID</th>
+    </tr>
+    <tr>
+        <td align="center" scope="row">mapreduce</td>
+        <td align="center">user1</td>
+        <td align="center">100</td>
+        <td align="center">en_US</td>
+        <td align="center">1</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">precompiler</td>
+        <td align="center">user14</td>
+        <td align="center">200</td>
+        <td align="center">fr_FR</td>
+        <td align="center">2</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">applet</td>
+        <td align="center">user2</td>
+        <td align="center">225</td>
+        <td align="center">fr_CA</td>
+        <td align="center">3</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">const</td>
+        <td align="center">user1</td>
+        <td align="center">255</td>
+        <td align="center">pt_BR</td>
+        <td align="center">4</td>
+    </tr>
+    <tr>
+        <td align="center" scope="row">int</td>
+        <td align="center">user5</td>
+        <td align="center">100</td>
+        <td align="center">en_UK</td>
+        <td align="center">5</td>
+    </tr>
+</table>
+<p>
+    Dalam tabel 1, tiap baris mewakili instance sebuah kata yang mungkin tidak
+    ditemukan dalam kamus standar. Tiap kolom mewakili beberapa data untuk kata itu, misalnya
+    bahasa lokal tempat kata itu ditemukan kali pertama. Header kolom adalah nama kolom yang disimpan dalam
+    penyedia. Untuk mengacu ke bahasa lokal suatu baris, Anda mengacu ke kolom <code>locale</code>-nya. Untuk
+    penyedia ini, kolom <code>_ID</code> berfungsi sebagai "kunci utama" kolom yang
+    dipelihara oleh penyedia secara otomatis.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Penyedia tidak diharuskan memiliki kunci utama, dan tidak diharuskan
+    menggunakan <code>_ID</code> sebagai nama kolom kunci utama jika kunci itu ada. Akan tetapi,
+    jika Anda ingin mengikat data dari penyedia ke {@link android.widget.ListView}, salah satu
+    nama kolom harus <code>_ID</code>. Ketentuan ini dijelaskan secara lebih detail di bagian
+    <a href="#DisplayResults">Menampilkan hasil query</a>.
+</p>
+<h3 id="ClientProvider">Mengakses penyedia</h3>
+<p>
+    Aplikasi mengakses data dari penyedia konten dengan
+    sebuah objek klien {@link android.content.ContentResolver}. Objek ini memiliki metode yang memanggil
+    metode dengan nama identik dalam objek penyedia, instance salah satu
+    subkelas konkret dari {@link android.content.ContentProvider}. Metode-metode
+    {@link android.content.ContentResolver} menyediakan fungsi-fungsi dasar
+    "CRUD" (create, retrieve, update, dan delete) pada penyimpanan yang persisten.
+</p>
+<p>
+    Objek {@link android.content.ContentResolver} dalam
+    proses aplikasi klien dan objek {@link android.content.ContentProvider} dalam aplikasi yang memiliki
+    penyedia itu secara otomatis akan menangani komunikasi antar-proses.
+    {@link android.content.ContentProvider} juga berfungsi sebagai lapisan abstraksi antara
+    repository datanya dan penampilan eksternal data sebagai tabel.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Untuk mengakses penyedia, aplikasi Anda biasanya harus meminta
+    izin tertentu dalam file manifesnya. Hal ini dijelaskan lebih detail di bagian
+    <a href="#Permissions">Izin Penyedia Konten</a>
+</p>
+<p>
+    Misalnya, untuk mendapatkan daftar kata dan lokalnya dari Penyedia Kamus Pengguna,
+    Anda memanggil {@link android.content.ContentResolver#query ContentResolver.query()}.
+    Metode {@link android.content.ContentResolver#query query()} memanggil
+    metode {@link android.content.ContentProvider#query ContentProvider.query()} yang didefinisikan oleh
+    Penyedia Kamus Pengguna. Baris-baris kode berikut menunjukkan sebuah
+    panggilan {@link android.content.ContentResolver#query ContentResolver.query()}:
+<p>
+<pre>
+// Queries the user dictionary and returns results
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,   // The content URI of the words table
+    mProjection,                        // The columns to return for each row
+    mSelectionClause                    // Selection criteria
+    mSelectionArgs,                     // Selection criteria
+    mSortOrder);                        // The sort order for the returned rows
+</pre>
+<p>
+    Tabel 2 menampilkan cara argumen untuk
+    {@link android.content.ContentResolver#query
+    query(Uri,projection,selection,selectionArgs,sortOrder)} cocok dengan sebuah pernyataan SELECT di SQL:
+</p>
+<p class="table-caption">
+    <strong>Tabel 2:</strong> Query() dibandingkan dengan query SQL.
+</p>
+<table id="table2" style="width: 75%;">
+    <tr>
+        <th style="width:25%" align="center" scope="col">Argumen query()</th>
+        <th style="width:25%" align="center" scope="col">Kata kunci/parameter SELECT</th>
+        <th style="width:50%" align="center" scope="col">Catatan</th>
+    </tr>
+    <tr>
+        <td align="center"><code>Uri</code></td>
+        <td align="center"><code>FROM <em>table_name</em></code></td>
+        <td><code>Uri</code> memetakan ke tabel dalam penyedia yang bernama <em>table_name</em>.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>projection</code></td>
+        <td align="center"><code><em>col,col,col,...</em></code></td>
+        <td>
+            <code>projection</code> adalah satu larik kolom yang harus disertakan untuk tiap baris
+            yang diambil.
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>selection</code></td>
+        <td align="center"><code>WHERE <em>col</em> = <em>value</em></code></td>
+        <td><code>selection</code> menetapkan kriteria untuk memilih baris.</td>
+    </tr>
+    <tr>
+        <td align="center"><code>selectionArgs</code></td>
+        <td align="center">
+            (Tidak ada padanan persis. Argumen pemilihan mengganti <code>?</code> placeholder dalam
+            klausa pemilihan.)
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><code>sortOrder</code></td>
+        <td align="center"><code>ORDER BY <em>col,col,...</em></code></td>
+        <td>
+            <code>sortOrder</code> menetapkan urutan munculnya baris dalam
+            {@link android.database.Cursor} yang dihasilkan.
+        </td>
+    </tr>
+</table>
+<h3 id="ContentURIs">URI Konten</h3>
+<p>
+    <strong>URI konten</strong> adalah URI yang mengidentifikasi data dalam penyedia. URI Konten
+    menyertakan nama simbolis seluruh penyedia (<strong>otoritas</strong>nya) dan sebuah
+    nama yang menunjuk ke tabel (<strong>path</strong>). Bila Anda memanggil
+    metode klien untuk mengakses tabel dalam penyedia, URI konten untuk tabel itu adalah salah satu
+    argumennya.
+</p>
+<p>
+    Dalam baris kode sebelumnya, konstanta
+    {@link android.provider.UserDictionary.Words#CONTENT_URI} mengandung URI konten dari
+    tabel "words" kamus pengguna. Objek {@link android.content.ContentResolver}
+    akan mengurai otoritas URI, dan menggunakannya untuk "mengetahui" penyedia dengan
+    membandingkan otoritas tersebut dengan sebuah tabel sistem berisi penyedia yang dikenal.
+{@link android.content.ContentResolver}    kemudian bisa mengirim argumen query ke penyedia
+    yang benar.
+</p>
+<p>
+    {@link android.content.ContentProvider} menggunakan bagian path dari URI konten untuk memilih
+    tabel yang akan diakses. Penyedia biasanya memiliki <strong>path</strong> untuk tiap tabel yang dieksposnya.
+</p>
+<p>
+    Dalam baris kode sebelumnya, URI lengkap untuk tabel "words" adalah:
+</p>
+<pre>
+content://user_dictionary/words
+</pre>
+<p>
+    dalam hal ini string <code>user_dictionary</code> adalah otoritas penyedia, dan string
+    <code>words</code> adalah path tabel. String
+    <code>content://</code> (<strong>skema</strong>) selalu ada,
+    dan mengidentifikasinya sebagai URI konten.
+</p>
+<p>
+    Banyak penyedia yang memperbolehkan Anda mengakses satu baris dalam tabel dengan menambahkan sebuah ID nilai
+    ke akhir URI. Misalnya, untuk mengambil sebuah baris yang <code>_ID</code>-nya adalah
+    <code>4</code> dari kamus pengguna, Anda bisa menggunakan URI konten ini:
+</p>
+<pre>
+Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
+</pre>
+<p>
+    Anda akan sering menggunakan nilai-nilai ID bila telah mengambil satu set baris kemudian ingin memperbarui atau menghapus
+    salah satunya.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Kelas-kelas {@link android.net.Uri} dan {@link android.net.Uri.Builder}
+    berisi metode praktis untuk membangun objek dari string URI yang tersusun dengan baik.
+{@link android.content.ContentUris}    berisi metode praktis untuk menambahkan nilai ID ke
+    URI. Cuplikan kode sebelumnya menggunakan {@link android.content.ContentUris#withAppendedId
+    withAppendedId()} untuk menambahkan id ke URI konten User Dictionary.
+</p>
+
+
+    <!-- Retrieving Data from the Provider -->
+<h2 id="SimpleQuery">Mengambil Data dari Penyedia</h2>
+<p>
+    Bagian ini menerangkan cara mengambil data dari penyedia, dengan menggunakan Penyedia Kamus Pengguna
+    sebagai contoh.
+</p>
+<p class="note">
+    Demi kejelasan, cuplikan kode di bagian ini memanggil
+    {@link android.content.ContentResolver#query ContentResolver.query()} pada "UI thread"". Akan tetapi, dalam
+    kode sesungguhnya, Anda harus melakukan query secara asinkron pada sebuah thread terpisah. Satu cara melakukannya
+    adalah menggunakan kelas {@link android.content.CursorLoader}, yang dijelaskan
+    lebih detail dalam panduan <a href="{@docRoot}guide/components/loaders.html">
+    Loader</a>. Juga, baris-baris kode tersebut hanyalah cuplikan; tidak menunjukkan sebuah aplikasi
+     lengkap.
+</p>
+<p>
+    Untuk mengambil data dari penyedia, ikutilah langkah-langkah dasar ini:
+</p>
+<ol>
+   <li>
+        Minta izin akses baca untuk penyedia itu.
+   </li>
+   <li>
+        Definisikan kode yang mengirim query ke penyedia.
+   </li>
+</ol>
+<h3 id="RequestPermissions">Meminta izin akses baca</h3>
+<p>
+    Untuk mengambil data dari penyedia, aplikasi Anda memerlukan "izin akses baca" untuk
+    penyedia itu. Anda tidak bisa meminta izin ini saat runtime; sebagai gantinya, Anda harus menetapkan bahwa
+    Anda memerlukan izin ini dalam manifes, dengan menggunakan elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    dan nama persis izin yang didefinisikan oleh
+    penyedia itu. Bila menetapkan elemen ini dalam manifes, Anda secara efektif "meminta"
+    izin ini untuk aplikasi Anda. Bila pengguna menginstal aplikasi Anda, mereka secara implisit akan memberikan
+    permintaan ini.
+</p>
+<p>
+    Untuk menemukan nama persis dari izin akses baca untuk penyedia yang sedang Anda gunakan, serta
+    nama-nama izin akses lain yang digunakan oleh penyedia, lihatlah dalam
+    dokumentasi penyedia.
+</p>
+<p>
+    Peran izin dalam yang mengakses penyedia dijelaskan lebih detail di bagian
+    <a href="#Permissions">Izin Penyedia Konten</a>.
+</p>
+<p>
+    Penyedia Kamus Pengguna mendefinisikan izin
+    <code>android.permission.READ_USER_DICTIONARY</code> dalam file manifesnya, sehingga
+    aplikasi yang ingin membaca dari penyedia itu harus meminta izin ini.
+</p>
+<!-- Constructing the query -->
+<h3 id="Query">Membuat query</h3>
+<p>
+    Langkah berikutnya dalam mengambil data penyedia adalah membuat query. Cuplikan kode pertama ini
+    mendefinisikan beberapa variabel untuk mengakses Penyedia Kamus Pengguna:
+</p>
+<pre class="prettyprint">
+
+// A "projection" defines the columns that will be returned for each row
+String[] mProjection =
+{
+    UserDictionary.Words._ID,    // Contract class constant for the _ID column name
+    UserDictionary.Words.WORD,   // Contract class constant for the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
+};
+
+// Defines a string to contain the selection clause
+String mSelectionClause = null;
+
+// Initializes an array to contain selection arguments
+String[] mSelectionArgs = {""};
+
+</pre>
+<p>
+    Cuplikan berikutnya menampilkan cara menggunakan
+    {@link android.content.ContentResolver#query ContentResolver.query()}, dengan menggunakan Penyedia Kamus Pengguna
+    sebagai contoh. Query klien penyedia serupa dengan query SQL, dan berisi satu
+    set kolom yang akan dihasilkan, satu set kriteria pemilihan, dan urutan sortir.
+</p>
+<p>
+    Set kolom yang harus dikembalikan query disebut dengan <strong>proyeksi</strong>
+    (variabel <code>mProjection</code>).
+</p>
+<p>
+    Ekspresi yang menetapkan baris yang harus diambil dipecah menjadi klausa pemilihan dan
+    argumen pemilihan. Klausa pemilihan adalah kombinasi ekspresi logis dan boolean,
+    nama kolom, dan nilai (variabel <code>mSelectionClause</code>). Jika Anda menetapkan
+    parameter <code>?</code> yang bisa diganti, sebagai ganti nilai, metode query akan mengambil nilai
+    dari larik argumen pemilihan (variabel <code>mSelectionArgs</code>).
+</p>
+<p>
+    Dalam cuplikan berikutnya, jika pengguna tidak memasukkan sebuah kata, klausa pemilihan akan diatur ke
+    <code>null</code>, dan query menghasilkan semua kata dalam penyedia. Jika pengguna memasukkan
+    sebuah kata, klausa pemilihan akan diatur ke <code>UserDictionary.Words.WORD + " = ?"</code> dan
+    elemen pertama larik argumen pemilihan diatur ke kata yang dimasukkan pengguna.
+</p>
+<pre class="prettyprint">
+/*
+ * This defines a one-element String array to contain the selection argument.
+ */
+String[] mSelectionArgs = {""};
+
+// Gets a word from the UI
+mSearchString = mSearchWord.getText().toString();
+
+// Remember to insert code here to check for invalid or malicious input.
+
+// If the word is the empty string, gets everything
+if (TextUtils.isEmpty(mSearchString)) {
+    // Setting the selection clause to null will return all words
+    mSelectionClause = null;
+    mSelectionArgs[0] = "";
+
+} else {
+    // Constructs a selection clause that matches the word that the user entered.
+    mSelectionClause = UserDictionary.Words.WORD + " = ?";
+
+    // Moves the user's input string to the selection arguments.
+    mSelectionArgs[0] = mSearchString;
+
+}
+
+// Does a query against the table and returns a Cursor object
+mCursor = getContentResolver().query(
+    UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
+    mProjection,                       // The columns to return for each row
+    mSelectionClause                   // Either null, or the word the user entered
+    mSelectionArgs,                    // Either empty, or the string the user entered
+    mSortOrder);                       // The sort order for the returned rows
+
+// Some providers return null if an error occurs, others throw an exception
+if (null == mCursor) {
+    /*
+     * Insert code here to handle the error. Be sure not to use the cursor! You may want to
+     * call android.util.Log.e() to log this error.
+     *
+     */
+// If the Cursor is empty, the provider found no matches
+} else if (mCursor.getCount() &lt; 1) {
+
+    /*
+     * Insert code here to notify the user that the search was unsuccessful. This isn't necessarily
+     * an error. You may want to offer the user the option to insert a new row, or re-type the
+     * search term.
+     */
+
+} else {
+    // Insert code here to do something with the results
+
+}
+</pre>
+<p>
+    Query ini analog dengan pernyataan SQL:
+</p>
+<pre>
+SELECT _ID, word, locale FROM words WHERE word = &lt;userinput&gt; ORDER BY word ASC;
+</pre>
+<p>
+    Dalam pernyataan SQL ini, nama kolom yang sesungguhnya digunakan sebagai ganti konstanta kelas kontrak.
+</p>
+<h4 id="Injection">Melindungi dari input merusak</h4>
+<p>
+    Jika data dikelola oleh penyedia konten berada dalam database SQL, memasukkan data tak dipercaya eksternal
+    ke dalam pernyataan SQL mentah bisa menyebabkan injeksi SQL.
+</p>
+<p>
+    Perhatikan klausa pemilihan ini:
+</p>
+<pre>
+// Constructs a selection clause by concatenating the user's input to the column name
+String mSelectionClause =  "var = " + mUserInput;
+</pre>
+<p>
+    Jika melakukannya, Anda akan membuat pengguna menyambungkan SQL merusak ke pernyataan SQL Anda.
+    Misalnya, pengguna bisa memasukkan "nothing; DROP TABLE *;"  untuk <code>mUserInput</code>, yang
+    akan menghasilkan klausa pemilihan <code>var = nothing; DROP TABLE *;</code>. Karena
+    klausa pemilihan diperlakukan sebagai pernyataan SQL, hal ini bisa menyebabkan penyedia itu menghapus semua
+    tabel dalam database SQLite yang mendasarinya (kecuali penyedia disiapkan untuk menangkap upaya
+    <a href="http://en.wikipedia.org/wiki/SQL_injection">injeksi SQL</a>).
+</p>
+<p>
+    Untuk menghindari masalah ini, gunakan klausa pemilihan yang menggunakan <code>?</code> sebagai
+    parameter yang bisa diganti dan larik argumen pemilihan yang terpisah. Bila Anda melakukannya, input pengguna
+    akan dibatasi secara langsung pada query agar tidak ditafsirkan sebagai bagian dari pernyataan SQL.
+    Karena tidak diperlakukan sebagai SQL, input pengguna tidak bisa menyuntikkan SQL merusak. Sebagai ganti menggunakan
+    penyambungan untuk menyertakan input pengguna, gunakan klausa pemilihan ini:
+</p>
+<pre>
+// Constructs a selection clause with a replaceable parameter
+String mSelectionClause =  "var = ?";
+</pre>
+<p>
+    Buat larik argumen pemilihan seperti ini:
+</p>
+<pre>
+// Defines an array to contain the selection arguments
+String[] selectionArgs = {""};
+</pre>
+<p>
+    Masukkan nilai dalam larik argumen pemilihan seperti ini:
+</p>
+<pre>
+// Sets the selection argument to the user's input
+selectionArgs[0] = mUserInput;
+</pre>
+<p>
+    Sebuah klausa pemilihan yang menggunakan <code>?</code> sebagai parameter yang bisa diganti dan sebuah larik
+    argumen pemilihan adalah cara yang lebih disukai untuk menyebutkan pemilihan, sekalipun penyedia tidak
+    dibuat berdasarkan database SQL.
+</p>
+<!-- Displaying the results -->
+<h3 id="DisplayResults">Menampilkan hasil query</h3>
+<p>
+    Metode klien {@link android.content.ContentResolver#query ContentResolver.query()} selalu
+    menghasilkan {@link android.database.Cursor} berisi kolom-kolom yang ditetapkan oleh
+    proyeksi query untuk baris yang cocok dengan kriteria pemilihan query. Objek
+    {@link android.database.Cursor} menyediakan akses baca acak ke baris dan kolom yang
+    dimuatnya. Dengan metode {@link android.database.Cursor}, Anda bisa mengulang baris-baris dalam
+    hasil, menentukan tipe data tiap kolom, mengambil data dari kolom, dan memeriksa
+    properti lain dari hasil. Beberapa implementasi {@link android.database.Cursor}
+    akan memperbarui objek secara otomatis bila data penyedia berubah, atau memicu metode dalam objek pengamat
+    bila {@link android.database.Cursor} berubah, atau keduanya.
+</p>
+<p class="note">
+    <strong>Catatan:</strong> Penyedia bisa membatasi akses ke kolom berdasarkan sifat
+    objek yang membuat query. Misalnya, Penyedia Kontak membatasi akses untuk beberapa kolom pada
+    adaptor sinkronisasi, sehingga tidak akan mengembalikannya ke aktivitas atau layanan.
+</p>
+<p>
+    Jika tidak ada baris yang cocok dengan kriteria pemilihan, penyedia
+    akan mengembalikan objek {@link android.database.Cursor} dengan
+    {@link android.database.Cursor#getCount Cursor.getCount()} adalah 0 (kursor kosong).
+</p>
+<p>
+    Jika terjadi kesalahan internal, hasil query akan bergantung pada penyedia tertentu. Penyedia bisa
+    memilih untuk menghasilkan <code>null</code>, atau melontarkan {@link java.lang.Exception}.
+</p>
+<p>
+    Karena {@link android.database.Cursor} adalah "daftar" baris, cara yang cocok untuk menampilkan
+    konten {@link android.database.Cursor} adalah mengaitkannya dengan {@link android.widget.ListView}
+    melalui {@link android.widget.SimpleCursorAdapter}.
+</p>
+<p>
+    Cuplikan berikut melanjutkan kode dari cuplikan sebelumnya. Cuplikan ini membuat
+    objek {@link android.widget.SimpleCursorAdapter} berisi {@link android.database.Cursor}
+    yang diambil oleh query, dan mengatur objek ini menjadi adaptor bagi
+    {@link android.widget.ListView}:
+</p>
+<pre class="prettyprint">
+// Defines a list of columns to retrieve from the Cursor and load into an output row
+String[] mWordListColumns =
+{
+    UserDictionary.Words.WORD,   // Contract class constant containing the word column name
+    UserDictionary.Words.LOCALE  // Contract class constant containing the locale column name
+};
+
+// Defines a list of View IDs that will receive the Cursor columns for each row
+int[] mWordListItems = { R.id.dictWord, R.id.locale};
+
+// Creates a new SimpleCursorAdapter
+mCursorAdapter = new SimpleCursorAdapter(
+    getApplicationContext(),               // The application's Context object
+    R.layout.wordlistrow,                  // A layout in XML for one row in the ListView
+    mCursor,                               // The result from the query
+    mWordListColumns,                      // A string array of column names in the cursor
+    mWordListItems,                        // An integer array of view IDs in the row layout
+    0);                                    // Flags (usually none are needed)
+
+// Sets the adapter for the ListView
+mWordList.setAdapter(mCursorAdapter);
+</pre>
+<p class="note">
+    <strong>Catatan:</strong> Untuk mendukung {@link android.widget.ListView} dengan
+    {@link android.database.Cursor}, kursor harus berisi kolom bernama <code>_ID</code>.
+    Karena itu, query yang ditampilkan sebelumnya mengambil kolom <code>_ID</code> untuk
+    tabel "words", walaupun {@link android.widget.ListView} tidak menampilkannya.
+    Pembatasan ini juga menjelaskan mengapa sebagian besar penyedia memiliki kolom <code>_ID</code> untuk masing-masing
+    tabelnya.
+</p>
+
+        <!-- Getting data from query results -->
+<h3 id="GettingResults">Mendapatkan data dari hasil query</h3>
+<p>
+    Daripada sekadar menampilkan hasil query, Anda bisa menggunakannya untuk tugas-tugas lain. Misalnya,
+    Anda bisa mengambil ejaan dari kamus pengguna kemudian mencarinya dalam
+    penyedia lain. Caranya, ulangi baris-baris dalam {@link android.database.Cursor}:
+</p>
+<pre class="prettyprint">
+
+// Determine the column index of the column named "word"
+int index = mCursor.getColumnIndex(UserDictionary.Words.WORD);
+
+/*
+ * Only executes if the cursor is valid. The User Dictionary Provider returns null if
+ * an internal error occurs. Other providers may throw an Exception instead of returning null.
+ */
+
+if (mCursor != null) {
+    /*
+     * Moves to the next row in the cursor. Before the first movement in the cursor, the
+     * "row pointer" is -1, and if you try to retrieve data at that position you will get an
+     * exception.
+     */
+    while (mCursor.moveToNext()) {
+
+        // Gets the value from the column.
+        newWord = mCursor.getString(index);
+
+        // Insert code here to process the retrieved word.
+
+        ...
+
+        // end of while loop
+    }
+} else {
+
+    // Insert code here to report an error if the cursor is null or the provider threw an exception.
+}
+</pre>
+<p>
+    Implementasi {@link android.database.Cursor} berisi beberapa metode "get" untuk
+    mengambil berbagai tipe data dari objek. Misalnya, cuplikan sebelumnya
+    menggunakan {@link android.database.Cursor#getString getString()}. Implementasi juga memiliki
+    metode {@link android.database.Cursor#getType getType()} yang menghasilkan nilai yang menunjukkan
+    tipe data kolom.
+</p>
+
+
+    <!-- Requesting permissions -->
+<h2 id="Permissions">Izin Penyedia Konten</h2>
+<p>
+    Aplikasi penyedia bisa menetapkan izin yang harus dimiliki aplikasi lain untuk
+    mengakses data penyedia. Izin ini akan memastikan bahwa pengguna mengetahui data
+    yang coba diakses oleh aplikasi. Berdasarkan ketentuan penyedia, aplikasi lain
+    meminta izin yang diperlukannya untuk mengakses penyedia. Pengguna akhir akan melihat
+    izin yang diminta saat menginstal aplikasi.
+</p>
+<p>
+    Jika aplikasi penyedia tidak menetapkan izin apa pun, maka aplikasi lain tidak memiliki
+    akses ke data penyedia. Akan tetapi, komponen-komponen dalam aplikasi penyedia selalu memiliki
+    akses penuh untuk baca dan tulis, izin apa pun yang ditetapkan.
+</p>
+<p>
+    Seperti disebutkan sebelumnya, Penyedia Kamus Pengguna mensyaratkan izin
+    <code>android.permission.READ_USER_DICTIONARY</code> untuk mengambil data darinya.
+    Penyedia memiliki izin <code>android.permission.WRITE_USER_DICTIONARY</code>
+    yang terpisah untuk menyisipkan, memperbarui, atau menghapus data.
+</p>
+<p>
+    Untuk mendapatkan izin yang diperlukan untuk mengakses penyedia, aplikasi memintanya dengan elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    dalam file manifesnya. Bila Android Package Manager memasang aplikasi, pengguna
+    harus menyetujui semua izin yang diminta aplikasi. Jika pengguna menyetujui semuanya,
+    Package Manager akan melanjutkan instalasi; jika pengguna tidak menyetujui, Package Manager
+    akan membatalkan instalasi.
+</p>
+<p>
+    Elemen
+<code><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></code>
+    berikut meminta akses baca ke Penyedia Kamus Pengguna:
+</p>
+<pre>
+    &lt;uses-permission android:name="android.permission.READ_USER_DICTIONARY"&gt;
+</pre>
+<p>
+    Dampak izin pada akses penyedia dijelaskan secara lebih detail dalam panduan
+    <a href="{@docRoot}guide/topics/security/security.html">Keamanan dan Izin</a>.
+</p>
+
+
+<!-- Inserting, Updating, and Deleting Data -->
+<h2 id="Modifications">Menyisipkan, Memperbarui, dan Menghapus Data</h2>
+<p>
+    Lewat cara yang sama dengan cara mengambil data dari penyedia, Anda juga menggunakan interaksi antara
+    klien penyedia dan {@link android.content.ContentProvider} penyedia untuk memodifikasi data.
+    Anda memanggil metode {@link android.content.ContentResolver} dengan argumen yang diteruskan ke
+    metode {@link android.content.ContentProvider} yang sesuai. Penyedia dan klien penyedia
+    menangani secara otomatis keamanan dan komunikasi antar-proses.
+</p>
+<h3 id="Inserting">Menyisipkan data</h3>
+<p>
+    Untuk menyisipkan data ke penyedia, Anda memanggil metode
+    {@link android.content.ContentResolver#insert ContentResolver.insert()}.
+ Metode ini menyisipkan sebuah baris baru ke penyedia itu dan menghasilkan URI konten untuk baris itu.
+    Cuplikan ini menampilkan cara menyisipkan sebuah kata baru ke Penyedia Kamus Pengguna:
+</p>
+<pre class="prettyprint">
+// Defines a new Uri object that receives the result of the insertion
+Uri mNewUri;
+
+...
+
+// Defines an object to contain the new values to insert
+ContentValues mNewValues = new ContentValues();
+
+/*
+ * Sets the values of each column and inserts the word. The arguments to the "put"
+ * method are "column name" and "value"
+ */
+mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+mNewValues.put(UserDictionary.Words.WORD, "insert");
+mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+mNewUri = getContentResolver().insert(
+    UserDictionary.Word.CONTENT_URI,   // the user dictionary content URI
+    mNewValues                          // the values to insert
+);
+</pre>
+<p>
+    Data untuk baris baru masuk ke dalam satu objek {@link android.content.ContentValues}, yang
+    serupa bentuknya dengan kursor satu-baris. Kolom dalam objek ini tidak perlu memiliki
+    tipe data yang sama, dan jika Anda tidak ingin menetapkan nilai sama sekali, Anda bisa mengatur kolom
+    ke <code>null</code> dengan menggunakan {@link android.content.ContentValues#putNull ContentValues.putNull()}.
+</p>
+<p>
+    Cuplikan ini tidak menambahkan kolom <code>_ID</code>, karena kolom ini dipelihara
+    secara otomatis. Penyedia menetapkan sebuah nilai unik <code>_ID</code> ke setiap baris yang
+    ditambahkan. Penyedia biasanya menggunakan nilai ini sebagai kunci utama tabel.
+</p>
+<p>
+    URI konten yang dihasilkan dalam <code>newUri</code> akan mengidentifikasi baris yang baru ditambahkan, dengan
+    format berikut:
+</p>
+<pre>
+content://user_dictionary/words/&lt;id_value&gt;
+</pre>
+<p>
+    <code>&lt;id_value&gt;</code> adalah konten <code>_ID</code> untuk baris baru.
+    Kebanyakan penyedia bisa mendeteksi bentuk URI konten ini secara otomatis kemudian melakukan
+    operasi yang diminta pada baris tersebut.
+</p>
+<p>
+    Untuk mendapatkan nilai <code>_ID</code> dari {@link android.net.Uri} yang dihasilkan, panggil
+    {@link android.content.ContentUris#parseId ContentUris.parseId()}.
+</p>
+<h3 id="Updating">Memperbarui data</h3>
+<p>
+    Untuk memperbarui sebuah baris, gunakan objek {@link android.content.ContentValues} dengan
+    nilai-nilai yang diperbarui, persis seperti yang Anda lakukan pada penyisipan, dan kriteria pemilihan persis seperti yang Anda lakukan pada query.
+    Metode klien yang Anda gunakan adalah
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Anda hanya perlu menambahkan
+    nilai-nilai ke objek {@link android.content.ContentValues} untuk kolom yang sedang Anda perbarui. Jika Anda
+    ingin membersihkan konten kolom, aturlah nilai ke <code>null</code>.
+</p>
+<p>
+    Cuplikan berikut mengubah semua baris yang kolom lokalnya memiliki bahasa "en" ke
+    lokal <code>null</code>. Nilai hasil adalah jumlah baris yang diperbarui:
+</p>
+<pre>
+// Defines an object to contain the updated values
+ContentValues mUpdateValues = new ContentValues();
+
+// Defines selection criteria for the rows you want to update
+String mSelectionClause = UserDictionary.Words.LOCALE +  "LIKE ?";
+String[] mSelectionArgs = {"en_%"};
+
+// Defines a variable to contain the number of updated rows
+int mRowsUpdated = 0;
+
+...
+
+/*
+ * Sets the updated value and updates the selected words.
+ */
+mUpdateValues.putNull(UserDictionary.Words.LOCALE);
+
+mRowsUpdated = getContentResolver().update(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mUpdateValues                       // the columns to update
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Anda juga harus membersihkan input pengguna bila memanggil
+    {@link android.content.ContentResolver#update ContentResolver.update()}. Untuk mengetahui selengkapnya tentang
+    hal ini, bacalah bagian <a href="#Injection">Melindungi dari input merusak</a>.
+</p>
+<h3 id="Deleting">Menghapus data</h3>
+<p>
+    Menghapus baris serupa dengan mengambil baris data: Anda menetapkan kriteria pemilihan untuk baris
+    yang ingin Anda hapus dan metode klien akan menghasilkan jumlah baris yang dihapus.
+    Cuplikan berikut menghapus baris yang appid-nya sama dengan "user". Metode menghasilkan
+    jumlah baris yang dihapus.
+</p>
+<pre>
+
+// Defines selection criteria for the rows you want to delete
+String mSelectionClause = UserDictionary.Words.APP_ID + " LIKE ?";
+String[] mSelectionArgs = {"user"};
+
+// Defines a variable to contain the number of rows deleted
+int mRowsDeleted = 0;
+
+...
+
+// Deletes the words that match the selection criteria
+mRowsDeleted = getContentResolver().delete(
+    UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+    mSelectionClause                    // the column to select on
+    mSelectionArgs                      // the value to compare to
+);
+</pre>
+<p>
+    Anda juga harus membersihkan input pengguna bila memanggil
+    {@link android.content.ContentResolver#delete ContentResolver.delete()}. Untuk mengetahui selengkapnya tentang
+    hal ini, bacalah bagian <a href="#Injection">Melindungi dari input merusak</a>.
+</p>
+<!-- Provider Data Types -->
+<h2 id="DataTypes">Tipe Data Penyedia</h2>
+<p>
+    Penyedia konten bisa menawarkan berbagai tipe data. Penyedia Kamus Pengguna hanya menawarkan
+    teks, namun penyedia juga bisa menawarkan format berikut:
+</p>
+    <ul>
+        <li>
+            integer
+        </li>
+        <li>
+            long integer (long)
+        </li>
+        <li>
+            floating point
+        </li>
+        <li>
+            long floating point (double)
+        </li>
+    </ul>
+<p>
+    Tipe data lain yang sering digunakan penyedia adalah Binary Large OBject (BLOB) yang diimplementasikan sebagai
+    larik byte 64 KB. Anda bisa melihat tipe data yang tersedia dengan memperhatikan metode "get"
+    kelas {@link android.database.Cursor}.
+</p>
+<p>
+    Tipe data tiap kolom dalam penyedia biasanya tercantum dalam dokumentasinya.
+    Tipe data untuk Penyedia Kamus Pengguna tercantum dalam dokumentasi acuan
+    untuk kelas kontraknya {@link android.provider.UserDictionary.Words} (kelas kontrak
+    dijelaskan di bagian <a href="#ContractClasses">Kelas-kelas Kontrak</a>).
+    Anda juga bisa menentukan tipe data dengan memanggil {@link android.database.Cursor#getType
+    Cursor.getType()}.
+</p>
+<p>
+    Penyedia juga memelihara informasi tipe data MIME untuk tiap URI konten yang didefinisikannya. Anda bisa
+    menggunakan informasi tipe MIME untuk mengetahui apakah aplikasi Anda bisa menangani data yang
+    disediakan penyedia, atau memilih tipe penanganan berdasarkan tipe MIME. Anda biasanya memerlukan
+    tipe MIME saat menggunakan penyedia yang berisi
+    struktur atau file data yang kompleks. Misalnya, tabel {@link android.provider.ContactsContract.Data}
+    dalam Penyedia Kontak menggunakan tipe MIME untuk memberi label tipe data kontak yang disimpan di tiap
+    baris. Untuk mendapatkan tipe MIME yang sesuai dengan URI konten, panggil
+    {@link android.content.ContentResolver#getType ContentResolver.getType()}.
+</p>
+<p>
+    Bagian <a href="#MIMETypeReference">Acuan Tipe MIME</a> menerangkan
+    sintaks tipe MIME baik yang standar maupun custom.
+</p>
+
+
+<!-- Alternative Forms of Provider Access -->
+<h2 id="AltForms">Bentuk-Bentuk Alternatif Akses Penyedia</h2>
+<p>
+    Tiga bentuk alternatif akses penyedia adalah penting dalam pengembangan aplikasi:
+</p>
+<ul>
+    <li>
+        <a href="#Batch">Akses batch</a>: Anda bisa membuat sebuah batch panggilan akses dengan metode-metode dalam
+        kelas {@link android.content.ContentProviderOperation}, kemudian menerapkannya dengan
+        {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}.
+    </li>
+    <li>
+        Query asinkron: Anda harus melakukan query dalam thread terpisah. Satu cara melakukannya adalah
+        menggunakan objek {@link android.content.CursorLoader}. Contoh-contoh dalam panduan
+        <a href="{@docRoot}guide/components/loaders.html">Loader</a> memperagakan
+        cara melakukannya.
+    </li>
+    <li>
+        <a href="#Intents">Akses data melalui intent</a>: Walaupun tidak bisa mengirim intent
+        ke penyedia secara langsung, Anda bisa mengirim intent ke aplikasi penyedia, yang
+        biasanya paling lengkap dibekali untuk memodifikasi data penyedia.
+    </li>
+</ul>
+<p>
+    Akses batch dan modifikasi melalui intent dijelaskan dalam bagian-bagian berikut.
+</p>
+<h3 id="Batch">Akses batch</h3>
+<p>
+    Akses batch ke penyedia berguna untuk menyisipkan baris dalam jumlah besar, atau menyisipkan
+    baris ke dalam beberapa tabel dalam panggilan metode yang sama, atau biasanya melakukan satu set
+    operasi lintas batas proses sebagai transaksi (operasi atomik).
+</p>
+<p>
+    Untuk mengakses penyedia dalam "mode batch",
+    buat satu larik objek {@link android.content.ContentProviderOperation}, kemudian
+    kirim larik itu ke penyedia konten dengan
+    {@link android.content.ContentResolver#applyBatch ContentResolver.applyBatch()}. Anda meneruskan
+    <em>otoritas</em> penyedia konten ke metode ini, daripada URI konten tertentu.
+    Ini memungkinkan tiap objek {@link android.content.ContentProviderOperation} dalam larik untuk bekerja
+    terhadap tabel yang berbeda. Panggilan ke {@link android.content.ContentResolver#applyBatch
+    ContentResolver.applyBatch()} menghasilkan satu larik hasil.
+</p>
+<p>
+    Keterangan kelas kontrak {@link android.provider.ContactsContract.RawContacts}
+    menyertakan cuplikan kode yang memperagakan penyisipan batch. Contoh aplikasi
+    <a href="{@docRoot}resources/samples/ContactManager/index.html">Contacts Manager</a>
+    berisi contoh akses batch dalam file sumber <code>ContactAdder.java</code>-nya
+.
+</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<h2>Menampilkan data dengan aplikasi pembantu</h2>
+<p>
+    Jika aplikasi Anda <em>memang</em> memiliki izin akses, Anda masih mungkin perlu menggunakan
+    intent untuk menampilkan data dalam aplikasi lain. Misalnya, aplikasi Kalender menerima
+    intent {@link android.content.Intent#ACTION_VIEW}, yang menampilkan tanggal atau kejadian tertentu.
+    Hal ini memungkinkan Anda menampilkan informasi kalender tanpa harus membuat UI sendiri.
+    Untuk mengetahui selengkapnya tentang fitur ini, lihat panduan
+    <a href="{@docRoot}guide/topics/providers/calendar-provider.html">Penyedia Kalender</a>.
+</p>
+<p>
+    Aplikasi yang Anda kirimi intent tidak harus aplikasi
+    yang terkait dengan penyedia. Misalnya, Anda bisa mengambil satu kontak dari
+    Penyedia Kontak, kemudian mengirim intent {@link android.content.Intent#ACTION_VIEW}
+    berisi URI konten untuk gambar kontak itu ke penampil gambar.
+</p>
+</div>
+</div>
+<h3 id="Intents">Akses data melalui intent</h3>
+<p>
+    Intent bisa menyediakan akses tidak langsung ke penyedia konten. Anda memperbolehkan pengguna mengakses
+    data dalam penyedia sekalipun aplikasi Anda tidak memiliki izin akses, baik dengan
+    mendapatkan intent yang dihasilkan aplikasi yang memiliki izin, atau dengan mengaktifkan
+    aplikasi yang memiliki izin dan membiarkan pengguna melakukan pekerjaan di dalamnya.
+</p>
+<h4>Mendapatkan akses dengan izin sementara</h4>
+<p>
+    Anda bisa mengakses data dalam penyedia konten, sekalipun tidak memiliki
+    izin akses yang sesuai, dengan mengirimkan intent ke aplikasi yang memang memiliki izin dan
+    menerima hasil berupa intent berisi izin "URI".
+    Inilah izin untuk URI konten tertentu yang berlaku hingga aktivitas yang menerima
+    izin selesai. Aplikasi yang memiliki izin tetap akan memberikan
+    izin sementara dengan mengatur flag dalam intent yang dihasilkan:
+</p>
+<ul>
+    <li>
+        <strong>Izin baca:</strong>
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}
+    </li>
+    <li>
+        <strong>Izin tulis:</strong>
+        {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}
+    </li>
+</ul>
+<p class="note">
+    <strong>Catatan:</strong> Flag ini tidak memberikan akses baca atau tulis umum ke penyedia
+    yang otoritasnya dimuat dalam URI konten. Aksesnya hanya untuk URI itu sendiri.
+</p>
+<p>
+    Penyedia mendefinisikan izin URI untuk URI konten dalam manifesnya, dengan menggunakan atribut
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">android:grantUriPermission</a></code>
+    dari elemen
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>
+,   serta elemen anak
+<code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+    dari elemen
+<code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code>.
+ Mekanisme izin URI dijelaskan secara lebih detail dalam panduan
+    <a href="{@docRoot}guide/topics/security/security.html">Keamanan dan Izin</a>,
+    di bagian "Izin URI".
+</p>
+<p>
+    Misalnya, Anda bisa mengambil data untuk satu kontak di Penyedia Kontak, sekalipun tidak
+    memiliki izin {@link android.Manifest.permission#READ_CONTACTS}. Anda mungkin ingin melakukan
+    ini dalam aplikasi yang mengirim kartu ucapan elektronik ke seorang kenalan pada hari ulang tahunnya. Sebagai ganti
+    meminta {@link android.Manifest.permission#READ_CONTACTS}, yang memberi Anda akses ke semua
+    kontak pengguna dan semua informasinya, Anda lebih baik membiarkan pengguna mengontrol
+    kontak-kontak yang akan digunakan oleh aplikasi Anda. Caranya, gunakan proses berikut:
+</p>
+<ol>
+    <li>
+        Aplikasi Anda akan mengirim intent berisi tindakan
+        {@link android.content.Intent#ACTION_PICK} dan tipe MIME "contacts"
+        {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE}, dengan menggunakan
+        metode {@link android.app.Activity#startActivityForResult
+        startActivityForResult()}.
+    </li>
+    <li>
+        Karena intent ini cocok dengan filter intent untuk
+        aktivitas "pemilihan" aplikasi People, aktivitas akan muncul ke latar depan.
+    </li>
+    <li>
+        Dalam aktivitas pemilihan, pengguna memilih sebuah
+        kontak untuk diperbarui. Bila ini terjadi, aktivitas pemilihan akan memanggil
+        {@link android.app.Activity#setResult setResult(resultcode, intent)}
+        untuk membuat intent yang akan diberikan kembali ke aplikasi Anda. Intent itu berisi URI konten
+        kontak yang dipilih pengguna, dan flag "extras"
+        {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION}. Semua flag ini memberikan
+        izin URI ke aplikasi Anda untuk membaca data kontak yang ditunjuk oleh
+        URI konten. Aktivitas pemilihan kemudian memanggil {@link android.app.Activity#finish()} untuk
+        mengembalikan kontrol ke aplikasi Anda.
+    </li>
+    <li>
+        Aktivitas Anda akan kembali ke latar depan, dan sistem memanggil metode
+        {@link android.app.Activity#onActivityResult onActivityResult()}
+        aktivitas Anda. Metode ini menerima intent yang dihasilkan oleh aktivitas pemilihan dalam
+        aplikasi People.
+    </li>
+    <li>
+        Dengan URI konten dari intent yang dihasilkan, Anda bisa membaca data kontak
+        dari Penyedia Kontak, sekalipun Anda tidak meminta izin akses baca tetap
+        ke penyedia dalam manifes Anda. Anda kemudian bisa mendapatkan informasi hari ulang tahun si kontak
+        atau alamat emailnya, kemudian mengirim kartu ucapan elektronik.
+    </li>
+</ol>
+<h4>Menggunakan aplikasi lain</h4>
+<p>
+    Satu cara mudah agar pengguna bisa memodifikasi data yang izin aksesnya tidak Anda miliki adalah
+    mengaktifkan aplikasi yang memiliki izin dan membiarkan pengguna melakukan pekerjaannya di sana.
+</p>
+<p>
+    Misalnya, aplikasi Kalender menerima
+    intent {@link android.content.Intent#ACTION_INSERT}, yang memungkinkan Anda mengaktifkan
+    UI penyisipan aplikasi itu. Anda bisa meneruskan data "extras" dalam intent ini, yang
+    digunakan aplikasi untuk mengisi dahulu UI-nya. Karena kejadian berulang memiliki sintaks yang rumit,
+    cara yang lebih disukai untuk menyisipkan kejadian ke dalam Penyedia Kalender adalah mengaktifkan aplikasi Kalender dengan
+    {@link android.content.Intent#ACTION_INSERT}, kemudian membiarkan pengguna menyisipkan kejadian di sana.
+</p>
+<!-- Contract Classes -->
+<h2 id="ContractClasses">Kelas-kelas Kontrak</h2>
+<p>
+    Kelas kontrak mendefinisikan konstanta yang membantu aplikasi menggunakan URI konten, nama
+    kolom, tindakan intent, dan fitur lain pada penyedia konten. Kelas kontrak tidak
+    disertakan secara otomatis bersama penyedia; pengembang penyedia harus mendefinisikannya kemudian
+    membuatnya tersedia bagi pengembang lain. Banyak penyedia yang disertakan pada platform Android
+    memiliki kelas kontrak yang sesuai dalam {@link android.provider} paketnya.
+</p>
+<p>
+    Misalnya, Penyedia Kamus Pengguna memiliki kelas kontrak
+    {@link android.provider.UserDictionary} yang berisi URI konten dan konstanta nama kolom. URI
+    konten untuk tabel "words" didefinisikan dalam konstanta
+    {@link android.provider.UserDictionary.Words#CONTENT_URI UserDictionary.Words.CONTENT_URI}.
+    Kelas {@link android.provider.UserDictionary.Words} juga berisi konstanta nama kolom,
+    yang digunakan dalam cuplikan contoh pada panduan ini. Misalnya, sebuah proyeksi query bisa
+    didefinisikan sebagai:
+</p>
+<pre>
+String[] mProjection =
+{
+    UserDictionary.Words._ID,
+    UserDictionary.Words.WORD,
+    UserDictionary.Words.LOCALE
+};
+</pre>
+<p>
+    Kelas kontrak lain adalah {@link android.provider.ContactsContract} untuk Penyedia Kontak.
+    Dokumentasi acuan untuk kelas ini menyertakan contoh cuplikan kode. Salah satu
+    subkelasnya, {@link android.provider.ContactsContract.Intents.Insert}, adalah
+    kelas kontrak yang berisi konstanta untuk intent dan data intent.
+</p>
+
+
+<!-- MIME Type Reference -->
+<h2 id="MIMETypeReference">Acuan Tipe MIME</h2>
+<p>
+    Penyedia konten bisa menghasilkan tipe media MIME standar, atau string tipe MIME custom, atau keduanya.
+</p>
+<p>
+    Tipe MIME memiliki format
+</p>
+<pre>
+<em>type</em>/<em>subtype</em>
+</pre>
+<p>
+    Misalnya, tipe MIME <code>text/html</code> yang dikenal luas memiliki tipe <code>text</code> dan
+    subtipe <code>html</code>. Jika penyedia menghasilkan tipe ini untuk sebuah URI, artinya
+    query dengan URI itu akan menghasilkan teks berisi tag HTML.
+</p>
+<p>
+    String tipe MIME custom, yang juga disebut dengan tipe MIME "khusus vendor", memiliki nilai-nilai
+    <em>tipe</em> dan <em>subtipe</em> yang lebih kompleks. Nilai <em>tipe</em> selalu
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>
+</pre>
+<p>
+    untuk beberapa baris, atau
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>
+</pre>
+<p>
+    untuk satu baris.
+</p>
+<p>
+    <em>Subtipe</em> adalah khusus penyedia. Penyedia bawaan Android biasanya memiliki subtipe
+    sederhana. Misalnya, bila aplikasi Contacts membuat satu baris untuk nomor telepon,
+    aplikasi akan mengatur tipe MIME berikut di baris itu:
+</p>
+<pre>
+vnd.android.cursor.item/phone_v2
+</pre>
+<p>
+    Perhatikan bahwa nilai subtipe adalah sekadar <code>phone_v2</code>.
+</p>
+<p>
+    Pengembang penyedia lain bisa membuat pola subtipe sendiri berdasarkan
+    otoritas dan nama-nama tabel penyedia. Misalnya, perhatikan penyedia yang berisi jadwal kereta api.
+    Otoritas penyedia adalah <code>com.example.trains</code>, dan berisi tabel-tabel
+    Line1, Line2, dan Line3. Untuk merespons URI konten
+</p>
+<p>
+<pre>
+content://com.example.trains/Line1
+</pre>
+<p>
+    untuk tabel Line1, penyedia menghasilkan tipe MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.example.line1
+</pre>
+<p>
+     Untuk merespons URI konten
+</p>
+<pre>
+content://com.example.trains/Line2/5
+</pre>
+<p>
+    untuk baris 5 di tabel Line2, penyedia menghasilkan tipe MIME
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.example.line2
+</pre>
+<p>
+    Kebanyakan penyedia konten mendefinisikan konstanta kelas kontrak untuk tipe MIME yang digunakannya. Kelas kontrak
+    {@link android.provider.ContactsContract.RawContacts} pada Penyedia Kontak
+    misalnya, mendefinisikan konstanta
+    {@link android.provider.ContactsContract.RawContacts#CONTENT_ITEM_TYPE} untuk tipe MIME
+    baris kontak mentah tunggal.
+</p>
+<p>
+    URI konten untuk baris-baris tunggal dijelaskan di bagian
+    <a href="#ContentURIs">URI Konten</a>.
+</p>

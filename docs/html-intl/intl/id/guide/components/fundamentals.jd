@@ -1,0 +1,480 @@
+page.title=Dasar-Dasar Aplikasi
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+<li><a href="#Components">Komponen Aplikasi</a>
+  <ol>
+    <li><a href="#ActivatingComponents">Mengaktifkan komponen</a></li>
+  </ol>
+</li>
+<li><a href="#Manifest">File Manifes</a>
+  <ol>
+    <li><a href="#DeclaringComponents">Mendeklarasikan komponen</a></li>
+    <li><a href="#DeclaringRequirements">Mendeklarasikan kebutuhan aplikasi</a></li>
+  </ol>
+</li>
+<li><a href="#Resources">Sumber Daya Aplikasi</a></li>
+</ol>
+</div>
+</div>
+
+<p>Aplikasi Android ditulis dalam bahasa pemrograman Java. Android SDK Tools mengkompilasi
+kode Anda&mdash;bersama data dan file sumber daya &mdash;ke dalam APK: <i>Paket Android</i>,
+yaitu file arsip berekstensi {@code .apk}. Satu file APK berisi semua konten
+aplikasi Android dan merupakan file yang digunakan perangkat berbasis Android untuk menginstal aplikasi.</p>
+
+<p>Setelah diinstal di perangkat, setiap aplikasi Android tinggal di sandbox keamanannya sendiri: </p>
+
+<ul>
+ <li>Sistem operasi Android merupakan sistem Linux multi-pengguna yang di dalamnya setiap
+aplikasi adalah pengguna berbeda.</li>
+
+<li>Secara default, sistem menetapkan ID pengguna Linux unik kepada setiap aplikasi (ID ini hanya
+ digunakan oleh sistem dan tidak diketahui aplikasi). Sistem menetapkan izin
+bagi semua file dalam aplikasi sehingga hanya ID pengguna yang diizinkan yang bisa mengaksesnya. </li>
+
+<li>Setiap proses memiliki mesin virtual (VM) sendiri, sehingga kode aplikasi yang berjalan secara terisolasi dari
+aplikasi lainnya.</li>
+
+<li>Secara default, setiap aplikasi berjalan dalam proses Linux-nya sendiri. Android memulai proses
+bila ada komponen aplikasi yang perlu dijalankan, kemudian mematikan proses bila tidak lagi diperlukan
+atau bila sistem harus memulihkan memori untuk digunakan aplikasi lain.</li>
+</ul>
+
+<p>Dengan cara ini, sistem Android mengimplementasikan <em>prinsip privilese minim</em>. Ini berarti,
+secara default aplikasi hanya memiliki akses ke komponen yang diperlukannya untuk melakukan pekerjaannya dan
+tidak lebih dari itu. Hal ini menghasilkan lingkungan yang sangat aman sehingga aplikasi tidak bisa mengakses bagian
+sistem bila tidak diberi izin.</p>
+
+<p>Akan tetapi, ada beberapa cara bagi aplikasi untuk berbagi data dengan aplikasi lain dan bagi aplikasi
+untuk mengakses layanan sistem:</p>
+
+<ul>
+  <li>Dua aplikasi bisa diatur untuk menggunakan ID pengguna Linux yang sama,
+dalam hal ini keduanya bisa saling mengakses file masing-masing.  Untuk menghemat sumber daya sistem, aplikasi dengan ID
+pengguna yang sama juga bisa diatur agar berjalan dalam proses Linux yang sama dan menggunakan VM yang sama (
+aplikasi juga harus ditandatangani dengan sertifikat yang sama).</li>
+  <li>Aplikasi bisa meminta izin akses ke data perangkat seperti kontak
+pengguna, pesan SMS, penyimpanan lepas-pasang (kartu SD), kamera, Bluetooth, dan lainnya. Semua
+izin aplikasi harus diberikan oleh pengguna saat menginstal.</li>
+</ul>
+
+<p>Hal tersebut mencakup dasar-dasar tentang cara aplikasi Android berada di dalam sistem. Bagian dokumen
+selanjutnya memperkenalkan Anda pada:</p>
+<ul>
+  <li>Komponen kerangka kerja inti yang mendefinisikan aplikasi.</li>
+  <li>File manifes tempat Anda mendeklarasikan komponen dan fitur yang diperlukan perangkat
+untuk aplikasi.</li>
+  <li>Sumber daya yang terpisah dari kode aplikasi dan memungkinkan
+aplikasi mengoptimalkan perilakunya untuk beragam konfigurasi perangkat.</li>
+</ul>
+
+
+
+<h2 id="Components">Komponen Aplikasi</h2>
+
+<p>Komponen aplikasi adalah blok pembangun penting dari aplikasi Android.
+Setiap komponen merupakan titik berbeda yang digunakan sistem untuk memasuki aplikasi. Tidak semua komponen
+merupakan titik masuk sebenarnya bagi pengguna dan sebagian saling bergantung, namun masing-masing komponen tersedia
+sebagai kesatuan sendiri dan memainkan peran tertentu&mdash;masing-masing merupakan
+blok pembangun unik yang mendefinisikan perilaku aplikasi secara keseluruhan.</p>
+
+<p>Ada empat macam tipe komponen aplikasi. Setiap tipe memiliki kegunaan tersendiri
+dan daur hidupnya sendiri yang mendefinisikan cara komponen dibuat dan dimusnahkan.</p>
+
+<p>Berikut ini empat tipe komponen aplikasi:</p>
+
+<dl>
+
+<dt><b>Aktivitas</b></dt>
+
+<dd>Sebuah <i>aktivitas</i> mewakili satu layar dengan antarmuka pengguna. Misalnya,
+aplikasi email mungkin memiliki satu aktivitas yang menampilkan daftar email
+baru, aktivitas lain untuk menulis email, dan aktivitas satunya lagi untuk membaca email. Walaupun
+semua aktivitas bekerja sama untuk membentuk pengalaman pengguna yang kohesif dalam aplikasi email,
+masing-masing tidak saling bergantung. Karenanya, aplikasi berbeda bisa memulai
+salah satu aktivitas ini (jika aplikasi email mengizinkannya). Misalnya, aplikasi kamera bisa memulai
+aktivitas dalam aplikasi email yang membuat email baru agar pengguna bisa berbagi gambar.
+
+<p>Aktivitas diimplementasikan sebagai subkelas {@link android.app.Activity} dan Anda bisa mengetahui selengkapnya
+tentang hal ini dalam panduan pengembang <a href="{@docRoot}guide/components/activities.html">Aktivitas</a>
+.</p>
+</dd>
+
+
+<dt><b>Layanan</b></dt>
+
+<dd>Sebuah <i>layanan</i> adalah komponen yang berjalan di latar belakang untuk melakukan
+operasi yang berjalan lama atau untuk melakukan pekerjaan bagi proses jarak jauh. Layanan
+tidak menyediakan antarmuka pengguna. Misalnya, sebuah layanan bisa memutar musik di latar belakang sementara
+pengguna berada dalam aplikasi lain, atau layanan bisa menarik data lewat jaringan tanpa
+memblokir interaksi pengguna dengan aktivitas. Komponen lain, seperti aktivitas, bisa memulai
+layanan dan membiarkannya berjalan atau mengikat layanan untuk berinteraksi dengannya.
+
+<p>Layanan diimplementasikan sebagai subkelas {@link android.app.Service} dan Anda bisa mengetahui selengkapnya
+tentang hal ini dalam panduan
+pengembang <a href="{@docRoot}guide/components/services.html">Layanan</a>.</p>
+</dd>
+
+
+<dt><b>Penyedia konten</b></dt>
+
+<dd>Sebuah <i>penyedia konten</i> mengelola seperangkat data-bersama aplikasi. Anda bisa menyimpan data
+dalam sistem file, database SQLite, di web, atau lokasi penyimpanan permanen lainnya
+yang bisa diakses aplikasi. Melalui penyedia konten, aplikasi lain bisa melakukan query atau bahkan
+memodifikasi data (jika penyedia konten mengizinkannya). Misalnya, sistem Android menyediakan penyedia
+konten yang mengelola informasi kontak pengguna. Karenanya, setiap aplikasi
+dengan izin yang sesuai bisa melakukan query mengenai bagian dari penyedia konten (seperti {@link
+android.provider.ContactsContract.Data}) untuk membaca dan menulis informasi tentang orang tertentu.
+
+<p>Penyedia konten juga berguna untuk membaca dan menulis data privat ke aplikasi Anda
+dan tidak dibagikan. Misalnya, aplikasi contoh <a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> menggunakan
+penyedia konten untuk menyimpan catatan.</p>
+
+<p>Penyedia konten diimplementasikan sebagai subkelas {@link android.content.ContentProvider}
+dan harus mengimplementasikan seperangkat standar API yang memungkinkan aplikasi
+lain melakukan transaksi. Untuk informasi selengkapnya, lihat panduan pengembang
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia Konten</a>.</p>
+</dd>
+
+
+<dt><b>Penerima siaran</b></dt>
+
+<dd>Sebuah <i>penerima siaran</i> adalah komponen yang merespons pengumuman siaran dalam lingkup
+sistem.  Banyak siaran yang berasal dari sistem&mdash;misalnya, siaran yang mengumumkan bahwa
+layar telah dimatikan, baterai lemah, atau gambar telah direkam.
+Aplikasi juga bisa memulai siaran&mdash;misalnya untuk menginformasikan ke
+aplikasi lain bahwa sebagian data telah diunduh ke perangkat dan bisa digunakan aplikasi lain tersebut. Walaupun penerima
+siaran tidak menampilkan antarmuka pengguna, penerima bisa <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">membuat pemberitahuan baris status</a>
+untuk memberi tahu pengguna kapan kejadian siaran dilakukan. Meskipun penerima siaran umumnya cuma menjadi
+"gerbang" untuk komponen lain dan dimaksudkan untuk melakukan pekerjaan dalam jumlah sangat minim. Misalnya
+, penerima siaran bisa menjalankan layanan untuk melakukan beberapa pekerjaan berdasarkan kejadian.
+
+<p>Penerima siaran diimplementasikan sebagai subkelas {@link android.content.BroadcastReceiver}
+dan setiap siaran dikirim sebagai objek {@link android.content.Intent}. Untuk informasi selengkapnya,
+lihat kelas {@link android.content.BroadcastReceiver}.</p>
+</dd>
+
+</dl>
+
+
+
+<p>Aspek unik dari desain sistem Android adalah aplikasi mana pun bisa memulai
+komponen aplikasi lain. Misalnya, jika Anda menginginkan pengguna mengambil
+foto dengan kamera perangkat, bisa saja aplikasi lain yang melakukannya dan aplikasi
+Anda bisa menggunakannya, sebagai ganti mengembangkan aktivitas sendiri untuk mengambil foto. Anda tidak
+harus menyatukan atau bahkan menautkan ke kode dari aplikasi kamera.
+Sebagai gantinya, Anda tinggal memulai aktivitas di aplikasi kamera yang akan mengambil
+foto. Bila selesai, foto akan dikembalikan ke aplikasi sehingga Anda bisa menggunakannya. Bagi pengguna,
+kamera seakan menjadi bagian dari aplikasi Anda.</p>
+
+<p>Saat sistem memulai komponen, sistem akan memulai proses untuk aplikasi itu (jika
+belum berjalan) dan membuat instance kelas yang diperlukan untuk komponen. Misalnya, jika aplikasi Anda
+memulai aktivitas dalam aplikasi kamera yang mengambil foto, aktivitas itu akan
+berjalan dalam proses yang dimiliki oleh aplikasi kamera, bukan dalam proses aplikasi Anda.
+Karenanya, tidak seperti aplikasi di sebagian besar sistem lain, aplikasi Android tidak memiliki titik
+masuk tunggal (misalnya tidak ada fungsi {@code main()}).</p>
+
+<p>Karena sistem menjalankan setiap aplikasi dalam proses terpisah dengan izin file yang
+membatasi akses ke aplikasi lain, aplikasi Anda tidak bisa langsung mengaktifkan komponen dari aplikasi lain. Akan tetapi, sistem
+Android bisa melakukannya. Jadi, untuk mengaktifkan
+komponen dalam aplikasi lain, Anda harus mengirim pesan ke sistem yang menetapkan <em>intent</em> Anda untuk memulai
+komponen tertentu. Selanjutnya sistem akan mengaktifkan komponen untuk Anda.</p>
+
+
+<h3 id="ActivatingComponents">Mengaktifkan Komponen</h3>
+
+<p>Tiga dari empat tipe komponen&mdash;aktivitas, layanan, dan
+penerima siaran&mdash;diaktifkan oleh pesan asinkron yang disebut <em>intent</em>.
+Intent saling mengikat setiap komponen saat runtime (Anda bisa menganggapnya
+sebagai pembawa pesan yang meminta tindakan dari komponen lain), baik komponen itu milik aplikasi Anda
+atau milik aplikasi lain.</p>
+
+<p>Intent dibuat dengan objek {@link android.content.Intent}, yang mendefinisikan pesan untuk
+mengaktifkan komponen tertentu atau komponen <em>tipe</em> komponen tertentu&mdash;masing-masing intent
+bisa eksplisit atau implisit.</p>
+
+<p>Untuk aktivitas dan layanan, intent mendefinisikan tindakan yang akan dilakukan (misalnya, untuk "melihat" atau
+"mengirim" sesuatu) dan mungkin menetapkan URI data untuk ditindaklanjuti (salah satu hal yang mungkin perlu diketahui
+oleh komponen yang akan dimulai). Misalnya, intent mungkin menyampaikan permintaan suatu
+aktivitas untuk menampilkan gambar atau membuka halaman web. Dalam beberapa kasus, Anda bisa memulai
+aktivitas untuk menerima hasil, dalam hal ini, aktivitas juga akan mengembalikan hasil
+dalam {@link android.content.Intent} (misalnya Anda bisa mengeluarkan intent agar
+pengguna bisa memilih kontak pribadi dan memintanya dikembalikan kepada Anda&mdash;intent yang dikembalikan menyertakan URI yang
+menunjuk ke kontak yang dipilih).</p>
+
+<p>Untuk penerima siaran, intent hanya mendefinisikan
+pengumuman yang sedang disiarkan (misalnya, siaran untuk menunjukkan baterai perangkat hampir habis
+hanya menyertakan string tindakan yang menunjukkan "baterai hampir habis").</p>
+
+<p>Tipe komponen lainnya dan penyedia konten, tidak diaktifkan oleh intent. Melainkan
+diaktifkan saat ditargetkan oleh permintaan dari {@link android.content.ContentResolver}. Resolver
+konten menangani semua transaksi langsung dengan penyedia konten sehingga komponen yang melakukan
+transaksi dengan penyedia tidak perlu dan sebagai gantinya memanggil metode pada objek {@link
+android.content.ContentResolver}. Ini membuat lapisan abstraksi antara penyedia
+konten dan komponen yang meminta informasi (demi keamanan).</p>
+
+<p>Ada beberapa metode terpisah untuk mengaktifkan masing-masing tipe komponen:</p>
+<ul>
+  <li>Anda bisa memulai aktivitas (atau memberinya pekerjaan baru) dengan
+meneruskan {@link android.content.Intent} ke {@link android.content.Context#startActivity
+startActivity()} atau {@link android.app.Activity#startActivityForResult startActivityForResult()}
+(bila Anda ingin aktivitas mengembalikan hasil).</li>
+  <li>Anda bisa memulai layanan (atau memberikan instruksi baru ke layanan yang sedang berlangsung) dengan
+meneruskan {@link android.content.Intent} ke {@link android.content.Context#startService
+startService()}. Atau Anda bisa mengikat ke layanan dengan meneruskan {@link android.content.Intent} ke
+{@link android.content.Context#bindService bindService()}.</li>
+  <li>Anda bisa memulai siaran dengan meneruskan {@link android.content.Intent} ke metode seperti
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}, atau {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
+  <li>Anda bisa melakukan query ke penyedia konten dengan memanggil {@link
+android.content.ContentProvider#query query()} pada {@link android.content.ContentResolver}.</li>
+</ul>
+
+<p>Untuk informasi selengkapnya tentang menggunakan intent, lihat dokumen <a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter
+ Intent</a>. Informasi selengkapnya tentang mengaktifkan komponen
+tertentu juga tersedia dalam dokumen berikut: <a href="{@docRoot}guide/components/activities.html">Aktivitas</a>, <a href="{@docRoot}guide/components/services.html">Layanan</a>, {@link
+android.content.BroadcastReceiver} dan <a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia Konten</a>.</p>
+
+
+<h2 id="Manifest">File Manifes</h2>
+
+<p>Sebelum sistem Android bisa memulai komponen aplikasi, sistem harus mengetahui
+keberadaan komponen dengan membaca file {@code AndroidManifest.xml} aplikasi (file
+"manifes"). Aplikasi Anda harus mendeklarasikan semua komponennya dalam file ini, yang harus menjadi akar
+dari direktori proyek aplikasi.</p>
+
+<p>Manifes melakukan banyak hal selain mendeklarasikan komponen aplikasi,
+seperti:</p>
+<ul>
+  <li>Mengidentifikasi izin pengguna yang diperlukan aplikasi, seperti akses Internet atau
+akses-baca ke kontak pengguna.</li>
+  <li>Mendeklarasikan <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a>
+ minimum yang diperlukan aplikasi, berdasarkan API yang digunakan aplikasi.</li>
+  <li>Mendeklarasikan fitur perangkat keras dan perangkat lunak yang diperlukan aplikasi, seperti kamera,
+layanan Bluetooth, atau layar multisentuh.</li>
+  <li>Pustaka API aplikasi perlu ditautkan (selain
+API kerangka kerja Android), seperti pustaka
+<a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google Maps.</a></li>
+  <li>Dan lainnya</li>
+</ul>
+
+
+<h3 id="DeclaringComponents">Mendeklarasikan komponen</h3>
+
+<p>Tugas utama manifes adalah menginformasikan komponen aplikasi pada sistem. Misalnya,
+file manifes bisa mendeklarasikan aktivitas sebagai berikut: </p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest ... &gt;
+    &lt;application android:icon="@drawable/app_icon.png" ... &gt;
+        &lt;activity android:name="com.example.project.ExampleActivity"
+                  android:label="@string/example_label" ... &gt;
+        &lt;/activity&gt;
+        ...
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>Dalam elemen <code><a
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code>
+, atribut {@code android:icon} menunjuk ke sumber daya untuk ikon yang mengidentifikasi
+aplikasi.</p>
+
+<p>Dalam elemen <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
+atribut {@code android:name} menetapkan nama kelas yang sepenuhnya memenuhi syarat subkelas {@link
+android.app.Activity} dan atribut {@code android:label} menetapkan string yang akan
+digunakan sebagai label yang terlihat oleh pengguna untuk aktivitas tersebut.</p>
+
+<p>Anda harus mendeklarasikan semua komponen aplikasi dengan cara ini:</p>
+<ul>
+  <li>Elemen <code><a
+href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> untuk
+aktivitas</li>
+  <li>Elemen <code><a
+href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code> untuk
+layanan</li>
+  <li>Elemen <code><a
+href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code> untuk
+penerima siaran</li>
+  <li>Elemen <code><a
+href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> untuk
+penyedia konten</li>
+</ul>
+
+<p>Aktivitas, layanan, dan penyedia konten yang Anda sertakan dalam kode sumber, namun tidak
+dideklarasikan dalam manifes, tidak akan terlihat pada sistem dan, akibatnya, tidak pernah bisa berjalan.  Akan tetapi,
+penerima siaran
+bisa dideklarasikan dalam manifes atau dibuat secara dinamis dalam kode (sebagai objek
+{@link android.content.BroadcastReceiver}) dan didaftarkan pada sistem dengan memanggil
+{@link android.content.Context#registerReceiver registerReceiver()}.</p>
+
+<p>Untuk informasi selengkapnya tentang cara menstrukturkan file manifes untuk aplikasi Anda,
+lihat dokumentasi <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">File AndroidManifest.xml</a>. </p>
+
+
+
+<h3 id="DeclaringComponentCapabilities">Mendeklarasikan kemampuan komponen</h3>
+
+<p>Seperti telah dibahas di atas, dalam <a href="#ActivatingComponents">Mengaktifkan Komponen</a>, Anda bisa menggunakan
+{@link android.content.Intent} untuk memulai aktivitas, layanan, dan penerima siaran. Anda bisa
+melakukannya dengan menamai komponen sasaran secara eksplisit (menggunakan nama kelas komponen) dalam intent. Akan tetapi,
+kemampuan intent sebenarnya ada pada konsep <em>intent implisit</em>. Intent implisit
+cuma menjelaskan tipe tindakan yang akan dilakukan (dan, secara opsional, data tempat Anda ingin
+melakukan tindakan) dan memungkinkan sistem untuk menemukan komponen pada perangkat yang bisa melakukan
+tindakan tersebut dan memulainya. Jika ada banyak komponen yang bisa melakukan tindakan yang dijelaskan oleh intent,
+maka pengguna bisa memilih komponen yang akan digunakan.</p>
+
+<p>Cara sistem mengidentifikasi komponen yang bisa merespons intent adalah dengan membandingkan
+intent yang diterima dengan <i>filter intent</i> yang disediakan dalam file manifes aplikasi lainnya pada
+perangkat.</p>
+
+<p>Bila mendeklarasikan aktivitas dalam manifes aplikasi, secara opsional Anda bisa menyertakan
+filter intent yang mendeklarasikan kemampuan aktivitas agar bisa merespons intent dari
+aplikasi lain. Anda bisa mendeklarasikan filter intent untuk komponen dengan
+menambahkan elemen <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> sebagai anak elemen deklarasi komponen.</p>
+
+<p>Misalnya, jika Anda telah membangun aplikasi email dengan aktivitas untuk menulis email baru, Anda bisa
+mendeklarasikan filter intent untuk merespons intent "kirim" (untuk mengirim email baru) seperti ini:</p>
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;application ... &gt;
+        &lt;activity android:name="com.example.project.ComposeEmailActivity">
+            &lt;intent-filter>
+                &lt;action android:name="android.intent.action.SEND" />
+                &lt;data android:type="*/*" />
+                &lt;category android:name="android.intent.category.DEFAULT" />
+            &lt;/intent-filter>
+        &lt;/activity>
+    &lt;/application&gt;
+&lt;/manifest>
+</pre>
+
+<p>Kemudian, jika aplikasi lain membuat intent dengan tindakan {@link
+android.content.Intent#ACTION_SEND} dan meneruskannya ke {@link android.app.Activity#startActivity
+startActivity()}, sistem bisa memulai aktivitas Anda agar pengguna bisa menulis draf dan mengirim
+email.</p>
+
+<p>Untuk informasi selengkapnya tentang membuat filter intent, lihat dokumen <a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter Intent</a>.
+</p>
+
+
+
+<h3 id="DeclaringRequirements">Mendeklarasikan kebutuhan aplikasi</h3>
+
+<p>Ada berbagai macam perangkat yang didukung oleh Android dan tidak
+semuanya menyediakan fitur dan kemampuan yang sama. Agar aplikasi Anda tidak dihapus pada perangkat yang tidak memiliki
+fitur yang diperlukan aplikasi, Anda harus jelas mendefinisikan profil mengenai
+tipe perangkat yang didukung aplikasi dengan mendeklarasikan kebutuhan perangkat dan perangkat lunak dalam file
+manifes. Kebanyakan deklarasi ini hanya bersifat informasi dan sistem tidak
+membacanya, namun layanan eksternal seperti Google Play akan membacanya untuk menyediakan
+penyaringan bagi pengguna saat mereka mencari aplikasi dari perangkat.</p>
+
+<p>Misalnya, jika aplikasi memerlukan kamera dan menggunakan API yang disediakan dalam Android 2.1 (<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> 7)
+, Anda harus mendeklarasikannya sebagai kebutuhan dalam file manifes seperti ini:</p>
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-feature android:name="android.hardware.camera.any"
+                  android:required="true" />
+    &lt;uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p>Sekarang, perangkat yang <em>tidak</em> memiliki kamera dan menggunakan
+Android versi <em>lebih rendah</em> dari 2.1 tidak bisa menginstal aplikasi Anda dari Google Play.</p>
+
+<p>Akan tetapi, bisa juga mendeklarasikan bahwa aplikasi Anda menggunakan kamera, namun tidak
+<em>mengharuskannya</em>. Dalam hal itu, aplikasi Anda harus mengatur atribut <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#required">{@code required}</a>
+ ke {@code "false"} dan memeriksa saat runtime apakah
+perangkat memiliki kamera dan menonaktifkan setiap fitur kamera yang sesuai.</p>
+
+<p>Informasi selengkapnya tentang cara mengelola kompatibilitas aplikasi dengan
+perangkat yang berbeda disediakan dalam dokumen
+<a href="{@docRoot}guide/practices/compatibility.html">Kompatibilitas Perangkat</a>.</p>
+
+
+
+<h2 id="Resources">Sumber Daya Aplikasi</h2>
+
+<p>Aplikasi Android tidak hanya terdiri dari kode&mdash;Aplikasi memerlukan sumber daya yang
+terpisah dari kode sumber, seperti gambar, file audio, dan apa saja yang berkaitan dengan
+presentasi visual dari aplikasi. Misalnya, Anda harus mendefinisikan animasi, menu, gaya, warna,
+dan layout antarmuka pengguna aktivitas dengan file XML. Penggunaan sumber daya aplikasi
+mempermudah pembaruan berbagai karakteristik aplikasi Anda tanpa memodifikasi kode dan&mdash;dengan menyediakan
+seperangkat sumber daya alternatif&mdash;memungkinkan Anda mengoptimalkan aplikasi untuk berbagai konfigurasi
+perangkat berbeda (seperti bahasa dan ukuran layar yang berbeda).</p>
+
+<p>Untuk setiap sumber daya yang Anda sertakan dalam proyek Android, alat bawaan SDK akan mendefinisikan ID integer
+unik, yang bisa Anda gunakan untuk mengacu sumber daya dari kode aplikasi atau dari sumber daya lainnya yang
+didefinisikan dalam XML. Misalnya, jika aplikasi berisi file gambar bernama {@code
+logo.png} (disimpan dalam direktori {@code res/drawable/}), alat SDK akan menghasilkan ID sumber daya
+bernama {@code R.drawable.logo}, yang bisa Anda gunakan untuk mengacu gambar dan memasukkannya dalam
+antarmuka pengguna.</p>
+
+<p>Salah satu aspek paling penting dari penyediaan sumber daya yang terpisah dari
+kode sumber adalah kemampuan Anda menyediakan sumber daya alternatif untuk konfigurasi perangkat
+yang berbeda. Misalnya, dengan mendefinisikan string UI dalam XML, Anda bisa menerjemahkan string ke dalam
+bahasa lain dan menyimpan string itu dalam file terpisah. Kemudian, berdasarkan <em>qualifier</em>
+bahasa yang ditambahkan ke nama direktori sumber daya (seperti {@code res/values-fr/} untuk nilai
+string Prancis) dan pengaturan bahasa pengguna, sistem Android akan menerapkan string bahasa yang sesuai
+untuk UI Anda.</p>
+
+<p>Android mendukung banyak <em>qualifier</em> berbeda untuk sumber daya alternatif Anda. Qualifier
+adalah string pendek yang Anda sertakan dalam nama direktori sumber
+daya untuk mendefinisikan konfigurasi perangkat yang harus digunakan sumber daya tersebut. Contoh lainnya,
+Anda harus sering membuat layout berbeda untuk aktivitas, bergantung pada
+orientasi layar dan ukuran perangkat. Misalnya, saat layar perangkat dalam orientasi
+tegak, Anda mungkin ingin layout tombolnya vertikal, tetapi saat layar dalam orientasi
+mendatar, tombolnya harus sejajar horizontal. Untuk mengubah layout
+sesuai orientasi, Anda bisa mendefinisikan dua layout berbeda dan menerapkan qualifier yang
+tepat untuk setiap nama direktori layout. Kemudian, sistem secara otomatis menerapkan
+layout yang tepat sesuai dengan orientasi perangkat saat ini.</p>
+
+<p>Untuk informasi selengkapnya tentang berbagai jenis sumber daya yang bisa disertakan dalam aplikasi dan cara
+membuat sumber daya alternatif untuk konfigurasi perangkat berbeda, bacalah <a href="{@docRoot}guide/topics/resources/providing-resources.html">Menyediakan Sumber Daya</a>.</p>
+
+
+
+<div class="next-docs">
+<div class="col-6">
+  <h2 class="norule">Teruskan membaca tentang:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter Intent</a>
+    </dt>
+    <dd>Informasi tentang cara menggunakan API {@link android.content.Intent} untuk
+ mengaktifkan komponen aplikasi, seperti aktivitas dan layanan, dan cara menyediakan komponen aplikasi
+ untuk digunakan oleh aplikasi lain.</dd>
+    <dt><a href="{@docRoot}guide/components/activities.html">Aktivitas</a></dt>
+    <dd>Informasi tentang cara membuat instance kelas {@link android.app.Activity},
+yang menyediakan layar tersendiri dalam aplikasi bersama antarmuka pengguna.</dd>
+    <dt><a href="{@docRoot}guide/topics/resources/providing-resources.html">Menyediakan Sumber Daya</a></dt>
+    <dd>Informasi tentang cara aplikasi Android disusun untuk memisahkan sumber daya aplikasi dari
+kode aplikasi, termasuk cara Anda bisa menyediakan sumber daya alternatif untuk
+konfigurasi perangkat tertentu.
+    </dd>
+  </dl>
+</div>
+<div class="col-6">
+  <h2 class="norule">Anda juga mungkin tertarik dengan:</h2>
+  <dl>
+    <dt><a href="{@docRoot}guide/practices/compatibility.html">Kompatibilitas Perangkat</a></dt>
+    <dd>Informasi tentang cara kerja Android pada berbagai tipe perangkat dan
+pengenalan mengenai cara mengoptimalkan aplikasi untuk setiap perangkat atau membatasi ketersediaan aplikasi Anda untuk
+perangkat berbeda.</dd>
+    <dt><a href="{@docRoot}guide/topics/security/permissions.html">Izin Sistem</a></dt>
+    <dd>Informasi tentang cara Android membatasi akses aplikasi pada API tertentu dengan sistem izin
+yang mengharuskan persetujuan pengguna agar aplikasi dapat menggunakan API tersebut.</dd>
+  </dl>
+</div>
+</div>
+
