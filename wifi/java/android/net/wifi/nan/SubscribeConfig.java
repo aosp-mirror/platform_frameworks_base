@@ -32,7 +32,7 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN subscribe session. Built using
  * {@link SubscribeConfig.Builder}. Subscribe is done using
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} or
+ * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} or
  * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
  *
  * @hide PROPOSED_NAN_API
@@ -354,7 +354,7 @@ public final class SubscribeConfig implements Parcelable {
          * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param subscribeCount Number of subscribe packets to broadcast.
@@ -379,7 +379,7 @@ public final class SubscribeConfig implements Parcelable {
          * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}.
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param ttlSec Lifetime of a subscribe session in seconds.
@@ -399,7 +399,7 @@ public final class SubscribeConfig implements Parcelable {
          * Sets the match style of the subscription - how are matches from a
          * single match session (corresponding to the same publish action on the
          * peer) reported to the host (using the
-         * {@link WifiNanDiscoverySessionCallback#onMatch(int, byte[], byte[])}
+         * {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])}
          * ). The options are: only report the first match and ignore the rest
          * {@link SubscribeConfig#MATCH_STYLE_FIRST_ONLY} or report every single
          * match {@link SubscribeConfig#MATCH_STYLE_ALL} (the default).
