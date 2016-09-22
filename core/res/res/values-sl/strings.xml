@@ -1214,7 +1214,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dotaknite se, če želite izbrati jezik in postavitev."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Pripravljanje shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Iskanje napak"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Zaznana je bila nova shramba <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1720,8 +1719,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Vnesite ime jezika"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predlagano"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Vsi jeziki"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Vse regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Išči"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Delovni način IZKLOPLJEN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Dovoljeno delovanje delovnega profila, vključno z aplikacijami, sinhronizacijo v ozadju in povezanimi funkcijami."</string>
