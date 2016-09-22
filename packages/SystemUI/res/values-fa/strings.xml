@@ -254,10 +254,10 @@
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"تنظیمات اعلان"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"تنظیمات <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
-    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در حالت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"صفحه اکنون به صورت خودکار می‌چرخد."</string>
-    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"صفحه اکنون روی جهت افقی قفل شده است."</string>
+    <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"صفحه اکنون در حالت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"صفحه اکنون روی جهت عمودی قفل شده است."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ویترین دسر"</string>
     <string name="start_dreams" msgid="5640361424498338327">"محافظ صفحه"</string>
