@@ -56,7 +56,7 @@ import java.util.Arrays;
  * The class provides access to:
  * <ul>
  * <li>Initialize a NAN cluster (peer-to-peer synchronization). Refer to
- * {@link #connect(Handler, WifiNanEventCallback)}. <li>Create discovery sessions (publish or
+ * {@link #attach(Handler, WifiNanEventCallback)}. <li>Create discovery sessions (publish or
  * subscribe sessions). Refer to
  * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} and
  * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)}. <li>Create
@@ -68,23 +68,23 @@ import java.util.Arrays;
  * </ul>
  * <p>
  *     NAN may not be usable when Wi-Fi is disabled (and other conditions). To validate that
- *     the functionality is available use the {@link #isUsageEnabled()} function. To track
+ *     the functionality is available use the {@link #isAvailable()} function. To track
  *     changes in NAN usability register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
  *     Note that this broadcast is not sticky - you should register for it and then check the
  *     above API to avoid a race condition.
  * <p>
- *     An application must use {@link #connect(Handler, WifiNanEventCallback)} to initialize a NAN
+ *     An application must use {@link #attach(Handler, WifiNanEventCallback)} to initialize a NAN
  *     cluster - before making any other NAN operation. NAN cluster membership is a device-wide
  *     operation - the API guarantees that the device is in a cluster or joins a NAN cluster (or
- *     starts one if none can be found). Information about connection success (or failure) are
+ *     starts one if none can be found). Information about attach success (or failure) are
  *     returned in callbacks of {@link WifiNanEventCallback}. Proceed with NAN discovery or
- *     connection setup only after receiving confirmation that NAN connection succeeded -
- *     {@link WifiNanEventCallback#onConnectSuccess(WifiNanSession)}. When an application is
- *     finished using NAN it <b>must</b> use the {@link WifiNanSession#disconnect()} API
- *     to indicate to the NAN service that the device may disconnect from the NAN cluster. The
- *     device will actually disconnect from the NAN cluster once the last application disconnects.
+ *     connection setup only after receiving confirmation that NAN attach succeeded -
+ *     {@link WifiNanEventCallback#onAttached(WifiNanSession)}. When an application is
+ *     finished using NAN it <b>must</b> use the {@link WifiNanSession#destroy()} API
+ *     to indicate to the NAN service that the device may detach from the NAN cluster. The
+ *     device will actually disable NAN once the last application detaches.
  * <p>
- *     Once a NAN connection is confirmed use the
+ *     Once a NAN attach is confirmed use the
  *     {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
  *     {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} to
  *     create publish or subscribe NAN discovery sessions. Events are called on the provided
@@ -99,7 +99,7 @@ import java.util.Arrays;
  *     be used to send messages using the
  *     {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int)} APIs. When an application
  *     is finished with a discovery session it <b>must</b> terminate it using the
- *     {@link WifiNanDiscoveryBaseSession#terminate()} API.
+ *     {@link WifiNanDiscoveryBaseSession#destroy()} API.
  * <p>
  *    Creating connections between NAN devices is managed by the standard
  *    {@link ConnectivityManager#requestNetwork(NetworkRequest, ConnectivityManager.NetworkCallback)}.
@@ -201,7 +201,7 @@ public class WifiNanManager {
      * disabled. An extra {@link #EXTRA_WIFI_STATE} provides the state
      * information as int using {@link #WIFI_NAN_STATE_DISABLED} and
      * {@link #WIFI_NAN_STATE_ENABLED} constants. This broadcast is <b>not</b> sticky,
-     * use the {@link #isUsageEnabled()} API after registering the broadcast to check the current
+     * use the {@link #isAvailable()} API after registering the broadcast to check the current
      * state of Wi-Fi NAN.
      *
      * @see #EXTRA_WIFI_STATE
@@ -274,9 +274,9 @@ public class WifiNanManager {
     }
 
     /**
-     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster formation - that only
-     * happens when a connection is made. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast will be
-     * triggered.
+     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster formation - that
+     * only happens when an attach is attempted. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast
+     * will be triggered.
      *
      * @hide
      */
@@ -289,7 +289,7 @@ public class WifiNanManager {
     }
 
     /**
-     * Disable the usage of the NAN API. All attempts to connect() will be rejected. All open
+     * Disable the usage of the NAN API. All attempts to attach() will be rejected. All open
      * connections and sessions will be terminated. {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast
      * will be triggered.
      *
@@ -304,13 +304,13 @@ public class WifiNanManager {
     }
 
     /**
-     * Returns the current status of NAN API: whether or not usage is enabled. To track changes
+     * Returns the current status of NAN API: whether or not NAN is available. To track changes
      * in the state of NAN API register for the {@link #ACTION_WIFI_NAN_STATE_CHANGED} broadcast.
      *
-     * @return A boolean indicating whether the app can use the NAN API (true)
-     *         or not (false).
+     * @return A boolean indicating whether the app can use the NAN API at this time (true) or
+     * not (false).
      */
-    public boolean isUsageEnabled() {
+    public boolean isAvailable() {
         try {
             return mService.isUsageEnabled();
         } catch (RemoteException e) {
@@ -319,49 +319,49 @@ public class WifiNanManager {
     }
 
     /**
-     * Connect to the Wi-Fi NAN service - enabling the application to create discovery session or
-     * create connection to peers. The device will connect to an existing cluster if it can find
+     * Attach to the Wi-Fi NAN service - enabling the application to create discovery session or
+     * create connection to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
-     * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
-     * An application <b>must</b> call {@link WifiNanSession#disconnect()} when done with the
-     * Wi-Fi NAN connection.
+     * (e.g. successful attach to a cluster) are provided to the {@code callback} object.
+     * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
+     * Wi-Fi NAN object.
      * <p>
-     * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
+     * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
      * than this function will simply indicate success immediately.
      *
      * @param handler The Handler on whose thread to execute all callbacks related to the
-     *            connection - including all sessions opened as part of this
-     *            connection. If a null is provided then the application's main thread will be used.
+     *            attach request - including all sessions opened as part of this
+     *            attach. If a null is provided then the application's main thread will be used.
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(@Nullable Handler handler, @NonNull WifiNanEventCallback callback) {
-        connect(handler, null, callback);
+    public void attach(@Nullable Handler handler, @NonNull WifiNanEventCallback callback) {
+        attach(handler, null, callback);
     }
 
     /**
-     * Connect to the Wi-Fi NAN service - enabling the application to create discovery session or
-     * create connection to peers. The device will connect to an existing cluster if it can find
+     * Attach to the Wi-Fi NAN service - enabling the application to create discovery session or
+     * create connection to peers. The device will attach to an existing cluster if it can find
      * one or create a new cluster (if it is the first to enable NAN in its vicinity). Results
-     * (e.g. successful connection to a cluster) are provided to the {@code callback} object.
-     * An application <b>must</b> call {@link WifiNanSession#disconnect()} when done with the
-     * Wi-Fi NAN connection. Allows requesting a specific configuration using
+     * (e.g. successful attach to a cluster) are provided to the {@code callback} object.
+     * An application <b>must</b> call {@link WifiNanSession#destroy()} when done with the
+     * Wi-Fi NAN object. Allows requesting a specific configuration using
      * {@link ConfigRequest}. If not necessary (default configuration should usually work) use
-     * the {@link #connect(Handler, WifiNanEventCallback)} method instead.
+     * the {@link #attach(Handler, WifiNanEventCallback)} method instead.
      * <p>
-     * Note: a NAN cluster is a shared resource - if the device is already connected to a cluster
+     * Note: a NAN cluster is a shared resource - if the device is already attached to a cluster
      * than this function will simply indicate success immediately.
      *
      * @param handler The Handler on whose thread to execute all callbacks related to the
-     *            connection - including all sessions opened as part of this
-     *            connection. If a null is provided then the application's main thread will be used.
+     *            attach request - including all sessions opened as part of this
+     *            attach. If a null is provided then the application's main thread will be used.
      * @param configRequest The requested NAN configuration.
      * @param callback A callback extended from {@link WifiNanEventCallback}.
      */
-    public void connect(@Nullable Handler handler, @Nullable ConfigRequest configRequest,
+    public void attach(@Nullable Handler handler, @Nullable ConfigRequest configRequest,
             @NonNull WifiNanEventCallback callback) {
         if (VDBG) {
             Log.v(TAG,
-                    "connect(): handler=" + handler + ", callback=" + callback + ", configRequest="
+                    "attach(): handler=" + handler + ", callback=" + callback + ", configRequest="
                             + configRequest);
         }
 
@@ -675,12 +675,12 @@ public class WifiNanManager {
 
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
-                            originalCallback.onConnectSuccess(
+                            originalCallback.onAttached(
                                     new WifiNanSession(mgr, mBinder, mLooper, msg.arg1));
                             break;
                         case CALLBACK_CONNECT_FAIL:
                             mNanManager.clear();
-                            originalCallback.onConnectFail(msg.arg1);
+                            originalCallback.onAttachFailed(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
                             originalCallback.onIdentityChanged((byte[]) msg.obj);
@@ -834,10 +834,10 @@ public class WifiNanManager {
                             onProxySessionStarted(msg.arg1);
                             break;
                         case CALLBACK_SESSION_CONFIG_SUCCESS:
-                            mOriginalCallback.onSessionConfigSuccess();
+                            mOriginalCallback.onSessionConfigUpdated();
                             break;
                         case CALLBACK_SESSION_CONFIG_FAIL:
-                            mOriginalCallback.onSessionConfigFail(msg.arg1);
+                            mOriginalCallback.onSessionConfigFailed(msg.arg1);
                             if (mSession == null) {
                                 /*
                                  * creation failed (as opposed to update
@@ -850,16 +850,16 @@ public class WifiNanManager {
                             onProxySessionTerminated(msg.arg1);
                             break;
                         case CALLBACK_MATCH:
-                            mOriginalCallback.onMatch(
+                            mOriginalCallback.onServiceDiscovered(
                                     msg.arg1,
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
                             break;
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
-                            mOriginalCallback.onMessageSendSuccess(msg.arg1);
+                            mOriginalCallback.onMessageSent(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_SEND_FAIL:
-                            mOriginalCallback.onMessageSendFail(msg.arg1, msg.arg2);
+                            mOriginalCallback.onMessageSendFailed(msg.arg1, msg.arg2);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
                             mOriginalCallback.onMessageReceived(msg.arg1, (byte[]) msg.obj);
