@@ -32,7 +32,7 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or updated using
+ * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or updated using
  * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
@@ -323,7 +323,7 @@ public final class PublishConfig implements Parcelable {
          * {@link #setEnableTerminateNotification(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param publishCount Number of publish packets to broadcast.
@@ -349,7 +349,7 @@ public final class PublishConfig implements Parcelable {
          * {@link #setEnableTerminateNotification(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
-         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#terminate()} is
+         *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
          *     called.
          *
          * @param ttlSec Lifetime of a publish session in seconds.
