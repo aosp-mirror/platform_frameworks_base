@@ -74,13 +74,18 @@ nonavpage=true
     </div>
     <div class="col-7of16 col-pull-6of16">
         <h1 class="dac-hero-title" style="color:#004d40">Android Studio 2.2!</h1>
-<p class="dac-hero-description" style="color:#004d40">The latest update is
-packed with over 20 new features, like a rewritten layout editor with the
-new constraint layout, support for Android 7.0 Nougat, Espresso test recording,
-enhanced Jack compiler / Java 8 support, expanded C++ support with CMake and
-NDK-Build, and much more!</p>
-<p class="dac-hero-description" style="color:#004d40">Android Studio 2.2
-helps you code faster and smarter.</p>
+
+<p class="dac-hero-description" style="color:#004d40">Packed with 20+ new
+features, Android Studio 2.2 focuses on speed, smarts, and Android platform
+support.</p>
+
+<p class="dac-hero-description" style="color:#004d40">Develop faster with
+features such as the new Layout Editor, and develop smarter with the new APK
+analyzer, expanded code analysis and more.</p>
+
+<p class="dac-hero-description" style="color:#004d40">Plus, this update
+includes support for all the latest developer features in Android 7.0 Nougat,
+with an updated emulator to test them all out.</p>
 
 <p style="margin-top:24px">
    <a class="dac-hero-cta" href="/studio/index.html" style="color:#004d40">
