@@ -21,7 +21,7 @@ import android.util.Log;
 
 /**
  * A class representing a NAN publish session. Created when
- * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} is called and a
+ * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} is called and a
  * discovery session is created and returned in
  * {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}. See
  * baseline functionality of all discovery sessions in {@link WifiNanDiscoveryBaseSession}. This
@@ -44,9 +44,9 @@ public class WifiNanPublishDiscoverySession extends WifiNanDiscoveryBaseSession 
      * at creation is still used. The results of the configuration are returned using
      * {@link WifiNanDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigSuccess()}: configuration
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
      *     update succeeded.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFail(int)}: configuration
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)}: configuration
      *     update failed. The publish discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>
