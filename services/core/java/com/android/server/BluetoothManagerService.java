@@ -689,6 +689,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (mUnbinding) return;
             mUnbinding = true;
             mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+            mHandler.removeMessages(MESSAGE_BIND_PROFILE_SERVICE);
             if (mBluetooth != null) {
                 //Unregister callback object
                 try {
