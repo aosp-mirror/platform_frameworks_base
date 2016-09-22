@@ -403,7 +403,7 @@
     <string name="device_owned_footer" msgid="3802752663326030053">"Түзмөктү көзөмөлдөсө болот"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профилди көзөмөлдөсө болот"</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Тармак көзөмөлдөнүшү мүмкүн"</string>
-    <string name="branded_vpn_footer" msgid="2168111859226496230">"Тармак тинтилиши мүмкүн"</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Тармак көзөмөлдөнүшү мүмкүн"</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Түзмөккө көз салуу"</string>
     <string name="monitoring_title_profile_owned" msgid="6790109874733501487">"Профилди көзөмөлдөө"</string>
     <string name="monitoring_title" msgid="169206259253048106">"Тармакка көз салуу"</string>
