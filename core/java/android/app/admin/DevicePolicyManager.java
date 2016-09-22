@@ -6493,4 +6493,35 @@ public class DevicePolicyManager {
             throw new SecurityException(functionName + " cannot be called on the parent instance");
         }
     }
+
+    /**
+     * @hide
+     * Enable backup service.
+     * <p>This includes all backup and restore mechanisms.
+     * Setting this to {@code false} will make backup service no-op or return empty results.
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
+     *
+     * <p>Backup service is off by default when device owner is present.
+     */
+    public void setBackupServiceEnabled(@NonNull ComponentName admin, boolean enabled) {
+        try {
+            mService.setBackupServiceEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @return {@code true} if backup service is enabled, {@code false} otherwise.
+     */
+    public boolean isBackupServiceEnabled(@NonNull ComponentName admin) {
+        try {
+            return mService.isBackupServiceEnabled(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }

@@ -497,9 +497,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 new MonitoringCertNotificationTask().execute(userId);
             }
             if (Intent.ACTION_USER_ADDED.equals(action)) {
-                disableSecurityLoggingIfNotCompliant();
+                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                disableSecurityLoggingIfNotCompliant();
+                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
@@ -1712,7 +1712,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
                 Slog.i(LOG_TAG, "Set ro.device_owner property to true");
-                disableSecurityLoggingIfNotCompliant();
+                disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
                 if (mInjector.securityLogGetLoggingEnabledProperty()) {
                     mSecurityLogMonitor.start();
                 }
@@ -5930,7 +5930,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
         updateDeviceOwnerLocked();
-        disableSecurityLoggingIfNotCompliant();
+        disableDeviceOwnerManagedSingleUserFeaturesIfNeeded();
         try {
             if (mInjector.getIBackupManager() != null) {
                 // Reactivate backup service.
@@ -8906,10 +8906,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    private synchronized void disableSecurityLoggingIfNotCompliant() {
+    private synchronized void disableDeviceOwnerManagedSingleUserFeaturesIfNeeded() {
         if (!isDeviceOwnerManagedSingleUserDevice()) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
             Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
+            setBackupServiceEnabledInternal(false);
+            Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
         }
     }
 
@@ -9208,6 +9210,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (Exception e) {
             Log.w(LOG_TAG, "Failed to get account feature", e);
             return false;
+        }
+    }
+
+    @Override
+    public void setBackupServiceEnabled(ComponentName admin, boolean enabled) {
+        Preconditions.checkNotNull(admin);
+        if (!mHasFeature) {
+            return;
+        }
+        ensureDeviceOwnerManagingSingleUser(admin);
+        setBackupServiceEnabledInternal(enabled);
+    }
+
+    private synchronized void setBackupServiceEnabledInternal(boolean enabled) {
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            IBackupManager ibm = mInjector.getIBackupManager();
+            if (ibm != null) {
+                ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, enabled);
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException(
+                "Failed " + (enabled ? "" : "de") + "activating backup service.", e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public boolean isBackupServiceEnabled(ComponentName admin) {
+        Preconditions.checkNotNull(admin);
+        if (!mHasFeature) {
+            return true;
+        }
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            try {
+                IBackupManager ibm = mInjector.getIBackupManager();
+                return ibm != null && ibm.isBackupServiceActive(UserHandle.USER_SYSTEM);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Failed requesting backup service state.", e);
+            }
         }
     }
 }
