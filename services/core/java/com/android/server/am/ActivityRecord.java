@@ -954,22 +954,18 @@ final class ActivityRecord {
                 stack != null && stack.topRunningActivityLocked() == this;
         final boolean isTopActivityWhileSleeping =
                 service.isSleepingLocked() && isTopActivityInStack;
-        final boolean isTopActivityInMinimizedDockedStack = isTopActivityInStack
-                && stack.mStackId == DOCKED_STACK_ID && mStackSupervisor.mIsDockMinimized
-                && state == ActivityState.PAUSED;
 
         // We want to immediately deliver the intent to the activity if:
-        // - It is the resumed activity.
+        // - It is currently resumed or paused. i.e. it is currently visible to the user and we want
+        //   the user to see the visual effects caused by the intent delivery now.
         // - The device is sleeping and it is the top activity behind the lock screen (b/6700897).
-        // - It is the top activity in a minimized docked stack. In this case the activity will be
-        //   temporarily resumed then paused again on the client side.
-        if ((state == ActivityState.RESUMED || isTopActivityWhileSleeping
-                || isTopActivityInMinimizedDockedStack) && app != null && app.thread != null) {
+        if ((state == ActivityState.RESUMED || state == ActivityState.PAUSED
+                || isTopActivityWhileSleeping) && app != null && app.thread != null) {
             try {
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
                 app.thread.scheduleNewIntent(
-                        ar, appToken, isTopActivityInMinimizedDockedStack /* andPause */);
+                        ar, appToken, state == ActivityState.PAUSED /* andPause */);
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
