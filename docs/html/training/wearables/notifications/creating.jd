@@ -58,7 +58,7 @@ such as action buttons and large icons, while remaining compatible with Android 
 
 <p>To create a notification with the support library, you create an instance of
 {@link android.support.v4.app.NotificationCompat.Builder} and issue the notification by
-passing it to {@link android.support.v4.app.NotificationManagerCompat#notify(int, android.app.Notification) notify()}. For example:
+passing it to {@link android.support.v4.app.NotificationManagerCompat#notify notify()}. For example:
 </p>
 
 <pre>

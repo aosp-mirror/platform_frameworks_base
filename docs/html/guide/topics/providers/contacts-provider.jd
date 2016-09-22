@@ -329,13 +329,13 @@ page.title=Contacts Provider
 </p>
 <dl>
     <dt>
-        {@link android.provider.ContactsContract.DataColumns#RAW_CONTACT_ID}
+        {@link android.provider.ContactsContract.Data#RAW_CONTACT_ID}
     </dt>
     <dd>
         The value of the <code>_ID</code> column of the raw contact for this data.
     </dd>
     <dt>
-        {@link android.provider.ContactsContract.DataColumns#MIMETYPE}
+        {@link android.provider.ContactsContract.Data#MIMETYPE}
     </dt>
     <dd>
         The type of data stored in this row, expressed as a custom MIME type. The Contacts Provider
@@ -2351,7 +2351,7 @@ child elements that provide specific data to the
     {@link android.provider.ContactsContract.Data} table, selecting on the raw contact's
     {@link android.provider.BaseColumns#_ID}, the
     {@link android.provider.ContactsContract.CommonDataKinds.Photo#CONTENT_ITEM_TYPE
-    Photo.CONTENT_ITEM_TYPE}, and the {@link android.provider.ContactsContract.DataColumns#IS_PRIMARY}
+    Photo.CONTENT_ITEM_TYPE}, and the {@link android.provider.ContactsContract.Data#IS_PRIMARY}
     column to find the raw contact's primary photo row.
 </p>
 <p>

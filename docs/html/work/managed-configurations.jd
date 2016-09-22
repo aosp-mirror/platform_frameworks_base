@@ -349,7 +349,7 @@ enterprise administrator to:</p>
 <p>
   To get a {@link android.content.RestrictionsManager} object, get the current
   activity with {@link android.app.Fragment#getActivity getActivity()}, then
-  call that activity's {@link android.app.Activity#getSystemService(java.lang.String)
+  call that activity's {@link android.app.Activity#getSystemService
   Activity.getSystemService()} method:
 </p>
 
@@ -399,9 +399,9 @@ enterprise administrator to:</p>
   <code>String</code>, and <code>String[]</code>. Once you have the
   managed configurations {@link android.os.Bundle}, you can check the current
   configuration settings with the standard {@link android.os.Bundle} methods for
-  those data types, such as {@link android.os.BaseBundle#getBoolean getBoolean()}
+  those data types, such as {@link android.os.Bundle#getBoolean getBoolean()}
   or
-  {@link android.os.BaseBundle#getString getString()}.
+  {@link android.os.Bundle#getString getString()}.
 </p>
 
 <p class="note">

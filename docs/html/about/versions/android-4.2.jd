@@ -213,9 +213,9 @@ setScreenBright(true)} allows you to instead set the display at its usual bright
 <p>Android now allows your app to display unique content on additional screens that are connected
 to the user’s device over either a wired connection or Wi-Fi.
  To create unique content for a secondary display, extend the {@link android.app.Presentation}
-class and implement the {@link android.app.Dialog#onCreate onCreate()} callback. Within
-{@link android.app.Dialog#onCreate onCreate()}, specify your UI for the secondary display
-by calling {@link android.app.Dialog#setContentView setContentView()}.
+class and implement the {@link android.app.Presentation#onCreate onCreate()} callback. Within
+{@link android.app.Presentation#onCreate onCreate()}, specify your UI for the secondary display
+by calling {@link android.app.Presentation#setContentView setContentView()}.
 As an extension of the {@link android.app.Dialog} class, the {@link
 android.app.Presentation} class provides the region in which your app can display a unique UI on the
 secondary display.</p>
@@ -241,13 +241,13 @@ appear on the secondary display.</p>
 
 <p>To detect at runtime when a new display has been connected, create an instance of {@link
 android.media.MediaRouter.SimpleCallback} in which you implement the {@link
-android.media.MediaRouter.Callback#onRoutePresentationDisplayChanged
+android.media.MediaRouter.SimpleCallback#onRoutePresentationDisplayChanged
 onRoutePresentationDisplayChanged()} callback method, which the system will call when a new
 presentation display is connected. Then register the {@link
 android.media.MediaRouter.SimpleCallback} by passing it to {@link
 android.media.MediaRouter#addCallback MediaRouter.addCallback()} along with the {@link
 android.media.MediaRouter#ROUTE_TYPE_LIVE_VIDEO} route type. When you receive a call to
-{@link android.media.MediaRouter.Callback#onRoutePresentationDisplayChanged
+{@link android.media.MediaRouter.SimpleCallback#onRoutePresentationDisplayChanged
 onRoutePresentationDisplayChanged()}, simply call {@link
 android.media.MediaRouter#getSelectedRoute MediaRouter.getSelectedRoute()} as mentioned above.</p>
 
@@ -262,7 +262,7 @@ applied to your application or activity.</p>
 likely a different screen density. Because the screen characteristics may different, you should
 provide resources that are optimized specifically for such larger displays. If you need
 to request additional resources from your {@link
-android.app.Presentation}, call {@link android.app.Dialog#getContext()}{@link
+android.app.Presentation}, call {@link android.app.Presentation#getContext()}{@link
 android.content.Context#getResources .getResources()} to get the {@link
 android.content.res.Resources} object corresponding to the display. This provides
 the appropriate resources from your app that are best suited for the
@@ -510,7 +510,7 @@ common operations for you such as:</p>
   <p>To use a script intrinsic, call the static <code>create()</code> method of each instrinsic
   to create an instance of the script. You then call the available <code>set()</code>
   methods of each script intrinsic to set any necessary inputs and options.
-  Finally, call the {@link android.renderscript.Script#forEach forEach()}</code>
+  Finally, call the {@link android.renderscript.ScriptC#forEach forEach()}</code>
   method to execute the script.</p>
   </dd>
 
