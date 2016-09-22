@@ -1,0 +1,274 @@
+// LINT: LEGACY_NAMES
+syntax = "proto2";
+
+package clearcut.connectivity;
+
+option java_package = "com.android.server.connectivity.metrics";
+option java_outer_classname = "IpConnectivityLogClass";
+
+// NetworkId represents the id given by the system to a physical network on the
+// Android device. It is used to relates events to each other for devices with
+// multiple networks (WiFi, 4G, ...).
+message NetworkId {
+  // Every network gets assigned a network_id on creation based on order of
+  // creation. Thus network_id N is assigned to the network created directly
+  // after network N-1. Thus there is no PII involved here. Zero means no
+  // network. The value 0 is never assigned to a network.
+  optional int32 network_id = 1;
+};
+
+// Logs changes in the system default network. Changes can be 1) acquiring a
+// default network with no previous default, 2) a switch of the system default
+// network to a new default network, 3) a loss of the system default network.
+// This message is associated to android.net.metrics.DefaultNetworkEvent.
+message DefaultNetworkEvent {
+  // A value of 0 means this is a loss of the system default network.
+  optional NetworkId network_id = 1;
+
+  // A value of 0 means there was no previous default network.
+  optional NetworkId previous_network_id = 2;
+
+  // Whether the network supports IPv4, IPv6, or both.
+  enum IPSupport {
+    NONE = 0;
+    IPV4 = 1;
+    IPV6 = 2;
+    DUAL = 3;
+  };
+
+  // Best available information about IP support of the previous network when
+  // disconnecting or switching to a new default network.
+  optional IPSupport previous_network_ip_support = 3;
+
+  // The transport types of the new default network, represented by
+  // TRANSPORT_* constants as defined in NetworkCapabilities.
+  repeated int32 transport_types = 4;
+};
+
+// Logs IpReachabilityMonitor probe events and NUD_FAILED events.
+// This message is associated to android.net.metrics.IpReachabilityEvent.
+message IpReachabilityEvent {
+  // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
+  optional string if_name = 1;
+
+  // The event type code of the probe, represented by constants defined in
+  // android.net.metrics.IpReachabilityEvent.
+  optional int32 event_type = 2;
+};
+
+// Logs NetworkMonitor and ConnectivityService events related to the state of
+// a network: connection, evaluation, validation, lingering, and disconnection.
+// This message is associated to android.net.metrics.NetworkEvent.
+message NetworkEvent {
+  // The id of the network on which this event happened.
+  optional NetworkId network_id = 1;
+
+  // The type of network event, represented by NETWORK_* constants defined in
+  // android.net.metrics.NetworkEvent.
+  optional int32 event_type = 2;
+
+  // Only valid after finishing evaluating a network for Internet connectivity.
+  // The time it took for this evaluation to complete.
+  optional int32 latency_ms = 3;
+}
+
+// Logs individual captive portal probing events that are performed when
+// evaluating or reevaluating networks for Internet connectivity.
+// This message is associated to android.net.metrics.ValidationProbeEvent.
+message ValidationProbeEvent {
+  // The id of the network for which the probe was sent.
+  optional NetworkId network_id = 1;
+
+  // The time it took for that probe to complete or time out.
+  optional int32 latency_ms = 2;
+
+  // The type of portal probe, represented by PROBE_* constants defined in
+  // android.net.metrics.ValidationProbeEvent.
+  optional int32 probe_type = 3;
+
+  // The http code result of the probe test.
+  optional int32 probe_result = 4;
+}
+
+// Logs DNS lookup latencies. Repeated fields must have the same length.
+// This message is associated to android.net.metrics.DnsEvent.
+message DNSLookupBatch {
+  // The id of the network on which the DNS lookups took place.
+  optional NetworkId network_id = 1;
+
+  // The types of the DNS lookups, as defined in android.net.metrics.DnsEvent.
+  repeated int32 event_types = 2;
+
+  // The return values of the DNS resolver for each DNS lookups.
+  repeated int32 return_codes = 3;
+
+  // The time it took for each DNS lookups to complete.
+  repeated int32 latencies_ms = 4;
+};
+
+// Represents a DHCP event on a single interface, which can be a DHCPClient
+// state transition or a response packet parsing error.
+// This message is associated to android.net.metrics.DhcpClientEvent and
+// android.net.metrics.DhcpErrorEvent.
+message DHCPEvent {
+  // The interface name (wlan, rmnet, lo, ...) on which the event happened.
+  optional string if_name = 1;
+
+  oneof value {
+    // The name of a state in the DhcpClient state machine, represented by
+    // the inner classes of android.net.dhcp.DhcpClient.
+    string state_transition = 2;
+
+    // The error code of a DHCP error, represented by constants defined in
+    // android.net.metrics.DhcpErrorEvent.
+    int32 error_code = 3;
+  }
+
+  // Lifetime duration in milliseconds of a DhcpClient state, or transition
+  // time in milliseconds between specific pairs of DhcpClient's states.
+  // Only populated when state_transition is populated.
+  optional int32 duration_ms = 4;
+}
+
+// Represents the generation of an Android Packet Filter program.
+message ApfProgramEvent {
+  // Lifetime of the program in seconds.
+  optional int64 lifetime = 1;
+
+  // Number of RAs filtered by the APF program.
+  optional int32 filtered_ras = 2;
+
+  // Total number of RAs to filter currently tracked by ApfFilter. Can be more
+  // than filtered_ras if all available program size was exhausted.
+  optional int32 current_ras = 3;
+
+  // Length of the APF program in bytes.
+  optional int32 program_length = 4;
+
+  // True if the APF program is dropping multicast and broadcast traffic.
+  optional bool drop_multicast = 5;
+
+  // True if the interface on which APF runs has an IPv4 address.
+  optional bool has_ipv4_addr = 6;
+}
+
+// Represents Router Advertisement listening statistics for an interface with
+// Android Packet Filter enabled.
+message ApfStatistics {
+  // The time interval in milliseconds these stastistics cover.
+  optional int64 duration_ms = 1;
+
+  // The total number of received RAs.
+  optional int32 received_ras = 2;
+
+  // The total number of received RAs that matched a known RA.
+  optional int32 matching_ras = 3;
+
+  // The total number of received RAs ignored due to the MAX_RAS limit.
+  optional int32 dropped_ras = 5;
+
+  // The total number of received RAs with an effective lifetime of 0 seconds.
+  // Effective lifetime for APF is the minimum of all lifetimes in a RA.
+  optional int32 zero_lifetime_ras = 6;
+
+  // The total number of received RAs that could not be parsed.
+  optional int32 parse_errors = 7;
+
+  // The total number of APF program updates triggered by an RA reception.
+  optional int32 program_updates = 8;
+
+  // The maximum APF program size in byte advertised by hardware.
+  optional int32 max_program_size = 9;
+}
+
+// Represents the reception of a Router Advertisement packet for an interface
+// with Android Packet Filter enabled.
+message RaEvent {
+  // All lifetime values are expressed in seconds. The default value for an
+  // option lifetime that was not present in the RA option list is -1.
+  // The lifetime of an option (e.g., the Prefix Information Option) is the
+  // minimum lifetime of all such options in the packet.
+
+  // The value of the router lifetime in the RA packet.
+  optional int64 router_lifetime = 1;
+
+  // Prefix valid lifetime from the prefix information option.
+  optional int64 prefix_valid_lifetime = 2;
+
+  // Prefix preferred lifetime from the prefix information option.
+  optional int64 prefix_preferred_lifetime = 3;
+
+  // Route info lifetime.
+  optional int64 route_info_lifetime = 4;
+
+  // Recursive DNS server lifetime.
+  optional int64 rdnss_lifetime = 5;
+
+  // DNS search list lifetime.
+  optional int64 dnssl_lifetime = 6;
+}
+
+// Represents an IP provisioning event in IpManager and how long the
+// provisioning action took.
+// This message is associated to android.net.metrics.IpManagerEvent.
+message IpProvisioningEvent {
+  // The interface name (wlan, rmnet, lo, ...) on which the probe was sent.
+  optional string if_name = 1;
+
+  // The code of the IP provisioning event, represented by constants defined in
+  // android.net.metrics.IpManagerEvent.
+  optional int32 event_type = 2;
+
+  // The duration of the provisioning action that resulted in this event.
+  optional int32 latency_ms = 3;
+}
+
+// Represents one of the IP connectivity event defined in this file.
+// Next tag: 12
+message IpConnectivityEvent {
+  // Time in ms when the event was recorded.
+  optional int64 time_ms = 1;
+
+  // Event type.
+  oneof event {
+
+    // An event about the system default network.
+    DefaultNetworkEvent default_network_event = 2;
+
+    // An IP reachability probe event.
+    IpReachabilityEvent ip_reachability_event = 3;
+
+    // A network lifecycle event.
+    NetworkEvent network_event = 4;
+
+    // A batch of DNS lookups.
+    DNSLookupBatch dns_lookup_batch = 5;
+
+    // A DHCP client event or DHCP receive error.
+    DHCPEvent dhcp_event = 6;
+
+    // An IP provisioning event.
+    IpProvisioningEvent ip_provisioning_event = 7;
+
+    // A network validation probe event.
+    ValidationProbeEvent validation_probe_event = 8;
+
+    // An Android Packet Filter program event.
+    ApfProgramEvent apf_program_event = 9;
+
+    // An Android Packet Filter statistics event.
+    ApfStatistics apf_statistics = 10;
+
+    // An RA packet reception event.
+    RaEvent ra_event = 11;
+  };
+};
+
+// The information about IP connectivity events.
+message IpConnectivityLog {
+  // An array of IP connectivity events.
+  repeated IpConnectivityEvent events = 1;
+
+  // The number of events that had to be dropped due to a full buffer.
+  optional int32 dropped_events = 2;
+};
