@@ -4139,13 +4139,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                 final int rx = (int) ev.getRawX();
                 final int ry = (int) ev.getRawY();
 
-                getLocationOnScreen(mTempInt2);
-                int[] location = new int[2];
-                view.getLocationOnScreen(location);
-                final int x = location[0] - mTempInt2[0];
-                final int y = location[1] - mTempInt2[1];
+                view.getLocationOnScreen(mTempInt2);
+                final int x = mTempInt2[0];
+                final int y = mTempInt2[1];
                 Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
-                if (!rect.contains((int) rx, (int) ry)) {
+                if (!rect.contains(rx, ry)) {
                     // Touch was outside visible guts / gear notification, close what's visible
                     mPhoneStatusBar.dismissPopups(-1, -1, true /* resetGear */, true /* animate */);
                 }
