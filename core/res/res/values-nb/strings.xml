@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Trykk for å velge språk og layout"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
-    <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sjekker for feil"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> ble oppdaget"</string>
@@ -1639,6 +1638,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> er valgt</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> er valgt</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"Diverse"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Du angir viktigheten for disse varslene."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dette er viktig på grunn av folkene som er involvert."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>

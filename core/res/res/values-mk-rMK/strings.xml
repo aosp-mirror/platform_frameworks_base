@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Се подготвува <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Се проверува за грешки"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Откриена е нова <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1641,6 +1640,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> е избрана</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> се избрани</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"Разно"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ја поставивте важноста на известувањава."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ова е важно заради луѓето кои се вклучени."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
