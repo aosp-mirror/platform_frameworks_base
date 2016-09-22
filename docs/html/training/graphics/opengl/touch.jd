@@ -36,7 +36,7 @@ class="button">Download the sample</a>
 getting some attention, but what if you want to have users interact with your OpenGL ES graphics?
 The key to making your OpenGL ES application touch interactive is expanding your implementation of
 {@link android.opengl.GLSurfaceView} to override the {@link
-android.view.View#onTouchEvent onTouchEvent()} to listen for touch events.</p>
+android.opengl.GLSurfaceView#onTouchEvent onTouchEvent()} to listen for touch events.</p>
 
 <p>This lesson shows you how to listen for touch events to let users rotate an OpenGL ES object.</p>
 
@@ -44,7 +44,7 @@ android.view.View#onTouchEvent onTouchEvent()} to listen for touch events.</p>
 <h2 id="listener">Setup a Touch Listener</h2>
 
 <p>In order to make your OpenGL ES application respond to touch events, you must implement the
-{@link android.view.View#onTouchEvent onTouchEvent()} method in your
+{@link android.opengl.GLSurfaceView#onTouchEvent onTouchEvent()} method in your
 {@link android.opengl.GLSurfaceView} class. The example implementation below shows how to listen for
 {@link android.view.MotionEvent#ACTION_MOVE MotionEvent.ACTION_MOVE} events and translate them to
 an angle of rotation for a shape.</p>

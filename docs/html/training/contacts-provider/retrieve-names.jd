@@ -227,7 +227,7 @@ public class ContactsFragment extends Fragment implements
 </pre>
 <p class="note">
     <strong>Note:</strong> Since
-    {@link android.provider.ContactsContract.ContactNameColumns#DISPLAY_NAME_PRIMARY
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME_PRIMARY
     Contacts.DISPLAY_NAME_PRIMARY} requires Android 3.0 (API version 11) or later, setting your
     app's <code>minSdkVersion</code> to 10 or below generates an Android Lint warning in
     Android Studio. To turn off this warning, add the annotation
@@ -261,7 +261,7 @@ public class ContactsFragment extends Fragment implements
     that displays the contacts, you need to call {@link android.app.Activity#findViewById
     Activity.findViewById()} using the parent activity of the
     {@link android.support.v4.app.Fragment}. Use the {@link android.content.Context} of the
-    parent activity when you call {@link android.widget.AdapterView#setAdapter setAdapter()}.
+    parent activity when you call {@link android.widget.ListView#setAdapter setAdapter()}.
     For example:
 </p>
 <pre>
@@ -293,7 +293,7 @@ public class ContactsFragment extends Fragment implements
 </p>
 <p>
     To continue setting up the listener, bind it to the {@link android.widget.ListView} by
-    calling the method {@link android.widget.AdapterView#setOnItemClickListener
+    calling the method {@link android.widget.ListView#setOnItemClickListener
     setOnItemClickListener()} in {@link android.support.v4.app.Fragment#onActivityCreated
     onActivityCreated()}. For example:
 </p>
@@ -318,15 +318,15 @@ public class ContactsFragment extends Fragment implements
     the {@link android.widget.ListView} displays the contact's display name,
     which contains the main form of the contact's name. In Android 3.0 (API version 11) and later,
     the name of this column is
-    {@link android.provider.ContactsContract.ContactNameColumns#DISPLAY_NAME_PRIMARY
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME_PRIMARY
     Contacts.DISPLAY_NAME_PRIMARY}; in versions previous to that, its name is
-    {@link android.provider.ContactsContract.ContactsColumns#DISPLAY_NAME Contacts.DISPLAY_NAME}.
+    {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME Contacts.DISPLAY_NAME}.
 </p>
 <p>
-    The column {@link android.provider.BaseColumns#_ID Contacts._ID} is used by the
+    The column {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} is used by the
     {@link android.support.v4.widget.SimpleCursorAdapter} binding process.
-    {@link android.provider.BaseColumns#_ID Contacts._ID} and
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY} are used together to
+    {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} and
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY} are used together to
     construct a content URI for the contact the user selects.
 </p>
 <pre>
@@ -635,7 +635,7 @@ public class ContactsFragment extends Fragment implements
     </li>
     <li>
         The name of the column that contains the custom MIME type value. This name is always
-        {@link android.provider.ContactsContract.DataColumns#MIMETYPE Data.MIMETYPE}.
+        {@link android.provider.ContactsContract.Data#MIMETYPE Data.MIMETYPE}.
     </li>
     <li>
         The custom MIME type value for the data type. As described previously, this is the constant

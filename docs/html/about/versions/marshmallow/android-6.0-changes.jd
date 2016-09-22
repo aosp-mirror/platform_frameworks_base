@@ -280,7 +280,7 @@ change fixes a problem where Dalvik was checking access rules incorrectly in pre
 If your app uses the
 {@link java.lang.reflect.Constructor#newInstance(java.lang.Object...) newInstance()} method and you
 want to override access checks, call the
-{@link java.lang.reflect.AccessibleObject#setAccessible(boolean) setAccessible()} method with the input
+{@link java.lang.reflect.Constructor#setAccessible(boolean) setAccessible()} method with the input
 parameter set to {@code true}. If your app uses the
 <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7 appcompat library</a> or the
 <a href="{@docRoot}tools/support-library/features.html#v7-recyclerview">v7 recyclerview library</a>,

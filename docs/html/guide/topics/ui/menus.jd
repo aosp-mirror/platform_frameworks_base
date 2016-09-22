@@ -682,7 +682,7 @@ listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
 </pre>
 
 <p>That's it. Now when the user selects an item with a long-click, the system calls the {@link
-android.view.ActionMode.Callback#onCreateActionMode onCreateActionMode()}
+android.widget.AbsListView.MultiChoiceModeListener#onCreateActionMode onCreateActionMode()}
 method and displays the contextual action bar with the specified actions. While the contextual
 action bar is visible, users can select additional items.</p>
 

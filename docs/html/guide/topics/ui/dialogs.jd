@@ -643,7 +643,7 @@ android.support.v4.app.Fragment}.</p>
 or other {@link android.app.Dialog} objects to build the dialog in this case. If
 you want the {@link android.support.v4.app.DialogFragment} to be
 embeddable, you must define the dialog's UI in a layout, then load the layout in the
-{@link android.support.v4.app.Fragment#onCreateView
+{@link android.support.v4.app.DialogFragment#onCreateView
 onCreateView()} callback.</p>
 
 <p>Here's an example {@link android.support.v4.app.DialogFragment} that can appear as either a

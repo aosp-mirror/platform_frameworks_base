@@ -37,7 +37,7 @@ possible while allowing you to still provide only one summary notification on th
 
 <p>To create a stack, call {@link android.support.v4.app.NotificationCompat.Builder#setGroup setGroup()}
 for each notification you want in the stack and specify a
-group key. Then call {@link android.support.v4.app.NotificationManagerCompat#notify(int, android.app.Notification) notify()}
+group key. Then call {@link android.support.v4.app.NotificationManagerCompat#notify notify()}
 to send it to the wearable.</p>
 
 <pre style="clear:right">
@@ -59,7 +59,7 @@ notificationManager.notify(notificationId1, notif);
 
 <p>Later on, when you create another notification, specify
 the same group key. When you call
-{@link android.support.v4.app.NotificationManagerCompat#notify(int, android.app.Notification) notify()},
+{@link android.support.v4.app.NotificationManagerCompat#notify notify()},
 this notification appears in the same stack as the previous notification,
 instead of as a new card:</p>
 
