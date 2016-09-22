@@ -26,8 +26,8 @@ import java.lang.annotation.RetentionPolicy;
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are set when a
  * publish or subscribe session is created using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} .
+ * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
+ * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} .
  * <p>
  * A single callback is set at session creation - it cannot be replaced.
  *
@@ -72,7 +72,7 @@ public class WifiNanDiscoverySessionCallback {
      * Indicates transmission failure: this may be due to local transmission
      * failure or to no ACK received - remote device didn't receive the
      * sent message. Failure reason flag for
-     * {@link WifiNanDiscoverySessionCallback#onMessageSendFail(int, int)} callback.
+     * {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)} callback.
      */
     public static final int REASON_TX_FAIL = 3;
 
@@ -100,7 +100,7 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a publish operation is started successfully in response to a
-     * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} operation.
+     * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} operation.
      *
      * @param session The {@link WifiNanPublishDiscoverySession} used to control the
      *            discovery session.
@@ -111,7 +111,7 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a subscribe operation is started successfully in response to a
-     * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} operation.
+     * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} operation.
      *
      * @param session The {@link WifiNanSubscribeDiscoverySession} used to control the
      *            discovery session.
@@ -121,19 +121,19 @@ public class WifiNanDiscoverySessionCallback {
     }
 
     /**
-     * Called when a publish or subscribe discovery session configuration is update request
+     * Called when a publish or subscribe discovery session configuration update request
      * succeeds. Called in response to
      * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} or
      * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
      */
-    public void onSessionConfigSuccess() {
+    public void onSessionConfigUpdated() {
         /* empty */
     }
 
     /**
      * Called when a publish or subscribe discovery session cannot be created:
-     * {@link WifiNanManager#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
-     * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)},
+     * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or
+     * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)},
      * or when a configuration update fails:
      * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)} or
      * {@link WifiNanSubscribeDiscoverySession#updateSubscribe(SubscribeConfig)}.
@@ -144,13 +144,13 @@ public class WifiNanDiscoverySessionCallback {
      * @param reason The failure reason using
      *            {@code WifiNanDiscoverySessionCallback.REASON_*} codes.
      */
-    public void onSessionConfigFail(@SessionReasonCodes int reason) {
+    public void onSessionConfigFailed(@SessionReasonCodes int reason) {
         /* empty */
     }
 
     /**
      * Called when a discovery session (publish or subscribe) terminates. Termination may be due
-     * to user-request (either directly through {@link WifiNanDiscoveryBaseSession#terminate()} or
+     * to user-request (either directly through {@link WifiNanDiscoveryBaseSession#destroy()} or
      * application-specified expiration, e.g. {@link PublishConfig.Builder#setPublishCount(int)}
      * or {@link SubscribeConfig.Builder#setTtlSec(int)}) or due to a failure.
      *
@@ -163,31 +163,31 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a discovery (publish or subscribe) operation results in a
-     * match - when a peer is discovered.
+     * service discovery.
      *
      * @param peerId The ID of the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
      *            byte array) provided by the peer as part of its discovery
      *            configuration.
      * @param matchFilter The filter (Tx on advertiser and Rx on listener) which
-     *            resulted in this match.
+     *            resulted in this service discovery.
      */
-    public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
+    public void onServiceDiscovered(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
         /* empty */
     }
 
     /**
      * Called in response to {@link WifiNanDiscoveryBaseSession#sendMessage(int, byte[], int)}
-     * when a message is transmitted successfully - when it was received successfully by the peer
-     * (corresponds to an ACK being received).
+     * when a message is transmitted successfully - i.e. when it was received successfully by the
+     * peer (corresponds to an ACK being received).
      * <p>
      * Note that either this callback or
-     * {@link WifiNanDiscoverySessionCallback#onMessageSendFail(int, int)} will be
+     * {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)} will be
      * received - never both.
      *
      * @param messageId The arbitrary message ID specified when sending the message.
      */
-    public void onMessageSendSuccess(@SuppressWarnings("unused") int messageId) {
+    public void onMessageSent(@SuppressWarnings("unused") int messageId) {
         /* empty */
     }
 
@@ -198,14 +198,14 @@ public class WifiNanDiscoverySessionCallback {
      * event is received after all retries are exhausted.
      * <p>
      * Note that either this callback or
-     * {@link WifiNanDiscoverySessionCallback#onMessageSendSuccess(int)} will be received
+     * {@link WifiNanDiscoverySessionCallback#onMessageSent(int)} will be received
      * - never both.
      *
      * @param messageId The arbitrary message ID specified when sending the message.
      * @param reason The failure reason using
      *            {@code WifiNanDiscoverySessionCallback.REASON_*} codes.
      */
-    public void onMessageSendFail(@SuppressWarnings("unused") int messageId,
+    public void onMessageSendFailed(@SuppressWarnings("unused") int messageId,
             @SessionReasonCodes int reason) {
         /* empty */
     }
