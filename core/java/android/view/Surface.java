@@ -71,6 +71,7 @@ public class Surface implements Parcelable {
     private static native long nativeGetNextFrameNumber(long nativeObject);
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
     private static native void nativeSetBuffersTransform(long nativeObject, long transform);
+    private static native int nativeForceScopedDisconnect(long nativeObject);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -546,6 +547,16 @@ public class Surface implements Parcelable {
             int err = nativeSetScalingMode(mNativeObject, scalingMode);
             if (err != 0) {
                 throw new IllegalArgumentException("Invalid scaling mode: " + scalingMode);
+            }
+        }
+    }
+
+    void forceScopedDisconnect() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            int err = nativeForceScopedDisconnect(mNativeObject);
+            if (err != 0) {
+                throw new RuntimeException("Failed to disconnect Surface instance (bad object?)");
             }
         }
     }
