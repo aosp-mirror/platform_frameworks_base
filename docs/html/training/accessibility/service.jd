@@ -174,7 +174,7 @@ android.accessibilityservice.AccessibilityService#onAccessibilityEvent} method.
 In that method, use {@link
 android.view.accessibility.AccessibilityEvent#getEventType} to determine the
 type of event, and {@link
-android.view.accessibility.AccessibilityRecord#getContentDescription} to extract
+android.view.accessibility.AccessibilityEvent#getContentDescription} to extract
 any label text associated with the view that fired the event.</pre>
 
 <pre>
@@ -211,7 +211,7 @@ android:canRetrieveWindowContent="true"
 </pre>
 <p>Once that's done, get an {@link
 android.view.accessibility.AccessibilityNodeInfo} object using {@link
-android.view.accessibility.AccessibilityRecord#getSource}.  This call only
+android.view.accessibility.AccessibilityEvent#getSource}.  This call only
 returns an object if the window where the event originated is still the active
 window.  If not, it will return null, so <em>behave accordingly</em>.  The
 following example is a snippet of code that, when it receives an event, does

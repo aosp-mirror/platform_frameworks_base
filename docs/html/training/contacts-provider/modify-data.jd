@@ -196,8 +196,8 @@ intent.putExtra(Intents.Insert.EMAIL, mEmailAddress.getText())
     Contacts.CONTENT_LOOKUP_URI}, call
     {@link android.provider.ContactsContract.Contacts#getLookupUri
     Contacts.getLookupUri(id, lookupkey)} with the contact's
-    {@link android.provider.BaseColumns#_ID Contacts._ID} and
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY Contacts.LOOKUP_KEY} values as
+    {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} and
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY} values as
     arguments.
 </p>
 <p>
