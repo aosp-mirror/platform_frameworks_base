@@ -14,49 +14,45 @@
  * limitations under the License.
  */
 
-package android.net.metrics;
+package android.net;
 
 import android.os.Bundle;
 import android.os.Parcel;
-import android.net.ConnectivityMetricsEvent;
-import android.net.IConnectivityMetricsLogger;
-
+import java.util.List;
 import junit.framework.TestCase;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
-public class IpConnectivityLogTest extends TestCase {
+public class ConnectivityMetricsLoggerTest extends TestCase {
 
     // use same Parcel object everywhere for pointer equality
     static final Bundle FAKE_EV = new Bundle();
+    static final int FAKE_COMPONENT = 1;
+    static final int FAKE_EVENT = 2;
 
     @Mock IConnectivityMetricsLogger mService;
     ArgumentCaptor<ConnectivityMetricsEvent> evCaptor;
+    ArgumentCaptor<ConnectivityMetricsEvent[]> evArrayCaptor;
 
-    IpConnectivityLog mLog;
+    ConnectivityMetricsLogger mLog;
 
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         evCaptor = ArgumentCaptor.forClass(ConnectivityMetricsEvent.class);
-        mLog = new IpConnectivityLog(mService);
+        evArrayCaptor = ArgumentCaptor.forClass(ConnectivityMetricsEvent[].class);
+        mLog = new ConnectivityMetricsLogger(mService);
     }
 
     public void testLogEvents() throws Exception {
-        assertTrue(mLog.log(1, FAKE_EV));
-        assertTrue(mLog.log(2, FAKE_EV));
-        assertTrue(mLog.log(3, FAKE_EV));
+        mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(3, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
 
         List<ConnectivityMetricsEvent> gotEvents = verifyEvents(3);
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
@@ -67,13 +63,21 @@ public class IpConnectivityLogTest extends TestCase {
     public void testLogEventTriggerThrottling() throws Exception {
         when(mService.logEvent(any())).thenReturn(1234L);
 
-        assertFalse(mLog.log(1, FAKE_EV));
+        mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+
+        List<ConnectivityMetricsEvent> gotEvents = verifyEvents(1);
+        assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
     public void testLogEventFails() throws Exception {
         when(mService.logEvent(any())).thenReturn(-1L); // Error.
 
-        assertFalse(mLog.log(1, FAKE_EV));
+        mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+
+        List<ConnectivityMetricsEvent> gotEvents = verifyEvents(1);
+        assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
     public void testLogEventWhenThrottling() throws Exception {
@@ -81,61 +85,30 @@ public class IpConnectivityLogTest extends TestCase {
 
         // No events are logged. The service is only called once
         // After that, throttling state is maintained locally.
-        assertFalse(mLog.log(1, FAKE_EV));
-        assertFalse(mLog.log(2, FAKE_EV));
+        mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
 
         List<ConnectivityMetricsEvent> gotEvents = verifyEvents(1);
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
     }
 
     public void testLogEventRecoverFromThrottling() throws Exception {
-        final long throttleTimeout = System.currentTimeMillis() + 50;
+        final long throttleTimeout = System.currentTimeMillis() + 10;
         when(mService.logEvent(any())).thenReturn(throttleTimeout, 0L);
 
-        assertFalse(mLog.log(1, FAKE_EV));
-        new Thread() {
-            public void run() {
-                busySpinLog();
-            }
-        }.start();
+        mLog.logEvent(1, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(2, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        mLog.logEvent(3, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
+        Thread.sleep(100);
+        mLog.logEvent(53, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
 
-        List<ConnectivityMetricsEvent> gotEvents = verifyEvents(2, 200);
+        List<ConnectivityMetricsEvent> gotEvents = verifyEvents(1);
         assertEventsEqual(expectedEvent(1), gotEvents.get(0));
-        assertEventsEqual(expectedEvent(2), gotEvents.get(1));
-    }
 
-    public void testLogEventRecoverFromThrottlingWithMultipleCallers() throws Exception {
-        final long throttleTimeout = System.currentTimeMillis() + 50;
-        when(mService.logEvent(any())).thenReturn(throttleTimeout, 0L);
-
-        assertFalse(mLog.log(1, FAKE_EV));
-        final int nCallers = 10;
-        for (int i = 0; i < nCallers; i++) {
-            new Thread() {
-                public void run() {
-                    busySpinLog();
-                }
-            }.start();
-        }
-
-        List<ConnectivityMetricsEvent> gotEvents = verifyEvents(1 + nCallers, 200);
-        assertEventsEqual(expectedEvent(1), gotEvents.get(0));
-        for (int i = 0; i < nCallers; i++) {
-            assertEventsEqual(expectedEvent(2), gotEvents.get(1 + i));
-        }
-    }
-
-    void busySpinLog() {
-        final long timeout = 200;
-        final long stop = System.currentTimeMillis() + timeout;
-        try {
-            while (System.currentTimeMillis() < stop) {
-                if (mLog.log(2, FAKE_EV)) {
-                    return;
-                }
-                Thread.sleep(10);
-            }
-        } catch (InterruptedException e) { }
+        verify(mService, times(1)).logEvents(evArrayCaptor.capture());
+        ConnectivityMetricsEvent[] gotOtherEvents = evArrayCaptor.getAllValues().get(0);
+        assertEquals(ConnectivityMetricsLogger.TAG_SKIPPED_EVENTS, gotOtherEvents[0].eventTag);
+        assertEventsEqual(expectedEvent(53), gotOtherEvents[1]);
     }
 
     List<ConnectivityMetricsEvent> verifyEvents(int n) throws Exception {
@@ -143,13 +116,8 @@ public class IpConnectivityLogTest extends TestCase {
         return evCaptor.getAllValues();
     }
 
-    List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
-        verify(mService, timeout(timeoutMs).times(n)).logEvent(evCaptor.capture());
-        return evCaptor.getAllValues();
-    }
-
     static ConnectivityMetricsEvent expectedEvent(int timestamp) {
-        return new ConnectivityMetricsEvent((long)timestamp, 0, 0, FAKE_EV);
+        return new ConnectivityMetricsEvent((long)timestamp, FAKE_COMPONENT, FAKE_EVENT, FAKE_EV);
     }
 
     /** Outer equality for ConnectivityMetricsEvent to avoid overriding equals() and hashCode(). */
