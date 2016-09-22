@@ -101,6 +101,10 @@ class WindowSurfacePlacer {
     static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 5;
 
     boolean mWallpaperMayChange = false;
+    // During an orientation change, we track whether all windows have rendered
+    // at the new orientation, and this will be false from changing orientation until that occurs.
+    // For seamless rotation cases this always stays true, as the windows complete their orientation
+    // changes 1 by 1 without disturbing global state.
     boolean mOrientationChangeComplete = true;
     boolean mWallpaperActionPending = false;
 
