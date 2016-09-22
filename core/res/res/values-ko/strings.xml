@@ -243,7 +243,7 @@
     <string name="user_owner_label" msgid="1119010402169916617">"개인으로 전환"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"직장으로 전환"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"주소록"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"주소록에 접근할 수 있도록"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"주소록에 액세스"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"위치"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"이 기기의 위치정보에 액세스"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"캘린더"</string>
@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"탭하여 언어와 레이아웃을 선택하세요."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> 준비 중"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"오류 확인 중"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"새로운 <xliff:g id="NAME">%s</xliff:g> 감지됨"</string>
@@ -1648,8 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"추천"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"모든 언어"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"모든 지역"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"검색"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"직장 모드가 사용 중지됨"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"앱, 백그라운드 동기화 및 관련 기능을 포함한 직장 프로필이 작동하도록 허용"</string>

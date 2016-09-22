@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"үміткерлер"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> дайындалуда"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Қателер тексерілуде"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Жаңа <xliff:g id="NAME">%s</xliff:g> анықталды"</string>
