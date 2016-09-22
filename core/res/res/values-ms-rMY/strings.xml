@@ -1647,8 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Taipkan nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Dicadangkan"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Semua bahasa"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Semua rantau"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cari"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Mod kerja DIMATIKAN"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Benarkan profil kerja berfungsi, termasuk apl, penyegerakan latar belakang dan ciri yang berkaitan."</string>

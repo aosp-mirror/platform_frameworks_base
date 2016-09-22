@@ -1074,7 +1074,7 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi konexioa ezin da Internetera konektatu"</string>
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi eginbidea ezin da Internetera konektatu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
@@ -1647,8 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Iradokitakoak"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Desaktibatuta dago laneko modua"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Baimendu laneko profilak funtzionatzea, besteak beste, aplikazioak, atzeko planoko sinkronizazioa eta erlazionatutako eginbideak."</string>

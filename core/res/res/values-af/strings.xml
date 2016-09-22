@@ -1647,8 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Voer taalnaam in"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Voorgestel"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle tale"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Allle streke"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Soek"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Werkmodus is AF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Stel werkprofiel in staat om te werk, insluitend programme, agtergrondsinkronisering en verwante kenmerke."</string>
