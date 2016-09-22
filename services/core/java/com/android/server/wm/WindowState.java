@@ -1816,15 +1816,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         Binder.restoreCallingIdentity(origId);
     }
 
-    @Override
-    boolean detachFromDisplay() {
-        // We are in the middle of changing the state of displays/stacks/tasks. We need
-        // to finish that, before we let layout interfere with it.
-        // Also removes child windows.
-        removeIfPossible();
-        return true;
-    }
-
     private void setupWindowForRemoveOnExit() {
         mRemoveOnExit = true;
         setDisplayLayoutNeeded();

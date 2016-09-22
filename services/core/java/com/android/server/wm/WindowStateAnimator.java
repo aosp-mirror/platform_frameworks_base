@@ -1750,7 +1750,7 @@ class WindowStateAnimator {
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
         if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
-            mService.adjustForImeIfNeeded(mWin.mDisplayContent);
+            mWin.mDisplayContent.adjustForImeIfNeeded();
             if (isEntrance) {
                 mWin.setDisplayLayoutNeeded();
                 mService.mWindowPlacerLocked.requestTraversal();

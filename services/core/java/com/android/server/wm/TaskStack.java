@@ -110,7 +110,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
-    boolean mDeferDetach;
+    boolean mDeferRemoval;
 
     private final Rect mTmpAdjustedBounds = new Rect();
     private boolean mAdjustedForIme;
@@ -764,12 +764,34 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 1 /*allowResizeInDockedMode*/, bounds).sendToTarget();
     }
 
-    // TODO: Should this really be removeImmidiately or removeChild?
-    boolean detachFromDisplay() {
+    @Override
+    void removeIfPossible() {
+        if (isAnimating()) {
+            mDeferRemoval = true;
+            return;
+        }
+        removeImmediately();
+    }
+
+    @Override
+    void removeImmediately() {
+        super.removeImmediately();
+
+        mDisplayContent.mDimLayerController.removeDimLayerUser(this);
         EventLog.writeEvent(EventLogTags.WM_STACK_REMOVED, mStackId);
-        boolean didSomething = super.detachFromDisplay();
-        close();
-        return didSomething;
+
+        if (mAnimationBackgroundSurface != null) {
+            mAnimationBackgroundSurface.destroySurface();
+            mAnimationBackgroundSurface = null;
+        }
+        mDisplayContent = null;
+
+        mService.mWindowPlacerLocked.requestTraversal();
+
+        if (mStackId == DOCKED_STACK_ID) {
+            mService.getDefaultDisplayContentLocked().mDividerControllerLocked
+                    .notifyDockedStackExistsChanged(false);
+        }
     }
 
     void resetAnimationBackgroundAnimator() {
@@ -799,14 +821,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
                 --top;
             }
         }
-    }
-
-    void close() {
-        if (mAnimationBackgroundSurface != null) {
-            mAnimationBackgroundSurface.destroySurface();
-            mAnimationBackgroundSurface = null;
-        }
-        mDisplayContent = null;
     }
 
     /**
@@ -1077,7 +1091,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "mStackId=" + mStackId);
-        pw.println(prefix + "mDeferDetach=" + mDeferDetach);
+        pw.println(prefix + "mDeferRemoval=" + mDeferRemoval);
         pw.println(prefix + "mFillsParent=" + mFillsParent);
         pw.println(prefix + "mBounds=" + mBounds.toShortString());
         if (mMinimizeAmount != 0f) {
@@ -1411,8 +1425,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         if (isAnimating()) {
             return true;
         }
-        if (mDeferDetach) {
-            mDisplayContent.detachChild(this);
+        if (mDeferRemoval) {
+            removeImmediately();
         }
 
         return super.checkCompleteDeferredRemoval();
