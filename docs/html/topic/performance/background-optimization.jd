@@ -200,11 +200,11 @@ public static void scheduleJob(Context context) {
 </h2>
 
 <p>
-  In the Android N, apps are not able to send or receive {@link
+  In Android 7.0 (API level 24), apps are not able to send or receive {@link
   android.hardware.Camera#ACTION_NEW_PICTURE} or {@link
   android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts. This restriction helps
   alleviate the performance and user experience impacts when several apps must
-  wake up in order to process a new image or video. Android N
+  wake up in order to process a new image or video. Android 7.0 (API level 24)
   extends {@link android.app.job.JobInfo} and {@link
   android.app.job.JobParameters} to provide an alternative solution.
 </p>
