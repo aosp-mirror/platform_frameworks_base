@@ -1,0 +1,1094 @@
+page.title=Menyediakan Sumber Daya
+parent.title=Sumber Daya Aplikasi
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Tampilan Cepat</h2>
+  <ul>
+    <li>Berbagai tipe sumber daya termasuk dalam subdirektori {@code res/}</li>
+    <li>Sumber daya alternatif menyediakan file sumber daya dengan konfigurasi tertentu</li>
+    <li>Sertakan selalu sumber daya default agar aplikasi Anda tidak bergantung pada
+konfigurasi perangkat tertentu</li>
+  </ul>
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#ResourceTypes">Mengelompokkan Tipe Sumber Daya</a></li>
+    <li><a href="#AlternativeResources">Menyediakan Sumber Daya Alternatif</a>
+      <ol>
+        <li><a href="#QualifierRules">Aturan penamaan qualifier</a></li>
+        <li><a href="#AliasResources">Membuat sumber daya alias</a></li>
+      </ol>
+    </li>
+    <li><a href="#Compatibility">Menyediakan Kompatibilitas Perangkat Terbaik dengan Sumber Daya</a></li>
+    <li><a href="#BestMatch">Cara Android Menemukan Sumber Daya yang Paling Cocok</a></li>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="accessing-resources.html">Mengakses Sumber Daya</a></li>
+    <li><a href="available-resources.html">Tipe Sumber Daya</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
+Layar</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Anda harus selalu mengeksternalkan sumber daya aplikasi seperti gambar dan string dari kode
+, agar Anda bisa memeliharanya secara independen. Anda juga harus menyediakan sumber daya alternatif untuk
+konfigurasi perangkat tertentu, dengan mengelompokkannya dalam direktori sumber daya bernama khusus. Saat
+runtime, Android menggunakan sumber daya yang sesuai berdasarkan konfigurasi saat ini. Misalnya, Anda mungkin
+ingin menyediakan layout UI berbeda bergantung pada ukuran layar atau string berbeda bergantung pada
+pengaturan bahasa.</p>
+
+<p>Setelah mengeksternalkan sumber daya aplikasi, Anda dapat mengaksesnya menggunakan
+ID sumber daya yang dibuat dalam kelas {@code R} proyek Anda. Cara menggunakan
+sumber daya dalam aplikasi dibahas dalam <a href="accessing-resources.html">Mengakses
+Sumber Daya</a>. Dokumen ini menampilkan cara mengelompokkan sumber daya
+dalam proyek Android Anda dan menyediakan sumber daya alternatif untuk konfigurasi perangkat tertentu.</p>
+
+
+<h2 id="ResourceTypes">Mengelompokkan Tipe Sumber Daya</h2>
+
+<p>Anda harus menempatkan setiap tipe sumber daya dalam subdirektori spesifik pada direktori
+{@code res/} proyek. Misalnya, inilah hierarki file untuk proyek sederhana:</p>
+
+<pre class="classic no-pretty-print">
+MyProject/
+    src/  <span style="color:black">
+        MyActivity.java  </span>
+    res/
+        drawable/  <span style="color:black">
+            graphic.png  </span>
+        layout/  <span style="color:black">
+            main.xml
+            info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
+        values/  <span style="color:black">
+            strings.xml  </span>
+</pre>
+
+<p>Seperti yang Anda lihat dalam contoh ini, direktori {@code res/} berisi semua sumber daya (dalam
+subdirektori): sumber daya gambar, dua sumber daya layout, direktori {@code mipmap/} untuk ikon
+launcher, dan satu file sumber daya string. Nama direktori
+sumber daya penting dan dijelaskan dalam tabel 1.</p>
+
+<p class="note"><strong>Catatan:</strong> Untuk informasi selengkapnya tentang menggunakan folder mipmap, lihat
+<a href="{@docRoot}tools/projects/index.html#mipmap">Mengelola Ikhtisar Proyek</a>.</p>
+
+<p class="table-caption" id="table1"><strong>Tabel 1.</strong> Direktori sumber daya
+didukung dalam direktori proyek {@code res/}.</p>
+
+<table>
+  <tr>
+    <th scope="col">Direktori</th>
+    <th scope="col">Tipe Sumber Daya</th>
+  </tr>
+
+  <tr>
+    <td><code>animator/</code></td>
+    <td>File XML yang mendefinisikan <a href="{@docRoot}guide/topics/graphics/prop-animation.html">animasi
+properti</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>anim/</code></td>
+    <td>File XML yang mendefinisikan <a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">animasi
+tween</a>. (Animasi properti juga dapat disimpan dalam direktori ini, namun
+direktori {@code animator/} lebih disukai bagi animasi properti agar kedua tipe
+ini dapat dibedakan.)</td>
+  </tr>
+
+  <tr>
+    <td><code>color/</code></td>
+    <td>File XML yang mendefinisikan daftar status warna. Lihat <a href="color-list-resource.html">Sumber Daya
+Daftar Status Warna</a></td>
+  </tr>
+
+  <tr>
+    <td><code>drawable/</code></td>
+
+    <td><p>File bitmap ({@code .png}, {@code .9.png}, {@code .jpg}, {@code .gif}) atau file XML yang
+dikompilasi menjadi subtipe sumber daya drawable berikut:</p>
+      <ul>
+        <li>File bitmap</li>
+        <li>Nine-Patches (bitmap yang dapat diubah ukurannya)</li>
+        <li>Daftar status</li>
+        <li>Bentuk</li>
+        <li>Drawable animasi</li>
+        <li>Drawable lainnya</li>
+      </ul>
+      <p>Lihat <a href="drawable-resource.html">Sumber Daya Drawable</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>File drawable untuk densitas ikon launcher yang berbeda. Untuk informasi selengkapnya tentang
+ mengelola ikon launcher dengan folder {@code mipmap/}, lihat
+<a href="{@docRoot}tools/project/index.html#mipmap">Mengelola Ikhtisar Proyek</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>layout/</code></td>
+    <td>File XML yang mendefinisikan layout antarmuka pengguna.
+        Lihat <a href="layout-resource.html">Sumber Daya Layout</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>menu/</code></td>
+    <td>File XML yang mendefinisikan menu aplikasi, seperti Menu Opsi, Menu Konteks, atau Sub
+Menu. Lihat <a href="menu-resource.html">Sumber Daya Menu</a>.</td>
+  </tr>
+
+  <tr>
+    <td><code>raw/</code></td>
+    <td><p>File tak didukung yang akan disimpan dalam bentuk mentah. Untuk membuka sumber daya ini dengan
+{@link java.io.InputStream} mentah, panggil {@link android.content.res.Resources#openRawResource(int)
+Resources.openRawResource()} dengan ID sumber daya, yaitu {@code R.raw.<em>filename</em>}.</p>
+      <p>Akan tetapi, jika Anda butuh akses ke nama file asli dan hierarki file, Anda bisa mempertimbangkan
+untuk menyimpan beberapa sumber daya dalam direktori {@code
+assets/} (sebagai ganti {@code res/raw/}). File dalam {@code assets/} tidak diberi
+ID sumber daya, jadi Anda bisa membacanya hanya dengan menggunakan {@link android.content.res.AssetManager}.</p></td>
+  </tr>
+
+  <tr>
+    <td><code>values/</code></td>
+    <td><p>File XML yang berisi nilai-nilai sederhana, seperti string, integer, dan warna.</p>
+      <p>Walaupun file sumber daya XML dalam subdirektori {@code res/} lainnya mendefinisikan satu sumber daya
+berdasarkan nama file XML, file dalam direktori {@code values/} menggambarkan beberapa sumber daya.
+Untuk file dalam direktori ini, setiap anak elemen {@code &lt;resources&gt;} mendefinisikan satu sumber
+daya. Misalnya, elemen {@code &lt;string&gt;} membuat sumber daya
+{@code R.string} dan elemen {@code &lt;color&gt;} membuat sumber daya {@code R.color}
+.</p>
+      <p>Karena setiap sumber daya didefinisikan dengan elemen XML-nya sendiri, Anda bisa bebas menamai file
+ini dan menempatkan tipe sumber daya berbeda dalam satu file. Akan tetapi, agar jelas, Anda mungkin
+perlu menempatkan tipe sumber daya unik dalam file berbeda. Misalnya, berikut ini adalah beberapa ketentuan
+penamaan file untuk sumber daya yang dapat Anda buat dalam direktori ini:</p>
+      <ul>
+        <li>arrays.xml untuk larik sumber daya tipe (<a href="more-resources.html#TypedArray">larik bertipe</a>).</li>
+        <li>colors.xml untuk <a href="more-resources.html#Color">nilai warna</a></li>
+        <li>dimens.xml untuk <a href="more-resources.html#Dimension">nilai dimensi</a>.</li>
+        <li>strings.xml untuk <a href="string-resource.html">nilai
+string</a>.</li>
+        <li>styles.xml untuk <a href="style-resource.html">gaya</a>.</li>
+      </ul>
+      <p>Lihat <a href="string-resource.html">Sumber Daya String</a>,
+        <a href="style-resource.html">Sumber Daya Gaya</a>, dan
+        <a href="more-resources.html">Tipe Sumber Daya Lainnya</a>.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>xml/</code></td>
+    <td>File XML tak didukung yang bisa dibaca saat runtime dengan memanggil {@link
+android.content.res.Resources#getXml(int) Resources.getXML()}. Berbagai file konfigurasi XML
+harus disimpan di sini, seperti <a href="{@docRoot}guide/topics/search/searchable-config.html">konfigurasi yang dapat dicari</a>.
+<!-- or preferences configuration. --></td>
+  </tr>
+</table>
+
+<p class="caution"><strong>Perhatian:</strong> Jangan menyimpan file sumber daya secara langsung dalam
+direktori {@code res/}&mdash; karena akan menyebabkan kesalahan compiler.</p>
+
+<p>Untuk informasi selengkapnya tentang tipe sumber daya tertentu, lihat dokumentasi <a href="available-resources.html">Tipe Sumber Daya</a>.</p>
+
+<p>Sumber daya yang disimpan dalam subdirektori yang didefinisikan dalam tabel 1 adalah sumber daya
+"default" Anda. Berarti sumber daya ini mendefinisikan desain default dan konten untuk aplikasi Anda.
+Akan tetapi, beberapa tipe perangkat berbasis Android mungkin memanggil tipe sumber daya yang berbeda.
+Misalnya, jika perangkat memiliki layar yang lebih besar daripada layar normal, maka Anda harus
+menyediakan sumber daya layout berbeda yang memanfaatkan ruang layar yang lebih besar. Atau, jika perangkat
+memiliki pengaturan bahasa berbeda, maka Anda harus menyediakan sumber daya string berbeda yang menerjemahkan teks dalam
+antarmuka pengguna Anda. Untuk menyediakan sumber daya berbeda ini bagi
+konfigurasi perangkat yang berbeda, Anda harus menyediakan sumber daya alternatif, selain sumber
+daya default.</p>
+
+
+<h2 id="AlternativeResources">Menyediakan Sumber Daya Alternatif</h2>
+
+
+<div class="figure" style="width:429px">
+<img src="{@docRoot}images/resources/resource_devices_diagram2.png" height="167" alt="" />
+<p class="img-caption">
+<strong>Gambar 1.</strong> Dua perangkat berbeda, masing-masing menggunakan sumber daya layout berbeda.</p>
+</div>
+
+<p>Hampir setiap aplikasi harus menyediakan sumber daya alternatif untuk mendukung konfigurasi
+perangkat tertentu. Misalnya, Anda harus menyertakan sumber daya drawable alternatif untuk densitas layar
+berbeda dan sumber daya string alternatif untuk bahasa yang berbeda. Saat runtime, Android
+akan mendeteksi konfigurasi perangkat aktif dan memuat
+sumber daya yang sesuai untuk aplikasi Anda.</p>
+
+<p>Untuk menyebutkan alternatif konfigurasi tertentu untuk satu set sumber daya:</p>
+<ol>
+  <li>Buat direktori baru dalam {@code res/} yang dinamai dalam bentuk {@code
+<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
+    <ul>
+      <li><em>{@code &lt;resources_name&gt;}</em> adalah nama direktori dari sumber daya default
+terkait (didefinisikan dalam tabel 1).</li>
+      <li><em>{@code &lt;qualifier&gt;}</em> adalah nama yang menetapkan konfigurasi individu
+yang akan digunakan sumber daya ini (didefinisikan dalam tabel 2).</li>
+    </ul>
+    <p>Anda bisa menambahkan lebih dari satu <em>{@code &lt;qualifier&gt;}</em>. Pisahkan masing-masing
+dengan tanda hubung.</p>
+    <p class="caution"><strong>Perhatian:</strong> Saat menambahkan beberapa qualifier, Anda
+harus menempatkannya dalam urutan yang sama dengan yang tercantum dalam tabel 2. Jika urutan qualifier
+salah, sumber daya akan diabaikan.</p>
+  </li>
+  <li>Simpan masing-masing sumber daya alternatif dalam direktori baru ini. File sumber daya harus dinamai
+sama persis dengan file sumber daya default.</li>
+</ol>
+
+<p>Misalnya, berikut ini beberapa sumber daya default dan sumber daya alternatif:</p>
+
+<pre class="classic no-pretty-print">
+res/
+    drawable/   <span style="color:black">
+        icon.png
+        background.png    </span>
+    drawable-hdpi/  <span style="color:black">
+        icon.png
+        background.png  </span>
+</pre>
+
+<p>Qualifier {@code hdpi} menunjukkan bahwa sumber daya dalam direktori itu diperuntukkan bagi perangkat dengan
+layar densitas tinggi. Gambar di masing-masing direktori drawable memiliki ukuran untuk densitas layar
+tertentu, namun nama filenya persis
+sama. Dengan demikian, ID sumber daya yang Anda gunakan untuk mengacu gambar {@code icon.png} atau @code
+background.png} selalu sama, namun Android memilih
+versi masing-masing sumber daya yang paling cocok dengan perangkat saat ini, dengan membandingkan informasi konfigurasi
+perangkat dengan qualifier dalam nama direktori sumber daya.</p>
+
+<p>Android mendukung beberapa qualifier konfigurasi dan Anda dapat
+menambahkan beberapa qualifier ke satu nama direktori, dengan memisahkan setiap qualifier dengan tanda hubung. Tabel 2
+berisi daftar qualifier konfigurasi yang valid, dalam urutan prioritas&mdash;jika Anda menggunakan beberapa
+qualifier sebagai direktori sumber daya, Anda harus menambahkannya ke nama direktori sesuai urutan
+yang tercantum dalam tabel.</p>
+
+
+<p class="table-caption" id="table2"><strong>Tabel 2.</strong> Nama-nama
+qualifier konfigurasi.</p>
+<table>
+    <tr>
+        <th>Konfigurasi</th>
+        <th>Nilai-nilai Qualifier</th>
+        <th>Keterangan</th>
+    </tr>
+    <tr id="MccQualifier">
+      <td>MCC dan MNC</td>
+      <td>Contoh:<br/>
+        <code>mcc310</code><br/>
+        <code><nobr>mcc310-mnc004</nobr></code><br/>
+        <code>mcc208-mnc00</code><br/>
+        dll.
+      </td>
+      <td>
+        <p>Kode negara seluler (MCC), bisa diikuti dengan kode jaringan seluler (MNC)
+ dari kartu SIM dalam perangkat. Misalnya, <code>mcc310</code> adalah AS untuk operator mana saja,
+ <code>mcc310-mnc004</code> adalah AS untuk Verizon, dan <code>mcc208-mnc00</code> Prancis untuk
+Orange.</p>
+        <p>Jika perangkat menggunakan koneksi radio (ponsel GSM), nilai-nilai MCC dan MNC berasal
+dari kartu SIM.</p>
+        <p>Anda juga dapat menggunakan MNC saja (misalnya, untuk menyertakan sumber daya legal
+spesifik untuk negara itu di aplikasi Anda). Jika Anda perlu menetapkan hanya berdasarkan bahasa, maka gunakan qualifier
+<em>bahasa dan wilayah</em> sebagai gantinya (akan dibahas nanti). Jika Anda memutuskan untuk menggunakan qualifier MCC dan
+MNC, Anda harus melakukannya dengan hati-hati dan menguji apakah qualifier itu berjalan sesuai harapan.</p>
+        <p>Lihat juga bidang konfigurasi {@link
+android.content.res.Configuration#mcc}, dan {@link
+android.content.res.Configuration#mnc}, yang masing-masing menunjukkan kode negara seluler saat ini
+dan kode jaringan seluler.</p>
+      </td>
+    </tr>
+    <tr id="LocaleQualifier">
+      <td>Bahasa dan wilayah</td>
+      <td>Contoh:<br/>
+        <code>en</code><br/>
+        <code>fr</code><br/>
+        <code>en-rUS</code><br/>
+        <code>fr-rFR</code><br/>
+        <code>fr-rCA</code><br/>
+        dll.
+      </td>
+      <td><p>Bahasa didefinisikan oleh kode bahasa dua huruf <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
+639-1</a>, bisa juga diikuti dengan kode wilayah
+dua huruf <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
+3166-1-alpha-2</a> (diawali dengan huruf kecil "{@code r}").
+        </p><p>
+        Kode <em>tidak</em> membedakan huruf besar atau kecil; awalan {@code r} akan digunakan untuk
+membedakan bagian wilayah.
+        Anda tidak bisa menetapkan wilayah saja.</p>
+        <p>Ini bisa berubah selama masa pakai
+aplikasi Anda jika pengguna mengubah bahasanya dalam pengaturan sistem. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk informasi tentang
+bagaimana hal ini dapat memengaruhi aplikasi Anda selama runtime.</p>
+        <p>Lihat <a href="localization.html">Pelokalan</a> untuk panduan lengkap melokalkan
+aplikasi Anda ke bahasa lain.</p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#locale} yang menunjukkan
+bahasa setempat yang digunakan saat ini.</p>
+      </td>
+    </tr>
+    <tr id="LayoutDirectionQualifier">
+      <td>Arah Layout</td>
+      <td><code>ldrtl</code><br/>
+        <code>ldltr</code><br/>
+      </td>
+      <td><p>Arah layout aplikasi Anda. {@code ldrtl} berarti "arah layout dari kanan ke kiri".
+ {@code ldltr} berarti "arah layout dari kiri ke kanan" dan merupakan nilai implisit default.
+      </p>
+      <p>Ini bisa berlaku untuk sumber daya mana pun seperti layout, drawable, atau nilai-nilai.
+      </p>
+      <p>Misalnya, jika Anda ingin memberikan beberapa layout khusus untuk bahasa Arab dan beberapa
+layout umum untuk setiap bahasa lainnya yang menggunakan "kanan-ke-kiri" lainnya (seperti bahasa Persia atau Ibrani) maka Anda akan memiliki:
+      </p>
+<pre class="classic no-pretty-print">
+res/
+    layout/   <span style="color:black">
+        main.xml  </span>(Default layout)
+    layout-ar/  <span style="color:black">
+        main.xml  </span>(Specific layout for Arabic)
+    layout-ldrtl/  <span style="color:black">
+        main.xml  </span>(Any "right-to-left" language, except
+                  for Arabic, because the "ar" language qualifier
+                  has a higher precedence.)
+</pre>
+        <p class="note"><strong>Catatan:</strong> Untuk mengaktifkan fitur
+layout kanan-ke-kiri untuk aplikasi, Anda harus mengatur <a href="{@docRoot}guide/topics/manifest/application-element.html#supportsrtl">{@code
+        supportsRtl}</a> ke {@code "true"} dan mengatur <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> ke 17 atau yang lebih tinggi.</p>
+        <p><em>Ditambahkan dalam API level 17.</em></p>
+      </td>
+    </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>smallestWidth</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        Contoh:<br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        dll.
+      </td>
+      <td>
+        <p>Ukuran dasar layar, sebagaimana yang ditunjukkan oleh dimensi terpendek dari area layar
+yang tersedia. Secara spesifik, smallestWidth perangkat adalah yang terpendek dari
+tinggi dan lebar layar yang tersedia (Anda dapat menganggapnya sebagai "lebar terkecil yang memungkinkan" untuk layar). Anda bisa
+menggunakan qualifier ini untuk memastikan bahwa, apa pun orientasi layar saat ini, aplikasi
+Anda memiliki paling tidak {@code &lt;N&gt;} dps dari lebar yang tersedia untuk UI-nya.</p>
+        <p>Misalnya, jika layout mengharuskan dimensi layar terkecilnya setiap saat paling tidak
+600 dp, maka Anda dapat menggunakan qualifer ini untuk membuat sumber daya layout, {@code
+res/layout-sw600dp/}. Sistem akan menggunakan sumber daya ini hanya bila dimensi layar terkecil yang
+tersedia paling tidak 600 dp, tanpa mempertimbangkan apakah sisi 600 dp adalah tinggi atau
+lebar yang dipersepsikan pengguna. SmallestWidth adalah karakteristik ukuran layar tetap dari perangkat; <strong>smallestWidth
+perangkat tidak berubah saat orientasi layar berubah</strong>.</p>
+        <p>SmallestWidth perangkat memperhitungkan dekorasi layar dan UI sistem. Misalnya
+, jika perangkat memiliki beberapa elemen UI persisten pada layar yang menghitung ruang di sepanjang
+sumbu smallestWidth, sistem akan mendeklarasikan smallestWidth lebih kecil daripada ukuran layar sebenarnya,
+karena itu adalah piksel layar yang tidak tersedia untuk UI Anda. Sehingga nilai yang Anda
+gunakan haruslah merupakan dimensi terkecil sebenarnya yang <em>dibutuhkan oleh layout Anda</em> (biasanya, nilai ini adalah
+"lebar terkecil" yang didukung layout Anda, apa pun orientasi layar saat ini).</p>
+        <p>Sebagian nilai yang mungkin Anda gunakan untuk ukuran layar umum:</p>
+        <ul>
+          <li>320, untuk perangkat berkonfigurasi layar seperti:
+            <ul>
+              <li>240x320 ldpi (handset QVGA)</li>
+              <li>320x480 mdpi (handset)</li>
+              <li>480x800 hdpi (handset densitas tinggi)</li>
+            </ul>
+          </li>
+          <li>480, untuk layar seperti 480x800 mdpi (tablet/handset).</li>
+          <li>600, untuk layar seperti 600x1024 mdpi (tablet 7").</li>
+          <li>720, untuk layar seperti 720x1280 mdpi (tablet 10").</li>
+        </ul>
+        <p>Bila aplikasi Anda menyediakan beberapa direktori sumber daya dengan nilai yang berbeda untuk
+qualifier smallestWidth terkecil, sistem akan menggunakan nilai terdekat dengan (tanpa melebihi)
+smallestWidth perangkat. </p>
+        <p><em>Ditambahkan dalam API level 13.</em></p>
+        <p>Lihat juga atribut <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">{@code
+android:requiresSmallestWidthDp}</a>, yang mendeklarasikan smallestWidth minimum yang
+kompatibel dengan aplikasi Anda, dan bidang konfigurasi {@link
+android.content.res.Configuration#smallestScreenWidthDp}, yang menyimpan nilai
+smallestWidth perangkat.</p>
+        <p>Untuk informasi selengkapnya tentang mendesain untuk layar berbeda dan menggunakan
+qualifier ini, lihat panduan pengembang <a href="{@docRoot}guide/practices/screens_support.html">Mendukung
+Multi Layar</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>Lebar yang tersedia</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        Contoh:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        dll.
+      </td>
+      <td>
+        <p>Menetapkan lebar layar minimum yang tersedia, di unit {@code dp} yang
+menggunakan sumber daya&mdash;yang didefinisikan oleh nilai <code>&lt;N&gt;</code>.  Nilai konfigurasi ini
+ akan berubah bila orientasi
+berubah antara lanskap dan potret agar cocok dengan lebar sebenarnya saat ini.</p>
+        <p>Bila aplikasi Anda menyediakan beberapa direktori sumber daya dengan nilai yang berbeda
+ untuk konfigurasi ini, sistem akan menggunakan nilai terdekat dengan (tanpa melebihi)
+ lebar layar perangkat saat ini.  Nilai
+di sini memperhitungkan dekorasi layar akun, jadi jika perangkat memiliki beberapa
+elemen UI persisten di tepi kiri atau kanan, layar
+menggunakan nilai lebar yang lebih kecil daripada ukuran layar sebenarnya, yang memperhitungkan
+elemen UI ini dan mengurangi ruang aplikasi yang tersedia.</p>
+        <p><em>Ditambahkan dalam API level 13.</em></p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenWidthDp}
+ yang menyimpan lebar layar saat ini.</p>
+        <p>Untuk informasi selengkapnya tentang mendesain untuk layar berbeda dan menggunakan
+qualifier ini, lihat panduan pengembang <a href="{@docRoot}guide/practices/screens_support.html">Mendukung
+Multi Layar</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>Tinggi yang tersedia</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        Contoh:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        dll.
+      </td>
+      <td>
+        <p>Menetapkan tinggi layar minimum yang tersedia, dalam satuan "dp" yang harus digunakan
+sumber daya &mdash;bersama nilai yang didefinisikan oleh <code>&lt;N&gt;</code>.  Nilai konfigurasi ini
+ akan berubah saat orientasi
+berubah antara lanskap dan potret agar cocok dengan tinggi sebenarnya saat ini.</p>
+        <p>Bila aplikasi menyediakan beberapa direktori sumber daya dengan nilai yang berbeda
+ untuk konfigurasi ini, sistem akan menggunakan nilai yang terdekat dengan (tanpa melebihi)
+ tinggi layar perangkat saat ini.  Nilai
+di sini memperhitungkan dekorasi layar akun, jadi jika perangkat memiliki beberapa
+elemen UI persisten di tepi atas atau bawah, layar akan
+menggunakan nilai tinggi yang lebih kecil daripada ukuran layar sebenarnya, memperhitungkan
+elemen UI ini dan mengurangi ruang aplikasi yang tersedia.  Dekorasi
+layar yang tidak tetap (misalnya baris status (status-bar) telepon yang bisa
+disembunyikan saat layar penuh) di sini <em>tidak</em> diperhitungkan, demikian pula
+dekorasi jendela seperti baris judul (title-bar)atau baris tindakan (action-bar), jadi aplikasi harus disiapkan
+untuk menangani ruang yang agak lebih kecil daripada yang ditetapkan.
+        <p><em>Ditambahkan dalam API level 13.</em></p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenHeightDp}
+ yang menyimpan lebar layar saat ini.</p>
+        <p>Untuk informasi selengkapnya tentang mendesain untuk layar berbeda dan menggunakan
+qualifier ini, lihat panduan pengembang <a href="{@docRoot}guide/practices/screens_support.html">Mendukung
+Multi Layar</a>.</p>
+      </td>
+    </tr>
+    <tr id="ScreenSizeQualifier">
+      <td>Ukuran layar</td>
+      <td>
+        <code>small</code><br/>
+        <code>normal</code><br/>
+        <code>large</code><br/>
+        <code>xlarge</code>
+      </td>
+      <td>
+        <ul class="nolist">
+        <li>{@code small}: Layar yang berukuran serupa dengan
+layar QVGA densitas rendah. Ukuran layout minimum untuk layar kecil
+adalah sekitar 320x426 satuan dp.  Misalnya QVGA densitas rendah
+dan VGA densitas tinggi.</li>
+        <li>{@code normal}: Layar yang berukuran serupa dengan
+layar HVGA densitas sedang. Ukuran layout minimum untuk
+layar normal adalah sekitar 320x470 satuan dp.  Contoh layar seperti itu adalah
+WQVGA densitas rendah, HVGA densitas sedang, WVGA
+     densitas tinggi.</li>
+        <li>{@code large}: Layar yang berukuran serupa dengan
+layar VGA densitas sedang.
+        Ukuran layout minimum untuk layar besar adalah sekitar 480x640 satuan dp.
+        Misalnya layar VGA dan WVGA densitas sedang.</li>
+        <li>{@code xlarge}: Layar yang jauh lebih besar dari layar HVGA
+densitas sedang tradisional. Ukuran layout minimum untuk
+layar ekstra besar adalah sekitar 720x960 satuan dp.  Perangkat dengan layar ekstra besar
+seringkali terlalu besar untuk dibawa dalam saku dan kemungkinan besar
+ berupa perangkat bergaya tablet. <em>Ditambahkan dalam API level 9.</em></li>
+        </ul>
+        <p class="note"><strong>Catatan:</strong> Menggunakan qualifier ukuran tidak berarti bahwa
+sumber daya <em>hanya</em> untuk layar ukuran itu saja. Jika Anda tidak menyediakan sumber
+daya alternatif dengan qualifier yang lebih cocok dengan konfigurasi perangkat saat ini, sistem dapat menggunakan sumber daya
+mana saja yang <a href="#BestMatch">paling cocok</a>.</p>
+        <p class="caution"><strong>Perhatian:</strong> Jika semua sumber daya Anda menggunakan
+qualifier yang berukuran <em>lebih besar</em> daripada layar saat ini, sistem <strong>tidak</strong> akan menggunakannya dan aplikasi
+Anda akan crash saat runtime (misalnya, jika semua sumber daya layout ditandai dengan qualifier {@code
+xlarge}, namun perangkat memiliki ukuran layar normal).</p>
+        <p><em>Ditambahkan dalam API level 4.</em></p>
+
+        <p>Lihat <a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
+Layar</a> untuk informasi selengkapnya.</p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenLayout},
+ yang menunjukkan apakah layar berukuran kecil, normal, atau
+besar.</p>
+      </td>
+    </tr>
+    <tr id="ScreenAspectQualifier">
+      <td>Aspek layar</td>
+      <td>
+        <code>long</code><br/>
+        <code>notlong</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code long}: Layar panjang, seperti WQVGA, WVGA, FWVGA</li>
+          <li>{@code notlong}: Layar tidak panjang, seperti QVGA, HVGA, dan VGA</li>
+        </ul>
+        <p><em>Ditambahkan dalam API level 4.</em></p>
+        <p>Ini berdasarkan sepenuhnya pada rasio aspek layar (layar "panjang" lebih lebar). Ini
+tidak ada kaitannya dengan orientasi layar.</p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#screenLayout},
+ yang menunjukkan apakah layar panjang.</p>
+      </td>
+    </tr>
+    <tr id="OrientationQualifier">
+      <td>Orientasi layar</td>
+      <td>
+        <code>port</code><br/>
+        <code>land</code>  <!-- <br/>
+        <code>square</code>  -->
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code port}: Perangkat dalam orientasi potret (vertikal)</li>
+          <li>{@code land}: Perangkat dalam orientasi lanskap (horizontal)</li>
+          <!-- Square mode is currently not used. -->
+        </ul>
+        <p>Ini bisa berubah selama masa pakai aplikasi Anda jika pengguna memutar
+layar. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk
+ informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#orientation},
+yang menunjukkan orientasi perangkat saat ini.</p>
+      </td>
+    </tr>
+    <tr id="UiModeQualifier">
+      <td>Mode UI</td>
+      <td>
+        <code>car</code><br/>
+        <code>desk</code><br/>
+        <code>television</code><br/>
+        <code>appliance</code>
+        <code>watch</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code car}: Perangkat sedang menampilkan di dudukan perangkat di mobil</li>
+          <li>{@code desk}: Perangkat sedang menampilkan di dudukan perangkat di meja</li>
+          <li>{@code television}: Perangkat sedang menampilkan di televisi, yang menyediakan
+pengalaman "sepuluh kaki" dengan UI-nya pada layar besar yang berada jauh dari pengguna,
+terutama diorientasikan seputar DPAD atau
+interaksi non-pointer lainnya</li>
+          <li>{@code appliance}: Perangkat berlaku sebagai
+alat, tanpa tampilan</li>
+          <li>{@code watch}: Perangkat memiliki tampilan dan dikenakan di pergelangan tangan</li>
+        </ul>
+        <p><em>Ditambahkan dalam API level 8, televisi ditambahkan dalam API 13, jam ditambahkan dalam API 20.</em></p>
+        <p>Untuk informasi tentang cara aplikasi merespons saat perangkat dimasukkan
+ke dalam atau dilepaskan dari dudukannya, bacalah <a href="{@docRoot}training/monitoring-device-state/docking-monitoring.html">Menentukan
+dan Memantau Kondisi dan Tipe Dudukan</a>.</p>
+        <p>Ini bisa berubah selama masa pakai aplikasi jika pengguna menempatkan perangkat di
+dudukannya. Anda dapat mengaktifkan atau menonaktifkan sebagian mode ini menggunakan {@link
+android.app.UiModeManager}. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk
+informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p>
+      </td>
+    </tr>
+    <tr id="NightQualifier">
+      <td>Mode malam</td>
+      <td>
+        <code>night</code><br/>
+        <code>notnight</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code night}: Waktu malam</li>
+          <li>{@code notnight}: Waktu siang</li>
+        </ul>
+        <p><em>Ditambahkan dalam API level 8.</em></p>
+        <p>Ini bisa berubah selama masa pakai aplikasi jika mode malam dibiarkan dalam
+mode otomatis (default), dalam hal ini perubahan mode berdasarkan pada waktu hari.  Anda dapat mengaktifkan
+atau menonaktifkan mode ini menggunakan {@link android.app.UiModeManager}. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk informasi tentang bagaimana hal ini memengaruhi
+aplikasi Anda selama runtime.</p>
+      </td>
+    </tr>
+    <tr id="DensityQualifier">
+      <td>Densitas piksel layar (dpi)</td>
+      <td>
+        <code>ldpi</code><br/>
+        <code>mdpi</code><br/>
+        <code>hdpi</code><br/>
+        <code>xhdpi</code><br/>
+        <code>xxhdpi</code><br/>
+        <code>xxxhdpi</code><br/>
+        <code>nodpi</code><br/>
+        <code>tvdpi</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code ldpi}: Layar densitas rendah; sekitar 120 dpi.</li>
+          <li>{@code mdpi}: Layar densitas sedang (pada HVGA tradisional); sekitar 160 dpi.
+</li>
+          <li>{@code hdpi}: Layar densitas tinggi; sekitar 240 dpi.</li>
+          <li>{@code xhdpi}: Layar densitas ekstra tinggi; sekitar 320 dpi. <em>Ditambahkan dalam API
+Level 8.</em></li>
+          <li>{@code xxhdpi}: Layar densitas ekstra-ekstra-tinggi; sekitar 480 dpi. <em>Ditambahkan dalam API
+Level 16.</em></li>
+          <li>{@code xxxhdpi}: Densitas ekstra-ekstra-ekstra-tinggi (hanya ikon launcher,
+lihat <a href="{@docRoot}guide/practices/screens_support.html#xxxhdpi-note">catatan</a>
+ dalam <em>Mendukung Beberapa Layar</em>); sekitar 640 dpi. <em>Ditambahkan dalam API
+Level 18.</em></li>
+          <li>{@code nodpi}: Ini bisa digunakan untuk sumber daya bitmap yang tidak ingin Anda
+skalakan agar sama dengan densitas perangkat.</li>
+          <li>{@code tvdpi}: Layar antara mdpi dan hdpi; sekitar 213 dpi. Ini
+tidak dianggap sebagai kelompok densitas "utama". Sebagian besar ditujukan untuk televisi dan kebanyakan
+aplikasi tidak memerlukannya &mdash;asalkan sumber daya mdpi dan hdpi cukup untuk sebagian besar aplikasi dan
+sistem akan menskalakan sebagaimana mestinya. Qualifier ini diperkenalkan pada API level 13.</li>
+        </ul>
+        <p>Terdapat rasio skala 3:4:6:8:12:16 antara enam densitas utama (dengan mengabaikan densitas
+tvdpi). Jadi bitmap 9x9 di ldpi adalah 12x12 di mdpi, 18x18 di hdpi, 24x24 di xhdpi dan seterusnya.
+</p>
+        <p>Jika Anda memutuskan bahwa sumber daya gambar tidak terlihat cukup baik di televisi
+atau perangkat tertentu lainnya dan ingin mencoba sumber daya tvdpi, faktor skalanya adalah 1,33*mdpi. Misalnya,
+gambar 100px x 100px untuk layar mdpi harus 133px x 133px untuk tvdpi.</p>
+        <p class="note"><strong>Catatan:</strong> Menggunakan qualifier densitas tidak berarti bahwa
+sumber daya <em>hanya</em> untuk layar dengan ukuran itu saja. Jika Anda tidak menyediakan sumber
+daya alternatif dengan qualifier yang lebih cocok dengan konfigurasi perangkat saat ini, sistem dapat menggunakan sumber daya
+mana saja yang <a href="#BestMatch">paling cocok</a>.</p>
+        <p>Lihat <a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
+Layar</a> untuk informasi selengkapnya tentang cara menangani densitas layar yang berbeda dan cara Android
+menurunkan skala bitmap Anda agar sesuai dengan densitas saat ini.</p>
+       </td>
+    </tr>
+    <tr id="TouchscreenQualifier">
+      <td>Tipe layar sentuh</td>
+      <td>
+        <code>notouch</code><br/>
+        <code>finger</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code notouch}: Perangkat tidak memiliki layar sentuh.</li>
+          <li>{@code finger}: Perangkat memiliki layar sentuh yang dimaksudkan untuk
+digunakan melalui interaksi dengan jari pengguna.</li>
+        </ul>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#touchscreen}, yang
+menunjukkan tipe layar sentuh pada perangkat.</p>
+      </td>
+    </tr>
+    <tr id="KeyboardAvailQualifier">
+      <td>Ketersediaan keyboard</td>
+      <td>
+        <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
+        <code>keyssoft</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code keysexposed}: Perangkat menyediakan keyboard. Jika perangkat mengaktifkan
+keyboard perangkat lunak (kemungkinan), ini dapat digunakan bahkan saat keyboard fisik
+<em>tidak</em> diekspos kepada pengguna, meskipun perangkat tidak memiliki keyboard fisik. Jika keyboard
+perangkat lunak tidak disediakan atau dinonaktifkan, maka ini hanya digunakan bila
+keyboard fisik diekspos.</li>
+          <li>{@code keyshidden}: Perangkat memiliki keyboard fisik yang tersedia
+tetapi tersembunyi <em>dan</em> perangkat <em>tidak</em> mengaktifkan keyboard perangkat lunak.</li>
+          <li>{@code keyssoft}: Perangkat mengaktifkan keyboard perangkat lunak,
+baik itu terlihat maupun tidak.</li>
+        </ul>
+        <p>Jika Anda menyediakan sumber daya <code>keysexposed</code>, namun bukan sumber daya <code>keyssoft</code>
+, sistem akan menggunakan sumber daya <code>keysexposed</code> baik keyboard
+terlihat atau tidak, asalkan sistem telah mengaktifkan keyboard perangkat lunak.</p>
+        <p>Ini bisa berubah selama masa pakai aplikasi jika pengguna membuka keyboard
+fisik. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk informasi tentang bagaimana
+hal ini memengaruhi aplikasi Anda selama runtime.</p>
+        <p>Lihat juga bidang konfigurasi {@link
+android.content.res.Configuration#hardKeyboardHidden} dan {@link
+android.content.res.Configuration#keyboardHidden}, yang menunjukkan visibilitas
+keyboard fisik dan visibilitas segala jenis keyboard (termasuk keyboard perangkat lunak), masing-masing.</p>
+      </td>
+    </tr>
+    <tr id="ImeQualifier">
+      <td>Metode input teks utama</td>
+      <td>
+        <code>nokeys</code><br/>
+        <code>qwerty</code><br/>
+        <code>12key</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nokeys}: Perangkat tidak memiliki tombol fisik untuk input teks.</li>
+          <li>{@code qwerty}: Perangkat memiliki keyboard fisik qwerty, baik terlihat maupun tidak pada
+pengguna
+.</li>
+          <li>{@code 12key}: Perangkat memiliki keyboard fisik 12 tombol, baik terlihat maupun tidak
+pada pengguna.</li>
+        </ul>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#keyboard},
+yang menunjukkan metode utama input teks yang tersedia.</p>
+      </td>
+    </tr>
+    <tr id="NavAvailQualifier">
+      <td>Ketersediaan tombol navigasi</td>
+      <td>
+        <code>navexposed</code><br/>
+        <code>navhidden</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code navexposed}: Tombol navigasi tersedia bagi pengguna.</li>
+          <li>{@code navhidden}: Tombol navigasi tidak tersedia (misalnya di balik penutup yang
+ditutup).</li>
+        </ul>
+        <p>Ini bisa berubah selama masa pakai aplikasi jika pengguna menyingkap tombol
+navigasi. Lihat <a href="runtime-changes.html">Menangani Perubahan Runtime</a> untuk
+informasi tentang bagaimana hal ini memengaruhi aplikasi Anda selama runtime.</p>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#navigationHidden}, yang menunjukkan
+apakah tombol navigasi disembunyikan.</p>
+      </td>
+    </tr>
+    <tr id="NavigationQualifier">
+      <td>Metode navigasi non-sentuh utama</td>
+      <td>
+        <code>nonav</code><br/>
+        <code>dpad</code><br/>
+        <code>trackball</code><br/>
+        <code>wheel</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code nonav}: Perangkat tidak memiliki fasilitas navigasi selain menggunakan
+layar sentuh.</li>
+          <li>{@code dpad}: Perangkat memiliki pad pengarah (directional pad / d-pad) untuk navigasi.</li>
+          <li>{@code trackball}: Perangkat memiliki trackball untuk navigasi.</li>
+          <li>{@code wheel}: Perangkat memiliki roda pengarah (directional wheel) untuk navigasi (tidak umum).</li>
+        </ul>
+        <p>Lihat juga bidang konfigurasi {@link android.content.res.Configuration#navigation},
+yang menunjukkan tipe metode navigasi yang tersedia.</p>
+      </td>
+    </tr>
+<!-- DEPRECATED
+    <tr>
+      <td>Screen dimensions</td>
+      <td>Examples:<br/>
+        <code>320x240</code><br/>
+        <code>640x480</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>The larger dimension must be specified first. <strong>This configuration is deprecated
+and should not be used</strong>. Instead use "screen size," "wider/taller screens," and "screen
+orientation" described above.</p>
+      </td>
+    </tr>
+-->
+    <tr id="VersionQualifier">
+      <td>Versi Platform (level API)</td>
+      <td>Contoh:<br/>
+        <code>v3</code><br/>
+        <code>v4</code><br/>
+        <code>v7</code><br/>
+        dll.</td>
+      <td>
+        <p>Level API yang didukung perangkat. Misalnya, <code>v1</code> untuk API level
+1 (perangkat dengan Android 1.0 atau yang lebih tinggi) dan <code>v4</code> untuk API level 4 (perangkat dengan Android
+1.6 atau yang lebih tinggi). Lihat dokumen <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Level API Android</a> untuk informasi selengkapnya
+tentang nilai-nilai ini.</p>
+      </td>
+    </tr>
+</table>
+
+
+<p class="note"><strong>Catatan:</strong> Sebagian qualifier konfigurasi telah ditambahkan sejak Android
+1.0, jadi tidak semua versi Android mendukung semua qualifier. Menggunakan qualifier baru secara implisit
+akan menambahkan qualifier versi platform sehingga perangkat yang lebih lama pasti mengabaikannya. Misalnya, menggunakan qualifier
+<code>w600dp</code> secara otomatis akan menyertakan qualifier <code>v13</code>, karena
+qualifier lebar yang tersedia baru di API level 13. Untuk menghindari masalah, selalu sertakan satu set
+sumber daya default (satu set sumber daya <em>tanpa qualifier</em>). Untuk informasi selengkapnya, lihat
+bagian tentang <a href="#Compatibility">Menyediakan Kompatibilitas Perangkat Terbaik dengan
+Sumber Daya</a>.</p>
+
+
+
+<h3 id="QualifierRules">Aturan penamaan qualifier</h3>
+
+<p>Inilah beberapa aturan tentang penggunaan nama qualifier konfigurasi:</p>
+
+<ul>
+    <li>Anda bisa menetapkan beberapa qualifier untuk satu set sumber daya, yang dipisahkan dengan tanda hubung. Misalnya,
+<code>drawable-en-rUS-land</code> berlaku untuk perangkat bahasa Inggris-AS dalam orientasi
+lanskap.</li>
+    <li>Qualifier harus dalam urutan seperti yang tercantum dalam <a href="#table2">tabel 2</a>.
+Misalnya:
+      <ul>
+        <li>Salah: <code>drawable-hdpi-port/</code></li>
+        <li>Benar: <code>drawable-port-hdpi/</code></li>
+      </ul>
+    </li>
+    <li>Direktori sumber daya alternatif tidak bisa digunakan. Misalnya, Anda tidak bisa memiliki
+<code>res/drawable/drawable-en/</code>.</li>
+    <li>Nilai tidak membedakan huruf besar maupun kecil.  Compiler sumber daya mengubah nama direktori
+menjadi huruf kecil sebelum pemrosesan untuk menghindari masalah pada sistem file yang membedakan
+huruf kecil dan besar. Setiap penggunaan huruf besar dalam nama hanyalah demi keterbacaan.</li>
+    <li>Hanya didukung satu nilai untuk setiap tipe qualifier. Misalnya, jika Anda ingin menggunakan
+file drawable yang sama untuk Spanyol dan Prancis, Anda <em>tidak bisa</em> memiliki direktori bernama
+<code>drawable-rES-rFR/</code>. Sebagai gantinya, Anda perlu dua direktori sumber daya, seperti
+<code>drawable-rES/</code> dan <code>drawable-rFR/</code>, berisi file yang sesuai.
+Akan tetapi, Anda tidak harus benar-benar menggandakan file yang sama di kedua lokasi. Sebagai gantinya, Anda
+bisa membuat alias ke satu sumber daya. Lihat <a href="#AliasResources">Membuat
+sumber daya alias</a> di bawah ini.</li>
+</ul>
+
+<p>Setelah Anda menyimpan sumber daya alternatif ke dalam direktori yang diberi nama dengan
+qualifier ini, Android secara otomatis menerapkan sumber daya dalam
+aplikasi Anda berdasarkan pada konfigurasi perangkat saat ini. Setiap kali sumber daya diminta, Android akan memeriksa direktori sumber daya
+alternatif berisi file sumber daya yang diminta, lalu <a href="#BestMatch">mencari sumber daya yang
+paling cocok</a>(dibahas di bawah). Jika tidak ada sumber daya alternatif yang cocok
+dengan konfigurasi perangkat tertentu, Android akan menggunakan sumber daya default terkait (set
+sumber daya untuk tipe sumber daya tertentu yang tidak termasuk qualifier
+konfigurasi).</p>
+
+
+
+<h3 id="AliasResources">Membuat sumber daya alias</h3>
+
+<p>Bila memiliki sumber daya yang ingin Anda gunakan untuk lebih dari satu konfigurasi
+perangkat (namun tidak ingin menyediakannya sebagai sumber daya default), Anda tidak perlu menempatkan sumber daya
+yang sama di lebih dari satu direktori sumber daya alternatif. Sebagai gantinya, (dalam beberapa kasus) Anda bisa membuat
+sumber daya alternatif
+yang berfungsi sebagai alias untuk sumber daya yang disimpan dalam direktori sumber daya default.</p>
+
+<p class="note"><strong>Catatan:</strong> Tidak semua sumber daya menawarkan mekanisme yang memungkinkan Anda
+membuat alias ke sumber daya lain. Khususnya, animasi, menu, raw, dan
+sumber daya lain yang tidak ditetapkan dalam direktori {@code xml/} tidak menawarkan fitur ini.</p>
+
+<p>Misalnya, bayangkan Anda memiliki ikon aplikasi {@code icon.png}, dan membutuhkan versi uniknya
+untuk lokal berbeda. Akan tetapi, dua lokal, bahasa Inggris-Kanada dan bahasa Prancis-Kanada, harus menggunakan
+versi yang sama. Anda mungkin berasumsi bahwa Anda perlu menyalin gambar
+yang sama ke dalam direktori sumber daya baik untuk bahasa Inggris-Kanada maupun bahasa Prancis-Kanada, namun
+bukan demikian. Sebagai gantinya, Anda bisa menyimpan gambar yang sama-sama digunakan sebagai {@code icon_ca.png} (nama
+apa saja selain {@code icon.png}) dan memasukkannya
+dalam direktori default {@code res/drawable/}. Lalu buat file {@code icon.xml} dalam {@code
+res/drawable-en-rCA/} dan {@code res/drawable-fr-rCA/} yang mengacu ke sumber daya {@code icon_ca.png}
+yang menggunakan elemen {@code &lt;bitmap&gt;}. Hal ini memungkinkan Anda menyimpan satu versi saja dari
+file PNG dan dua file XML kecil yang menunjuk ke sana. (Contoh file XML ditampilkan di bawah.)</p>
+
+
+<h4>Drawable</h4>
+
+<p>Untuk membuat alias ke drawable yang ada, gunakan elemen {@code &lt;bitmap&gt;}.
+Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/icon_ca" />
+</pre>
+
+<p>Jika Anda menyimpan file ini sebagai {@code icon.xml} (dalam direktori sumber daya alternatif, seperti
+{@code res/drawable-en-rCA/}), maka file akan dikompilasi menjadi sumber daya yang dapat Anda acu
+sebagai {@code R.drawable.icon}, namun sebenarnya merupakan alias untuk sumber daya {@code
+R.drawable.icon_ca} (yang disimpan dalam {@code res/drawable/}).</p>
+
+
+<h4>Layout</h4>
+
+<p>Untuk membuat alias ke layout yang ada, gunakan elemen {@code &lt;include&gt;},
+yang dibungkus dalam {@code &lt;merge&gt;}. Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;merge>
+    &lt;include layout="@layout/main_ltr"/>
+&lt;/merge>
+</pre>
+
+<p>Jika Anda menyimpan file ini sebagai {@code main.xml}, file akan dikompilasi menjadi sumber daya yang dapat Anda acu
+sebagai {@code R.layout.main}, namun sebenarnya merupakan alias untuk sumber daya {@code R.layout.main_ltr}
+.</p>
+
+
+<h4>String dan nilai-nilai sederhana lainnya</h4>
+
+<p>Untuk membuat alias ke string yang ada, cukup gunakan ID sumber daya
+dari string yang diinginkan sebagai nilai untuk string baru. Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;string name="hello">Hello&lt;/string>
+    &lt;string name="hi">@string/hello&lt;/string>
+&lt;/resources>
+</pre>
+
+<p>Sumber daya {@code R.string.hi} sekarang merupakan alias untuk {@code R.string.hello}.</p>
+
+<p> <a href="{@docRoot}guide/topics/resources/more-resources.html">Nilai sederhana lainnya</a> sama
+cara kerjanya. Misalnya, sebuah warna:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;color name="yellow">#f00&lt;/color>
+    &lt;color name="highlight">@color/red&lt;/color>
+&lt;/resources>
+</pre>
+
+
+
+
+<h2 id="Compatibility">Menyediakan Kompatibilitas Perangkat Terbaik dengan Sumber Daya</h2>
+
+<p>Agar aplikasi Anda mendukung beberapa konfigurasi perangkat,
+Anda harus selalu menyediakan sumber daya default untuk setiap tipe sumber daya yang menggunakan aplikasi Anda.</p>
+
+<p>Misalnya, jika aplikasi Anda mendukung beberapa bahasa, sertakan selalu direktori {@code
+values/} (tempat string Anda disimpan) <em>tanpa</em> <a href="#LocaleQualifier">qualifier bahasa dan wilayah</a>. Jika sebaliknya Anda menempatkan semua file
+string dalam direktori yang memiliki qualifier bahasa dan wilayah, maka aplikasi Anda akan crash saat berjalan
+pada perangkat yang telah diatur ke bahasa yang tidak didukung string Anda. Namun asalkan Anda menyediakan sumber daya default
+{@code values/}, aplikasi akan berjalan lancar (meskipun pengguna
+tidak memahami bahasa itu&mdash;, ini lebih baik daripada crash).</p>
+
+<p>Demikian pula, jika Anda menyediakan sumber daya layout berbeda berdasarkan orientasi layar, Anda harus
+memilih satu orientasi sebagai default. Misalnya, sebagai ganti menyediakan sumber daya dalam {@code
+layout-land/} untuk lanskap dan {@code layout-port/} untuk potret, biarkan salah satu sebagai default, seperti
+{@code layout/} untuk lanskap dan {@code layout-port/} untuk potret.</p>
+
+<p>Sumber daya default perlu disediakan bukan hanya karena aplikasi mungkin berjalan pada
+konfigurasi yang belum Anda antisipasi, namun juga karena versi baru Android terkadang menambahkan
+qualifier konfigurasi yang tidak didukung oleh versi lama. Jika Anda menggunakan qualifier sumber daya baru,
+namun mempertahankan kompatibilitas kode dengan versi Android yang lebih lama, maka saat versi lama
+Android menjalankan aplikasi, aplikasi itu akan crash jika Anda tidak menyediakan sumber daya default, aplikasi
+tidak bisa menggunakan sumber daya yang dinamai dengan qualifier baru. Misalnya, jika <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> Anda diatur ke 4, dan Anda memenuhi syarat semua sumber daya drawable dengan menggunakan <a href="#NightQualifier">mode malam</a> ({@code night} atau {@code notnight}, yang ditambahkan di API
+Level 8), maka perangkat API level 4 tidak bisa mengakses sumber daya drawable dan akan crash. Dalam hal
+ini, Anda mungkin ingin {@code notnight} menjadi sumber daya default, jadi Anda harus mengecualikan
+qualifier itu agar sumber daya drawable Anda ada dalam {@code drawable/} atau {@code drawable-night/}.</p>
+
+<p>Jadi, agar bisa menyediakan kompatibilitas perangkat terbaik, sediakan selalu sumber daya
+default untuk sumber daya yang diperlukan aplikasi Anda untuk berjalan dengan benar. Selanjutnya buatlah sumber daya
+alternatif untuk konfigurasi perangkat tertentu dengan menggunakan qualifier konfigurasi.</p>
+
+<p>Ada satu eksepsi untuk aturan ini: Jika <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> aplikasi Anda adalah 4 atau
+lebih, Anda <em>tidak</em> memerlukan sumber daya drawable default saat menyediakan sumber daya
+drawable alternatif dengan qualifier <a href="#DensityQualifier">densitas layar</a>. Tanpa sumber daya
+drawable default sekali pun, Android bisa menemukan yang paling cocok di antara densitas layar alternatif dan menskalakan
+bitmap sesuai kebutuhan. Akan tetapi, demi pengalaman terbaik pada semua jenis perangkat, Anda harus
+menyediakan drawable alternatif untuk ketiga tipe densitas.</p>
+
+
+
+<h2 id="BestMatch">Cara Android Menemukan Sumber Daya yang Paling Cocok</h2>
+
+<p>Saat Anda meminta sumber daya yang Anda berikan alternatifnya, Android akan memilih
+sumber daya alternatif yang akan digunakan saat runtime, bergantung pada konfigurasi perangkat saat ini. Untuk
+mendemonstrasikan cara Android memilih sumber daya alternatif, anggaplah direktori drawable berikut
+masing-masing berisi versi berbeda dari gambar yang sama:</p>
+
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+drawable-fr-rCA/
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+
+<p>Dan anggaplah yang berikut ini merupakan konfigurasi perangkatnya:</p>
+
+<p style="margin-left:1em;">
+Lokal = <code>en-GB</code> <br/>
+Orientasi layar = <code>port</code> <br/>
+Densitas piksel layar = <code>hdpi</code> <br/>
+Tipe layar sentuh = <code>notouch</code> <br/>
+Metode input teks utama = <code>12key</code>
+</p>
+
+<p>Dengan membandingkan konfigurasi perangkat dengan sumber daya alternatif yang tersedia, Android akan memilih
+drawable dari {@code drawable-en-port}.</p>
+
+<p>Sistem akan menentukan keputusannya mengenai sumber daya yang akan digunakan dengan logika
+berikut:</p>
+
+
+<div class="figure" style="width:371px">
+<img src="{@docRoot}images/resources/res-selection-flowchart.png" alt="" height="471" />
+<p class="img-caption"><strong>Gambar 2.</strong> Bagan alur cara Android menemukan
+sumber daya yang paling cocok.</p>
+</div>
+
+
+<ol>
+  <li>Menghapus file sumber daya yang bertentangan dengan konfigurasi perangkat.
+    <p>Direktori <code>drawable-fr-rCA/</code> dihapus karena bertentangan
+dengan lokal <code>en-GB</code>.</p>
+<pre class="classic no-pretty-print">
+drawable/
+drawable-en/
+<strike>drawable-fr-rCA/</strike>
+drawable-en-port/
+drawable-en-notouch-12key/
+drawable-port-ldpi/
+drawable-port-notouch-12key/
+</pre>
+<p class="note"><strong>Eksepsi:</strong> Densitas piksel layar adalah satu qualifier yang
+tidak dihapus karena bertentangan. Meskipun densitas layar perangkat adalah hdpi,
+<code>drawable-port-ldpi/</code> tidak dihapus karena setiap densitas layar
+dianggap cocok untuk saat ini. Informasi selengkapnya tersedia dalam dokumen <a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
+Layar</a>.</p></li>
+
+  <li>Pilih qualifier berkedudukan tertinggi (berikutnya) dalam daftar (<a href="#table2">tabel 2</a>).
+(Mulai dengan MCC, lalu pindah ke bawah.) </li>
+  <li>Apakah salah satu direktori sumber daya menyertakan qualifier ini?  </li>
+    <ul>
+      <li>Jika Tidak, kembali ke langkah 2 dan lihat qualifier berikutnya. (Dalam contoh,
+jawabannya adalah "tidak" hingga qualifier bahasa tercapai.)</li>
+      <li>Jika Ya, lanjutkan ke langkah 4.</li>
+    </ul>
+  </li>
+
+  <li>Hapus direktori sumber daya yang tidak menyertakan qualifier ini. Dalam contoh, sistem
+menghapus semua direktori yang tidak menyertakan qualifier bahasa:</li>
+<pre class="classic no-pretty-print">
+<strike>drawable/</strike>
+drawable-en/
+drawable-en-port/
+drawable-en-notouch-12key/
+<strike>drawable-port-ldpi/</strike>
+<strike>drawable-port-notouch-12key/</strike>
+</pre>
+<p class="note"><strong>Eksepsi:</strong> Jika qualifier yang dimaksud adalah densitas piksel layar,
+Android akan memilih opsi yang paling cocok dengan densitas layar perangkat.
+Secara umum, Android lebih suka menurunkan skala gambar asli yang lebih besar daripada menaikkan skala
+atas gambar asli yang lebih kecil. Lihat <a href="{@docRoot}guide/practices/screens_support.html">Mendukung Beberapa
+Layar</a>.</p>
+  </li>
+
+  <li>Kembali dan ulangi langkah 2, 3, dan 4 hingga tersisa satu direktori. Dalam contoh ini, orientasi
+layar adalah qualifier berikutnya yang memiliki kecocokan.
+Jadi, sumber daya yang tidak menetapkan orientasi layar akan dihapus:
+<pre class="classic no-pretty-print">
+<strike>drawable-en/</strike>
+drawable-en-port/
+<strike>drawable-en-notouch-12key/</strike>
+</pre>
+<p>Direktori yang tersisa adalah {@code drawable-en-port}.</p>
+  </li>
+</ol>
+
+<p>Meskipun prosedur dijalankan untuk setiap sumber daya yang diminta, sistem akan mengoptimalkan beberapa aspek
+lebih lanjut. Satu optimalisasi tersebut adalah bahwa setelah konfigurasi perangkat diketahui, sistem mungkin
+akan menghapus sumber daya alternatif yang sama sekali tidak cocok. Misalnya, jika bahasa konfigurasi
+adalah bahasa Inggris ("en"), maka setiap direktori sumber daya yang memiliki qualifier bahasa akan diatur ke
+selain bahasa Inggris tidak akan pernah disertakan dalam pool sumber daya yang diperiksa (meskipun
+direktori sumber daya <em>tanpa</em> qualifier bahasa masih disertakan).</p>
+
+<p>Saat memilih sumber daya berdasarkan qualifier ukuran layar, sistem akan menggunakan
+sumber daya yang didesain untuk layar yang lebih kecil daripada layar saat ini jika tidak ada sumber daya yang lebih cocok
+(misalnya, layar ukuran besar akan menggunakan sumber daya layar ukuran normal jika diperlukan). Akan tetapi,
+jika satu-satunya sumber daya yang tersedia <em>lebih besar</em> daripada layar saat ini, sistem
+<strong>tidak</strong> akan menggunakannya dan aplikasi Anda akan crash jika tidak ada sumber daya lain yang cocok dengan konfigurasi
+perangkat (misalnya, jika semua sumber daya layout ditandai dengan qualifier {@code xlarge},
+namun perangkat memiliki ukuran layar normal).</p>
+
+<p class="note"><strong>Catatan:</strong> <em>Kedudukan</em> qualifier (dalam <a href="#table2">tabel 2</a>) lebih penting
+daripada jumlah qualifier yang benar-benar pas dengan perangkat. Misalnya, dalam langkah 4 di atas, pilihan
+terakhir pada daftar berisi tiga qualifier yang bebar-benar cocok dengan perangkat (orientasi, tipe
+layar sentuh, dan metode input), sementara <code>drawable-en</code> hanya memiliki satu parameter yang cocok
+(bahasa). Akan tetapi, bahasa memiliki kedudukan lebih tinggi dari pada qualifier lainnya, sehingga
+<code>drawable-port-notouch-12key</code> tidak masuk.</p>
+
+<p>Untuk mengetahui selengkapnya tentang cara menggunakan sumber daya dalam aplikasi, lanjutkan ke <a href="accessing-resources.html">Mengakses Sumber Daya</a>.</p>

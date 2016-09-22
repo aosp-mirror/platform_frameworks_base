@@ -1,0 +1,71 @@
+page.title=Ikhtisar UI
+@jd:body
+
+
+<p>Semua elemen antarmuka pengguna dalam aplikasi Android dibangun menggunakan objek {@link android.view.View} dan
+{@link android.view.ViewGroup}. {@link android.view.View} adalah objek yang menarik
+sesuatu di layar dan dapat berinteraksi dengan pengguna. {@link android.view.ViewGroup} merupakan sebuah
+objek yang menyimpan objek {@link android.view.View} lainnya (dan {@link android.view.ViewGroup}) untuk
+mendefinisikan layout antarmuka.</p>
+
+<p>Android menyediakan sekumpulan subkelas {@link android.view.View} dan {@link
+android.view.ViewGroup} yang menawarkan kontrol input umum (seperti tombol dan bidang
+teks) serta berbagai model layout (seperti layout linear atau relatif).</p>
+
+
+<h2 id="Layout">Layout Antarmuka Pengguna</h2>
+
+<p>Antarmuka pengguna untuk setiap komponen aplikasi Anda didefinisikan menggunakan hierarki objek {link
+android.view.View} dan {@link android.view.ViewGroup}, seperti yang ditampilkan dalam gambar 1. Setiap kelompok tampilan
+merupakan kontainer tak terlihat yang mengelola tampilan anak, sementara tampilan anak ini dapat menjadi kontrol
+input atau widget lain yang
+menarik sebagian dari UI. Pohon hierarki ini bisa sederhana atau bisa juga kompleks bergantung kebutuhan
+(namun yang sederhana paling baik untuk kinerja).</p>
+
+<img src="{@docRoot}images/viewgroup.png" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Ilustrasi dari hierarki tampilan, yang mendefinisikan layout
+UI.</p>
+
+<p>Untuk mendeklarasikan layout, Anda dapat menyediakan objek {@link android.view.View} dalam kode dan mulai
+membangun pohon, namun cara termudah dan terefektif untuk mendefinisikan layout adalah dengan file XML.
+XML menawarkan struktur layout yang dapat dibaca manusia, serupa dengan HTML.</p>
+
+<p>Nama elemen XML untuk tampilan sesuai dengan kelas Android yang diwakilinya. Dengan demikian elemen
+<code>&lt;TextView&gt;</code> membuat widget {@link android.widget.TextView} dalam UI Anda,
+dan elemen <code>&lt;LinearLayout&gt;</code> membuat kelompok tampilan {@link android.widget.LinearLayout}
+. </p>
+
+<p>Misalnya, layout vertikal sederhana dengan tampilan teks dan tombol akan tampak seperti ini:</p>
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="I am a TextView" />
+    &lt;Button android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a Button" />
+&lt;/LinearLayout>
+</pre>
+
+<p>Saat Anda memuat sumber daya layout di aplikasi, Android akan menginisialisasi setiap simpul layout menjadi
+objek runtime yang bisa Anda gunakan untuk mendefinisikan perilaku tambahan, query status objek, atau memodifikasi
+layout.</p>
+
+<p>Untuk mendapatkan panduan lengkap mengenai pembuatan layout UI, lihat <a href="declaring-layout.html">Layout
+XML</a>.
+
+
+<h2 id="UIComponents">Komponen Antarmuka Pengguna</h2>
+
+<p>Anda tidak harus membuat semua UI menggunakan objek {@link android.view.View} dan {link
+android.view.ViewGroup}. Android menyediakan beberapa komponen aplikasi yang menawarkan
+layout UI standar yang tinggal Anda definisikan kontennya. Komponen UI ini masing-masing
+memiliki set API unik yang dijelaskan dalam masing-masing dokumennya, seperti <a href="{@docRoot}guide/topics/ui/actionbar.html">Action-Bar</a>, <a href="{@docRoot}guide/topics/ui/dialogs.html">Dialog</a>, dan <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Pemberitahuan Status</a>.</p>
+
+
