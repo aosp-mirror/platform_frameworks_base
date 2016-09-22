@@ -737,7 +737,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // global background data policy
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
                 synchronized (mUidRulesFirstLock) {
-                    updateRestrictionRulesForUidUL(uid);
+                    updateRestrictionRulesForUidUL(uid, false);
                 }
             }
         }
@@ -754,9 +754,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // remove any policy and update rules to clean up
             if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
             synchronized (mUidRulesFirstLock) {
+                mUidRules.delete(uid);
                 mUidPolicy.delete(uid);
-                removeRestrictBackgroundWhitelistedUidUL(uid, true, true);
-                updateRestrictionRulesForUidUL(uid);
+                // TODO: rather than passing onUidDeleted=true, it would be clearner to have a
+                // method that reset all firewall rules for an UID....
+                updateRestrictionRulesForUidUL(uid, true);
                 synchronized (mNetworkPoliciesSecondLock) {
                     writePolicyAL();
                 }
@@ -1793,6 +1795,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final boolean isWhitelisted = policy == POLICY_ALLOW_METERED_BACKGROUND;
             final boolean wasBlocked = wasBlacklisted || (mRestrictBackground && !wasWhitelisted);
             final boolean isBlocked = isBlacklisted || (mRestrictBackground && !isWhitelisted);
+            if ((wasWhitelisted && (!isWhitelisted || isBlacklisted))
+                    && mDefaultRestrictBackgroundWhitelistUids.get(uid)
+                    && !mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+                if (LOGD)
+                    Slog.d(TAG, "Adding uid " + uid + " to revoked restrict background whitelist");
+                mRestrictBackgroundWhitelistRevokedUids.append(uid, true);
+            }
             notifyApp = wasBlocked != isBlocked;
         }
         mHandler.obtainMessage(MSG_POLICIES_CHANGED, uid, policy, Boolean.valueOf(notifyApp))
@@ -1800,7 +1809,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void setUidPolicyUncheckedUL(int uid, int policy, boolean persist) {
-        mUidPolicy.put(uid, policy);
+        if (policy == POLICY_NONE) {
+            mUidPolicy.delete(uid);
+        } else {
+            mUidPolicy.put(uid, policy);
+        }
 
         // uid policy changed, recompute rules and persist policy.
         updateRulesForDataUsageRestrictionsUL(uid);
@@ -2080,44 +2093,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateNotificationsNL();
             writePolicyAL();
         }
-    }
-
-    /**
-     * Removes a uid from the restricted background whitelist, returning whether its current
-     * {@link ConnectivityManager.RestrictBackgroundStatus} changed.
-     */
-    private boolean removeRestrictBackgroundWhitelistedUidUL(int uid, boolean uidDeleted,
-            boolean updateNow) {
-        final boolean oldStatus =
-                (mUidPolicy.get(uid, POLICY_NONE) & POLICY_ALLOW_METERED_BACKGROUND) != 0;
-        if (!oldStatus && !uidDeleted) {
-            if (LOGD) Slog.d(TAG, "uid " + uid + " was not whitelisted before");
-            return false;
-        }
-        final boolean needFirewallRules = uidDeleted || isUidValidForWhitelistRules(uid);
-        if (oldStatus) {
-            Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
-            mUidPolicy.delete(uid);
-        }
-        if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
-                && !mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
-            if (LOGD) Slog.d(TAG, "Adding uid " + uid
-                    + " to revoked restrict background whitelist");
-            mRestrictBackgroundWhitelistRevokedUids.append(uid, true);
-        }
-        if (needFirewallRules) {
-            // Only update firewall rules if necessary...
-            updateRulesForDataUsageRestrictionsUL(uid, uidDeleted);
-        }
-        if (updateNow) {
-            // ...but always persists the whitelist request.
-            synchronized (mNetworkPoliciesSecondLock) {
-                writePolicyAL();
-            }
-        }
-        // Status only changes if Data Saver is turned on (otherwise it is DISABLED, even if the
-        // app was whitelisted before).
-        return mRestrictBackground && needFirewallRules;
     }
 
     @Override
@@ -2848,7 +2823,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * <p>This method changes both the external firewall rules and the internal state.
      */
-    private void updateRestrictionRulesForUidUL(int uid) {
+    private void updateRestrictionRulesForUidUL(int uid, boolean onUidDeleted) {
         // Methods below only changes the firewall rules for the power-related modes.
         updateRuleForDeviceIdleUL(uid);
         updateRuleForAppIdleUL(uid);
@@ -2858,7 +2833,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         updateRulesForPowerRestrictionsUL(uid);
 
         // Update firewall and internal rules for Data Saver Mode.
-        updateRulesForDataUsageRestrictionsUL(uid);
+        updateRulesForDataUsageRestrictionsUL(uid, onUidDeleted);
     }
 
     /**
@@ -2908,8 +2883,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Overloaded version of {@link #updateRulesForDataUsageRestrictionsUL(int)} called when an
      * app is removed - it ignores the UID validity check.
      */
-    private void updateRulesForDataUsageRestrictionsUL(int uid, boolean uidDeleted) {
-        if (!uidDeleted && !isUidValidForWhitelistRules(uid)) {
+    private void updateRulesForDataUsageRestrictionsUL(int uid, boolean onUidDeleted) {
+        if (!onUidDeleted && !isUidValidForWhitelistRules(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict data rules for uid " + uid);
             return;
         }
