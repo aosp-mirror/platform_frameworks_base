@@ -40,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.IBinder.DeathRecipient;
@@ -750,7 +751,13 @@ public class MediaFocusControl implements OnFinished {
             synchronized(mRCStack) {
                 if ((mMediaReceiverForCalls != null) &&
                         (mIsRinging || (mAudioService.getMode() == AudioSystem.MODE_IN_CALL))) {
-                    dispatchMediaKeyEventForCalls(keyEvent, needWakeLock);
+                    if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                        // Prevent dispatching key event to the global priority session.
+                        Slog.i(TAG, "Only the system can dispatch media key event "
+                                + "to the global priority session.");
+                    } else {
+                        dispatchMediaKeyEventForCalls(keyEvent, needWakeLock);
+                    }
                     return;
                 }
             }
