@@ -305,4 +305,7 @@ interface IDevicePolicyManager {
     boolean isDeviceProvisioned();
     boolean isDeviceProvisioningConfigApplied();
     void setDeviceProvisioningConfigApplied();
+
+    void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
+    boolean isBackupServiceEnabled(in ComponentName admin);
 }
