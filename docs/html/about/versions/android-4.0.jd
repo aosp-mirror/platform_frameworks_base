@@ -631,8 +631,8 @@ Bluetooth connection.</p>
 <p>A new package, {@link android.net.wifi.p2p}, contains all the APIs for performing peer-to-peer
 connections with Wi-Fi. The primary class you need to work with is {@link
 android.net.wifi.p2p.WifiP2pManager}, which you can acquire by calling {@link
-android.app.Activity#getSystemService(java.lang.String) getSystemService(WIFI_P2P_SERVICE)}.
-The {@link android.net.wifi.p2p.WifiP2pManager} includes APIs that allow you to:</p>
+android.app.Activity#getSystemService getSystemService(WIFI_P2P_SERVICE)}. The {@link
+android.net.wifi.p2p.WifiP2pManager} includes APIs that allow you to:</p>
 <ul>
 <li>Initialize your application for P2P connections by calling {@link
 android.net.wifi.p2p.WifiP2pManager#initialize initialize()}</li>
@@ -798,7 +798,7 @@ text content to the {@link android.view.accessibility.AccessibilityEvent} if the
 android.R.attr#contentDescription android:contentDescription} text is missing or
 insufficient. To add more text description to the
 {@link android.view.accessibility.AccessibilityEvent}, call {@link
-android.view.accessibility.AccessibilityRecord#getText()}.{@link java.util.List#add add()}.</p>
+android.view.accessibility.AccessibilityEvent#getText()}.{@link java.util.List#add add()}.</p>
 </li>
   <li>At this point, the {@link android.view.View} passes the event up the view hierarchy by calling
 {@link android.view.ViewGroup#requestSendAccessibilityEvent requestSendAccessibilityEvent()} on the

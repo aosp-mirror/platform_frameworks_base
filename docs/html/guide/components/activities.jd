@@ -624,8 +624,8 @@ android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
 before making the activity vulnerable to destruction. The system passes this method
 a {@link android.os.Bundle} in which you can save
 state information about the activity as name-value pairs, using methods such as {@link
-android.os.BaseBundle#putString putString()} and {@link
-android.os.BaseBundle#putInt putInt()}. Then, if the system kills your application
+android.os.Bundle#putString putString()} and {@link
+android.os.Bundle#putInt putInt()}. Then, if the system kills your application
 process and the user navigates back to your activity, the system recreates the activity and passes
 the {@link android.os.Bundle} to both {@link android.app.Activity#onCreate onCreate()} and {@link
 android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Using either of these

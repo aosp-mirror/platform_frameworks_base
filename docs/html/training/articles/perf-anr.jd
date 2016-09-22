@@ -146,7 +146,7 @@ as the UI thread by default.</p>
 
 <p>If you implement {@link java.lang.Thread} or {@link android.os.HandlerThread},
 be sure that your UI thread does not block while waiting for the worker thread to
-complete&mdash;do not call {@link java.lang.Object#wait Thread.wait()} or
+complete&mdash;do not call {@link java.lang.Thread#wait Thread.wait()} or
 {@link java.lang.Thread#sleep Thread.sleep()}. Instead of blocking while waiting for a worker
 thread to complete, your main thread should provide a {@link
 android.os.Handler} for the other threads to post back to upon completion.

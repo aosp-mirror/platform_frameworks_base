@@ -423,7 +423,7 @@ ArrayAdapter&lt;String> adapter = new ArrayAdapter&lt;String>(this,
   <li>The string array</li>
 </ul>
 <p>Then simply call
-{@link android.widget.AdapterView#setAdapter setAdapter()} on your {@link android.widget.ListView}:</p>
+{@link android.widget.ListView#setAdapter setAdapter()} on your {@link android.widget.ListView}:</p>
 <pre>
 ListView listView = (ListView) findViewById(R.id.listview);
 listView.setAdapter(adapter);
