@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
 }
 </pre>
 
-<p>This code also calls {@link android.widget.AdapterView#setOnItemClickListener
+<p>This code also calls {@link android.widget.ListView#setOnItemClickListener
 setOnItemClickListener()} to receive click events in the navigation drawer's list.
 The next section shows how to implement this interface
 and change the content view when the user selects an item.</p>
@@ -160,7 +160,7 @@ and change the content view when the user selects an item.</p>
 <p>When the user selects an item in the drawer's list, the system calls {@link
 android.widget.AdapterView.OnItemClickListener#onItemClick onItemClick()} on the
 {@link android.widget.AdapterView.OnItemClickListener OnItemClickListener} given to
-{@link android.widget.AdapterView#setOnItemClickListener setOnItemClickListener()}.</p>
+{@link android.widget.ListView#setOnItemClickListener setOnItemClickListener()}.</p>
 
 <p>What you do in the {@link
 android.widget.AdapterView.OnItemClickListener#onItemClick onItemClick()} method

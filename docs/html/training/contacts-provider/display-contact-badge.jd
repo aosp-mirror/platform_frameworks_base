@@ -113,10 +113,10 @@ trainingnavtop=true
 <p>
     For Android 3.0 (API level 11) and later, include the following columns in your projection:</p>
 <ul>
-    <li>{@link android.provider.BaseColumns#_ID Contacts._ID}</li>
-    <li>{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY Contacts.LOOKUP_KEY}</li>
+    <li>{@link android.provider.ContactsContract.Contacts#_ID Contacts._ID}</li>
+    <li>{@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY}</li>
     <li>
-        {@link android.provider.ContactsContract.ContactsColumns#PHOTO_THUMBNAIL_URI
+        {@link android.provider.ContactsContract.Contacts#PHOTO_THUMBNAIL_URI
         Contacts.PHOTO_THUMBNAIL_URI}
     </li>
 </ul>
@@ -124,8 +124,8 @@ trainingnavtop=true
     For Android 2.3.3 (API level 10) and earlier, use the following columns:
 </p>
 <ul>
-    <li>{@link android.provider.BaseColumns#_ID Contacts._ID}</li>
-    <li>{@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY Contacts.LOOKUP_KEY}</li>
+    <li>{@link android.provider.ContactsContract.Contacts#_ID Contacts._ID}</li>
+    <li>{@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY}</li>
 </ul>
 <p>
     The remainder of this lesson assumes that you've already loaded a
@@ -187,14 +187,14 @@ trainingnavtop=true
 </p>
 <p class="note">
     <strong>Note:</strong> The
-    {@link android.provider.ContactsContract.ContactsColumns#PHOTO_THUMBNAIL_URI} column isn't available
+    {@link android.provider.ContactsContract.Contacts#PHOTO_THUMBNAIL_URI} column isn't available
     in platform versions prior to 3.0. For those versions, you must retrieve the URI
     from the {@link android.provider.ContactsContract.Contacts.Photo Contacts.Photo} subtable.
 </p>
 <p>
     First, set up variables for accessing the {@link android.database.Cursor} containing the
-    {@link android.provider.BaseColumns#_ID Contacts._ID} and
-    {@link android.provider.ContactsContract.ContactsColumns#LOOKUP_KEY Contacts.LOOKUP_KEY} columns, as
+    {@link android.provider.ContactsContract.Contacts#_ID Contacts._ID} and
+    {@link android.provider.ContactsContract.Contacts#LOOKUP_KEY Contacts.LOOKUP_KEY} columns, as
     described previously:
 </p>
 <pre>
