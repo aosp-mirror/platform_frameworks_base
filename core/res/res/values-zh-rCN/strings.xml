@@ -1647,8 +1647,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"建议语言"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有语言"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"所有国家/地区"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜索"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已关闭"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"启用工作资料，包括应用、后台同步和相关功能。"</string>
