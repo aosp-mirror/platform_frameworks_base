@@ -1191,7 +1191,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema se <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Provjera grešaka"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Novi uređaj <xliff:g id="NAME">%s</xliff:g> je otkriven"</string>
@@ -1677,6 +1676,7 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> stavke su odabrane</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> stavki je odabrano</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"Razno"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi određujete značaj ovih obavještenja."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je značajno zbog osoba koje su uključene."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljavate aplikaciji <xliff:g id="APP">%1$s</xliff:g> da kreira novog korisnika s računom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>

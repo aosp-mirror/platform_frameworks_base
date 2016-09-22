@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"भाषा आणि लेआउट निवडण्यासाठी टॅप करा"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"उमेदवार"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> तयार करीत आहे"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटींसाठी तपासत आहे"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नवीन <xliff:g id="NAME">%s</xliff:g> आढळले"</string>
@@ -1639,6 +1638,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडला</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"संकीर्ण"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"आपण या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>

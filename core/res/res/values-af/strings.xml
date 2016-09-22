@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"kandidate"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Berei tans <xliff:g id="NAME">%s</xliff:g> voor"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Kyk tans vir foute"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nuwe <xliff:g id="NAME">%s</xliff:g> bespeur"</string>
@@ -1639,6 +1638,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> gekies</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> gekies</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"Diverse"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Jy stel die belangrikheid van hierdie kennisgewings."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dit is belangrik as gevolg van die mense wat betrokke is."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep?"</string>
@@ -1648,8 +1648,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"Voer taalnaam in"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Voorgestel"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle tale"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"Allle streke"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Soek"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Werkmodus is AF"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Stel werkprofiel in staat om te werk, insluitend programme, agtergrondsinkronisering en verwante kenmerke."</string>

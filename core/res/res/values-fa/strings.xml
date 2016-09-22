@@ -1164,7 +1164,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"داوطلبین"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"در حال آماده‌سازی <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"در حال بررسی برای خطاها"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> جدید شناسایی شد"</string>
@@ -1524,8 +1523,8 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"عمودی ناشناس"</string>
-    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"افقی ناشناس"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"عمودی نامشخص"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"افقی نامشخص"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"لغو شد"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"خطا هنگام نوشتن محتوا"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"نامعلوم"</string>
@@ -1639,6 +1638,7 @@
       <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"متفرقه"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"به دلیل افراد درگیر مهم است."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> اضافه کند؟"</string>

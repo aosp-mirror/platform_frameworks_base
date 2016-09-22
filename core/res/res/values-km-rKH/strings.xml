@@ -1166,7 +1166,6 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style" msgid="4333913089637062257"><u>"បេក្ខជន"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"កំពុងរៀបចំ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"កំពុងពិនិត្យរកកំហុស"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"បានរកឃើញ <xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
@@ -1641,6 +1640,7 @@
       <item quantity="other">បានជ្រើស <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">បានជ្រើស <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
+    <string name="default_notification_channel_label" msgid="6950908610709016902">"ផ្សេងៗ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"វាមានសារៈសំខាន់ដោយសារតែមនុស្សដែលពាក់ព័ន្ធ"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"អនុញ្ញាតឲ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ឬទេ?"</string>
@@ -1650,8 +1650,7 @@
     <string name="search_language_hint" msgid="7042102592055108574">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"បាន​ស្នើ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
-    <!-- no translation found for region_picker_section_all (8966316787153001779) -->
-    <skip />
+    <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"របៀបការងារបានបិទ"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"អនុញ្ញាតឲ្យប្រវត្តិរូបការងារដំណើរការ ដោយរាប់បញ្ចូលទាំងកម្មវិធី ការធ្វើសមកាលកម្មផ្ទៃខាងក្រោយ និងលក្ខណៈពិសេសដែលពាក់ព័ន្ធ។"</string>
