@@ -19,10 +19,6 @@ package com.android.server.pm;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.os.Environment;
-import android.os.SystemProperties;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -34,10 +30,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -65,23 +58,9 @@ public final class SELinuxMMAC {
     // to synchronize access during policy load and access attempts.
     private static List<Policy> sPolicies = new ArrayList<>();
 
-    private static final String PROP_FORCE_RESTORECON = "sys.force_restorecon";
-
-    /** Path to version on rootfs */
-    private static final File VERSION_FILE = new File("/selinux_version");
-
     /** Path to MAC permissions on system image */
     private static final File MAC_PERMISSIONS = new File(Environment.getRootDirectory(),
             "/etc/security/mac_permissions.xml");
-
-    /** Path to app contexts on rootfs */
-    private static final File SEAPP_CONTEXTS = new File("/seapp_contexts");
-
-    /** Calculated hash of {@link #SEAPP_CONTEXTS} */
-    private static final byte[] SEAPP_CONTEXTS_HASH = returnHash(SEAPP_CONTEXTS);
-
-    /** Attribute where {@link #SEAPP_CONTEXTS_HASH} is stored */
-    private static final String XATTR_SEAPP_HASH = "user.seapp_hash";
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
@@ -311,66 +290,6 @@ public final class SELinuxMMAC {
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
                     "seinfo=" + pkg.applicationInfo.seinfo);
-        }
-    }
-
-    /**
-     * Determines if a recursive restorecon on the given package data directory
-     * is needed. It does this by comparing the SHA-1 of the seapp_contexts file
-     * against the stored hash in an xattr.
-     * <p>
-     * Note that the xattr isn't in the 'security' namespace, so this should
-     * only be run on directories owned by the system.
-     *
-     * @return Returns true if the restorecon should occur or false otherwise.
-     */
-    public static boolean isRestoreconNeeded(File file) {
-        // To investigate boot timing, allow a property to always force restorecon
-        if (SystemProperties.getBoolean(PROP_FORCE_RESTORECON, false)) {
-            return true;
-        }
-
-        try {
-            final byte[] buf = new byte[20];
-            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, buf);
-            if ((len == 20) && Arrays.equals(SEAPP_CONTEXTS_HASH, buf)) {
-                return false;
-            }
-        } catch (ErrnoException e) {
-            if (e.errno != OsConstants.ENODATA) {
-                Slog.e(TAG, "Failed to read seapp hash for " + file, e);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Stores the SHA-1 of the seapp_contexts into an xattr.
-     * <p>
-     * Note that the xattr isn't in the 'security' namespace, so this should
-     * only be run on directories owned by the system.
-     */
-    public static void setRestoreconDone(File file) {
-        try {
-            Os.setxattr(file.getAbsolutePath(), XATTR_SEAPP_HASH, SEAPP_CONTEXTS_HASH, 0);
-        } catch (ErrnoException e) {
-            Slog.e(TAG, "Failed to persist seapp hash in " + file, e);
-        }
-    }
-
-    /**
-     * Return the SHA-1 of a file.
-     *
-     * @param file The path to the file given as a string.
-     * @return Returns the SHA-1 of the file as a byte array.
-     */
-    private static byte[] returnHash(File file) {
-        try {
-            final byte[] contents = IoUtils.readFileAsByteArray(file.getAbsolutePath());
-            return MessageDigest.getInstance("SHA-1").digest(contents);
-        } catch (IOException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
         }
     }
 }
