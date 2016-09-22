@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseLongArray;
 
@@ -119,5 +120,6 @@ public class LatencyTracker {
         Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, NAMES[action], 0);
         long duration = endRtc - startRtc;
         Log.i(TAG, "action=" + action + " latency=" + duration);
+        EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, (int) duration);
     }
 }
