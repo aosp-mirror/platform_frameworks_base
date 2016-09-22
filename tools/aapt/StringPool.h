@@ -12,7 +12,6 @@
 
 #include <androidfw/ResourceTypes.h>
 #include <utils/String16.h>
-#include <utils/TypeHelpers.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -177,14 +176,6 @@ private:
     // This array maps from the original position a string was placed at
     // in mEntryArray to its new position after being sorted with sortByConfig().
     Vector<size_t>                          mOriginalPosToNewPos;
-};
-
-// The entry types are trivially movable because all fields they contain, including
-// the vectors and strings, are trivially movable.
-namespace android {
-    ANDROID_TRIVIAL_MOVE_TRAIT(StringPool::entry);
-    ANDROID_TRIVIAL_MOVE_TRAIT(StringPool::entry_style_span);
-    ANDROID_TRIVIAL_MOVE_TRAIT(StringPool::entry_style);
 };
 
 #endif
