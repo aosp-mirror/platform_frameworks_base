@@ -1,0 +1,168 @@
+page.title=Mempertahankan Kompatibilitas
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Pelajaran ini mengajarkan Anda cara</h2>
+<ol>
+  <li><a href="#Theme">Mendefinisikan Gaya Alternatif</a></li>
+  <li><a href="#Layouts">Menyediakan Layout Alternatif</a></li>
+  <li><a href="#SupportLib">Menggunakan Support Library</a></li>
+  <li><a href="#CheckVersion">Memeriksa Versi Sistem</a></li>
+</ol>
+<h2>Anda juga harus membaca</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Spesifikasi desain bahan</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Desain bahan di Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Sebagian fitur desain bahan seperti tema bahan dan transisi aktivitas custom
+hanya tersedia pada Android 5.0 (API level 21) ke atas. Akan tetapi, Anda bisa mendesain aplikasi untuk menggunakan
+fitur-fitur ini saat dijalankan pada perangkat yang mendukung desain bahan dan tetap kompatibel
+dengan perangkat yang menjalankan rilis Android sebelumnya.</p>
+
+
+<h2 id="Theme">Mendefinisikan Gaya Alternatif</h2>
+
+<p>Anda bisa mengonfigurasi aplikasi untuk menggunakan tema bahan pada perangkat yang mendukungnya dan mengembalikan
+ke tema lama pada perangkat yang menjalankan versi Android terdahulu:</p>
+
+<ol>
+<li>Definisikan tema yang mewarisi tema lama (seperti Holo) di
+    <code>res/values/styles.xml</code>.</li>
+<li>Definisikan tema bernama sama yang mewarisi tema bahan di
+    <code>res/values-v21/styles.xml</code>.</li>
+<li>Atur tema ini sebagai tema aplikasi Anda dalam file manifes.</li>
+</ol>
+
+<p class="note"><strong>Catatan:</strong>
+Jika aplikasi Anda menggunakan tema bahan namun tidak menyediakan tema alternatif dengan cara ini,
+aplikasi itu tidak akan berjalan pada versi Android sebelum 5.0.
+</p>
+
+
+<h2 id="Layouts">Menyediakan Layout Alternatif</h2>
+
+<p>Jika layout yang Anda desain sesuai dengan panduan desain bahan tidak menggunakan salah satu
+atribut XML baru yang diperkenalkan di Android 5.0 (API level 21), layout itu akan berfungsi pada
+versi Android sebelumnya. Jika tidak, Anda bisa menyediakan layout alternatif. Anda juga bisa menyediakan
+layout alternatif untuk menyesuaikan cara aplikasi ditampilkan pada versi Android terdahulu.</p>
+
+<p>Buatlah file layout untuk Android 5.0 (API level 21) dalam <code>res/layout-v21/</code> dan
+file layout alternatif untuk versi Android terdahulu dalam <code>res/layout/</code>.
+Misalnya, <code>res/layout/my_activity.xml</code> adalah layout alternatif untuk
+<code>res/layout-v21/my_activity.xml</code>.</p>
+
+<p>Untuk menghindari duplikasi kode, definisikan gaya dalam <code>res/values/</code>, modifikasi
+gaya di <code>res/values-v21/</code> untuk API baru, dan gunakan pewarisan gaya, dengan mendefinisikan
+gaya dasar di <code>res/values/</code> dan mewarisi gaya di <code>res/values-v21/</code>.</p>
+
+
+<h2 id="SupportLib">Menggunakan Support Library</h2>
+
+<p><a href="{@docRoot}tools/support-library/features.html#v7">v7 Support Library</a>
+r21 ke atas menyertakan fitur desain bahan berikut:</p>
+
+<ul>
+<li><a href="{@docRoot}training/material/theme.html">Gaya desain bahan</a> untuk beberapa widget sistem
+    bila Anda menerapkan salah satu tema <code>Theme.AppCompat</code>.</li>
+<li><a href="{@docRoot}training/material/theme.html#ColorPalette">Atribut tema palet warna</a>
+    dalam tema <code>Theme.AppCompat</code>.</li>
+<li>Widget {@link android.support.v7.widget.RecyclerView} untuk <a href="{@docRoot}training/material/lists-cards.html#RecyclerView">
+menampilkan kumpulan data.</a></li>
+<li>Widget {@link android.support.v7.widget.CardView} untuk <a href="{@docRoot}training/material/lists-cards.html#CardView">membuat kartu</a>.</li>
+<li>Kelas {@link android.support.v7.graphics.Palette} untuk <a href="{@docRoot}training/material/drawables.html#ColorExtract">mengekstrak warna mencolok dari
+    gambar</a>.</li>
+</ul>
+
+<h3>Widget sistem</h3>
+
+<p>Tema-tema <code>Theme.AppCompat</code> menyediakan gaya desain bahan untuk widget ini:</p>
+
+<ul>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Spinner}</li>
+  <li>{@link android.widget.CheckBox}</li>
+  <li>{@link android.widget.RadioButton}</li>
+  <li>{@link android.support.v7.widget.SwitchCompat}</li>
+  <li>{@link android.widget.CheckedTextView}</li>
+</ul>
+
+<h3>Palet Warna</h3>
+
+<p>Untuk memperoleh gaya desain bahan dan menyesuaikan palet warna dengan Android v7 Support
+Library, terapkan salah satu tema <code>Theme.AppCompat</code>:</p>
+
+<pre>
+&lt;!-- extend one of the Theme.AppCompat themes -->
+&lt;style name="Theme.MyTheme" parent="Theme.AppCompat.Light">
+    &lt;!-- customize the color palette -->
+    &lt;item name="colorPrimary">@color/material_blue_500&lt;/item>
+    &lt;item name="colorPrimaryDark">@color/material_blue_700&lt;/item>
+    &lt;item name="colorAccent">@color/material_green_A200&lt;/item>
+&lt;/style>
+</pre>
+
+<h3>Daftar dan Kartu</h3>
+
+<p>Widget {@link android.support.v7.widget.RecyclerView} dan {@link
+android.support.v7.widget.CardView} tersedia di versi Android terdahulu melalui
+Android v7 Support Library dengan pembatasan ini:</p>
+<ul>
+<li>{@link android.support.v7.widget.CardView} memundurkan ke implementasi bayangan terprogram
+    dengan menggunakan pengisi tambahan.</li>
+<li>{@link android.support.v7.widget.CardView} tidak memangkas tampilan anaknya yang berpotongan
+    dengan sudut melengkung.</li>
+</ul>
+
+
+<h3>Dependensi</h3>
+
+<p>Untuk menggunakan fitur-fitur ini di versi Android sebelum 5.0 (API level 21), sertakan
+Android v7 Support Library dalam proyek Anda sebagai <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a>:</p>
+
+<pre>
+dependencies {
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+}
+</pre>
+
+
+<h2 id="CheckVersion">Memeriksa Versi Sistem</h2>
+
+<p>Fitur berikut hanya tersedia di Android 5.0 (API level 21) ke atas:</p>
+
+<ul>
+<li>Transisi aktivitas</li>
+<li>Umpan balik sentuh</li>
+<li>Animasi membuka</li>
+<li>Animasi berbasis path</li>
+<li>Drawable vektor</li>
+<li>Pewarnaan drawable</li>
+</ul>
+
+<p>Untuk menjaga kompatibilitas dengan versi Android terdahulu, periksa {@link
+android.os.Build.VERSION#SDK_INT version} sistem saat runtime sebelum Anda memanggil API untuk salah satu
+fitur ini:</p>
+
+<pre>
+// Check if we're running on Android 5.0 or higher
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // Call some material design APIs here
+} else {
+    // Implement this feature without material design
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Untuk menetapkan versi Android yang didukung aplikasi Anda,
+gunakan atribut <code>android:minSdkVersion</code> dan <code>android:targetSdkVersion</code>
+dalam file manifes. Untuk menggunakan fitur desain bahan di Android 5.0, atur
+atribut <code>android:targetSdkVersion</code> ke <code>21</code>. Untuk informasi selengkapnya, lihat
+panduan <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">API
+&lt;uses-sdk&gt;</a>.</p>

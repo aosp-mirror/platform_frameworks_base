@@ -1,0 +1,307 @@
+page.title=Prinsip Desain Android
+@jd:body
+
+<p>Prinsip desain ini dikembangkan oleh dan untuk Tim Pengalaman Pengguna
+ Android agar selalu mempertimbangkan kepentingan pengguna.
+Untuk pengembang dan desainer Android, mereka terus
+meletakkan dasar pedoman desain yang lebih detail untuk beragam tipe
+perangkat.</p>
+
+<p>
+Perhatikan prinsip-prinsip ini saat Anda menerapkan
+kreativitas dan pemikiran desain sendiri. Menyimpang dengan sengaja.
+</p>
+
+<h2 id="enchant-me">Pikat Saya</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="delight-me">Senangkan saya dengan cara yang mengejutkan</h4>
+<p>Permukaan yang cantik, animasi yang ditempatkan dengan hati-hati, atau efek suara di saat yang tepat sungguh menyenangkan untuk
+dinikmati. Efek yang lembut menimbulkan perasaan serba mudah dan kesadaran bahwa kekuatan yang
+bisa diandalkan ada dalam genggaman.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_delight.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="real-objects-more-fun">Objek sungguhan lebih menyenangkan daripada tombol dan menu</h4>
+<p>Biarkan orang langsung menyentuh dan memanipulasi objek dalam aplikasi Anda. Ini mengurangi upaya kognitif
+yang diperlukan untuk menjalankan tugas sekaligus membuatnya lebih memuaskan secara emosional.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_real_objects.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="make-it-mine">Biarkan saya memilikinya</h4>
+<p>Orang suka menambahkan sentuhan pribadi karena membantu mereka merasa betah dan memegang kendali. Memberikan
+default yang pantas dan indah, tetapi juga mempertimbangkan penyesuaian opsional yang menyenangkan, yang tidak mengganggu
+tugas utama.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_make_it_mine.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="get-to-know-me">Kenali saya</h4>
+<p>Pelajari preferensi orang dari waktu ke waktu. Daripada meminta mereka untuk membuat pilihan yang sama
+berulang-ulang, tempatkan pilihan sebelumnya agar mudah dijangkau.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_get_to_know_me.png">
+
+  </div>
+</div>
+
+<h2 id="simplify-my-life">Sederhanakan Hidup Saya</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="keep-it-brief">Persingkat</h4>
+<p>Gunakan frasa pendek dengan kata-kata sederhana. Orang cenderung melewatkan kalimat-kalimat panjang.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_keep_it_brief.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="pictures-faster-than-words">Gambar lebih cepat dibanding kata-kata</h4>
+<p>Pertimbangkan menggunakan gambar untuk menjelaskan gagasan. Gambar menarik perhatian orang dan bisa jauh lebih efisien
+dibanding kata-kata.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_pictures.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="decide-for-me">Putuskan untuk saya tetapi biarkan saya yang menentukan</h4>
+<p>Gunakan tebakan terbaik Anda dan bertindaklah daripada meminta terlebih dahulu. Terlalu banyak pilihan dan keputusan membuat orang
+tidak suka. Untuk berjaga-jaga jika Anda salah, izinkan 'pembatalan'.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_decide_for_me.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="only-show-when-i-need-it">Cukup tunjukkan yang saya perlukan ketika saya memerlukannya</h4>
+<p>Orang merasa kewalahan ketika melihat terlalu banyak hal sekaligus. Uraikan tugas dan informasi menjadi potongan-potongan
+kecil yang mudah dicerna. Sembunyikan opsi yang tidak perlu pada saat ini, dan ajari orang sambil jalan.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_information_when_need_it.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="always-know-where-i-am">Saya harus selalu tahu di mana saya berada</h4>
+<p>Beri orang kepercayaan diri bahwa mereka tahu di mana berada. Buat agar tempat-tempat dalam aplikasi Anda terlihat berbeda dan
+gunakan transisi untuk menunjukkan hubungan antar layar. Berikan umpan balik tentang tugas yang sedang berlangsung.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_navigation.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="never-lose-my-stuff">Jangan sekali-kali menghilangkan milik saya</h4>
+<p>Simpan apa yang telah susah-payah dibuat orang dan biarkan mereka mengaksesnya dari mana saja. Ingat pengaturan,
+sentuhan pribadi, dan kreasi lintas ponsel, tablet, dan komputer. Itu membuat pemutakhiran menjadi
+hal termudah di dunia.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="looks-same-should-act-same">Jika terlihat sama, seharusnya fungsinya sama</h4>
+<p>Bantu orang merasakan perbedaan fungsional dengan membuat mereka terlihat berbeda daripada mirip.
+Hindari mode, yaitu tempat yang terlihat mirip tetapi berbeda fungsinya pada input yang sama.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_looks_same.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="interrupt-only-if-important">Sela saya jika penting saja</h4>
+<p>Layaknya asisten pribadi yang baik, lindungi orang dari detail yang tidak penting. Orang ingin tetap
+fokus, dan kecuali jika memang penting dan sensitif waktu, interupsi bisa melelahkan dan menjengkelkan.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_important_interruption.png">
+
+  </div>
+</div>
+
+<h2 id="make-me-amazing">Buat Saya Terpesona</h2>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="give-me-tricks">Beri saya trik yang efektif di mana saja</h4>
+<p>Orang merasa senang ketika mereka memahami sendiri sesuatu. Jadikan aplikasi Anda lebih mudah dipelajari dengan
+memanfaatkan pola visual dan memori otot dari aplikasi Android lainnya. Misalnya, gerakan menggeser
+dapat menjadi pintasan navigasi yang bagus.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_tricks.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="its-not-my-fault">Bukan salah saya</h4>
+<p>Bersikap ramahlah dalam meminta orang untuk melakukan koreksi. Mereka ingin merasa pintar ketika menggunakan
+aplikasi Anda. Jika terjadi kesalahan, berikan petunjuk perbaikan yang jelas tetapi lepaskan mereka dari detail teknis.
+Jika Anda dapat memperbaikinya secara diam-diam, tentu lebih baik.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_error.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="sprinkle-encouragement">Berikan dorongan</h4>
+<p>Uraikan tugas-tugas rumit menjadi langkah-langkah kecil yang dapat dilakukan dengan mudah. Beri umpan balik tentang tindakan,
+meskipun hanya sesuatu yang sederhana.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="do-heavy-lifting-for-me">Lakukan pekerjaan yang sulit untuk saya</h4>
+<p>Buatlah pemula merasa seperti ahli dengan memungkinkan mereka untuk melakukan hal-hal yang mereka pikir tidak akan bisa.
+Misalnya, pintasan yang menggabungkan beberapa efek foto dapat membuat foto amatir terlihat mengagumkan hanya
+dalam beberapa langkah.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_heavy_lifting.png">
+
+  </div>
+</div>
+
+<div class="vspace size-2">&nbsp;</div>
+
+<div class="cols">
+  <div class="col-7">
+
+<h4 id="make-important-things-fast">Percepat hal penting</h4>
+<p>Tidak semua tindakan itu sama. Putuskan apa yang terpenting dalam aplikasi Anda dan permudah untuk menemukannya serta
+cepat untuk digunakan, seperti tombol rana pada kamera, atau tombol jeda pada pemutar musik.</p>
+
+  </div>
+  <div class="col-6">
+
+    <img src="{@docRoot}design/media/principles_make_important_fast.png">
+
+  </div>
+</div>

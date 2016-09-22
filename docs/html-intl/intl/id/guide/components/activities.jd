@@ -1,0 +1,756 @@
+page.title=Aktivitas
+page.tags=aktivitas,intent
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#Creating">Membuat Aktivitas</a>
+    <ol>
+      <li><a href="#UI">Mengimplementasikan antarmuka pengguna</a></li>
+      <li><a href="#Declaring">Mendeklarasikan aktivitas dalam manifes</a></li>
+    </ol>
+  </li>
+  <li><a href="#StartingAnActivity">Memulai Aktivitas</a>
+    <ol>
+      <li><a href="#StartingAnActivityForResult">Memulai aktivitas agar berhasil</a></li>
+    </ol>
+  </li>
+  <li><a href="#ShuttingDown">Mematikan Aktivitas</a></li>
+  <li><a href="#Lifecycle">Mengelola Daur Hidup Aktivitas</a>
+    <ol>
+      <li><a href="#ImplementingLifecycleCallbacks">Mengimplementasikan callback daur hidup</a></li>
+      <li><a href="#SavingActivityState">Menyimpan status aktivitas</a></li>
+      <li><a href="#ConfigurationChanges">Menangani perubahan konfigurasi</a></li>
+      <li><a href="#CoordinatingActivities">Mengoordinasikan aktivitas</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Kelas-kelas utama</h2>
+<ol>
+  <li>{@link android.app.Activity}</li>
+</ol>
+
+<h2>Lihat juga</h2>
+<ol>
+  <li><a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tugas dan
+Back-Stack</a></li>
+</ol>
+
+</div>
+</div>
+
+
+
+<p>{@link android.app.Activity} adalah sebuah komponen aplikasi yang menyediakan layar yang digunakan
+pengguna untuk berinteraksi guna melakukan sesuatu, misalnya memilih nomor telepon, mengambil foto, mengirim email, atau
+menampilkan peta. Tiap aktivitas diberi sebuah jendela untuk menggambar antarmuka penggunanya. Jendela ini
+biasanya mengisi layar, namun mungkin lebih kecil daripada layar dan mengambang di atas
+jendela lain.</p>
+
+<p> Sebuah aplikasi biasanya terdiri atas beberapa aktivitas yang terikat secara longgar
+satu sama lain. Biasanya, satu aktivitas dalam aplikasi ditetapkan sebagai aktivitas "utama", yang
+ditampilkan kepada pengguna saat membuka aplikasi untuk pertama kali. Tiap
+aktivitas kemudian bisa memulai aktivitas lain untuk melakukan berbagai tindakan. Tiap kali
+aktivitas baru dimulai, aktivitas sebelumnya akan dihentikan, namun sistem mempertahankan aktivitas
+dalam sebuah tumpukan ("back-stack"). Bila sebuah aktivitas baru dimulai, aktivitas itu akan didorong ke atas back-stack dan
+mengambil fokus pengguna. Back-stack mematuhi mekanisme dasar tumpukan "masuk terakhir, keluar pertama",
+jadi, bila pengguna selesai dengan aktivitas saat ini dan menekan tombol <em>Back</em>, aktivitas
+akan dikeluarkan dari tumpukan (dan dimusnahkan) dan aktivitas sebelumnya akan dilanjutkan. (Back-stack
+dibahas selengkapnya dalam dokumen <a href="{@docRoot}guide/components/tasks-and-back-stack.html">Tugas
+dan Back-Stack</a>.)</p>
+
+<p>Bila aktivitas dihentikan karena ada aktivitas baru yang dimulai, aktivitas lama akan diberi tahu tentang perubahan status ini
+melalui metode callback daur hidupnya.
+Ada beberapa metode callback yang mungkin diterima aktivitas, karena sebuah perubahan dalam
+statusnya&mdash;apakah sistem sedang membuatnya, menghentikannya, melanjutkannya, atau menghapuskannya&mdash;dan
+masing-masing callback memberi Anda kesempatan melakukan pekerjaan tertentu yang
+sesuai untuk perubahan status itu. Misalnya, bila dihentikan, aktivitas Anda harus melepas
+objek besar, seperti koneksi jaringan atau database. Bila aktivitas dilanjutkan, Anda bisa
+memperoleh kembali sumber daya yang diperlukan dan melanjutkan tindakan yang terputus. Transisi status ini
+semuanya bagian dari daur hidup aktivitas.</p>
+
+<p>Bagian selebihnya dari dokumen ini membahas dasar-dasar cara membuat dan menggunakan aktivitas,
+yang meliputi satu pembahasan lengkap tentang cara kerja daur hidup aktivitas, sehingga Anda bisa dengan benar mengelola
+transisi di antara berbagai status aktivitas.</p>
+
+
+
+<h2 id="Creating">Membuat Aktivitas</h2>
+
+<p>Untuk membuat sebuah aktivitas, Anda harus membuat subkelas {@link android.app.Activity} (atau
+subkelasnya yang ada). Dalam subkelas itu, Anda perlu mengimplementasikan metode-metode callback yang
+dipanggil sistem saat aktivitas bertransisi di antara berbagai status daur hidupnya, misalnya saat
+aktivitas sedang dibuat, dihentikan, dilanjutkan, atau dimusnahkan. Dua metode callback
+terpenting adalah:</p>
+
+<dl>
+  <dt>{@link android.app.Activity#onCreate onCreate()}</dt>
+  <dd>Anda harus mengimplementasikan metode ini. Sistem memanggilnya saat membuat
+    aktivitas Anda. Dalam implementasi, Anda harus menginisialisasi komponen-komponen esensial
+aktivitas.
+    Yang terpenting, inilah tempat Anda harus memanggil {@link android.app.Activity#setContentView
+    setContentView()} untuk mendefinisikan layout untuk antarmuka pengguna aktivitas.</dd>
+  <dt>{@link android.app.Activity#onPause onPause()}</dt>
+  <dd>Sistem memanggil metode ini sebagai pertanda pertama bahwa pengguna sedang meninggalkan
+aktivitas Anda (walau itu tidak selalu berarti aktivitas sedang dimusnahkan). Inilah biasanya tempat Anda
+harus mengikat setiap perubahan yang harus dipertahankan selepas sesi pengguna saat ini (karena
+pengguna mungkin tidak kembali).</dd>
+</dl>
+
+<p>Ada beberapa metode callback daur hidup lainnya yang harus Anda gunakan untuk memberikan
+pengalaman pengguna yang mengalir di antara aktivitas dan menangani interupsi tidak terduga yang menyebabkan aktivitas Anda
+dihentikan dan bahkan dimusnahkan. Semua metode callback daur hidup akan dibahas nanti, di
+bagian tentang <a href="#Lifecycle">Mengelola Daur Hidup Aktivitas</a>.</p>
+
+
+
+<h3 id="UI">Mengimplementasikan antarmuka pengguna</h3>
+
+<p> Antarmuka pengguna aktivitas disediakan oleh hierarki objek&mdash;tampilan yang diturunkan
+dari kelas {@link android.view.View}.  Tiap tampilan mengontrol sebuah ruang persegi panjang tertentu
+dalam jendela aktivitas dan bisa merespons interaksi pengguna. Misalnya, sebuah tampilan mungkin berupa sebuah
+tombol yang mengawali suatu tindakan bila pengguna menyentuhnya.</p>
+
+<p>Android menyediakan sejumlah tampilan siap-dibuat yang bisa Anda gunakan untuk mendesain dan mengatur
+layout. "Widget" adalah tampilan yang menyediakan elemen-elemen visual (dan interaktif) untuk layar,
+misalnya tombol, bidang teks, kotak cek, atau sekadar sebuah gambar. "Layout" adalah tampilan yang diturunkan dari {@link
+android.view.ViewGroup} yang memberikan sebuah model layout unik untuk tampilan anaknya, misalnya
+layout linier, layout grid, atau layout relatif. Anda juga bisa mensubkelaskan kelas-kelas {@link android.view.View} dan
+{@link android.view.ViewGroup} (atau subkelas yang ada) untuk membuat widget dan
+layout Anda sendiri dan menerapkannya ke layout aktivitas Anda.</p>
+
+<p>Cara paling umum untuk mendefinisikan layout dengan menggunakan tampilan adalah dengan file layout XML yang disimpan dalam
+sumber daya aplikasi Anda. Dengan cara ini, Anda bisa memelihara desain antarmuka pengguna Anda secara terpisah dari
+kode yang mendefinisikan perilaku aktivitas. Anda bisa mengatur layout sebagai UI
+aktivitas Anda dengan {@link android.app.Activity#setContentView(int) setContentView()}, dengan meneruskan
+ID sumber daya untuk layout itu. Akan tetapi, Anda juga bisa membuat {@link android.view.View} baru dalam
+kode aktivitas dan membuat hierarki tampilan dengan menyisipkan {@link
+android.view.View} baru ke dalam {@link android.view.ViewGroup}, kemudian menggunakan layout itu dengan meneruskan akar
+{@link android.view.ViewGroup} ke {@link android.app.Activity#setContentView(View)
+setContentView()}.</p>
+
+<p>Untuk informasi tentang cara membuat antarmuka pengguna, lihat dokumentasi <a href="{@docRoot}guide/topics/ui/index.html">Antarmuka Pengguna</a>.</p>
+
+
+
+<h3 id="Declaring">Mendeklarasikan aktivitas dalam manifes</h3>
+
+<p>Anda harus mendeklarasikan aktivitas dalam file manifes agar file itu
+bisa diakses oleh sistem. Untuk mendeklarasikan aktivitas, bukalah file manifes Anda dan tambahkan sebuah elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+sebagai anak elemen <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+. Misalnya:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
+      &lt;activity android:name=".ExampleActivity" /&gt;
+      ...
+  &lt;/application ... &gt;
+  ...
+&lt;/manifest &gt;
+</pre>
+
+<p>Ada beberapa atribut lain yang bisa Anda sertakan dalam elemen ini, untuk mendefinisikan properti
+misalnya label untuk aktivitas, ikon untuk aktivitas, atau tema untuk memberi gaya ke
+UI aktivitas. Atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a>
+ adalah satu-satunya atribut yang diperlukan&mdash;atribut ini menetapkan nama kelas aktivitas. Setelah
+Anda mempublikasikan aplikasi, Anda tidak boleh mengubah nama ini, karena jika melakukannya, Anda bisa merusak
+sebagian fungsionalitas, misalnya pintasan aplikasi (bacalah posting blog berjudul <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>).</p>
+
+<p>Lihat acuan elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+untuk informasi selengkapnya tentang cara mendeklarasikan aktivitas Anda dalam manifes.</p>
+
+
+<h4>Menggunakan filter intent</h4>
+
+<p>Elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> juga bisa menetapkan berbagai filter intent&mdash;dengan menggunakan elemen <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> &mdash;untuk mendeklarasikan cara komponen aplikasi lain
+mengaktifkannya.</p>
+
+<p>Bila Anda membuat aplikasi baru dengan Android SDK Tools, aktivitas stub
+yang dibuat untuk Anda secara otomatis menyertakan filter intent yang mendeklarasikan respons
+aktivitas pada tindakan "main" (utama) dan harus diletakkan dalam kategori "launcher"). Filter intent
+terlihat seperti ini:</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity" android:icon="@drawable/app_icon"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</pre>
+
+<p>Elemen <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> menetapkan bahwa ini adalah titik masuk "main" ke aplikasi. Elemen <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> menetapkan bahwa aktivitas ini harus tercantum dalam launcher aplikasi
+sistem (untuk memungkinkan pengguna meluncurkan aktivitas ini).</p>
+
+<p>Jika Anda bermaksud agar aplikasi dimuat dengan sendirinya dan tidak memperbolehkan aplikasi lain
+mengaktifkan aktivitasnya, maka Anda tidak memerlukan filter intent lain. Hanya satu aktivitas yang boleh
+memiliki tindakan "main" dan kategori "launcher", seperti dalam contoh sebelumnya. Aktivitas yang
+tidak ingin Anda sediakan untuk aplikasi lain tidak boleh memiliki filter intent dan Anda bisa
+memulai sendiri aktivitas dengan menggunakan intent secara eksplisit (seperti dibahas di bagian berikut).</p>
+
+<p>Akan tetapi, jika ingin aktivitas Anda merespons intent implisit yang dikirim dari
+aplikasi lain (dan aplikasi Anda sendiri), maka Anda harus mendefinisikan filter intent tambahan untuk
+aktivitas. Untuk masing-masing tipe intent yang ingin direspons, Anda harus menyertakan sebuah <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
+&lt;intent-filter&gt;}</a> yang menyertakan elemen
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+&lt;action&gt;}</a> dan, opsional, sebuah elemen <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+&lt;category&gt;}</a> dan/atau elemen <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+&lt;data&gt;}</a>. Elemen-elemen ini menetapkan tipe intent yang bisa
+direspons oleh aktivitas Anda.</p>
+
+<p>Untuk informasi selengkapnya tentang cara aktivitas Anda merespons intent, lihat dokumen <a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter Intent</a>.
+</p>
+
+
+
+<h2 id="StartingAnActivity">Memulai Aktivitas</h2>
+
+<p>Anda bisa memulai aktivitas lain dengan memanggil {@link android.app.Activity#startActivity
+  startActivity()}, dengan meneruskan sebuah {@link android.content.Intent} yang menjelaskan aktivitas
+  yang ingin Anda mulai. Intent menetapkan aktivitas persis yang ingin Anda mulai atau menjelaskan
+  tipe tindakan yang ingin Anda lakukan (dan sistem akan memilih aktivitas yang sesuai untuk Anda,
+yang bahkan
+  bisa berasal dari aplikasi berbeda). Intent juga bisa membawa sejumlah kecil data untuk
+  digunakan oleh aktivitas yang dimulai.</p>
+
+<p>Saat bekerja dalam aplikasi sendiri, Anda nanti akan sering meluncurkan aktivitas yang dikenal saja.
+ Anda bisa melakukannya dengan membuat intent yang mendefinisikan secara eksplisit aktivitas yang ingin Anda mulai,
+dengan menggunakan nama kelas. Misalnya, beginilah cara satu aktivitas memulai aktivitas lain bernama {@code
+SignInActivity}:</p>
+
+<pre>
+Intent intent = new Intent(this, SignInActivity.class);
+startActivity(intent);
+</pre>
+
+<p>Akan tetapi, aplikasi Anda mungkin juga perlu melakukan beberapa tindakan, misalnya mengirim email,
+  pesan teks, atau pembaruan status, dengan menggunakan data dari aktivitas Anda. Dalam hal ini, aplikasi Anda mungkin
+ tidak memiliki aktivitasnya sendiri untuk melakukan tindakan tersebut, sehingga Anda bisa memanfaatkan aktivitas
+  yang disediakan oleh aplikasi lain pada perangkat, yang bisa melakukan tindakan itu untuk Anda. Inilah saatnya
+intent benar-benar berharga&mdash;Anda bisa membuat intent yang menjelaskan tindakan yang ingin
+dilakukan dan sistem
+  akan meluncurkan aktivitas yang tepat dari aplikasi lain. Jika ada
+  beberapa aktivitas yang bisa menangani intent itu, pengguna bisa memilih aktivitas yang akan digunakan. Misalnya,
+  jika Anda ingin memperbolehkan pengguna mengirim pesan email, Anda bisa membuat
+  intent berikut:</p>
+
+<pre>
+Intent intent = new Intent(Intent.ACTION_SEND);
+intent.putExtra(Intent.EXTRA_EMAIL, recipientArray);
+startActivity(intent);
+</pre>
+
+<p>Ekstra {@link android.content.Intent#EXTRA_EMAIL} yang ditambahkan ke intent adalah sebuah larik string
+  alamat email yang menjadi tujuan pengiriman email. Bila aplikasi email merespons intent ini,
+ aplikasi itu akan membaca larik string yang disediakan dalam ekstra dan meletakkannya dalam bidang "to"
+  pada formulir penulisan email. Dalam situasi ini, aktivitas aplikasi email dimulai dan bila
+  pengguna selesai, aktivitas Anda akan dilanjutkan.</p>
+
+
+
+
+<h3 id="StartingAnActivityForResult">Memulai aktivitas agar berhasil</h3>
+
+<p>Kadang-kadang, Anda mungkin ingin menerima hasil dari aktivitas yang Anda mulai. Dalam hal itu,
+  mulailah aktivitas dengan memanggil {@link android.app.Activity#startActivityForResult
+  startActivityForResult()} (sebagai ganti {@link android.app.Activity#startActivity
+  startActivity()}). Untuk menerima hasil dari
+aktivitas selanjutnya nanti, implementasikan metode callback {@link android.app.Activity#onActivityResult onActivityResult()}
+. Bila aktivitas selanjutnya selesai, aktivitas akan mengembalikan hasil dalam {@link
+android.content.Intent} kepada metode {@link android.app.Activity#onActivityResult onActivityResult()}
+Anda.</p>
+
+<p>Misalnya, mungkin Anda ingin pengguna mengambil salah satu kontaknya, sehingga aktivitas Anda bisa
+melakukan sesuatu dengan informasi dalam kontak itu. Begini caranya membuat intent tersebut dan
+menangani hasilnya:</p>
+
+<pre>
+private void pickContact() {
+    // Create an intent to "pick" a contact, as defined by the content provider URI
+    Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+    startActivityForResult(intent, PICK_CONTACT_REQUEST);
+}
+
+&#64;Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+    if (resultCode == Activity.RESULT_OK &amp;&amp; requestCode == PICK_CONTACT_REQUEST) {
+        // Perform a query to the contact's content provider for the contact's name
+        Cursor cursor = getContentResolver().query(data.getData(),
+        new String[] {Contacts.DISPLAY_NAME}, null, null, null);
+        if (cursor.moveToFirst()) { // True if the cursor is not empty
+            int columnIndex = cursor.getColumnIndex(Contacts.DISPLAY_NAME);
+            String name = cursor.getString(columnIndex);
+            // Do something with the selected contact's name...
+        }
+    }
+}
+</pre>
+
+<p>Contoh ini menunjukkan logika dasar yang harus Anda gunakan dalam metode {@link
+android.app.Activity#onActivityResult onActivityResult()} Anda untuk menangani
+hasil aktivitas. Syarat pertama memeriksa apakah permintaan berhasil&mdash;jika ya, maka
+ {@code resultCode} akan berupa {@link android.app.Activity#RESULT_OK}&mdash;dan apakah permintaan
+yang direspons hasil ini dikenal&mdash;dalam hal ini, {@code requestCode} cocok dengan
+parameter kedua yang dikirim dengan {@link android.app.Activity#startActivityForResult
+startActivityForResult()}. Dari sana, kode akan menangani hasil aktivitas dengan membuat query
+data yang dihasilkan dalam{@link android.content.Intent} (parameter {@code data}).</p>
+
+<p>Yang terjadi adalah {@link
+android.content.ContentResolver} melakukan query terhadap penyedia konten, yang menghasilkan
+{@link android.database.Cursor} yang memperbolehkan data query dibaca. Untuk informasi selengkapnya, lihat dokumen
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Penyedia Konten</a>.</p>
+
+<p>Untuk informasi selengkapnya tentang menggunakan intent, lihat dokumen <a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter
+Intent</a>.</p>
+
+
+<h2 id="ShuttingDown">Mematikan Aktivitas</h2>
+
+<p>Anda bisa mematikan aktivitas dengan memanggil metode {@link android.app.Activity#finish
+finish()}-nya. Anda juga bisa mematikan aktivitas terpisah yang sebelumnya Anda mulai dengan memanggil
+{@link android.app.Activity#finishActivity finishActivity()}.</p>
+
+<p class="note"><strong>Catatan:</strong> Pada umumnya, Anda tidak boleh secara eksplisit mengakhiri aktivitas
+dengan menggunakan metode-metode ini. Seperti yang dibahas di bagian berikut tentang daur hidup aktivitas,
+sistem Android mengelola hidup aktivitas untuk Anda, sehingga Anda tidak perlu menyelesaikan sendiri
+aktivitas tersebut. Memanggil metode-metode ini bisa berpengaruh negatif pada pengalaman
+pengguna yang diharapkan dan hanya boleh digunakan bila Anda benar-benar tidak ingin pengguna kembali ke
+instance aktivitas ini.</p>
+
+
+<h2 id="Lifecycle">Mengelola Daur Hidup Aktivitas</h2>
+
+<p>Mengelola daur hidup aktivitas dengan mengimplementasikan metode-metode callback sangat
+penting untuk mengembangkan
+aplikasi yang kuat dan fleksibel. Daur hidup aktivitas dipengaruhi langsung oleh kaitannya dengan
+aktivitas lain, tugasnya, serta back-stack.</p>
+
+<p>Pada dasarnya, sebuah aktivitas bisa berada dalam tiga status:</p>
+
+<dl>
+  <dt><i>Dilanjutkan</i></dt>
+    <dd>Aktivitas berada di latar depan layar dan mendapatkan fokus pengguna. (Status ini
+kadang-kadang disebut juga dengan "running" (berjalan).)</dd>
+
+  <dt><i>Dihentikan sementara</i></dt>
+    <dd>Aktivitas lain berada di latar depan dan mendapat fokus, namun aktivitas ini masih terlihat. Yakni,
+aktivitas lain terlihat di atas aplikasi ini dan aktivitas itu setengah transparan atau tidak
+menuutpi seluruh layar. Aktivitas yang dihentikan sementara adalah benar-benar hidup (objek {@link android.app.Activity}
+dipertahankan dalam memori, objek itu memelihara semua informasi status dan anggota, dan tetap dikaitkan dengan
+window manager), namun bisa dimatikan oleh sistem dalam situasi memori sangat rendah.</dd>
+
+  <dt><i>Dihentikan</i></dt>
+    <dd>Aktivitas ditutupi sepenuhnya oleh aktivitas lain (aktivitas sekarang berada di
+"latar belakang"). Aktivitas yang dihentikan juga masih hidup (objek {@link android.app.Activity}
+dipertahankan dalam memori, objek itu menjaga semua informasi status dan anggota, namun <em>tidak</em>
+dikaitkan dengan window manager). Akan tetapi, aktivitas tidak lagi terlihat bagi pengguna dan
+bisa dimatikan oleh sistem bila memori diperlukan di lain.</dd>
+</dl>
+
+<p>Jika aktivitas dihentikan sementara atau dihentikan, sistem bisa mengeluarkannya dari memori baik dengan memintanya agar
+diakhiri (memanggil metode {@link android.app.Activity#finish finish()}-nya), atau sekadar mematikan
+prosesnya.  Bila dibuka lagi (setelah diakhiri atau dimatikan), aktivitas harus dibuat dari
+awal.</p>
+
+
+
+<h3 id="ImplementingLifecycleCallbacks">Mengimplementasikan callback daur hidup</h3>
+
+<p>Saat bertransisi ke dalam dan ke luar berbagai status yang dijelaskan di atas, aktivitas diberi tahu
+melalui berbagai metode callback. Semua metode callback adalah sangkutan yang
+bisa Anda kesampingkan untuk melakukan pekerjaan yang sesuai saat status aktivitas Anda berubah. Aktivitas skeleton
+berikut menyertakan setiap metode daur hidup mendasar:</p>
+
+
+<pre>
+public class ExampleActivity extends Activity {
+    &#64;Override
+    public void {@link android.app.Activity#onCreate onCreate}(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // The activity is being created.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStart onStart()} {
+        super.onStart();
+        // The activity is about to become visible.
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onResume onResume()} {
+        super.onResume();
+        // The activity has become visible (it is now "resumed").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onPause onPause()} {
+        super.onPause();
+        // Another activity is taking focus (this activity is about to be "paused").
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onStop onStop()} {
+        super.onStop();
+        // The activity is no longer visible (it is now "stopped")
+    }
+    &#64;Override
+    protected void {@link android.app.Activity#onDestroy onDestroy()} {
+        super.onDestroy();
+        // The activity is about to be destroyed.
+    }
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Implementasi Anda terhadap metode-metode daur hidup ini harus
+selalu memanggil implementasi superkelas sebelum melakukan pekerjaan apa pun, seperti yang ditampilkan dalam contoh-contoh di atas.</p>
+
+<p>Bersama-sama, semua metode ini mendefinisikan seluruh daur hidup sebuah aktivitas. Dengan mengimplementasikan
+metode-metode ini, Anda bisa memantau tiga loop tersarang (nested loop) dalam daur hidup aktivitas: </p>
+
+<ul>
+<li><b>Seluruh masa hidup</b> aktivitas berlangsung antara panggilan ke {@link
+android.app.Activity#onCreate onCreate()} dan panggilan ke {@link
+android.app.Activity#onDestroy}. Aktivitas Anda harus melakukan penyiapan
+status "global" (misalnya mendefinisikan layout) dalam {@link android.app.Activity#onCreate onCreate()}, dan
+melepas semua sisa sumber daya dalam {@link android.app.Activity#onDestroy}. Misalnya, jika
+aktivitas Anda memiliki sebuah thread yang berjalan di latar belakang untuk mengunduh data dari jaringan, aktivitas itu bisa membuat
+thread itu dalam {@link android.app.Activity#onCreate onCreate()} kemudian menghentikan thread dalam {@link
+android.app.Activity#onDestroy}.</li>
+
+<li><p><b>Masa pakai terlihat</b> (visible lifetime) aktivitas berlangsung antara panggilan ke {@link
+android.app.Activity#onStart onStart()} dan panggilan ke {@link
+android.app.Activity#onStop onStop()}. Selama ini, pengguna bisa melihat aktivitas
+pada layar dan berinteraksi dengannya. Misalnya, {@link android.app.Activity#onStop onStop()} dipanggil
+bila sebuah aktivitas baru dimulai dan aktivitas ini tidak lagi terlihat. Di antara dua metode ini, Anda bisa
+memelihara sumber daya yang diperlukan untuk menampilkan aktivitas kepada pengguna. Misalnya, Anda bisa mendaftarkan sebuah
+{@link android.content.BroadcastReceiver} dalam {@link
+android.app.Activity#onStart onStart()} untuk memantau perubahan yang berdampak pada UI Anda, dan mencabut pendaftarannya
+dalam {@link android.app.Activity#onStop onStop()} bila pengguna tidak bisa lagi melihat apa yang sedang Anda
+tampilkan. Sistem bisa memanggil {@link android.app.Activity#onStart onStart()} dan {@link
+android.app.Activity#onStop onStop()} beberapa kali selama masa pakai aktivitas, sambil
+aktivitas berganti-ganti antara terlihat dan tersembunyi bagi pengguna.</p></li>
+
+<li><p><b>Masa pakai latar depan</b> aktivitas berlangsung antara panggilan ke {@link
+android.app.Activity#onResume onResume()} dan panggilan ke {@link android.app.Activity#onPause
+onPause()}. Selama waktu ini, aktivitas berada di depan semua aktivitas lain pada layar dan mendapatkan
+fokus input pengguna.  Aktivitas bisa sering bertransisi ke dalam dan ke luar latar depan&mdash;misalnya,
+ {@link android.app.Activity#onPause onPause()} dipanggil bila perangkat masuk ke mode tidur atau
+bila dialog muncul. Karena status ini bisa sering bertransisi, kode dalam dua metode ini harus
+cukup ringan untuk menghindari transisi lamban yang membuat pengguna menunggu.</p></li>
+</ul>
+
+<p>Gambar 1 mengilustrasikan loop dan path yang mungkin diambil sebuah aktivitas di antara status-status.
+Persegi panjang mewakili metode callback yang bisa Anda implementasikan untuk melakukan operasi saat
+aktivitas bertransisi di antara status. <p>
+
+<img src="{@docRoot}images/activity_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Gambar 1.</strong> Daur hidup aktivitas.</p>
+
+<p>Metode-metode callback daur hidup yang sama tercantum dalam tabel 1, yang menjelaskan setiap metode callback
+secara lebih detail dan menentukan lokasinya masing-masing dalam
+daur hidup aktivitas keseluruhan, termasuk apakah sistem bisa mematikan aktivitas setelah
+metode callback selesai.</p>
+
+<p class="table-caption"><strong>Tabel 1.</strong> Rangkuman metode callback
+daur hidup aktivitas.</p>
+
+<table border="2" width="85%" frame="hsides" rules="rows">
+<colgroup align="left" span="3"></colgroup>
+<colgroup align="left"></colgroup>
+<colgroup align="center"></colgroup>
+<colgroup align="center"></colgroup>
+
+<thead>
+<tr><th colspan="3">Metode</th> <th>Keterangan</th> <th>Bisa dimatikan setelahnya?</th> <th>Berikutnya</th></tr>
+</thead>
+
+<tbody>
+<tr>
+  <td colspan="3" align="left"><code>{@link android.app.Activity#onCreate onCreate()}</code></td>
+  <td>Dipanggil saat aktivitas pertama kali dibuat.
+      Di sinilah Anda harus melakukan semua persiapan statis normal &mdash;
+      membuat tampilan, mengikat data ke daftar, dan sebagainya.  Metode ini diberi
+      sebuah objek Bundle yang berisi status aktivitas sebelumnya, jika
+      status itu tertangkap (lihat <a href="#actstate">Menyimpan Status Aktivitas</a>,
+      nanti).
+      <p>Selalu diikuti oleh {@code onStart()}.</p></td>
+  <td align="center">Tidak</td>
+      <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onRestart
+onRestart()}</code></td>
+   <td>Dipanggil setelah aktivitas dihentikan, tepat sebelum
+       dimulai lagi.
+       <p>Selalu diikuti oleh {@code onStart()}</p></td>
+   <td align="center">Tidak</td>
+   <td align="center">{@code onStart()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStart onStart()}</code></td>
+   <td>Dipanggil tepat sebelum aktivitas menjadi terlihat bagi pengguna.
+       <p>Diikuti oleh {@code onResume()} jika aktivitas maju
+       ke latar depan, atau {@code onStop()} jika menjadi tersembunyi.</p></td>
+    <td align="center">Tidak</td>
+    <td align="center">{@code onResume()} <br/>atau<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td align="left"><code>{@link android.app.Activity#onResume onResume()}</code></td>
+   <td>Dipanggil tepat sebelum aktivitas mulai
+       berinteraksi dengan pengguna.  Pada titik ini, aktivitas berada di
+       puncak tumpukan aktivitas, dengan input pengguna menuju kepadanya.
+       <p>Selalu diikuti oleh {@code onPause()}.</p></td>
+   <td align="center">Tidak</td>
+   <td align="center">{@code onPause()}</td>
+</tr>
+
+<tr>
+   <td align="left"><code>{@link android.app.Activity#onPause onPause()}</code></td>
+   <td>Dipanggil bila sistem akan memulai pelanjutan
+       aktivitas lain.  Metode ini biasanya digunakan untuk menerapkan (commit) perubahan yang tidak tersimpan pada
+       data persisten, menghentikan animasi dan hal-hal lain yang mungkin menghabiskan
+       CPU, dan sebagainya.  Metode ini harus melakukan apa saja yang dilakukannya dengan sangat cepat, karena
+       aktivitas berikutnya tidak akan dilanjutkan hingga aktivitas ini kembali.
+       <p>Diikuti oleh {@code onResume()} jika aktivitas
+       kembali ke depan, atau oleh {@code onStop()} jika menjadi
+       tidak terlihat bagi pengguna.</td>
+   <td align="center"><strong style="color:#800000">Ya</strong></td>
+   <td align="center">{@code onResume()} <br/>atau<br/> {@code onStop()}</td>
+</tr>
+
+<tr>
+   <td colspan="2" align="left"><code>{@link android.app.Activity#onStop onStop()}</code></td>
+   <td>Dipanggil bila aktivitas tidak lagi terlihat bagi pengguna.  Hal ini
+       bisa terjadi karena aktivitas sedang dimusnahkan, atau karena aktivitas lain
+       (aktivitas yang ada atau yang baru) telah dilanjutkan dan sedang menutupinya.
+       <p>Diikuti oleh {@code onRestart()} jika
+       aktivitas kembali untuk berinteraksi dengan pengguna, atau oleh
+       {@code onDestroy()} jika aktivitas ini akan menghilang.</p></td>
+   <td align="center"><strong style="color:#800000">Ya</strong></td>
+   <td align="center">{@code onRestart()} <br/>atau<br/> {@code onDestroy()}</td>
+</tr>
+
+<tr>
+   <td colspan="3" align="left"><code>{@link android.app.Activity#onDestroy
+onDestroy()}</code></td>
+   <td>Dipanggil sebelum aktivitas dimusnahkan.  Inilah panggilan terakhir
+       yang akan diterima aktivitas.  Metode ini bisa dipanggil karena
+       aktivitas selesai (seseorang memanggil <code>{@link android.app.Activity#finish
+       finish()}</code> padanya), atau karena sistem memusnahkan sementara
+       instance aktivitas ini untuk menghemat tempat.  Anda bisa membedakan
+       kedua skenario ini dengan metode <code>{@link
+       android.app.Activity#isFinishing isFinishing()}</code>.</td>
+   <td align="center"><strong style="color:#800000">Ya</strong></td>
+   <td align="center"><em>tidak ada</em></td>
+</tr>
+</tbody>
+</table>
+
+<p>Kolom berlabel "Bisa dimatikan setelahnya?" menunjukkan apakah sistem bisa
+atau tidak mematikan proses yang menjadi host aktivitas kapan saja <em>setelah metode kembali</em>, tanpa
+menjalankan baris lain pada kode aktivitas.  Tiga metode ini ditandai "ya": ({@link
+android.app.Activity#onPause
+onPause()}, {@link android.app.Activity#onStop onStop()}, dan {@link android.app.Activity#onDestroy
+onDestroy()}). Karena {@link android.app.Activity#onPause onPause()} adalah yang pertama
+dari tiga, begitu aktivitas dibuat, {@link android.app.Activity#onPause onPause()} adalah
+metode terakhir yang dipastikan akan dipanggil sebelum proses <em>bisa</em> dimatikan&mdash;jika
+sistem harus memulihkan memori dalam keadaan darurat, maka {@link
+android.app.Activity#onStop onStop()} dan {@link android.app.Activity#onDestroy onDestroy()} mungkin
+tidak dipanggil. Karena itu, Anda harus menggunakan {@link android.app.Activity#onPause onPause()} untuk menulis
+data persisten yang penting (misalnya hasil edit pengguna) ke penyimpanan. Akan tetapi, Anda harus selektif dalam hal
+informasi yang harus dipertahankan selama {@link android.app.Activity#onPause onPause()}, karena setiap
+prosedur pemblokiran dalam metode ini akan memblokir transisi ke aktivitas berikutnya dan memperlambat
+pengalaman pengguna.</p>
+
+<p> Metode-metode yang ditandai "Tidak" dalam kolom <b>Bisa dimatikan</b> melindungi proses yang menjadi host
+aktivitas dari dimatikan sejak saat metode dipanggil.  Jadi, aktivitas bisa dimatikan
+sejak {@link android.app.Activity#onPause onPause()} kembali hingga waktu
+{@link android.app.Activity#onResume onResume()} dipanggil. Aktivitas tidak akan lagi bisa dimatikan hingga
+{@link android.app.Activity#onPause onPause()} dipanggil lagi dan kembali. </p>
+
+<p class="note"><strong>Catatan:</strong> Aktivitas yang tidak "bisa dimatikan" secara teknis oleh
+definisi dalam tabel 1 masih bisa dimatikan oleh sistem&mdash;namun itu hany terjadi dalam
+situasi ekstrem bila tidak ada jalan lain. Kapan aktivitas bisa dimatikan
+akan dibahas selengkapnya dalam dokumen <a href="{@docRoot}guide/components/processes-and-threads.html">Proses dan
+Threading</a>.</p>
+
+
+<h3 id="SavingActivityState">Menyimpan status aktivitas</h3>
+
+<p>Pengantar untuk <a href="#Lifecycle">Mengelola Daur Hidup Aktivitas</a> secara ringkas menyebutkan
+bahwa
+bila aktivitas dihentikan sementara atau dihentikan, status aktivitas akan dipertahankan. Hal itu terjadi karena
+objek {@link android.app.Activity} masih ditahan dalam memori saat aktivitas dihentikan sementara atau
+dihentikan&mdash;semua informasi tentang anggota dan statusnya saat ini masih hidup. Jadi, setiap perubahan
+yang dibuat pengguna dalam aktivitas akan dipertahankan sehingga bila aktivitas kembali ke
+latar depan (bila "dilanjutkan"), perubahan itu masih ada.</p>
+
+<p>Akan tetapi, bila sistem memusnahkan aktivitas untuk memulihkan memori, objek {@link
+android.app.Activity} akan dimusnahkan, sehingga sistem tidak bisa sekadar melanjutkan aktivitas dengan status
+tidak berubah. Sebagai gantinya, sistem harus membuat ulang objek {@link android.app.Activity} jika pengguna
+menyusuri kembali ke aktivitas tersebut. Namun, pengguna tidak menyadari
+bahwa sistem memusnahkan aktivitas dan membuatnya kembali dan, karena itu, mungkin
+mengharapkan aktivitas untuk sama persis dengan sebelumnya. Dalam situasi ini, Anda bisa memastikan bahwa
+informasi penting tentang status aktivitas tetap terjaga dengan mengimplementasikan
+metode callback tambahan yang memungkinkan Anda menyimpan informasi tentang status aktivitas: {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}.</p>
+
+<p>Sistem memanggil {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+sebelum membuat aktivitas rawan terhadap pemusnahan. Sistem meneruskan ke metode ini
+sebuah {@link android.os.Bundle} tempat Anda bisa menyimpan
+informasi status tentang aktivitas sebagai pasangan nama-nilai, dengan menggunakan metode-metode misalnya {@link
+android.os.Bundle#putString putString()} dan {@link
+android.os.Bundle#putInt putInt()}. Kemudian, jika sistem mematikan proses aplikasi Anda
+dan pengguna menyusuri kembali ke aktivitas tersebut, sistem akan membuat kembali aktivitas dan meneruskan
+{@link android.os.Bundle} ke {@link android.app.Activity#onCreate onCreate()} maupun {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()}. Dengan menggunakan salah satu
+metode ini, Anda bisa mengekstrak status tersimpan dari {@link android.os.Bundle} dan memulihkan
+status aktivitas. Jika tidak ada informasi status untuk dipulihkan, maka {@link
+android.os.Bundle} yang diteruskan kepada adalah Anda null (yang akan terjadi bila aktivitas dibuat untuk
+pertama kali).</p>
+
+<img src="{@docRoot}images/fundamentals/restore_instance.png" alt="" />
+<p class="img-caption"><strong>Gambar 2.</strong> Ada dua cara yang bisa digunakan aktivitas untuk kembali ke fokus pengguna
+dengan status tetap: aktivitas dimusnahkan, kemudian dibuat kembali, dan aktivitas harus memulihkan
+status yang disimpan sebelumnya, atau aktivitas dihentikan, kemudian dilanjutkan dengan status aktivitas
+tetap.</p>
+
+<p class="note"><strong>Catatan:</strong> Tidak ada jaminan bahwa {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} akan dipanggil sebelum
+aktivitas Anda dimusnahkan, karena bisa saja terjadi aktivitas tidak perlu menyimpan status
+(misalnya saat pengguna meninggalkan aktivitas Anda dengan menggunakan tombol <em>Back</em>, karena pengguna menutup aktivitas
+secara eksplisit
+). Jika sistem memanggil {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()}, ini akan dilakukan sebelum {@link
+android.app.Activity#onStop onStop()} dan mungkin sebelum {@link android.app.Activity#onPause
+onPause()}.</p>
+
+<p>Akan tetapi, sekalipun Anda tidak melakukan apa-apa dan tidak mengimplementasikan {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()}, beberapa status aktivitas
+akan dipulihkan oleh implementasi default {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} dalam kelas {@link android.app.Activity}. Khususnya,
+implementasi default akan memanggil metode {@link
+android.view.View#onSaveInstanceState onSaveInstanceState()} yang sesuai untuk setiap {@link
+android.view.View} dalam layout, yang memungkinkan setiap tampilan untuk memberi informasi tentang dirinya
+yang harus disimpan. Hampir setiap widget dalam kerangka kerja Android mengimplementasikan metode ini
+sebagaimana mestinya, sehingga setiap perubahan yang terlihat pada UI akan disimpan dan dipulihkan secara otomatis bila
+aktivitas Anda dibuat kembali. Misalnya, widget {@link android.widget.EditText} menyimpan teks apa saja
+yang dimasukkan oleh pengguna dan widget {@link android.widget.CheckBox} menyimpan baik teks itu diperiksa maupun
+tidak. Satu-satunya pekerjaan yang Anda perlukan adalah memberikan ID unik (dengan atribut <a href="{@docRoot}guide/topics/resources/layout-resource.html#idvalue">{@code android:id}</a>
+) untuk masing-masing widget yang ingin disimpan statusnya. Jika widget tidak memiliki ID, maka sistem
+tidak bisa menyimpan statusnya.</p>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>Anda juga bisa menghentikan secara eksplisit sebuah tampilan dalam layout Anda agar tidak menyimpan statusnya dengan mengatur atribut
+{@link android.R.attr#saveEnabled android:saveEnabled} ke {@code "false"} atau dengan memanggil
+metode {@link android.view.View#setSaveEnabled setSaveEnabled()}. Biasanya, Anda tidak boleh
+menonaktifkannya, namun Anda boleh melakukannya jika ingin memulihkan status UI aktivitas secara berbeda.</p>
+</div>
+</div>
+
+<p>Walaupun implementasi default {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} menyimpan informasi yang berguna tentang
+UI aktivitas, Anda mungkin masih perlu mengesampingkannya untuk menyimpan informasi tambahan.
+Misalnya, Anda mungkin perlu menyimpan nilai-nilai anggota yang berubah selama masa pakai aktivitas (yang
+mungkin berkorelasi dengan nilai-nilai yang dipulihkan dalam UI, namun anggota-anggota yang menyimpan nilai-nilai UI itu tidak
+dipulihkan, secara default).</p>
+
+<p>Karena implementasi default {@link
+android.app.Activity#onSaveInstanceState onSaveInstanceState()} membantu menyimpan status UI, jika
+Anda mengesampingkan metode ini untuk menyimpan informasi tambahan status, Anda harus selalu memanggil
+implementasi superkelas {@link android.app.Activity#onSaveInstanceState onSaveInstanceState()}
+sebelum melakukan pekerjaan apa pun. Demikian pula, Anda juga harus memanggil implementasi superkelas {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} jika Anda mengesampingkannya, sehingga
+implementasi default bisa memulihkan status tampilan.</p>
+
+<p class="note"><strong>Catatan:</strong> Karena {@link android.app.Activity#onSaveInstanceState
+onSaveInstanceState()} tidak dijamin
+akan dipanggil, Anda harus menggunakannya hanya untuk mencatat status aktivitas sementara (transient) (status
+UI)&mdash;Anda tidak boleh menggunakannya untuk menyimpan data persisten.  Sebagai gantinya, Anda harus menggunakan {@link
+android.app.Activity#onPause onPause()} untuk menyimpan data persisten (misalnya data yang harus disimpan
+ke database) saat pengguna meninggalkan aktivitas.</p>
+
+<p>Salah satu cara yang baik untuk menguji kemampuan aplikasi dalam memulihkan statusnya adalah cukup dengan memutar
+perangkat sehingga orientasi layarnya berubah. Bila orientasi layar berubah, sistem
+akan memusnahkan dan membuat kembali aktivitas untuk menerapkan sumber daya alternatif yang mungkin tersedia
+untuk konfigurasi layar baru. Karena alasan ini saja, sangat penting bahwa aktivitas Anda
+memulihkan statusnya secara lengkap saat dibuat kembali, karena pengguna memutar layar secara rutin saat
+menggunakan aplikasi.</p>
+
+
+<h3 id="ConfigurationChanges">Menangani perubahan konfigurasi</h3>
+
+<p>Sebagian konfigurasi perangkat bisa berubah saat runtime (misalnya orientasi layar, ketersediaan keyboard
+, dan bahasa). Bila terjadi perubahan demikian, Android akan membuat kembali aktivitas yang berjalan
+(sistem akan memanggil {@link android.app.Activity#onDestroy}, kemudian segera memanggil {@link
+android.app.Activity#onCreate onCreate()}). Perilaku ini
+didesain untuk membantu aplikasi Anda menyesuaikan diri dengan konfigurasi baru dengan cara memuat ulang
+aplikasi Anda secara otomatis dengan sumber daya alternatif yang telah Anda sediakan (misalnya layout yang berbeda untuk
+layar orientasi dan ukuran yang berbeda).</p>
+
+<p>Jika Anda mendesain aktivitas dengan benar untuk menangani restart karena perubahan orientasi layar dan
+memulihkan status aktivitas seperti yang dijelaskan di atas, aplikasi Anda akan lebih tahan terhadap
+kejadian tidak terduga lainnya dalam daur hidup aktivitas.</p>
+
+<p>Cara terbaik menangani restart tersebut adalah
+  menyimpan dan memulihkan status aktivitas Anda dengan menggunakan {@link
+  android.app.Activity#onSaveInstanceState onSaveInstanceState()} dan {@link
+android.app.Activity#onRestoreInstanceState onRestoreInstanceState()} (atau {@link
+android.app.Activity#onCreate onCreate()}), seperti yang dibahas di bagian sebelumnya.</p>
+
+<p>Untuk informasi selengkapnya tentang konfigurasi perubahan yang terjadi saat program berjalan dan cara menanganinya
+, bacalah panduan untuk <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani
+Perubahan Runtime</a>.</p>
+
+
+
+<h3 id="CoordinatingActivities">Mengoordinasikan aktivitas</h3>
+
+ <p>Bila suatu aktivitas memulai aktivitas lain, keduanya akan mengalami transisi daur hidup. Aktivitas pertama
+akan berhenti sementara dan berhenti sama sekali (walau tidak akan berhenti jika masih terlihat di latar belakang), saat
+aktivitas lain dibuat. Jika aktivitas-aktivitas ini berbagi data yang disimpan ke disk atau di tempat lain, Anda perlu
+memahami bahwa aktivitas pertama tidak dihentikan sepenuhnya sebelum aktivitas kedua dibuat.
+Sebagai gantinya, proses akan memulai aktivitas kedua secara tumpang tindih dengan proses penghentian
+aktivitas pertama.</p>
+
+<p>Urutan callback daur hidup didefinisikan dengan baik, khususnya bila kedua aktivitas berada dalam
+proses yang sama dan salah satunya memulai yang lain. Berikut ini adalah urutan operasi yang terjadi bila Aktivitas
+A memulai Aktivitas B: </p>
+
+<ol>
+<li>Metode {@link android.app.Activity#onPause onPause()} Aktivitas A berjalan.</li>
+
+<li>Metode-metode {@link android.app.Activity#onCreate onCreate()}, {@link
+android.app.Activity#onStart onStart()}, dan {@link android.app.Activity#onResume onResume()}
+Aktivitas B berjalan secara berurutan. (Aktivitas B sekarang mendapatkan fokus pengguna.)</li>
+
+<li>Kemudian, jika Aktivitas A tidak lagi terlihat di layar, metode {@link
+android.app.Activity#onStop onStop()}-nya akan dijalankan.</li>
+</ol>
+
+ <p>Urutan callback daur hidup yang bisa diramalkan ini memungkinkan Anda mengelola transisi
+informasi dari satu aktivitas ke aktivitas lainnya. Misalnya, jika Anda harus menulis ke database saat
+aktivitas pertama berhenti agar aktivitas berikutnya bisa membacanya, maka Anda harus menulis ke
+database selama {@link android.app.Activity#onPause onPause()} sebagai ganti selama {@link
+android.app.Activity#onStop onStop()}.</p>
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>For more information about how Android maintains a history of activities and
+enables user multitasking, continue with the <b><a
+href="{@docRoot}guide/components/tasks-and-back-stack.html">Tasks and Back
+Stack</a></b> document.</p>
+-->
