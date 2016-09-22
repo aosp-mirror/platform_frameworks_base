@@ -205,7 +205,7 @@ from when the service is started
 while it is running ({@link android.accessibilityservice.AccessibilityService#onAccessibilityEvent
 onAccessibilityEvent()},
 {@link android.accessibilityservice.AccessibilityService#onInterrupt onInterrupt()}) to when it is
-shut down ({@link android.app.Service#onUnbind onUnbind()}).</p>
+shut down ({@link android.accessibilityservice.AccessibilityService#onUnbind onUnbind()}).</p>
 
 <ul>
   <li>{@link android.accessibilityservice.AccessibilityService#onServiceConnected
@@ -231,7 +231,7 @@ service.</li>
 providing, usually in response to a user action such as moving focus to a different control. This
 method may be called many times over the lifecycle of your service.</li>
 
-  <li>{@link android.app.Service#onUnbind onUnbind()} - (optional)
+  <li>{@link android.accessibilityservice.AccessibilityService#onUnbind onUnbind()} - (optional)
 This method is called when the system is about to shutdown the accessibility service. Use this
 method to do any one-time shutdown procedures, including de-allocating user feedback system
 services, such as the audio manager or device vibrator.</li>
@@ -283,7 +283,7 @@ retrieve the set of {@link android.view.accessibility.AccessibilityRecord} objec
 to the {@link android.view.accessibility.AccessibilityEvent} passed to you by the system. This level
 of detail provides more context for the event that triggered your accessibility service.</li>
 
-  <li>{@link android.view.accessibility.AccessibilityRecord#getSource
+  <li>{@link android.view.accessibility.AccessibilityEvent#getSource
 AccessibilityEvent.getSource()} - This method returns an {@link
 android.view.accessibility.AccessibilityNodeInfo} object. This object allows you to request view
 layout hierarchy (parents and children) of the component that originated the accessibility event.
@@ -296,10 +296,10 @@ user information to your accessibility service. For this reason, your service mu
 level of access through the accessibility <a href="#service-config">service configuration XML</a>
 file, by including the {@code canRetrieveWindowContent} attribute and setting it to {@code true}. If
 you do not include this setting in your service configuration xml file, calls to {@link
-android.view.accessibility.AccessibilityRecord#getSource getSource()} fail.</p>
+android.view.accessibility.AccessibilityEvent#getSource getSource()} fail.</p>
 
 <p class="note"><strong>Note:</strong> In Android 4.1 (API Level 16) and higher, the
-{@link android.view.accessibility.AccessibilityRecord#getSource getSource()} method,
+{@link android.view.accessibility.AccessibilityEvent#getSource getSource()} method,
 as well as {@link android.view.accessibility.AccessibilityNodeInfo#getChild
 AccessibilityNodeInfo.getChild()} and
 {@link android.view.accessibility.AccessibilityNodeInfo#getParent getParent()}, return only
@@ -372,7 +372,7 @@ public class MyAccessibilityService extends AccessibilityService {
   <a href="#service-config">service configuration file</a>. When events are received by your
   service, it can then retrieve the
   {@link android.view.accessibility.AccessibilityNodeInfo} object from the event using
-  {@link android.view.accessibility.AccessibilityRecord#getSource getSource()}.
+  {@link android.view.accessibility.AccessibilityEvent#getSource getSource()}.
   With the {@link android.view.accessibility.AccessibilityNodeInfo} object, your service can then
   explore the view hierarchy to determine what action to take and then act for the user using
   {@link android.view.accessibility.AccessibilityNodeInfo#performAction performAction()}.</p>
