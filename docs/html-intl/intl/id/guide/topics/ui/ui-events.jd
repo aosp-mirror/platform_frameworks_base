@@ -1,0 +1,291 @@
+page.title=Kejadian Input
+parent.title=Antarmuka Pengguna
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#EventListeners">Event Listener</a></li>
+    <li><a href="#EventHandlers">Event Handler</a></li>
+    <li><a href="#TouchMode">Mode Sentuh</a></li>
+    <li><a href="#HandlingFocus">Menangani Fokus</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>Di Android, ada lebih dari satu cara untuk mencegat kejadian dari interaksi pengguna dengan aplikasi Anda.
+Saat mempertimbangkan kejadian dalam antarmuka pengguna Anda, pendekatannya adalah menangkap kejadian
+dari objek View tertentu yang digunakan pengguna untuk berinteraksi. Kelas View menyediakan sarana untuk melakukannya.</p>
+
+<p>Dalam berbagai kelas View yang akan digunakan untuk menyusun layout, Anda mungkin melihat beberapa metode callback
+publik yang tampak berguna untuk kejadian UI. Metode ini dipanggil oleh kerangka kerja Android ketika masing-masing
+tindakan terjadi pada objek itu. Misalnya, bila View (seperti Button/Tombol) disentuh,
+metode <code>onTouchEvent()</code> akan dipanggil pada objek itu. Akan tetapi, untuk mencegatnya, Anda harus memperluas
+kelas dan mengesampingkan metode itu. Akan tetapi, memperluas setiap objek View
+untuk menangani kejadian seperti itu tidaklah praktis. Karena itulah kelas View juga berisi
+sekumpulan antarmuka tersarang dengan callback yang jauh lebih mudah didefinisikan. Antarmuka ini,
+yang disebut <a href="#EventListeners">event listener</a>, merupakan tiket Anda untuk menangkap interaksi pengguna dengan UI.</p>
+
+<p>Walaupun Anda akan lebih sering menggunakan event listener ini untuk interaksi pengguna,
+mungkin ada saatnya Anda ingin memperluas kelas View, untuk membuat komponen custom.
+Mungkin Anda ingin memperluas kelas {@link android.widget.Button}
+untuk membuat sesuatu yang lebih menarik. Dalam hal ini, Anda akan dapat mendefinisikan perilaku kejadian default untuk kelas Anda dengan menggunakan
+kelas <a href="#EventHandlers">event handler</a>.</p>
+
+
+<h2 id="EventListeners">Event Listener</h2>
+
+<p>Event listener merupakan antarmuka di kelas {@link android.view.View} yang berisi metode
+callback tunggal. Metode ini akan dipanggil oleh kerangka kerja Android bila View yang
+telah didaftarkan dengan listener dipicu oleh interaksi pengguna dengan item dalam UI.</p>
+
+<p>Yang juga disertakan dalam antarmuka event listener adalah metode callback berikut ini:</p>
+
+<dl>
+  <dt><code>onClick()</code></dt>
+    <dd>Dari {@link android.view.View.OnClickListener}.
+    Ini dipanggil baik saat pengguna menyentuh item
+ (bila dalam mode sentuh), maupun memfokuskan pada item dengan tombol navigasi atau trackball dan
+menekan tombol "enter" yang sesuai atau menekan trackball.</dd>
+  <dt><code>onLongClick()</code></dt>
+    <dd>Dari {@link android.view.View.OnLongClickListener}.
+    Ini dipanggil baik saat pengguna menyentuh dan menahan item (bila dalam mode sentuh),
+maupun memfokuskan pada item dengan tombol navigasi atau trackball dan
+menekan serta menahan tombol "enter" yang sesuai atau menekan dan menahan trackball (selama satu detik).</dd>
+  <dt><code>onFocusChange()</code></dt>
+    <dd>Dari {@link android.view.View.OnFocusChangeListener}.
+    Ini dipanggil saat pengguna menyusuri ke atau dari item, dengan menggunakan tombol navigasi atau trackball.</dd>
+  <dt><code>onKey()</code></dt>
+    <dd>Dari {@link android.view.View.OnKeyListener}.
+    Ini dipanggil saat pengguna memfokuskan pada item dan menekan atau melepas tombol fisik pada perangkat.</dd>
+  <dt><code>onTouch()</code></dt>
+    <dd>Dari {@link android.view.View.OnTouchListener}.
+    Ini dipanggil saat pengguna melakukan tindakan yang digolongkan sebagai kejadian sentuh, termasuk penekanan, pelepasan,
+atau gerak perpindahan pada layar (dalam batasan item itu).</dd>
+  <dt><code>onCreateContextMenu()</code></dt>
+    <dd>Dari {@link android.view.View.OnCreateContextMenuListener}.
+    Ini dipanggil saat Menu Konteks sedang dibuat (akibat "klik lama" terus-menerus). Lihat diskusi
+tentang menu konteks di panduan pengembang <a href="{@docRoot}guide/topics/ui/menus.html#context-menu">Menu</a>.
+</dd>
+</dl>
+
+<p>Metode ini satu-satunya yang menempati antarmukanya masing-masing. Untuk mendefinisikan salah satu metode ini
+dan menangani kejadian Anda, implementasikan antarmuka tersarang dalam Aktivitas Anda atau definisikan sebagai kelas anonim.
+Kemudian, teruskan satu
+instance implementasi Anda pada masing-masing metode <code>View.set...Listener()</code>. (Misalnya, panggil
+<code>{@link android.view.View#setOnClickListener(View.OnClickListener) setOnClickListener()}</code>
+dan teruskan implementasi {@link android.view.View.OnClickListener OnClickListener} Anda.)</p>
+
+<p>Contoh di bawah menunjukkan cara mendaftarkan on-click listener untuk Button. </p>
+
+<pre>
+// Create an anonymous implementation of OnClickListener
+private OnClickListener mCorkyListener = new OnClickListener() {
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+};
+
+protected void onCreate(Bundle savedValues) {
+    ...
+    // Capture our button from layout
+    Button button = (Button)findViewById(R.id.corky);
+    // Register the onClick listener with the implementation above
+    button.setOnClickListener(mCorkyListener);
+    ...
+}
+</pre>
+
+<p>Anda juga akan merasa lebih praktis mengimplementasikan OnClickListener sebagai bagian dari Aktivitas.
+Ini akan menghindari beban kelas ekstra dan alokasi objek. Misalnya:</p>
+<pre>
+public class ExampleActivity extends Activity implements OnClickListener {
+    protected void onCreate(Bundle savedValues) {
+        ...
+        Button button = (Button)findViewById(R.id.corky);
+        button.setOnClickListener(this);
+    }
+
+    // Implement the OnClickListener callback
+    public void onClick(View v) {
+      // do something when the button is clicked
+    }
+    ...
+}
+</pre>
+
+<p>Perhatikan bahwa callback <code>onClick()</code> dalam contoh di atas tidak memiliki
+nilai hasil, namun beberapa metode event listener lainnya harus mengembalikan boolean. Sebabnya
+bergantung pada kejadian. Untuk sebagian yang mengembalikan boolean, ini sebabnya:</p>
+<ul>
+  <li><code>{@link android.view.View.OnLongClickListener#onLongClick(View) onLongClick()}</code> -
+    Ini mengembalikan boolean untuk menunjukkan apakah Anda telah menggunakan kejadian dan tidak boleh dibawa lebih jauh.
+    Yaitu, mengembalikan <em>benar</em> untuk menunjukkan apakah Anda telah menangani kejadian dan semestinya berhenti di sini;
+    mengembalikan <em>salah</em> jika Anda tidak menanganinya dan/atau kejadian semestinya berlanjut ke
+    on-click listener lainnya.</li>
+  <li><code>{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent) onKey()}</code> -
+    Ini mengembalikan boolean untuk menunjukkan apakah Anda telah menggunakan kejadian dan tidak boleh dibawa lebih jauh.
+    Yaitu, mengembalikan <em>benar</em> untuk menunjukkan apakah Anda telah menangani kejadian dan semestinya berhenti di sini;
+    mengembalikan <em>salah</em> jika Anda tidak menanganinya dan/atau kejadian semestinya berlanjut ke
+    on-key listener lainnya.</li>
+  <li><code>{@link android.view.View.OnTouchListener#onTouch(View,MotionEvent) onTouch()}</code> -
+    Ini mengembalikan boolean untuk menunjukkan apakah listener Anda telah menggunakan kejadian ini. Yang penting adalah
+kejadian ini bisa memiliki beberapa tindakan yang saling mengikuti. Jadi, jika Anda mengembalikan <em>salah</em>saat
+kejadian tindakan turun diterima, itu menunjukkan bahwa Anda belum menggunakan kejadian itu dan juga
+tidak tertarik dengan tindakan berikutnya dari kejadian ini. Karena itu, Anda tidak akan diminta untuk melakukan tindakan
+ lainnya dalam kejadian, seperti gerakan jari, atau kejadian tindakan naik yang akan terjadi.</li>
+</ul>
+
+<p>Ingatlah bahwa kejadian tombol fisik selalu disampaikan ke View yang sedang difokus. Kejadian ini dikirim mulai dari atas
+hierarki View, kemudian turun hingga tujuan yang sesuai. Jika View Anda (atau anak View Anda)
+saat ini sedang fokus, maka Anda dapat melihat kejadian berpindah melalui metode.<code>{@link android.view.View#dispatchKeyEvent(KeyEvent)
+dispatchKeyEvent()}</code> Sebagai pengganti untuk menangkap kejadian penting melalui View, Anda juga dapat menerima
+semua kejadian dalam Aktivitas Anda dengan <code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>
+dan <code>{@link android.app.Activity#onKeyUp(int,KeyEvent) onKeyUp()}</code>.</p>
+
+<p>Selain itu, saat memikirkan tentang input teks aplikasi Anda, ingatlah bahwa banyak perangkat yang hanya memiliki
+metode input perangkat lunak. Metode seperti itu tidak harus berbasis tombol; sebagian mungkin menggunakan input suara, tulisan tangan, dan seterusnya. Meskipun
+metode input menyajikan antarmuka seperti keyboard, itu umumnya <strong>tidak</strong> memicu keluarga kejadian
+<code>{@link android.app.Activity#onKeyDown(int,KeyEvent) onKeyDown()}</code>. Anda sama sekali tidak boleh
+membangun UI yang mengharuskan penekanan tombol tertentu dikontrol kecuali jika Anda ingin membatasi aplikasi Anda pada perangkat yang memiliki
+keyboard fisik. Khususnya, jangan mengandalkan metode ini untuk memvalidasi input saat pengguna menekan tombol
+enter; melainkan, gunakan tindakan seperti {@link android.view.inputmethod.EditorInfo#IME_ACTION_DONE} untuk menandai
+metode input mengenai reaksi yang diharapkan aplikasi Anda, sehingga bisa mengubah UI-nya secara signifikan. Hindari anggapan
+tentang bagaimana metode input perangkat lunak seharusnya bekerja dan percayalah bahwa metode akan menyediakan teks yang sudah diformat bagi aplikasi Anda.</p>
+
+<p class="note"><strong>Catatan:</strong> Android akan memanggil event handler terlebih dahulu kemudian handler
+default yang sesuai dari definisi kelas. Karena itu, mengembalikan <em>benar</em> dari event listener ini akan menghentikan
+penyebaran kejadian ke event listener lain dan juga akan memblokir callback ke
+event handler default di View. Pastikan bahwa Anda ingin mengakhiri kejadian saat mengembalikan <em>true</em>.</p>
+
+
+<h2 id="EventHandlers">Event Handler</h2>
+
+<p>Jika Anda membuat komponen custom dari View, maka Anda dapat mendefinisikan penggunaan beberapa
+metode callback sebagai event handler default.
+Dalam dokumen tentang <a href="{@docRoot}guide/topics/ui/custom-components.html">Komponen
+Custom</a>, Anda akan melihat penggunaan beberapa callback umum untuk penanganan kejadian,
+termasuk:</p>
+<ul>
+  <li><code>{@link  android.view.View#onKeyDown}</code> - Dipanggil bila terjadi kejadian tombol baru.</li>
+  <li><code>{@link  android.view.View#onKeyUp}</code> - Dipanggil bila terjadi kejadian tombol naik.</li>
+  <li><code>{@link  android.view.View#onTrackballEvent}</code> - Dipanggil bila terjadi kejadian gerakan trackball.</li>
+  <li><code>{@link  android.view.View#onTouchEvent}</code> - Dipanggil bila terjadi kejadian gerakan layar sentuh.</li>
+  <li><code>{@link  android.view.View#onFocusChanged}</code> - Dipanggil bila View memperoleh atau kehilangan fokus.</li>
+</ul>
+<p>Ada beberapa metode lain yang harus Anda ketahui, yang bukan bagian dari kelas View,
+namun bisa berdampak langsung pada kemampuan Anda menangani kejadian. Jadi, saat mengelola kejadian yang lebih kompleks dalam
+layout, pertimbangkanlah metode-metode lain ini:</p>
+<ul>
+  <li><code>{@link  android.app.Activity#dispatchTouchEvent(MotionEvent)
+    Activity.dispatchTouchEvent(MotionEvent)}</code> - Ini memungkinkan {@link
+    android.app.Activity} Anda mencegat semua kejadian sentuh sebelum dikirim ke jendela.</li>
+  <li><code>{@link  android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)
+    ViewGroup.onInterceptTouchEvent(MotionEvent)}</code> - Ini memungkinkan {@link
+    android.view.ViewGroup} memantau kejadian saat dikirim ke View anak.</li>
+  <li><code>{@link  android.view.ViewParent#requestDisallowInterceptTouchEvent(boolean)
+    ViewParent.requestDisallowInterceptTouchEvent(boolean)}</code> - Panggil ini
+    pada View induk untuk menunjukan larangan mencegat kejadian sentuh dengan <code>{@link
+    android.view.ViewGroup#onInterceptTouchEvent(MotionEvent)}</code>.</li>
+</ul>
+
+<h2 id="TouchMode">Mode Sentuh</h2>
+<p>
+Saat pengguna menyusuri antarmuka pengguna dengan tombol pengarah atau trackball, Anda
+perlu memberikan fokus pada item tindakan (seperti tombol) agar pengguna bisa mengetahui apa
+yang akan menerima input.  Akan tetapi jika perangkat memiliki kemampuan sentuh, dan pengguna
+mulai berinteraksi dengan antarmuka dengan menyentuhnya, maka Anda tidak perlu lagi
+menyorot item, atau memfokuskan pada View tertentu.  Karena itu, ada mode
+untuk interaksi yang bernama "mode sentuh".
+</p>
+<p>
+Untuk perangkat berkemampuan sentuh, setelah pengguna menyentuh layar, perangkat
+akan masuk ke mode sentuh.  Dari sini dan selanjutnya, hanya View dengan
+{@link android.view.View#isFocusableInTouchMode} benar yang akan dapat difokus, seperti widget pengedit teks.
+View lain yang dapat disentuh, seperti tombol, tidak akan difokus bila disentuh; View ini akan
+langsung memicu on-click listener bila ditekan.
+</p>
+<p>
+Kapan saja pengguna menekan tombol pengarah atau menggulir dengan trackball, perangkat akan
+keluar dari mode sentuh, dan mencari tampilan untuk difokuskan. Kini pengguna bisa melanjutkan interaksi
+dengan antarmuka pengguna tanpa menyentuh layar.
+</p>
+<p>
+Status mode sentuh dipertahankan di seluruh sistem (semua jendela dan aktivitas).
+Untuk query status saat ini, Anda bisa memanggil
+{@link android.view.View#isInTouchMode} untuk mengetahui apakah perangkat saat ini sedang dalam mode sentuh.
+</p>
+
+
+<h2 id="HandlingFocus">Menangani Fokus</h2>
+
+<p>Kerangka kerja ini akan menangani gerakan fokus rutin sebagai respons input pengguna.
+Ini termasuk mengubah fokus saat View dihapus atau disembunyikan, atau saat tersedia View
+baru. View menunjukkan kesediaannya untuk mengambil fokus
+melalui metode <code>{@link android.view.View#isFocusable()}</code>. Untuk mengubah apakah View bisa mengambil
+fokus, panggil <code>{@link android.view.View#setFocusable(boolean) setFocusable()}</code>.  Saat dalam mode sentuh,
+Anda dapat me-query apakah View memungkinkan fokus dengan <code>{@link android.view.View#isFocusableInTouchMode()}</code>.
+Anda bisa mengubahnya dengan <code>{@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode()}</code>.
+</p>
+
+<p>Gerakan fokus berdasarkan pada algoritma yang mencari tetangga terdekat dalam
+arah yang diberikan. Dalam kasus yang jarang terjadi, algoritma default mungkin
+tidak cocok dengan perilaku yang diinginkan pengembang. Dalam situasi ini, Anda bisa memberikan
+pengesampingan eksplisit dengan mengikuti atribut XML berikut dalam file layout:
+<var>nextFocusDown</var>, <var>nextFocusLeft</var>, <var>nextFocusRight</var>, dan
+<var>nextFocusUp</var>. Tambahkan salah satu atribut ini ke View <em>dari</em> mana fokus
+meninggalkan. Definisikan nilai atribut untuk menjadi ID View
+<em>ke</em> mana fokus harus diberikan. Misalnya:</p>
+<pre>
+&lt;LinearLayout
+    android:orientation="vertical"
+    ... >
+  &lt;Button android:id="@+id/top"
+          android:nextFocusUp="@+id/bottom"
+          ... />
+  &lt;Button android:id="@+id/bottom"
+          android:nextFocusDown="@+id/top"
+          ... />
+&lt;/LinearLayout>
+</pre>
+
+<p>Biasanya, dalam layout vertikal ini, navigasi ke atas dari Button pertama tidak akan membawa ke
+mana pun, tidak pula akan menyusuri ke bawah dari Button kedua. Karena sekarang Button atas telah
+mendefinisikan Button bawah sebagai <var>nextFocusUp</var> (dan sebaliknya), fokus navigasi akan
+silih berganti dari atas ke bawah dan bawah ke atas.</p>
+
+<p>Jika Anda ingin mendeklarasikan View sebagai dapat difokus dalam UI (bila biasanya tidak dapat difokus),
+tambahkan atribut XML <code>android:focusable</code> ke View, dalam deklarasi layout Anda.
+Atur nilai <var>true</var>. Anda juga bisa mendeklarasikan View
+sebagai dapat difokus saat dalam Mode Sentuh dengan <code>android:focusableInTouchMode</code>.</p>
+<p>Untuk meminta View tertentu difokus, panggil <code>{@link android.view.View#requestFocus()}</code>.</p>
+<p>Untuk mendengarkan kejadian fokus (diberi tahu bila View menerima atau kehilangan fokus), gunakan
+<code>{@link android.view.View.OnFocusChangeListener#onFocusChange(View,boolean) onFocusChange()}</code>
+, seperti yang dibahas di bagian <a href="#EventListeners">Event Listener</a>, di atas.</p>
+
+
+
+<!--
+<h2 is="EventCycle">Event Cycle</h2>
+   <p>The basic cycle of a View is as follows:</p>
+   <ol>
+    <li>An event comes in and is dispatched to the appropriate View. The View
+    handles the event and notifies any listeners.</li>
+    <li>If, in the course of processing the event, the View's bounds may need
+    to be changed, the View will call {@link android.view.View#requestLayout()}.</li>
+    <li>Similarly, if in the course of processing the event the View's appearance
+    may need to be changed, the View will call {@link android.view.View#invalidate()}.</li>
+    <li>If either {@link android.view.View#requestLayout()} or {@link android.view.View#invalidate()} were called,
+    the framework will take care of measuring, laying out, and drawing the tree
+    as appropriate.</li>
+   </ol>
+
+   <p class="note"><strong>Note:</strong> The entire View tree is single threaded. You must always be on
+   the UI thread when calling any method on any View.
+   If you are doing work on other threads and want to update the state of a View
+   from that thread, you should use a {@link android.os.Handler}.
+   </p>
+-->

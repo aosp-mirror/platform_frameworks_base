@@ -1,0 +1,813 @@
+page.title=Layanan
+@jd:body
+
+<div id="qv-wrapper">
+<ol id="qv">
+<h2>Dalam dokumen ini</h2>
+<ol>
+<li><a href="#Basics">Dasar-Dasar</a></li>
+<ol>
+  <li><a href="#Declaring">Mendeklarasikan layanan dalam manifes</a></li>
+</ol>
+<li><a href="#CreatingAService">Membuat Layanan yang Sudah Dimulai</a>
+  <ol>
+    <li><a href="#ExtendingIntentService">Memperluas kelas IntentService</a></li>
+    <li><a href="#ExtendingService">Memperluas kelas Layanan</a></li>
+    <li><a href="#StartingAService">Memulai layanan</a></li>
+    <li><a href="#Stopping">Menghentikan layanan</a></li>
+  </ol>
+</li>
+<li><a href="#CreatingBoundService">Membuat Layanan Terikat</a></li>
+<li><a href="#Notifications">Mengirim Pemberitahuan ke Pengguna</a></li>
+<li><a href="#Foreground">Menjalankan Layanan di Latar Depan</a></li>
+<li><a href="#Lifecycle">Mengelola Daur Hidup Layanan</a>
+<ol>
+  <li><a href="#LifecycleCallbacks">Mengimplementasikan callback daur hidup</a></li>
+</ol>
+</li>
+</ol>
+
+<h2>Kelas-kelas utama</h2>
+<ol>
+  <li>{@link android.app.Service}</li>
+  <li>{@link android.app.IntentService}</li>
+</ol>
+
+<h2>Contoh</h2>
+<ol>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ServiceStartArguments.html">{@code
+      ServiceStartArguments}</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LocalService.html">{@code
+      LocalService}</a></li>
+</ol>
+
+<h2>Lihat juga</h2>
+<ol>
+<li><a href="{@docRoot}guide/components/bound-services.html">Layanan Terikat</a></li>
+</ol>
+
+</div>
+
+
+<p>{@link android.app.Service} adalah sebuah komponen aplikasi yang bisa melakukan
+operasi yang berjalan lama di latar belakang dan tidak menyediakan antarmuka pengguna. Komponen
+aplikasi lain bisa memulai layanan dan komponen aplikasi tersebut akan terus berjalan
+di latar belakang walaupun pengguna beralih ke aplikasi lain. Selain itu, komponen bisa mengikat ke layanan
+untuk berinteraksi dengannya dan bahkan melakukan komunikasi antarproses (IPC). Misalnya, layanan mungkin
+menangani transaksi jaringan, memutar musik, melakukan file I/O, atau berinteraksi dengan penyedia konten
+dari latar belakang.</p>
+
+<p>Ada dua bentuk dasar layanan:</p>
+
+<dl>
+  <dt>Sudah Dimulai</dt>
+  <dd>Layanan "sudah dimulai" bila komponen aplikasi (misalnya aktivitas) memulainya dengan
+memanggil {@link android.content.Context#startService startService()}. Sesudah dimulai, layanan
+bisa berjalan terus-menerus di latar belakang walaupun komponen yang memulainya telah dimusnahkan. Biasanya,
+layanan yang sudah dimulai akan melakukan operasi tunggal dan tidak mengembalikan hasil ke pemanggilnya.
+Misalnya, layanan bisa mengunduh atau mengunggah file melalui jaringan. Bila operasi selesai,
+layanan seharusnya berhenti sendiri.</dd>
+  <dt>Terikat</dt>
+  <dd>Layanan "terikat" bila komponen aplikasi mengikat kepadanya dengan memanggil {@link
+android.content.Context#bindService bindService()}. Layanan terikat menawarkan antarmuka
+klien-server yang memungkinkan komponen berinteraksi dengan layanan tersebut, mengirim permintaan, mendapatkan hasil dan bahkan
+melakukannya pada sejumlah proses dengan komunikasi antarproses (IPC). Layanan terikat hanya berjalan selama
+ada komponen aplikasi lain yang terikat padanya. Sejumlah komponen bisa terikat pada layanan secara bersamaan,
+namun bila semuanya melepas ikatan, layanan tersebut akan dimusnahkan.</dd>
+</dl>
+
+<p>Walaupun dokumentasi ini secara umum membahas kedua jenis layanan secara terpisah, layanan
+Anda bisa menggunakan keduanya&mdash;layanan bisa dimulai (untuk berjalan terus-menerus) sekaligus memungkinkan pengikatan.
+Cukup mengimplementasikan dua metode callback: {@link
+android.app.Service#onStartCommand onStartCommand()} untuk memungkinkan komponen memulainya dan {@link
+android.app.Service#onBind onBind()} untuk memungkinkan pengikatan.</p>
+
+<p>Apakah aplikasi Anda sudah dimulai, terikat, atau keduanya, semua komponen aplikasi
+bisa menggunakan layanan (bahkan dari aplikasi terpisah), demikian pula semua komponen bisa menggunakan
+suatu aktivitas&mdash;dengan memulainya dengan {@link android.content.Intent}. Akan tetapi, Anda bisa mendeklarasikan
+layanan sebagai privat, pada file manifes, dan memblokir akses dari aplikasi lain. Hal ini
+dibahas selengkapnya di bagian tentang <a href="#Declaring">Mendeklarasikan layanan dalam
+manifes</a>.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Layanan berjalan di
+thread utama proses yang menjadi host-nya&mdash;layanan <strong>tidak</strong> membuat thread-nya sendiri
+dan <strong>tidak</strong> berjalan pada proses terpisah (kecuali bila Anda tentukan demikian). Artinya,
+jika layanan Anda akan melakukan pekerjaan yang membutuhkan tenaga CPU besar atau operasi yang memblokir (seperti
+pemutaran MP3 atau jaringan), Anda perlu membuat thread baru dalam layanan untuk melakukan pekerjaan tersebut. Dengan menggunakan
+thread terpisah, Anda mengurangi risiko terjadinya kesalahan Aplikasi Tidak Merespons (Application Not Responding/ANR) dan
+thread utama aplikasi bisa tetap dikhususkan pada interaksi pengguna dengan aktivitas Anda.</p>
+
+
+<h2 id="Basics">Dasar-Dasar</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Haruskah menggunakan layanan atau thread?</h3>
+  <p>Layanan sekadar komponen yang bisa berjalan di latar belakang walaupun pengguna sedang tidak
+berinteraksi dengan aplikasi Anda. Sehingga, Anda harus membuat layanan bila memang itu
+yang dibutuhkan.</p>
+  <p>Bila Anda perlu melakukan pekerjaan di luar thread utama, namun hanya bila pengguna sedang berinteraksi
+dengan aplikasi, maka Anda harus membuat thread baru sebagai ganti layanan baru. Misalnya,
+bila Anda ingin memutar musik, namun hanya saat aktivitas Anda berjalan, Anda bisa membuat
+thread dalam {@link android.app.Activity#onCreate onCreate()}, mulai menjalankannya di {@link
+android.app.Activity#onStart onStart()}, kemudian menghentikannya di {@link android.app.Activity#onStop
+onStop()}. Pertimbangkan juga untuk menggunakan {@link android.os.AsyncTask} atau {@link android.os.HandlerThread},
+sebagai ganti kelas {@link java.lang.Thread} yang lazim digunakan. Lihat dokumen <a href="{@docRoot}guide/components/processes-and-threads.html#Threads">Proses dan
+Threading</a> untuk informasi selengkapnya tentang thread.</p>
+  <p>Ingatlah jika menggunakan layanan, layanan tersebut tetap berjalan di thread utama aplikasi Anda secara
+default, jadi Anda harus tetap membuat thread baru dalam layanan bila layanan tersebut melakukan operasi yang intensif
+atau operasi yang memblokir.</p>
+</div>
+</div>
+
+<p>Untuk membuat layanan, Anda harus membuat subkelas {@link android.app.Service} (atau
+salah satu dari subkelasnya yang ada). Dalam implementasi, Anda perlu mengesampingkan sebagian metode callback yang
+menangani aspek utama daur hidup layanan dan memberikan mekanisme bagi komponen untuk mengikat
+pada layanan, bila dibutuhkan. Metode callback terpenting yang perlu Anda kesampingkan adalah:</p>
+
+<dl>
+  <dt>{@link android.app.Service#onStartCommand onStartCommand()}</dt>
+    <dd>Sistem akan memanggil metode ini bila komponen lain, misalnya aktivitas,
+meminta dimulainya layanan, dengan memanggil {@link android.content.Context#startService
+startService()}. Setelah metode ini dieksekusi, layanan akan dimulai dan bisa berjalan di
+latar belakang terus-menerus. Jika mengimplementasikan ini, Anda bertanggung jawab menghentikan layanan bila
+bila pekerjaannya selesai, dengan memanggil {@link android.app.Service#stopSelf stopSelf()} atau {@link
+android.content.Context#stopService stopService()}. (Jika hanya ingin menyediakan pengikatan, Anda tidak
+perlu mengimplementasikan metode ini.)</dd>
+  <dt>{@link android.app.Service#onBind onBind()}</dt>
+    <dd>Sistem akan memanggil metode ini bila komponen lain ingin mengikat pada
+layanan (misalnya untuk melakukan RPC), dengan memanggil {@link android.content.Context#bindService
+bindService()}. Dalam mengimplementasikan metode ini, Anda harus menyediakan antarmuka yang digunakan
+klien untuk berkomunikasi dengan layanan, dengan mengembalikan {@link android.os.IBinder}. Anda harus selalu
+mengimplementasikan metode ini, namun jika tidak ingin mengizinkan pengikatan, Anda perlu mengembalikan null.</dd>
+  <dt>{@link android.app.Service#onCreate()}</dt>
+    <dd>Sistem memanggil metode ini bila layanan dibuat untuk pertama kalinya, untuk melakukan prosedur
+penyiapan satu kali (sebelum memanggil {@link android.app.Service#onStartCommand onStartCommand()} atau
+{@link android.app.Service#onBind onBind()}). Bila layanan sudah berjalan, metode ini tidak
+dipanggil.</dd>
+  <dt>{@link android.app.Service#onDestroy()}</dt>
+    <dd>Sistem memanggil metode ini bila layanan tidak lagi digunakan dan sedang dimusnahkan.
+Layanan Anda perlu mengimplementasikannya untuk membersihkan sumber daya seperti thread, listener
+terdaftar, penerima, dll. Ini adalah panggilan terakhir yang diterima layanan.</dd>
+</dl>
+
+<p>Bila komponen memulai layanan dengan memanggil {@link
+android.content.Context#startService startService()} (yang menyebabkan panggilan ke {@link
+android.app.Service#onStartCommand onStartCommand()}), maka layanan
+terus berjalan hingga terhenti sendiri dengan {@link android.app.Service#stopSelf()} atau bila komponen
+lain menghentikannya dengan memanggil {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Bila komponen memanggil
+{@link android.content.Context#bindService bindService()} untuk membuat layanan (dan {@link
+android.app.Service#onStartCommand onStartCommand()} <em>tidak</em> dipanggil), maka layanan hanya berjalan
+selama komponen terikat kepadanya. Setelah layanan dilepas ikatannya dari semua klien,
+sistem akan menghancurkannya.</p>
+
+<p>Sistem Android akan menghentikan paksa layanan hanya bila memori tinggal sedikit dan sistem harus memulihkan
+sumber daya sistem untuk aktivitas yang mendapatkan fokus pengguna. Jika layanan terikat pada suatu aktivitas yang mendapatkan
+fokus pengguna, layanan tersebut lebih kecil kemungkinannya untuk dimatikan, dan jika layanan dideklarasikan untuk <a href="#Foreground">berjalan di latar depan</a> (akan dibahas kemudian), maka sudah hampir pasti ia tidak akan dimatikan.
+Sebaliknya, bila layanan sudah dimulai dan berjalan lama, maka sistem akan menurunkan posisinya
+dalam daftar tugas latar belakang seiring waktu dan layanan akan sangat rentan untuk
+dimatikan&mdash;bila layanan Anda dimulai, maka Anda harus mendesainnya agar bisa menangani restart
+oleh sistem dengan baik. Jika sistem mematikan layanan Anda, layanan akan dimulai kembali begitu sumber daya
+kembali tersedia (tetapi ini juga bergantung pada nilai yang Anda kembalikan dari {@link
+android.app.Service#onStartCommand onStartCommand()}, sebagaimana akan dibahas nanti). Untuk informasi selengkapnya
+tentang kapan sistem mungkin akan memusnahkan layanan, lihat dokumen
+<a href="{@docRoot}guide/components/processes-and-threads.html">Proses dan Threading</a>.</p>
+
+<p>Dalam bagian selanjutnya, Anda akan melihat bagaimana membuat masing-masing tipe layanan dan cara menggunakannya
+dari komponen aplikasi lain.</p>
+
+
+
+<h3 id="Declaring">Mendeklarasikan layanan dalam manifes</h3>
+
+<p>Sebagaimana aktivitas (dan komponen lainnya), Anda harus mendeklarasikan semua layanan dalam file manifes
+aplikasi Anda.</p>
+
+<p>Untuk mendeklarasikan layanan Anda, tambahkan sebuah elemen <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
+sebagai anak
+elemen <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>. Misalnya:</p>
+
+<pre>
+&lt;manifest ... &gt;
+  ...
+  &lt;application ... &gt;
+      &lt;service android:name=".ExampleService" /&gt;
+      ...
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<p>Lihat acuan elemen <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a>
+untuk informasi selengkapnya tentang cara mendeklarasikan layanan Anda dalam manifes.</p>
+
+<p>Ada atribut lain yang bisa Anda sertakan dalam elemen <a href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> untuk
+mendefinisikan properti seperti izin yang dibutuhkan untuk memulai layanan dan proses
+tempat berjalannya layanan. <a href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a> adalah satu-satunya atribut yang diperlukan
+&mdash;atribut tersebut menetapkan nama kelas layanan. Setelah
+mempublikasikan aplikasi, Anda tidak boleh mengubah nama ini, karena jika melakukannya, Anda bisa merusak
+kode karena dependensi terhadap intent eksplisit untuk memulai atau mengikat layanan (bacalah posting blog berjudul <a href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>).
+
+<p>Untuk memastikan aplikasi Anda aman, <strong>selalu gunakan intent eksplisit saat memulai atau mengikat
+{@link android.app.Service} Anda</strong> dan jangan mendeklarasikan filter intent untuk layanan. Jika
+Anda perlu membiarkan adanya ambiguitas tentang layanan mana yang dimulai, Anda bisa
+menyediakan filter intent bagi layanan dan tidak memasukkan nama komponen pada {@link
+android.content.Intent}, namun Anda juga harus menyesuaikan paket bagi intent tersebut dengan {@link
+android.content.Intent#setPackage setPackage()}, yang memberikan klarifikasi memadai bagi
+target layanan.</p>
+
+<p>Anda juga bisa memastikan layanan tersedia hanya bagi aplikasi Anda dengan
+menyertakan atribut <a href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code android:exported}</a>
+dan mengaturnya ke {@code "false"}. Hal ini efektif menghentikan aplikasi lain agar tidak memulai
+layanan Anda, bahkan saat menggunakan intent eksplisit.</p>
+
+
+
+
+<h2 id="CreatingStartedService">Membuat Layanan yang Sudah Dimulai</h2>
+
+<p>Layanan yang sudah dimulai adalah layanan yang dimulai komponen lain dengan memanggil {@link
+android.content.Context#startService startService()}, yang menyebabkan panggilan ke metode
+{@link android.app.Service#onStartCommand onStartCommand()} layanan.</p>
+
+<p>Bila layanan sudah dimulai, layanan tersebut memiliki daur hidup yang tidak bergantung pada
+komponen yang memulainya dan bisa berjalan terus-menerus di latar belakang walaupun
+komponen yang memulainya dimusnahkan. Dengan sendirinya, layanan akan berhenti sendiri bila pekerjaannya
+selesai dengan memanggil {@link android.app.Service#stopSelf stopSelf()}, atau komponen lain bisa menghentikannya
+dengan memanggil {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Komponen aplikasi seperti aktivitas bisa memulai layanan dengan memanggil {@link
+android.content.Context#startService startService()} dan meneruskan {@link android.content.Intent}
+yang menetapkan layanan dan menyertakan data untuk digunakan layanan. Layanan menerima
+{@link android.content.Intent} ini dalam metode {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Sebagai contoh, anggaplah aktivitas perlu menyimpan data ke database online. Aktivitas tersebut bisa
+memulai layanan pendamping dan mengiriminya data untuk disimpan dengan meneruskan intent ke {@link
+android.content.Context#startService startService()}. Layanan akan menerima intent dalam {@link
+android.app.Service#onStartCommand onStartCommand()}, menghubungkan ke Internet dan melakukan
+transaksi database. Bila transaksi selesai, layanan akan berhenti sendiri dan
+dimusnahkan.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Layanan berjalan dalam proses yang sama dengan aplikasi
+tempatnya dideklarasikan dan dalam thread utama aplikasi tersebut, secara default. Jadi, bila layanan Anda
+melakukan operasi yang intensif atau operasi pemblokiran saat pengguna berinteraksi dengan aktivitas dari
+aplikasi yang sama, layanan akan memperlambat kinerja aktivitas. Agar tidak memengaruhi
+kinerja aplikasi, Anda harus memulai thread baru di dalam layanan.</p>
+
+<p>Biasanya, ada dua kelas yang bisa Anda perluas untuk membuat layanan yang sudah dimulai:</p>
+<dl>
+  <dt>{@link android.app.Service}</dt>
+  <dd>Ini adalah kelas dasar untuk semua layanan. Bila memperluas kelas ini, Anda perlu
+membuat thread baru sebagai tempat melaksanakan semua pekerjaan layanan tersebut, karena layanan
+menggunakan thread utama aplikasi Anda secara default, dan hal ini bisa memperlambat
+kinerja aktivitas yang dijalankan aplikasi Anda.</dd>
+  <dt>{@link android.app.IntentService}</dt>
+  <dd>Ini adalah subkelas {@link android.app.Service} yang menggunakan thread pekerja untuk menangani
+semua permintaan memulai, satu per satu. Ini adalah pilihan terbaik jika Anda tidak mengharuskan layanan
+menangani beberapa permintaan sekaligus. Anda cukup mengimplementasikan {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, yang menerima intent untuk setiap
+permintaan memulai agar bisa melakukan pekerjaan latar belakang.</dd>
+</dl>
+
+<p>Bagian selanjutnya membahas cara mengimplementasikan layanan Anda menggunakan
+salah satu dari kelas-kelas ini.</p>
+
+
+<h3 id="ExtendingIntentService">Memperluas kelas IntentService</h3>
+
+<p>Mengingat kebanyakan layanan yang sudah dimulai tidak perlu menangani beberapa permintaan
+sekaligus (yang bisa berupa skenario multi-threading berbahaya), mungkin Anda sebaiknya mengimplementasikan
+layanan menggunakan kelas {@link android.app.IntentService}.</p>
+
+<p>Berikut ini yang dilakukan {@link android.app.IntentService}:</p>
+
+<ul>
+  <li>Membuat thread pekerja default yang menjalankan semua intent yang disampaikan ke {@link
+android.app.Service#onStartCommand onStartCommand()} terpisah dari thread utama aplikasi
+Anda.</li>
+  <li>Membuat antrean pekerjaan yang meneruskan intent satu per satu ke implementasi {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}, sehingga Anda tidak perlu
+mengkhawatirkan multi-threading.</li>
+  <li>Menghentikan layanan setelah semua permintaan memulai telah ditangani, jadi Anda tidak perlu memanggil
+{@link android.app.Service#stopSelf}.</li>
+  <li>Menyediakan implementasi default {@link android.app.IntentService#onBind onBind()} yang
+mengembalikan null.</li>
+  <li>Menyediakan implementasi default {@link android.app.IntentService#onStartCommand
+onStartCommand()} yang mengirimkan intent ke antrean pekerjaan kemudian ke implementasi {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} Anda.</li>
+</ul>
+
+<p>Oleh karena itu, Anda hanya perlu mengimplementasikan {@link
+android.app.IntentService#onHandleIntent onHandleIntent()} untuk melakukan pekerjaan yang diberikan oleh
+klien. (Akan tetapi, Anda juga perlu menyediakan konstruktor kecil bagi layanan.)</p>
+
+<p>Berikut ini contoh implementasi {@link android.app.IntentService}:</p>
+
+<pre>
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super {@link android.app.IntentService#IntentService}
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  &#64;Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      long endTime = System.currentTimeMillis() + 5*1000;
+      while (System.currentTimeMillis() &lt; endTime) {
+          synchronized (this) {
+              try {
+                  wait(endTime - System.currentTimeMillis());
+              } catch (Exception e) {
+              }
+          }
+      }
+  }
+}
+</pre>
+
+<p>Anda hanya memerlukan: konstruktor dan implementasi {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}.</p>
+
+<p>Jika Anda memutuskan untuk juga mengesampingkan metode callback lain, seperti {@link
+android.app.IntentService#onCreate onCreate()}, {@link
+android.app.IntentService#onStartCommand onStartCommand()}, atau {@link
+android.app.IntentService#onDestroy onDestroy()}, pastikan memanggil implementasi super, sehingga
+{@link android.app.IntentService} bisa menangani hidup thread pekerja dengan baik.</p>
+
+<p>Misalnya, {@link android.app.IntentService#onStartCommand onStartCommand()} harus mengembalikan
+implementasi default (yang merupakan cara penyampaian intent ke {@link
+android.app.IntentService#onHandleIntent onHandleIntent()}):</p>
+
+<pre>
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+    return super.onStartCommand(intent,flags,startId);
+}
+</pre>
+
+<p>Selain {@link android.app.IntentService#onHandleIntent onHandleIntent()}, satu-satunya metode lain
+yang tidak mengharuskan Anda memanggil super kelas adalah {@link android.app.IntentService#onBind
+onBind()} (namun Anda hanya perlu mengimplementasikannya bila layanan mengizinkan pengikatan).</p>
+
+<p>Dalam bagian berikutnya, Anda akan melihat bagaimana layanan serupa diimplementasikan saat
+memperluas kelas {@link android.app.Service} basis, yang membutuhkan kode lebih banyak lagi, namun mungkin
+cocok jika Anda perlu menangani beberapa permintaan memulai sekaligus.</p>
+
+
+<h3 id="ExtendingService">Memperluas kelas Layanan</h3>
+
+<p>Seperti telah Anda lihat di bagian sebelumnya, menggunakan {@link android.app.IntentService} membuat
+implementasi layanan yang sudah dimulai jadi sangat sederhana. Namun, bila Anda mengharuskan layanan untuk
+melakukan multi-threading (sebagai ganti memproses permintaan memulai melalui antrean pekerjaan), maka Anda
+bisa memperluas kelas {@link android.app.Service} untuk menangani masing-masing intent.</p>
+
+<p>Sebagai perbandingan, contoh kode berikut ini adalah implementasi kelas {@link
+android.app.Service} yang melakukan pekerjaan yang persis sama dengan contoh di atas menggunakan {@link
+android.app.IntentService}. Artinya, untuk setiap permintaan memulai, kode tersebut akan menggunakan thread pekerja
+untuk melakukan pekerjaan dan memproses permintaan satu per satu.</p>
+
+<pre>
+public class HelloService extends Service {
+  private Looper mServiceLooper;
+  private ServiceHandler mServiceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      &#64;Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          long endTime = System.currentTimeMillis() + 5*1000;
+          while (System.currentTimeMillis() &lt; endTime) {
+              synchronized (this) {
+                  try {
+                      wait(endTime - System.currentTimeMillis());
+                  } catch (Exception e) {
+                  }
+              }
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  &#64;Override
+  public void onCreate() {
+    // Start up the thread running the service.  Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block.  We also make it
+    // background priority so CPU-intensive work will not disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    mServiceLooper = thread.getLooper();
+    mServiceHandler = new ServiceHandler(mServiceLooper);
+  }
+
+  &#64;Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = mServiceHandler.obtainMessage();
+      msg.arg1 = startId;
+      mServiceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  &#64;Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  &#64;Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+</pre>
+
+<p>Seperti yang bisa Anda lihat, ini membutuhkan lebih banyak pekerjaan daripada menggunakan {@link android.app.IntentService}.</p>
+
+<p>Akan tetapi, karena Anda menangani sendiri setiap panggilan ke {@link android.app.Service#onStartCommand
+onStartCommand()}, Anda bisa melakukan beberapa permintaan sekaligus. Itu bukan yang
+dilakukan contoh ini, namun jika itu yang diinginkan, Anda bisa membuat thread baru untuk setiap
+permintaan dan langsung menjalankannya (sebagai ganti menunggu permintaan sebelumnya selesai).</p>
+
+<p>Perhatikan bahwa metode {@link android.app.Service#onStartCommand onStartCommand()} harus mengembalikan
+integer. Integer tersebut merupakan nilai yang menjelaskan cara sistem melanjutkan layanan dalam
+kejadian yang dimatikan oleh sistem (sebagaimana dibahas di atas, implementasi default {@link
+android.app.IntentService} menangani hal ini untuk Anda, walaupun Anda bisa memodifikasinya). Nilai yang dikembalikan
+dari {@link android.app.Service#onStartCommand onStartCommand()} harus berupa salah satu
+konstanta berikut ini:</p>
+
+<dl>
+  <dt>{@link android.app.Service#START_NOT_STICKY}</dt>
+    <dd>Jika sistem mematikan layanan setelah {@link android.app.Service#onStartCommand
+onStartCommand()} dikembalikan, <em>jangan</em> membuat lagi layanan tersebut, kecuali jika ada intent
+tertunda yang akan disampaikan. Inilah pilihan teraman untuk menghindari menjalankan layanan Anda
+bila tidak diperlukan dan bila aplikasi Anda bisa me-restart pekerjaan yang belum selesai.</dd>
+  <dt>{@link android.app.Service#START_STICKY}</dt>
+    <dd>Jika sistem mematikan layanan setelah {@link android.app.Service#onStartCommand
+onStartCommand()} dikembalikan, buat kembali layanan dan panggil {@link
+android.app.Service#onStartCommand onStartCommand()}, namun <em>jangan</em> menyampaikan ulang intent terakhir.
+Sebagai gantinya, sistem akan memanggil {@link android.app.Service#onStartCommand onStartCommand()} dengan
+intent null, kecuali jika ada intent tertunda untuk memulai layanan, dan dalam hal ini,
+intent tersebut disampaikan. Ini cocok bagi pemutar media (atau layanan serupa) yang tidak
+mengeksekusi perintah, namun berjalan terus-menerus dan menunggu pekerjaan.</dd>
+  <dt>{@link android.app.Service#START_REDELIVER_INTENT}</dt>
+    <dd>Jika sistem mematikan layanan setelah {@link android.app.Service#onStartCommand
+onStartCommand()} kembali, buat kembali layanan dan panggil {@link
+android.app.Service#onStartCommand onStartCommand()} dengan intent terakhir yang disampaikan ke
+layanan. Intent yang tertunda akan disampaikan pada gilirannya. Ini cocok bagi layanan yang
+aktif melakukan pekerjaan yang harus segera dilanjutkan, misalnya mengunduh file.</dd>
+</dl>
+<p>Untuk detail selengkapnya tentang nilai pengembalian ini, lihat dokumentasi acuan untuk setiap
+konstanta.</p>
+
+
+
+<h3 id="StartingAService">Memulai Layanan</h3>
+
+<p>Anda bisa memulai layanan dari aktivitas atau komponen aplikasi lain dengan meneruskan
+{@link android.content.Intent} (yang menetapkan layanan yang akan dimulai) ke {@link
+android.content.Context#startService startService()}. Sistem Android akan memanggil metode {@link
+android.app.Service#onStartCommand onStartCommand()} layanan dan meneruskan {@link
+android.content.Intent} padanya. (Jangan sekali-kali memanggil {@link android.app.Service#onStartCommand
+onStartCommand()} secara langsung.)</p>
+
+<p>Misalnya, aktivitas bisa memulai contoh layanan di bagian sebelumnya ({@code
+HelloSevice}) menggunakan intent eksplisit dengan {@link android.content.Context#startService
+startService()}:</p>
+
+<pre>
+Intent intent = new Intent(this, HelloService.class);
+startService(intent);
+</pre>
+
+<p>Metode {@link android.content.Context#startService startService()} segera kembali dan
+sistem Android akan memanggil metode {@link android.app.Service#onStartCommand
+onStartCommand()} layanan. Jika layanan belum berjalan, sistem mula-mula memanggil {@link
+android.app.Service#onCreate onCreate()}, kemudian memanggil {@link android.app.Service#onStartCommand
+onStartCommand()}.</p>
+
+<p>Jika layanan juga tidak menyediakan pengikatan, intent yang disampaikan dengan {@link
+android.content.Context#startService startService()} adalah satu-satunya mode komunikasi antara
+komponen aplikasi dan layanan. Akan tetapi, jika Anda ingin agar layanan mengirimkan hasilnya kembali, maka
+klien yang memulai layanan bisa membuat {@link android.app.PendingIntent} untuk siaran
+(dengan {@link android.app.PendingIntent#getBroadcast getBroadcast()}) dan menyampaikannya ke layanan
+dalam {@link android.content.Intent} yang memulai layanan. Layanan kemudian bisa menggunakan
+siaran untuk menyampaikan hasil.</p>
+
+<p>Beberapa permintaan untuk memulai layanan menghasilkan beberapa panggilan pula ke
+{@link android.app.Service#onStartCommand onStartCommand()} layanan. Akan tetapi, hanya satu permintaan untuk menghentikan
+layanan (dengan {@link android.app.Service#stopSelf stopSelf()} atau {@link
+android.content.Context#stopService stopService()}) dibutuhkan untuk menghentikannya.</p>
+
+
+<h3 id="Stopping">Menghentikan layanan</h3>
+
+<p>Layanan yang sudah dimulai harus mengelola daur hidupnya sendiri. Artinya, sistem tidak menghentikan atau
+memusnahkan layanan kecuali jika harus memulihkan memori sistem dan layanan
+terus berjalan setelah {@link android.app.Service#onStartCommand onStartCommand()} kembali. Jadi,
+layanan tersebut harus berhenti sendiri dengan memanggil {@link android.app.Service#stopSelf stopSelf()} atau
+komponen lain bisa menghentikannya dengan memanggil {@link android.content.Context#stopService stopService()}.</p>
+
+<p>Setelah diminta untuk berhenti dengan {@link android.app.Service#stopSelf stopSelf()} atau {@link
+android.content.Context#stopService stopService()}, sistem akan menghapus layanan
+secepatnya.</p>
+
+<p>Akan tetapi, bila layanan Anda menangani beberapa permintaan ke {@link
+android.app.Service#onStartCommand onStartCommand()} sekaligus, Anda tidak boleh menghentikan
+layanan bila Anda baru selesai memproses permintaan memulai, karena setelah itu mungkin Anda sudah menerima permintaan memulai
+yang baru (berhenti pada permintaan pertama akan menghentikan permintaan kedua). Untuk menghindari
+masalah ini, Anda bisa menggunakan {@link android.app.Service#stopSelf(int)} untuk memastikan bahwa permintaan
+Anda untuk menghentikan layanan selalu berdasarkan pada permintaan memulai terbaru. Artinya, bila Anda memanggil {@link
+android.app.Service#stopSelf(int)}, Anda akan meneruskan ID permintaan memulai (<code>startId</code>
+yang disampaikan ke {@link android.app.Service#onStartCommand onStartCommand()}) yang terkait dengan permintaan berhenti
+Anda. Kemudian jika layanan menerima permintaan memulai baru sebelum Anda bisa memanggil {@link
+android.app.Service#stopSelf(int)}, maka ID tidak akan sesuai dan layanan tidak akan berhenti.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Aplikasi Anda perlu menghentikan layanannya
+bila selesai bekerja untuk menghindari pemborosan sumber daya sistem dan tenaga baterai. Jika perlu,
+komponen lain bisa menghentikan layanan secara eksplisit dengan memanggil {@link
+android.content.Context#stopService stopService()}. Bahkan jika Anda mengaktifkan pengikatan bagi layanan,
+Anda harus selalu menghentikan layanan sendiri jika layanan tersebut menerima panggilan ke {@link
+android.app.Service#onStartCommand onStartCommand()}.</p>
+
+<p>Untuk informasi selengkapnya tentang daur hidup layanan, lihat bagian di bawah ini tentang <a href="#Lifecycle">Mengelola Daur Hidup Layanan</a>.</p>
+
+
+
+<h2 id="CreatingBoundService">Membuat Layanan Terikat</h2>
+
+<p>Layanan terikat adalah layanan yang memungkinkan komponen aplikasi untuk mengikatnya dengan memanggil {@link
+android.content.Context#bindService bindService()} guna membuat koneksi yang berlangsung lama
+(dan umumnya tidak mengizinkan komponen untuk <em>memulainya</em> dengan memanggil {@link
+android.content.Context#startService startService()}).</p>
+
+<p>Anda sebaiknya membuat layanan terikat bila ingin berinteraksi dengan layanan dari aktivitas
+dan komponen lain dalam aplikasi Anda atau mengeskpos sebagian fungsionalitas aplikasi Anda ke
+ke aplikasi lain, melalui komunikasi antarproses (IPC).</p>
+
+<p>Untuk membuat layanan terikat, Anda harus mengimplementasikan metode callback {@link
+android.app.Service#onBind onBind()} untuk mengembalikan {@link android.os.IBinder} yang
+mendefinisikan antarmuka bagi komunikasi dengan layanan. Komponen aplikasi lain kemudian bisa memanggil
+{@link android.content.Context#bindService bindService()} untuk mengambil antarmuka dan
+mulai memanggil metode pada layanan. Layanan hanya hidup untuk melayani komponen aplikasi yang
+terikat padanya, jadi bila tidak ada komponen yang terikat pada layanan, sistem akan memusnahkannya
+(Anda <em>tidak</em> perlu menghentikan layanan terikat seperti halnya bila layanan dimulai
+melalui {@link android.app.Service#onStartCommand onStartCommand()}).</p>
+
+<p>Untuk membuat layanan terikat, hal yang perlu dilakukan pertama kali adalah mendefinisikan antarmuka yang menetapkan
+cara klien berkomunikasi dengan layanan. Antarmuka antara layanan
+dan klien ini harus berupa implementasi {@link android.os.IBinder} dan yang harus dikembalikan
+layanan Anda dari metode callback {@link android.app.Service#onBind
+onBind()}. Setelah menerima {@link android.os.IBinder}, klien bisa mulai
+berinteraksi dengan layanan melalui antarmuka tersebut.</p>
+
+<p>Beberapa klien bisa mengikat ke layanan sekaligus. Bila klien selesai berinteraksi dengan
+layanan, klien akan memanggil {@link android.content.Context#unbindService unbindService()} untuk melepas ikatan. Bila
+tidak ada klien yang terikat pada layanan, sistem akan menghapus layanan tersebut.</p>
+
+<p>Ada beberapa cara untuk mengimplementasikan layanan terikat dan implementasinya lebih
+rumit daripada layanan yang sudah dimulai, jadi layanan terikat dibahas dalam dokumen
+terpisah tentang <a href="{@docRoot}guide/components/bound-services.html">Layanan Terikat</a>.</p>
+
+
+
+<h2 id="Notifications">Mengirim Pemberitahuan ke Pengguna</h2>
+
+<p>Setelah berjalan, layanan bisa memberi tahu pengguna tentang suatu kejadian menggunakan <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Pemberitahuan Toast</a> atau <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Pemberitahuan Baris Status</a>.</p>
+
+<p>Pemberitahuan Toast adalah pesan yang muncul sebentar pada permukaan jendela saat ini
+kemudian menghilang, sementara pemberitahuan baris status memberikan ikon di baris status dengan
+pesan yang bisa dipilih oleh pengguna untuk melakukan suatu tindakan (misalnya memulai suatu aktivitas).</p>
+
+<p>Biasanya, pemberitahuan baris status adalah teknik terbaik bila ada pekerjaan latar belakang yang sudah selesai
+(misalnya file selesai
+diunduh) dan pengguna kini bisa menggunakannya. Bila pengguna memilih pemberitahuan dari
+tampilan diperluas, pemberitahuan akan bisa memulai aktivitas (misalnya menampilkan file yang baru diunduh).</p>
+
+<p>Lihat panduan pengembang <a href="{@docRoot}guide/topics/ui/notifiers/toasts.html">Pemberitahuan Toast</a> atau <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Pemberitahuan Baris Status</a>
+untuk informasi selengkapnya.</p>
+
+
+
+<h2 id="Foreground">Menjalankan Layanan di Latar Depan</h2>
+
+<p>Layanan latar depan adalah layanan yang dianggap sebagai sesuatu yang
+diketahui secara aktif oleh pengguna, jadi bukan sesuatu yang akan dihapus oleh sistem bila memori menipis. Sebuah
+layanan latar depan harus memberikan pemberitahuan bagi baris status, yang ditempatkan pada
+heading "Ongoing" yang artinya pemberitahuan tersebut tidak bisa diabaikan kecuali jika layanan
+dihentikan atau dihapus dari latar depan.</p>
+
+<p>Misalnya, pemutar musik yang memutar musik dari suatu layanan harus diatur untuk berjalan di
+latar depan, karena pengguna mengetahui operasi tersebut
+secara eksplisit. Pemberitahuan di baris status bisa menunjukkan lagu saat ini dan memungkinkan
+pengguna untuk menjalankan suatu aktivitas untuk berinteraksi dengan pemutar musik.</p>
+
+<p>Untuk meminta agar layanan Anda berjalan di latar depan, panggil {@link
+android.app.Service#startForeground startForeground()}. Metode ini memerlukan dua parameter: sebuah integer
+yang mengidentifikasi pemberitahuan secara unik dan {@link
+android.app.Notification} untuk baris status. Misalnya:</p>
+
+<pre>
+Notification notification = new Notification(R.drawable.icon, getText(R.string.ticker_text),
+        System.currentTimeMillis());
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.setLatestEventInfo(this, getText(R.string.notification_title),
+        getText(R.string.notification_message), pendingIntent);
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+</pre>
+
+<p class="caution"><strong>Perhatian:</strong> ID integer yang Anda berikan ke {@link
+android.app.Service#startForeground startForeground()} tidak boleh 0.</p>
+
+
+<p>Untuk menghapus layanan dari latar depan, panggil {@link
+android.app.Service#stopForeground stopForeground()}. Metode ini memerlukan boolean, yang menunjukkan
+apakah pemberitahuan baris status juga akan dihapus. Metode ini <em>tidak</em> menghentikan
+layanan. Akan tetapi, jika Anda menghentikan layanan saat masih berjalan di latar depan
+maka pemberitahuan juga akan dihapus.</p>
+
+<p>Untuk informasi selengkapnya tentang pemberitahuan, lihat <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Membuat Pemberitahuan
+Baris Status</a>.</p>
+
+
+
+<h2 id="Lifecycle">Mengelola Daur Hidup Layanan</h2>
+
+<p>Daur hidup layanan jauh lebih sederhana daripada daur hidup aktivitas. Akan tetapi, lebih penting lagi adalah
+memerhatikan dengan cermat bagaimana layanan Anda dibuat dan dimusnahkan, karena suatu layanan
+bisa berjalan di latar belakang tanpa disadari oleh pengguna.</p>
+
+<p>Daur hidup layanan&mdash;dari saat dibuat hingga dimusnahkan&mdash;bisa mengikuti
+dua path berbeda:</p>
+
+<ul>
+<li>Layanan yang sudah dimulai
+  <p>Layanan dibuat bila komponen lain memanggil {@link
+android.content.Context#startService startService()}. Layanan kemudian berjalan terus-menerus dan harus
+berhenti sendiri dengan memanggil {@link
+android.app.Service#stopSelf() stopSelf()}. Komponen lain juga bisa menghentikan
+layanan dengan memanggil {@link android.content.Context#stopService
+stopService()}. Bila layanan dihentikan, sistem akan menghancurkannya.</p></li>
+
+<li>Layanan terikat
+  <p>Layanan dibuat bila komponen lain (klien) memanggil {@link
+android.content.Context#bindService bindService()}. Klien kemudian berkomunikasi dengan layanan
+melalui antarmuka {@link android.os.IBinder}. Klien bisa menutup koneksi dengan memanggil
+{@link android.content.Context#unbindService unbindService()}. Sejumlah klien bisa mengikat pada
+layanan yang sama dan bila semuanya melepas ikatan, sistem akan memusnahkan layanan tersebut. (Layanan
+<em>tidak</em> perlu berhenti sendiri.)</p></li>
+</ul>
+
+<p>Kedua path tersebut tidak benar-benar terpisah. Artinya, Anda bisa mengikat ke layanan yang sudah
+dimulai dengan {@link android.content.Context#startService startService()}. Misalnya, layanan
+musik latar belakang bisa dimulai dengan memanggil {@link android.content.Context#startService
+startService()} dengan {@link android.content.Intent} yang mengidentifikasi musik yang akan diputar. Kemudian,
+mungkin saat pengguna ingin mengontrol pemutar musik atau mendapatkan informasi
+tentang lagu yang diputar, aktivitas bisa mengikat ke layanan dengan memanggil {@link
+android.content.Context#bindService bindService()}. Dalam kasus seperti ini, {@link
+android.content.Context#stopService stopService()} atau {@link android.app.Service#stopSelf
+stopSelf()} tidak menghentikan layanan sampai semua klien melepas ikatan. </p>
+
+
+<h3 id="LifecycleCallbacks">Mengimplementasikan callback daur hidup</h3>
+
+<p>Seperti halnya aktivitas, layanan memiliki metode callback daur hidup yang bisa Anda implementasikan
+untuk memantau perubahan status layanan dan melakukan pekerjaan pada waktu yang tepat. Layanan skeleton
+berikut memperagakan setiap metode daur hidup:</p>
+
+<pre>
+public class ExampleService extends Service {
+    int mStartMode;       // indicates how to behave if the service is killed
+    IBinder mBinder;      // interface for clients that bind
+    boolean mAllowRebind; // indicates whether onRebind should be used
+
+    &#64;Override
+    public void {@link android.app.Service#onCreate onCreate}() {
+        // The service is being created
+    }
+    &#64;Override
+    public int {@link android.app.Service#onStartCommand onStartCommand}(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to {@link android.content.Context#startService startService()}
+        return <em>mStartMode</em>;
+    }
+    &#64;Override
+    public IBinder {@link android.app.Service#onBind onBind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()}
+        return <em>mBinder</em>;
+    }
+    &#64;Override
+    public boolean {@link android.app.Service#onUnbind onUnbind}(Intent intent) {
+        // All clients have unbound with {@link android.content.Context#unbindService unbindService()}
+        return <em>mAllowRebind</em>;
+    }
+    &#64;Override
+    public void {@link android.app.Service#onRebind onRebind}(Intent intent) {
+        // A client is binding to the service with {@link android.content.Context#bindService bindService()},
+        // after onUnbind() has already been called
+    }
+    &#64;Override
+    public void {@link android.app.Service#onDestroy onDestroy}() {
+        // The service is no longer used and is being destroyed
+    }
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> Tidak seperti metode callback daur hidup aktivitas, Anda
+<em>tidak</em> perlu memanggil implementasi superkelas metode callback tersebut.</p>
+
+<img src="{@docRoot}images/service_lifecycle.png" alt="" />
+<p class="img-caption"><strong>Gambar 2.</strong> Daur hidup layanan. Diagram di sebelah kiri
+menampilkan daur hidup bila layanan dibuat dengan {@link android.content.Context#startService
+startService()} dan diagram di sebelah kanan menampilkan daur hidup bila layanan dibuat
+dengan {@link android.content.Context#bindService bindService()}.</p>
+
+<p>Dengan mengimplementasikan metode-metode ini, Anda bisa memantau dua loop tersarang (nested loop) daur hidup layanan: </p>
+
+<ul>
+<li><strong>Seluruh masa pakai</strong> layanan terjadi antara saat {@link
+android.app.Service#onCreate onCreate()} dipanggil dan saat {@link
+android.app.Service#onDestroy} kembali. Seperti halnya aktivitas, layanan melakukan penyiapan awal di
+{@link android.app.Service#onCreate onCreate()} dan melepaskan semua sisa sumber daya yang ada di {@link
+android.app.Service#onDestroy onDestroy()}.  Misalnya,
+layanan pemutar musik bisa membuat thread tempat musik akan diputar dalam {@link
+android.app.Service#onCreate onCreate()}, kemudian menghentikan thread tersebut dalam {@link
+android.app.Service#onDestroy onDestroy()}.
+
+<p>Metode {@link android.app.Service#onCreate onCreate()} dan {@link android.app.Service#onDestroy
+onDestroy()} diperlukan semua layanan, baik yang
+dibuat oleh {@link android.content.Context#startService startService()} maupun {@link
+android.content.Context#bindService bindService()}.</p></li>
+
+<li><strong>Masa pakai aktif</strong> layanan dimulai dengan panggilan ke {@link
+android.app.Service#onStartCommand onStartCommand()} atau {@link android.app.Service#onBind onBind()}.
+Masing-masing metode diberikan {@link
+android.content.Intent} yang diteruskan ke {@link android.content.Context#startService
+startService()} atau {@link android.content.Context#bindService bindService()}.
+<p>Jika layanan telah dimulai, masa pakai aktif akan berakhir pada saat yang sama dengan
+berakhirnya seluruh masa pakai (layanan masih aktif bahkan setelah {@link android.app.Service#onStartCommand
+onStartCommand()} kembali). Jika layanan tersebut terikat, masa pakai aktifnya akan berakhir bila {@link
+android.app.Service#onUnbind onUnbind()} kembali.</p>
+</li>
+</ul>
+
+<p class="note"><strong>Catatan:</strong> Meskipun layanan yang sudah dimulai dihentikan dengan panggilan ke
+{@link android.app.Service#stopSelf stopSelf()} atau {@link
+android.content.Context#stopService stopService()}, tidak ada callback tersendiri bagi
+layanan tersebut (tidak ada callback {@code onStop()}). Jadi, kecuali jika layanan terikat ke klien,
+sistem akan memusnahkannya bila layanan dihentikan&mdash;{@link
+android.app.Service#onDestroy onDestroy()} adalah satu-satunya callback yang diterima.</p>
+
+<p>Gambar 2 mengilustrasikan metode callback yang lazim bagi suatu layanan. Walaupun gambar tersebut memisahkan
+layanan yang dibuat oleh {@link android.content.Context#startService startService()} dari layanan
+yang dibuat oleh {@link android.content.Context#bindService bindService()}, ingatlah
+bahwa suatu layanan, bagaimana pun dimulainya, bisa memungkinkan klien mengikat padanya.
+Jadi, suatu layanan yang awalnya dimulai dengan {@link android.app.Service#onStartCommand
+onStartCommand()} (oleh klien yang memanggil {@link android.content.Context#startService startService()})
+masih bisa menerima panggilan ke {@link android.app.Service#onBind onBind()} (bila klien memanggil
+{@link android.content.Context#bindService bindService()}).</p>
+
+<p>Untuk informasi selengkapnya tentang membuat layanan yang menyediakan pengikatan, lihat dokumen <a href="{@docRoot}guide/components/bound-services.html">Layanan Terikat</a>,
+yang menyertakan informasi selengkapnya tentang metode callback {@link android.app.Service#onRebind onRebind()}
+di bagian tentang <a href="{@docRoot}guide/components/bound-services.html#Lifecycle">Mengelola Daur Hidup
+Layanan Terikat</a>.</p>
+
+
+<!--
+<h2>Beginner's Path</h2>
+
+<p>To learn how to query data from the system or other applications (such as contacts or media
+stored on the device), continue with the <b><a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
+document.</p>
+-->
