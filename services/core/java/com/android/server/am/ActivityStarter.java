@@ -542,9 +542,7 @@ class ActivityStarter {
             ephemeralIntent.setPackage(ephemeralPackage);
         } else {
             // Success intent goes back to the installer
-            // TODO; do we need any extras for the installer?
             ephemeralIntent = new Intent(launchIntent);
-            ephemeralIntent.setData(null);
         }
 
         // Intent that is eventually launched if the ephemeral package was
@@ -569,7 +567,7 @@ class ActivityStarter {
         intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, new IntentSender(failureIntentTarget));
         intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, new IntentSender(successIntentTarget));
         // TODO: Remove when the platform has fully implemented ephemeral apps
-        intent.setData(origIntent.getData());
+        intent.setData(origIntent.getData().buildUpon().clearQuery().build());
         return intent;
     }
 
