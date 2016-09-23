@@ -64,8 +64,10 @@
     <string name="wifi_disabled_password_failure">Authentication problem</string>
     <!-- Summary for the remembered network but currently not in range. -->
     <string name="wifi_not_in_range">Not in range</string>
+    <!-- Summary for the network but no internet connection was detected. -->
+    <string name="wifi_no_internet_no_reconnect">No Internet Access Detected, won\'t automatically reconnect.</string>
     <!-- Summary for the remembered network but no internet connection was detected. -->
-    <string name="wifi_no_internet">No Internet Access Detected, won\'t automatically reconnect.</string>
+    <string name="wifi_no_internet">No Internet Access.</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
 
