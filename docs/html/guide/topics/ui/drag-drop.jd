@@ -152,7 +152,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     drag event listeners or callback methods of each View in the layout. The listeners or callback
     methods can use the metadata to decide if they want to accept the data when it is dropped.
     If the user drops the data over a View object, and that View object's listener or callback
-    method has previously told the system that it wants to accept the drop, then the system sends
+    method has previously told the system that it wants to accept the data, then the system sends
     the data to the listener or callback method in a drag event.
 </p>
 <p>
@@ -226,7 +226,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
     </dt>
     <dd>
         The user releases the drag shadow within the bounding box of a View that can accept the
-        data. The system sends the View object's listener a drag event with action type
+        data, but not within its descendant view that can accept the data. The system sends the View
+        object's listener a drag event with action type
         {@link android.view.DragEvent#ACTION_DROP}. The drag event contains the data that was
         passed to the system in the call to
         {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}
@@ -317,6 +318,10 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
             application calls
 {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()} and
             gets a drag shadow.
+            <p>
+                If the listener wants to continue receiving drag events for this operation, it must
+                return boolean <code>true</code> to the system.
+            <\p>
         </td>
     </tr>
     <tr>
@@ -324,9 +329,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>
             A View object's drag event listener receives this event action type when the drag shadow
             has just entered the bounding box of the View. This is the first event action type the
-            listener receives when the drag shadow enters the bounding box. If the listener wants to
-            continue receiving drag events for this operation, it must return boolean
-            <code>true</code> to the system.
+            listener receives when the drag shadow enters the bounding box.
         </td>
     </tr>
     <tr>
@@ -334,7 +337,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
         <td>
             A View object's drag event listener receives this event action type after it receives a
             {@link android.view.DragEvent#ACTION_DRAG_ENTERED} event while the drag shadow is
-            still within the bounding box of the View.
+            still within the bounding box of the View and not within a descendant view that can
+            accept the data.
         </td>
     </tr>
     <tr>
@@ -343,7 +347,8 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
             A View object's drag event listener receives this event action type after it receives a
             {@link android.view.DragEvent#ACTION_DRAG_ENTERED} and at least one
             {@link android.view.DragEvent#ACTION_DRAG_LOCATION} event, and after the user has moved
-            the drag shadow outside the bounding box of the View.
+            the drag shadow outside the bounding box of the View or into a descendant view that can
+            accept the data.
         </td>
     </tr>
     <tr>
@@ -711,8 +716,7 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
         If the listener can accept a drop, it should return <code>true</code>. This tells
         the system to continue to send drag events to the listener.
         If it can't accept a drop, it should return <code>false</code>, and the system
-        will stop sending drag events until it sends out
-        {@link android.view.DragEvent#ACTION_DRAG_ENDED}.
+        will stop sending drag events for the current drag operation.
     </li>
 </ol>
 <p>
@@ -754,7 +758,8 @@ imageView.setOnLongClickListener(new View.OnLongClickListener() {
     <li>
         {@link android.view.DragEvent#ACTION_DRAG_EXITED}:  This event is sent to a listener that
         previously received {@link android.view.DragEvent#ACTION_DRAG_ENTERED}, after
-        the drag shadow is no longer within the bounding box of the listener's View.
+        the drag shadow is no longer within the bounding box of the listener's View or it's within
+        the bounding box of a descendant view that can accept the data.
     </li>
 </ul>
 <p>
