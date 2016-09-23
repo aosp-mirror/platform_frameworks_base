@@ -1,0 +1,1202 @@
+page.title=Pengaturan
+page.tags=preference,preferenceactivity,preferencefragment
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+  <li><a href="#Overview">Ikhtisar</a>
+    <ol>
+      <li><a href="#SettingTypes">Preferensi</a></li>
+    </ol>
+  </li>
+  <li><a href="#DefiningPrefs">Mendefinisikan Preferensi dalam XML</a>
+    <ol>
+      <li><a href="#Groups">Membuat grup pengaturan</a></li>
+      <li><a href="#Intents">Menggunakan intent</a></li>
+    </ol>
+  </li>
+  <li><a href="#Activity">Membuat Aktivitas Preferensi</a></li>
+  <li><a href="#Fragment">Menggunakan Fragmen Preferensi</a></li>
+  <li><a href="#Defaults">Mengatur Nilai Default</a></li>
+  <li><a href="#PreferenceHeaders">Menggunakan Header Preferensi</a>
+    <ol>
+      <li><a href="#CreateHeaders">Membuat file header</a></li>
+      <li><a href="#DisplayHeaders">Menampilkan header</a></li>
+      <li><a href="#BackCompatHeaders">Mendukung versi yang lebih lama dengan header preferensi</a></li>
+    </ol>
+  </li>
+  <li><a href="#ReadingPrefs">Preferensi Membaca</a>
+    <ol>
+      <li><a href="#Listening">Mendengarkan perubahan preferensi</a></li>
+    </ol>
+  </li>
+  <li><a href="#NetworkUsage">Mengelola Penggunaan Jaringan</a></li>
+  <li><a href="#Custom">Membangun Preferensi Custom</a>
+    <ol>
+      <li><a href="#CustomSelected">Menetapkan antarmuka pengguna</a></li>
+      <li><a href="#CustomSave">Menyimpan nilai pengaturan</a></li>
+      <li><a href="#CustomInitialize">Menginisialisasi nilai saat ini</a></li>
+      <li><a href="#CustomDefault">Menyediakan nilai default</a></li>
+      <li><a href="#CustomSaveState">Menyimpan dan memulihkan status Preferensi</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Kelas-kelas utama</h2>
+<ol>
+  <li>{@link android.preference.Preference}</li>
+  <li>{@link android.preference.PreferenceActivity}</li>
+  <li>{@link android.preference.PreferenceFragment}</li>
+</ol>
+
+
+<h2>Lihat juga</h2>
+<ol>
+  <li><a href="{@docRoot}design/patterns/settings.html">Panduan desain pengaturan</a></li>
+</ol>
+</div>
+</div>
+
+
+
+
+<p>Aplikasi sering kali menyertakan pengaturan yang memungkinkan pengguna memodifikasi fitur dan perilaku aplikasi. Misalnya,
+beberapa aplikasi memungkinkan pengguna untuk menetapkan apakah pemberitahuan diaktifkan atau menetapkan seberapa sering
+aplikasi menyinkronkan data dengan cloud.</p>
+
+<p>Jika ingin menyediakan pengaturan untuk aplikasi, Anda harus menggunakan
+API Android {@link android.preference.Preference} untuk membangun antarmuka yang konsisten dengan
+pengalaman pengguna di aplikasi Android yang lain (termasuk pengaturan sistem). Dokumen ini menjelaskan
+cara membangun pengaturan aplikasi Anda menggunakan API {@link android.preference.Preference}.</p>
+
+<div class="note design">
+<p><strong>Desain Pengaturan</strong></p>
+  <p>Untuk informasi tentang cara mendesain pengaturan Anda, bacalah panduan desain <a href="{@docRoot}design/patterns/settings.html">Pengaturan</a>.</p>
+</div>
+
+
+<img src="{@docRoot}images/ui/settings/settings.png" alt="" width="435" />
+<p class="img-caption"><strong>Gambar 1.</strong> Cuplikan layar dari pengaturan
+aplikasi Messaging Android. Memilih item yang didefinisikan oleh {@link android.preference.Preference}
+akan membuka antarmuka untuk mengubah pengaturan.</p>
+
+
+
+
+<h2 id="Overview">Ikhtisar</h2>
+
+<p>Sebagai ganti menggunakan objek {@link android.view.View} untuk membangun antarmuka pengguna, pengaturan
+dibangun menggunakan berbagai subkelas dari kelas {@link android.preference.Preference} yang Anda
+deklarasikan dalam file XML.</p>
+
+<p>Objek {@link android.preference.Preference} adalah blok pembangun untuk pengaturan
+tunggal. Setiap {@link android.preference.Preference} muncul sebagai item dalam daftar dan menyediakan UI
+yang sesuai bagi pengguna untuk memodifikasi pengaturan. Misalnya, {@link
+android.preference.CheckBoxPreference} membuat item daftar yang menampilkan kotak cek, dan {@link
+android.preference.ListPreference} membuat item yang membuka dialog berisi daftar pilihan.</p>
+
+<p>Setiap {@link android.preference.Preference} yang Anda tambahkan memiliki pasangan nilai-kunci yang sesuai yang
+digunakan sistem untuk menyimpan pengaturan dalam file {@link android.content.SharedPreferences}
+default untuk pengaturan aplikasi Anda. Bila pengguna mengubah pengaturan, sistem akan memperbarui nilai
+yang bersangkutan dalam file {@link android.content.SharedPreferences} untuk Anda. Satu-satunya saat di mana Anda harus
+berinteraksi langsung dengan file {@link android.content.SharedPreferences} yang terkait adalah bila Anda
+perlu membaca nilai untuk menentukan perilaku aplikasi berdasarkan pengaturan pengguna.</p>
+
+<p>Nilai yang tersimpan di {@link android.content.SharedPreferences} untuk setiap pengaturan bisa berupa
+tipe data berikut:</p>
+
+<ul>
+  <li>Boolean</li>
+  <li>Float</li>
+  <li>Int</li>
+  <li>Long</li>
+  <li>String</li>
+  <li>String {@link java.util.Set}</li>
+</ul>
+
+<p>Oleh karena UI pengaturan aplikasi Anda dibangun menggunakan objek {@link android.preference.Preference}
+sebagai ganti
+objek {@link android.view.View}, Anda perlu menggunakan {@link android.app.Activity} khusus atau
+subkelas {@link android.app.Fragment} untuk menampilkan pengaturan daftar:</p>
+
+<ul>
+  <li>Jika aplikasi Anda mendukung versi Android yang lebih lama dari 3.0 (API level 10 dan yang lebih rendah), Anda harus
+membangun aktivitas sebagai ekstensi dari kelas {@link android.preference.PreferenceActivity}.</li>
+  <li>Pada Android 3.0 dan yang lebih baru, sebaiknya Anda menggunakan {@link android.app.Activity} biasa
+yang menjadi host {@link android.preference.PreferenceFragment} yang menampilkan pengaturan aplikasi Anda.
+Akan tetapi, Anda juga bisa menggunakan {@link android.preference.PreferenceActivity} untuk membuat layout dua panel
+bagi layar besar bila Anda memiliki beberapa grup pengaturan.</li>
+</ul>
+
+<p>Cara mengatur {@link android.preference.PreferenceActivity} Anda dan instance {@link
+android.preference.PreferenceFragment} dibahas di bagian tentang <a href="#Activity">Membuat Aktivitas Preferensi</a> dan <a href="#Fragment">Menggunakan
+Fragmen Preferensi</a>.</p>
+
+
+<h3 id="SettingTypes">Preferensi</h3>
+
+<p>Setiap pengaturan untuk aplikasi Anda diwakili oleh subkelas khusus dari kelas {@link
+android.preference.Preference}. Setiap subkelas menyertakan seperangkat properti utama yang memungkinkan Anda
+untuk menetapkan berbagai hal seperti judul pengaturan dan nilai default. Setiap subkelas juga menyediakan
+antarmuka pengguna dan properti khusus miliknya sendiri. Misalnya, gambar 1 menampilkan cuplikan layar dari
+ pengaturan aplikasi Messaging. Setiap item daftar dalam layar pengaturan didukung oleh objek {@link
+android.preference.Preference} berbeda.</p>
+
+<p>Beberapa preferensi yang paling umum adalah:</p>
+
+<dl>
+  <dt>{@link android.preference.CheckBoxPreference}</dt>
+  <dd>Menampilkan item dengan kotak cek untuk pengaturan yang diaktifkan atau dinonaktifkan. Nilai
+tersimpan adalah boolean (<code>true</code> jika diberi tanda cek).</dd>
+
+  <dt>{@link android.preference.ListPreference}</dt>
+  <dd>Membuka dialog berisi daftar tombol radio. Nilai
+tersimpan bisa berupa tipe nilai apa pun yang didukung (tercantum di atas).</dd>
+
+  <dt>{@link android.preference.EditTextPreference}</dt>
+  <dd>Membuka dialog berisi widget {@link android.widget.EditText}. Nilai tersimpan adalah {@link
+java.lang.String}.</dd>
+</dl>
+
+<p>Lihat kelas {@link android.preference.Preference} untuk mengetahui daftar subkelas lain dan
+propertinya.</p>
+
+<p>Tentu saja, kelas bawaan tidak mengakomodasi setiap kebutuhan dan aplikasi Anda mungkin memerlukan
+sesuatu yang lebih khusus. Misalnya, platform saat ini tidak menyediakan kelas {@link
+android.preference.Preference} untuk mengambil nomor atau tanggal. Anda mungkin perlu mendefinisikan
+subkelas {@link android.preference.Preference} sendiri. Untuk bantuan melakukannya, lihat bagian tentang <a href="#Custom">Membangun Preferensi Custom</a>.</p>
+
+
+
+<h2 id="DefiningPrefs">Mendefinisikan Preferensi dalam XML</h2>
+
+<p>Meskipun bisa membuat instance objek {@link android.preference.Preference} baru saat runtime, Anda
+harus mendefinisikan daftar pengaturan dalam XML dengan hierarki objek
+{@link android.preference.Preference}. Menggunakan file XML untuk mendefinisikan sekumpulan pengaturan lebih disukai karena file
+menyediakan struktur yang mudah dibaca dan diperbarui. Selain itu, pengaturan aplikasi Anda
+umumnya telah ditetapkan sebelumnya, meskipun Anda masih bisa memodifikasi kumpulan tersebut saat runtime.</p>
+
+<p>Setiap subkelas {@link android.preference.Preference} bisa dideklarasikan dengan elemen XML yang
+cocok dengan nama kelas, seperti {@code &lt;CheckBoxPreference&gt;}.</p>
+
+<p>Anda harus menyimpan file XML dalam direktori {@code res/xml/}. Meskipun bisa memberi nama file
+sesuka Anda, biasanya file diberi nama {@code preferences.xml}. Biasanya Anda hanya memerlukan satu file,
+karena cabang di hierarki (yang membuka daftar pengaturanny sendiri) dideklarasikan menggunakan instance
+tersarang {@link android.preference.PreferenceScreen}.</p>
+
+<p class="note"><strong>Catatan:</strong> Jika ingin membuat layout multipanel untuk
+pengaturan, Anda memerlukan file XML terpisah untuk setiap fragmen.</p>
+
+<p>Simpul akar untuk file XML harus merupakan elemen {@link android.preference.PreferenceScreen
+&lt;PreferenceScreen&gt;}. Dalam elemen inilah tempat Anda menambahkan setiap {@link
+android.preference.Preference}. Setiap anak yang Anda tambahkan dalam elemen
+{@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;} akan tampak sebagai item
+tunggal dalam daftar pengaturan.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;CheckBoxPreference
+        android:key="pref_sync"
+        android:title="@string/pref_sync"
+        android:summary="@string/pref_sync_summ"
+        android:defaultValue="true" />
+    &lt;ListPreference
+        android:dependency="pref_sync"
+        android:key="pref_syncConnectionType"
+        android:title="@string/pref_syncConnectionType"
+        android:dialogTitle="@string/pref_syncConnectionType"
+        android:entries="@array/pref_syncConnectionTypes_entries"
+        android:entryValues="@array/pref_syncConnectionTypes_values"
+        android:defaultValue="@string/pref_syncConnectionTypes_default" />
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Dalam contoh ini, terdapat {@link android.preference.CheckBoxPreference} dan {@link
+android.preference.ListPreference}. Kedua item tersebut menyertakan tiga atribut berikut:</p>
+
+<dl>
+  <dt>{@code android:key}</dt>
+  <dd>Atribut ini diperlukan untuk preferensi yang mempertahankan nilai data. Ini menetapkan kunci
+unik (string) yang digunakan sistem saat menyimpan nilai pengaturan ini dalam {@link
+android.content.SharedPreferences}.
+  <p>Instance satu-satunya di mana atribut ini <em>tidak diperlukan</em> adalah bila preferensi berupa
+{@link android.preference.PreferenceCategory} atau {@link android.preference.PreferenceScreen}, atau
+preferensi menetapkan {@link android.content.Intent} untuk dipanggil (dengan elemen <a href="#Intents">{@code &lt;intent&gt;}</a>) atau {@link android.app.Fragment} untuk ditampilkan (dengan atribut <a href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
+android:fragment}</a>).</p>
+  </dd>
+  <dt>{@code android:title}</dt>
+  <dd>Ini menyediakan nama pengaturan yang bisa dilihat oleh pengguna.</dd>
+  <dt>{@code android:defaultValue}</dt>
+  <dd>Ini menetapkan nilai awal yang harus diatur sistem dalam file {@link
+android.content.SharedPreferences}. Anda harus memberikan nilai default untuk semua
+pengaturan.</dd>
+</dl>
+
+<p>Untuk informasi tentang semua atribut lain yang didukung, lihat dokumentasi {@link
+android.preference.Preference} (dan subkelas masing-masing).</p>
+
+
+<div class="figure" style="width:300px">
+  <img src="{@docRoot}images/ui/settings/settings-titles.png" alt="" />
+  <p class="img-caption"><strong>Gambar 2.</strong> Mengatur kategori
+    dengan judul. <br/><b>1.</b> Kategori ditetapkan oleh elemen {@link
+android.preference.PreferenceCategory &lt;PreferenceCategory&gt;}. <br/><b>2.</b> Judul
+ditetapkan dengan atribut {@code android:title}.</p>
+</div>
+
+
+<p>Bila daftar pengaturan Anda melebihi sekitar 10 item, Anda mungkin perlu menambahkan judul untuk
+mendefinisikan grup pengaturan atau menampilkan grup tersebut di
+layar terpisah. Opsi ini dijelaskan di bagian berikut.</p>
+
+
+<h3 id="Groups">Membuat grup pengaturan</h3>
+
+<p>Jika Anda menampilkan daftar 10 pengaturan atau lebih, pengguna
+mungkin akan kesulitan dalam memindai, memahami dan memprosesnya. Anda bisa mengatasinya dengan
+membagi sebagian atau semua pengaturan ke dalam beberapa grup, yang secara efektif akan mengubah satu daftar panjang menjadi beberapa daftar
+yang lebih pendek. Suatu grup pengaturan terkait bisa ditampilkan dalam salah satu dari dua cara:</p>
+
+<ul>
+  <li><a href="#Titles">Menggunakan judul</a></li>
+  <li><a href="#Subscreens">Menggunakan sublayar</a></li>
+</ul>
+
+<p>Anda bisa menggunakan salah satu atau keduanya untuk mengelola pengaturan aplikasi Anda. Saat
+memutuskan mana yang akan digunakan dan cara membagi pengaturan, Anda harus mengikuti pedoman dalam
+Panduan <a href="{@docRoot}design/patterns/settings.html">Pengaturan</a> Desain Android.</p>
+
+
+<h4 id="Titles">Menggunakan judul</h4>
+
+<p>Jika ingin menyediakan divider dengan heading di antara grup pengaturan (seperti yang ditampilkan dalam gambar 2),
+tempatkan setiap grup objek {@link android.preference.Preference} di dalam {@link
+android.preference.PreferenceCategory}.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;PreferenceCategory
+        android:title="&#64;string/pref_sms_storage_title"
+        android:key="pref_key_storage_settings">
+        &lt;CheckBoxPreference
+            android:key="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_auto_delete"
+            android:title="&#64;string/pref_title_auto_delete"
+            android:defaultValue="false"... />
+        &lt;Preference
+            android:key="pref_key_sms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_sms_delete"... />
+        &lt;Preference
+            android:key="pref_key_mms_delete_limit"
+            android:dependency="pref_key_auto_delete"
+            android:summary="&#64;string/pref_summary_delete_limit"
+            android:title="&#64;string/pref_title_mms_delete" ... />
+    &lt;/PreferenceCategory>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h4 id="Subscreens">Menggunakan sublayar</h4>
+
+<p>Jika ingin menempatkan grup pengaturan ke dalam sublayar (seperti yang ditampilkan dalam gambar 3), tempatkan grup
+objek {@link android.preference.Preference} di dalam {@link
+android.preference.PreferenceScreen}.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
+<p class="img-caption"><strong>Gambar 3.</strong> Mengatur sublayar. Elemen {@code
+&lt;PreferenceScreen&gt;}
+membuat item yang, bila dipilih, akan membuka daftar terpisah untuk menampilkan pengaturan tersarang.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+&lt;PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;!-- opens a subscreen of settings -->
+    &lt;PreferenceScreen
+        android:key="button_voicemail_category_key"
+        android:title="&#64;string/voicemail"
+        android:persistent="false">
+        &lt;ListPreference
+            android:key="button_voicemail_provider_key"
+            android:title="&#64;string/voicemail_provider" ... />
+        &lt;!-- opens another nested subscreen -->
+        &lt;PreferenceScreen
+            android:key="button_voicemail_setting_key"
+            android:title="&#64;string/voicemail_settings"
+            android:persistent="false">
+            ...
+        &lt;/PreferenceScreen>
+        &lt;RingtonePreference
+            android:key="button_voicemail_ringtone_key"
+            android:title="&#64;string/voicemail_ringtone_title"
+            android:ringtoneType="notification" ... />
+        ...
+    &lt;/PreferenceScreen>
+    ...
+&lt;/PreferenceScreen>
+</pre>
+
+
+<h3 id="Intents">Menggunakan intent</h3>
+
+<p>Dalam beberapa kasus, Anda mungkin ingin item preferensi untuk membuka beberapa aktivitas sebagai ganti
+layar pengaturan, seperti browser web untuk melihat halaman web. Untuk memanggil {@link
+android.content.Intent} saat pengguna memilih item preferensi, tambahkan elemen {@code &lt;intent&gt;}
+sebagai anak dari elemen {@code &lt;Preference&gt;} yang bersangkutan.</p>
+
+<p>Misalnya, berikut ini cara menggunakan item preferensi untuk membuka halaman web:</p>
+
+<pre>
+&lt;Preference android:title="@string/prefs_web_page" >
+    &lt;intent android:action="android.intent.action.VIEW"
+            android:data="http://www.example.com" />
+&lt;/Preference>
+</pre>
+
+<p>Anda bisa membuat intent implisit maupun eksplisit menggunakan atribut berikut:</p>
+
+<dl>
+  <dt>{@code android:action}</dt>
+    <dd>Tindakan yang akan ditetapkan, sesuai metode
+{@link android.content.Intent#setAction setAction()}.</dd>
+  <dt>{@code android:data}</dt>
+    <dd>Data yang akan ditetapkan, sesuai metode {@link android.content.Intent#setData setData()}.</dd>
+  <dt>{@code android:mimeType}</dt>
+    <dd>Tipe MIME yang akan ditetapkan, sesuai metode
+{@link android.content.Intent#setType setType()}.</dd>
+  <dt>{@code android:targetClass}</dt>
+    <dd>Bagian kelas dari nama komponen, sesuai metode {@link android.content.Intent#setComponent
+setComponent()}.</dd>
+  <dt>{@code android:targetPackage}</dt>
+    <dd>Bagian paket dari nama komponen, sesuai metode {@link
+android.content.Intent#setComponent setComponent()}.</dd>
+</dl>
+
+
+
+<h2 id="Activity">Membuat Aktivitas Preferensi</h2>
+
+<p>Untuk menampilkan pengaturan Anda dalam suatu aktivitas, perluas kelas {@link
+android.preference.PreferenceActivity}. Ini adalah ekstensi dari kelas {@link
+android.app.Activity} biasa yang menampilkan daftar pengaturan berdasarkan hierarki objek {@link
+android.preference.Preference}. {@link android.preference.PreferenceActivity}
+secara otomatis mempertahankan pengaturan yang dikaitkan dengan setiap {@link
+android.preference.Preference} bila pengguna membuat perubahan.</p>
+
+<p class="note"><strong>Catatan:</strong> Jika Anda mengembangkan aplikasi untuk Android 3.0 dan
+yang lebih tinggi, sebaiknya gunakan {@link android.preference.PreferenceFragment}. Pindah ke bagian
+berikutnya tentang <a href="#Fragment">Menggunakan Fragmen Preferensi</a>.</p>
+
+<p>Hal paling penting untuk diingat adalah jangan memuat layout tampilan selama callback {@link
+android.preference.PreferenceActivity#onCreate onCreate()}. Sebagai gantinya, panggil {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} untuk
+menambahkan preferensi yang telah Anda deklarasikan dalam file XML ke aktivitas. Misalnya, berikut ini adalah kode minimum
+polos yang diperlukan untuk {@link android.preference.PreferenceActivity} fungsional:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.preferences);
+    }
+}
+</pre>
+
+<p>Ini sebenarnya kode yang cukup untuk beberapa aplikasi, karena segera setelah pengguna memodifikasi preferensi,
+sistem akan menyimpan perubahan tersebut ke file {@link android.content.SharedPreferences} default yang
+bisa dibaca oleh komponen aplikasi Anda lainnya bila Anda perlu memeriksa pengaturan pengguna. Akan tetapi,
+banyak aplikasi, yang memerlukan kode lebih sedikit untuk mendengarkan perubahan yang terjadi pada preferensi.
+Untuk informasi tentang mendengarkan perubahan di file {@link android.content.SharedPreferences},
+lihat bagian tentang <a href="#ReadingPrefs">Preferensi Membaca</a>.</p>
+
+
+
+
+<h2 id="Fragment">Menggunakan Fragmen Preferensi</h2>
+
+<p>Jika Anda mengembangkan Android 3.0 (API level 11) dan yang lebih tinggi, Anda harus menggunakan {@link
+android.preference.PreferenceFragment} untuk menampilkan daftar objek {@link android.preference.Preference}
+Anda. Anda bisa menambahkan {@link android.preference.PreferenceFragment} ke aktivitas apa pun,&mdash;Anda tidak
+perlu menggunakan {@link android.preference.PreferenceActivity}.</p>
+
+<p><a href="{@docRoot}guide/components/fragments.html">Fragmen</a> menyediakan arsitektur yang lebih
+fleksibel untuk aplikasi Anda, dibandingkan hanya menggunakan aktivitas, apa pun jenis
+aktivitas yang Anda bangun. Dengan sendirinya, kami menyarankan Anda menggunakan {@link
+android.preference.PreferenceFragment} untuk mengontrol tampilan pengaturan Anda sebagai ganti {@link
+android.preference.PreferenceActivity} bila memungkinkan.</p>
+
+<p>Implementasi {@link android.preference.PreferenceFragment} Anda bisa semudah
+mendefinisikan metode {@link android.preference.PreferenceFragment#onCreate onCreate()} untuk memuat
+file preferensi dengan {@link android.preference.PreferenceFragment#addPreferencesFromResource
+addPreferencesFromResource()}. Misalnya:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load the preferences from an XML resource
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+}
+</pre>
+
+<p>Anda nanti bisa menambahkan fragmen ini ke {@link android.app.Activity} seperti yang Anda lakukan untuk
+{@link android.app.Fragment} lainnya. Misalnya:</p>
+
+<pre>
+public class SettingsActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+}
+</pre>
+
+<p class="note"><strong>Catatan:</strong> {@link android.preference.PreferenceFragment} tidak memiliki
+objek {@link android.content.Context} sendiri. Jika memerlukan objek {@link android.content.Context}
+, Anda bisa memanggil {@link android.app.Fragment#getActivity()}. Akan tetapi, berhati-hatilah untuk memanggil
+{@link android.app.Fragment#getActivity()} hanya bila fragmen telah dikaitkan dengan aktivitas. Bila
+fragmen belum dikaitkan, atau terlepas saat akhir daur hidupnya, {@link
+android.app.Fragment#getActivity()} akan mengembalikan nol.</p>
+
+
+<h2 id="Defaults">Mengatur Nilai Default</h2>
+
+<p>Preferensi yang Anda buat mungkin mendefinisikan beberapa perilaku penting untuk aplikasi, jadi Anda
+perlu menginisialisasi file {@link android.content.SharedPreferences} yang terkait dengan
+nilai default untuk setiap {@link android.preference.Preference} bila pengguna menggunakan aplikasi
+Anda untuk pertama kali.</p>
+
+<p>Hal pertama yang harus Anda lakukan adalah menetapkan nilai default untuk setiap objek {@link
+android.preference.Preference}
+di file XML Anda menggunakan atribut {@code android:defaultValue}. Nilainya bisa berupa tipe data
+apa saja yang sesuai untuk objek {@link android.preference.Preference} bersangkutan. Misalnya:
+</p>
+
+<pre>
+&lt;!-- default value is a boolean -->
+&lt;CheckBoxPreference
+    android:defaultValue="true"
+    ... />
+
+&lt;!-- default value is a string -->
+&lt;ListPreference
+    android:defaultValue="@string/pref_syncConnectionTypes_default"
+    ... />
+</pre>
+
+<p>Kemudian, dari metode {@link android.app.Activity#onCreate onCreate()} dalam aktivitas utama aplikasi
+Anda&mdash;dan dalam aktivitas lainnya yang digunakan pengguna untuk masuk ke aplikasi Anda untuk pertama kali
+&mdash;panggil {@link android.preference.PreferenceManager#setDefaultValues
+setDefaultValues()}:</p>
+
+<pre>
+PreferenceManager.setDefaultValues(this, R.xml.advanced_preferences, false);
+</pre>
+
+<p>Memanggil ini selama {@link android.app.Activity#onCreate onCreate()} akan memastikan aplikasi
+Anda diinisialisasi dengan pengaturan default, yang mungkin perlu
+dibaca oleh aplikasi Anda untuk menentukan beberapa perilaku (seperti apakah akan mengunduh data pada
+jaringan seluler).</p>
+
+<p>Metode ini membutuhkan tiga argumen:</p>
+<ul>
+  <li>{@link android.content.Context} aplikasi Anda.</li>
+  <li>ID sumber daya untuk file XML preferensi yang ingin Anda atur nilai defaultnya.</li>
+  <li>Boolean menunjukkan apakah nilai default harus diatur lebih dari satu kali.
+<p>Bila <code>false</code>, sistem akan mengatur nilai default hanya jika metode ini belum pernah
+dipanggil sebelumnya (atau {@link android.preference.PreferenceManager#KEY_HAS_SET_DEFAULT_VALUES}
+dalam file preferensi berbagi nilai default salah).</p></li>
+</ul>
+
+<p>Selama Anda mengatur argumen ketiga ke <code>false</code>, Anda bisa dengan aman memanggil metode ini
+setiap kali aktivitas Anda memulai tanpa mengesampingkan preferensi tersimpan pengguna dengan mengatur ulang preferensi tersebut ke
+default. Akan tetapi, jika mengatur ke <code>true</code>, Anda akan mengesampingkan nilai
+sebelumnya dengan default.</p>
+
+
+
+<h2 id="PreferenceHeaders">Menggunakan Header Preferensi</h2>
+
+<p>Dalam kasus yang jarang terjadi, Anda mungkin perlu mendesain pengaturan agar layar pertama
+hanya menampilkan daftar <a href="#Subscreens">sublayar</a> (seperti dalam aplikasi Setting pada sistem,
+seperti yang ditampilkan dalam gambar 4 dan 5). Bila mengembangkan desain seperti itu untuk Android 3.0 dan yang lebih tinggi, Anda
+harus menggunakan fitur "header" yang baru di Android 3.0, sebagai ganti membangun sublayar dengan elemen
+{@link android.preference.PreferenceScreen} tersarang.</p>
+
+<p>Untuk membangun pengaturan dengan header, Anda perlu:</p>
+<ol>
+  <li>Memisahkan setiap grup pengaturan ke dalam instance {@link
+android.preference.PreferenceFragment} terpisah. Ini berarti, setiap grup pengaturan memerlukan file XML
+terpisah.</li>
+  <li>Membuat file header XML yang mencantumkan daftar setiap grup pengaturan dan mendeklarasikan fragmen mana
+yang berisi daftar pengaturan yang sesuai.</li>
+  <li>Memperluas kelas {@link android.preference.PreferenceActivity} untuk menjadi host pengaturan Anda.</li>
+  <li>Mengimplementasikan callback {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} untuk menetapkan file
+header.</li>
+</ol>
+
+<p>Manfaat besar dalam menggunakan desain ini adalah karena {@link android.preference.PreferenceActivity}
+secara otomatis akan menampilkan layout dua panel yang ditampilkan dalam gambar 4 bila dijalankan pada layar besar.</p>
+
+<p>Bahkan jika aplikasi Anda mendukung versi Android yang lebih lama dari 3.0, Anda bisa membangun
+aplikasi untuk menggunakan {@link android.preference.PreferenceFragment} bagi presentasi dua panel pada perangkat
+yang lebih baru sementara tetap mendukung hierarki multilayar biasa pada perangkat
+yang lebih lama (lihat bagian tentang <a href="#BackCompatHeaders">Mendukung versi yang lebih lama dengan
+header preferensi</a>).</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
+<p class="img-caption"><strong>Gambar 4.</strong> Layout dua panel dengan header. <br/><b>1.</b> Header
+didefinisikan dengan file header XML. <br/><b>2.</b> Setiap grup pengaturan didefinisikan dengan
+{@link android.preference.PreferenceFragment} yang ditetapkan oleh elemen {@code &lt;header&gt;} dalam
+file header.</p>
+
+<img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
+<p class="img-caption"><strong>Gambar 5.</strong> Perangkat handset dengan header pengaturan. Bila sebuah
+item dipilih, {@link android.preference.PreferenceFragment} terkait akan menggantikan
+header.</p>
+
+
+<h3 id="CreateHeaders" style="clear:left">Membuat file header</h3>
+
+<p>Setiap grup pengaturan dalam daftar header Anda akan ditetapkan oleh elemen {@code &lt;header&gt;}
+tunggal dalam elemen {@code &lt;preference-headers&gt;} akar. Misalnya:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header
+        android:fragment="com.example.prefs.SettingsActivity$SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;!-- key/value pairs can be included as arguments for the fragment. -->
+        &lt;extra android:name="someKey" android:value="someHeaderValue" />
+    &lt;/header>
+&lt;/preference-headers>
+</pre>
+
+<p>Dengan atribut {@code android:fragment}, setiap header mendeklarasikan instance {@link
+android.preference.PreferenceFragment} yang harus terbuka saat pengguna memilih header.</p>
+
+<p>Elemen {@code &lt;extras&gt;} memungkinkan Anda meneruskan pasangan nilai-kunci ke fragmen di {@link
+android.os.Bundle}. Fragmen bisa mengambil argumen dengan memanggil {@link
+android.app.Fragment#getArguments()}. Anda bisa meneruskan argumen ke fragmen dengan berbagai
+alasan, namun satu alasan yang baik adalah untuk menggunakan kembali subkelas yang sama dari {@link
+android.preference.PreferenceFragment} untuk setiap grup dan menggunakan argumen untuk menetapkan file
+XML preferensi mana yang harus dimuat fragmen.</p>
+
+<p>Misalnya, ada fragmen yang bisa digunakan ulang untuk berbagai grup pengaturan, bila setiap
+header mendefinisikan argumen {@code &lt;extra&gt;} dengan kunci {@code "settings"}:</p>
+
+<pre>
+public static class SettingsFragment extends PreferenceFragment {
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        String settings = getArguments().getString("settings");
+        if ("notifications".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_wifi);
+        } else if ("sync".equals(settings)) {
+            addPreferencesFromResource(R.xml.settings_sync);
+        }
+    }
+}
+</pre>
+
+
+
+<h3 id="DisplayHeaders">Menampilkan header</h3>
+
+<p>Untuk menampilkan header preferensi, Anda harus mengimplementasikan metode callback {@link
+android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} dan memanggil
+{@link android.preference.PreferenceActivity#loadHeadersFromResource
+loadHeadersFromResource()}. Misalnya:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity {
+    &#64;Override
+    public void onBuildHeaders(List&lt;Header> target) {
+        loadHeadersFromResource(R.xml.preference_headers, target);
+    }
+}
+</pre>
+
+<p>Bila pengguna memilih item dari daftar header, sistem akan membuka {@link
+android.preference.PreferenceFragment} terkait.</p>
+
+<p class="note"><strong>Catatan:</strong> Saat menggunakan header preferensi, subkelas {@link
+android.preference.PreferenceActivity} Anda tidak perlu mengimplementasikan metode {@link
+android.preference.PreferenceActivity#onCreate onCreate()}, karena tugas
+yang diperlukan untuk aktivitas hanyalah memuat header.</p>
+
+
+<h3 id="BackCompatHeaders">Mendukung versi yang lebih lama dengan header preferensi</h3>
+
+<p>Jika aplikasi Anda mendukung versi Android yang lebih lama dari 3.0, Anda tetap bisa menggunakan header untuk
+menyediakan layout dua panel saat berjalan pada Android 3.0 dan yang lebih tinggi. Anda hanya perlu membuat
+file XML preferensi tambahan yang menggunakan elemen {@link android.preference.Preference
+&lt;Preference&gt;} dasar yang berperilaku seperti item header (untuk digunakan oleh Android
+versi yang lebih lama).</p>
+
+<p>Akan tetapi, sebagai ganti membuka {@link android.preference.PreferenceScreen} baru, setiap elemen {@link
+android.preference.Preference &lt;Preference&gt;} mengirimkan {@link android.content.Intent} ke
+{@link android.preference.PreferenceActivity} yang menetapkan file XML preferensi mana yang
+akan dimuat.</p>
+
+<p>Misalnya, ini adalah file XML untuk header preferensi yang menggunakan Android 3.0
+dan yang lebih tinggi ({@code res/xml/preference_headers.xml}):</p>
+
+<pre>
+&lt;preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;header
+        android:fragment="com.example.prefs.SettingsFragmentOne"
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one" />
+    &lt;header
+        android:fragment="com.example.prefs.SettingsFragmentTwo"
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" />
+&lt;/preference-headers>
+</pre>
+
+<p>Dan ini adalah file preferensi yang menyediakan header yang sama untuk versi yang lebih lama dari
+Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
+
+<pre>
+&lt;PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;Preference
+        android:title="@string/prefs_category_one"
+        android:summary="@string/prefs_summ_category_one"  >
+        &lt;intent
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_ONE" />
+    &lt;/Preference>
+    &lt;Preference
+        android:title="@string/prefs_category_two"
+        android:summary="@string/prefs_summ_category_two" >
+        &lt;intent
+            android:targetPackage="com.example.prefs"
+            android:targetClass="com.example.prefs.SettingsActivity"
+            android:action="com.example.prefs.PREFS_TWO" />
+    &lt;/Preference>
+&lt;/PreferenceScreen>
+</pre>
+
+<p>Karena dukungan untuk {@code &lt;preference-headers&gt;} telah ditambahkan di Android 3.0, sistem akan memanggil
+{@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} di {@link
+android.preference.PreferenceActivity} hanya saat berjalan pada Android 3.0 atau yang lebih tinggi. Untuk memuat
+file header "lama" ({@code preference_headers_legacy.xml}), Anda harus memeriksa versi Android
+dan, jika versi tersebut lebih lama dari Android 3.0 ({@link
+android.os.Build.VERSION_CODES#HONEYCOMB}), panggil {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} untuk
+memuat file header lama. Misalnya:</p>
+
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ...
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+
+// Called only on Honeycomb and later
+&#64;Override
+public void onBuildHeaders(List&lt;Header> target) {
+   loadHeadersFromResource(R.xml.preference_headers, target);
+}
+</pre>
+
+<p>Satu-satunya hal yang perlu dilakukan adalah menangani {@link android.content.Intent} yang diteruskan ke
+aktivitas untuk mengidentifikasi file preferensi yang akan dimuat. Jadi ambillah tindakan intent dan bandingkan dengan
+string tindakan yang diketahui yang telah Anda gunakan dalam tag {@code &lt;intent&gt;} XML preferensi:</p>
+
+<pre>
+final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";
+...
+
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    String action = getIntent().getAction();
+    if (action != null &amp;&amp; action.equals(ACTION_PREFS_ONE)) {
+        addPreferencesFromResource(R.xml.preferences);
+    }
+    ...
+
+    else if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.HONEYCOMB) {
+        // Load the legacy preferences headers
+        addPreferencesFromResource(R.xml.preference_headers_legacy);
+    }
+}
+</pre>
+
+<p>Ketahuilah bahwa panggilan berturut-turut ke {@link
+android.preference.PreferenceActivity#addPreferencesFromResource addPreferencesFromResource()} akan
+menumpuk semua preferensi ke dalam satu daftar, jadi pastikan bahwa ini hanya dipanggil sekali dengan mengikatkan syarat
+ke pernyataan else-if.</p>
+
+
+
+
+
+<h2 id="ReadingPrefs">Preferensi Membaca</h2>
+
+<p>Secara default, semua preferensi aplikasi Anda disimpan ke file yang bisa diakses dari mana saja
+di dalam aplikasi dengan memanggil metode statis {@link
+android.preference.PreferenceManager#getDefaultSharedPreferences
+PreferenceManager.getDefaultSharedPreferences()}. Ini akan mengembalikan objek {@link
+android.content.SharedPreferences} berisi semua pasangan nilai-kunci yang terkait
+dengan objek {@link android.preference.Preference} yang digunakan di {@link
+android.preference.PreferenceActivity} Anda.</p>
+
+<p>Misalnya, inilah cara membaca salah satu nilai preferensi dari aktivitas lain dalam aplikasi
+Anda:</p>
+
+<pre>
+SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+</pre>
+
+
+
+<h3 id="Listening">Mendengarkan perubahan preferensi</h3>
+
+<p>Ada beberapa alasan yang membuat Anda perlu mendapatkan pemberitahuan segera setelah pengguna mengubah salah satu
+preferensi. Untuk menerima callback saat perubahan terjadi pada salah satu preferensi,
+implementasikan antarmuka {@link android.content.SharedPreferences.OnSharedPreferenceChangeListener
+SharedPreference.OnSharedPreferenceChangeListener} dan daftarkan listener untuk objek
+{@link android.content.SharedPreferences} dengan memanggil {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}.</p>
+
+<p>Antarmuka hanya memiliki satu metode callback, {@link
+android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged
+onSharedPreferenceChanged()}, dan mungkin lebih mudah mengimplementasikan antarmuka sebagai bagian dari
+aktivitas Anda. Misalnya:</p>
+
+<pre>
+public class SettingsActivity extends PreferenceActivity
+                              implements OnSharedPreferenceChangeListener {
+    public static final String KEY_PREF_SYNC_CONN = "pref_syncConnectionType";
+    ...
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+        String key) {
+        if (key.equals(KEY_PREF_SYNC_CONN)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        }
+    }
+}
+</pre>
+
+<p>Dalam contoh ini, metode akan memeriksa apakah pengaturan yang diubah adalah untuk kunci preferensi yang diketahui. Ini akan
+memanggil {@link android.preference.PreferenceActivity#findPreference findPreference()} untuk mendapatkan objek
+{@link android.preference.Preference} yang diubah agar bisa memodifikasi rangkuman item
+menjadi keterangan pada pilihan pengguna. Ini berarti, bila pengaturan adalah {@link
+android.preference.ListPreference} atau pengaturan multipilihan, Anda harus memanggil {@link
+android.preference.Preference#setSummary setSummary()} bila pengaturan berubah ke tampilkan
+status saat ini (seperti pengaturan Sleep yang ditampilkan dalam gambar 5).</p>
+
+<p class="note"><strong>Catatan:</strong> Seperti dijelaskan dalam dokumen Desain Android tentang <a href="{@docRoot}design/patterns/settings.html">Pengaturan</a>, kami merekomendasikan Anda untuk memperbarui
+rangkuman {@link android.preference.ListPreference} setiap kali pengguna mengubah preferensi untuk
+menjelaskan pengaturan saat ini.</p>
+
+<p>Untuk manajemen daur hidup yang baik di aktivitas, kami merekomendasikan Anda untuk mendaftarkan dan mencabut pendaftaran
+{@link android.content.SharedPreferences.OnSharedPreferenceChangeListener} selama callback {@link
+android.app.Activity#onResume} dan {@link android.app.Activity#onPause}:</p>
+
+<pre>
+&#64;Override
+protected void onResume() {
+    super.onResume();
+    getPreferenceScreen().getSharedPreferences()
+            .registerOnSharedPreferenceChangeListener(this);
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    getPreferenceScreen().getSharedPreferences()
+            .unregisterOnSharedPreferenceChangeListener(this);
+}
+</pre>
+
+<p class="caution"><strong>Perhatian:</strong> Bila Anda memanggil {@link
+android.content.SharedPreferences#registerOnSharedPreferenceChangeListener
+registerOnSharedPreferenceChangeListener()}, pengelola preferensi saat ini tidak akan
+menyimpan referensi kuat ke listener. Anda harus menyimpan referensi
+kuat bagi listener, atau referensi akan rentan terhadap pengumpulan sampah. Kami
+merekomendasikan Anda untuk mempertahankan referensi bagi listener dalam data instance objek
+yang akan ada selama Anda memerlukan listener tersebut.</p>
+
+<p>Misalnya, dalam kode berikut, caller tidak menyimpan referensi ke
+listener. Akibatnya, listener akan dikenakan pengumpulan sampah,
+dan suatu saat nanti akan gagal:</p>
+
+<pre>
+prefs.registerOnSharedPreferenceChangeListener(
+  // Bad! The listener is subject to garbage collection!
+  new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+});
+</pre>
+
+<p>Sebagai gantinya, simpan referensi ke listener dalam bidang data instance
+objek yang akan ada selama listener dibutuhkan:</p>
+
+<pre>
+SharedPreferences.OnSharedPreferenceChangeListener listener =
+    new SharedPreferences.OnSharedPreferenceChangeListener() {
+  public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+    // listener implementation
+  }
+};
+prefs.registerOnSharedPreferenceChangeListener(listener);
+</pre>
+
+<h2 id="NetworkUsage">Mengelola Penggunaan Jaringan</h2>
+
+
+<p>Mulai Android 4.0, aplikasi Settings untuk sistem memungkinkan pengguna melihat seberapa besar
+data jaringan yang digunakan aplikasi mereka saat berada di latar depan dan latar belakang. Kemudian pengguna bisa
+menonaktifkan penggunaan data latar belakang untuk aplikasi individual. Agar pengguna tidak menonaktifkan akses
+aplikasi ke data dari latar belakang, Anda harus menggunakan koneksi data secara efisien dan mengizinkan
+pengguna untuk menyaring penggunaan data aplikasi melalui pengaturan aplikasi Anda.<p>
+
+<p>Misalnya, Anda bisa mengizinkan pengguna untuk mengontrol seberapa sering aplikasi menyinkronkan data, apakah aplikasi
+hanya melakukan pengunggahan/pengunduhan bila ada Wi-Fi, apakah aplikasi menggunakan data saat roaming, dll. Dengan
+tersedianya kontrol ini bagi pengguna, mereka kemungkinan besar tidak akan menonaktifkan akses aplikasi ke data
+saat mendekati batas yang mereka tetapkan dalam Settings pada sistem, karena mereka bisa mengontrol secara tepat
+seberapa besar data yang digunakan aplikasi Anda.</p>
+
+<p>Setelah menambahkan preferensi yang diperlukan dalam {@link android.preference.PreferenceActivity} Anda
+untuk mengontrol kebiasaan data aplikasi, Anda harus menambahkan filter intent untuk {@link
+android.content.Intent#ACTION_MANAGE_NETWORK_USAGE} dalam file manifes Anda. Misalnya:</p>
+
+<pre>
+&lt;activity android:name="SettingsActivity" ... >
+    &lt;intent-filter>
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+       &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>Filter intent ini menunjukkan pada sistem bahwa ini adalah aktivitas yang mengontrol penggunaan
+data aplikasi Anda. Jadi, saat pengguna memeriksa seberapa banyak data yang digunakan oleh aplikasi dari
+aplikasi Settings pada sistem, tombol <em>View application settings</em> akan tersedia dan menjalankan
+{@link android.preference.PreferenceActivity} sehingga pengguna bisa menyaring seberapa besar data yang digunakan
+aplikasi Anda.</p>
+
+
+
+
+
+
+
+<h2 id="Custom">Membangun Preferensi Custom</h2>
+
+<p>Kerangka kerja Android menyertakan berbagai subkelas {@link android.preference.Preference} yang
+memungkinkan Anda membangun UI untuk beberapa macam tipe pengaturan.
+Akan tetapi, Anda mungkin menemukan pengaturan yang diperlukan bila tidak ada solusi bawaan, seperti
+picker nomor atau picker tanggal. Dalam hal demikian, Anda akan perlu membuat preferensi custom dengan memperluas
+kelas {@link android.preference.Preference} atau salah satu subkelas lainnya.</p>
+
+<p>Bila memperluas kelas {@link android.preference.Preference}, ada beberapa hal
+penting yang perlu Anda lakukan:</p>
+
+<ul>
+  <li>Menetapkan antarmuka pengguna yang akan muncul saat pengguna memilih pengaturan.</li>
+  <li>Menyimpan nilai pengaturan bila perlu.</li>
+  <li>Menginisialisasi {@link android.preference.Preference} dengan nilai saat ini (atau default)
+bila muncul di tampilan.</li>
+  <li>Menyediakan nilai default bila diminta oleh sistem.</li>
+  <li>Jika {@link android.preference.Preference} menyediakan UI sendiri (seperti dialog), simpan
+dan pulihkan status untuk menangani perubahan daur hidup (seperti saat pengguna memutar layar).</li>
+</ul>
+
+<p>Bagian berikut menjelaskan cara melakukan setiap tugas ini.</p>
+
+
+
+<h3 id="CustomSelected">Menetapkan antarmuka pengguna</h3>
+
+  <p>Jika secara langsung memperluas kelas {@link android.preference.Preference}, Anda perlu mengimplementasikan
+{@link android.preference.Preference#onClick()} untuk mendefinisikan tindakan yang terjadi bila pengguna
+memilih item tersebut. Akan tetapi, sebagian besar pengaturan custom memperluas {@link android.preference.DialogPreference} untuk
+menampilkan dialog, sehingga menyederhanakan prosedur. Bila memperluas {@link
+android.preference.DialogPreference}, Anda harus memanggil {@link
+android.preference.DialogPreference#setDialogLayoutResource setDialogLayoutResourcs()} selama di
+konstruktor kelas untuk menetapkan layout dialog.</p>
+
+  <p>Misalnya, beri ini konstruktor untuk {@link
+android.preference.DialogPreference} custom yang mendeklarasikan layout dan menetapkan teks untuk tombol dialog
+negatif dan positif default:</p>
+
+<pre>
+public class NumberPickerPreference extends DialogPreference {
+    public NumberPickerPreference(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        setDialogLayoutResource(R.layout.numberpicker_dialog);
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+
+        setDialogIcon(null);
+    }
+    ...
+}
+</pre>
+
+
+
+<h3 id="CustomSave">Menyimpan nilai pengaturan</h3>
+
+<p>Anda bisa menyimpan nilai pengaturan kapan saja dengan memanggil salah satu metode {@code persist*()} kelas {@link
+android.preference.Preference}, seperti {@link
+android.preference.Preference#persistInt persistInt()} jika nilai pengaturan adalah integer atau
+{@link android.preference.Preference#persistBoolean persistBoolean()} untuk menyimpan boolean.</p>
+
+<p class="note"><strong>Catatan:</strong> Setiap {@link android.preference.Preference} hanya bisa menyimpan satu
+tipe data, jadi Anda harus menggunakan metode {@code persist*()} yang tepat untuk tipe data yang digunakan
+oleh {@link android.preference.Preference} custom Anda.</p>
+
+<p>Bila Anda memilih untuk mempertahankannya, pengaturan bisa bergantung pada kelas {@link
+android.preference.Preference} yang Anda perluas. Jika Anda memperluas {@link
+android.preference.DialogPreference}, maka Anda harus mempertahankan nilai hanya jika dialog
+tertutup karena hasil positif (pengguna memilih tombol "OK").</p>
+
+<p>Bila {@link android.preference.DialogPreference} tertutup, sistem akan memanggil metode {@link
+android.preference.DialogPreference#onDialogClosed onDialogClosed()}. Metode mencakup argumen
+boolean yang menetapkan apakah hasil pengguna "positif"&mdash;jika nilainya
+<code>true</code>, maka pengguna memilih tombol positif dan Anda harus menyimpan nilai baru. Misalnya:
+</p>
+
+<pre>
+&#64;Override
+protected void onDialogClosed(boolean positiveResult) {
+    // When the user selects "OK", persist the new value
+    if (positiveResult) {
+        persistInt(mNewValue);
+    }
+}
+</pre>
+
+<p>Dalam contoh ini, <code>mNewValue</code> adalah anggota kelas yang menampung nilai
+pengaturan saat ini. Memanggil {@link android.preference.Preference#persistInt persistInt()} akan menyimpan nilai
+ke file {@link android.content.SharedPreferences} (secara otomatis menggunakan kunci yang
+ditetapkan dalam file XML untuk {@link android.preference.Preference} ini).</p>
+
+
+<h3 id="CustomInitialize">Menginisialisasi nilai saat ini</h3>
+
+<p>Bila sistem menambahkan {@link android.preference.Preference} Anda ke layar, ia
+akan memanggil {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} untuk memberi tahu
+Anda apakah pengaturan memiliki nilai yang dipertahankan. Jika tidak ada nilai yang dipertahankan, panggilan ini
+akan menyediakan nilai default bagi Anda.</p>
+
+<p>Metode {@link android.preference.Preference#onSetInitialValue onSetInitialValue()} akan meneruskan
+boolean, <code>restorePersistedValue</code>, untuk menunjukkan apakah nilai dipertahankan
+untuk pengaturan. Jika <code>true</code>, maka Anda harus mengambil nilai yang dipertahankan dengan memanggil
+salah satu metode {@code getPersisted*()} kelas {@link
+android.preference.Preference}, seperti {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} untuk nilai integer. Anda biasanya
+perlu mengambil nilai yang dipertahankan agar bisa memperbarui UI dengan benar untuk merefleksikan
+nilai yang tersimpan sebelumnya.</p>
+
+<p>Jika <code>restorePersistedValue</code> adalah <code>false</code>, maka Anda
+harus menggunakan nilai default yang diteruskan dalam argumen kedua.</p>
+
+<pre>
+&#64;Override
+protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+    if (restorePersistedValue) {
+        // Restore existing state
+        mCurrentValue = this.getPersistedInt(DEFAULT_VALUE);
+    } else {
+        // Set default state from the XML attribute
+        mCurrentValue = (Integer) defaultValue;
+        persistInt(mCurrentValue);
+    }
+}
+</pre>
+
+<p>Setiap metode {@code getPersisted*()} memerlukan argumen yang menetapkan
+nilai default untuk digunakan jika tidak ada nilai yang dipertahankan atau kunci tidak ada. Dalam contoh
+di atas, konstanta lokal yang digunakan untuk menetapkan nilai default dalam kasus {@link
+android.preference.Preference#getPersistedInt getPersistedInt()} tidak bisa mengembalikan nilai yang dipertahankan.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Anda <strong>tidak bisa</strong> menggunakan
+<code>defaultValue</code> sebagai nilai default dalam metode {@code getPersisted*()}, karena
+nilainya selalu nol bila <code>restorePersistedValue</code> adalah <code>true</code>.</p>
+
+
+<h3 id="CustomDefault">Menyediakan nilai default</h3>
+
+<p>Jika instance kelas {@link android.preference.Preference} Anda menetapkan nilai default
+(dengan atribut {@code android:defaultValue}), maka
+sistem akan memanggil {@link android.preference.Preference#onGetDefaultValue
+onGetDefaultValue()} bila membuat instance objek untuk mengambil nilai. Anda harus mengimplementasikan
+metode ini agar sistem bisa menyimpan nilai default dalam {@link
+android.content.SharedPreferences}. Misalnya:</p>
+
+<pre>
+&#64;Override
+protected Object onGetDefaultValue(TypedArray a, int index) {
+    return a.getInteger(index, DEFAULT_VALUE);
+}
+</pre>
+
+<p>Argumen metode menyediakan semua hal yang Anda perlukan: larik atribut dan posisi
+indeks dari {@code android:defaultValue}, yang harus Anda ambil. Alasan Anda harus
+mengimplementasikan metode ini untuk mengekstrak nilai default dari atribut adalah karena Anda harus menetapkan
+nilai default lokal untuk atribut jika nilai tidak didefinisikan.</p>
+
+
+
+<h3 id="CustomSaveState">Menyimpan dan memulihkan status Preferensi</h3>
+
+<p>Seperti halnya {@link android.view.View} di layout, subkelas {@link android.preference.Preference}
+Anda bertanggung jawab menyimpan dan memulihkan statusnya jika aktivitas atau fragmen
+di-restart (seperti saat pengguna memutar layar). Untuk menyimpan
+dan memulihkan status kelas {@link android.preference.Preference} dengan benar, Anda harus mengimplementasikan
+metode callback daur hidup {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} dan {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()}.</p>
+
+<p>Status {@link android.preference.Preference} Anda didefinisikan oleh objek yang mengimplementasikan
+antarmuka {@link android.os.Parcelable}. Kerangka kerja Android menyediakan objek seperti itu untuk Anda gunakan
+sebagai titik mulai untuk mendefinisikan objek status Anda: kelas {@link
+android.preference.Preference.BaseSavedState}.</p>
+
+<p>Untuk mendefinisikan cara kelas {@link android.preference.Preference} menyimpan statusnya, Anda harus
+memperluas kelas {@link android.preference.Preference.BaseSavedState}. Anda hanya perlu mengesampingkan
+ beberapa metode dan mendefinisikan objek {@link android.preference.Preference.BaseSavedState#CREATOR}
+.</p>
+
+<p>Untuk sebagian besar aplikasi, Anda bisa menyalin implementasi berikut dan cukup mengubah baris yang
+menangani {@code value} jika subkelas {@link android.preference.Preference} Anda menyimpan tipe
+data selain integer.</p>
+
+<pre>
+private static class SavedState extends BaseSavedState {
+    // Member that holds the setting's value
+    // Change this data type to match the type saved by your Preference
+    int value;
+
+    public SavedState(Parcelable superState) {
+        super(superState);
+    }
+
+    public SavedState(Parcel source) {
+        super(source);
+        // Get the current preference's value
+        value = source.readInt();  // Change this to read the appropriate data type
+    }
+
+    &#64;Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        // Write the preference's value
+        dest.writeInt(value);  // Change this to write the appropriate data type
+    }
+
+    // Standard creator object using an instance of this class
+    public static final Parcelable.Creator&lt;SavedState> CREATOR =
+            new Parcelable.Creator&lt;SavedState>() {
+
+        public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+        }
+
+        public SavedState[] newArray(int size) {
+            return new SavedState[size];
+        }
+    };
+}
+</pre>
+
+<p>Dengan implementasi {@link android.preference.Preference.BaseSavedState} di atas yang ditambahkan
+ke aplikasi Anda (biasanya sebagai subkelas dari subkelas {@link android.preference.Preference}), Anda
+nanti perlu mengimplementasikan metode {@link android.preference.Preference#onSaveInstanceState
+onSaveInstanceState()} dan {@link
+android.preference.Preference#onRestoreInstanceState onRestoreInstanceState()} untuk subkelas
+{@link android.preference.Preference} Anda.</p>
+
+<p>Misalnya:</p>
+
+<pre>
+&#64;Override
+protected Parcelable onSaveInstanceState() {
+    final Parcelable superState = super.onSaveInstanceState();
+    // Check whether this Preference is persistent (continually saved)
+    if (isPersistent()) {
+        // No need to save instance state since it's persistent,
+        // use superclass state
+        return superState;
+    }
+
+    // Create instance of custom BaseSavedState
+    final SavedState myState = new SavedState(superState);
+    // Set the state's value with the class member that holds current
+    // setting value
+    myState.value = mNewValue;
+    return myState;
+}
+
+&#64;Override
+protected void onRestoreInstanceState(Parcelable state) {
+    // Check whether we saved the state in onSaveInstanceState
+    if (state == null || !state.getClass().equals(SavedState.class)) {
+        // Didn't save the state, so call superclass
+        super.onRestoreInstanceState(state);
+        return;
+    }
+
+    // Cast state to custom BaseSavedState and pass to superclass
+    SavedState myState = (SavedState) state;
+    super.onRestoreInstanceState(myState.getSuperState());
+
+    // Set this Preference's widget to reflect the restored state
+    mNumberPicker.setValue(myState.value);
+}
+</pre>
+

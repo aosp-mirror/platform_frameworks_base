@@ -1,0 +1,1214 @@
+page.title=Membuat Penyedia Konten
+@jd:body
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>Dalam dokumen ini</h2>
+<ol>
+    <li>
+        <a href="#DataStorage">Mendesain Penyimpanan Data</a>
+    </li>
+    <li>
+        <a href="#ContentURI">Mendesain URI Konten</a>
+    </li>
+    <li>
+        <a href="#ContentProvider">Mengimplementasikan Kelas ContentProvider</a>
+        <ol>
+            <li>
+                <a href="#RequiredAccess">Metode-Metode yang Diperlukan</a>
+            </li>
+            <li>
+                <a href="#Query">Mengimplementasikan metode query()</a>
+            </li>
+            <li>
+                <a href="#Insert">Mengimplementasikan metode insert()</a>
+            </li>
+            <li>
+                <a href="#Delete">Mengimplementasikan metode delete()</a>
+            </li>
+            <li>
+                <a href="#Update">Mengimplementasikan metode update()</a>
+            </li>
+            <li>
+                <a href="#OnCreate">Mengimplementasikan metode onCreate()</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#MIMETypes">Mengimplementasikan Tipe MIME Penyedia Konten</a>
+        <ol>
+            <li>
+                <a href="#TableMIMETypes">Tipe MIME untuk tabel</a>
+            </li>
+            <li>
+                <a href="#FileMIMETypes">Tipe MIME untuk file</a>
+            </li>
+        </ol>
+    </li>
+    <li>
+        <a href="#ContractClass">Mengimplementasikan Kelas Kontrak</a>
+    </li>
+    <li>
+        <a href="#Permissions">Mengimplementasikan Izin Penyedia Konten</a>
+    </li>
+    <li>
+        <a href="#ProviderElement">Elemen &lt;provider&gt;</a>
+    </li>
+    <li>
+        <a href="#Intents">Intent dan Akses Data</a>
+    </li>
+</ol>
+<h2>Kelas-kelas utama</h2>
+    <ol>
+        <li>
+            {@link android.content.ContentProvider}
+        </li>
+        <li>
+            {@link android.database.Cursor}
+        </li>
+        <li>
+            {@link android.net.Uri}
+        </li>
+    </ol>
+<h2>Contoh-Contoh Terkait</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}resources/samples/NotePad/index.html">
+                Aplikasi contoh Note Pad
+            </a>
+        </li>
+    </ol>
+<h2>Lihat juga</h2>
+    <ol>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+            Dasar-Dasar Penyedia Konten</a>
+        </li>
+        <li>
+            <a href="{@docRoot}guide/topics/providers/calendar-provider.html">
+            Penyedia Kalender</a>
+        </li>
+    </ol>
+</div>
+</div>
+
+
+<p>
+    Penyedia konten mengelola akses ke repository data pusat. Anda mengimplementasikan
+    penyedia sebagai satu atau beberapa kelas dalam aplikasi Android, bersama elemen-elemen dalam
+    file manifes. Salah satu kelas Anda mengimplementasikan subkelas
+    {@link android.content.ContentProvider}, yang merupakan antarmuka antara penyedia Anda dan
+    aplikasi lain. Walaupun penyedia konten dimaksudkan untuk menyediakan data bagi
+    aplikasi lain, Anda tentu saja bisa memiliki aktivitas dalam aplikasi yang memungkinkan pengguna
+    melakukan query dan memodifikasi data yang dikelola oleh penyedia Anda.
+</p>
+<p>
+    Bagian selebihnya dalam topik ini adalah daftar langkah-langkah dasar untuk membangun penyedia konten dan daftar
+    API yang akan digunakan.
+</p>
+
+
+<!-- Before You Start Building -->
+<h2 id="BeforeYouStart">Sebelum Anda Mulai Membangun</h2>
+<p>
+    Sebelum Anda mulai membangun penyedia, lakukanlah hal-hal berikut:
+</p>
+<ol>
+    <li>
+        <strong>Putuskan apakah Anda memerlukan penyedia konten</strong>. Anda perlu membangun sebuah
+        penyedia konten jika ingin menyediakan salah satu atau beberapa dari fitur berikut:
+        <ul>
+            <li>Anda ingin menawarkan data atau file yang kompleks ke aplikasi lain.</li>
+            <li>Anda ingin memungkinkan pengguna menyalin data yang kompleks dari aplikasi Anda ke dalam aplikasi lain.</li>
+            <li>Anda ingin menyediakan saran pencarian custom dengan menggunakan kerangka kerja pencarian.</li>
+        </ul>
+    <p>
+        Anda <em>tidak</em> mengharuskan penyedia untuk menggunakan database SQLite jika hanya digunakan dalam
+        aplikasi sendiri.
+    </p>
+    </li>
+    <li>
+        Jika Anda belum siap melakukannya, bacalah topik
+        <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+        Dasar-Dasar Penyedia Konten</a> untuk mengetahui selengkapnya tentang penyedia.
+    </li>
+</ol>
+<p>
+    Berikutnya, ikuti langkah-langkah ini untuk membangun penyedia:
+</p>
+<ol>
+    <li>
+        Desain penyimpanan mentah untuk data Anda. Penyedia konten menawarkan data dengan dua cara:
+        <dl>
+            <dt>
+                Data file
+            </dt>
+            <dd>
+                Data yang biasanya masuk ke dalam file, misalnya
+                foto, audio, atau video. Simpan file dalam ruang privat
+                aplikasi Anda. Untuk merespons permintaan file dari aplikasi lain,
+                penyedia Anda bisa menawarkan handle ke file tersebut.
+            </dd>
+            <dt>
+                Data "terstruktur"
+            </dt>
+            <dd>
+                Data yang biasanya masuk ke dalam database, larik, atau struktur serupa.
+                Simpan data dalam bentuk yang kompatibel dengan tabel berisi baris dan kolom. Baris
+                mewakili entitas, misalnya satu orang atau satu barang inventori. Kolom mewakili
+                beberapa data untuk entitas itu, misalnya nama orang atau harga barang. Cara umum untuk
+                menyimpan tipe data ini adalah dalam database SQLite, namun Anda bisa menggunakan tipe
+                penyimpanan apa saja yang persisten. Untuk mengetahui selengkapnya tentang tipe penyimpanan yang tersedia di
+                sistem Android, lihat bagian <a href="#DataStorage">
+                Mendesain Penyimpanan Data</a>.
+            </dd>
+        </dl>
+    </li>
+    <li>
+        Definisikan sebuah implementasi konkret kelas {@link android.content.ContentProvider} dan
+        metode yang diperlukannya. Kelas ini adalah antarmuka antara data Anda dan bagian selebihnya pada
+        sistem Android. Untuk informasi selengkapnya tentang kelas ini, lihat bagian
+        <a href="#ContentProvider">Mengimplementasikan Kelas ContentProvider</a>.
+    </li>
+    <li>
+        Definisikan string otoritas, semua URI isinya, dan nama-nama kolom penyedia. Jika Anda ingin
+        penyedia aplikasi menangani intent, definisikan juga semua tindakan intent, data ekstra,
+        dan flag. Definisikan juga izin yang akan Anda syaratkan terhadap aplikasi yang ingin
+        mengakses data Anda. Anda harus mempertimbangkan pendefinisian semua nilai ini sebagai konstanta di
+        kelas kontrak terpisah; nantinya, Anda bisa mengekspos kelas ini kepada pengembang lain. Untuk
+        informasi selengkapnya tentang URI konten, lihat
+        bagian <a href="#ContentURI">Mendesain URI Konten</a>.
+        Untuk informasi selengkapnya tentang intent, lihat
+        bagian <a href="#Intents">Intent dan Akses Data</a>.
+    </li>
+    <li>
+        Tambahkan bagian opsional lainnya, seperti data contoh atau implementasi
+        {@link android.content.AbstractThreadedSyncAdapter} yang bisa menyinkronkan data antara
+        penyedia dan data berbasis cloud.
+    </li>
+</ol>
+
+
+<!-- Designing Data Storage -->
+<h2 id="DataStorage">Mendesain Penyimpanan Data</h2>
+<p>
+    Penyedia konten adalah antarmuka ke data yang disimpan dalam format terstruktur. Sebelum membuat
+    antarmuka, Anda harus memutuskan cara menyimpan data. Anda bisa menyimpan data dalam bentuk apa saja yang Anda
+    sukai, kemudian mendesain antarmuka untuk membaca dan menulis data yang diperlukan.
+</p>
+<p>
+    Berikut ini adalah beberapa teknologi penyimpanan data yang tersedia di Android:
+</p>
+<ul>
+    <li>
+        Sistem Android menyertakan API database SQLite yang digunakan penyedia Android sendiri
+        untuk menyimpan data berorientasi tabel. Kelas
+        {@link android.database.sqlite.SQLiteOpenHelper} membantu Anda membuat database, dan kelas
+        {@link android.database.sqlite.SQLiteDatabase} adalah kelas dasar untuk mengakses
+        database.
+        <p>
+            Ingatlah bahwa Anda tidak harus menggunakan database untuk mengimplementasikan repository. Penyedia
+            muncul secara eksternal sebagai satu set tabel, yang serupa dengan sebuah database relasional, namun ini
+            bukan persyaratan untuk implementasi internal penyedia.
+        </p>
+    </li>
+    <li>
+        Untuk menyimpan file data, Android memiliki beragam API berorientasi file.
+        Untuk mengetahui selengkapnya tentang penyimpanan file, bacalah topik
+        <a href="{@docRoot}guide/topics/data/data-storage.html">Penyimpanan Data</a>. Jika Anda sedang
+        mendesain penyedia yang menawarkan data yang terkait dengan media seperti musik atau video, Anda bisa
+        memiliki penyedia yang mengombinasikan data tabel dan file.
+    </li>
+    <li>
+        Untuk bekerja dengan data berbasis jaringan, gunakan kelas-kelas dalam {@link java.net} dan
+        {@link android.net}. Anda juga bisa menyinkronkan data berbasis jaringan dengan penyimpanan data lokal
+        seperti database, kemudian menawarkan data sebagai tabel atau file.
+        Aplikasi contoh <a href="{@docRoot}resources/samples/SampleSyncAdapter/index.html">
+        Sample Sync Adapter</a> memperagakan tipe sinkronisasi ini.
+    </li>
+</ul>
+<h3 id="DataDesign">
+    Pertimbangan desain data
+</h3>
+<p>
+    Berikut ini adalah beberapa tip untuk mendesain struktur data penyedia:
+</p>
+<ul>
+    <li>
+        Data tabel harus selalu memiliki kolom "kunci utama" yang dipelihara oleh penyedia
+        sebagai nilai numerik unik untuk setiap baris. Anda bisa menggunakan nilai ini untuk menautkan baris ke
+        baris yang terkait dalam tabel lain (dengan menggunakannya sebagai "kunci asing"). Walaupun Anda bisa menggunakan nama
+        apa saja untuk kolom ini, menggunakan {@link android.provider.BaseColumns#_ID BaseColumns._ID} adalah
+        pilihan terbaik, karena menautkan hasil query penyedia dengan
+        {@link android.widget.ListView} mensyaratkan bahwa salah satu kolom yang diambil memiliki nama
+        <code>_ID</code>.
+    </li>
+    <li>
+        Jika Anda ingin untuk menyediakan gambar bitmap atau potongan data berorientasi file lainnya yang berukuran sangat besar, simpanlah
+        data dalam sebuah file kemudian sediakan secara tidak langsung sebagai ganti menyimpannya secara langsung dalam
+        tabel. Jika melakukannya, Anda perlu memberi tahu pengguna penyedia Anda bahwa mereka perlu menggunakan metode file
+        {@link android.content.ContentResolver} untuk mengakses data.
+    </li>
+    <li>
+        Gunakan tipe data Binary Large OBject (BLOB) untuk menyimpan data yang bervariasi ukurannya atau memiliki
+        struktur yang beragam. Misalnya, Anda bisa menggunakan sebuah kolom BLOB untuk menyimpan
+        <a href="http://code.google.com/p/protobuf">buffer protokol</a> atau
+        <a href="http://www.json.org">struktur JSON</a>.
+        <p>
+            Anda juga bisa menggunakan BLOB untuk mengimplementasikan tabel yang <em>tidak bergantung skema</em>. Dalam
+            tipe tabel ini, Anda mendefinisikan kolom kunci utama, kolom tipe MIME, dan satu atau beberapa
+            kolom generik sebagai BLOB. Arti dari data dalam kolom-kolom BLOB ditunjukkan
+            oleh nilai dalam kolom tipe MIME. Cara ini memungkinkan Anda menyimpan berbagai tipe baris dalam
+            tabel yang sama. Tabel "data"
+            {@link android.provider.ContactsContract.Data} Penyedia Kontak adalah contoh tabel yang tidak bergantung skema
+            tersebut.
+        </p>
+    </li>
+</ul>
+<!-- Designing Content URIs -->
+<h2 id="ContentURI">Mendesain URI Konten</h2>
+<p>
+    <strong>URI konten</strong> adalah URI yang mengidentifikasi data dalam penyedia. URI Konten
+    berisi nama simbolis seluruh penyedia (<strong>otoritas</strong>nya) dan sebuah
+    nama yang menunjuk ke tabel atau file (<strong>path</strong>). Bagian id opsional menunjuk ke
+    satu baris dalam tabel. Setiap metode akses data
+    {@link android.content.ContentProvider} memiliki sebuah URI konten sebagai argumen; hal ini memungkinkan Anda
+    menentukan tabel, baris, atau file yang akan diakses.
+</p>
+<p>
+    Dasar-dasar URI konten dijelaskan dalam topik
+    <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
+    Dasar-Dasar Penyedia Konten</a>.
+</p>
+<h3>Mendesain otoritas</h3>
+<p>
+    Penyedia biasanya memiliki otoritas tunggal, yang berfungsi sebagai nama internal Android-nya. Untuk
+    menghindari konflik dengan penyedia lain, Anda harus menggunakan kepemilikan domain internet (secara terbalik)
+    sebagai basis otoritas penyedia Anda. Karena saran ini juga berlaku untuk
+    nama-nama paket Android, Anda bisa mendefinisikan otoritas penyedia sebagai perluasan dari nama
+    paket yang berisi penyedia. Misalnya, jika nama paket Android Anda adalah
+    <code>com.example.&lt;appname&gt;</code>, Anda harus memberikan penyedia Anda
+    otoritas <code>com.example.&lt;appname&gt;.provider</code>.
+</p>
+<h3>Mendesain struktur path</h3>
+<p>
+    Pengembang biasanya membuat URI konten dari otoritas dengan menambahkan path yang menunjuk ke
+    masing-masing tabel. Misalnya, jika Anda memiliki dua tabel <em>table1</em> dan
+    <em>table2</em>, Anda mengombinasikan otoritas dari contoh sebelumnya untuk menghasilkan
+    URI konten
+    <code>com.example.&lt;appname&gt;.provider/table1</code> dan
+    <code>com.example.&lt;appname&gt;.provider/table2</code>. Path tidak
+    dibatasi pada segmen tunggal, dan tidak harus berupa tabel untuk masing-masing tingkat path.
+</p>
+<h3>Menangani ID URI konten</h3>
+<p>
+    Berdasarkan standar, penyedia menawarkan akses ke satu baris dalam tabel dengan menerima URI konten
+    dengan sebuah nilai ID untuk baris itu di akhir URI. Juga berdasarkan standar, penyedia mencocokkan
+    nilai ID dengan kolom <code>_ID</code> tabel, dan melakukan akses yang diminta terhadap baris
+    yang cocok.
+</p>
+<p>
+    Standar ini memudahkan pola desain umum untuk aplikasi yang mengakses penyedia. Aplikasi
+    melakukan query terhadap penyedia dan menampilkan {@link android.database.Cursor} yang dihasilkan
+    dalam {@link android.widget.ListView} dengan menggunakan {@link android.widget.CursorAdapter}.
+    Definisi {@link android.widget.CursorAdapter} mengharuskan salah satu kolom dalam
+    {@link android.database.Cursor} berupa <code>_ID</code>
+</p>
+<p>
+    Pengguna kemudian mengambil salah satu baris yang ditampilkan dari UI untuk menemukan atau memodifikasi
+    data. Aplikasi mengambil baris yang sesuai dari {@link android.database.Cursor} yang mendukung
+    {@link android.widget.ListView}, mengambil nilai <code>_ID</code> untuk baris ini, menambahkannya ke
+    URI konten, dan mengirim permintaan akses ke penyedia. Penyedia nanti bisa melakukan
+    query atau modifikasi terhadap baris yang persis diambil pengguna.
+</p>
+<h3>Pola URI konten</h3>
+<p>
+    Untuk membantu Anda memilih tindakan yang diambil bagi URI konten yang masuk, API penyedia menyertakan
+    kelas praktis {@link android.content.UriMatcher}, yang memetakan "pola-pola" URI konten ke
+    nilai-nilai integer. Anda bisa menggunakan nilai-nilai integer dalam pernyataan <code>switch</code> yang
+    memilih tindakan yang diinginkan untuk URI konten atau URI yang cocok dengan pola tertentu.
+</p>
+<p>
+    Pola URI konten mencocokkan dengan URI konten menggunakan karakter wildcard:
+</p>
+    <ul>
+        <li>
+            <strong><code>*</code>:</strong> Mencocokkan string yang memiliki karakter yang sah dengan panjang berapa saja.
+        </li>
+        <li>
+            <strong><code>#</code>:</strong> Mencocokkan string karakter numerik dengan panjang berapa saja.
+        </li>
+    </ul>
+<p>
+    Sebagai contoh desain dan pemrograman penanganan URI konten, perhatikan penyedia dengan
+    otoritas <code>com.example.app.provider</code> yang mengenali URI konten berikut
+    yang menunjuk ke tabel-tabel:
+</p>
+<ul>
+    <li>
+        <code>content://com.example.app.provider/table1</code>: Tabel bernama <code>table1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset1</code>: Tabel bernama
+        <code>dataset1</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table2/dataset2</code>: Tabel bernama
+        <code>dataset2</code>.
+    </li>
+    <li>
+        <code>content://com.example.app.provider/table3</code>: Tabel bernama <code>table3</code>.
+    </li>
+</ul>
+<p>
+    Penyedia juga mengenali URI konten ini jika baris ID ditambahkan ke URI,
+    misalnya <code>content://com.example.app.provider/table3/1</code> untuk baris yang diidentifikasi oleh
+    <code>1</code> dalam <code>table3</code>.
+</p>
+<p>
+    Pola-pola URI konten berikut akan menjadi mungkin:
+</p>
+<dl>
+    <dt>
+        <code>content://com.example.app.provider/*</code>
+    </dt>
+    <dd>
+        Mencocokkan URI konten di penyedia.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table2/*</code>:
+    </dt>
+    <dd>
+        Mencocokkan URI konten untuk tabel-tabel <code>dataset1</code>
+        dan <code>dataset2</code>, namun tidak mencocokkan URI konten untuk <code>table1</code> atau
+        <code>table3</code>.
+    </dd>
+    <dt>
+        <code>content://com.example.app.provider/table3/#</code>: Mencocokkan URI konten
+        untuk satu baris di <code>table3</code>, misalnya
+        <code>content://com.example.app.provider/table3/6</code> untuk baris yang diidentifikasi oleh
+        <code>6</code>.
+    </dt>
+</dl>
+<p>
+    Cuplikan kode berikut menunjukkan cara kerja metode di {@link android.content.UriMatcher}.
+    Kode ini menangani URI seluruh tabel secara berbeda dengan URI untuk
+    satu baris, menggunakan pola URI konten
+    <code>content://&lt;authority&gt;/&lt;path&gt;</code> untuk tabel, dan
+    <code>content://&lt;authority&gt;/&lt;path&gt;/&lt;id&gt;</code> untuk satu baris.
+</p>
+<p>
+    Metode {@link android.content.UriMatcher#addURI(String, String, int) addURI()} memetakan
+    otoritas dan path ke nilai integer. Metode {@link android.content.UriMatcher#match(Uri)
+    match()} menghasilkan nilai integer URI. Pernyataan <code>switch</code>
+    memilih antara melakukan query seluruh tabel dan melakukan query satu record:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider {
+...
+    // Creates a UriMatcher object.
+    private static final UriMatcher sUriMatcher;
+...
+    /*
+     * The calls to addURI() go here, for all of the content URI patterns that the provider
+     * should recognize. For this snippet, only the calls for table 3 are shown.
+     */
+...
+    /*
+     * Sets the integer value for multiple rows in table 3 to 1. Notice that no wildcard is used
+     * in the path
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3", 1);
+
+    /*
+     * Sets the code for a single row to 2. In this case, the "#" wildcard is
+     * used. "content://com.example.app.provider/table3/3" matches, but
+     * "content://com.example.app.provider/table3 doesn't.
+     */
+    sUriMatcher.addURI("com.example.app.provider", "table3/#", 2);
+...
+    // Implements ContentProvider.query()
+    public Cursor query(
+        Uri uri,
+        String[] projection,
+        String selection,
+        String[] selectionArgs,
+        String sortOrder) {
+...
+        /*
+         * Choose the table to query and a sort order based on the code returned for the incoming
+         * URI. Here, too, only the statements for table 3 are shown.
+         */
+        switch (sUriMatcher.match(uri)) {
+
+
+            // If the incoming URI was for all of table3
+            case 1:
+
+                if (TextUtils.isEmpty(sortOrder)) sortOrder = "_ID ASC";
+                break;
+
+            // If the incoming URI was for a single row
+            case 2:
+
+                /*
+                 * Because this URI was for a single row, the _ID value part is
+                 * present. Get the last path segment from the URI; this is the _ID value.
+                 * Then, append the value to the WHERE clause for the query
+                 */
+                selection = selection + "_ID = " uri.getLastPathSegment();
+                break;
+
+            default:
+            ...
+                // If the URI is not recognized, you should do some error handling here.
+        }
+        // call the code to actually do the query
+    }
+</pre>
+<p>
+    Kelas lainnya, {@link android.content.ContentUris}, menyediakan metode praktis untuk menggunakan
+    bagian <code>id</code> URI konten. Kelas-kelas {@link android.net.Uri} dan
+    {@link android.net.Uri.Builder} menyertakan metode praktis untuk mengurai
+    objek {@link android.net.Uri} yang ada dan membuat objek baru.
+</p>
+
+<!-- Implementing the ContentProvider class -->
+<h2 id="ContentProvider">Mengimplementasikan Kelas ContentProvider</h2>
+<p>
+    Instance {@link android.content.ContentProvider} mengelola akses
+    ke satu set data terstruktur dengan menangani permintaan dari aplikasi lain. Semua bentuk
+    akses pada akhirnya akan memanggil {@link android.content.ContentResolver}, yang kemudian memanggil
+    metode konkret {@link android.content.ContentProvider} untuk mendapatkan akses.
+</p>
+<h3 id="RequiredAccess">Metode-metode yang diperlukan</h3>
+<p>
+    Kelas abstrak {@link android.content.ContentProvider} mendefinisikan enam metode abstrak yang
+    harus Anda implementasikan sebagai bagian dari subkelas konkret Anda sendiri. Semua metode ini kecuali
+    {@link android.content.ContentProvider#onCreate() onCreate()} dipanggil oleh aplikasi klien
+    yang berupaya mengakses penyedia konten Anda:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+        query()}
+    </dt>
+    <dd>
+        Mengambil data dari penyedia Anda. Menggunakan argumen untuk memilih tabel yang akan
+        di-query, baris dan kolom yang akan dihasilkan, dan urutan sortir hasilnya.
+        Menghasilkan data berupa objek {@link android.database.Cursor}.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}
+    </dt>
+    <dd>
+        Menyisipkan baris baru ke dalam penyedia Anda. Menggunakan argumen untuk memilih
+        tabel tujuan dan mendapatkan nilai-nilai kolom yang akan digunakan. Menghasilkan URI konten untuk
+        baris yang baru disisipkan.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+        update()}
+    </dt>
+    <dd>
+        Memperbarui baris yang ada di penyedia Anda. Menggunakan argumen untuk memilih tabel dan baris
+        yang akan diperbarui dan mendapatkan nilai-nilai kolom yang diperbarui. Menghasilkan jumlah baris yang diperbarui.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    </dt>
+    <dd>
+        Menghapus baris dari penyedia Anda. Menggunakan argumen untuk memilih tabel dan baris yang akan
+        dihapus. Menghasilkan jumlah baris yang dihapus.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Menghasilkan tipe MIME yang sesuai dengan URI konten. Metode ini dijelaskan lebih detail
+        di bagian <a href="#MIMETypes">Mengimplementasikan Tipe MIME Penyedia Konten</a>.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#onCreate() onCreate()}
+    </dt>
+    <dd>
+        Inisialisasi penyedia Anda. Sistem Android memanggil metode ini segera setelah
+        membuat penyedia Anda. Perhatikan bahwa penyedia Anda tidak dibuat hingga
+        objek {@link android.content.ContentResolver} mencoba mengaksesnya.
+    </dd>
+</dl>
+<p>
+    Perhatikan bahwa metode-metode ini memiliki signature yang sama dengan
+    metode-metode {@link android.content.ContentResolver} yang sama namanya.
+</p>
+<p>
+    Implementasi metode-metode ini harus memperhitungkan hal-hal berikut:
+</p>
+<ul>
+    <li>
+        Semua metode ini kecuali {@link android.content.ContentProvider#onCreate() onCreate()}
+        bisa dipanggil oleh beberapa thread sekaligus, jadi harus thread-safe (aman untuk thread). Untuk mengetahui
+        selengkapnya tentang multi-thread, lihat topik
+        <a href="{@docRoot}guide/components/processes-and-threads.html">
+        Proses dan Thread</a>.
+    </li>
+    <li>
+        Hindari melakukan operasi yang lama dalam {@link android.content.ContentProvider#onCreate()
+        onCreate()}. Tunda inisialisasi tugas hingga benar-benar diperlukan.
+        Bagian <a href="#OnCreate">Mengimplementasikan metode onCreate()</a>
+        membahas hal ini secara lebih detail.
+    </li>
+    <li>
+        Walaupun harus mengimplementasikan metode-metode ini, kode Anda tidak harus melakukan apa pun selain
+        tipe data yang diharapkan. Misalnya, Anda mungkin ingin mencegah aplikasi lain
+        menyisipkan data ke dalam beberapa tabel. Caranya, Anda bisa mengabaikan panggilan ke
+        {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} dan menghasilkan
+        0.
+    </li>
+</ul>
+<h3 id="Query">Mengimplementasikan metode query()</h3>
+<p>
+    Metode
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()} harus menghasilkan objek {@link android.database.Cursor}, atau jika
+    gagal, melontarkan {@link java.lang.Exception}. Jika menggunakan database SQLite sebagai
+    penyimpanan data, Anda bisa mengembalikan{@link android.database.Cursor} yang dikembalikan oleh salah satu metode
+    <code>query()</code> dari kelas {@link android.database.sqlite.SQLiteDatabase}.
+    Jika query tidak mencocokkan baris apa pun, Anda harus mengembalikan instance {@link android.database.Cursor}
+    yang metode {@link android.database.Cursor#getCount()}-nya mengembalikan 0.
+    Anda harus mengembalikan <code>null</code> hanya jika terjadi kesalahan internal selama proses query.
+</p>
+<p>
+    Jika Anda tidak menggunakan database SQLite sebagai penyimpanan data, gunakan salah satu subkelas konkret
+    {@link android.database.Cursor}. Misalnya, kelas {@link android.database.MatrixCursor}
+    mengimplementasikan kursor dengan masing-masing baris berupa larik {@link java.lang.Object}. Dengan kelas ini,
+    gunakan {@link android.database.MatrixCursor#addRow(Object[]) addRow()} untuk menambahkan baris baru.
+</p>
+<p>
+    Ingatlah bahwa sistem Android harus mampu mengomunikasikan {@link java.lang.Exception}
+    lintas batas proses. Android bisa melakukannya untuk eksepsi berikut yang mungkin berguna
+    dalam menangani kesalahan query:
+</p>
+<ul>
+    <li>
+        {@link java.lang.IllegalArgumentException} (Anda bisa saja melontarkannya jika penyedia Anda
+        menerima URI konten yang tidak sah)
+    </li>
+    <li>
+        {@link java.lang.NullPointerException}
+    </li>
+</ul>
+<h3 id="Insert">Mengimplementasikan metode insert()</h3>
+<p>
+    Metode {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()} menambahkan satu
+    baris baru ke tabel yang sesuai, dengan menggunakan nilai-nilai dalam argumen {@link android.content.ContentValues}.
+ Jika kolom nama tidak ada dalam argumen {@link android.content.ContentValues}, Anda
+    mungkin perlu menyediakan nilai default untuknya, baik dalam kode penyedia atau dalam skema database
+    Anda.
+</p>
+<p>
+    Metode ini harus mengembalikan URI konten untuk baris baru. Untuk membuatnya, tambahkan nilai
+    <code>_ID</code> baris baru (atau kunci utama lainnya) ke tabel URI konten, dengan menggunakan
+    {@link android.content.ContentUris#withAppendedId(Uri, long) withAppendedId()}.
+</p>
+<h3 id="Delete">Mengimplementasikan metode delete()</h3>
+<p>
+    Metode {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()}
+    tidak harus menghapus baris-baris dari penyimpanan data Anda secara fisik. Jika menggunakan adaptor sinkronisasi
+    bersama penyedia, Anda harus mempertimbangkan penandaan baris yang dihapus
+    dengan flag "delete"; bukan menghilangkan baris itu sepenuhnya. Adaptor sinkronisasi bisa
+    memeriksa baris yang dihapus dan menghilangkannya dari server sebelum menghapusnya dari penyedia.
+</p>
+<h3 id="Update">Mengimplementasikan metode update()</h3>
+<p>
+    Metode {@link android.content.ContentProvider#update(Uri, ContentValues, String, String[])
+    update()} mengambil argumen {@link android.content.ContentValues} yang sama dengan yang digunakan oleh
+    {@link android.content.ContentProvider#insert(Uri, ContentValues) insert()}, dan
+    argumen-argumen <code>selection</code> dan <code>selectionArgs</code> yang sama dengan yang digunakan oleh
+    {@link android.content.ContentProvider#delete(Uri, String, String[]) delete()} dan
+    {@link android.content.ContentProvider#query(Uri, String[], String, String[], String)
+    ContentProvider.query()}. Hal ini bisa memungkinkan Anda menggunakan kembali kode di antara metode-metode ini.
+</p>
+<h3 id="OnCreate">Mengimplementasikan metode onCreate()</h3>
+<p>
+    Sistem Android memanggil {@link android.content.ContentProvider#onCreate()
+    onCreate()} saat memulai penyedia. Anda harus melakukan tugas-tugas inisialisasi yang berjalan cepat saja
+    dalam metode ini, serta menunda pembuatan database dan pemuatan data hingga penyedia benar-benar
+    menerima permintaan terhadap data. Jika Anda melakukan tugas yang memakan waktu dalam
+    {@link android.content.ContentProvider#onCreate() onCreate()}, Anda akan memperlambat
+    startup penyedia. Pada gilirannya, hal ini akan memperlambat respons dari penyedia terhadap
+    aplikasi lain.
+</p>
+<p>
+    Misalnya, jika menggunakan database SQLite, Anda bisa membuat
+    sebuah objek {@link android.database.sqlite.SQLiteOpenHelper} baru di
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()},
+    kemudian membuat tabel-tabel SQL saat pertama kali membuka database itu. Untuk memperlancar hal ini,
+    saat pertama Anda memanggil {@link android.database.sqlite.SQLiteOpenHelper#getWritableDatabase
+    getWritableDatabase()}, metode ini memanggil metode
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()} secara otomatis.
+</p>
+<p>
+    Dua cuplikan berikut memperagakan interaksi antara
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()} dan
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}. Cuplikan pertama adalah implementasi
+    {@link android.content.ContentProvider#onCreate() ContentProvider.onCreate()}:
+</p>
+<pre class="prettyprint">
+public class ExampleProvider extends ContentProvider
+
+    /*
+     * Defines a handle to the database helper object. The MainDatabaseHelper class is defined
+     * in a following snippet.
+     */
+    private MainDatabaseHelper mOpenHelper;
+
+    // Defines the database name
+    private static final String DBNAME = "mydb";
+
+    // Holds the database object
+    private SQLiteDatabase db;
+
+    public boolean onCreate() {
+
+        /*
+         * Creates a new helper object. This method always returns quickly.
+         * Notice that the database itself isn't created or opened
+         * until SQLiteOpenHelper.getWritableDatabase is called
+         */
+        mOpenHelper = new MainDatabaseHelper(
+            getContext(),        // the application context
+            DBNAME,              // the name of the database)
+            null,                // uses the default SQLite cursor
+            1                    // the version number
+        );
+
+        return true;
+    }
+
+    ...
+
+    // Implements the provider's insert method
+    public Cursor insert(Uri uri, ContentValues values) {
+        // Insert code here to determine which table to open, handle error-checking, and so forth
+
+        ...
+
+        /*
+         * Gets a writeable database. This will trigger its creation if it doesn't already exist.
+         *
+         */
+        db = mOpenHelper.getWritableDatabase();
+    }
+}
+</pre>
+<p>
+    Cuplikan berikutnya adalah implementasi
+    {@link android.database.sqlite.SQLiteOpenHelper#onCreate(SQLiteDatabase)
+    SQLiteOpenHelper.onCreate()}, yang menyertakan kelas helper:
+</p>
+<pre class="prettyprint">
+...
+// A string that defines the SQL statement for creating a table
+private static final String SQL_CREATE_MAIN = "CREATE TABLE " +
+    "main " +                       // Table's name
+    "(" +                           // The columns in the table
+    " _ID INTEGER PRIMARY KEY, " +
+    " WORD TEXT"
+    " FREQUENCY INTEGER " +
+    " LOCALE TEXT )";
+...
+/**
+ * Helper class that actually creates and manages the provider's underlying data repository.
+ */
+protected static final class MainDatabaseHelper extends SQLiteOpenHelper {
+
+    /*
+     * Instantiates an open helper for the provider's SQLite data repository
+     * Do not do database creation and upgrade here.
+     */
+    MainDatabaseHelper(Context context) {
+        super(context, DBNAME, null, 1);
+    }
+
+    /*
+     * Creates the data repository. This is called when the provider attempts to open the
+     * repository and SQLite reports that it doesn't exist.
+     */
+    public void onCreate(SQLiteDatabase db) {
+
+        // Creates the main table
+        db.execSQL(SQL_CREATE_MAIN);
+    }
+}
+</pre>
+
+
+<!-- Implementing ContentProvider MIME Types -->
+<h2 id="MIMETypes">Mengimplementasikan Tipe MIME Penyedia Konten</h2>
+<p>
+    Kelas {@link android.content.ContentProvider} memiliki dua metode untuk menghasilkan tipe-tipe MIME:
+</p>
+<dl>
+    <dt>
+        {@link android.content.ContentProvider#getType(Uri) getType()}
+    </dt>
+    <dd>
+        Salah satu metode wajib yang harus Anda implementasikan untuk setiap penyedia.
+    </dd>
+    <dt>
+        {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    </dt>
+    <dd>
+        Sebuah metode yang diharapkan untuk Anda implementasikan jika penyedia Anda menawarkan file.
+    </dd>
+</dl>
+<h3 id="TableMIMETypes">Tipe MIME untuk tabel</h3>
+<p>
+    Metode {@link android.content.ContentProvider#getType(Uri) getType()} mengembalikan
+    {@link java.lang.String} dengan format MIME yang menjelaskan tipe data yang dikembalikan oleh
+    argumen URI konten. Argumen {@link android.net.Uri} bisa berupa pola, bukannya URI tertentu;
+    dalam hal ini, Anda harus mengembalikan tipe data terkait URI konten yang cocok dengan
+    polanya.
+</p>
+<p>
+    Untuk tipe data umum misalnya teks, HTML, atau JPEG,
+    {@link android.content.ContentProvider#getType(Uri) getType()} harus mengembalikan
+    tipe MIME standar untuk data itu. Daftar lengkap tipe standar ini tersedia di situs web
+    <a href="http://www.iana.org/assignments/media-types/index.htm">IANA MIME Media Types</a>.
+
+</p>
+<p>
+    Untuk URI konten yang menunjuk ke baris atau baris-baris data tabel,
+    {@link android.content.ContentProvider#getType(Uri) getType()} harus mengembalikan
+    tipe MIME dalam format MIME khusus vendor Android:
+</p>
+<ul>
+    <li>
+        Bagian tipe: <code>vnd</code>
+    </li>
+    <li>
+        Bagian subtipe:
+        <ul>
+            <li>
+    Jika pola URI adalah untuk satu baris: <code>android.cursor.<strong>item</strong>/</code>
+            </li>
+            <li>
+    Jika pola URI adalah untuk lebih dari satu baris: <code>android.cursor.<strong>dir</strong>/</code>
+            </li>
+        </ul>
+    </li>
+    <li>
+        Bagian khusus penyedia: <code>vnd.&lt;name&gt;</code>.<code>&lt;type&gt;</code>
+        <p>
+            Anda menyediakan <code>&lt;name&gt;</code> dan <code>&lt;type&gt;</code>.
+            Nilai <code>&lt;name&gt;</code> harus unik secara global,
+            dan nilai <code>&lt;type&gt;</code> harus unik bagi pola URI
+            yang sesuai. Pilihan tepat untuk <code>&lt;name&gt;</code> adalah nama perusahaan Anda atau
+            sebagian dari nama paket Android aplikasi Anda. Pilihan tepat untuk
+            <code>&lt;type&gt;</code> adalah string yang mengidentifikasi tabel yang terkait dengan
+            URI.
+        </p>
+
+    </li>
+</ul>
+<p>
+    Misalnya, jika otoritas penyedia adalah
+    <code>com.example.app.provider</code>, dan penyedia mengekspos tabel bernama
+    <code>table1</code>, tipe MIME untuk beberapa baris dalam <code>table1</code> adalah:
+</p>
+<pre>
+vnd.android.cursor.<strong>dir</strong>/vnd.com.example.provider.table1
+</pre>
+<p>
+    Untuk satu baris <code>table1</code>, tipe MIME adalah:
+</p>
+<pre>
+vnd.android.cursor.<strong>item</strong>/vnd.com.example.provider.table1
+</pre>
+<h3 id="FileMIMETypes">Tipe MIME untuk file</h3>
+<p>
+    Jika penyedia Anda menawarkan file, implementasikan
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}.
+    Metode ini menghasilkan larik {@link java.lang.String} tipe MIME untuk file
+    yang bisa dikembalikan penyedia Anda untuk URI konten bersangkutan. Anda harus memfilter tipe MIME yang Anda tawarkan dengan argumen filter
+    tipe MIME, sehingga Anda hanya mengembalikan tipe MIME yang ingin ditangani klien.
+</p>
+<p>
+    Misalnya, perhatikan penyedia yang menawarkan gambar foto sebagai file dalam format <code>.jpg</code>,
+    <code>.png</code>, dan <code>.gif</code>.
+    Jika aplikasi memanggil {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} dengan string filter <code>image/*</code> (sesuatu yang
+    merupakan "gambar"),
+    maka metode {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} harus mengembalikan larik:
+</p>
+<pre>
+{ &quot;image/jpeg&quot;, &quot;image/png&quot;, &quot;image/gif&quot;}
+</pre>
+<p>
+    Jika aplikasi tertarik pada file <code>.jpg</code>, maka aplikasi bisa memanggil
+    {@link android.content.ContentResolver#getStreamTypes(Uri, String)
+    ContentResolver.getStreamTypes()} dengan string filter <code>*\/jpeg</code>, dan
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String)
+    ContentProvider.getStreamTypes()} harus mengembalikan:
+<pre>
+{&quot;image/jpeg&quot;}
+</pre>
+<p>
+    Jika penyedia Anda tidak menawarkan tipe MIME apa pun yang diminta dalam string filter,
+    {@link android.content.ContentProvider#getStreamTypes(Uri, String) getStreamTypes()}
+    harus mengembalikan <code>null</code>.
+</p>
+
+
+<!--  Implementing a Contract Class -->
+<h2 id="ContractClass">Mengimplementasikan Kelas Kontrak</h2>
+<p>
+    Kelas kontrak adalah kelas <code>public final</code> yang berisi definisi konstanta untuk URI, nama kolom, tipe MIME, dan
+metadata lain yang melekat ke penyedia. Kelas
+    membentuk sebuah kontrak antara penyedia dan aplikasi lain dengan memastikan bahwa penyedia
+    bisa diakses dengan benar sekalipun ada perubahan pada nilai URI sesungguhnya, nama kolom,
+    dan seterusnya.
+</p>
+<p>
+    Kelas kontrak juga membantu pengembang karena kelas ini biasanya memiliki nama-nama simbolik untuk konstantanya,
+    sehingga memperkecil kemungkinan pengembang menggunakan nilai yang salah untuk nama kolom atau URI. Karena berupa
+    kelas, kelas ini bisa berisi dokumentasi Javadoc. Lingkungan pengembangan terpadu (IDE) seperti
+    Eclipse secara otomatis bisa melengkapi nama-nama konstanta dari kelas kontrak dan menampilkan Javadoc untuk
+    konstanta.
+</p>
+<p>
+    Pengembang tidak bisa mengakses file kelas milik kelas kontrak dari aplikasi Anda, namun bisa
+    mengompilasinya secara statis ke dalam aplikasi mereka dari file <code>.jar</code> yang Anda sediakan.
+</p>
+<p>
+    Kelas {@link android.provider.ContactsContract} dan kelas-kelas tersarangnya adalah contoh
+    kelas kontrak.
+</p>
+<h2 id="Permissions">Mengimplementasikan Izin Penyedia Konten</h2>
+<p>
+    Izin dan akses untuk semua aspek sistem Android dijelaskan secara detail dalam
+    topik <a href="{@docRoot}guide/topics/security/security.html">Keamanan dan Izin</a>.
+    Topik <a href="{@docRoot}guide/topics/data/data-storage.html">Penyimpanan Data</a> juga
+    menjelaskan keamanan dan izin terkait dengan berbagai tipe penyimpanan.
+    Singkatnya, poin-poin pentingnya adalah:
+</p>
+<ul>
+    <li>
+        Secara default, file data yang disimpan pada penyimpanan internal perangkat bersifat privat bagi
+        aplikasi dan penyedia Anda.
+    </li>
+    <li>
+        Database {@link android.database.sqlite.SQLiteDatabase} yang Anda buat bersifat privat bagi
+        aplikasi dan penyedia Anda.
+    </li>
+    <li>
+        Secara default, file data yang Anda simpan ke penyimpanan eksternal bersifat <em>publik</em> dan
+        <em>bisa dibaca secara global</em>. Anda tidak bisa menggunakan penyedia konten untuk membatasi akses ke file dalam
+        penyimpanan eksternal, karena aplikasi lain bisa menggunakan panggilan API untuk membaca dan menulis ke file tersebut.
+    </li>
+    <li>
+        Panggilan metode untuk membuka atau membuat file atau database SQLite pada
+        penyimpanan internal perangkat Anda berpotensi memberikan akses baca maupun tulis ke semua aplikasi lain. Jika Anda
+        menggunakan file atau database internal sebagai repository penyedia, dan Anda memberinya
+        akses "world-readable" (bisa dibaca secara global) atau "world-writeable" (bisa ditulis secara global), izin yang Anda atur untuk penyedia dalam
+        manifesnya tidak akan melindungi data Anda. Akses default untuk file dan database dalam
+        penyimpanan internal adalah "privat", dan untuk repository penyedia, tidak boleh Anda ubah.
+    </li>
+</ul>
+<p>
+    Jika Anda ingin menggunakan izin penyedia konten untuk mengontrol akses ke data Anda, maka Anda harus
+    menyimpan data Anda dalam file internal, database SQLite, atau "cloud" (misalnya,
+    di server jauh), dan Anda harus membuat file dan database tetap privat bagi aplikasi Anda.
+</p>
+<h3>Mengimplementasikan izin</h3>
+<p>
+    Semua aplikasi bisa membaca dari atau menulis ke penyedia Anda, sekalipun data yang mendasari adalah
+    privat, karena secara default penyedia Anda tidak mengatur izin. Untuk mengubahnya,
+    atur izin untuk penyedia dalam file manifes, dengan menggunakan atribut atau elemen anak
+    dari elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. Anda bisa mengatur izin yang berlaku pada seluruh penyedia,
+    atau pada tabel tertentu, atau bahkan pada record tertentu, atau ketiganya.
+</p>
+<p>
+    Anda mendefinisikan izin untuk penyedia dengan satu atau beberapa elemen
+    <code><a href="{@docRoot}guide/topics/manifest/permission-element.html">
+    &lt;permission&gt;</a></code> dalam file manifes. Untuk membuat
+    izin unik bagi penyedia, gunakan scoping (pengaturan lingkup) bergaya Java untuk
+    atribut <code><a href="{@docRoot}guide/topics/manifest/permission-element.html#nm">
+    android:name</a></code>. Misalnya, beri nama izin membaca dengan
+    <code>com.example.app.provider.permission.READ_PROVIDER</code>.
+
+</p>
+<p>
+    Daftar berikut menjelaskan lingkup penyedia izin, mulai dengan
+    izin yang berlaku pada seluruh penyedia kemudian menjadi semakin sempit.
+    Izin yang lebih sempit akan didahulukan daripada izin yang berlingkup lebih luas:
+</p>
+<dl>
+    <dt>
+        Izin baca-tulis tunggal tingkat penyedia
+    </dt>
+    <dd>
+        Suatu izin yang mengontrol akses baca-tulis bagi seluruh penyedia, ditetapkan
+        dengan atribut <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code> dari
+        elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>.
+    </dd>
+    <dt>
+        Izin baca-tulis terpisah tingkat penyedia
+    </dt>
+    <dd>
+        Satu izin baca dan satu izin tulis untuk seluruh penyedia. Anda menetapkan keduanya
+        dengan atribut <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+        android:readPermission</a></code> dan
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+        android:writePermission</a></code> dari elemen
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Kedua izin akan didahulukan daripada izin yang diharuskan oleh
+        <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+        android:permission</a></code>.
+    </dd>
+    <dt>
+        Izin tingkat path
+    </dt>
+    <dd>
+        Izin baca, tulis, atau baca/tulis untuk URI konten dalam penyedia Anda. Anda menetapkan
+        tiap URI yang ingin dikontrol dengan elemen anak
+        <code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">
+        &lt;path-permission&gt;</a></code> dari
+        elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+        &lt;provider&gt;</a></code>. Untuk setiap URI konten yang ditetapkan, Anda bisa menetapkan
+        satu izin baca/tulis, satu izin baca, atau satu izin tulis, atau ketiganya. Izin baca dan
+        tulis akan didahulukan daripada izin baca/tulis. Juga,
+        izin tingkat path akan didahulukan daripada izin tingkat penyedia.
+    </dd>
+    <dt>
+        Izin sementara
+    </dt>
+    <dd>
+        Tingkat izin yang memberikan akses sementara ke aplikasi, sekalipun aplikasi itu
+        tidak memiliki izin yang biasanya diminta. Fitur akses
+         sementara mengurangi jumlah izin yang harus diminta aplikasi dalam
+        manifesnya. Bila Anda mengaktifkan izin sementara, satu-satunya aplikasi yang memerlukan
+        izin "permanen" untuk penyedia adalah aplikasi yang mengakses terus-menerus semua
+        data Anda.
+        <p>
+            Perhatikan izin yang Anda perlukan untuk mengimplementasikan penyedia dan aplikasi email, bila Anda
+            ingin memperbolehkan aplikasi penampil gambar dari luar menampilkan lampiran foto dari
+            penyedia Anda. Untuk memberikan akses yang diperlukan kepada penampil gambar tanpa mengharuskan izin,
+            siapkan izin sementara untuk URI konten bagi foto. Desainlah aplikasi email Anda agar
+            bila pengguna ingin menampilkan foto, aplikasi itu akan mengirim intent berisi
+            URI konten foto dan flag izin ke penampil gambar. Penampil gambar nanti bisa
+            melakukan query penyedia email untuk mengambil foto, sekalipun penampil itu tidak
+            memiliki izin baca normal untuk penyedia Anda.
+        </p>
+        <p>
+            Untuk mengaktifkan izin sementara, atur atribut
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> dari
+            elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>, atau tambahkan satu atau beberapa elemen anak
+            <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> ke
+            elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> Anda. Jika menggunakan izin sementara, Anda harus memanggil
+            {@link android.content.Context#revokeUriPermission(Uri, int)
+            Context.revokeUriPermission()} kapan saja Anda menghilangkan dukungan untuk URI konten dari
+            penyedia, dan URI konten dikaitkan dengan izin sementara.
+        </p>
+        <p>
+            Nilai atribut menentukan seberapa banyak penyedia Anda yang dijadikan bisa diakses.
+            Jika atribut diatur ke <code>true</code>, maka sistem akan memberikan
+            izin sementara kepada seluruh penyedia, dengan mengesampingkan izin lain yang diharuskan
+            oleh izin tingkat penyedia atau tingkat path.
+        </p>
+        <p>
+            Jika flag ini diatur ke <code>false</code>, maka Anda harus menambahkan elemen-elemen anak
+            <code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">
+            &lt;grant-uri-permission&gt;</a></code> ke
+            elemen <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code> Anda. Tiap elemen anak menetapkan URI konten atau
+            URI yang telah diberi akses sementara.
+        </p>
+        <p>
+            Untuk mendelegasikan akses sementara ke sebuah aplikasi, intent harus berisi
+            {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION} atau flag
+            {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, atau keduanya. Keduanya
+            diatur dengan metode {@link android.content.Intent#setFlags(int) setFlags()}.
+        </p>
+        <p>
+            Jika atribut <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+            android:grantUriPermissions</a></code> tidak ada, atribut ini diasumsikan sebagai
+            <code>false</code>.
+        </p>
+    </dd>
+</dl>
+
+
+
+<!-- The Provider Element -->
+<h2 id="ProviderElement">Elemen &lt;provider&gt;</h2>
+<p>
+    Seperti halnya komponen {@link android.app.Activity} dan {@link android.app.Service},
+    subkelas {@link android.content.ContentProvider}
+    harus didefinisikan dalam file manifes untuk aplikasinya, dengan menggunakan elemen
+    <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+    &lt;provider&gt;</a></code>. Sistem Android mendapatkan informasi berikut dari
+    elemen:
+<dl>
+    <dt>
+        Otoritas
+        (<a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code
+        android:authorities}</a>)
+    </dt>
+    <dd>
+        Nama-nama simbolik yang mengidentifikasi seluruh penyedia dalam sistem. Atribut
+        ini dijelaskan lebih detail di bagian
+        <a href="#ContentURI">Mendesain URI Konten</a>.
+    </dd>
+    <dt>
+        Nama kelas penyedia
+        (<code>
+<a href="{@docRoot}guide/topics/manifest/provider-element.html#nm">android:name</a>
+        </code>)
+    </dt>
+    <dd>
+        Kelas yang mengimplementasikan {@link android.content.ContentProvider}. Kelas ini
+        dijelaskan lebih detail di bagian
+        <a href="#ContentProvider">Mengimplementasikan Kelas ContentProvider</a>.
+    </dd>
+    <dt>
+        Izin
+    </dt>
+    <dd>
+        Atribut-atribut yang menetapkan izin yang harus dimiliki aplikasi lain untuk mengakses
+        data penyedia:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#gprmsn">
+                android:grantUriPermssions</a></code>: Flag izin sementara.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">
+                android:permission</a></code>: Izin baca/tulis tunggal untuk tingkat penyedia.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#rprmsn">
+                android:readPermission</a></code>: Izin baca untuk tingkat penyedia.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">
+                android:writePermission</a></code>: Izin tulis untuk tingkat penyedia.
+            </li>
+        </ul>
+        <p>
+            Izin dan atribut-atribut yang sesuai dijelaskan lebih detail
+            di bagian
+            <a href="#Permissions">Mengimplementasikan Izin Penyedia Konten</a>.
+        </p>
+    </dd>
+    <dt>
+        Atribut-atribut startup dan kontrol
+    </dt>
+    <dd>
+        Atribut-atribut ini menentukan cara dan waktu sistem Android memulai penyedia,
+        karakteristik proses penyedia, dan pengaturan runtime lainnya:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#enabled">
+                android:enabled</a></code>: Flag yang memperbolehkan sistem untuk memulai penyedia.
+            </li>
+              <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#exported">
+                android:exported</a></code>: Flag yang memperbolehkan aplikasi lain untuk menggunakan penyedia ini.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#init">
+                android:initOrder</a></code>: Urutan yang digunakan untuk memulai penyedia ini,
+                relatif terhadap penyedia lain dalam proses yang sama.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#multi">
+                android:multiProcess</a></code>: Flag yang memperbolehkan sistem untuk memulai penyedia
+                dalam proses yang sama dengan proses klien pemanggil.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#proc">
+                android:process</a></code>: Nama proses tempat penyedia harus
+                berjalan.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#sync">
+                android:syncable</a></code>: Flag yang menunjukkan bahwa data penyedia harus
+                disinkronkan dengan data di server.
+            </li>
+        </ul>
+        <p>
+            Atribut-atribut ini didokumentasikan dengan lengkap dalam topik panduan pengembang untuk elemen
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+
+        </p>
+    </dd>
+    <dt>
+        Atribut-atribut informatif
+    </dt>
+    <dd>
+        Ikon dan label opsional untuk penyedia:
+        <ul>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#icon">
+                android:icon</a></code>: Sumber daya drawable, berisi ikon untuk penyedia.
+                Ikon ini muncul di sebelah label penyedia dalam daftar aplikasi dalam menu
+                <em>Settings</em> &gt; <em>Apps</em> &gt; <em>All</em>.
+            </li>
+            <li>
+                <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#label">
+                android:label</a></code>: Label informatif yang menjelaskan penyedia atau
+                datanya, atau keduanya. Label ini muncul dalam daftar aplikasi di
+                <em>Settings</em> &gt; <em>Apps</em> &gt; <em>All</em>.
+            </li>
+        </ul>
+        <p>
+            Atribut-atribut ini didokumentasikan dengan lengkap dalam topik panduan pengembang untuk elemen
+            <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">
+            &lt;provider&gt;</a></code>.
+        </p>
+    </dd>
+</dl>
+
+<!-- Intent Access -->
+<h2 id="Intents">Intent dan Akses Data</h2>
+<p>
+    Aplikasi bisa mengakses penyedia konten secara tidak langsung dengan sebuah {@link android.content.Intent}.
+    Aplikasi tidak memanggil satu pun dari metode-metode {@link android.content.ContentResolver} atau
+    {@link android.content.ContentProvider}. Sebagai gantinya, aplikasi mengirim intent yang memulai aktivitas,
+    yang sering kali merupakan bagian dari aplikasi penyedia sendiri. Aktivitas tujuan bertugas
+    mengambil dan menampilkan data dalam UI-nya. Bergantung pada tindakan dalam intent,
+    aktivitas tujuan juga bisa meminta pengguna untuk membuat modifikasi pada data penyedia.
+    Intent juga bisa berisi data "ekstra" yang menampilkan aktivitas tujuan
+    dalam UI; pengguna nanti memiliki pilihan untuk mengubah data ini sebelum menggunakannya untuk mengubah
+    data di penyedia.
+</p>
+<p>
+
+</p>
+<p>
+    Anda mungkin perlu menggunakan akses intent guna membantu memastikan integritas data. Penyedia Anda mungkin bergantung
+    pada data yang disisipkan, diperbarui, dan dihapusnya sesuai dengan logika bisnis yang didefinisikan dengan ketat. Jika
+    demikian halnya, memperbolehkan aplikasi lain mengubah data Anda secara langsung bisa menyebabkan
+    data yang tidak sah. Jika Anda ingin pengembang menggunakan akses intent, pastikan untuk mendokumentasikannya secara saksama.
+    Jelaskan kepada mereka alasan akses intent yang menggunakan UI aplikasi Anda sendiri adalah lebih baik daripada mencoba
+    memodifikasi data dengan kode mereka.
+</p>
+<p>
+    Menangani sebuah intent masuk yang ingin memodifikasi data penyedia Anda tidak berbeda dengan
+    menangani intent lainnya. Anda bisa mengetahui selengkapnya tentang penggunaan intent dengan membaca topik
+    <a href="{@docRoot}guide/components/intents-filters.html">Intent dan Filter Intent</a>.
+</p>
