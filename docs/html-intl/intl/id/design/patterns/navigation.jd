@@ -1,0 +1,213 @@
+page.title=Navigasi dengan Back dan Up
+page.tags="navigation","activity","task","up navigation","back navigation"
+page.image=/design/media/navigation_between_siblings_gmail.png
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/implementing-navigation/index.html">
+  <div>
+    <h3>Dokumen Pengembang</h3>
+    <p>Mengimplementasikan Navigasi yang Efektif</p>
+  </div>
+</a>
+
+<p itemprop="description">Navigasi yang konsisten merupakan komponen penting dari keseluruhan pengalaman pengguna. Hampir tidak ada yang lebih membingungkan
+pengguna selain navigasi dasar yang perilakunya tidak konsisten dan tidak sesuai harapan. Android 3.0
+memperkenalkan perubahan besar dalam perilaku navigasi global. Mengikuti dengan saksama
+panduan untuk Back dan Up akan membuat navigasi aplikasi Anda dapat diprediksi dan dapat diandalkan pengguna.</p>
+<p>Android 2.3 dan versi sebelumnya mengandalkan tombol <em>Back</em> sistem untuk mendukung navigasi dalam
+aplikasi. Dengan diperkenalkannya action-bar dalam Android 3.0, mekanisme navigasi kedua muncul:
+tombol <em>Up</em>, yang terdiri dari ikon aplikasi dan tanda panah yang menunjuk ke kiri.</p>
+
+<img src="{@docRoot}design/media/navigation_with_back_and_up.png">
+
+<h2 id="up-vs-back">Up vs. Back</h2>
+
+<p>Tombol Up digunakan untuk berpindah dalam aplikasi berdasarkan hubungan hierarki
+antar layar. Misalnya, jika layar A menampilkan daftar item, dan memilih sebuah item akan membuka
+layar B (yang menampilkan item tersebut secara lebih detail), maka layar B akan menawarkan tombol Up untuk
+kembali ke layar A.</p>
+<p>Jika suatu layar merupakan yang teratas dalam aplikasi (yaitu layar Home aplikasi), maka tidak perlu menampilkan tombol
+Up.</p>
+
+<p>Tombol Back sistem digunakan untuk berpindah, dalam urutan kronologis terbalik, melalui riwayat
+layar yang baru dibuka oleh pengguna. Biasanya ini berdasarkan hubungan sementara
+antar layar, dan bukan hierarki aplikasi.</p>
+
+<p>Bila layar yang dilihat sebelumnya juga merupakan induk hierarki dari layar yang sekarang, menekan tombol
+Back akan sama hasilnya dengan menekan tombol Up&mdash;ini adalah kejadian
+biasa. Akan tetapi, berbeda dengan tombol Up, yang memastikan pengguna tetap berada dalam aplikasi Anda, tombol Back
+dapat mengembalikan pengguna ke layar Home, atau bahkan ke aplikasi lain.</p>
+
+<img src="{@docRoot}design/media/navigation_up_vs_back_gmail.png">
+
+<p>Tombol Back juga mendukung beberapa perilaku yang tidak terkait langsung dengan navigasi antar layar:
+</p>
+<ul>
+<li>Menghilangkan jendela mengambang (dialog, popup)</li>
+<li>Menghilangkan action-bar kontekstual, dan menghapus sorotan dari item yang dipilih</li>
+<li>Menyembunyikan keyboard di layar (IME)</li>
+</ul>
+<h2 id="within-app">Navigasi Dalam Aplikasi Anda</h2>
+
+<h4>Berpindah ke layar yang memiliki beberapa titik masuk</h4>
+<p>Kadang-kadang layar tidak memiliki posisi pasti dalam hierarki aplikasi, dan bisa dimasuki
+dari berbagai titik masuk&mdash;seperti layar pengaturan yang dapat dibuka dari layar lain
+dalam aplikasi Anda. Dalam hal ini, tombol Up akan memilih untuk kembali ke layar pengarah, yang cara kerjanya
+sama dengan tombol Back.</p>
+<h4>Mengubah tampilan dalam layar</h4>
+<p>Mengubah opsi tampilan untuk layar tidak mengubah perilaku Up atau Back: layar tetap
+berada di tempat yang sama dalam hierarki aplikasi, dan tidak dibuat riwayat navigasi yang baru.</p>
+<p>Contoh perubahan tampilan tersebut adalah:</p>
+<ul>
+<li>Mengganti tampilan menggunakan tab dan/atau geser kiri dan kanan</li>
+<li>Mengubah tampilan menggunakan tarik-turun (alias tab turun)</li>
+<li>Memfilter daftar</li>
+<li>Menyortir daftar</li>
+<li>Mengubah karakteristik tampilan (seperti zoom)</li>
+</ul>
+<h4>Berpindah antar layar yang seinduk</h4>
+<p>Bila aplikasi Anda mendukung navigasi dari daftar item ke tampilan detail salah satu item tersebut, aplikasi
+juga sering diharapkan mendukung navigasi langsung dari item itu ke item sebelumnya atau
+sesudahnya dalam daftar. Misalnya, dalam Gmail, begitu mudah untuk bergeser ke kiri atau kanan dari sebuah percakapan
+untuk melihat percakapan yang lebih baru atau lebih lama dalam Inbox yang sama. Sama seperti saat mengubah tampilan dalam layar, navigasi
+ini tidak mengubah perilaku Up atau Back.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_gmail.png">
+
+<p>Akan tetapi, pengecualian khusus terhadap hal ini terjadi saat menjelajah di antara tampilan detail terkait yang tidak disatukan
+oleh daftar yang merujuknya&mdash;misalnya, saat menjelajahi Play Store di antara aplikasi dari
+pengembang yang sama, atau album dari artis yang sama. Dalam hal ini, mengikuti setiap tautan akan membuat
+riwayat, sehingga tombol Back akan menyusuri setiap layar yang dilihat sebelumnya. Tombol Up akan terus
+melewatkan semua layar terkait ini dan berpindah ke layar kontainer yang terakhir dilihat.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market1.png">
+
+<p>Anda dapat menjadikan perilaku tombol Up lebih cerdas lagi berdasarkan pengetahuan Anda tentang tampilan
+detail. Dengan memperluas contoh Play Store dari atas, bayangkan pengguna yang telah berpindah dari Buku
+terakhir yang dilihat ke detail untuk adaptasi Film. Dalam hal itu, tombol Up dapat kembali ke kontainer
+(Movies) yang sebelumnya belum dilalui pengguna.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market2.png">
+
+<h2 id="into-your-app">Navigasi ke Aplikasi Anda melalui Widget dan Pemberitahuan Layar Home</h2>
+
+<p>Anda bisa menggunakan widget atau pemberitahuan layar Home untuk membantu pengguna berpindah langsung ke layar
+jauh dalam hierarki aplikasi Anda. Misalnya, widget Inbox dan pemberitahuan pesan baru di Gmail dapat
+melewatkan layar Inbox, dan membawa pengguna langsung ke tampilan percakapan.</p>
+
+<p>Untuk kedua kasus ini, tangani tombol Up sebagai berikut:</p>
+
+<ul>
+<li><em>Jika layar tujuan biasanya dicapai dari satu layar tertentu dalam aplikasi
+Anda</em>, tombol Up akan mengarahkannya ke layar itu.</li>
+<li><em>Jika tidak</em>, tombol Up akan mengarahkan ke layar teratas ("Home") dari aplikasi Anda.</li>
+</ul>
+
+<p>Dalam hal tombol Back, Anda harus membuat navigasi lebih bisa diprediksi dengan menyisipkan ke dalam
+back-stack tugas path navigasi naik lengkap menuju layar teratas aplikasi. Ini memungkinkan pengguna
+yang lupa cara masuk ke aplikasi Anda untuk berpindah ke layar teratas aplikasi sebelum
+keluar.</p>
+
+<p>Sebagai contoh, widget layar Home di Gmail memiliki tombol untuk menuju langsung ke layar
+Compose. Tombol Up atau Back dari layar Compose akan membawa pengguna ke Inbox, dan dari sana tombol
+Back berlanjut ke Home.</p>
+
+<img src="{@docRoot}design/media/navigation_from_outside_back.png">
+
+<h4>Pemberitahuan tidak langsung</h4>
+
+<p>Jika aplikasi Anda perlu menampilkan informasi tentang beberapa kejadian sekaligus, aplikasi dapat menggunakan
+pemberitahuan tunggal yang mengarahkan pengguna ke layar antara. Layar ini merangkum semua
+kejadian tersebut, dan menyediakan path bagi pengguna untuk menjelajah ke dalam aplikasi. Pemberitahuan dengan gaya seperti ini
+disebut <em>pemberitahuan tidak langsung</em>.</p>
+
+<p>Berbeda dengan pemberitahuan standar (langsung), menekan tombol Back dari
+layar antara pada pemberitahuan tidak langsung akan mengembalikan pengguna ke titik pemicu pemberitahuan tersebut&mdash;tidak ada
+layar tambahan yang disisipkan ke dalam back-stack. Setelah pengguna melanjutkan ke dalam aplikasi dari
+layar antara, tombol Up dan Back akan berperilaku seperti pada pemberitahuan standar, sebagaimana dijelaskan di atas:
+menyusuri ke dalam aplikasi dan bukan kembali ke layar antara.</p>
+
+<p>Misalnya, anggaplah seorang pengguna di Gmail menerima pemberitahuan tidak langsung dari Kalender. Menyentuh
+pemberitahuan ini akan membuka layar antara, yang menampilkan pengingat beberapa macam
+kejadian. Menyentuh Back dari layar antara akan mengembalikan pengguna ke Gmail. Menyentuh kejadian
+tertentu akan membawa pengguna dari layar antara ke aplikasi Kalender lengkap untuk menampilkan detail
+kejadian. Dari detail kejadian, tombol Up dan Back akan mengarahkan ke tampilan Kalender tingkat atas.</p>
+
+<img src="{@docRoot}design/media/navigation_indirect_notification.png">
+
+<h4>Pemberitahuan pop-up</h4>
+
+<p><em>Pemberitahuan pop-up</em> akan melewatkan laci pemberitahuan, bukan muncul secara langsung di
+hadapan pengguna. Ini jarang digunakan, dan <strong>harus dicadangkan untuk peristiwa yang memerlukan respons tepat waktu
+dan diperlukan interupsi dari konteks pengguna</strong>. Misalnya,
+Talk menggunakan gaya ini untuk memberi tahu pengguna tentang ajakan dari teman untuk bergabung dalam chatting video, karena
+ajakan ini akan kedaluwarsa secara otomatis setelah beberapa detik.</p>
+
+<p>Dalam hal perilaku navigasi, pemberitahuan pop-up sangat mirip perilaku pemberitahuan
+tidak langsung pada layar antara. Tombol Back akan menghilangkan pemberitahuan pop-up. Jika pengguna berpindah
+dari pop-up ke aplikasi yang memberi tahu, tombol Up dan Back akan mengikuti aturan pemberitahuan standar,
+berpindah dalam aplikasi.</p>
+
+<img src="{@docRoot}design/media/navigation_popup_notification.png">
+
+<h2 id="between-apps">Navigasi Antar Aplikasi</h2>
+
+<p>Salah satu kekuatan dasar sistem Android adalah kemampuan aplikasi untuk saling
+mengaktifkan, sehingga pengguna dapat berpindah langsung dari satu aplikasi ke aplikasi lainnya. Misalnya, sebuah
+aplikasi yang perlu mengambil foto dapat mengaktifkan aplikasi Kamera, yang akan mengembalikan foto
+ke aplikasi perujuk. Ini sangat menguntungkan pengembang, yang bisa dengan mudah memanfaatkan
+kode dari aplikasi lain, maupun pengguna, yang menikmati pengalaman konsisten untuk tindakan yang biasa
+dilakukan.</p>
+
+<p>Untuk memahami navigasi antar aplikasi, maka perlu memahami perilaku kerangka kerja Android
+yang akan dibahas di bawah ini.</p>
+
+<h4>Aktivitas, tugas, dan intent</h4>
+
+<p>Dalam Android, <strong>aktivitas</strong> adalah komponen aplikasi yang mendefinisikan layar
+informasi dan semua tindakan terkait yang dapat dilakukan pengguna. Aplikasi Anda adalah kumpulan
+aktivitas, yang terdiri dari aktivitas yang Anda buat dan aktivitas yang Anda gunakan ulang dari aplikasi lain.</p>
+
+<p><strong>Tugas</strong> adalah urutan aktivitas yang diikuti pengguna untuk mencapai tujuan.
+Tugas tunggal dapat memanfaatkan aktivitas dari satu aplikasi saja, atau dapat memanfaatkan aktivitas dari sejumlah
+aplikasi berbeda.</p>
+
+<p><strong>Intent</strong> adalah mekanisme bagi satu aplikasi untuk memberi isyarat minta bantuan
+aplikasi lain dalam menjalankan suatu tindakan. Aktivitas aplikasi dapat menunjukkan intent
+ apa saja yang dapat diresponsnya. Untuk intent umum seperti "Share", pengguna mungkin telah menginstal beberapa aplikasi
+yang dapat memenuhi permintaan itu.</p>
+
+<h4>Contoh: berpindah antar aplikasi untuk mendukung berbagi</h4>
+
+<p>Untuk memahami cara kerja sama aktivitas, tugas, dan intent, perhatikan bagaimana sebuah aplikasi memungkinkan pengguna
+untuk berbagi konten dengan menggunakan aplikasi lain. Misalnya, membuka aplikasi Play Store dari Home akan memulai
+Task A baru (lihat gambar di bawah). Setelah menyusuri Play Store dan menyentuh buku yang dipromosikan
+untuk melihat detailnya, pengguna tetap berada dalam tugas yang sama, memperluasnya dengan menambahkan aktivitas. Memicu
+tindakan Share akan memberi tahu pengguna dengan dialog berisi daftar aktivitas (dari aplikasi berbeda)
+yang telah terdaftar untuk menangani intent Share.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_inward.png">
+
+<p>Bila pengguna memilih untuk berbagi melalui Gmail, aktivitas penulisan di Gmail akan ditambahkan sebagai kelanjutan dari
+Task A&mdash;tidak ada tugas baru yang dibuat. Jika Gmail sedang menjalankan tugasnya di latar belakang, maka
+tidak akan terpengaruh.</p>
+
+<p>Dari aktivitas penulisan, mengirim pesan atau menyentuh tombol Back akan mengembalikan pengguna ke
+aktivitas detail buku tersebut. Penyentuhan tombol Back berikutnya akan terus mengarahkan kembali melalui Play
+Store, sampai akhirnya tiba di Home.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_back.png">
+
+<p>Akan tetapi, dengan menyentuh tombol Up dari aktivitas penulisan, pengguna menunjukkan keinginan untuk tetap berada di
+Gmail. Aktivitas daftar percakapan Gmail muncul, Task B yang baru akan dibuat untuk itu. Tugas baru
+selalu terkait ke Home, maka menyentuh tombol Back dari daftar percakapan akan mengembalikan ke sana.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_up.png">
+
+<p>Task A tetap berjalan di latar belakang, dan pengguna nanti dapat kembali ke sana (misalnya, melalui layar
+Recents). Jika Gmail sedang menjalankan tugasnya di latar belakang, maka itu akan digantikan
+dengan Task B&mdash;konteks sebelumnya akan diabaikan demi tujuan baru pengguna.</p>
+
+<p>Jika register aplikasi Anda menangani intent dengan aktivitas yang jauh di dalam hierarki aplikasi,
+lihat <a href="#into-your-app">Navigasi Aplikasi Anda melalui Widget Layar Home dan
+Pemberitahuan</a> untuk panduan mengenai cara menetapkan navigasi Up.</p>

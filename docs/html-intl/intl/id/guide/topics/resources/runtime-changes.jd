@@ -1,0 +1,281 @@
+page.title=Menangani Perubahan Runtime
+page.tags=aktivitas,daur hidup
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Dalam dokumen ini</h2>
+  <ol>
+    <li><a href="#RetainingAnObject">Mempertahankan Objek Selama Perubahan Konfigurasi</a></li>
+    <li><a href="#HandlingTheChange">Menangani Sendiri Perubahan Konfigurasi</a>
+  </ol>
+
+  <h2>Lihat juga</h2>
+  <ol>
+    <li><a href="providing-resources.html">Menyediakan Sumber Daya</a></li>
+    <li><a href="accessing-resources.html">Mengakses Sumber Daya</a></li>
+    <li><a href="http://android-developers.blogspot.com/2009/02/faster-screen-orientation-change.html">Perubahan
+ Orientasi Layar yang Lebih Cepat</a></li>
+  </ol>
+</div>
+</div>
+
+<p>Sebagian konfigurasi perangkat bisa berubah selama runtime
+(seperti orientasi layar, ketersediaan keyboard, dan bahasa). Saat perubahan demikian terjadi,
+Android akan me-restart
+{@link android.app.Activity} yang berjalan ({@link android.app.Activity#onDestroy()} dipanggil, diikuti oleh {@link
+android.app.Activity#onCreate(Bundle) onCreate()}). Perilaku restart didesain untuk membantu
+aplikasi Anda beradaptasi dengan konfigurasi baru melalui pemuatan kembali aplikasi Anda secara otomatis dengan
+sumber daya alternatif sumber yang sesuai dengan konfigurasi perangkat baru.</p>
+
+<p>Untuk menangani restart dengan benar, aktivitas Anda harus mengembalikan
+statusnya seperti semula melalui <a href="{@docRoot}guide/components/activities.html#Lifecycle">Daur hidup
+aktivitas</a> normal, dalam hal ini Android akan memanggil
+{@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} sebelum menghentikan
+aktivitas Anda sehingga Anda dapat menyimpan data mengenai status aplikasi. Selanjutnya Anda bisa mengembalikan status
+selama {@link android.app.Activity#onCreate(Bundle) onCreate()} atau {@link
+android.app.Activity#onRestoreInstanceState(Bundle) onRestoreInstanceState()}.</p>
+
+<p>Untuk menguji bahwa aplikasi me-restart sendiri dengan status tak berubah, Anda harus
+memanggil perubahan konfigurasi (seperti mengubah orientasi layar) saat melakukan berbagai
+tugas dalam aplikasi. Aplikasi Anda harus dapat me-restart setiap saat tanpa kehilangan
+data pengguna atau status untuk menangani kejadian seperti perubahan konfigurasi atau bila pengguna menerima panggilan telepon
+masuk lalu kembali ke aplikasi setelah proses
+aplikasi Anda dimusnahkan. Untuk mengetahui cara mengembalikan status aktivitas, bacalah tentang <a href="{@docRoot}guide/components/activities.html#Lifecycle">Daur hidup aktivitas</a>.</p>
+
+<p>Akan tetapi, Anda mungkin menemui situasi ketika me-restart aplikasi dan
+mengembalikan data dalam jumlah besar malah menjadi mahal dan menghasilkan pengalaman pengguna yang buruk. Dalam situasi
+demikian, Anda memiliki dua opsi lain:</p>
+
+<ol type="a">
+  <li><a href="#RetainingAnObject">Mempertahankan objek selama perubahan konfigurasi</a>
+  <p>Izinkan aktivitas Anda me-restart saat konfigurasi berubah, namun bawa objek
+berstatus (stateful) ke instance baru aktivitas Anda.</p>
+
+  </li>
+  <li><a href="#HandlingTheChange">Menangani sendiri perubahan konfigurasi</a>
+  <p>Cegah sistem me-restart aktivitas selama perubahan konfigurasi
+tertentu, namun terima callback saat konfigurasi benar-benar berubah, agar Anda bisa memperbarui
+aktivitas secara manual bila diperlukan.</p>
+  </li>
+</ol>
+
+
+<h2 id="RetainingAnObject">Mempertahankan Objek Selama Perubahan Konfigurasi</h2>
+
+<p>Jika me-restart aktivitas mengharuskan pemulihan seperangkat data dalam jumlah besar, menghubungkan kembali koneksi
+jaringan, atau melakukan operasi intensif lainnya, maka restart penuh karena perubahan konfigurasi mungkin
+menjadi pengalaman pengguna yang lambat. Selain itu, Anda mungkin tidak bisa sepenuhnya mengembalikan status
+aktivitas dengan {@link android.os.Bundle} yang disimpan sistem untuk Anda dengan callback {@link
+android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()}&mdash;itu tidaklah
+didesain untuk membawa objek besar (seperti bitmap) dan data di dalamnya harus diserialkan kemudian
+dinon-serialkan, yang bisa menghabiskan banyak memori dan membuat perubahan konfigurasi menjadi lambat. Dalam situasi
+demikian, Anda bisa meringankan beban memulai kembali aktivitas Anda dengan mempertahankan {@link
+android.app.Fragment} saat aktivitas Anda di-restart karena perubahan konfigurasi. Fragmen ini
+bisa berisi acuan ke objek stateful yang ingin Anda pertahankan.</p>
+
+<p>Bila sistem Android menghentikan aktivitas Anda karena perubahan konfigurasi, fragmen
+aktivitas yang telah ditandai untuk dipertahankan tidak akan dimusnahkan. Anda dapat menambahkan fragmen tersebut ke
+aktivitas untuk mempertahankan objek stateful.</p>
+
+<p>Untuk mempertahankan objek stateful dalam fragmen selama perubahan konfigurasi runtime:</p>
+
+<ol>
+  <li>Perluas kelas {@link android.app.Fragment} dan deklarasikan referensi ke objek stateful
+Anda.</li>
+  <li>Panggil {@link android.app.Fragment#setRetainInstance(boolean)} saat fragmen dibuat.
+      </li>
+  <li>Tambahkan fragmen ke aktivitas.</li>
+  <li>Gunakan {@link android.app.FragmentManager} untuk mengambil fragmen saat aktivitas
+di-restart.</li>
+</ol>
+
+<p>Misalnya, definisikan fragmen sebagai berikut:</p>
+
+<pre>
+public class RetainedFragment extends Fragment {
+
+    // data object we want to retain
+    private MyDataObject data;
+
+    // this method is only called once for this fragment
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // retain this fragment
+        setRetainInstance(true);
+    }
+
+    public void setData(MyDataObject data) {
+        this.data = data;
+    }
+
+    public MyDataObject getData() {
+        return data;
+    }
+}
+</pre>
+
+<p class="caution"><strong>Perhatian:</strong> Meskipun bisa menyimpan objek apa saja, Anda
+sama sekali tidak boleh meneruskan objek yang terkait dengan {@link android.app.Activity}, seperti {@link
+android.graphics.drawable.Drawable}, {@link android.widget.Adapter}, {@link android.view.View}
+atau objek lainnya mana pun yang terkait dengan {@link android.content.Context}. Jika Anda melakukannya, hal tersebut akan
+membocorkan semua tampilan dan sumber daya instance aktivitas semula. (Sumber daya yang bocor
+berarti bahwa aplikasi Anda tetap menyimpannya dan tidak bisa dijadikan kumpulan sampah, sehingga bisa banyak
+memori yang hilang.)</p>
+
+<p>Selanjutnya gunakan {@link android.app.FragmentManager} untuk menambahkan fragmen ke aktivitas.
+Anda bisa memperoleh objek data dari fragmen saat aktivitas memulai kembali selama perubahan
+konfigurasi runtime. Misalnya, definisikan aktivitas Anda sebagai berikut:</p>
+
+<pre>
+public class MyActivity extends Activity {
+
+    private RetainedFragment dataFragment;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getFragmentManager();
+        dataFragment = (DataFragment) fm.findFragmentByTag(“data”);
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+            // add the fragment
+            dataFragment = new DataFragment();
+            fm.beginTransaction().add(dataFragment, “data”).commit();
+            // load the data from the web
+            dataFragment.setData(loadMyData());
+        }
+
+        // the data is available in dataFragment.getData()
+        ...
+    }
+
+    &#64;Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(collectMyLoadedData());
+    }
+}
+</pre>
+
+<p>Dalam contoh ini, {@link android.app.Activity#onCreate(Bundle) onCreate()} menambahkan fragmen
+atau mengembalikan referensinya. {@link android.app.Activity#onCreate(Bundle) onCreate()} juga
+menyimpan objek stateful dalam instance fragmen.
+{@link android.app.Activity#onDestroy() onDestroy()} akan memperbarui objek stateful dalam
+instance fragmen yang dipertahankan.</p>
+
+
+
+
+
+<h2 id="HandlingTheChange">Menangani Sendiri Perubahan Konfigurasi</h2>
+
+<p>Jika aplikasi Anda tidak memerlukan pembaruan sumber daya selama perubahan konfigurasi
+tertentu <em>dan</em> Anda memiliki keterbatasan kinerja yang mengharuskan Anda untuk
+menghindari restart aktivitas, maka Anda bisa mendeklarasikan agar aktivitas Anda menangani sendiri perubahan
+konfigurasinya, sehingga mencegah sistem me-restart aktivitas.</p>
+
+<p class="note"><strong>Catatan:</strong> Menangani sendiri perubahan konfigurasi bisa jauh lebih
+mempersulit penggunaan sumber daya alternatif, karena sistem tidak menerapkannya secara otomatis
+untuk Anda. Teknik ini harus dianggap sebagai usaha terakhir bila Anda harus menghindari restart
+karena perubahan konfigurasi dan tidak disarankan untuk sebagian besar aplikasi.</p>
+
+<p>Untuk mendeklarasikan agar aktivitas Anda menangani perubahan konfigurasi, edit elemen <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> yang sesuai
+dalam file manifes Anda agar menyertakan atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> dengan nilai yang mewakili konfigurasi yang ingin
+ditangani. Nilai yang memungkinkan tercantum dalam dokumentasi untuk atribut <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> (nilai paling sering digunakan adalah {@code "orientation"} untuk
+mencegah restart saat orientasi layar berubah dan {@code "keyboardHidden"} untuk mencegah
+restart saat ketersediaan keyboard berubah).  Anda dapat mendeklarasikan beberapa nilai konfigurasi
+dalam atribut dengan memisahkannya menggunakan karakter pipa {@code |}.</p>
+
+<p>Misalnya, kode manifes berikut menyatakan aktivitas yang menangani
+perubahan orientasi layar maupun perubahan ketersediaan keyboard:</p>
+
+<pre>
+&lt;activity android:name=".MyActivity"
+          android:configChanges="orientation|keyboardHidden"
+          android:label="@string/app_name">
+</pre>
+
+<p>Sekarang, bila salah satu konfigurasi ini berubah, {@code MyActivity} tidak akan me-restart.
+Sebagai gantinya, {@code MyActivity} akan menerima panggilan ke {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Metode ini
+meneruskan objek {@link android.content.res.Configuration} yang menetapkan
+konfigurasi perangkat baru. Dengan membaca bidang-bidang dalam {@link android.content.res.Configuration},
+Anda dapat menentukan konfigurasi baru dan membuat perubahan yang sesuai dengan memperbarui
+sumber daya yang digunakan dalam antarmuka. Pada saat
+metode ini dipanggil, objek {@link android.content.res.Resources} aktivitas Anda akan diperbarui untuk
+mengembalikan sumber daya berdasarkan konfigurasi baru, jadi Anda bisa dengan mudah
+me-reset elemen UI tanpa membuat sistem me-restart aktivitas Anda.</p>
+
+<p class="caution"><strong>Perhatian:</strong> Mulai Android 3.2 (API level 13), <strong>
+"ukuran layar" juga berubah</strong> bila perangkat beralih orientasi antara potret
+dan lanskap. Jadi jika Anda tidak ingin runtime di-restart karena perubahan orientasi saat mengembangkan
+API level 13 atau yang lebih tinggi (sebagaimana dideklarasikan oleh atribut <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> dan <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
+), Anda harus menyertakan nilai {@code "screenSize"} selain nilai {@code
+"orientation"}. Yaitu Anda harus mendeklarasikan {@code
+android:configChanges="orientation|screenSize"}. Akan tetapi, jika aplikasi Anda menargetkan API level
+12 atau yang lebih rendah, maka aktivitas Anda akan selalu menangani sendiri perubahan konfigurasi ini (perubahan
+konfigurasi ini tidak me-restart aktivitas Anda, bahkan saat berjalan pada perangkat Android 3.2 atau yang lebih tinggi).</p>
+
+<p>Misalnya, implementasi {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()} berikut akan
+memeriksa orientasi perangkat saat ini:</p>
+
+<pre>
+&#64;Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+
+    // Checks the orientation of the screen
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
+    }
+}
+</pre>
+
+<p>Objek {@link android.content.res.Configuration} mewakili semua konfigurasi
+saat ini, tidak hanya konfigurasi yang telah berubah. Seringkali Anda tidak perlu memperhatikan dengan persis bagaimana
+konfigurasi berubah dan cukup menetapkan kembali semua sumber daya yang memberikan alternatif untuk
+konfigurasi sedang ditangani. Misalnya, karena objek {@link
+android.content.res.Resources} sekarang diperbarui, Anda dapat me-reset
+setiap {@link android.widget.ImageView} dengan {@link android.widget.ImageView#setImageResource(int)
+setImageResource()}
+dan sumber daya yang sesuai untuk konfigurasi baru yang digunakan (seperti dijelaskan dalam <a href="providing-resources.html#AlternateResources">Menyediakan Sumber Daya</a>).</p>
+
+<p>Perhatikan bahwa nilai-nilai dari bidang {@link
+android.content.res.Configuration} adalah integer yang sesuai dengan konstanta spesifik
+dari kelas {@link android.content.res.Configuration}. Untuk dokumentasi tentang konstanta
+yang harus digunakan di setiap bidang, lihat bidang yang sesuai dalam referensi {@link
+android.content.res.Configuration}.</p>
+
+<p class="note"><strong>Ingatlah:</strong> Saat mendeklarasikan aktivitas untuk menangani perubahan
+konfigurasi, Anda bertanggung jawab untuk me-reset setiap elemen yang alternatifnya Anda berikan. Jika Anda
+mendeklarasikan aktivitas untuk menangani perubahan orientasi dan memiliki gambar yang harus berubah
+antara lanskap dan potret, Anda harus menetapkan kembali setiap sumber daya elemen selama {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}.</p>
+
+<p>Jika Anda tidak perlu memperbarui aplikasi berdasarkan perubahan
+konfigurasi ini, sebagai gantinya Anda bisa saja <em>tidak</em> mengimplementasikan {@link
+android.app.Activity#onConfigurationChanged(Configuration) onConfigurationChanged()}. Dalam
+hal ini, semua sumber daya yang digunakan sebelum perubahan konfigurasi akan tetap digunakan
+dan Anda hanya menghindari restart aktivitas. Akan tetapi, aplikasi Anda harus selalu
+bisa dimatikan dan di-restart dengan status sebelumnya tetap utuh, sehingga Anda jangan menganggap teknik
+ini sebagai jalan keluar untuk mempertahankan status selama daur hidup aktivitas normal. Tidak hanya
+karena ada perubahan konfigurasi lainnya yang tidak bisa Anda cegah untuk me-restart aplikasi, namun
+juga karena Anda harus menangani kejadian seperti saat pengguna meninggalkan aplikasi dan
+dimusnahkan sebelum pengguna kembali ke aplikasi.</p>
+
+<p>Untuk informasi selengkapnya tentang perubahan konfigurasi yang bisa Anda tangani dalam aktivitas, lihat dokumentasi <a href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
+android:configChanges}</a> dan kelas {@link android.content.res.Configuration}
+.</p>
