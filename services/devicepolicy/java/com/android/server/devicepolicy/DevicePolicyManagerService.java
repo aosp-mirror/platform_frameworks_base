@@ -309,6 +309,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
 
+    /**
+     * Minimum timeout in milliseconds after which unlocking with weak auth times out,
+     * i.e. the user has to use a strong authentication method like password, PIN or pattern.
+     */
+    private static final long MINIMUM_STRONG_AUTH_TIMEOUT_MS = 1 * 60 * 60 * 1000; // 1h
+
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
@@ -550,6 +556,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_PERMITTED_IMES = "permitted-imes";
         private static final String TAG_MAX_FAILED_PASSWORD_WIPE = "max-failed-password-wipe";
         private static final String TAG_MAX_TIME_TO_UNLOCK = "max-time-to-unlock";
+        private static final String TAG_STRONG_AUTH_UNLOCK_TIMEOUT = "strong-auth-unlock-timeout";
         private static final String TAG_MIN_PASSWORD_NONLETTER = "min-password-nonletter";
         private static final String TAG_MIN_PASSWORD_SYMBOLS = "min-password-symbols";
         private static final String TAG_MIN_PASSWORD_NUMERIC = "min-password-numeric";
@@ -603,6 +610,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
         long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
+
+        long strongAuthUnlockTimeout = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
 
         static final int DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE = 0;
         int maximumFailedPasswordsForWipe = DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE;
@@ -752,6 +761,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, TAG_MAX_TIME_TO_UNLOCK);
                 out.attribute(null, ATTR_VALUE, Long.toString(maximumTimeToUnlock));
                 out.endTag(null, TAG_MAX_TIME_TO_UNLOCK);
+            }
+            if (strongAuthUnlockTimeout != DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS) {
+                out.startTag(null, TAG_STRONG_AUTH_UNLOCK_TIMEOUT);
+                out.attribute(null, ATTR_VALUE, Long.toString(strongAuthUnlockTimeout));
+                out.endTag(null, TAG_STRONG_AUTH_UNLOCK_TIMEOUT);
             }
             if (maximumFailedPasswordsForWipe != DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
                 out.startTag(null, TAG_MAX_FAILED_PASSWORD_WIPE);
@@ -966,6 +980,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_STRONG_AUTH_UNLOCK_TIMEOUT.equals(tag)) {
+                    strongAuthUnlockTimeout = Long.parseLong(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MAX_FAILED_PASSWORD_WIPE.equals(tag)) {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
@@ -1218,6 +1235,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(minimumPasswordNonLetter);
             pw.print(prefix); pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
+            pw.print(prefix); pw.print("strongAuthUnlockTimeout=");
+                    pw.println(strongAuthUnlockTimeout);
             pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
                     pw.println(maximumFailedPasswordsForWipe);
             pw.print(prefix); pw.print("specifiesGlobalProxy=");
@@ -4220,6 +4239,60 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return time;
+    }
+
+    @Override
+    public void setRequiredStrongAuthTimeout(ComponentName who, long timeoutMs,
+            boolean parent) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkArgument(timeoutMs >= MINIMUM_STRONG_AUTH_TIMEOUT_MS,
+                "Timeout must not be lower than the minimum strong auth timeout.");
+        Preconditions.checkArgument(timeoutMs <= DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS,
+                "Timeout must not be higher than the default strong auth timeout.");
+
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
+            if (ap.strongAuthUnlockTimeout != timeoutMs) {
+                ap.strongAuthUnlockTimeout = timeoutMs;
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
+
+    /**
+     * Return a single admin's strong auth unlock timeout or minimum value (strictest) of all
+     * admins if who is null.
+     * Returns default timeout if not configured.
+     */
+    @Override
+    public long getRequiredStrongAuthTimeout(ComponentName who, int userId, boolean parent) {
+        if (!mHasFeature) {
+            return DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+        }
+        enforceFullCrossUsersPermission(userId);
+        synchronized (this) {
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId, parent);
+                return admin != null ? Math.max(admin.strongAuthUnlockTimeout,
+                        MINIMUM_STRONG_AUTH_TIMEOUT_MS)
+                        : DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+            }
+
+            // Return the strictest policy across all participating admins.
+            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userId, parent);
+
+            long strongAuthUnlockTimeout = DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+            for (int i = 0; i < admins.size(); i++) {
+                strongAuthUnlockTimeout = Math.min(admins.get(i).strongAuthUnlockTimeout,
+                        strongAuthUnlockTimeout);
+            }
+            return Math.max(strongAuthUnlockTimeout, MINIMUM_STRONG_AUTH_TIMEOUT_MS);
+        }
     }
 
     @Override
