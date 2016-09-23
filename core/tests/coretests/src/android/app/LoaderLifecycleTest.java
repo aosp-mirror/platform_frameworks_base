@@ -99,6 +99,9 @@ public class LoaderLifecycleTest {
             final FragmentManager fm2 = fc2.getFragmentManager();
 
             fc2.attachHost(null);
+            // Make sure nothing blows up on a null here
+            fc2.restoreLoaderNonConfig(null);
+            // for real this time
             fc2.restoreLoaderNonConfig(loaderNonConfig);
             fc2.restoreAllState(savedState, nonconf);
             fc2.dispatchCreate();
