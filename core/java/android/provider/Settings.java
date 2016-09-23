@@ -44,7 +44,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
@@ -8370,6 +8369,13 @@ public final class Settings {
          * @hide
          */
         public static final String CALL_AUTO_RETRY = "call_auto_retry";
+
+        /**
+         * A setting that can be read whether the emergency affordance is currently needed.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
 
         /**
          * See RIL_PreferredNetworkType in ril.h
