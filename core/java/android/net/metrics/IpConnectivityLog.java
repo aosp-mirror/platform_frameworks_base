@@ -33,6 +33,8 @@ public class IpConnectivityLog extends ConnectivityMetricsLogger {
     private static String TAG = "IpConnectivityMetricsLogger";
     private static final boolean DBG = true;
 
+    public static final String SERVICE_NAME = "connmetrics";
+
     public IpConnectivityLog() {
         // mService initialized in super constructor.
     }
