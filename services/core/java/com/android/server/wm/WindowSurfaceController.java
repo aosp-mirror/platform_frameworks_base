@@ -101,8 +101,9 @@ class WindowSurfaceController {
                     s, name, w, h, format, flags);
         }
 
-        if (mService.mSurfaceTraceEnabled) {
-            mSurfaceControl = new RemoteSurfaceTrace(mService.mSurfaceTraceFd.getFileDescriptor(),
+        if (mService.mRoot.mSurfaceTraceEnabled) {
+            mSurfaceControl = new RemoteSurfaceTrace(
+                    mService.mRoot.mSurfaceTraceFd.getFileDescriptor(),
                     mSurfaceControl, animator.mWin);
         }
     }
@@ -116,7 +117,7 @@ class WindowSurfaceController {
     }
 
 
-    void logSurface(String msg, RuntimeException where) {
+    private void logSurface(String msg, RuntimeException where) {
         String str = "  SURFACE " + msg + ": " + title;
         if (where != null) {
             Slog.i(TAG, str, where);

@@ -528,7 +528,7 @@ public class WindowAnimator {
     }
 
     private void updateWallpaperLocked(int displayId) {
-        mService.getDisplayContentLocked(displayId).resetAnimationBackgroundAnimator();
+        mService.mRoot.getDisplayContent(displayId).resetAnimationBackgroundAnimator();
 
         final WindowList windows = mService.getWindowListLocked(displayId);
         WindowState detachedWallpaper = null;
@@ -615,7 +615,7 @@ public class WindowAnimator {
             final int numDisplays = mDisplayContentsAnimators.size();
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+                final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
                 displayContent.stepAppWindowsAnimation(mCurrentTime);
                 DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
 
@@ -654,7 +654,7 @@ public class WindowAnimator {
 
             for (int i = 0; i < numDisplays; i++) {
                 final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+                final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
 
                 displayContent.checkAppWindowsReadyToShow();
 
@@ -691,22 +691,10 @@ public class WindowAnimator {
                     TAG, "<<< CLOSE TRANSACTION animateLocked");
         }
 
-        boolean hasPendingLayoutChanges = false;
-        final int numDisplays = mService.mDisplayContents.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
-            final int pendingChanges = getPendingLayoutChanges(displayContent.getDisplayId());
-            if ((pendingChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
-                mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;
-            }
-            if (pendingChanges != 0) {
-                hasPendingLayoutChanges = true;
-            }
-        }
-
+        boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
         boolean doRequest = false;
         if (mBulkUpdateParams != 0) {
-            doRequest = mWindowPlacerLocked.copyAnimToLayoutParamsLocked();
+            doRequest = mService.mRoot.copyAnimToLayoutParams();
         }
 
         if (hasPendingLayoutChanges || doRequest) {
@@ -725,7 +713,8 @@ public class WindowAnimator {
         }
 
         if (mRemoveReplacedWindows) {
-            removeReplacedWindowsLocked();
+            mService.mRoot.removeReplacedWindows();
+            mRemoveReplacedWindows = false;
         }
 
         mService.stopUsingSavedSurfaceLocked();
@@ -738,28 +727,6 @@ public class WindowAnimator {
                     + " mPendingLayoutChanges(DEFAULT_DISPLAY)="
                     + Integer.toHexString(getPendingLayoutChanges(Display.DEFAULT_DISPLAY)));
         }
-    }
-
-    private void removeReplacedWindowsLocked() {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
-        mService.openSurfaceTransaction();
-        try {
-            for (int i = mService.mDisplayContents.size() - 1; i >= 0; i--) {
-                DisplayContent display = mService.mDisplayContents.valueAt(i);
-                final WindowList windows = mService.getWindowListLocked(display.getDisplayId());
-                for (int j = windows.size() - 1; j >= 0; j--) {
-                    final WindowState win = windows.get(j);
-                    final AppWindowToken aToken = win.mAppToken;
-                    if (aToken != null) {
-                        aToken.removeReplacedWindowIfNeeded(win);
-                    }
-                }
-            }
-        } finally {
-            mService.closeSurfaceTransaction();
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
-        }
-        mRemoveReplacedWindows = false;
     }
 
     private static String bulkUpdateParamsToString(int bulkUpdateParams) {
@@ -832,7 +799,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return 0;
         }
-        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         return (displayContent != null) ? displayContent.pendingLayoutChanges : 0;
     }
 
@@ -840,7 +807,7 @@ public class WindowAnimator {
         if (displayId < 0) {
             return;
         }
-        final DisplayContent displayContent = mService.getDisplayContentLocked(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
         if (displayContent != null) {
             displayContent.pendingLayoutChanges |= changes;
         }

@@ -2507,7 +2507,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "set mOrientationChanging of " + this);
             mOrientationChanging = true;
-            mService.mWindowPlacerLocked.mOrientationChangeComplete = false;
+            mService.mRoot.mOrientationChangeComplete = false;
         }
         mLastFreezeDuration = 0;
         setDisplayLayoutNeeded();
