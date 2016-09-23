@@ -164,6 +164,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mAwaitingFirstLayout = true;
     @ViewDebug.ExportedProperty(category="recents")
+    private boolean mLaunchNextAfterFirstMeasure = false;
+    @ViewDebug.ExportedProperty(category="recents")
     @InitialStateAction
     private int mInitialState = INITIAL_STATE_UPDATE_ALL;
     @ViewDebug.ExportedProperty(category="recents")
@@ -339,6 +341,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Since we always animate to the same place in (the initial state), always reset the stack
         // to the initial state when resuming
         mAwaitingFirstLayout = true;
+        mLaunchNextAfterFirstMeasure = false;
         mInitialState = INITIAL_STATE_UPDATE_ALL;
         requestLayout();
     }
@@ -1226,6 +1229,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mInitialState = INITIAL_STATE_UPDATE_NONE;
             }
         }
+        // If we got the launch-next event before the first layout pass, then re-send it after the
+        // initial state has been updated
+        if (mLaunchNextAfterFirstMeasure) {
+            mLaunchNextAfterFirstMeasure = false;
+            EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
+        }
 
         // Rebind all the views, including the ignore ones
         bindVisibleTaskViews(mStackScroller.getStackScroll(), false /* ignoreTaskOverrides */);
@@ -1669,6 +1678,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(LaunchNextTaskRequestEvent event) {
+        if (mAwaitingFirstLayout) {
+            mLaunchNextAfterFirstMeasure = true;
+            return;
+        }
+
         int launchTaskIndex = mStack.indexOfStackTask(mStack.getLaunchTarget());
         if (launchTaskIndex != -1) {
             launchTaskIndex = Math.max(0, launchTaskIndex - 1);
