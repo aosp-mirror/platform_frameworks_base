@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.TestApi;
+import android.view.PointerIcon;
 import com.android.internal.R;
 import com.android.internal.view.menu.ShowableListMenu;
 
@@ -901,6 +902,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 vto.addOnGlobalLayoutListener(listener);
             }
         }
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (getPointerIcon() == null && isClickable() && isEnabled()) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 
     static class SavedState extends AbsSpinner.SavedState {
