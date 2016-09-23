@@ -114,7 +114,7 @@ final class UserController {
 
     // Amount of time we wait for observers to handle a user switch before
     // giving up on them and unfreezing the screen.
-    static final int USER_SWITCH_TIMEOUT = 2 * 1000;
+    static final int USER_SWITCH_TIMEOUT = 3 * 1000;
 
     private final Object mLock;
     private final Injector mInjector;
@@ -1088,6 +1088,7 @@ final class UserController {
                 mCurWaitingUserSwitchCallbacks = curWaitingUserSwitchCallbacks;
             }
             final AtomicInteger waitingCallbacksCount = new AtomicInteger(observerCount);
+            final long dispatchStartedTime = SystemClock.elapsedRealtime();
             for (int i = 0; i < observerCount; i++) {
                 try {
                     // Prepend with unique prefix to guarantee that keys are unique
@@ -1099,6 +1100,11 @@ final class UserController {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
                             synchronized (mLock) {
+                                long delay = SystemClock.elapsedRealtime() - dispatchStartedTime;
+                                if (delay > USER_SWITCH_TIMEOUT) {
+                                    Slog.wtf(TAG, "User switch timeout: observer "  + name
+                                            + " sent result after " + delay + " ms");
+                                }
                                 // Early return if this session is no longer valid
                                 if (curWaitingUserSwitchCallbacks
                                         != mCurWaitingUserSwitchCallbacks) {
