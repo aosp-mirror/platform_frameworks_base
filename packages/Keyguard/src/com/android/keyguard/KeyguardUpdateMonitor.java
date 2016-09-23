@@ -111,12 +111,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
-    /**
-     * Milliseconds after unlocking with fingerprint times out, i.e. the user has to use a
-     * strong auth method like password, PIN or pattern.
-     */
-    private static final long FINGERPRINT_UNLOCK_TIMEOUT_MS = 72 * 60 * 60 * 1000;
-
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
@@ -608,7 +602,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void scheduleStrongAuthTimeout() {
-        long when = SystemClock.elapsedRealtime() + FINGERPRINT_UNLOCK_TIMEOUT_MS;
+        final DevicePolicyManager dpm =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        long when = SystemClock.elapsedRealtime() + dpm.getRequiredStrongAuthTimeout(null,
+                sCurrentUser);
         Intent intent = new Intent(ACTION_STRONG_AUTH_TIMEOUT);
         intent.putExtra(USER_ID, sCurrentUser);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,

@@ -417,6 +417,14 @@ public class DevicePolicyManager {
     public static final int NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED = 3;
 
     /**
+     * Default and maximum timeout in milliseconds after which unlocking with weak auth times out,
+     * i.e. the user has to use a strong authentication method like password, PIN or pattern.
+     *
+     * @hide
+     */
+    public static final long DEFAULT_STRONG_AUTH_TIMEOUT_MS = 72 * 60 * 60 * 1000; // 72h
+
+    /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
      * allows a mobile device management application or NFC programmer application which starts
      * managed provisioning to pass data to the management application instance after provisioning.
@@ -2333,6 +2341,78 @@ public class DevicePolicyManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Called by a device/profile owner to set the timeout after which unlocking with secondary, non
+     * strong auth (e.g. fingerprint, trust agents) times out, i.e. the user has to use a strong
+     * authentication method like password, pin or pattern.
+     *
+     * <p>This timeout is used internally to reset the timer to require strong auth again after
+     * specified timeout each time it has been successfully used.
+     *
+     * <p>Fingerprint can also be disabled altogether using {@link #KEYGUARD_DISABLE_FINGERPRINT}.
+     *
+     * <p>Trust agents can also be disabled altogether using {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
+     *
+     * <p>The calling device admin must be a device or profile owner. If it is not,
+     * a {@link SecurityException} will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
+     * profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param timeoutMs The new timeout, after which the user will have to unlock with strong
+     *         authentication method. If the timeout is lower than 1 hour (minimum) or higher than
+     *         72 hours (default and maximum) an {@link IllegalArgumentException} is thrown.
+     *
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws IllegalArgumentException if the timeout is lower than 1 hour (minimum) or higher than
+     *         72 hours (default and maximum)
+     *
+     * @hide
+     */
+    public void setRequiredStrongAuthTimeout(@NonNull ComponentName admin,
+            long timeoutMs) {
+        if (mService != null) {
+            try {
+                mService.setRequiredStrongAuthTimeout(admin, timeoutMs, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Determine for how long the user will be able to use secondary, non strong auth for
+     * authentication, since last strong method authentication (password, pin or pattern) was used.
+     * After the returned timeout the user is required to use strong authentication method.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
+     * @param admin The name of the admin component to check, or {@code null} to aggregate
+     *         accross all participating admins.
+     * @return The timeout or default timeout if not configured
+     *
+     * @hide
+     */
+    public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
+        return getRequiredStrongAuthTimeout(admin, myUserId());
+    }
+
+    /** @hide per-user version */
+    public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin, @UserIdInt int userId) {
+        if (mService != null) {
+            try {
+                return mService.getRequiredStrongAuthTimeout(admin, userId, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return DEFAULT_STRONG_AUTH_TIMEOUT_MS;
     }
 
     /**
