@@ -77,6 +77,8 @@ sources := \
 
 sources += Format.proto
 
+sourcesJni :=
+
 testSources := \
 	compile/IdAssigner_test.cpp \
 	compile/InlineXmlFormatParser_test.cpp \
@@ -175,6 +177,25 @@ LOCAL_SRC_FILES := $(sources)
 LOCAL_STATIC_LIBRARIES := $(hostStaticLibs)
 LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
 include $(BUILD_HOST_STATIC_LIBRARY)
+
+
+# ==========================================================
+# Build the host shared library: libaapt2_jni
+# ==========================================================
+include $(CLEAR_VARS)
+LOCAL_MODULE := libaapt2_jni
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_HOST_OS := darwin linux windows
+LOCAL_CFLAGS := $(cFlags)
+LOCAL_CFLAGS_darwin := $(cFlags_darwin)
+LOCAL_CFLAGS_windows := $(cFlags_windows)
+LOCAL_CPPFLAGS := $(cppFlags)
+LOCAL_C_INCLUDES := $(protoIncludes)
+LOCAL_SRC_FILES := $(sourcesJni)
+LOCAL_STATIC_LIBRARIES := libaapt2 $(hostStaticLibs)
+LOCAL_STATIC_LIBRARIES_windows := $(hostStaticLibs_windows)
+include $(BUILD_HOST_SHARED_LIBRARY)
+
 
 # ==========================================================
 # Build the host tests: libaapt2_tests
