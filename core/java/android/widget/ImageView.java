@@ -1419,7 +1419,9 @@ public class ImageView extends View {
     /**
      * Returns the alpha that will be applied to the drawable of this ImageView.
      *
-     * @return the alpha that will be applied to the drawable of this ImageView
+     * @return the alpha value that will be applied to the drawable of this
+     * ImageView (between 0 and 255 inclusive, with 0 being transparent and
+     * 255 being opaque)
      *
      * @see #setImageAlpha(int)
      */
@@ -1430,7 +1432,8 @@ public class ImageView extends View {
     /**
      * Sets the alpha value that should be applied to the image.
      *
-     * @param alpha the alpha value that should be applied to the image
+     * @param alpha the alpha value that should be applied to the image (between
+     * 0 and 255 inclusive, with 0 being transparent and 255 being opaque)
      *
      * @see #getImageAlpha()
      */
