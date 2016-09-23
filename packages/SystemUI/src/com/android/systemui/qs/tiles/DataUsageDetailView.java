@@ -115,6 +115,12 @@ public class DataUsageDetailView extends LinearLayout {
         final TextView infoBottom = (TextView) findViewById(R.id.usage_info_bottom_text);
         infoBottom.setVisibility(bottom != null ? View.VISIBLE : View.GONE);
         infoBottom.setText(bottom);
+        boolean showLevel = info.warningLevel > 0 || info.limitLevel > 0;
+        graph.setVisibility(showLevel ? View.VISIBLE : View.GONE);
+        if (!showLevel) {
+            infoTop.setVisibility(View.GONE);
+        }
+
     }
 
     private String formatBytes(long bytes) {
