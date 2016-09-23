@@ -16,87 +16,65 @@
 
 package android.net.wifi.nan;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * Defines a request object to configure a Wi-Fi NAN network. Built using
  * {@link ConfigRequest.Builder}. Configuration is requested using
- * {@link WifiNanManager#attach(android.os.Handler, WifiNanEventCallback)}.
+ * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}.
  * Note that the actual achieved configuration may be different from the
  * requested configuration - since different applications may request different
  * configurations.
  *
- * @hide PROPOSED_NAN_API
+ * @hide
  */
 public final class ConfigRequest implements Parcelable {
     /**
      * Lower range of possible cluster ID.
-     *
-     * @hide
      */
     public static final int CLUSTER_ID_MIN = 0;
 
     /**
      * Upper range of possible cluster ID.
-     *
-     * @hide
      */
     public static final int CLUSTER_ID_MAX = 0xFFFF;
 
     /**
      * Indicates whether 5G band support is requested.
-     *
-     * @hide
      */
     public final boolean mSupport5gBand;
 
     /**
      * Specifies the desired master preference.
-     *
-     * @hide
      */
     public final int mMasterPreference;
 
     /**
      * Specifies the desired lower range of the cluster ID. Must be lower then
      * {@link ConfigRequest#mClusterHigh}.
-     *
-     * @hide
      */
     public final int mClusterLow;
 
     /**
      * Specifies the desired higher range of the cluster ID. Must be higher then
      * {@link ConfigRequest#mClusterLow}.
-     *
-     * @hide
      */
     public final int mClusterHigh;
 
-    /**
-     * Indicates whether we want to get callbacks when our identity is changed.
-     *
-     * @hide
-     */
-    public final boolean mEnableIdentityChangeCallback;
-
     private ConfigRequest(boolean support5gBand, int masterPreference, int clusterLow,
-            int clusterHigh, boolean enableIdentityChangeCallback) {
+            int clusterHigh) {
         mSupport5gBand = support5gBand;
         mMasterPreference = masterPreference;
         mClusterLow = clusterLow;
         mClusterHigh = clusterHigh;
-        mEnableIdentityChangeCallback = enableIdentityChangeCallback;
     }
 
     @Override
     public String toString() {
         return "ConfigRequest [mSupport5gBand=" + mSupport5gBand + ", mMasterPreference="
                 + mMasterPreference + ", mClusterLow=" + mClusterLow + ", mClusterHigh="
-                + mClusterHigh + ", mEnableIdentityChangeCallback=" + mEnableIdentityChangeCallback
-                + "]";
+                + mClusterHigh + "]";
     }
 
     @Override
@@ -110,7 +88,6 @@ public final class ConfigRequest implements Parcelable {
         dest.writeInt(mMasterPreference);
         dest.writeInt(mClusterLow);
         dest.writeInt(mClusterHigh);
-        dest.writeInt(mEnableIdentityChangeCallback ? 1 : 0);
     }
 
     public static final Creator<ConfigRequest> CREATOR = new Creator<ConfigRequest>() {
@@ -125,9 +102,7 @@ public final class ConfigRequest implements Parcelable {
             int masterPreference = in.readInt();
             int clusterLow = in.readInt();
             int clusterHigh = in.readInt();
-            boolean enableIdentityChangeCallback = in.readInt() != 0;
-            return new ConfigRequest(support5gBand, masterPreference, clusterLow, clusterHigh,
-                    enableIdentityChangeCallback);
+            return new ConfigRequest(support5gBand, masterPreference, clusterLow, clusterHigh);
         }
     };
 
@@ -144,43 +119,15 @@ public final class ConfigRequest implements Parcelable {
         ConfigRequest lhs = (ConfigRequest) o;
 
         return mSupport5gBand == lhs.mSupport5gBand && mMasterPreference == lhs.mMasterPreference
-                && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh
-                && mEnableIdentityChangeCallback == lhs.mEnableIdentityChangeCallback;
-    }
-
-    /**
-     * Checks for equality of two configuration - but only considering their
-     * on-the-air NAN configuration impact.
-     *
-     * @param o Object to compare to.
-     * @return true if configuration objects have the same on-the-air
-     *         configuration, false otherwise.
-     *
-     * @hide
-     */
-    public boolean equalsOnTheAir(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof ConfigRequest)) {
-            return false;
-        }
-
-        ConfigRequest lhs = (ConfigRequest) o;
-
-        return mSupport5gBand == lhs.mSupport5gBand && mMasterPreference == lhs.mMasterPreference
                 && mClusterLow == lhs.mClusterLow && mClusterHigh == lhs.mClusterHigh;
     }
 
     /**
-     * Checks whether the configuration's settings which impact on-air behavior are non-default.
+     * Checks whether the configuration's settings are non-default.
      *
-     * @return true if any of the on-air-impacting settings are non-default.
-     *
-     * @hide
+     * @return true if any of the settings are non-default.
      */
-    public boolean isNonDefaultOnTheAir() {
+    public boolean isNonDefault() {
         return mSupport5gBand || mMasterPreference != 0 || mClusterLow != CLUSTER_ID_MIN
                 || mClusterHigh != CLUSTER_ID_MAX;
     }
@@ -193,7 +140,6 @@ public final class ConfigRequest implements Parcelable {
         result = 31 * result + mMasterPreference;
         result = 31 * result + mClusterLow;
         result = 31 * result + mClusterHigh;
-        result = 31 * result + (mEnableIdentityChangeCallback ? 1 : 0);
 
         return result;
     }
@@ -201,8 +147,6 @@ public final class ConfigRequest implements Parcelable {
     /**
      * Verifies that the contents of the ConfigRequest are valid. Otherwise
      * throws an IllegalArgumentException.
-     *
-     * @hide
      */
     public void validate() throws IllegalArgumentException {
         if (mMasterPreference < 0) {
@@ -239,7 +183,6 @@ public final class ConfigRequest implements Parcelable {
         private int mMasterPreference = 0;
         private int mClusterLow = CLUSTER_ID_MIN;
         private int mClusterHigh = CLUSTER_ID_MAX;
-        private boolean mEnableIdentityChangeCallback = false;
 
         /**
          * Specify whether 5G band support is required in this request. Disabled by default.
@@ -248,8 +191,6 @@ public final class ConfigRequest implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
-         *
-         * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setSupport5gBand(boolean support5gBand) {
             mSupport5gBand = support5gBand;
@@ -264,8 +205,6 @@ public final class ConfigRequest implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
-         *
-         * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setMasterPreference(int masterPreference) {
             if (masterPreference < 0) {
@@ -293,8 +232,6 @@ public final class ConfigRequest implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setClusterLow(..).setClusterHigh(..)}.
-         *
-         * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setClusterLow(int clusterLow) {
             if (clusterLow < CLUSTER_ID_MIN) {
@@ -320,8 +257,6 @@ public final class ConfigRequest implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setClusterLow(..).setClusterHigh(..)}.
-         *
-         * @hide PROPOSED_NAN_SYSTEM_API
          */
         public Builder setClusterHigh(int clusterHigh) {
             if (clusterHigh < CLUSTER_ID_MIN) {
@@ -336,27 +271,6 @@ public final class ConfigRequest implements Parcelable {
         }
 
         /**
-         * Indicate whether or not we want to enable the
-         * {@link WifiNanEventCallback#onIdentityChanged(byte[])} callback. A
-         * device identity is its Discovery MAC address which is randomized at regular intervals.
-         * An application may need to know the MAC address, e.g. when using OOB (out-of-band)
-         * discovery together with NAN connections.
-         * <p>
-         *     The callbacks are disabled by default since it may result in additional wake-ups
-         *     of the host -
-         *     increasing power.
-         *
-         * @param enableIdentityChangeCallback Enable the callback informing
-         *            listener when identity is changed.
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setEnableIdentityChangeCallback(boolean enableIdentityChangeCallback) {
-            mEnableIdentityChangeCallback = enableIdentityChangeCallback;
-            return this;
-        }
-
-        /**
          * Build {@link ConfigRequest} given the current requests made on the
          * builder.
          */
@@ -366,8 +280,7 @@ public final class ConfigRequest implements Parcelable {
                         "Invalid argument combination - must have Cluster Low <= Cluster High");
             }
 
-            return new ConfigRequest(mSupport5gBand, mMasterPreference, mClusterLow, mClusterHigh,
-                    mEnableIdentityChangeCallback);
+            return new ConfigRequest(mSupport5gBand, mMasterPreference, mClusterLow, mClusterHigh);
         }
     }
 }
