@@ -4068,25 +4068,29 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean setProcessMemoryTrimLevel(String process, int userId, int level) {
+    public boolean setProcessMemoryTrimLevel(String process, int userId, int level)
+            throws RemoteException {
         synchronized (this) {
             final ProcessRecord app = findProcessLocked(process, userId, "setProcessMemoryTrimLevel");
             if (app == null) {
-                return false;
+                throw new IllegalArgumentException("Unknown process: " + process);
             }
-            if (app.trimMemoryLevel < level && app.thread != null &&
-                    (level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
-                            app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND)) {
-                try {
-                    app.thread.scheduleTrimMemory(level);
-                    app.trimMemoryLevel = level;
-                    return true;
-                } catch (RemoteException e) {
-                    // Fallthrough to failure case.
-                }
+            if (app.thread == null) {
+                throw new IllegalArgumentException("Process has no app thread");
             }
+            if (app.trimMemoryLevel >= level) {
+                throw new IllegalArgumentException(
+                        "Unable to set a higher trim level than current level");
+            }
+            if (!(level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
+                    app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND)) {
+                throw new IllegalArgumentException("Unable to set a background trim level "
+                    + "on a foreground process");
+            }
+            app.thread.scheduleTrimMemory(level);
+            app.trimMemoryLevel = level;
+            return true;
         }
-        return false;
     }
 
     private void dispatchProcessesChanged() {
