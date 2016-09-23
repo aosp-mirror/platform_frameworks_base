@@ -236,8 +236,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
             stack = dc.getStackById(stackId);
             if (stack != null) {
-                // It's already attached to the display...clear mDeferRemoval!
+                // It's already attached to the display...clear mDeferRemoval and move stack to
+                // appropriate z-order on display as needed.
                 stack.mDeferRemoval = false;
+                dc.moveStack(stack, onTop);
                 attachedToDisplay = true;
             } else {
                 stack = new TaskStack(mService, stackId);
@@ -249,14 +251,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                         .notifyDockedStackExistsChanged(true);
             }
         }
+
         if (!attachedToDisplay) {
             stack.attachDisplayContent(dc);
+            dc.attachStack(stack, onTop);
         }
-        dc.attachStack(stack, onTop);
+
         if (stack.getRawFullscreen()) {
             return null;
         }
-        Rect bounds = new Rect();
+        final Rect bounds = new Rect();
         stack.getRawBounds(bounds);
         return bounds;
     }
@@ -1428,5 +1432,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 }
             }
         }
+    }
+
+    @Override
+    String getName() {
+        return "ROOT";
     }
 }

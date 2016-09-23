@@ -3976,23 +3976,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void addTask(int taskId, int stackId, boolean toTop) {
-        synchronized (mWindowMap) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "addTask: adding taskId=" + taskId
-                    + " to " + (toTop ? "top" : "bottom"));
-            Task task = mTaskIdToTask.get(taskId);
-            if (task == null) {
-                if (DEBUG_STACK) Slog.i(TAG_WM, "addTask: could not find taskId=" + taskId);
-                return;
-            }
-            TaskStack stack = mStackIdToStack.get(stackId);
-            stack.addTask(task, toTop);
-            final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.layoutNeeded = true;
-            mWindowPlacerLocked.performSurfacePlacement();
-        }
-    }
-
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: moving taskId=" + taskId
@@ -9205,6 +9188,13 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("all".equals(cmd) || "a".equals(cmd)) {
                 synchronized(mWindowMap) {
                     dumpWindowsLocked(pw, true, null);
+                }
+                return;
+            } else if ("containers".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    StringBuilder output = new StringBuilder();
+                    mRoot.dumpChildrenNames(output, " ");
+                    pw.println(output.toString());
                 }
                 return;
             } else {
