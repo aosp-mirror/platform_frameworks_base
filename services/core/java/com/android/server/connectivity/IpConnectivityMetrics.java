@@ -54,6 +54,8 @@ final public class IpConnectivityMetrics extends SystemService {
 
     @VisibleForTesting
     public final Impl impl = new Impl();
+    private NetdEventListenerService mNetdListener;
+
     @GuardedBy("mLock")
     private ArrayList<ConnectivityMetricsEvent> mBuffer;
     @GuardedBy("mLock")
@@ -75,8 +77,10 @@ final public class IpConnectivityMetrics extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             if (DBG) Log.d(TAG, "onBootPhase");
+            mNetdListener = new NetdEventListenerService(getContext());
 
             publishBinderService(SERVICE_NAME, impl);
+            publishBinderService(mNetdListener.SERVICE_NAME, mNetdListener);
         }
     }
 
@@ -164,6 +168,9 @@ final public class IpConnectivityMetrics extends SystemService {
             pw.println("Buffered events: " + mBuffer.size());
             pw.println("Buffer capacity: " + mCapacity);
             pw.println("Dropped events: " + mDropped);
+        }
+        if (mNetdListener != null) {
+            mNetdListener.dump(pw);
         }
     }
 

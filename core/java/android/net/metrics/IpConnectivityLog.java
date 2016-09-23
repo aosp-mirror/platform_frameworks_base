@@ -17,65 +17,65 @@
 package android.net.metrics;
 
 import android.net.ConnectivityMetricsEvent;
-import android.net.ConnectivityMetricsLogger;
-import android.net.IConnectivityMetricsLogger;
+import android.net.IIpConnectivityMetrics;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
-
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * Specialization of the ConnectivityMetricsLogger class for recording IP connectivity events.
+ * Class for logging IpConnectvity events with IpConnectivityMetrics
  * {@hide}
  */
-public class IpConnectivityLog extends ConnectivityMetricsLogger {
-    private static String TAG = "IpConnectivityMetricsLogger";
-    private static final boolean DBG = true;
+public class IpConnectivityLog {
+    private static final String TAG = IpConnectivityLog.class.getSimpleName();
+    private static final boolean DBG = false;
 
     public static final String SERVICE_NAME = "connmetrics";
 
+    private IIpConnectivityMetrics mService;
+
     public IpConnectivityLog() {
-        // mService initialized in super constructor.
     }
 
     @VisibleForTesting
-    public IpConnectivityLog(IConnectivityMetricsLogger service) {
-        super(service);
+    public IpConnectivityLog(IIpConnectivityMetrics service) {
+        mService = service;
+    }
+
+    private boolean checkLoggerService() {
+        if (mService != null) {
+            return true;
+        }
+        final IIpConnectivityMetrics service =
+                IIpConnectivityMetrics.Stub.asInterface(ServiceManager.getService(SERVICE_NAME));
+        if (service == null) {
+            return false;
+        }
+        // Two threads racing here will write the same pointer because getService
+        // is idempotent once MetricsLoggerService is initialized.
+        mService = service;
+        return true;
     }
 
     /**
-     * Log an IpConnectivity event. Contrary to logEvent(), this method does not
-     * keep track of skipped events and is thread-safe for callers.
-     *
+     * Log an IpConnectivity event.
      * @param timestamp is the epoch timestamp of the event in ms.
      * @param data is a Parcelable instance representing the event.
-     *
      * @return true if the event was successfully logged.
      */
     public boolean log(long timestamp, Parcelable data) {
         if (!checkLoggerService()) {
             if (DBG) {
-                Log.d(TAG, CONNECTIVITY_METRICS_LOGGER_SERVICE + " service was not ready");
-            }
-            return false;
-        }
-
-        if (System.currentTimeMillis() < mServiceUnblockedTimestampMillis) {
-            if (DBG) {
-                Log.d(TAG, "skipping logging due to throttling for IpConnectivity component");
+                Log.d(TAG, SERVICE_NAME + " service was not ready");
             }
             return false;
         }
 
         try {
-            final ConnectivityMetricsEvent event =
-                new ConnectivityMetricsEvent(timestamp, COMPONENT_TAG_CONNECTIVITY, 0, data);
-            final long result = mService.logEvent(event);
-            if (result >= 0) {
-                mServiceUnblockedTimestampMillis = result;
-            }
-            return (result == 0);
+            int left = mService.logEvent(new ConnectivityMetricsEvent(timestamp, 0, 0, data));
+            return left >= 0;
         } catch (RemoteException e) {
             Log.e(TAG, "Error logging event", e);
             return false;
