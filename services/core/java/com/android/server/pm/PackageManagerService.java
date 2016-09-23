@@ -4646,6 +4646,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public String[] getPackagesForUid(int uid) {
+        final int userId = UserHandle.getUserId(uid);
         uid = UserHandle.getAppId(uid);
         // reader
         synchronized (mPackages) {
@@ -4653,9 +4654,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final int N = sus.packages.size();
-                final String[] res = new String[N];
-                for (int i = 0; i < N; i++) {
-                    res[i] = sus.packages.valueAt(i).name;
+                String[] res = new String[N];
+                final Iterator<PackageSetting> it = sus.packages.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    PackageSetting ps = it.next();
+                    if (ps.getInstalled(userId)) {
+                        res[i++] = ps.name;
+                    } else {
+                        res = ArrayUtils.removeElement(String.class, res, res[i]);
+                    }
                 }
                 return res;
             } else if (obj instanceof PackageSetting) {
