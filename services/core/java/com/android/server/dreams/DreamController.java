@@ -24,8 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
@@ -253,7 +255,8 @@ final class DreamController {
     private void attach(IDreamService service) {
         try {
             service.asBinder().linkToDeath(mCurrentDream, 0);
-            service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze);
+            service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze,
+                    mCurrentDream.mDreamingStartedCallback);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
             stopDream(true /*immediate*/);
@@ -298,10 +301,10 @@ final class DreamController {
             mCanDoze = canDoze;
             mUserId  = userId;
             mWakeLock = wakeLock;
-            // Hold the lock while we're waiting for the service to connect. Released either when
-            // DreamService connects (and is then responsible for keeping the device awake) or
-            // dreaming stops.
+            // Hold the lock while we're waiting for the service to connect and start dreaming.
+            // Released after the service has started dreaming, we stop dreaming, or it timed out.
             mWakeLock.acquire();
+            mHandler.postDelayed(mReleaseWakeLockIfNeeded, 10000);
         }
 
         // May be called on any thread.
@@ -324,23 +327,15 @@ final class DreamController {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        mConnected = true;
-                        if (mCurrentDream == DreamRecord.this && mService == null) {
-                            attach(IDreamService.Stub.asInterface(service));
-                        }
-                    } finally {
+                    mConnected = true;
+                    if (mCurrentDream == DreamRecord.this && mService == null) {
+                        attach(IDreamService.Stub.asInterface(service));
+                        // Wake lock will be released once dreaming starts.
+                    } else {
                         releaseWakeLockIfNeeded();
                     }
                 }
             });
-        }
-
-        private void releaseWakeLockIfNeeded() {
-            if (mWakeLock != null) {
-                mWakeLock.release();
-                mWakeLock = null;
-            }
         }
 
         // May be called on any thread.
@@ -356,5 +351,23 @@ final class DreamController {
                 }
             });
         }
+
+        void releaseWakeLockIfNeeded() {
+            if (mWakeLock != null) {
+                mWakeLock.release();
+                mWakeLock = null;
+                mHandler.removeCallbacks(mReleaseWakeLockIfNeeded);
+            }
+        }
+
+        final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
+
+        final IRemoteCallback mDreamingStartedCallback = new IRemoteCallback.Stub() {
+            // May be called on any thread.
+            @Override
+            public void sendResult(Bundle data) throws RemoteException {
+                mHandler.post(mReleaseWakeLockIfNeeded);
+            }
+        };
     }
 }
