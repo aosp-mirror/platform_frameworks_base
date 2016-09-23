@@ -4841,6 +4841,11 @@ i
         <!-- The list year's selected circle color in the list.
              {@deprecated No longer displayed.} -->
         <attr name="yearListSelectorColor" format="color" />
+
+        <!-- @hide Whether this time picker is being displayed within a dialog,
+             in which case it may ignore the requested time picker mode due to
+             space considerations. -->
+        <attr name="dialogMode" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -5169,6 +5174,11 @@ i
         <!-- The background color state list for the AM/PM selectors.
              {@deprecated Use headerBackground instead.}-->
         <attr name="amPmBackgroundColor" format="color" />
+
+        <!-- @hide Whether this time picker is being displayed within a dialog,
+             in which case it may ignore the requested time picker mode due to
+             space considerations. -->
+        <attr name="dialogMode" />
     </declare-styleable>
 
     <!-- ========================= -->
