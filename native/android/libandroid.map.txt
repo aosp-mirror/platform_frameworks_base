@@ -1,0 +1,194 @@
+LIBANDROID {
+  global:
+    AAssetDir_close;
+    AAssetDir_getNextFileName;
+    AAssetDir_rewind;
+    AAssetManager_fromJava;
+    AAssetManager_open;
+    AAssetManager_openDir;
+    AAsset_close;
+    AAsset_getBuffer;
+    AAsset_getLength;
+    AAsset_getLength64; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AAsset_getRemainingLength;
+    AAsset_getRemainingLength64; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AAsset_isAllocated;
+    AAsset_openFileDescriptor;
+    AAsset_openFileDescriptor64; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AAsset_read;
+    AAsset_seek;
+    AAsset_seek64; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AChoreographer_getInstance; # introduced=24
+    AChoreographer_postFrameCallback; # introduced=24
+    AChoreographer_postFrameCallbackDelayed; # introduced=24
+    AConfiguration_copy;
+    AConfiguration_delete;
+    AConfiguration_diff;
+    AConfiguration_fromAssetManager;
+    AConfiguration_getCountry;
+    AConfiguration_getDensity;
+    AConfiguration_getKeyboard;
+    AConfiguration_getKeysHidden;
+    AConfiguration_getLanguage;
+    AConfiguration_getLayoutDirection; # introduced-arm=17 introduced-arm64=21 introduced-mips=17 introduced-mips64=21 introduced-x86=17 introduced-x86_64=21
+    AConfiguration_getMcc;
+    AConfiguration_getMnc;
+    AConfiguration_getNavHidden;
+    AConfiguration_getNavigation;
+    AConfiguration_getOrientation;
+    AConfiguration_getScreenHeightDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_getScreenLong;
+    AConfiguration_getScreenSize;
+    AConfiguration_getScreenWidthDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_getSdkVersion;
+    AConfiguration_getSmallestScreenWidthDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_getTouchscreen;
+    AConfiguration_getUiModeNight;
+    AConfiguration_getUiModeType;
+    AConfiguration_isBetterThan;
+    AConfiguration_match;
+    AConfiguration_new;
+    AConfiguration_setCountry;
+    AConfiguration_setDensity;
+    AConfiguration_setKeyboard;
+    AConfiguration_setKeysHidden;
+    AConfiguration_setLanguage;
+    AConfiguration_setLayoutDirection; # introduced-arm=17 introduced-arm64=21 introduced-mips=17 introduced-mips64=21 introduced-x86=17 introduced-x86_64=21
+    AConfiguration_setMcc;
+    AConfiguration_setMnc;
+    AConfiguration_setNavHidden;
+    AConfiguration_setNavigation;
+    AConfiguration_setOrientation;
+    AConfiguration_setScreenHeightDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_setScreenLong;
+    AConfiguration_setScreenSize;
+    AConfiguration_setScreenWidthDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_setSdkVersion;
+    AConfiguration_setSmallestScreenWidthDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AConfiguration_setTouchscreen;
+    AConfiguration_setUiModeNight;
+    AConfiguration_setUiModeType;
+    AInputEvent_getDeviceId;
+    AInputEvent_getSource;
+    AInputEvent_getType;
+    AInputQueue_attachLooper;
+    AInputQueue_detachLooper;
+    AInputQueue_finishEvent;
+    AInputQueue_getEvent;
+    AInputQueue_hasEvents;
+    AInputQueue_preDispatchEvent;
+    AKeyEvent_getAction;
+    AKeyEvent_getDownTime;
+    AKeyEvent_getEventTime;
+    AKeyEvent_getFlags;
+    AKeyEvent_getKeyCode;
+    AKeyEvent_getMetaState;
+    AKeyEvent_getRepeatCount;
+    AKeyEvent_getScanCode;
+    ALooper_acquire;
+    ALooper_addFd;
+    ALooper_forThread;
+    ALooper_pollAll;
+    ALooper_pollOnce;
+    ALooper_prepare;
+    ALooper_release;
+    ALooper_removeFd;
+    ALooper_wake;
+    AMotionEvent_getAction;
+    AMotionEvent_getAxisValue; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AMotionEvent_getButtonState; # introduced-arm=14 introduced-arm64=21 introduced-mips=14 introduced-mips64=21 introduced-x86=14 introduced-x86_64=21
+    AMotionEvent_getDownTime;
+    AMotionEvent_getEdgeFlags;
+    AMotionEvent_getEventTime;
+    AMotionEvent_getFlags;
+    AMotionEvent_getHistoricalAxisValue; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    AMotionEvent_getHistoricalEventTime;
+    AMotionEvent_getHistoricalOrientation;
+    AMotionEvent_getHistoricalPressure;
+    AMotionEvent_getHistoricalRawX;
+    AMotionEvent_getHistoricalRawY;
+    AMotionEvent_getHistoricalSize;
+    AMotionEvent_getHistoricalToolMajor;
+    AMotionEvent_getHistoricalToolMinor;
+    AMotionEvent_getHistoricalTouchMajor;
+    AMotionEvent_getHistoricalTouchMinor;
+    AMotionEvent_getHistoricalX;
+    AMotionEvent_getHistoricalY;
+    AMotionEvent_getHistorySize;
+    AMotionEvent_getMetaState;
+    AMotionEvent_getOrientation;
+    AMotionEvent_getPointerCount;
+    AMotionEvent_getPointerId;
+    AMotionEvent_getPressure;
+    AMotionEvent_getRawX;
+    AMotionEvent_getRawY;
+    AMotionEvent_getSize;
+    AMotionEvent_getToolMajor;
+    AMotionEvent_getToolMinor;
+    AMotionEvent_getToolType; # introduced-arm=14 introduced-arm64=21 introduced-mips=14 introduced-mips64=21 introduced-x86=14 introduced-x86_64=21
+    AMotionEvent_getTouchMajor;
+    AMotionEvent_getTouchMinor;
+    AMotionEvent_getX;
+    AMotionEvent_getXOffset;
+    AMotionEvent_getXPrecision;
+    AMotionEvent_getY;
+    AMotionEvent_getYOffset;
+    AMotionEvent_getYPrecision;
+    ANativeActivity_finish;
+    ANativeActivity_hideSoftInput;
+    ANativeActivity_setWindowFlags;
+    ANativeActivity_setWindowFormat;
+    ANativeActivity_showSoftInput;
+    ANativeWindow_acquire;
+    ANativeWindow_fromSurface;
+    ANativeWindow_fromSurfaceTexture; # introduced-arm=13 introduced-mips=13 introduced-x86=13
+    ANativeWindow_getFormat;
+    ANativeWindow_getHeight;
+    ANativeWindow_getWidth;
+    ANativeWindow_lock;
+    ANativeWindow_release;
+    ANativeWindow_setBuffersGeometry;
+    ANativeWindow_unlockAndPost;
+    AObbInfo_delete;
+    AObbInfo_getFlags;
+    AObbInfo_getPackageName;
+    AObbInfo_getVersion;
+    AObbScanner_getObbInfo;
+    ASensorEventQueue_disableSensor;
+    ASensorEventQueue_enableSensor;
+    ASensorEventQueue_getEvents;
+    ASensorEventQueue_hasEvents;
+    ASensorEventQueue_setEventRate;
+    ASensorManager_createEventQueue;
+    ASensorManager_destroyEventQueue;
+    ASensorManager_getDefaultSensor;
+    ASensorManager_getDefaultSensorEx; # introduced=21
+    ASensorManager_getInstance;
+    ASensorManager_getSensorList;
+    ASensor_getFifoMaxEventCount; # introduced=21
+    ASensor_getFifoReservedEventCount; # introduced=21
+    ASensor_getMinDelay;
+    ASensor_getName;
+    ASensor_getReportingMode; # introduced=21
+    ASensor_getResolution;
+    ASensor_getStringType; # introduced=21
+    ASensor_getType;
+    ASensor_getVendor;
+    ASensor_isWakeUpSensor; # introduced=21
+    AStorageManager_delete;
+    AStorageManager_getMountedObbPath;
+    AStorageManager_isObbMounted;
+    AStorageManager_mountObb;
+    AStorageManager_new;
+    AStorageManager_unmountObb;
+    ATrace_beginSection; # introduced=23
+    ATrace_endSection; # introduced=23
+    ATrace_isEnabled; # introduced=23
+    android_getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+    android_getaddrinfofornetwork; # introduced=23
+    android_setprocnetwork; # introduced=23
+    android_setsocknetwork; # introduced=23
+    getTtsEngine; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
+  local:
+    *;
+};
