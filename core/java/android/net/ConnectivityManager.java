@@ -1825,6 +1825,16 @@ public class ConnectivityManager {
         return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
+    /* TODO: These permissions checks don't belong in client-side code. Move them to
+     * services.jar, possibly in com.android.server.net. */
+
+    /** {@hide} */
+    public static final boolean checkChangePermission(Context context) {
+        int uid = Binder.getCallingUid();
+        return Settings.checkAndNoteChangeNetworkStateOperation(context, uid, Settings
+                .getPackageNameForUid(context, uid), false /* throwException */);
+    }
+
     /** {@hide} */
     public static final void enforceChangePermission(Context context) {
         int uid = Binder.getCallingUid();

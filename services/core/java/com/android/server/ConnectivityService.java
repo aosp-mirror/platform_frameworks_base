@@ -4330,8 +4330,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceAccessPermission();
         }
 
-        NetworkRequest networkRequest = new NetworkRequest(
-                new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId(),
+        NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
+        if (!ConnectivityManager.checkChangePermission(mContext)) {
+            // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
+            // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
+            // onLost and onAvailable callbacks when networks move in and out of the background.
+            // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
+            // can't request networks.
+            nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        }
+
+        NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder);
         if (VDBG) log("listenForNetwork for " + nri);
@@ -4646,6 +4655,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNumDnsEntries = last;
     }
 
+    private String getNetworkPermission(NetworkCapabilities nc) {
+        // TODO: make these permission strings AIDL constants instead.
+        if (!nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)) {
+            return NetworkManagementService.PERMISSION_SYSTEM;
+        }
+        if (!nc.hasCapability(NET_CAPABILITY_FOREGROUND)) {
+            return NetworkManagementService.PERMISSION_NETWORK;
+        }
+        return null;
+    }
+
     /**
      * Update the NetworkCapabilities for {@code networkAgent} to {@code networkCapabilities}
      * augmented with any stateful capabilities implied from {@code networkAgent}
@@ -4684,12 +4704,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (Objects.equals(nai.networkCapabilities, networkCapabilities)) return;
 
-        if (nai.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) !=
-                networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)) {
+        final String oldPermission = getNetworkPermission(nai.networkCapabilities);
+        final String newPermission = getNetworkPermission(networkCapabilities);
+        if (!Objects.equals(oldPermission, newPermission) && nai.created && !nai.isVPN()) {
             try {
-                mNetd.setNetworkPermission(nai.network.netId,
-                        networkCapabilities.hasCapability(NET_CAPABILITY_NOT_RESTRICTED) ?
-                                null : NetworkManagementService.PERMISSION_SYSTEM);
+                mNetd.setNetworkPermission(nai.network.netId, newPermission);
             } catch (RemoteException e) {
                 loge("Exception in setNetworkPermission: " + e);
             }
@@ -5259,9 +5278,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 !networkAgent.networkMisc.allowBypass));
                 } else {
                     mNetd.createPhysicalNetwork(networkAgent.network.netId,
-                            networkAgent.networkCapabilities.hasCapability(
-                                    NET_CAPABILITY_NOT_RESTRICTED) ?
-                                    null : NetworkManagementService.PERMISSION_SYSTEM);
+                            getNetworkPermission(networkAgent.networkCapabilities));
                 }
             } catch (Exception e) {
                 loge("Error creating network " + networkAgent.network.netId + ": "
