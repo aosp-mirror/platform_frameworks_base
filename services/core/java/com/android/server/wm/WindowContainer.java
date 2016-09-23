@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.annotation.CallSuper;
 import android.view.animation.Animation;
 
-import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -63,9 +62,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     @CallSuper
     protected void addChild(E child, Comparator<E> comparator) {
         if (child.mParent != null) {
-            throw new IllegalArgumentException("addChild: container=" + child
-                    + " is already a child of container=" + child.mParent
-                    + " can't add to container=" + this);
+            throw new IllegalArgumentException("addChild: container=" + child.getName()
+                    + " is already a child of container=" + child.mParent.getName()
+                    + " can't add to container=" + getName());
         }
         child.mParent = this;
 
@@ -89,9 +88,9 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
     @CallSuper
     protected void addChild(E child, int index) {
         if (child.mParent != null) {
-            throw new IllegalArgumentException("addChild: container=" + child
-                    + " is already a child of container=" + child.mParent
-                    + " can't add to container=" + this);
+            throw new IllegalArgumentException("addChild: container=" + child.getName()
+                    + " is already a child of container=" + child.mParent.getName()
+                    + " can't add to container=" + getName());
         }
         child.mParent = this;
         mChildren.add(index, child);
@@ -107,8 +106,8 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         if (mChildren.remove(child)) {
             child.mParent = null;
         } else {
-            throw new IllegalArgumentException("removeChild: container=" + child
-                    + " is not a child of container=" + this);
+            throw new IllegalArgumentException("removeChild: container=" + child.getName()
+                    + " is not a child of container=" + getName());
         }
     }
 
@@ -469,12 +468,14 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
      * Dumps the names of this container children in the input print writer indenting each
      * level with the input prefix.
      */
-    void dumpChildrenNames(PrintWriter pw, String prefix) {
-        final String childPrefix = prefix + prefix;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
+    void dumpChildrenNames(StringBuilder out, String prefix) {
+        final String childPrefix = prefix + " ";
+        out.append(getName() + "\n");
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
             final WindowContainer wc = mChildren.get(i);
-            pw.println("#" + i + " " + getName());
-            wc.dumpChildrenNames(pw, childPrefix);
+            out.append(childPrefix + "#" + i + " ");
+            wc.dumpChildrenNames(out, childPrefix);
         }
     }
 

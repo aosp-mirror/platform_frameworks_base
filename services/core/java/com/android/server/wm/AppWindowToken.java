@@ -1100,12 +1100,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    int rebuildWindowListUnchecked(DisplayContent dc, int addIndex) {
+        return super.rebuildWindowList(dc, addIndex);
+    }
+
     @Override
     int rebuildWindowList(DisplayContent dc, int addIndex) {
         if (mIsExiting && !waitingForReplacement()) {
             return addIndex;
         }
-        return super.rebuildWindowList(dc, addIndex);
+        return rebuildWindowListUnchecked(dc, addIndex);
     }
 
     @Override
@@ -1187,6 +1191,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             sb.append(" token="); sb.append(token); sb.append('}');
             stringName = sb.toString();
         }
-        return stringName;
+        return stringName + ((mIsExiting) ? " mIsExiting=" : "");
     }
 }

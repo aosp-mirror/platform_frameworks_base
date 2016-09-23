@@ -183,11 +183,11 @@ class DisplayContent extends WindowContainer<TaskStack> {
     /**
      * Returns true if the specified UID has access to this display.
      */
-    public boolean hasAccess(int uid) {
+    boolean hasAccess(int uid) {
         return mDisplay.hasAccess(uid);
     }
 
-    public boolean isPrivate() {
+    boolean isPrivate() {
         return (mDisplay.getFlags() & Display.FLAG_PRIVATE) != 0;
     }
 
@@ -237,11 +237,23 @@ class DisplayContent extends WindowContainer<TaskStack> {
         super.stepAppWindowsAnimation(currentTime, mDisplayId);
     }
 
+    @Override
+    boolean fillsParent() {
+        return true;
+    }
+
+    @Override
+    boolean isVisible() {
+        return true;
+    }
+
+    @Override
     void onAppTransitionDone() {
         super.onAppTransitionDone();
         rebuildAppWindowList();
     }
 
+    @Override
     int getOrientation() {
         if (mService.isStackVisibleLocked(DOCKED_STACK_ID)
                 || mService.isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
@@ -322,8 +334,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             }
             mHomeStack = stack;
         }
-        addChild(stack, onTop ? mChildren.size() : 0);
-        layoutNeeded = true;
+        addChild(stack, onTop);
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
@@ -337,7 +348,10 @@ class DisplayContent extends WindowContainer<TaskStack> {
             Slog.wtf(TAG_WM, "moving stack that was not added: " + stack, new Throwable());
         }
         removeChild(stack);
+        addChild(stack, toTop);
+    }
 
+    private void addChild(TaskStack stack, boolean toTop) {
         int addIndex = toTop ? mChildren.size() : 0;
 
         if (toTop
@@ -352,6 +366,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             }
         }
         addChild(stack, addIndex);
+        layoutNeeded = true;
     }
 
     /**
@@ -1063,7 +1078,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             AppTokenList exitingAppTokens = mChildren.get(stackNdx).mExitingAppTokens;
             int NT = exitingAppTokens.size();
             for (int j = 0; j < NT; j++) {
-                i = exitingAppTokens.get(j).rebuildWindowList(this, i);
+                i = exitingAppTokens.get(j).rebuildWindowListUnchecked(this, i);
             }
         }
 
@@ -1090,7 +1105,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
                     ws.mWinAnimator.destroySurfaceLocked();
                 }
             }
-            Slog.w(TAG_WM, "Current app token list:");
+            Slog.w(TAG_WM, "Current window hierarchy:");
             dumpChildrenNames();
             Slog.w(TAG_WM, "Final window list:");
             dumpWindows();
@@ -1188,9 +1203,9 @@ class DisplayContent extends WindowContainer<TaskStack> {
     }
 
     private void dumpChildrenNames() {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-        dumpChildrenNames(pw, "  ");
+        StringBuilder output = new StringBuilder();
+        dumpChildrenNames(output, " ");
+        Slog.v(TAG_WM, output.toString());
     }
 
     private void dumpWindows() {

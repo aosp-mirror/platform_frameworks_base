@@ -493,7 +493,9 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     void positionTask(Task task, int position, boolean showForAllUsers) {
         final boolean canShowTask =
                 showForAllUsers || mService.isCurrentProfileLocked(task.mUserId);
-        removeChild(task);
+        if (mChildren.contains(task)) {
+            super.removeChild(task);
+        }
         int stackSize = mChildren.size();
         int minPosition = 0;
         int maxPosition = stackSize;
@@ -589,10 +591,6 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     @Override
     void removeChild(Task task) {
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
-        if (!mChildren.contains(task)) {
-            Slog.e(TAG_WM, "removeChild: task=" + this + " not found.");
-            return;
-        }
 
         super.removeChild(task);
 
