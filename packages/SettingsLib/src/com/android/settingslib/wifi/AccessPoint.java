@@ -409,7 +409,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             String format = mContext.getString(R.string.available_via_passpoint);
             summary.append(String.format(format, config.providerFriendlyName));
         } else if (config != null && config.hasNoInternetAccess()) {
-            summary.append(mContext.getString(R.string.wifi_no_internet));
+            int messageID = config.getNetworkSelectionStatus().isNetworkPermanentlyDisabled()
+                    ? R.string.wifi_no_internet_no_reconnect
+                    : R.string.wifi_no_internet;
+            summary.append(mContext.getString(messageID));
         } else if (config != null && !config.getNetworkSelectionStatus().isNetworkEnabled()) {
             WifiConfiguration.NetworkSelectionStatus networkStatus =
                     config.getNetworkSelectionStatus();
