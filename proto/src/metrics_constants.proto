@@ -2557,6 +2557,14 @@ message MetricsEvent {
 
     // OPEN: Settings > Wifi > Write config to NFC dialog
     DIALOG_WIFI_WRITE_NFC = 606;
+    // OPEN: Settings > Date > Date picker dialog
+    DIALOG_DATE_PICKER = 607;
+
+    // OPEN: Settings > Date > Time picker dialog
+    DIALOG_TIME_PICKER = 608;
+
+    // OPEN: Settings > Wireless > Manage wireless plan dialog
+    DIALOG_MANAGE_MOBILE_PLAN = 609;
 
     // ---- End O Constants, all O constants go above this line ----
 
