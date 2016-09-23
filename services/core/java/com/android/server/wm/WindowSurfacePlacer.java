@@ -1332,8 +1332,25 @@ class WindowSurfacePlacer {
                 "Checking " + appsCount + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
                         + mService.mAppTransition.isTimeout() + ")...");
+        final ScreenRotationAnimation screenRotationAnimation =
+            mService.mAnimator.getScreenRotationAnimationLocked(
+                    Display.DEFAULT_DISPLAY);
+
         int reason = APP_TRANSITION_TIMEOUT;
         if (!mService.mAppTransition.isTimeout()) {
+            // Imagine the case where we are changing orientation due to an app transition, but a previous
+            // orientation change is still in progress. We won't process the orientation change
+            // for our transition because we need to wait for the rotation animation to finish.
+            // If we start the app transition at this point, we will interrupt it halfway with a new rotation
+            // animation after the old one finally finishes. It's better to defer the
+            // app transition.
+            if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
+                    mService.rotationNeedsUpdateLocked()) {
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
+                }
+                return false;
+            }
             for (int i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
