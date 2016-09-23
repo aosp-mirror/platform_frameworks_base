@@ -3809,7 +3809,7 @@ public final class ActivityThread {
      * than our client -- for the server, stop means to save state and give
      * it the result when it is done, but the window may still be visible.
      * For the client, we want to call onStop()/onStart() to indicate when
-     * the activity's UI visibillity changes.
+     * the activity's UI visibility changes.
      */
     private void performStopActivityInner(ActivityClientRecord r,
             StopInfo info, boolean keepShown, boolean saveState, String reason) {
@@ -3983,6 +3983,9 @@ public final class ActivityThread {
         mSomeActivitiesChanged = true;
     }
 
+    // TODO: This method should be changed to use {@link #performStopActivityInner} to perform to
+    // stop operation on the activity to reduce code duplication and the chance of fixing a bug in
+    // one place and missing the other.
     private void handleSleeping(IBinder token, boolean sleeping) {
         ActivityClientRecord r = mActivities.get(token);
 
@@ -3993,6 +3996,10 @@ public final class ActivityThread {
 
         if (sleeping) {
             if (!r.stopped && !r.isPreHoneycomb()) {
+                if (!r.activity.mFinished && r.state == null) {
+                    callCallActivityOnSaveInstanceState(r);
+                }
+
                 try {
                     // Now we are idle.
                     r.activity.performStop(false /*preserveWindow*/);
