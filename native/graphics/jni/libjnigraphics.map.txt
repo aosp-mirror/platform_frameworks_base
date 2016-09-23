@@ -1,0 +1,8 @@
+LIBJNIGRAPHICS {
+  global:
+    AndroidBitmap_getInfo;
+    AndroidBitmap_lockPixels;
+    AndroidBitmap_unlockPixels;
+  local:
+    *;
+};
