@@ -2523,8 +2523,7 @@ public class Am extends BaseCommand {
                 return;
         }
         if (!mAm.setProcessMemoryTrimLevel(proc, userId, level)) {
-            System.err.println("Error: Failure to set the level - probably Unknown Process: " +
-                               proc);
+            System.err.println("Unknown error: failed to set trim level");
         }
     }
 
