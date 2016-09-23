@@ -40,7 +40,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
@@ -2440,9 +2439,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                     1             PFLAG3_SCROLL_INDICATOR_START
      *                    1              PFLAG3_SCROLL_INDICATOR_END
      *                   1               PFLAG3_ASSIST_BLOCKED
-     *                  1                PFLAG3_POINTER_ICON_NULL
-     *                 1                 PFLAG3_POINTER_ICON_VALUE_START
-     *           11111111                PFLAG3_POINTER_ICON_MASK
+     *           xxxxxxxx                * NO LONGER NEEDED, SHOULD BE REUSED *
      *          1                        PFLAG3_OVERLAPPING_RENDERING_FORCED_VALUE
      *         1                         PFLAG3_HAS_OVERLAPPING_RENDERING_FORCED
      *        1                          PFLAG3_TEMPORARY_DETACH
@@ -2639,31 +2636,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * into this view.<p>
      */
     static final int PFLAG3_ASSIST_BLOCKED = 0x4000;
-
-    /**
-     * The mask for use with private flags indicating bits used for pointer icon shapes.
-     */
-    static final int PFLAG3_POINTER_ICON_MASK = 0x7f8000;
-
-    /**
-     * Left-shift used for pointer icon shape values in private flags.
-     */
-    static final int PFLAG3_POINTER_ICON_LSHIFT = 15;
-
-    /**
-     * Value indicating no specific pointer icons.
-     */
-    private static final int PFLAG3_POINTER_ICON_NOT_SPECIFIED = 0 << PFLAG3_POINTER_ICON_LSHIFT;
-
-    /**
-     * Value indicating {@link PointerIcon.TYPE_NULL}.
-     */
-    private static final int PFLAG3_POINTER_ICON_NULL = 1 << PFLAG3_POINTER_ICON_LSHIFT;
-
-    /**
-     * The base value for other pointer icon shapes.
-     */
-    private static final int PFLAG3_POINTER_ICON_VALUE_START = 2 << PFLAG3_POINTER_ICON_LSHIFT;
 
     /**
      * Whether this view has rendered elements that overlap (see {@link
