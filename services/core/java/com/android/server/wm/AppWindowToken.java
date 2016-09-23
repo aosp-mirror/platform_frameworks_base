@@ -1055,7 +1055,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     @Override
     void updateAllDrawn(int displayId) {
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
+        final DisplayContent displayContent = mService.mRoot.getDisplayContentOrCreate(displayId);
 
         if (!allDrawn) {
             final int numInteresting = numInterestingWindows;

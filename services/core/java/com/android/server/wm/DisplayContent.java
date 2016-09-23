@@ -485,8 +485,6 @@ class DisplayContent extends WindowContainer<TaskStack> {
     void removeImmediately() {
         super.removeImmediately();
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-        // TODO: remove this line once RootWindowContainer is online.
-        mService.mRoot.mDisplayContents.delete(mDisplayId);
         mDimLayerController.close();
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mService.unregisterPointerEventListener(mTapDetector);
