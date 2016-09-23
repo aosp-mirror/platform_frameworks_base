@@ -22,14 +22,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Base class for NAN events callbacks. Should be extended by applications and set when calling
- * {@link WifiNanManager#attach(android.os.Handler, WifiNanEventCallback)}. These are callbacks
+ * Base class for NAN attach callbacks. Should be extended by applications and set when calling
+ * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}. These are callbacks
  * applying to the NAN connection as a whole - not to specific publish or subscribe sessions -
  * for that see {@link WifiNanDiscoverySessionCallback}.
  *
  * @hide PROPOSED_NAN_API
  */
-public class WifiNanEventCallback {
+public class WifiNanAttachCallback {
     /** @hide */
     @IntDef({
             REASON_INVALID_ARGS, REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG, REASON_OTHER
@@ -40,27 +40,27 @@ public class WifiNanEventCallback {
 
     /**
      * Indicates invalid argument in the requested operation. Failure reason flag for
-     * {@link WifiNanEventCallback#onAttachFailed(int)}.
+     * {@link WifiNanAttachCallback#onAttachFailed(int)}.
      */
     public static final int REASON_INVALID_ARGS = 1000;
 
     /**
      * Indicates that a {@link ConfigRequest} passed in
-     * {@link WifiNanManager#attach(android.os.Handler, ConfigRequest, WifiNanEventCallback)}
+     * {@code WifiNanManager#attach(android.os.Handler, ConfigRequest, WifiNanAttachCallback)}
      * couldn't be applied since other connections already exist with an incompatible
-     * configurations. Failure reason flag for {@link WifiNanEventCallback#onAttachFailed(int)}.
+     * configurations. Failure reason flag for {@link WifiNanAttachCallback#onAttachFailed(int)}.
      */
     public static final int REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG = 1001;
 
     /**
      * Indicates an unspecified error occurred during the operation. Failure reason flag for
-     * {@link WifiNanEventCallback#onAttachFailed(int)}.
+     * {@link WifiNanAttachCallback#onAttachFailed(int)}.
      */
     public static final int REASON_OTHER = 1002;
 
     /**
      * Called when NAN attach operation
-     * {@link WifiNanManager#attach(android.os.Handler, WifiNanEventCallback)}
+     * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}
      * is completed and that we can now start discovery sessions or connections.
      *
      * @param session The NAN object on which we can execute further NAN operations - e.g.
@@ -72,37 +72,12 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN attach operation
-     * {@link WifiNanManager#attach(android.os.Handler, WifiNanEventCallback)} failed.
+     * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)} failed.
      *
      * @param reason Failure reason code, see
      *            {@code WifiNanEventCallback.REASON_*}.
      */
     public void onAttachFailed(@EventReasonCodes int reason) {
-        /* empty */
-    }
-
-    /**
-     * Called when NAN identity (the MAC address representing our NAN discovery interface) has
-     * changed. Change may be due to device joining a cluster, starting a cluster, or discovery
-     * interface change (addresses are randomized at regular intervals). The implication is that
-     * peers you've been communicating with may no longer recognize you and you need to
-     * re-establish your identity - e.g. by starting a discovery session. This actual MAC address
-     * of the interface may also be useful if the application uses alternative (non-NAN)
-     * discovery but needs to set up a NAN connection. The provided NAN discovery interface MAC
-     * address can then be used in
-     * {@link WifiNanSession#createNetworkSpecifier(int, byte[], byte[])}.
-     * <p>
-     *     This callback is only called if the NAN connection enables it using
-     *     {@link ConfigRequest.Builder#setEnableIdentityChangeCallback(boolean)} in
-     *     {@link WifiNanManager#attach(android.os.Handler, ConfigRequest, WifiNanEventCallback)}
-     *     . It is disabled by default since it may result in additional wake-ups of the host -
-     *     increasing power.
-     *
-     * @param mac The MAC address of the NAN discovery interface. The application must have the
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} to get the actual MAC address,
-     *            otherwise all 0's will be provided.
-     */
-    public void onIdentityChanged(byte[] mac) {
         /* empty */
     }
 }
