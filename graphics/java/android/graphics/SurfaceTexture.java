@@ -156,7 +156,6 @@ public class SurfaceTexture {
      * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
      *
      * @throws Surface.OutOfResourcesException If the SurfaceTexture cannot be created.
-     * @hide
      */
     public SurfaceTexture(boolean singleBufferMode) {
         mCreatorLooper = Looper.myLooper();
