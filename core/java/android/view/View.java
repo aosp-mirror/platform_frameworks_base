@@ -3987,7 +3987,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public View(Context context) {
         mContext = context;
-        mResources = context != null ? context.getResources() : null;
+        mResources = context.getResources();
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
         // Set some flags defaults
         mPrivateFlags2 =
