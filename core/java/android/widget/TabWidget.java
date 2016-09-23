@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.view.MotionEvent;
+import android.view.PointerIcon;
 import com.android.internal.R;
 
 import android.annotation.DrawableRes;
@@ -494,6 +496,10 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         child.setFocusable(true);
         child.setClickable(true);
 
+        if (child.getPointerIcon() == null) {
+            child.setPointerIcon(PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND));
+        }
+
         super.addView(child);
 
         // TODO: detect this via geometry with a tabwidget listener rather
@@ -505,6 +511,14 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public void removeAllViews() {
         super.removeAllViews();
         mSelectedTab = -1;
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (!isEnabled()) {
+            return null;
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 
     /**
