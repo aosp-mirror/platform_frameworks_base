@@ -159,18 +159,15 @@ public class DozeService extends DreamService {
         // Ask the host to get things ready to start dozing.
         // Once ready, we call startDozing() at which point the CPU may suspend
         // and we will need to acquire a wakelock to do work.
-        mHost.startDozing(new Runnable() {
-            @Override
-            public void run() {
-                if (mDreaming) {
-                    startDozing();
+        mHost.startDozing(mWakeLock.wrap(() -> {
+            if (mDreaming) {
+                startDozing();
 
-                    // From this point until onDreamingStopped we will need to hold a
-                    // wakelock whenever we are doing work.  Note that we never call
-                    // stopDozing because can we just keep dozing until the bitter end.
-                }
+                // From this point until onDreamingStopped we will need to hold a
+                // wakelock whenever we are doing work.  Note that we never call
+                // stopDozing because can we just keep dozing until the bitter end.
             }
-        });
+        }));
     }
 
     @Override
