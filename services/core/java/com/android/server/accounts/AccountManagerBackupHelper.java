@@ -142,9 +142,8 @@ public final class AccountManagerBackupHelper {
         final AccountManagerService.UserAccounts accounts = mAccountManagerService
                 .getUserAccounts(userId);
         synchronized (accounts.cacheLock) {
-            SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-            List<Pair<String, Integer>> allAccountGrants = DeDatabaseHelper.findAllAccountGrants(
-                    db);
+            List<Pair<String, Integer>> allAccountGrants = accounts.accountsDb
+                    .findAllAccountGrants();
             if (allAccountGrants.isEmpty()) {
                 return null;
             }

@@ -98,9 +98,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.accounts.AccountsDb.CeDatabaseHelper;
-import com.android.server.accounts.AccountsDb.DeDatabaseHelper;
-import com.android.server.accounts.AccountsDb.DebugDbHelper;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
@@ -161,8 +158,6 @@ public class AccountManagerService
         }
     }
 
-    private static final int MAX_DEBUG_DB_SIZE = 64;
-
     final Context mContext;
 
     private final PackageManager mPackageManager;
@@ -193,7 +188,7 @@ public class AccountManagerService
 
     static class UserAccounts {
         private final int userId;
-        final DeDatabaseHelper openHelper;
+        final AccountsDb accountsDb;
         private final HashMap<Pair<Pair<Account, String>, Integer>, Integer>
                 credentialsPermissionNotificationIds =
                 new HashMap<Pair<Pair<Account, String>, Integer>, Integer>();
@@ -242,12 +237,12 @@ public class AccountManagerService
                 new HashMap<Account, AtomicReference<String>>();
 
         private int debugDbInsertionPoint = -1;
-        private SQLiteStatement statementForLogging;
+        private SQLiteStatement statementForLogging; // TODO Move to AccountsDb
 
         UserAccounts(Context context, int userId, File preNDbFile, File deDbFile) {
             this.userId = userId;
             synchronized (cacheLock) {
-                openHelper = DeDatabaseHelper.create(context, userId, preNDbFile, deDbFile);
+                accountsDb = AccountsDb.create(context, userId, preNDbFile, deDbFile);
             }
         }
     }
@@ -993,7 +988,7 @@ public class AccountManagerService
             UserAccounts accounts, boolean invalidateAuthenticatorCache) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "validateAccountsInternal " + accounts.userId
-                    + " isCeDatabaseAttached=" + accounts.openHelper.isCeDatabaseAttached()
+                    + " isCeDatabaseAttached=" + accounts.accountsDb.isCeDatabaseAttached()
                     + " userLocked=" + mLocalUnlockedUsers.get(accounts.userId));
         }
 
@@ -1006,11 +1001,11 @@ public class AccountManagerService
         boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
 
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             boolean accountDeleted = false;
 
             // Get a map of stored authenticator types to UID
-            Map<String, Integer> metaAuthUid = DeDatabaseHelper.findMetaAuthUid(db);
+            final AccountsDb accountsDb = accounts.accountsDb;
+            Map<String, Integer> metaAuthUid = accountsDb.findMetaAuthUid();
             // Create a list of authenticator type whose previous uid no longer exists
             HashSet<String> obsoleteAuthType = Sets.newHashSet();
             SparseBooleanArray knownUids = null;
@@ -1047,7 +1042,7 @@ public class AccountManagerService
                         // So purge its data from the account databases.
                         obsoleteAuthType.add(type);
                         // And delete it from the TABLE_META
-                        DeDatabaseHelper.deleteMetaByAuthTypeAndUid(db, type, uid);
+                        accountsDb.deleteMetaByAuthTypeAndUid(type, uid);
                     }
                 }
             }
@@ -1056,11 +1051,10 @@ public class AccountManagerService
             // been re-enabled (after being updated for example), then we just overwrite the old
             // values.
             for (Entry<String, Integer> entry : knownAuth.entrySet()) {
-                DeDatabaseHelper.insertOrReplaceMetaAuthTypeAndUid(db, entry.getKey(),
-                        entry.getValue());
+                accountsDb.insertOrReplaceMetaAuthTypeAndUid(entry.getKey(), entry.getValue());
             }
 
-            final Map<Long, Account> accountsMap = DeDatabaseHelper.findAllAccounts(db);
+            final Map<Long, Account> accountsMap = accountsDb.findAllDeAccounts();
             try {
                 accounts.accountCache.clear();
                 final HashMap<String, ArrayList<String>> accountNamesByType = new LinkedHashMap<>();
@@ -1070,17 +1064,17 @@ public class AccountManagerService
                     if (obsoleteAuthType.contains(account.type)) {
                         Slog.w(TAG, "deleting account " + account.name + " because type "
                                 + account.type + "'s registered authenticator no longer exist.");
-                        db.beginTransaction();
+                        accountsDb.beginTransaction();
                         try {
-                            DeDatabaseHelper.deleteAccount(db, accountId);
+                            accountsDb.deleteDeAccount(accountId);
                             // Also delete from CE table if user is unlocked; if user is currently
                             // locked the account will be removed later by syncDeCeAccountsLocked
                             if (userUnlocked) {
-                                AccountsDb.deleteCeAccount(db, accountId);
+                                accountsDb.deleteCeAccount(accountId);
                             }
-                            db.setTransactionSuccessful();
+                            accountsDb.setTransactionSuccessful();
                         } finally {
-                            db.endTransaction();
+                            accountsDb.endTransaction();
                         }
                         accountDeleted = true;
 
@@ -1163,20 +1157,17 @@ public class AccountManagerService
                 File preNDbFile = new File(mInjector.getPreNDatabaseName(userId));
                 File deDbFile = new File(mInjector.getDeDatabaseName(userId));
                 accounts = new UserAccounts(mContext, userId, preNDbFile, deDbFile);
-                initializeDebugDbSizeAndCompileSqlStatementForLogging(
-                        accounts.openHelper.getWritableDatabase(), accounts);
+                initializeDebugDbSizeAndCompileSqlStatementForLogging(accounts);
                 mUsers.append(userId, accounts);
                 purgeOldGrants(accounts);
                 validateAccounts = true;
             }
             // open CE database if necessary
-            if (!accounts.openHelper.isCeDatabaseAttached() && mLocalUnlockedUsers.get(userId)) {
+            if (!accounts.accountsDb.isCeDatabaseAttached() && mLocalUnlockedUsers.get(userId)) {
                 Log.i(TAG, "User " + userId + " is unlocked - opening CE database");
                 synchronized (accounts.cacheLock) {
-                    File preNDatabaseFile = new File(mInjector.getPreNDatabaseName(userId));
                     File ceDatabaseFile = new File(mInjector.getCeDatabaseName(userId));
-                    CeDatabaseHelper.create(mContext, userId, preNDatabaseFile, ceDatabaseFile);
-                    accounts.openHelper.attachCeDatabase(ceDatabaseFile);
+                    accounts.accountsDb.attachCeDatabase(ceDatabaseFile);
                 }
                 syncDeCeAccountsLocked(accounts);
             }
@@ -1189,8 +1180,7 @@ public class AccountManagerService
 
     private void syncDeCeAccountsLocked(UserAccounts accounts) {
         Preconditions.checkState(Thread.holdsLock(mUsers), "mUsers lock must be held");
-        final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
-        List<Account> accountsToRemove = AccountsDb.findCeAccountsNotInDe(db);
+        List<Account> accountsToRemove = accounts.accountsDb.findCeAccountsNotInDe();
         if (!accountsToRemove.isEmpty()) {
             Slog.i(TAG, "Accounts " + accountsToRemove + " were previously deleted while user "
                     + accounts.userId + " was locked. Removing accounts from CE tables");
@@ -1213,8 +1203,7 @@ public class AccountManagerService
 
     private void purgeOldGrants(UserAccounts accounts) {
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-            List<Integer> uids = DeDatabaseHelper.findAllUidGrants(db);
+            List<Integer> uids = accounts.accountsDb.findAllUidGrants();
             for (int uid : uids) {
                 final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
                 if (packageExists) {
@@ -1222,7 +1211,7 @@ public class AccountManagerService
                 }
                 Log.d(TAG, "deleting grants for UID " + uid
                         + " because its package is no longer installed");
-                DeDatabaseHelper.deleteGrantsByUid(db, uid);
+                accounts.accountsDb.deleteGrantsByUid(uid);
             }
         }
     }
@@ -1241,7 +1230,7 @@ public class AccountManagerService
         }
         if (accounts != null) {
             synchronized (accounts.cacheLock) {
-                accounts.openHelper.close();
+                accounts.accountsDb.close();
             }
         }
         Log.i(TAG, "Removing database files for user " + userId);
@@ -1334,9 +1323,7 @@ public class AccountManagerService
         }
 
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
-            return CeDatabaseHelper.findAccountPasswordByNameAndType(db, account.name,
-                    account.type);
+            return accounts.accountsDb.findAccountPasswordByNameAndType(account.name, account.type);
         }
     }
 
@@ -1365,8 +1352,7 @@ public class AccountManagerService
         synchronized (accounts.cacheLock) {
             AtomicReference<String> previousNameRef = accounts.previousNameCache.get(account);
             if (previousNameRef == null) {
-                final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-                String previousName = DeDatabaseHelper.findAccountPreviousName(db, account);
+                String previousName = accounts.accountsDb.findDeAccountPreviousName(account);
                 previousNameRef = new AtomicReference<>(previousName);
                 accounts.previousNameCache.put(account, previousNameRef);
                 return previousName;
@@ -1602,8 +1588,7 @@ public class AccountManagerService
     private boolean updateLastAuthenticatedTime(Account account) {
         final UserAccounts accounts = getUserAccountsForCaller();
         synchronized (accounts.cacheLock) {
-            return DeDatabaseHelper.updateAccountLastAuthenticatedTime(
-                    accounts.openHelper.getWritableDatabase(), account);
+            return accounts.accountsDb.updateAccountLastAuthenticatedTime(account);
         }
     }
 
@@ -1672,22 +1657,21 @@ public class AccountManagerService
             return false;
         }
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             try {
-                if (CeDatabaseHelper.findAccountId(db, account) >= 0) {
+                if (accounts.accountsDb.findCeAccountId(account) >= 0) {
                     Log.w(TAG, "insertAccountIntoDatabase: " + account
                             + ", skipping since the account already exists");
                     return false;
                 }
-                long accountId = CeDatabaseHelper.insertAccount(db, account, password);
+                long accountId = accounts.accountsDb.insertCeAccount(account, password);
                 if (accountId < 0) {
                     Log.w(TAG, "insertAccountIntoDatabase: " + account
                             + ", skipping the DB insert failed");
                     return false;
                 }
                 // Insert into DE table
-                if (DeDatabaseHelper.insertAccount(db, account, accountId) < 0) {
+                if (accounts.accountsDb.insertDeAccount(account, accountId) < 0) {
                     Log.w(TAG, "insertAccountIntoDatabase: " + account
                             + ", skipping the DB insert failed");
                     return false;
@@ -1695,21 +1679,21 @@ public class AccountManagerService
                 if (extras != null) {
                     for (String key : extras.keySet()) {
                         final String value = extras.getString(key);
-                        if (CeDatabaseHelper.insertExtra(db, accountId, key, value) < 0) {
+                        if (accounts.accountsDb.insertExtra(accountId, key, value) < 0) {
                             Log.w(TAG, "insertAccountIntoDatabase: " + account
                                     + ", skipping since insertExtra failed for key " + key);
                             return false;
                         }
                     }
                 }
-                db.setTransactionSuccessful();
+                accounts.accountsDb.setTransactionSuccessful();
 
                 logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
                         accountId, accounts, callingUid);
 
                 insertAccountIntoCacheLocked(accounts, account);
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
             }
         }
         if (getUserManager().getUserInfo(accounts.userId).canHaveProfile()) {
@@ -1892,17 +1876,16 @@ public class AccountManagerService
             }
         }
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             Account renamedAccount = new Account(newName, accountToRename.type);
             try {
-                final long accountId = DeDatabaseHelper.findAccountId(db, accountToRename);
+                final long accountId = accounts.accountsDb.findDeAccountId(accountToRename);
                 if (accountId >= 0) {
-                    CeDatabaseHelper.renameAccount(db, accountId, newName);
-                    DeDatabaseHelper.renameAccount(db, accountId, newName, accountToRename.name);
+                    accounts.accountsDb.renameCeAccount(accountId, newName);
+                    accounts.accountsDb.renameDeAccount(accountId, newName, accountToRename.name);
                 }
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
             }
             /*
              * Database transaction was successful. Clean up cached
@@ -2025,8 +2008,7 @@ public class AccountManagerService
                 }
             }
         }
-        SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-        final long accountId = DeDatabaseHelper.findAccountId(db, account);
+        final long accountId = accounts.accountsDb.findDeAccountId(account);
         logRecord(
                 AccountsDb.DEBUG_ACTION_CALLED_ACCOUNT_REMOVE,
                 AccountsDb.TABLE_ACCOUNTS,
@@ -2065,8 +2047,7 @@ public class AccountManagerService
         }
         removeVisibleListFunctionality(account, getUserAccounts(UserHandle.getUserId(callingUid)));
         UserAccounts accounts = getUserAccountsForCaller();
-        SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
-        final long accountId = DeDatabaseHelper.findAccountId(db, account);
+        final long accountId = accounts.accountsDb.findDeAccountId(account);
         logRecord(
                 AccountsDb.DEBUG_ACTION_CALLED_ACCOUNT_REMOVE,
                 AccountsDb.TABLE_ACCOUNTS,
@@ -2143,26 +2124,23 @@ public class AccountManagerService
                     + " is still locked. CE data will be removed later");
         }
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = userUnlocked
-                    ? accounts.openHelper.getWritableDatabaseUserIsUnlocked()
-                    : accounts.openHelper.getWritableDatabase();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             // Set to a dummy value, this will only be used if the database
             // transaction succeeds.
             long accountId = -1;
             try {
-                accountId = DeDatabaseHelper.findAccountId(db, account);
+                accountId = accounts.accountsDb.findDeAccountId(account);
                 if (accountId >= 0) {
-                    DeDatabaseHelper.deleteAccount(db, accountId);
+                    accounts.accountsDb.deleteDeAccount(accountId);
                     if (userUnlocked) {
                         // Delete from CE table
-                        AccountsDb.deleteCeAccount(db, accountId);
+                        accounts.accountsDb.deleteCeAccount(accountId);
                     }
-                    db.setTransactionSuccessful();
+                    accounts.accountsDb.setTransactionSuccessful();
                     isChanged = true;
                 }
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
             }
             if (isChanged) {
                 removeAccountFromCacheLocked(accounts, account);
@@ -2221,14 +2199,13 @@ public class AccountManagerService
         try {
             UserAccounts accounts = getUserAccounts(userId);
             synchronized (accounts.cacheLock) {
-                final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-                db.beginTransaction();
+                accounts.accountsDb.beginTransaction();
                 try {
-                    invalidateAuthTokenLocked(accounts, db, accountType, authToken);
+                    invalidateAuthTokenLocked(accounts, accountType, authToken);
                     invalidateCustomTokenLocked(accounts, accountType, authToken);
-                    db.setTransactionSuccessful();
+                    accounts.accountsDb.setTransactionSuccessful();
                 } finally {
-                    db.endTransaction();
+                    accounts.accountsDb.endTransaction();
                 }
             }
         } finally {
@@ -2247,21 +2224,20 @@ public class AccountManagerService
         accounts.accountTokenCaches.remove(accountType, authToken);
     }
 
-    private void invalidateAuthTokenLocked(UserAccounts accounts, SQLiteDatabase db,
-            String accountType, String authToken) {
+    private void invalidateAuthTokenLocked(UserAccounts accounts, String accountType,
+            String authToken) {
         if (authToken == null || accountType == null) {
             return;
         }
-        Cursor cursor = CeDatabaseHelper.findAuthtokenForAllAccounts(db, accountType, authToken);
+        Cursor cursor = accounts.accountsDb.findAuthtokenForAllAccounts(accountType, authToken);
         try {
             while (cursor.moveToNext()) {
                 String authTokenId = cursor.getString(0);
                 String accountName = cursor.getString(1);
                 String authTokenType = cursor.getString(2);
-                CeDatabaseHelper.deleteAuthToken(db, authTokenId);
+                accounts.accountsDb.deleteAuthToken(authTokenId);
                 writeAuthTokenIntoCacheLocked(
                         accounts,
-                        db,
                         new Account(accountName, accountType),
                         authTokenType,
                         null);
@@ -2299,22 +2275,21 @@ public class AccountManagerService
         cancelNotification(getSigninRequiredNotificationId(accounts, account),
                 UserHandle.of(accounts.userId));
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             try {
-                long accountId = DeDatabaseHelper.findAccountId(db, account);
+                long accountId = accounts.accountsDb.findDeAccountId(account);
                 if (accountId < 0) {
                     return false;
                 }
-                CeDatabaseHelper.deleteAuthtokensByAccountIdAndType(db, accountId, type);
-                if (CeDatabaseHelper.insertAuthToken(db, accountId, type, authToken) >= 0) {
-                    db.setTransactionSuccessful();
-                    writeAuthTokenIntoCacheLocked(accounts, db, account, type, authToken);
+                accounts.accountsDb.deleteAuthtokensByAccountIdAndType(accountId, type);
+                if (accounts.accountsDb.insertAuthToken(accountId, type, authToken) >= 0) {
+                    accounts.accountsDb.setTransactionSuccessful();
+                    writeAuthTokenIntoCacheLocked(accounts, account, type, authToken);
                     return true;
                 }
                 return false;
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
             }
         }
     }
@@ -2413,16 +2388,15 @@ public class AccountManagerService
         }
         boolean isChanged = false;
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabaseUserIsUnlocked();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             try {
-                final long accountId = DeDatabaseHelper.findAccountId(db, account);
+                final long accountId = accounts.accountsDb.findDeAccountId(account);
                 if (accountId >= 0) {
-                    CeDatabaseHelper.updateAccountPassword(db, accountId, password);
-                    CeDatabaseHelper.deleteAuthTokensByAccountId(db, accountId);
+                    accounts.accountsDb.updateCeAccountPassword(accountId, password);
+                    accounts.accountsDb.deleteAuthTokensByAccountId(accountId);
                     accounts.authTokenCache.remove(account);
                     accounts.accountTokenCaches.remove(account);
-                    db.setTransactionSuccessful();
+                    accounts.accountsDb.setTransactionSuccessful();
                     // If there is an account whose password will be updated and the database
                     // transactions succeed, then we say that a change has occured. Even if the
                     // new password is the same as the old and there were no authtokens to delete.
@@ -2433,7 +2407,7 @@ public class AccountManagerService
                     logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts, callingUid);
                 }
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
                 if (isChanged) {
                     // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
                     sendAccountsChangedBroadcast(accounts.userId);
@@ -2523,26 +2497,25 @@ public class AccountManagerService
         if (account == null || key == null) {
             return;
         }
-        final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-        db.beginTransaction();
+        accounts.accountsDb.beginTransaction();
         try {
-            long accountId = DeDatabaseHelper.findAccountId(db, account);
+            long accountId = accounts.accountsDb.findDeAccountId(account);
             if (accountId < 0) {
                 return;
             }
-            long extrasId = CeDatabaseHelper.findExtrasIdByAccountId(db, accountId, key);
+            long extrasId = accounts.accountsDb.findExtrasIdByAccountId(accountId, key);
             if (extrasId < 0) {
-                extrasId = CeDatabaseHelper.insertExtra(db, accountId, key, value);
+                extrasId = accounts.accountsDb.insertExtra(accountId, key, value);
                 if (extrasId < 0) {
                     return;
                 }
-            } else if (!CeDatabaseHelper.updateExtra(db, extrasId, value)) {
+            } else if (!accounts.accountsDb.updateExtra(extrasId, value)) {
                 return;
             }
-            writeUserDataIntoCacheLocked(accounts, db, account, key, value);
-            db.setTransactionSuccessful();
+            writeUserDataIntoCacheLocked(accounts, account, key, value);
+            accounts.accountsDb.setTransactionSuccessful();
         } finally {
-            db.endTransaction();
+            accounts.accountsDb.endTransaction();
         }
     }
 
@@ -4171,9 +4144,8 @@ public class AccountManagerService
     private boolean addSharedAccountAsUser(Account account, int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
-        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-        DeDatabaseHelper.deleteSharedAccount(db, account);
-        long accountId = DeDatabaseHelper.insertSharedAccount(db, account);
+        accounts.accountsDb.deleteSharedAccount(account);
+        long accountId = accounts.accountsDb.insertSharedAccount(account);
         if (accountId < 0) {
             Log.w(TAG, "insertAccountIntoDatabase: " + account
                     + ", skipping the DB insert failed");
@@ -4188,9 +4160,8 @@ public class AccountManagerService
     public boolean renameSharedAccountAsUser(Account account, String newName, int userId) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
-        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-        long sharedTableAccountId = DeDatabaseHelper.findSharedAccountId(db, account);
-        int r = DeDatabaseHelper.renameSharedAccount(db, account, newName);
+        long sharedTableAccountId = accounts.accountsDb.findSharedAccountId(account);
+        int r = accounts.accountsDb.renameSharedAccount(account, newName);
         if (r > 0) {
             int callingUid = getCallingUid();
             logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_RENAME, AccountsDb.TABLE_SHARED_ACCOUNTS,
@@ -4209,9 +4180,8 @@ public class AccountManagerService
     private boolean removeSharedAccountAsUser(Account account, int userId, int callingUid) {
         userId = handleIncomingUser(userId);
         UserAccounts accounts = getUserAccounts(userId);
-        SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-        long sharedTableAccountId = DeDatabaseHelper.findSharedAccountId(db, account);
-        boolean deleted = DeDatabaseHelper.deleteSharedAccount(db, account);
+        long sharedTableAccountId = accounts.accountsDb.findSharedAccountId(account);
+        boolean deleted = accounts.accountsDb.deleteSharedAccount(account);
         if (deleted) {
             logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE, AccountsDb.TABLE_SHARED_ACCOUNTS,
                     sharedTableAccountId, accounts, callingUid);
@@ -4223,8 +4193,8 @@ public class AccountManagerService
     @Override
     public Account[] getSharedAccountsAsUser(int userId) {
         userId = handleIncomingUser(userId);
-        SQLiteDatabase db = getUserAccounts(userId).openHelper.getReadableDatabase();
-        List<Account> accountList = DeDatabaseHelper.getSharedAccounts(db);
+        UserAccounts accounts = getUserAccounts(userId);
+        List<Account> accountList = accounts.accountsDb.getSharedAccounts();
         Account[] accountArray = new Account[accountList.size()];
         accountList.toArray(accountArray);
         return accountArray;
@@ -4575,9 +4545,8 @@ public class AccountManagerService
                     if (mAuthDetailsRequired) {
                         long lastAuthenticatedTime = -1;
                         if (accountPresent) {
-                            lastAuthenticatedTime = DeDatabaseHelper
+                            lastAuthenticatedTime = mAccounts.accountsDb
                                     .findAccountLastAuthenticatedTime(
-                                            mAccounts.openHelper.getReadableDatabase(),
                                             new Account(mAccountName, mAccountType));
                         }
                         result.putLong(AccountManager.KEY_LAST_AUTHENTICATED_TIME,
@@ -4795,7 +4764,7 @@ public class AccountManagerService
         LogRecordTask logTask = new LogRecordTask(action, tableName, accountId, userAccount,
                 callingUid, userAccount.debugDbInsertionPoint);
         userAccount.debugDbInsertionPoint = (userAccount.debugDbInsertionPoint + 1)
-                % MAX_DEBUG_DB_SIZE;
+                % AccountsDb.MAX_DEBUG_DB_SIZE;
         mHandler.post(logTask);
     }
 
@@ -4803,17 +4772,10 @@ public class AccountManagerService
      * This should only be called once to compile the sql statement for logging
      * and to find the insertion point.
      */
-    private void initializeDebugDbSizeAndCompileSqlStatementForLogging(SQLiteDatabase db,
-            UserAccounts userAccount) {
-        // Initialize the count if not done earlier.
-        int size = DebugDbHelper.getDebugTableRowCount(db);
-        if (size >= MAX_DEBUG_DB_SIZE) {
-            // Table is full, and we need to find the point where to insert.
-            userAccount.debugDbInsertionPoint = DebugDbHelper.getDebugTableInsertionPoint(db);
-        } else {
-            userAccount.debugDbInsertionPoint = size;
-        }
-        userAccount.statementForLogging = DebugDbHelper.compileSqlStatementForLogging(db);
+    private void initializeDebugDbSizeAndCompileSqlStatementForLogging(UserAccounts userAccount) {
+        userAccount.debugDbInsertionPoint = userAccount.accountsDb
+                .calculateDebugTableInsertionPoint();
+        userAccount.statementForLogging = userAccount.accountsDb.compileSqlStatementForLogging();
     }
 
     public IBinder onBind(@SuppressWarnings("unused") Intent intent) {
@@ -4862,11 +4824,9 @@ public class AccountManagerService
     private void dumpUser(UserAccounts userAccounts, FileDescriptor fd, PrintWriter fout,
             String[] args, boolean isCheckinRequest) {
         synchronized (userAccounts.cacheLock) {
-            final SQLiteDatabase db = userAccounts.openHelper.getReadableDatabase();
-
             if (isCheckinRequest) {
                 // This is a checkin request. *Only* upload the account types and the count of each.
-                DeDatabaseHelper.dumpAccountsTable(db, fout);
+                userAccounts.accountsDb.dumpDeAccountsTable(fout);
             } else {
                 Account[] accounts = getAccountsFromCacheLocked(userAccounts, null /* type */,
                         Process.myUid(), null);
@@ -4877,7 +4837,7 @@ public class AccountManagerService
 
                 // Add debug information.
                 fout.println();
-                DebugDbHelper.dumpDebugTable(db, fout);
+                userAccounts.accountsDb.dumpDebugTable(fout);
                 fout.println();
                 synchronized (mSessions) {
                     final long now = SystemClock.elapsedRealtime();
@@ -5139,13 +5099,12 @@ public class AccountManagerService
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(callerUid));
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getReadableDatabase();
             long grantsCount;
             if (authTokenType != null) {
-                grantsCount = DeDatabaseHelper.findMatchingGrantsCount(db, callerUid, authTokenType,
+                grantsCount = accounts.accountsDb.findMatchingGrantsCount(callerUid, authTokenType,
                         account);
             } else {
-                grantsCount = DeDatabaseHelper.findMatchingGrantsCountAnyToken(db, callerUid,
+                grantsCount = accounts.accountsDb.findMatchingGrantsCountAnyToken(callerUid,
                         account);
             }
             final boolean permissionGranted = grantsCount > 0;
@@ -5273,10 +5232,9 @@ public class AccountManagerService
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-            long accountId = DeDatabaseHelper.findAccountId(db, account);
+            long accountId = accounts.accountsDb.findDeAccountId(account);
             if (accountId >= 0) {
-                DeDatabaseHelper.insertGrant(db, accountId, authTokenType, uid);
+                accounts.accountsDb.insertGrant(accountId, authTokenType, uid);
             }
             cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
                     UserHandle.of(accounts.userId));
@@ -5306,17 +5264,16 @@ public class AccountManagerService
         }
         UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.cacheLock) {
-            final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
-            db.beginTransaction();
+            accounts.accountsDb.beginTransaction();
             try {
-                long accountId = DeDatabaseHelper.findAccountId(db, account);
+                long accountId = accounts.accountsDb.findDeAccountId(account);
                 if (accountId >= 0) {
-                    DeDatabaseHelper.deleteGrantsByAccountIdAuthTokenTypeAndUid(
-                            db, accountId, authTokenType, uid);
-                    db.setTransactionSuccessful();
+                    accounts.accountsDb.deleteGrantsByAccountIdAuthTokenTypeAndUid(
+                            accountId, authTokenType, uid);
+                    accounts.accountsDb.setTransactionSuccessful();
                 }
             } finally {
-                db.endTransaction();
+                accounts.accountsDb.endTransaction();
             }
 
             cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid),
@@ -5472,11 +5429,11 @@ public class AccountManagerService
         }
     }
 
-    protected void writeUserDataIntoCacheLocked(UserAccounts accounts, final SQLiteDatabase db,
+    protected void writeUserDataIntoCacheLocked(UserAccounts accounts,
             Account account, String key, String value) {
         Map<String, String> userDataForAccount = accounts.userDataCache.get(account);
         if (userDataForAccount == null) {
-            userDataForAccount = CeDatabaseHelper.findUserExtrasForAccount(db, account);
+            userDataForAccount = accounts.accountsDb.findUserExtrasForAccount(account);
             accounts.userDataCache.put(account, userDataForAccount);
         }
         if (value == null) {
@@ -5498,11 +5455,11 @@ public class AccountManagerService
         }
     }
 
-    protected void writeAuthTokenIntoCacheLocked(UserAccounts accounts, final SQLiteDatabase db,
+    protected void writeAuthTokenIntoCacheLocked(UserAccounts accounts,
             Account account, String key, String value) {
         Map<String, String> authTokensForAccount = accounts.authTokenCache.get(account);
         if (authTokensForAccount == null) {
-            authTokensForAccount = CeDatabaseHelper.findAuthTokensByAccount(db, account);
+            authTokensForAccount = accounts.accountsDb.findAuthTokensByAccount(account);
             accounts.authTokenCache.put(account, authTokensForAccount);
         }
         if (value == null) {
@@ -5518,8 +5475,7 @@ public class AccountManagerService
             Map<String, String> authTokensForAccount = accounts.authTokenCache.get(account);
             if (authTokensForAccount == null) {
                 // need to populate the cache for this account
-                final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
-                authTokensForAccount = CeDatabaseHelper.findAuthTokensByAccount(db, account);
+                authTokensForAccount = accounts.accountsDb.findAuthTokensByAccount(account);
                 accounts.authTokenCache.put(account, authTokensForAccount);
             }
             return authTokensForAccount.get(authTokenType);
@@ -5531,8 +5487,7 @@ public class AccountManagerService
         Map<String, String> userDataForAccount = accounts.userDataCache.get(account);
         if (userDataForAccount == null) {
             // need to populate the cache for this account
-            final SQLiteDatabase db = accounts.openHelper.getReadableDatabaseUserIsUnlocked();
-            userDataForAccount = CeDatabaseHelper.findUserExtrasForAccount(db, account);
+            userDataForAccount = accounts.accountsDb.findUserExtrasForAccount(account);
             accounts.userDataCache.put(account, userDataForAccount);
         }
         return userDataForAccount.get(key);
