@@ -26,7 +26,6 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.AuthenticatorDescription;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.GrantCredentialsPermissionActivity;
-import android.accounts.IAccountAccessTracker;
 import android.accounts.IAccountAuthenticator;
 import android.accounts.IAccountAuthenticatorResponse;
 import android.accounts.IAccountManager;
@@ -85,7 +84,6 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -125,7 +123,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1115,7 +1115,7 @@ public class AccountManagerService
                     final Account[] accountsForType = new Account[accountNames.size()];
                     for (int i = 0; i < accountsForType.length; i++) {
                         accountsForType[i] = new Account(accountNames.get(i), accountType,
-                                new AccountAccessTracker());
+                                UUID.randomUUID().toString());
                     }
                     accounts.accountCache.put(accountType, accountsForType);
                 }
@@ -1865,8 +1865,8 @@ public class AccountManagerService
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
-            result.putBinder(AccountManager.KEY_ACCOUNT_ACCESS_TRACKER,
-                    resultingAccount.getAccessTracker().asBinder());
+            result.putString(AccountManager.KEY_ACCOUNT_ACCESS_ID,
+                    resultingAccount.getAccessId());
             try {
                 response.onResult(result);
             } catch (RemoteException e) {
@@ -4330,6 +4330,30 @@ public class AccountManagerService
         }
     }
 
+    @Override
+    public void onAccountAccessed(String token) throws RemoteException {
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
+            return;
+        }
+        final int userId = UserHandle.getCallingUserId();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            for (Account account : getAccounts(userId, mContext.getOpPackageName())) {
+                if (Objects.equals(account.getAccessId(), token)) {
+                    // An app just accessed the account. At this point it knows about
+                    // it and there is not need to hide this account from the app.
+                    if (!hasAccountAccess(account, null, uid)) {
+                        updateAppPermission(account, AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE,
+                                uid, true);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
             implements IBinder.DeathRecipient, ServiceConnection {
         IAccountManagerResponse mResponse;
@@ -5400,9 +5424,9 @@ public class AccountManagerService
         if (accountsForType != null) {
             System.arraycopy(accountsForType, 0, newAccountsForType, 0, oldLength);
         }
-        IAccountAccessTracker accessTracker = account.getAccessTracker() != null
-                ? account.getAccessTracker() : new AccountAccessTracker();
-        newAccountsForType[oldLength] = new Account(account, accessTracker);
+        String token = account.getAccessId() != null ? account.getAccessId()
+                : UUID.randomUUID().toString();
+        newAccountsForType[oldLength] = new Account(account, token);
         accounts.accountCache.put(account.type, newAccountsForType);
         return newAccountsForType[oldLength];
     }
@@ -5603,33 +5627,6 @@ public class AccountManagerService
             // exceptions
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "failure while notifying response", e);
-            }
-        }
-    }
-
-    private final class AccountAccessTracker extends IAccountAccessTracker.Stub {
-        @Override
-        public void onAccountAccessed() throws RemoteException {
-            final int uid = Binder.getCallingUid();
-            if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
-                return;
-            }
-            final int userId = UserHandle.getCallingUserId();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                for (Account account : getAccounts(userId, mContext.getOpPackageName())) {
-                    IAccountAccessTracker accountTracker = account.getAccessTracker();
-                    if (accountTracker != null && asBinder() == accountTracker.asBinder()) {
-                        // An app just accessed the account. At this point it knows about
-                        // it and there is not need to hide this account from the app.
-                        if (!hasAccountAccess(account, null, uid)) {
-                            updateAppPermission(account, AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE,
-                                    uid, true);
-                        }
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }

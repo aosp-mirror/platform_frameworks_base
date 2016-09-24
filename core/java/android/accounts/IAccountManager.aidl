@@ -124,4 +124,6 @@ interface IAccountManager {
     /* Crate an intent to request account access for package and a given user id */
     IntentSender createRequestAccountAccessIntentSenderAsUser(in Account account,
         String packageName, in UserHandle userHandle);
+
+    void onAccountAccessed(String token);
 }
