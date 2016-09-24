@@ -1088,7 +1088,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     final boolean adjustedForMinimizedDockOrIme = task != null
                             && (task.mStack.isAdjustedForMinimizedDockedStack()
                             || task.mStack.isAdjustedForIme());
-                    if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                    if (mService.okToDisplay()
+                            && (w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                             && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
                             && (task == null || w.getTask().mStack.hasMovementAnimations())
                             && !w.mWinAnimator.mLastHidden) {

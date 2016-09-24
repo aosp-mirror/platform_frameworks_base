@@ -1562,7 +1562,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
-                && !mAnimatingExit && mService.okToDisplay()
+                && !mAnimatingExit
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (!mIsChildWindow || !getParentWindow().hasMoved());
     }
