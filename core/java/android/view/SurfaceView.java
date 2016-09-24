@@ -589,6 +589,18 @@ public class SurfaceView extends View {
                             for (SurfaceHolder.Callback c : callbacks) {
                                 c.surfaceDestroyed(mSurfaceHolder);
                             }
+                            // Since Android N the same surface may be reused and given to us
+                            // again by the system server at a later point. However
+                            // as we didn't do this in previous releases, clients weren't
+                            // necessarily required to clean up properly in
+                            // surfaceDestroyed. This leads to problems for example when
+                            // clients don't destroy their EGL context, and try
+                            // and create a new one on the same surface following reuse.
+                            // Since there is no valid use of the surface in-between
+                            // surfaceDestroyed and surfaceCreated, we force a disconnect,
+                            // so the next connect will always work if we end up reusing
+                            // the surface.
+                            mSurface.forceScopedDisconnect();
                         }
                     }
 
