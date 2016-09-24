@@ -709,6 +709,14 @@ public class Build {
          * {@link android.widget.LinearLayout.LayoutParams LinearLayout.LayoutParams} to
          * {@link android.widget.RelativeLayout.LayoutParams RelativeLayout.LayoutParams}).</li>
          * <li>Your application processes will not be killed when the device density changes.</li>
+         * <li>Drag and drop. After a view receives the
+         * {@link android.view.DragEvent#ACTION_DRAG_ENTERED} event, when the drag shadow moves into
+         * a descendant view that can accept the data, the view receives the
+         * {@link android.view.DragEvent#ACTION_DRAG_EXITED} event and won’t receive
+         * {@link android.view.DragEvent#ACTION_DRAG_LOCATION} and
+         * {@link android.view.DragEvent#ACTION_DROP} events while the drag shadow is within that
+         * descendant view, even if the descendant view returns <code>false</code> from its handler
+         * for these events.</li>
          * </ul>
          */
         public static final int N = 24;
