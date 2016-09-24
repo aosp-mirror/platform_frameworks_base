@@ -1068,14 +1068,6 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                         mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
                                 .sendToTarget();
                     }
-                    @Override
-                    public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        // Ignore.
-                    }
-                    @Override
-                    public void onForegroundProfileSwitch(int newProfileId) {
-                        // Ignore.
-                    }
                 }, TAG);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to listen for user switching event" ,e);

@@ -27,10 +27,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.IUserSwitchObserver;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
+import android.app.UserSwitchObserver;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
@@ -933,19 +933,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new IUserSwitchObserver.Stub() {
+                    new UserSwitchObserver() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
                             switchUser(newUserId, reply);
-                        }
-
-                        @Override
-                        public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        }
-
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
                         }
                     }, TAG);
         } catch (RemoteException e) {

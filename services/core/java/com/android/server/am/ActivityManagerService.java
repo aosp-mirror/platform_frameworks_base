@@ -1526,6 +1526,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int VR_MODE_APPLY_IF_NEEDED_MSG = 69;
     static final int SHOW_UNSUPPORTED_DISPLAY_SIZE_DIALOG_MSG = 70;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 71;
+    static final int REPORT_LOCKED_BOOT_COMPLETE_MSG = 72;
     static final int START_USER_SWITCH_FG_MSG = 712;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
@@ -2273,6 +2274,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case REPORT_USER_SWITCH_COMPLETE_MSG: {
                 mUserController.dispatchUserSwitchComplete(msg.arg1);
+            } break;
+            case REPORT_LOCKED_BOOT_COMPLETE_MSG: {
+                mUserController.dispatchLockedBootComplete(msg.arg1);
             } break;
             case SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG: {
                 IUiAutomationConnection connection = (IUiAutomationConnection) msg.obj;

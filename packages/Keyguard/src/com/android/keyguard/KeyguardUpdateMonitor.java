@@ -29,8 +29,8 @@ import static android.os.BatteryManager.EXTRA_STATUS;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
-import android.app.IUserSwitchObserver;
 import android.app.PendingIntent;
+import android.app.UserSwitchObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -1071,7 +1071,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                    new IUserSwitchObserver.Stub() {
+                    new UserSwitchObserver() {
                         @Override
                         public void onUserSwitching(int newUserId, IRemoteCallback reply) {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHING,
@@ -1081,10 +1081,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         public void onUserSwitchComplete(int newUserId) throws RemoteException {
                             mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCH_COMPLETE,
                                     newUserId, 0));
-                        }
-                        @Override
-                        public void onForegroundProfileSwitch(int newProfileId) {
-                            // Ignore.
                         }
                     }, TAG);
         } catch (RemoteException e) {

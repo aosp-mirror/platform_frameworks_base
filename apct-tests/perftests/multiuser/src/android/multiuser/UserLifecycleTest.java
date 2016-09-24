@@ -18,7 +18,8 @@ package android.multiuser;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.SynchronousUserSwitchObserver;
+import android.app.IStopUserCallback;
+import android.app.UserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -43,17 +44,35 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Perf tests for user life cycle events.
+ *
+ * Running the tests:
+ * make MultiUserPerfTests &&
+ * adb install -r \
+ *     ${ANDROID_PRODUCT_OUT}/data/app/MultiUserPerfTests/MultiUserPerfTests.apk &&
+ * adb shell am instrument -e class android.multiuser.UserLifecycleTest \
+ *     -w com.android.perftests.multiuser/android.support.test.runner.AndroidJUnitRunner
+ */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class UserLifecycleTest {
     private final int MIN_REPEAT_TIMES = 4;
 
-    private final int TIMEOUT_REMOVE_USER_SEC = 4;
+    private final int TIMEOUT_REMOVE_USER_MS = 4 * 1000; // 4 sec
     private final int CHECK_USER_REMOVED_INTERVAL_MS = 200; // 0.2 sec
 
     private final int TIMEOUT_USER_START_SEC = 4; // 4 sec
 
     private final int TIMEOUT_USER_SWITCH_SEC = 8; // 8 sec
+
+    private final int TIMEOUT_USER_STOP_SEC = 1; // 1 sec
+
+    private final int TIMEOUT_MANAGED_PROFILE_UNLOCK_SEC = 2; // 2 sec
+
+    private final int TIMEOUT_LOCKED_BOOT_COMPLETE_MS = 5 * 1000; // 5 sec
+
+    private final int TIMEOUT_EPHERMAL_USER_STOP_SEC = 6; // 6 sec
 
     private UserManager mUm;
     private ActivityManager mAm;
@@ -78,7 +97,11 @@ public class UserLifecycleTest {
     @After
     public void tearDown() {
         for (int userId : mUsersToRemove) {
-            mUm.removeUser(userId);
+            try {
+                mUm.removeUser(userId);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 
@@ -88,14 +111,7 @@ public class UserLifecycleTest {
             final UserInfo userInfo = mUm.createUser("TestUser", 0);
 
             final CountDownLatch latch = new CountDownLatch(1);
-            InstrumentationRegistry.getContext().registerReceiverAsUser(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
-                        latch.countDown();
-                    }
-                }
-            }, UserHandle.ALL, new IntentFilter(Intent.ACTION_USER_STARTED), null, null);
+            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
             mIam.startUserInBackground(userInfo.id);
             latch.await(TIMEOUT_USER_START_SEC, TimeUnit.SECONDS);
 
@@ -122,37 +138,163 @@ public class UserLifecycleTest {
         }
     }
 
+    @Test
+    public void stopUserPerf() throws Exception {
+        while (mState.keepRunning()) {
+            mState.pauseTiming();
+            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_STARTED, latch, userInfo.id);
+            mIam.startUserInBackground(userInfo.id);
+            latch.await(TIMEOUT_USER_START_SEC, TimeUnit.SECONDS);
+            mState.resumeTiming();
+
+            stopUser(userInfo.id);
+
+            mState.pauseTiming();
+            removeUser(userInfo.id);
+            mState.resumeTiming();
+        }
+    }
+
+    @Test
+    public void lockedBootCompletedPerf() throws Exception {
+        while (mState.keepRunning()) {
+            mState.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final UserInfo userInfo = mUm.createUser("TestUser", 0);
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerUserSwitchObserver(null, latch, userInfo.id);
+            mState.resumeTiming();
+
+            mAm.switchUser(userInfo.id);
+            latch.await(TIMEOUT_LOCKED_BOOT_COMPLETE_MS, TimeUnit.SECONDS);
+
+            mState.pauseTiming();
+            switchUser(startUser);
+            removeUser(userInfo.id);
+            mState.resumeTiming();
+        }
+    }
+
+    @Test
+    public void managedProfileUnlockPerf() throws Exception {
+        while (mState.keepRunning()) {
+            mState.pauseTiming();
+            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
+                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, userInfo.id);
+            mState.resumeTiming();
+
+            mIam.startUserInBackground(userInfo.id);
+            latch.await(TIMEOUT_MANAGED_PROFILE_UNLOCK_SEC, TimeUnit.SECONDS);
+
+            mState.pauseTiming();
+            removeUser(userInfo.id);
+            mState.resumeTiming();
+        }
+    }
+
+    @Test
+    public void ephemeralUserStoppedPerf() throws Exception {
+        while (mState.keepRunning()) {
+            mState.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final UserInfo userInfo = mUm.createUser("TestUser",
+                    UserInfo.FLAG_EPHEMERAL | UserInfo.FLAG_DEMO);
+            switchUser(userInfo.id);
+            final CountDownLatch latch = new CountDownLatch(1);
+            InstrumentationRegistry.getContext().registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (Intent.ACTION_USER_STOPPED.equals(intent.getAction()) && intent.getIntExtra(
+                            Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userInfo.id) {
+                        latch.countDown();
+                    }
+                }
+            }, new IntentFilter(Intent.ACTION_USER_STOPPED));
+            final CountDownLatch switchLatch = new CountDownLatch(1);
+            registerUserSwitchObserver(switchLatch, null, startUser);
+            mState.resumeTiming();
+
+            mAm.switchUser(startUser);
+            latch.await(TIMEOUT_EPHERMAL_USER_STOP_SEC, TimeUnit.SECONDS);
+
+            mState.pauseTiming();
+            switchLatch.await(TIMEOUT_USER_SWITCH_SEC, TimeUnit.SECONDS);
+            removeUser(userInfo.id);
+            mState.resumeTiming();
+        }
+    }
+
     private void switchUser(int userId) throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
-        registerUserSwitchObserver(latch);
+        registerUserSwitchObserver(latch, null, userId);
         mAm.switchUser(userId);
         latch.await(TIMEOUT_USER_SWITCH_SEC, TimeUnit.SECONDS);
     }
 
-    private void registerUserSwitchObserver(final CountDownLatch latch) throws Exception {
-        ActivityManagerNative.getDefault().registerUserSwitchObserver(
-                new SynchronousUserSwitchObserver() {
-                    @Override
-                    public void onUserSwitching(int newUserId) throws RemoteException {
-                    }
+    private void stopUser(int userId) throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mIam.stopUser(userId, false /* force */, new IStopUserCallback.Stub() {
+            @Override
+            public void userStopped(int userId) throws RemoteException {
+                latch.countDown();
+            }
 
+            @Override
+            public void userStopAborted(int userId) throws RemoteException {
+            }
+        });
+        latch.await(TIMEOUT_USER_STOP_SEC, TimeUnit.SECONDS);
+    }
+
+    private void registerUserSwitchObserver(final CountDownLatch switchLatch,
+            final CountDownLatch bootCompleteLatch, final int userId) throws Exception {
+        ActivityManagerNative.getDefault().registerUserSwitchObserver(
+                new UserSwitchObserver() {
                     @Override
                     public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                        latch.countDown();
+                        if (switchLatch != null && userId == newUserId) {
+                            switchLatch.countDown();
+                        }
                     }
 
                     @Override
-                    public void onForegroundProfileSwitch(int newProfileId) throws RemoteException {
+                    public void onLockedBootComplete(int newUserId) {
+                        if (bootCompleteLatch != null && userId == newUserId) {
+                            bootCompleteLatch.countDown();
+                        }
                     }
                 }, "UserLifecycleTest");
     }
 
-    private void removeUser(int userId) throws Exception {
-        mUm.removeUser(userId);
-        final long startTime = System.currentTimeMillis();
-        while (mUm.getUserInfo(userId) != null &&
-                System.currentTimeMillis() - startTime < TIMEOUT_REMOVE_USER_SEC) {
-            Thread.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
+    private void registerBroadcastReceiver(final String action, final CountDownLatch latch,
+            final int userId) {
+        InstrumentationRegistry.getContext().registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (action.equals(intent.getAction()) && intent.getIntExtra(
+                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL) == userId) {
+                    latch.countDown();
+                }
+            }
+        }, UserHandle.of(userId), new IntentFilter(action), null, null);
+    }
+
+    private void removeUser(int userId) {
+        try {
+            mUm.removeUser(userId);
+            final long startTime = System.currentTimeMillis();
+            while (mUm.getUserInfo(userId) != null &&
+                    System.currentTimeMillis() - startTime < TIMEOUT_REMOVE_USER_MS) {
+                Thread.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            // Ignore
         }
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
