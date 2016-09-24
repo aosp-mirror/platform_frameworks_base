@@ -68,6 +68,7 @@ LOCAL_SRC_FILES := $(call all-cpp-files-under)
 
 LOCAL_SHARED_LIBRARIES := \
   libbinder \
+  liblog \
   libcutils \
   libnativehelper \
   libnetdaidl
