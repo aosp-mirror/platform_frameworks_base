@@ -179,12 +179,12 @@ public class AccountManager {
     public static final String KEY_ACCOUNT_TYPE = "accountType";
 
     /**
-     * Bundle key used for the {@link IAccountAccessTracker} account access tracker
-     * used for noting the account was accessed when unmarshalled from a parcel.
+     * Bundle key used for the account access id used for noting the
+     * account was accessed when unmarshaled from a parcel.
      *
      * @hide
      */
-    public static final String KEY_ACCOUNT_ACCESS_ID = "accountAccessTracker";
+    public static final String KEY_ACCOUNT_ACCESS_ID = "accountAccessId";
 
     /**
      * Bundle key used for the auth token value in results
