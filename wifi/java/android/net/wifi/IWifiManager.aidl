@@ -97,10 +97,6 @@ interface IWifiManager
 
     String getCountryCode();
 
-    void setFrequencyBand(int band, boolean persist);
-
-    int getFrequencyBand();
-
     boolean isDualBandSupported();
 
     boolean saveConfiguration();
