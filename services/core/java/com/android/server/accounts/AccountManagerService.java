@@ -1918,7 +1918,7 @@ public class AccountManagerService
              * Database transaction was successful. Clean up cached
              * data associated with the account in the user profile.
              */
-            insertAccountIntoCacheLocked(accounts, renamedAccount);
+            renamedAccount = insertAccountIntoCacheLocked(accounts, renamedAccount);
             /*
              * Extract the data and token caches before removing the
              * old account to preserve the user data associated with
