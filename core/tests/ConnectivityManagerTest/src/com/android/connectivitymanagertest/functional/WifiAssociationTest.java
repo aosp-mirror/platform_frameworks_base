@@ -63,11 +63,6 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
 
         String password = arguments.getString("password");
 
-        String freqStr = arguments.getString("frequency-band");
-        if (freqStr != null) {
-            setFrequencyBand(freqStr);
-        }
-
         assertTrue("enable Wifi failed", enableWifi());
         WifiInfo wi = mWifiManager.getConnectionInfo();
         logv("%s", wi);
@@ -77,28 +72,6 @@ public class WifiAssociationTest extends ConnectivityManagerTestBase {
 
         logv("Network config: %s", config.toString());
         connectToWifi(config);
-    }
-
-    /**
-     * Set the frequency band and verify that it has been set.
-     */
-    private void setFrequencyBand(String frequencyBandStr) {
-        int frequencyBand = -1;
-        if ("2.4".equals(frequencyBandStr)) {
-            frequencyBand = WifiManager.WIFI_FREQUENCY_BAND_2GHZ;
-        } else if ("5.0".equals(frequencyBandStr)) {
-            frequencyBand = WifiManager.WIFI_FREQUENCY_BAND_5GHZ;
-        } else if ("auto".equals(frequencyBandStr)) {
-            frequencyBand = WifiManager.WIFI_FREQUENCY_BAND_AUTO;
-        } else {
-            fail("Invalid frequency-band");
-        }
-        if (mWifiManager.getFrequencyBand() != frequencyBand) {
-            logv("Set frequency band to %s", frequencyBandStr);
-            mWifiManager.setFrequencyBand(frequencyBand, true);
-        }
-        assertEquals("Specified frequency band does not match operational band",
-                frequencyBand, mWifiManager.getFrequencyBand());
     }
 
     /**
