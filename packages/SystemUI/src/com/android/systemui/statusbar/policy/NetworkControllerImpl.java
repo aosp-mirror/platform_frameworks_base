@@ -819,6 +819,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return info;
     }
 
+    public boolean hasEmergencyCryptKeeperText() {
+        return EncryptionHelper.IS_DATA_ENCRYPTED;
+    }
+
+    public boolean isRadioOn() {
+        return !mAirplaneMode;
+    }
+
     private class SubListener extends OnSubscriptionsChangedListener {
         @Override
         public void onSubscriptionsChanged() {
