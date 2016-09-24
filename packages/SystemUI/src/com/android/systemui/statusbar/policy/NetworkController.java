@@ -41,20 +41,20 @@ public interface NetworkController {
     void removeEmergencyListener(EmergencyListener listener);
 
     public interface SignalCallback {
-        void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description);
+        default void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
+                boolean activityIn, boolean activityOut, String description) {}
 
-        void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
+        default void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut, String typeContentDescription,
-                String description, boolean isWide, int subId);
-        void setSubs(List<SubscriptionInfo> subs);
-        void setNoSims(boolean show);
+                String description, boolean isWide, int subId) {}
+        default void setSubs(List<SubscriptionInfo> subs) {}
+        default void setNoSims(boolean show) {}
 
-        void setEthernetIndicators(IconState icon);
+        default void setEthernetIndicators(IconState icon) {}
 
-        void setIsAirplaneMode(IconState icon);
+        default void setIsAirplaneMode(IconState icon) {}
 
-        void setMobileDataEnabled(boolean enabled);
+        default void setMobileDataEnabled(boolean enabled) {}
     }
 
     public interface EmergencyListener {
