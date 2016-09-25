@@ -39,7 +39,7 @@ interface IWifiNanManager
 
     // client API
     void connect(in IBinder binder, in String callingPackage, in IWifiNanEventCallback callback,
-            in ConfigRequest configRequest);
+            in ConfigRequest configRequest, boolean notifyOnIdentityChanged);
     void disconnect(int clientId, in IBinder binder);
 
     void publish(int clientId, in PublishConfig publishConfig,
