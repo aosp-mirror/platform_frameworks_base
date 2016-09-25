@@ -594,12 +594,14 @@ public final class SystemServer {
                 false);
         boolean disableTrustManager = SystemProperties.getBoolean("config.disable_trustmanager",
                 false);
-        boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices", false);
+        boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices",
+                false);
         boolean disableSamplingProfiler = SystemProperties.getBoolean("config.disable_samplingprof",
                 false);
-
         boolean disableConsumerIr = SystemProperties.getBoolean("config.disable_consumerir", false);
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
+        boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
+                false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
@@ -633,10 +635,12 @@ public final class SystemServer {
 
             mContentResolver = context.getContentResolver();
 
-            Slog.i(TAG, "Camera Service");
-            traceBeginAndSlog("StartCameraService");
-            mSystemServiceManager.startService(CameraService.class);
-            traceEnd();
+            if (!disableCameraService) {
+                Slog.i(TAG, "Camera Service");
+                traceBeginAndSlog("StartCameraService");
+                mSystemServiceManager.startService(CameraService.class);
+                traceEnd();
+            }
 
             // The AccountManager must come before the ContentService
             traceBeginAndSlog("StartAccountManagerService");
