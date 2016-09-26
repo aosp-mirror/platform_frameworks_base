@@ -1733,7 +1733,7 @@ densities: '160'
     </p>
     <p>
       <code>android.hardware.location.network</code>
-      (Only when target API level is 20 orlower.)
+      (Only when target API level is 20 or lower.)
     </p>
   </td>
 <!--  <td></td> -->
@@ -1746,7 +1746,7 @@ densities: '160'
     </p>
     <p>
       <code>android.hardware.location.gps</code>
-      (Only when target API level is 20 orlower.)
+      (Only when target API level is 20 or lower.)
     </p>
   </td>
 
