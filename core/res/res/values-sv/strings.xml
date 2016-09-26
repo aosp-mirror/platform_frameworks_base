@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Felrapport"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Skapa felrapport"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nu hämtas information om aktuell status för enheten, som sedan skickas i ett e-postmeddelade. Det tar en liten stund innan felrapporten är färdig och kan skickas, så vi ber dig ha tålamod."</string>
@@ -671,7 +673,7 @@
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Ingen tjänst"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skärmen har låsts."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Tryck på Menu om du vill låsa upp eller ringa nödsamtal."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Menu om du vill låsa upp."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Tryck på Menu för att låsa upp."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Rita grafiskt lösenord för att låsa upp"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Nödsamtal"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Tillbaka till samtal"</string>
@@ -1655,7 +1657,7 @@
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Du har nya meddelanden"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Öppna sms-appen och visa meddelandet"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Vissa funktioner är begränsade"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Tryck om du vill låsa upp"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Tryck för att låsa upp"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Användaruppgifterna är låsta"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Jobbprofilen är låst"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Tryck och lås upp jobbprofilen"</string>
