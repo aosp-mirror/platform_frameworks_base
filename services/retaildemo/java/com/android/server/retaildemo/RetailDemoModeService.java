@@ -43,6 +43,7 @@ import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -465,6 +466,9 @@ public class RetailDemoModeService extends SystemService {
                 mInjector.getSystemUsersConfiguration(), userId);
         mInjector.turnOffAllFlashLights(mCameraIdsWithFlash);
         muteVolumeStreams();
+        if (!mInjector.isWifiEnabled()) {
+            mInjector.enableWifi();
+        }
         // Disable lock screen for demo users.
         mInjector.getLockPatternUtils().setLockScreenDisabled(true, userId);
         mInjector.getNotificationManager().notifyAsUser(TAG,
@@ -519,6 +523,7 @@ public class RetailDemoModeService extends SystemService {
         private PowerManager mPowerManager;
         private CameraManager mCameraManager;
         private PowerManager.WakeLock mWakeLock;
+        private WifiManager mWifiManager;
         private Configuration mSystemUserConfiguration;
         private PendingIntent mResetDemoPendingIntent;
 
@@ -528,6 +533,13 @@ public class RetailDemoModeService extends SystemService {
 
         Context getContext() {
             return mContext;
+        }
+
+        private WifiManager getWifiManager() {
+            if (mWifiManager == null) {
+                mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            }
+            return mWifiManager;
         }
 
         UserManager getUserManager() {
@@ -630,6 +642,14 @@ public class RetailDemoModeService extends SystemService {
 
         void releaseWakeLock() {
             mWakeLock.release();
+        }
+
+        boolean isWifiEnabled() {
+            return getWifiManager().isWifiEnabled();
+        }
+
+        void enableWifi() {
+            getWifiManager().setWifiEnabled(true);
         }
 
         void logSessionDuration(int duration) {
