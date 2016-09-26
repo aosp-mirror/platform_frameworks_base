@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.view.PointerIcon;
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
@@ -1050,6 +1051,18 @@ public class RadialTimePickerView extends View {
     public void setInputEnabled(boolean inputEnabled) {
         mInputEnabled = inputEnabled;
         invalidate();
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (!isEnabled()) {
+            return null;
+        }
+        final int degrees = getDegreesFromXY(event.getX(), event.getY(), false);
+        if (degrees != -1) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 
     private class RadialPickerTouchHelper extends ExploreByTouchHelper {

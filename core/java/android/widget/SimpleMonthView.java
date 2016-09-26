@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.view.PointerIcon;
 import com.android.internal.R;
 import com.android.internal.widget.ExploreByTouchHelper;
 
@@ -1023,6 +1024,21 @@ class SimpleMonthView extends View {
         // This is a no-op if accessibility is turned off.
         mTouchHelper.sendEventForVirtualView(day, AccessibilityEvent.TYPE_VIEW_CLICKED);
         return true;
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        if (!isEnabled()) {
+            return null;
+        }
+        // Add 0.5f to event coordinates to match the logic in onTouchEvent.
+        final int x = (int) (event.getX() + 0.5f);
+        final int y = (int) (event.getY() + 0.5f);
+        final int dayUnderPointer = getDayAtLocation(x, y);
+        if (dayUnderPointer >= 0) {
+            return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
+        }
+        return super.onResolvePointerIcon(event, pointerIndex);
     }
 
     /**
