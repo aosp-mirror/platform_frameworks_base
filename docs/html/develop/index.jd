@@ -22,7 +22,7 @@ excludeFromSuggestions=true
       <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
         <h1 class="dac-hero-title">
             <a style="color:inherit" href="{@docRoot}studio/index.html">
-            Android Studio 2.2!</a></h1>
+            Android Studio 2.2</a></h1>
 
 <p class="dac-hero-description">There are 20+ new features in this release
 focused on helping you code faster and smarter. With Android Studio 2.2 you
@@ -41,9 +41,9 @@ can:</p>
       Get Android Studio 2.2
     </a>
   &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
-    <a class="dac-hero-cta" href="{@docRoot}studio/releases/index.html">
+    <a class="dac-hero-cta" href="{@docRoot}studio/features.html">
     <span class="dac-sprite dac-auto-chevron"></span>
-    See the release notes</a>
+    See more features</a>
 </p>
 
       </div>
