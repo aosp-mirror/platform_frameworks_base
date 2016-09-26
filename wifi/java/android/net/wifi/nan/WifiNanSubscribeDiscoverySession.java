@@ -21,8 +21,8 @@ import android.util.Log;
 
 /**
  * A class representing a NAN subscribe session. Created when
- * {@link WifiNanSession#subscribe(SubscribeConfig, WifiNanDiscoverySessionCallback)} is called
- * and a discovery session is created and returned in
+ * {@link WifiNanSession#subscribe(android.os.Handler, SubscribeConfig, WifiNanDiscoverySessionCallback)}
+ * is called and a discovery session is created and returned in
  * {@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}.
  * See baseline functionality of all discovery sessions in {@link WifiNanDiscoveryBaseSession}.
  * This object allows updating an existing/running subscribe discovery session using
@@ -48,7 +48,7 @@ public class WifiNanSubscribeDiscoverySession extends WifiNanDiscoveryBaseSessio
      * <ul>
      *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigUpdated()}: configuration
      *     update succeeded.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)}: configuration
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()}: configuration
      *     update failed. The subscribe discovery session is still running using its previous
      *     configuration (i.e. update failure does not terminate the session).
      * </ul>

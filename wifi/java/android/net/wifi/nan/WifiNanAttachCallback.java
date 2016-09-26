@@ -16,11 +16,6 @@
 
 package android.net.wifi.nan;
 
-import android.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * Base class for NAN attach callbacks. Should be extended by applications and set when calling
  * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}. These are callbacks
@@ -30,34 +25,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide PROPOSED_NAN_API
  */
 public class WifiNanAttachCallback {
-    /** @hide */
-    @IntDef({
-            REASON_INVALID_ARGS, REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG, REASON_OTHER
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface EventReasonCodes {
-    }
-
-    /**
-     * Indicates invalid argument in the requested operation. Failure reason flag for
-     * {@link WifiNanAttachCallback#onAttachFailed(int)}.
-     */
-    public static final int REASON_INVALID_ARGS = 1000;
-
-    /**
-     * Indicates that a {@link ConfigRequest} passed in
-     * {@code WifiNanManager#attach(android.os.Handler, ConfigRequest, WifiNanAttachCallback)}
-     * couldn't be applied since other connections already exist with an incompatible
-     * configurations. Failure reason flag for {@link WifiNanAttachCallback#onAttachFailed(int)}.
-     */
-    public static final int REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG = 1001;
-
-    /**
-     * Indicates an unspecified error occurred during the operation. Failure reason flag for
-     * {@link WifiNanAttachCallback#onAttachFailed(int)}.
-     */
-    public static final int REASON_OTHER = 1002;
-
     /**
      * Called when NAN attach operation
      * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)}
@@ -73,11 +40,8 @@ public class WifiNanAttachCallback {
     /**
      * Called when NAN attach operation
      * {@link WifiNanManager#attach(android.os.Handler, WifiNanAttachCallback)} failed.
-     *
-     * @param reason Failure reason code, see
-     *            {@code WifiNanEventCallback.REASON_*}.
      */
-    public void onAttachFailed(@EventReasonCodes int reason) {
+    public void onAttachFailed() {
         /* empty */
     }
 }
