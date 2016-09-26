@@ -158,8 +158,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean _voiceInteraction) {
-        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true);
+    AppWindowToken(WindowManagerService service, IApplicationToken token, boolean _voiceInteraction,
+            DisplayContent displayContent) {
+        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true,
+                displayContent);
         appToken = token;
         voiceInteraction = _voiceInteraction;
         mInputApplicationHandle = new InputApplicationHandle(this);
@@ -897,7 +899,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean transferStartingWindow(IBinder transferFrom) {
-        final AppWindowToken fromToken = mService.findAppWindowToken(transferFrom);
+        final AppWindowToken fromToken = getDisplayContent().getAppWindowToken(transferFrom);
         if (fromToken == null) {
             return false;
         }

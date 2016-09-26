@@ -53,6 +53,7 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Debug;
+import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -66,6 +67,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 class DisplayContentList extends ArrayList<DisplayContent> {
@@ -86,6 +89,9 @@ class DisplayContent extends WindowContainer<TaskStack> {
     /** Z-ordered (bottom-most first) list of all Window objects. Assigned to an element
      * from mDisplayWindows; */
     private final WindowList mWindows = new WindowList();
+
+    // Mapping from a token IBinder to a WindowToken object on this display.
+    private final HashMap<IBinder, WindowToken> mTokenMap = new HashMap();
 
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
@@ -165,6 +171,35 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
     WindowList getWindowList() {
         return mWindows;
+    }
+
+    WindowToken getWindowToken(IBinder binder) {
+        return mTokenMap.get(binder);
+    }
+
+    AppWindowToken getAppWindowToken(IBinder binder) {
+        final WindowToken token = getWindowToken(binder);
+        if (token == null) {
+            return null;
+        }
+        return token.asAppWindowToken();
+    }
+
+    void setWindowToken(IBinder binder, WindowToken token) {
+        final DisplayContent dc = mService.mRoot.getWindowTokenDisplay(token);
+        if (dc != null) {
+            // We currently don't support adding a window token to the display if the display
+            // already has the binder mapped to another token. If there is a use case for supporting
+            // this moving forward we will either need to merge the WindowTokens some how or have
+            // the binder map to a list of window tokens.
+            throw new IllegalArgumentException("Can't map token=" + token + " to display=" + this
+                    + " already mapped to display=" + dc + " tokens=" + dc.mTokenMap);
+        }
+        mTokenMap.put(binder, token);
+    }
+
+    WindowToken removeWindowToken(IBinder binder) {
+        return mTokenMap.remove(binder);
     }
 
     Display getDisplay() {
@@ -342,6 +377,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             mHomeStack = stack;
         }
         addChild(stack, onTop);
+        stack.onDisplayChanged(this);
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
@@ -899,7 +935,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         // position; else we need to look some more.
         if (pos != null) {
             // Move behind any windows attached to this one.
-            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
+            final WindowToken atoken = getWindowToken(pos.mClient.asBinder());
             if (atoken != null) {
                 tokenWindowList = getTokenWindowsOnDisplay(atoken);
                 final int NC = tokenWindowList.size();
@@ -929,7 +965,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
         if (pos != null) {
             // Move in front of any windows attached to this one.
-            final WindowToken atoken = mService.mTokenMap.get(pos.mClient.asBinder());
+            final WindowToken atoken = getWindowToken(pos.mClient.asBinder());
             if (atoken != null) {
                 final WindowState top = atoken.getTopWindow();
                 if (top != null && top.mSubLayer >= 0) {
@@ -1235,6 +1271,25 @@ class DisplayContent extends WindowContainer<TaskStack> {
         final WindowList windows = getWindowList();
         for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
             Slog.v(TAG_WM, "  #" + winNdx + ": " + windows.get(winNdx));
+        }
+    }
+
+    void dumpTokens(PrintWriter pw, boolean dumpAll) {
+        if (mTokenMap.isEmpty()) {
+            return;
+        }
+        pw.println("  Display #" + mDisplayId);
+        final Iterator<WindowToken> it = mTokenMap.values().iterator();
+        while (it.hasNext()) {
+            final WindowToken token = it.next();
+            pw.print("  ");
+            pw.print(token);
+            if (dumpAll) {
+                pw.println(':');
+                token.dump(pw, "    ");
+            } else {
+                pw.println();
+            }
         }
     }
 

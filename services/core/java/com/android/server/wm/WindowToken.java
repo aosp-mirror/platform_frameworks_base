@@ -78,12 +78,16 @@ class WindowToken extends WindowContainer<WindowState> {
     // windows will be put to the bottom of the list.
     boolean sendingToBottom;
 
-    WindowToken(WindowManagerService service, IBinder _token, int type, boolean _explicit) {
+    // The display this token is on.
+    private DisplayContent mDisplayContent;
+
+    WindowToken(WindowManagerService service, IBinder _token, int type, boolean _explicit,
+            DisplayContent dc) {
         mService = service;
         token = _token;
         windowType = type;
         explicit = _explicit;
-        mService.mTokenMap.put(token, this);
+        onDisplayChanged(dc);
     }
 
     void removeAllWindows() {
@@ -398,6 +402,33 @@ class WindowToken extends WindowContainer<WindowState> {
         // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
         // I am not an app window token!
         return null;
+    }
+
+    DisplayContent getDisplayContent() {
+        return mDisplayContent;
+    }
+
+    @Override
+    void removeImmediately() {
+        super.removeImmediately();
+        if (mDisplayContent != null) {
+            mDisplayContent.removeWindowToken(token);
+            mService.mRoot.removeWindowTokenIfPossible(token);
+        }
+    }
+
+    void onDisplayChanged(DisplayContent dc) {
+        if (mDisplayContent == dc) {
+            return;
+        }
+
+        if (mDisplayContent != null) {
+            mDisplayContent.removeWindowToken(token);
+        }
+        mDisplayContent = dc;
+        mDisplayContent.setWindowToken(token, this);
+
+        super.onDisplayChanged(dc);
     }
 
     void dump(PrintWriter pw, String prefix) {

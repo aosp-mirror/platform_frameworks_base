@@ -58,7 +58,8 @@ public class WindowStateTests {
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
         sWm = TestWindowManagerPolicy.getWindowManagerService(context);
-        mWindowToken = new WindowToken(sWm, new Binder(), 0, false);
+        mWindowToken = new WindowToken(sWm, new Binder(), 0, false,
+                sWm.getDefaultDisplayContentLocked());
     }
 
     @Test

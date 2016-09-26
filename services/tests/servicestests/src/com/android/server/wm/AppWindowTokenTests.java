@@ -84,7 +84,7 @@ public class AppWindowTokenTests {
     private class TestAppWindowToken extends AppWindowToken {
 
         TestAppWindowToken() {
-            super(sWm, null, false);
+            super(sWm, null, false, sWm.getDefaultDisplayContentLocked());
         }
 
         int getWindowsCount() {

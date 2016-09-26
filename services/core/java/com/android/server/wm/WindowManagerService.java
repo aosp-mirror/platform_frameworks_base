@@ -163,7 +163,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -401,11 +400,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * NOTE: Never call into methods that lock ActivityManagerService while holding this object.
      */
     final HashMap<IBinder, WindowState> mWindowMap = new HashMap<>();
-
-    /**
-     * Mapping from a token IBinder to a WindowToken object.
-     */
-    final HashMap<IBinder, WindowToken> mTokenMap = new HashMap<>();
 
     /**
      * List of window tokens that have finished starting their application,
@@ -912,7 +906,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
             mH.sendEmptyMessage(H.NOTIFY_APP_TRANSITION_FINISHED);
-            AppWindowToken atoken = findAppWindowToken(token);
+            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
             if (atoken == null) {
                 return;
             }
@@ -1535,7 +1529,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean hasParent = parentWindow != null;
             // Use existing parent window token for child windows since they go in the same token
             // as there parent window so we can apply the same policy on them.
-            WindowToken token = mTokenMap.get(hasParent ? parentWindow.mAttrs.token : attrs.token);
+            WindowToken token = mRoot.getWindowToken(
+                    hasParent ? parentWindow.mAttrs.token : attrs.token, displayContent);
             // If this is a child window, we want to apply the same type checking rules as the
             // parent window type.
             final int rootType = hasParent ? parentWindow.mAttrs.type : type;
@@ -1587,7 +1582,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                     }
                 }
-                token = new WindowToken(this, attrs.token, -1, false);
+                token = new WindowToken(this, attrs.token, -1, false, displayContent);
             } else if (rootType >= FIRST_APPLICATION_WINDOW && rootType <= LAST_APPLICATION_WINDOW) {
                 atoken = token.asAppWindowToken();
                 if (atoken == null) {
@@ -1655,7 +1650,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, null, -1, false);
+                token = new WindowToken(this, null, -1, false, displayContent);
             }
 
             WindowState win = new WindowState(this, session, client, token, parentWindow,
@@ -2025,7 +2020,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty()) {
             if (!token.explicit) {
-                mTokenMap.remove(token.token);
+                token.removeImmediately();
             } else if (atoken != null) {
                 // TODO: Should this be moved into AppWindowToken.removeWindow? Might go away after
                 // re-factor.
@@ -2750,14 +2745,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
     }
 
-    AppWindowToken findAppWindowToken(IBinder token) {
-        WindowToken wtoken = mTokenMap.get(token);
-        if (wtoken == null) {
-            return null;
-        }
-        return wtoken.asAppWindowToken();
-    }
-
     @Override
     public void addWindowToken(IBinder token, int type) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()")) {
@@ -2765,15 +2752,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            WindowToken wtoken = mTokenMap.get(token);
-            if (wtoken != null) {
-                Slog.w(TAG_WM, "Attempted to add existing input method token: " + token);
-                return;
-            }
-            wtoken = new WindowToken(this, token, type, true);
-            if (type == TYPE_WALLPAPER) {
-                mWallpaperControllerLocked.addWallpaperToken(wtoken);
-            }
+            mRoot.addWindowToken(token, type);
         }
     }
 
@@ -2784,20 +2763,28 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final long origId = Binder.clearCallingIdentity();
-        synchronized(mWindowMap) {
-            final WindowToken wtoken = mTokenMap.remove(token);
-            if (wtoken != null) {
-                wtoken.setExiting();
-                if (wtoken.windowType == TYPE_WALLPAPER) {
-                    mWallpaperControllerLocked.removeWallpaperToken(wtoken);
+        try {
+            synchronized (mWindowMap) {
+                final ArrayList<WindowToken> removedTokens = mRoot.removeWindowToken(token);
+                if (removedTokens == null || removedTokens.isEmpty()) {
+                    Slog.w(TAG_WM,
+                            "removeWindowToken: Attempted to remove non-existing token: " + token);
+                    return;
                 }
 
-                mInputMonitor.updateInputWindowsLw(true /*force*/);
-            } else {
-                Slog.w(TAG_WM, "Attempted to remove non-existing token: " + token);
+                for (int i = removedTokens.size() - 1; i >= 0; --i) {
+                    final WindowToken wtoken = removedTokens.get(i);
+                    wtoken.setExiting();
+                    if (wtoken.windowType == TYPE_WALLPAPER) {
+                        mWallpaperControllerLocked.removeWallpaperToken(wtoken);
+                    }
+
+                    mInputMonitor.updateInputWindowsLw(true /*force*/);
+                }
             }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        Binder.restoreCallingIdentity(origId);
     }
 
     private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken,
@@ -2841,12 +2828,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            AppWindowToken atoken = findAppWindowToken(token.asBinder());
+            AppWindowToken atoken = mRoot.getAppWindowToken(token.asBinder());
             if (atoken != null) {
                 Slog.w(TAG_WM, "Attempted to add existing app token: " + token);
                 return;
             }
-            atoken = new AppWindowToken(this, token, voiceInteraction);
+
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
+            }
+
+            atoken = new AppWindowToken(this, token, voiceInteraction, stack.getDisplayContent());
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.setFillsParent(fullscreen);
             atoken.showForAllUsers = showForAllUsers;
@@ -2882,7 +2875,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            final AppWindowToken atoken = findAppWindowToken(token);
+            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
             if (atoken == null) {
                 Slog.w(TAG_WM, "Attempted to set task id of non-existing app token: " + token);
                 return;
@@ -2998,12 +2991,10 @@ public class WindowManagerService extends IWindowManager.Stub
         Configuration config = null;
 
         if (updateOrientationFromAppTokensLocked(false)) {
-            // If we changed the orientation but mOrientationChangeComplete is
-            // already true, we used seamless rotation, and we don't need
-            // to freeze the screen.
-            if (freezeThisOneIfNeeded != null &&
-                    !mRoot.mOrientationChangeComplete) {
-                final AppWindowToken atoken = findAppWindowToken(freezeThisOneIfNeeded);
+            // If we changed the orientation but mOrientationChangeComplete is already true,
+            // we used seamless rotation, and we don't need to freeze the screen.
+            if (freezeThisOneIfNeeded != null && !mRoot.mOrientationChangeComplete) {
+                final AppWindowToken atoken = mRoot.getAppWindowToken(freezeThisOneIfNeeded);
                 if (atoken != null) {
                     atoken.startFreezingScreen();
                 }
@@ -3117,7 +3108,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            final AppWindowToken atoken = findAppWindowToken(token.asBinder());
+            final AppWindowToken atoken = mRoot.getAppWindowToken(token.asBinder());
             if (atoken == null) {
                 Slog.w(TAG_WM, "Attempted to set orientation of non-existing app token: " + token);
                 return;
@@ -3130,9 +3121,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public int getAppOrientation(IApplicationToken token) {
         synchronized(mWindowMap) {
-            AppWindowToken wtoken = findAppWindowToken(token.asBinder());
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token.asBinder());
             if (wtoken == null) {
-                return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+                return SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
             return wtoken.getOrientation();
@@ -3161,7 +3152,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Clearing focused app, was " + mFocusedApp);
                 newFocus = null;
             } else {
-                newFocus = findAppWindowToken(token);
+                newFocus = mRoot.getAppWindowToken(token);
                 if (newFocus == null) {
                     Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token);
                 }
@@ -3353,7 +3344,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     TAG_WM, "setAppStartingWindow: token=" + token + " pkg=" + pkg
                     + " transferFrom=" + transferFrom);
 
-            AppWindowToken wtoken = findAppWindowToken(token);
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null) {
                 Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + token);
                 return false;
@@ -3440,14 +3431,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void removeAppStartingWindow(IBinder token) {
         synchronized (mWindowMap) {
-            final AppWindowToken wtoken = mTokenMap.get(token).asAppWindowToken();
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
             scheduleRemoveStartingWindowLocked(wtoken);
         }
     }
 
     public void setAppFullscreen(IBinder token, boolean toOpaque) {
         synchronized (mWindowMap) {
-            final AppWindowToken atoken = findAppWindowToken(token);
+            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
             if (atoken != null) {
                 atoken.setFillsParent(toOpaque);
                 setWindowOpaqueLocked(token, toOpaque);
@@ -3463,7 +3454,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
-        final AppWindowToken wtoken = findAppWindowToken(token);
+        final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
         if (wtoken != null) {
             final WindowState win = wtoken.findMainWindow();
             if (win != null) {
@@ -3488,8 +3479,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            final AppWindowToken wtoken;
-            wtoken = findAppWindowToken(token);
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null) {
                 Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + token);
                 return;
@@ -3506,7 +3496,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         synchronized(mWindowMap) {
             final AppWindowToken wtoken;
-            wtoken = findAppWindowToken(token);
+            wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null) {
                 Slog.w(TAG_WM, "Attempted to notify stopped of non-existing app token: " + token);
                 return;
@@ -3524,7 +3514,7 @@ public class WindowManagerService extends IWindowManager.Stub
         AppWindowToken wtoken;
 
         synchronized(mWindowMap) {
-            wtoken = findAppWindowToken(token);
+            wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null) {
                 Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
                 return;
@@ -3644,7 +3634,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            final AppWindowToken wtoken = findAppWindowToken(token);
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null || wtoken.appToken == null) {
                 Slog.w(TAG_WM, "Attempted to freeze screen with non-existing app token: " + wtoken);
                 return;
@@ -3662,7 +3652,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            final AppWindowToken wtoken = findAppWindowToken(token);
+            final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
             if (wtoken == null || wtoken.appToken == null) {
                 return;
             }
@@ -3680,71 +3670,14 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
-        AppWindowToken wtoken = null;
-        AppWindowToken startingToken = null;
-        boolean delayed = false;
-
         final long origId = Binder.clearCallingIdentity();
-        synchronized(mWindowMap) {
-            WindowToken basewtoken = mTokenMap.remove(token);
-            if (basewtoken != null && (wtoken = basewtoken.asAppWindowToken()) != null) {
-                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Removing app token: " + wtoken);
-                delayed = wtoken.setVisibility(null, false,
-                        TRANSIT_UNSET, true, wtoken.voiceInteraction);
-                mOpeningApps.remove(wtoken);
-                wtoken.waitingToShow = false;
-                if (mClosingApps.contains(wtoken)) {
-                    delayed = true;
-                } else if (mAppTransition.isTransitionSet()) {
-                    mClosingApps.add(wtoken);
-                    delayed = true;
-                }
-                if (DEBUG_APP_TRANSITIONS) Slog.v(
-                        TAG_WM, "Removing app " + wtoken + " delayed=" + delayed
-                        + " animation=" + wtoken.mAppAnimator.animation
-                        + " animating=" + wtoken.mAppAnimator.animating);
-                if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
-                        + wtoken + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
-                final TaskStack stack = wtoken.mTask.mStack;
-                if (delayed && !wtoken.isEmpty()) {
-                    // set the token aside because it has an active animation to be finished
-                    if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM,
-                            "removeAppToken make exiting: " + wtoken);
-                    stack.mExitingAppTokens.add(wtoken);
-                    wtoken.mIsExiting = true;
-                } else {
-                    // Make sure there is no animation running on this token,
-                    // so any windows associated with it will be removed as
-                    // soon as their animations are complete
-                    wtoken.mAppAnimator.clearAnimation();
-                    wtoken.mAppAnimator.animating = false;
-                    wtoken.removeIfPossible();
-                }
-
-                wtoken.removed = true;
-                if (wtoken.startingData != null) {
-                    startingToken = wtoken;
-                }
-                wtoken.stopFreezingScreen(true, true);
-                if (mFocusedApp == wtoken) {
-                    if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + wtoken);
-                    mFocusedApp = null;
-                    updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
-                    mInputMonitor.setFocusedAppLw(null);
-                }
-            } else {
-                Slog.w(TAG_WM, "Attempted to remove non-existing app token: " + token);
+        try {
+            synchronized(mWindowMap) {
+                mRoot.removeAppToken(token);
             }
-
-            if (!delayed && wtoken != null) {
-                wtoken.updateReportedVisibilityLocked();
-            }
-
-            // Will only remove if startingToken non null.
-            scheduleRemoveStartingWindowLocked(startingToken);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
-        Binder.restoreCallingIdentity(origId);
-
     }
 
     void scheduleRemoveStartingWindowLocked(AppWindowToken wtoken) {
@@ -5542,7 +5475,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mRotation == rotation && mAltOrientation == altOrientation) {
             // No change.
-             return false;
+            return false;
         }
 
         if (DEBUG_ORIENTATION) {
@@ -6616,9 +6549,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            WindowToken token = mTokenMap.get(_token);
-            if (token != null) {
-                mInputMonitor.pauseDispatchingLw(token);
+            final ArrayList<WindowToken> tokens = mRoot.getWindowTokens(_token);
+            if (tokens != null && !tokens.isEmpty()) {
+                for (int i = tokens.size() - 1; i >= 0; --i) {
+                    mInputMonitor.pauseDispatchingLw(tokens.get(i));
+                }
             }
         }
     }
@@ -6630,9 +6565,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            WindowToken token = mTokenMap.get(_token);
-            if (token != null) {
-                mInputMonitor.resumeDispatchingLw(token);
+            final ArrayList<WindowToken> tokens = mRoot.getWindowTokens(_token);
+            if (tokens != null && !tokens.isEmpty()) {
+                for (int i = tokens.size() - 1; i >= 0; --i) {
+                    mInputMonitor.resumeDispatchingLw(tokens.get(i));
+                }
             }
         }
     }
@@ -8661,7 +8598,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void notifyAppRelaunching(IBinder token) {
         synchronized (mWindowMap) {
-            AppWindowToken appWindow = findAppWindowToken(token);
+            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
             if (appWindow != null) {
                 appWindow.startRelaunching();
             }
@@ -8670,7 +8607,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void notifyAppRelaunchingFinished(IBinder token) {
         synchronized (mWindowMap) {
-            AppWindowToken appWindow = findAppWindowToken(token);
+            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
             if (appWindow != null) {
                 appWindow.finishRelaunching();
             }
@@ -8679,7 +8616,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void notifyAppRelaunchesCleared(IBinder token) {
         synchronized (mWindowMap) {
-            final AppWindowToken appWindow = findAppWindowToken(token);
+            final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
             if (appWindow != null) {
                 appWindow.clearRelaunching();
             }
@@ -8703,20 +8640,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
-        if (!mTokenMap.isEmpty()) {
-            pw.println("  All tokens:");
-            Iterator<WindowToken> it = mTokenMap.values().iterator();
-            while (it.hasNext()) {
-                WindowToken token = it.next();
-                pw.print("  "); pw.print(token);
-                if (dumpAll) {
-                    pw.println(':');
-                    token.dump(pw, "    ");
-                } else {
-                    pw.println();
-                }
-            }
-        }
+        mRoot.dumpTokens(pw, dumpAll);
         mWallpaperControllerLocked.dumpTokens(pw, "  ", dumpAll);
         if (!mFinishedStarting.isEmpty()) {
             pw.println();
@@ -9248,7 +9172,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     public void setWillReplaceWindow(IBinder token, boolean animate) {
         synchronized (mWindowMap) {
-            final AppWindowToken appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
@@ -9270,9 +9194,9 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     // TODO: The s at the end of the method name is the only difference with the name of the method
     // above. We should combine them or find better names.
-    public void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
+    void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
         synchronized (mWindowMap) {
-            final AppWindowToken appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.hasContentToDisplay()) {
                 Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
                         + token);
@@ -9300,7 +9224,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     public void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
         synchronized (mWindowMap) {
-            final AppWindowToken appWindowToken = findAppWindowToken(token);
+            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
             if (appWindowToken == null) {
                 Slog.w(TAG_WM, "Attempted to reset replacing window on non-existing app token "
                         + token);
@@ -9765,9 +9689,12 @@ public class WindowManagerService extends IWindowManager.Stub
         public void removeWindowToken(IBinder token, boolean removeWindows) {
             synchronized(mWindowMap) {
                 if (removeWindows) {
-                    final WindowToken wtoken = mTokenMap.remove(token);
-                    if (wtoken != null) {
-                        wtoken.removeAllWindows();
+                    final ArrayList<WindowToken> removedTokens = mRoot.removeWindowToken(token);
+                    if (removedTokens != null && !removedTokens.isEmpty()) {
+                        for (int i = removedTokens.size() - 1; i >= 0; --i) {
+                            final WindowToken wtoken = removedTokens.get(i);
+                            wtoken.removeAllWindows();
+                        }
                     }
                 }
                 WindowManagerService.this.removeWindowToken(token);

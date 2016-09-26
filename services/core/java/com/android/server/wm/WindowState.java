@@ -469,6 +469,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mHasSurface = false;
 
     private boolean mNotOnAppsDisplay = false;
+    // TODO: Get this from WindowToken? Done in ag/1522894
     DisplayContent  mDisplayContent;
 
     /** When true this window can be displayed on screens owther than mOwnerUid's */

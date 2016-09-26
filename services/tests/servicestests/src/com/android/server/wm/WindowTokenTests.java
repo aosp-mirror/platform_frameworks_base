@@ -165,7 +165,7 @@ public class WindowTokenTests {
     private class TestWindowToken extends WindowToken {
 
         TestWindowToken() {
-            super(mWm, null, 0, false);
+            super(mWm, null, 0, false, mWm.getDefaultDisplayContentLocked());
         }
 
         int getWindowsCount() {

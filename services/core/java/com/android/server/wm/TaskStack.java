@@ -94,16 +94,16 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
     private boolean mFillsParent = true;
 
     // Device rotation as of the last time {@link #mBounds} was set.
-    int mRotation;
+    private int mRotation;
 
     /** Density as of last time {@link #mBounds} was set. */
-    int mDensity;
+    private int mDensity;
 
     /** Support for non-zero {@link android.view.animation.Animation#getBackgroundColor()} */
-    DimLayer mAnimationBackgroundSurface;
+    private DimLayer mAnimationBackgroundSurface;
 
     /** The particular window with an Animation with non-zero background color. */
-    WindowStateAnimator mAnimationBackgroundAnimator;
+    private WindowStateAnimator mAnimationBackgroundAnimator;
 
     /** Application tokens that are exiting, but still on screen for animations. */
     final AppTokenList mExitingAppTokens = new AppTokenList();
@@ -606,12 +606,12 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
     }
 
-    void attachDisplayContent(DisplayContent displayContent) {
+    void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null) {
-            throw new IllegalStateException("attachDisplayContent: Already attached");
+            throw new IllegalStateException("onDisplayChanged: Already attached");
         }
 
-        mDisplayContent = displayContent;
+        mDisplayContent = dc;
         mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
                 "animation background stackId=" + mStackId);
 
@@ -625,7 +625,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             // not fullscreen. If it's fullscreen, it means that we are in the transition of
             // dismissing it, so we must not resize this stack.
             bounds = new Rect();
-            displayContent.getLogicalDisplayRect(mTmpRect);
+            dc.getLogicalDisplayRect(mTmpRect);
             mTmpRect2.setEmpty();
             if (dockedStack != null) {
                 dockedStack.getRawBounds(mTmpRect2);
@@ -638,6 +638,8 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
         }
 
         updateDisplayInfo(bounds);
+
+        super.onDisplayChanged(dc);
     }
 
     void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibility) {

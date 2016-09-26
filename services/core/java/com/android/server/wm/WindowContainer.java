@@ -254,6 +254,17 @@ class WindowContainer<E extends WindowContainer> implements Comparable<WindowCon
         }
     }
 
+    /**
+     * Notify that the display this container is on has changed.
+     * @param dc The new display this container is on.
+     */
+    void onDisplayChanged(DisplayContent dc) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            child.onDisplayChanged(dc);
+        }
+    }
+
     void setWaitingForDrawnIfResizingChanged() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
