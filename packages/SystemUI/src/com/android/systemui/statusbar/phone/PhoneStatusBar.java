@@ -175,12 +175,14 @@ import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
+import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
@@ -897,6 +899,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         initSignalCluster(mStatusBarView);
         initSignalCluster(mKeyguardStatusBar);
+        initEmergencyCryptkeeperText();
 
         mFlashlightController = new FlashlightController(mContext);
         mKeyguardBottomArea.setFlashlightController(mFlashlightController);
@@ -1012,6 +1015,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
+    }
+
+    private void initEmergencyCryptkeeperText() {
+        View emergencyViewStub = mStatusBarWindow.findViewById(R.id.emergency_cryptkeeper_text);
+        if (mNetworkController.hasEmergencyCryptKeeperText()) {
+            if (emergencyViewStub != null) {
+                ((ViewStub) emergencyViewStub).inflate();
+            }
+            mNetworkController.addSignalCallback(new NetworkController.SignalCallback() {
+                @Override
+                public void setIsAirplaneMode(NetworkController.IconState icon) {
+                    recomputeDisableFlags(true /* animate */);
+                }
+            });
+        } else if (emergencyViewStub != null) {
+            ViewGroup parent = (ViewGroup) emergencyViewStub.getParent();
+            parent.removeView(emergencyViewStub);
+        }
     }
 
     protected BatteryController createBatteryController() {
@@ -2346,6 +2367,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
             state |= StatusBarManager.DISABLE_SYSTEM_INFO;
         }
+        if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
+            if (mNetworkController.hasEmergencyCryptKeeperText()) {
+                state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+            }
+            if (!mNetworkController.isRadioOn()) {
+                state |= StatusBarManager.DISABLE_SYSTEM_INFO;
+            }
+        }
         return state;
     }
 
@@ -2448,6 +2477,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if ((diff2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) != 0) {
             updateQsExpansionEnabled();
         }
+    }
+
+    /**
+     * Reapplies the disable flags as last requested by StatusBarManager.
+     *
+     * This needs to be called if state used by {@link #adjustDisableFlags} changes.
+     */
+    private void recomputeDisableFlags(boolean animate) {
+        disable(mDisabledUnmodified1, mDisabledUnmodified2, animate);
     }
 
     @Override
@@ -2743,7 +2781,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         visibilityChanged(true);
         mWaitingForKeyguardExit = false;
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, !force /* animate */);
+        recomputeDisableFlags(!force /* animate */);
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
@@ -2885,7 +2923,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
         showBouncer();
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
+        recomputeDisableFlags(true /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
         // the bouncer appear animation.
@@ -4270,7 +4308,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 startTime + fadeoutDuration
                         - StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION,
                 StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, fadeoutDuration > 0 /* animate */);
+        recomputeDisableFlags(fadeoutDuration > 0 /* animate */);
     }
 
     public boolean isKeyguardFadingAway() {
@@ -4762,7 +4800,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void setBouncerShowing(boolean bouncerShowing) {
         super.setBouncerShowing(bouncerShowing);
         mStatusBarView.setBouncerShowing(bouncerShowing);
-        disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
+        recomputeDisableFlags(true /* animate */);
     }
 
     public void onStartedGoingToSleep() {
