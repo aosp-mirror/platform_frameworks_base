@@ -2091,4 +2091,18 @@ class ActivityStarter {
         return (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
                 (flags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0;
     }
+
+    boolean clearPendingActivityLaunchesLocked(String packageName) {
+        boolean didSomething = false;
+
+        for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
+            ActivityRecord r = pal.r;
+            if (r != null && r.packageName.equals(packageName)) {
+                mPendingActivityLaunches.remove(palNdx);
+                didSomething = true;
+            }
+        }
+        return didSomething;
+    }
 }
