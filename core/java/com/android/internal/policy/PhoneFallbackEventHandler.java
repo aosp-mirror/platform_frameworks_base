@@ -150,6 +150,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
                         sendCloseSystemWindows();
                         // Broadcast an intent that the Camera button was longpressed
                         Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
+                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                         intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
                         mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT_OR_SELF,
                                 null, null, null, 0, null, null);
