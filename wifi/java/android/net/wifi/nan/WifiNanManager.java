@@ -197,42 +197,14 @@ public class WifiNanManager {
     public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
 
     /**
-     * Broadcast intent action to indicate whether Wi-Fi NAN is enabled or
-     * disabled. An extra {@link #EXTRA_WIFI_STATE} provides the state
-     * information as int using {@link #WIFI_NAN_STATE_DISABLED} and
-     * {@link #WIFI_NAN_STATE_ENABLED} constants. This broadcast is <b>not</b> sticky,
-     * use the {@link #isAvailable()} API after registering the broadcast to check the current
-     * state of Wi-Fi NAN.
-     *
-     * @see #EXTRA_WIFI_STATE
+     * Broadcast intent action to indicate that the state of Wi-Fi NAN availability has changed.
+     * Use the {@link #isAvailable()} to query the current status.
+     * This broadcast is <b>not</b> sticky, use the {@link #isAvailable()} API after registering
+     * the broadcast to check the current state of Wi-Fi NAN.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WIFI_NAN_STATE_CHANGED =
             "android.net.wifi.nan.action.WIFI_NAN_STATE_CHANGED";
-
-    /**
-     * The lookup key for an int value indicating whether Wi-Fi NAN is enabled or
-     * disabled. Retrieve it with
-     * {@link android.content.Intent#getIntExtra(String,int)}.
-     *
-     * @see #WIFI_NAN_STATE_DISABLED
-     * @see #WIFI_NAN_STATE_ENABLED
-     */
-    public static final String EXTRA_WIFI_STATE = "android.net.wifi.nan.extra.WIFI_STATE";
-
-    /**
-     * Wi-Fi NAN is disabled.
-     *
-     * @see #ACTION_WIFI_NAN_STATE_CHANGED
-     */
-    public static final int WIFI_NAN_STATE_DISABLED = 1;
-
-    /**
-     * Wi-Fi NAN is enabled.
-     *
-     * @see #ACTION_WIFI_NAN_STATE_CHANGED
-     */
-    public static final int WIFI_NAN_STATE_ENABLED = 2;
 
     /** @hide */
     @IntDef({
