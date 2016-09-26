@@ -44,6 +44,7 @@ import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -117,6 +118,7 @@ public class RetailDemoModeService extends SystemService {
     private ServiceThread mHandlerThread;
     private PendingIntent mResetDemoPendingIntent;
     private CameraManager mCameraManager;
+    private WifiManager mWifiManager;
     private String[] mCameraIdsWithFlash;
     private Configuration mSystemUserConfiguration;
     private PreloadAppsInstaller mPreloadAppsInstaller;
@@ -491,6 +493,7 @@ public class RetailDemoModeService extends SystemService {
                                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
                                 TAG);
                 mNm = NotificationManager.from(getContext());
+                mWifiManager = (WifiManager) getContext().getSystemService(Context.WIFI_SERVICE);
                 mCameraManager = (CameraManager) getContext()
                         .getSystemService(Context.CAMERA_SERVICE);
                 mCameraIdsWithFlash = getCameraIdsWithFlash();
@@ -528,6 +531,9 @@ public class RetailDemoModeService extends SystemService {
         mAmi.updatePersistentConfigurationForUser(getSystemUsersConfiguration(), userId);
         turnOffAllFlashLights();
         muteVolumeStreams();
+        if (!mWifiManager.isWifiEnabled()) {
+            mWifiManager.setWifiEnabled(true);
+        }
         // Disable lock screen for demo users.
         LockPatternUtils lockPatternUtils = new LockPatternUtils(getContext());
         lockPatternUtils.setLockScreenDisabled(true, userId);
