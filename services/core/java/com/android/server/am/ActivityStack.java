@@ -708,9 +708,10 @@ final class ActivityStack {
         }
         if (task != null) {
             insertTaskAtTop(task, null);
-        } else {
-            task = topTask();
+            return;
         }
+
+        task = topTask();
         if (task != null) {
             mWindowManager.moveTaskToTop(task.taskId);
         }
@@ -2747,6 +2748,7 @@ final class ActivityStack {
         }
         mTaskHistory.add(taskNdx, task);
         updateTaskMovement(task, true);
+        mWindowManager.moveTaskToTop(task.taskId);
     }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask, boolean keepCurTransition,
@@ -2759,7 +2761,6 @@ final class ActivityStack {
             // Insert or replace.
             // Might not even be in.
             insertTaskAtTop(rTask, r);
-            mWindowManager.moveTaskToTop(taskId);
         }
         TaskRecord task = null;
         if (!newTask) {
