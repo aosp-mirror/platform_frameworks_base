@@ -125,19 +125,20 @@ public class WifiNanDiscoverySessionCallback {
      * Called when a discovery (publish or subscribe) operation results in a
      * service discovery.
      *
-     * @param peerId The ID of the peer matching our discovery operation.
+     * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
      *            byte array) provided by the peer as part of its discovery
      *            configuration.
      * @param matchFilter The filter (Tx on advertiser and Rx on listener) which
      *            resulted in this service discovery.
      */
-    public void onServiceDiscovered(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
+    public void onServiceDiscovered(Object peerHandle, byte[] serviceSpecificInfo,
+            byte[] matchFilter) {
         /* empty */
     }
 
     /**
-     * Called in response to {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])}
+     * Called in response to {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[])}
      * when a message is transmitted successfully - i.e. when it was received successfully by the
      * peer (corresponds to an ACK being received).
      * <p>
@@ -154,7 +155,7 @@ public class WifiNanDiscoverySessionCallback {
     /**
      * Called when message transmission fails - when no ACK is received from the peer.
      * Retries when ACKs are not received are done by hardware, MAC, and in the NAN stack (using
-     * the {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[], int)} method) - this
+     * the {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[], int)} method) - this
      * event is received after all retries are exhausted.
      * <p>
      * Note that either this callback or
@@ -169,13 +170,13 @@ public class WifiNanDiscoverySessionCallback {
 
     /**
      * Called when a message is received from a discovery session peer - in response to the
-     * peer's {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[])} or
-     * {@link WifiNanDiscoveryBaseSession#sendMessage(int, int, byte[], int)}.
+     * peer's {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[])} or
+     * {@link WifiNanDiscoveryBaseSession#sendMessage(Object, int, byte[], int)}.
      *
-     * @param peerId The ID of the peer sending the message.
+     * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param message A byte array containing the message.
      */
-    public void onMessageReceived(int peerId, byte[] message) {
+    public void onMessageReceived(Object peerHandle, byte[] message) {
         /* empty */
     }
 }
