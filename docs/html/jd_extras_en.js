@@ -1032,6 +1032,17 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type":"distribute"
   },
   {
+    "title": "Play Games Quality",
+    "category": "google",
+    "summary": "Meet the basic expectations of game players through compelling features and an intuitive, well-designed UI.",
+    "url": "https://developers.google.com/games/services/checklist",
+    "group": "",
+    "keywords": ["games", "play games", "quality"],
+    "tags": [],
+    "image": "images/cards/distribute/engage/card-game-services.png",
+    "type": "distribute"
+  },
+  {
     "title":"Get Started with Analytics",
     "category":"google",
     "summary":"Get advanced insight into how players discover and play your games.",
@@ -4376,6 +4387,7 @@ METADATA['en'].collections = {
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/auto.html",
+      "https://developers.google.com/games/services/checklist",
       "distribute/essentials/quality/billions.html",
       "https://developers.google.com/edu/guidelines"
     ]
