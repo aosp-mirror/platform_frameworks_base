@@ -131,7 +131,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mIsBeingDragged;
     private int mLastMotionY;
     private int mDownX;
-    private int mActivePointerId;
+    private int mActivePointerId = INVALID_POINTER;
     private boolean mTouchIsClick;
     private float mInitialTouchX;
     private float mInitialTouchY;
