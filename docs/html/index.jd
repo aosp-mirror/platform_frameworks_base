@@ -73,7 +73,7 @@ nonavpage=true
       </a>
     </div>
     <div class="col-7of16 col-pull-6of16">
-        <h1 class="dac-hero-title" style="color:#004d40">Android Studio 2.2!</h1>
+        <h1 class="dac-hero-title" style="color:#004d40">Android Studio 2.2</h1>
 
 <p class="dac-hero-description" style="color:#004d40">Packed with 20+ new
 features, Android Studio 2.2 focuses on speed, smarts, and Android platform
@@ -93,9 +93,9 @@ with an updated emulator to test them all out.</p>
       Get Android Studio 2.2
     </a>
   &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
-   <a class="dac-hero-cta" href="/studio/releases/index.html" style="color:#004d40">
+   <a class="dac-hero-cta" href="/studio/features.html" style="color:#004d40">
     <span class="dac-sprite dac-auto-chevron"></span>
-    See the release notes</a>
+    See more features</a>
 </p>
     </div>
   </div>
