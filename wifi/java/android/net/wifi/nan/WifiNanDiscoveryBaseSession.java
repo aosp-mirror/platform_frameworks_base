@@ -144,7 +144,7 @@ public class WifiNanDiscoveryBaseSession {
      *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
      *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)}.
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
      *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}.
@@ -187,7 +187,7 @@ public class WifiNanDiscoveryBaseSession {
      *     {@link WifiNanDiscoverySessionCallback} indicate message was transmitted successfully,
      *     {@link WifiNanDiscoverySessionCallback#onMessageSent(int)}, or transmission failed
      *     (possibly after several retries) -
-     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int, int)}.
+     *     {@link WifiNanDiscoverySessionCallback#onMessageSendFailed(int)}.
      * <p>
      *     The peer will get a callback indicating a message was received using
      *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}.
