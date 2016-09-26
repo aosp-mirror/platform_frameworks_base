@@ -180,7 +180,7 @@ public class BugreportProgressService extends Service {
     /** System property (and value) used to stop dumpstate. */
     // TODO: should call ActiveManager API instead
     private static final String CTL_STOP = "ctl.stop";
-    private static final String BUGREPORT_SERVICE = "bugreportplus";
+    private static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
      * Directory on Shell's data storage where screenshots will be stored.
