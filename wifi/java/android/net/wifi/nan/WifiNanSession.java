@@ -98,7 +98,8 @@ public class WifiNanSession {
      * the specified {@code publishConfig} configuration. The results of the publish operation
      * are routed to the callbacks of {@link WifiNanDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
+     *     <li>
+     *     {@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
      *     is called when the publish session is created and provides a handle to the session.
      *     Further operations on the publish session can be executed on that object.
      *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()} is called if the
@@ -140,7 +141,8 @@ public class WifiNanSession {
      * the specified {@code subscribeConfig} configuration. The results of the subscribe
      * operation are routed to the callbacks of {@link WifiNanDiscoverySessionCallback}:
      * <ul>
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
+     *     <li>
+     *  {@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
      *     is called when the subscribe session is created and provides a handle to the session.
      *     Further operations on the subscribe session can be executed on that object.
      *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()} is called if the
@@ -186,7 +188,7 @@ public class WifiNanSession {
      *     This API is targeted for applications which can obtain the peer MAC address using OOB
      *     (out-of-band) discovery. NAN discovery does not provide the MAC address of the peer -
      *     when using NAN discovery use the alternative network specifier method -
-     *     {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, int, byte[])}.
+     *     {@link WifiNanDiscoveryBaseSession#createNetworkSpecifier(int, Object, byte[])}.
      *
      * @param role  The role of this device:
      *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
