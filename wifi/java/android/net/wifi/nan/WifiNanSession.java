@@ -41,19 +41,17 @@ public class WifiNanSession {
 
     private final WeakReference<WifiNanManager> mMgr;
     private final Binder mBinder;
-    private final Looper mLooper;
     private final int mClientId;
 
     private boolean mTerminated = true;
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /** @hide */
-    public WifiNanSession(WifiNanManager manager, Binder binder, Looper looper, int clientId) {
+    public WifiNanSession(WifiNanManager manager, Binder binder, int clientId) {
         if (VDBG) Log.v(TAG, "New session created: manager=" + manager + ", clientId=" + clientId);
 
         mMgr = new WeakReference<>(manager);
         mBinder = binder;
-        mLooper = looper;
         mClientId = clientId;
         mTerminated = false;
 
@@ -68,7 +66,7 @@ public class WifiNanSession {
      * session-wide destroy.
      * <p>
      * An application may re-attach after a destroy using
-     * {@link WifiNanManager#attach(Handler, WifiNanEventCallback)} .
+     * {@link WifiNanManager#attach(Handler, WifiNanAttachCallback)} .
      */
     public void destroy() {
         WifiNanManager mgr = mMgr.get();
@@ -115,12 +113,14 @@ public class WifiNanSession {
      *      terminate the publish discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      *
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * callback} object. If a null is provided then the application's main thread will be used.
      * @param publishConfig The {@link PublishConfig} specifying the
      *            configuration of the requested publish session.
      * @param callback A {@link WifiNanDiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
      */
-    public void publish(@NonNull PublishConfig publishConfig,
+    public void publish(@Nullable Handler handler, @NonNull PublishConfig publishConfig,
             @NonNull WifiNanDiscoverySessionCallback callback) {
         WifiNanManager mgr = mMgr.get();
         if (mgr == null) {
@@ -131,7 +131,8 @@ public class WifiNanSession {
             Log.e(TAG, "publish: called after termination");
             return;
         }
-        mgr.publish(mClientId, mLooper, publishConfig, callback);
+        mgr.publish(mClientId, (handler == null) ? Looper.getMainLooper() : handler.getLooper(),
+                publishConfig, callback);
     }
 
     /**
@@ -154,12 +155,14 @@ public class WifiNanSession {
      *      terminate the subscribe discovery session once it isn't needed. This will free
      *      resources as well terminate any on-air transmissions.
      *
+     * @param handler The Handler on whose thread to execute the callbacks of the {@code
+     * callback} object. If a null is provided then the application's main thread will be used.
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
      *            configuration of the requested subscribe session.
      * @param callback A {@link WifiNanDiscoverySessionCallback} derived object to be used for
      *                 session event callbacks.
      */
-    public void subscribe(@NonNull SubscribeConfig subscribeConfig,
+    public void subscribe(@Nullable Handler handler, @NonNull SubscribeConfig subscribeConfig,
             @NonNull WifiNanDiscoverySessionCallback callback) {
         WifiNanManager mgr = mMgr.get();
         if (mgr == null) {
@@ -170,7 +173,8 @@ public class WifiNanSession {
             Log.e(TAG, "publish: called after termination");
             return;
         }
-        mgr.subscribe(mClientId, mLooper, subscribeConfig, callback);
+        mgr.subscribe(mClientId, (handler == null) ? Looper.getMainLooper() : handler.getLooper(),
+                subscribeConfig, callback);
     }
 
     /**
