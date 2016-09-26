@@ -2584,6 +2584,16 @@
     <!-- True if the device supports system navigation keys. -->
     <bool name="config_supportSystemNavigationKeys">false</bool>
 
+    <!-- emergency call number for the emergency affordance -->
+    <string name="config_emergency_call_number" translatable="false">112</string>
+
+    <!-- Do not translate. Mcc codes whose existence trigger the presence of emergency
+         affordances-->
+    <integer-array name="config_emergency_mcc_codes" translatable="false">
+        <item>404</item>
+        <item>405</item>
+    </integer-array>
+
     <!-- Package name for the device provisioning package. -->
     <string name="config_deviceProvisioningPackage"></string>
 
