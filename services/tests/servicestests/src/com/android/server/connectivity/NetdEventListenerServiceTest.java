@@ -66,7 +66,7 @@ public class NetdEventListenerServiceTest extends TestCase {
         }
     }
 
-    NetdEventListenerService mNetdService;
+    NetdEventListenerService mNetdEventListenerService;
 
     @Mock ConnectivityManager mCm;
     @Mock IpConnectivityLog mLog;
@@ -77,7 +77,7 @@ public class NetdEventListenerServiceTest extends TestCase {
         MockitoAnnotations.initMocks(this);
         mCallbackCaptor = ArgumentCaptor.forClass(NetworkCallback.class);
         mEvCaptor = ArgumentCaptor.forClass(DnsEvent.class);
-        mNetdService = new NetdEventListenerService(mCm, mLog);
+        mNetdEventListenerService = new NetdEventListenerService(mCm, mLog);
 
         verify(mCm, times(1)).registerNetworkCallback(any(), mCallbackCaptor.capture());
     }
@@ -131,7 +131,7 @@ public class NetdEventListenerServiceTest extends TestCase {
         new Thread() {
             public void run() {
                 while (System.currentTimeMillis() < stop) {
-                    mNetdService.dump(pw);
+                    mNetdEventListenerService.dump(pw);
                 }
             }
         }.start();
@@ -158,7 +158,7 @@ public class NetdEventListenerServiceTest extends TestCase {
 
     void log(int netId, int[] latencies) {
         for (int l : latencies) {
-            mNetdService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l);
+            mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l);
         }
     }
 
