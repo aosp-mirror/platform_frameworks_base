@@ -460,7 +460,7 @@ public class ExampleProvider extends ContentProvider {
                  * present. Get the last path segment from the URI; this is the _ID value.
                  * Then, append the value to the WHERE clause for the query
                  */
-                selection = selection + "_ID = " uri.getLastPathSegment();
+                selection = selection + "_ID = " + uri.getLastPathSegment();
                 break;
 
             default:
