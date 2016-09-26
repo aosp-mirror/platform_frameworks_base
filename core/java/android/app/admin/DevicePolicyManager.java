@@ -5498,6 +5498,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by profile or device owners to set the master volume mute on or off.
+     * This has no effect when set on a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param on {@code true} to mute master volume, {@code false} to turn mute off.
