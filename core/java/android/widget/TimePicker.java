@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
@@ -31,6 +32,8 @@ import android.util.MathUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;
@@ -46,10 +49,35 @@ import libcore.icu.LocaleData;
  */
 @Widget
 public class TimePicker extends FrameLayout {
-    private static final int MODE_SPINNER = 1;
-    private static final int MODE_CLOCK = 2;
+    /**
+     * Presentation mode for the Holo-style time picker that uses a set of
+     * {@link android.widget.NumberPicker}s.
+     *
+     * @see #getMode()
+     * @hide Visible for testing only.
+     */
+    @TestApi
+    public static final int MODE_SPINNER = 1;
+
+    /**
+     * Presentation mode for the Material-style time picker that uses a clock
+     * face.
+     *
+     * @see #getMode()
+     * @hide Visible for testing only.
+     */
+    @TestApi
+    public static final int MODE_CLOCK = 2;
+
+    /** @hide */
+    @IntDef({MODE_SPINNER, MODE_CLOCK})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TimePickerMode {}
 
     private final TimePickerDelegate mDelegate;
+
+    @TimePickerMode
+    private final int mMode;
 
     /**
      * The callback interface used to indicate the time has been adjusted.
@@ -81,10 +109,19 @@ public class TimePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TimePicker, defStyleAttr, defStyleRes);
-        final int mode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
+        final boolean isDialogMode = a.getBoolean(R.styleable.TimePicker_dialogMode, false);
+        final int requestedMode = a.getInt(R.styleable.TimePicker_timePickerMode, MODE_SPINNER);
         a.recycle();
 
-        switch (mode) {
+        if (requestedMode == MODE_CLOCK && isDialogMode) {
+            // You want MODE_CLOCK? YOU CAN'T HANDLE MODE_CLOCK! Well, maybe
+            // you can depending on your screen size. Let's check...
+            mMode = context.getResources().getInteger(R.integer.time_picker_mode);
+        } else {
+            mMode = requestedMode;
+        }
+
+        switch (mMode) {
             case MODE_CLOCK:
                 mDelegate = new TimePickerClockDelegate(
                         this, context, attrs, defStyleAttr, defStyleRes);
@@ -95,6 +132,18 @@ public class TimePicker extends FrameLayout {
                         this, context, attrs, defStyleAttr, defStyleRes);
                 break;
         }
+    }
+
+    /**
+     * @return the picker's presentation mode, one of {@link #MODE_CLOCK} or
+     *         {@link #MODE_SPINNER}
+     * @attr ref android.R.styleable#TimePicker_timePickerMode
+     * @hide Visible for testing only.
+     */
+    @TimePickerMode
+    @TestApi
+    public int getMode() {
+        return mMode;
     }
 
     /**
