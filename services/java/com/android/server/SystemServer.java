@@ -616,7 +616,7 @@ public final class SystemServer {
             traceBeginAndSlog("StartKeyAttestationApplicationIdProviderService");
             ServiceManager.addService("sec_key_att_app_id_provider",
                     new KeyAttestationApplicationIdProviderService(context));
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            traceEnd();
 
             traceBeginAndSlog("StartSchedulingPolicyService");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
