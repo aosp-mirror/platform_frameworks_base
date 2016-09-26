@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"फ़ोन विकल्‍प"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"स्‍क्रीन लॉक"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"पावर बंद"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रिपोर्ट"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट प्राप्त करें"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ईमेल संदेश के रूप में भेजने के लिए, इसके द्वारा आपके डिवाइस की वर्तमान स्थिति के बारे में जानकारी एकत्र की जाएगी. बग रिपोर्ट प्रारंभ करने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया धैर्य रखें."</string>

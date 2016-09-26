@@ -216,6 +216,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zaključavanje ekrana"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Isključi telefon"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao poruka e-pošte. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>

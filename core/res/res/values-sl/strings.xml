@@ -218,6 +218,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefona"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zaklep zaslona"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Izklopi"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Poročilo o napakah"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ustvari poročilo o napakah"</string>
     <string name="bugreport_message" msgid="398447048750350456">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>

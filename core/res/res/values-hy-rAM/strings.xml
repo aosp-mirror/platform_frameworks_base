@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Հեռախոսի ընտրանքներ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Էկրանի փական"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Անջատել"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Գրել սխալի զեկույց"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>

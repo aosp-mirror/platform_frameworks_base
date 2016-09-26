@@ -218,6 +218,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>

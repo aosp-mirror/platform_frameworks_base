@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"手机选项"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"屏幕锁定"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"关机"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"错误报告"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"提交错误报告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>

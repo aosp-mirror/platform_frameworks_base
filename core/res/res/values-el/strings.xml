@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Επιλογές τηλεφώνου"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Κλείδωμα οθόνης"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Απενεργοποίηση"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Αναφορά σφαλμάτων"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Λήψη αναφοράς σφάλματος"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Θα συλλέξει πληροφορίες σχετικά με την τρέχουσα κατάσταση της συσκευής σας και θα τις στείλει μέσω μηνύματος ηλεκτρονικού ταχυδρομείου. Απαιτείται λίγος χρόνος για τη σύνταξη της αναφοράς σφάλματος και την αποστολή της. Κάντε λίγη υπομονή."</string>
