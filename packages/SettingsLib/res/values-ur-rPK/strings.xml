@@ -28,7 +28,10 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏WiFi کنکشن کی ناکامی"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"توثیق کا مسئلہ"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"رینج میں نہیں ہے"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"انٹرنیٹ تک کسی رسائی کا پتہ نہیں چلا، خود بخود دوبارہ منسلک نہیں ہوگا۔"</string>
+    <!-- no translation found for wifi_no_internet_no_reconnect (2211781637653149657) -->
+    <skip />
+    <!-- no translation found for wifi_no_internet (5011955173375805204) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> کی جانب سے محفوظ کردہ"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"‏Wi‑Fi اسسٹنٹ کے ذریعے منسلک ہے"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
