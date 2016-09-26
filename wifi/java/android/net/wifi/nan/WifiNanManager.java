@@ -725,7 +725,7 @@ public class WifiNanManager {
 
         @Override
         public void onConnectFail(int reason) {
-            if (VDBG) Log.v(TAG, "onConfigFailed: reason=" + reason);
+            if (VDBG) Log.v(TAG, "onConnectFail: reason=" + reason);
 
             Message msg = mHandler.obtainMessage(CALLBACK_CONNECT_FAIL);
             msg.arg1 = reason;
