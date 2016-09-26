@@ -31,8 +31,8 @@ import java.lang.ref.WeakReference;
  * {@link WifiNanPublishDiscoverySession} and {@link WifiNanSubscribeDiscoverySession}. This
  * class provides functionality common to both publish and subscribe discovery sessions:
  * <ul>
- *     <li>Sending messages: {@link #sendMessage(int, byte[], int)} or
- *     {@link #sendMessage(int, byte[], int, int)} methods.
+ *     <li>Sending messages: {@link #sendMessage(int, int, byte[])} or
+ *     {@link #sendMessage(int, int, byte[], int)} methods.
  *     <li>Creating a network-specifier when requesting a NAN connection:
  *     {@link #createNetworkSpecifier(int, int, byte[])}.
  * </ul>
@@ -61,7 +61,7 @@ public class WifiNanDiscoveryBaseSession {
 
     /**
      * Return the maximum permitted retry count when sending messages using
-     * {@link #sendMessage(int, byte[], int, int)}.
+     * {@link #sendMessage(int, int, byte[], int)}.
      *
      * @return Maximum retry count when sending messages.
      */
@@ -153,17 +153,17 @@ public class WifiNanDiscoveryBaseSession {
      *            {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])}
      *               or
      *               {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
-     * @param message The message to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
      *            failure. The {@code messageId} is not used internally by the NAN service - it
      *                  can be arbitrary and non-unique.
+     * @param message The message to be transmitted.
      * @param retryCount An integer specifying how many additional service-level (as opposed to PHY
      *            or MAC level) retries should be attempted if there is no ACK from the receiver
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
      */
-    public void sendMessage(int peerId, @Nullable byte[] message, int messageId, int retryCount) {
+    public void sendMessage(int peerId, int messageId, @Nullable byte[] message, int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
             return;
@@ -191,21 +191,21 @@ public class WifiNanDiscoveryBaseSession {
      * <p>
      *     The peer will get a callback indicating a message was received using
      *     {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])}.
-     * Equivalent to {@link #sendMessage(int, byte[], int, int)} with a {@code retryCount} of
+     * Equivalent to {@link #sendMessage(int, int, byte[], int)} with a {@code retryCount} of
      * 0.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
      *            {@link WifiNanDiscoverySessionCallback#onServiceDiscovered(int, byte[], byte[])}
      *               or
      *               {@link WifiNanDiscoverySessionCallback#onMessageReceived(int, byte[])} events.
-     * @param message The message to be transmitted.
      * @param messageId An arbitrary integer used by the caller to identify the message. The same
      *            integer ID will be returned in the callbacks indicating message send success or
      *            failure. The {@code messageId} is not used internally by the NAN service - it
      *                  can be arbitrary and non-unique.
+     * @param message The message to be transmitted.
      */
-    public void sendMessage(int peerId, @Nullable byte[] message, int messageId) {
-        sendMessage(peerId, message, messageId, 0);
+    public void sendMessage(int peerId, int messageId, @Nullable byte[] message) {
+        sendMessage(peerId, messageId, message, 0);
     }
 
     /**
