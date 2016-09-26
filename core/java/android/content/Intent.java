@@ -128,7 +128,7 @@ import static android.content.ContentProvider.maybeAddUserId;
  *     a list of people, which the user can browse through.  This example is a
  *     typical top-level entry into the Contacts application, showing you the
  *     list of people. Selecting a particular person to view would result in a
- *     new intent { <b>{@link #ACTION_VIEW} <i>content://contacts/N</i></b> }
+ *     new intent { <b>{@link #ACTION_VIEW} <i>content://contacts/people/N</i></b> }
  *     being used to start an activity to display that person.</p>
  *   </li>
  * </ul>
