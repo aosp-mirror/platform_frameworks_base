@@ -28,7 +28,10 @@
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
-    <string name="wifi_no_internet" msgid="9151470775868728896">"မည်သည့် အင်တာနက်မျှမရှိပါ၊ အလိုအလျောက် ပြန်လည်မချိတ်ဆက်ပါ။"</string>
+    <!-- no translation found for wifi_no_internet_no_reconnect (2211781637653149657) -->
+    <skip />
+    <!-- no translation found for wifi_no_internet (5011955173375805204) -->
+    <skip />
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_wfa" msgid="3805736726317410714">"ကြိုးမဲ့ကူညီသူမှတဆင့် ချိတ်ဆက်၏"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
