@@ -105,7 +105,7 @@ public class CarStatusBar extends PhoneStatusBar implements
                         R.dimen.status_bar_connected_device_signal_margin_end));
 
         mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
-                mSignalsView);
+                mSignalsView, mBluetoothController);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);

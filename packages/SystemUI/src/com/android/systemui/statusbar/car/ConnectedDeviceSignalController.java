@@ -17,11 +17,15 @@ import android.view.View;
 import android.widget.ImageView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ScalingDrawableWrapper;
+import com.android.systemui.statusbar.policy.BluetoothController;
+
+import static com.android.systemui.statusbar.phone.PhoneStatusBar.DEBUG;
 
 /**
  * Controller that monitors signal strength for a device that is connected via bluetooth.
  */
-public class ConnectedDeviceSignalController extends BroadcastReceiver {
+public class ConnectedDeviceSignalController extends BroadcastReceiver implements
+        BluetoothController.Callback {
     private final static String TAG = "DeviceSignalCtlr";
 
     /**
@@ -54,18 +58,21 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
 
     private final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
     private final Context mContext;
-    private final View mSignalsView;
+    private final BluetoothController mController;
 
+    private final View mSignalsView;
     private final ImageView mNetworkSignalView;
 
     private final float mIconScaleFactor;
 
     private BluetoothHeadsetClient mBluetoothHeadsetClient;
 
-    public ConnectedDeviceSignalController(Context context, View signalsView) {
+    public ConnectedDeviceSignalController(Context context, View signalsView,
+            BluetoothController controller) {
         mContext = context;
-        mSignalsView = signalsView;
+        mController = controller;
 
+        mSignalsView = signalsView;
         mNetworkSignalView = (ImageView)
                 mSignalsView.findViewById(R.id.connected_device_network_signal);
 
@@ -86,22 +93,46 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         filter.addAction(BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothHeadsetClient.ACTION_AG_EVENT);
         mContext.registerReceiver(this, filter);
+
+        mController.addStateChangedCallback(this);
     }
 
     public void stopListening() {
         mContext.unregisterReceiver(this);
+        mController.removeStateChangedCallback(this);
+    }
+
+    @Override
+    public void onBluetoothDevicesChanged() {
+        // Nothing to do here because this Controller is not displaying a list of possible
+        // bluetooth devices.
+    }
+
+    @Override
+    public void onBluetoothStateChange(boolean enabled) {
+        if (DEBUG) {
+            Log.d(TAG, "onBluetoothStateChange(). enabled: " + enabled);
+        }
+
+        // Only need to handle the case if bluetooth has been disabled, in which case the
+        // signal indicators are hidden. If bluetooth has been enabled, then this class should
+        // receive updates to the connection state via onReceive().
+        if (!enabled) {
+            mNetworkSignalView.setVisibility(View.GONE);
+            mSignalsView.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
 
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
+        if (DEBUG) {
             Log.d(TAG, "onReceive(). action: " + action);
         }
 
         if (BluetoothHeadsetClient.ACTION_AG_EVENT.equals(action)) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "Received ACTION_AG_EVENT");
             }
 
@@ -109,13 +140,13 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         } else if (BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
             int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
 
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 int oldState = intent.getIntExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, -1);
                 Log.d(TAG, "ACTION_CONNECTION_STATE_CHANGED event: "
                         + oldState + " -> " + newState);
             }
             BluetoothDevice device =
-                    (BluetoothDevice)intent.getExtra(BluetoothDevice.EXTRA_DEVICE);
+                    (BluetoothDevice) intent.getExtra(BluetoothDevice.EXTRA_DEVICE);
             updateViewVisibility(device, newState);
         }
     }
@@ -128,7 +159,7 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         int networkStatus = intent.getIntExtra(BluetoothHeadsetClient.EXTRA_NETWORK_STATUS,
                 INVALID_SIGNAL);
         if (networkStatus != INVALID_SIGNAL) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "EXTRA_NETWORK_STATUS: " + " " + networkStatus);
             }
 
@@ -140,7 +171,7 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         int signalStrength = intent.getIntExtra(
                 BluetoothHeadsetClient.EXTRA_NETWORK_SIGNAL_STRENGTH, INVALID_SIGNAL);
         if (signalStrength != INVALID_SIGNAL) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "EXTRA_NETWORK_SIGNAL_STRENGTH: " + signalStrength);
             }
 
@@ -150,7 +181,7 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         int roamingStatus = intent.getIntExtra(BluetoothHeadsetClient.EXTRA_NETWORK_ROAMING,
                 INVALID_SIGNAL);
         if (roamingStatus != INVALID_SIGNAL) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "EXTRA_NETWORK_ROAMING: " + roamingStatus);
             }
         }
@@ -169,7 +200,7 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
 
     private void updateViewVisibility(BluetoothDevice device, int newState) {
         if (newState == BluetoothProfile.STATE_CONNECTED) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "Device connected");
             }
 
@@ -186,14 +217,14 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
             int signalStrength = featuresBundle.getInt(
                     BluetoothHeadsetClient.EXTRA_NETWORK_SIGNAL_STRENGTH, INVALID_SIGNAL);
             if (signalStrength != INVALID_SIGNAL) {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                if (DEBUG) {
                     Log.d(TAG, "EXTRA_NETWORK_SIGNAL_STRENGTH: " + signalStrength);
                 }
 
                 setNetworkSignalIcon(SIGNAL_STRENGTH_ICONS[signalStrength]);
             }
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (DEBUG) {
                 Log.d(TAG, "Device disconnected");
             }
 
