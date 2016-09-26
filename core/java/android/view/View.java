@@ -8057,7 +8057,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Set the enabled state of this view.
+     * Set the visibility state of this view.
      *
      * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
      * @attr ref android.R.styleable#View_visibility
