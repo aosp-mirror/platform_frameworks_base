@@ -28,9 +28,6 @@ page.tags="users, growth, promotion"
     Link to Your Apps in Google Play
   </h2>
 
-
-</div>
-
 <p>
   After publishing your apps, you can take Android users directly to your
   app/games detail page on Google Play by <a href=
@@ -63,9 +60,6 @@ page.tags="users, growth, promotion"
   <h2 id="use-the-google-play-badge">
     Use the Google Play Badge
   </h2>
-
-
-</div>
 
 <div class="figure" style="margin:0 3em;">
   <img src="{@docRoot}images/gp-build-buzz-uplift-1.png">
