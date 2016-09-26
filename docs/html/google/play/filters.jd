@@ -382,9 +382,12 @@ characteristics that affect filtering on Google Play.</p>
   suspended, users will not be able to reinstall or update it, even if it appears in their Downloads.</p> </td></tr>
   <tr>
   <td valign="top">Priced
-    Status</td> <td valign="top"><p>Not all users can see paid apps. To show paid apps, a device
-must have a SIM card and be running Android 1.1 or later, and it must be in a
-country (as determined by SIM carrier) in which paid apps are available.</p></td>
+    Status</td> <td valign="top"><p>Not all users can see paid apps. To show
+    paid apps, a device must be running Android 1.1 or later, and it must be in
+    a country where paid apps are available. If a device has a SIM card, the SIM
+    carrier determines whether paid apps are available. If a device doesn't have
+    a SIM card, the device's IP address is used to determine whether the device
+    is in a country where paid apps are available.</p></td>
 </tr> <tr>
   <td valign="top">Country Targeting</td> <td valign="top"> <p>When you upload your app to
     Google Play, you can select the countries in which to distribute your app
