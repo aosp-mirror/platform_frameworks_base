@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference;
  *     <li>Sending messages: {@link #sendMessage(Object, int, byte[])} or
  *     {@link #sendMessage(Object, int, byte[], int)} methods.
  *     <li>Creating a network-specifier when requesting a NAN connection:
- *     {@link #createNetworkSpecifier(int, int, byte[])}.
+ *     {@link #createNetworkSpecifier(int, Object, byte[])}.
  * </ul>
  * The {@link #destroy()} method must be called to destroy discovery sessions once they are
  * no longer needed.

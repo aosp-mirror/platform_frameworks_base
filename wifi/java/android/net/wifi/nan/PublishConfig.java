@@ -32,7 +32,8 @@ import java.util.Arrays;
 /**
  * Defines the configuration of a NAN publish session. Built using
  * {@link PublishConfig.Builder}. A publish session is created using
- * {@link WifiNanSession#publish(PublishConfig, WifiNanDiscoverySessionCallback)} or updated using
+ * {@link WifiNanSession#publish(android.os.Handler, PublishConfig, WifiNanDiscoverySessionCallback)}
+ * or updated using
  * {@link WifiNanPublishDiscoverySession#updatePublish(PublishConfig)}.
  *
  * @hide PROPOSED_NAN_API
