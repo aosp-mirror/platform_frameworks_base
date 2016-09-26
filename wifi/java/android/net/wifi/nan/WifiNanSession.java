@@ -101,7 +101,7 @@ public class WifiNanSession {
      *     <li>{@link WifiNanDiscoverySessionCallback#onPublishStarted(WifiNanPublishDiscoverySession)}
      *     is called when the publish session is created and provides a handle to the session.
      *     Further operations on the publish session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)} is called if the
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()} is called if the
      *     publish operation failed.
      * </ul>
      * <p>
@@ -143,7 +143,7 @@ public class WifiNanSession {
      *     <li>{@link WifiNanDiscoverySessionCallback#onSubscribeStarted(WifiNanSubscribeDiscoverySession)}
      *     is called when the subscribe session is created and provides a handle to the session.
      *     Further operations on the subscribe session can be executed on that object.
-     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed(int)} is called if the
+     *     <li>{@link WifiNanDiscoverySessionCallback#onSessionConfigFailed()} is called if the
      *     subscribe operation failed.
      * </ul>
      * <p>
