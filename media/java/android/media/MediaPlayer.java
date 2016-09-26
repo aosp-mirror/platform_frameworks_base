@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -982,13 +983,16 @@ public class MediaPlayer extends PlayerBase
     public void setDataSource(@NonNull Context context, @NonNull Uri uri,
             @Nullable Map<String, String> headers) throws IOException, IllegalArgumentException,
                     SecurityException, IllegalStateException {
+        // The context and URI usually belong to the calling user. Get a resolver for that user
+        // and strip out the userId from the URI if present.
         final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
+        final String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             setDataSource(uri.getPath());
             return;
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                && Settings.AUTHORITY.equals(uri.getAuthority())) {
+                && Settings.AUTHORITY.equals(authority)) {
             // Try cached ringtone first since the actual provider may not be
             // encryption aware, or it may be stored on CE media storage
             final int type = RingtoneManager.getDefaultType(uri);

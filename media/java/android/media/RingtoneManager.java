@@ -816,6 +816,7 @@ public class RingtoneManager {
      * @return The type of the defaultRingtoneUri, or -1.
      */
     public static int getDefaultType(Uri defaultRingtoneUri) {
+        defaultRingtoneUri = ContentProvider.getUriWithoutUserId(defaultRingtoneUri);
         if (defaultRingtoneUri == null) {
             return -1;
         } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
