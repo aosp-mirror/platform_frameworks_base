@@ -700,7 +700,7 @@ public class WifiNanManager {
                             break;
                         case CALLBACK_CONNECT_FAIL:
                             mNanManager.clear();
-                            attachCallback.onAttachFailed(msg.arg1);
+                            attachCallback.onAttachFailed();
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
                             identityChangedListener.onIdentityChanged((byte[]) msg.obj);
@@ -857,7 +857,7 @@ public class WifiNanManager {
                             mOriginalCallback.onSessionConfigUpdated();
                             break;
                         case CALLBACK_SESSION_CONFIG_FAIL:
-                            mOriginalCallback.onSessionConfigFailed(msg.arg1);
+                            mOriginalCallback.onSessionConfigFailed();
                             if (mSession == null) {
                                 /*
                                  * creation failed (as opposed to update
@@ -879,7 +879,7 @@ public class WifiNanManager {
                             mOriginalCallback.onMessageSent(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_SEND_FAIL:
-                            mOriginalCallback.onMessageSendFailed(msg.arg1, msg.arg2);
+                            mOriginalCallback.onMessageSendFailed(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
                             mOriginalCallback.onMessageReceived(msg.arg1, (byte[]) msg.obj);
