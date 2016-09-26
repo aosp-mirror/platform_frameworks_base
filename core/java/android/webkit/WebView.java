@@ -188,7 +188,7 @@ import java.util.Map;
  * <p>By default, requests by the HTML to open new windows are
  * ignored. This is true whether they be opened by JavaScript or by
  * the target attribute on a link. You can customize your
- * {@link WebChromeClient} to provide your own behaviour for opening multiple windows,
+ * {@link WebChromeClient} to provide your own behavior for opening multiple windows,
  * and render them in whatever manner you want.</p>
  *
  * <p>The standard behavior for an Activity is to be destroyed and
@@ -281,7 +281,7 @@ import java.util.Map;
  * <ul>
  * <li>The HTML body layout height is set to a fixed value. This means that elements with a height
  * relative to the HTML body may not be sized correctly. </li>
- * <li>For applications targetting {@link android.os.Build.VERSION_CODES#KITKAT} and earlier SDKs the
+ * <li>For applications targeting {@link android.os.Build.VERSION_CODES#KITKAT} and earlier SDKs the
  * HTML viewport meta tag will be ignored in order to preserve backwards compatibility. </li>
  * </ul>
  * </p>
@@ -596,7 +596,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Constructs a new WebView with layout parameters, a default style and a set
-     * of custom Javscript interfaces to be added to this WebView at initialization
+     * of custom JavaScript interfaces to be added to this WebView at initialization
      * time. This guarantees that these interfaces will be available when the JS
      * context is initialized.
      *
@@ -610,7 +610,7 @@ public class WebView extends AbsoluteLayout
      *                             values
      * @param privateBrowsing whether this WebView will be initialized in
      *                        private mode
-     * @hide This is used internally by dumprendertree, as it requires the javaScript interfaces to
+     * @hide This is used internally by dumprendertree, as it requires the JavaScript interfaces to
      *       be added synchronously, before a subsequent loadUrl call takes effect.
      */
     protected WebView(Context context, AttributeSet attrs, int defStyleAttr,
@@ -723,7 +723,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Sets a username and password pair for the specified host. This data is
-     * used by the Webview to autocomplete username and password fields in web
+     * used by the WebView to autocomplete username and password fields in web
      * forms. Note that this is unrelated to the credentials used for HTTP
      * authentication.
      *
@@ -926,7 +926,7 @@ public class WebView extends AbsoluteLayout
      *            value. Note that if this map contains any of the headers
      *            that are set by default by this WebView, such as those
      *            controlling caching, accept types or the User-Agent, their
-     *            values may be overriden by this WebView's defaults.
+     *            values may be overridden by this WebView's defaults.
      */
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
@@ -1047,7 +1047,7 @@ public class WebView extends AbsoluteLayout
      * @param script the JavaScript to execute.
      * @param resultCallback A callback to be invoked when the script execution
      *                       completes with the result of the execution (if any).
-     *                       May be null if no notificaion of the result is required.
+     *                       May be null if no notification of the result is required.
      */
     public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
         checkThread();
@@ -1118,7 +1118,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Gets whether this WebView has a forward history item.
      *
-     * @return true iff this Webview has a forward history item
+     * @return true iff this WebView has a forward history item
      */
     public boolean canGoForward() {
         checkThread();
@@ -1192,14 +1192,14 @@ public class WebView extends AbsoluteLayout
      * Posts a {@link VisualStateCallback}, which will be called when
      * the current state of the WebView is ready to be drawn.
      *
-     * <p>Because updates to the the DOM are processed asynchronously, updates to the DOM may not
+     * <p>Because updates to the DOM are processed asynchronously, updates to the DOM may not
      * immediately be reflected visually by subsequent {@link WebView#onDraw} invocations. The
      * {@link VisualStateCallback} provides a mechanism to notify the caller when the contents of
      * the DOM at the current time are ready to be drawn the next time the {@link WebView}
      * draws.</p>
      *
      * <p>The next draw after the callback completes is guaranteed to reflect all the updates to the
-     * DOM up to the the point at which the {@link VisualStateCallback} was posted, but it may also
+     * DOM up to the point at which the {@link VisualStateCallback} was posted, but it may also
      * contain updates applied after the callback was posted.</p>
      *
      * <p>The state of the DOM covered by this API includes the following:
@@ -1232,7 +1232,7 @@ public class WebView extends AbsoluteLayout
      * </ul></p>
      *
      * <p>When using this API it is also recommended to enable pre-rasterization if the {@link
-     * WebView} is offscreen to avoid flickering. See {@link WebSettings#setOffscreenPreRaster} for
+     * WebView} is off screen to avoid flickering. See {@link WebSettings#setOffscreenPreRaster} for
      * more details and do consider its caveats.</p>
      *
      * @param requestId An id that will be returned in the callback to allow callers to match
@@ -1297,11 +1297,11 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Creates a PrintDocumentAdapter that provides the content of this Webview for printing.
+     * Creates a PrintDocumentAdapter that provides the content of this WebView for printing.
      *
-     * The adapter works by converting the Webview contents to a PDF stream. The Webview cannot
+     * The adapter works by converting the WebView contents to a PDF stream. The WebView cannot
      * be drawn during the conversion process - any such draws are undefined. It is recommended
-     * to use a dedicated off screen Webview for the printing. If necessary, an application may
+     * to use a dedicated off screen WebView for the printing. If necessary, an application may
      * temporarily hide a visible WebView by using a custom PrintDocumentAdapter instance
      * wrapped around the object returned and observing the onStart and onFinish methods. See
      * {@link android.print.PrintDocumentAdapter} for more information.
@@ -1336,7 +1336,7 @@ public class WebView extends AbsoluteLayout
      * {@link WebSettings#getUseWideViewPort()} and
      * {@link WebSettings#getLoadWithOverviewMode()}.
      * If the content fits into the WebView control by width, then
-     * the zoom is set to 100%. For wide content, the behavor
+     * the zoom is set to 100%. For wide content, the behavior
      * depends on the state of {@link WebSettings#getLoadWithOverviewMode()}.
      * If its value is true, the content will be zoomed out to be fit
      * by width into the WebView control, otherwise not.
@@ -1613,10 +1613,10 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Clears the client certificate preferences stored in response
-     * to proceeding/cancelling client cert requests. Note that Webview
+     * to proceeding/cancelling client cert requests. Note that WebView
      * automatically clears these preferences when it receives a
      * {@link KeyChain#ACTION_STORAGE_CHANGED} intent. The preferences are
-     * shared by all the webviews that are created by the embedder application.
+     * shared by all the WebViews that are created by the embedder application.
      *
      * @param onCleared  A runnable to be invoked when client certs are cleared.
      *                   The embedder can pass null if not interested in the
@@ -1672,7 +1672,7 @@ public class WebView extends AbsoluteLayout
      * Notifies any registered {@link FindListener}.
      *
      * @param find the string to find
-     * @return the number of occurances of the String "find" that were found
+     * @return the number of occurrences of the String "find" that were found
      * @deprecated {@link #findAllAsync} is preferred.
      * @see #setFindListener
      */
@@ -2087,7 +2087,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Performs a zoom operation in this WebView.
      *
-     * @param zoomFactor the zoom factor to apply. The zoom factor will be clamped to the Webview's
+     * @param zoomFactor the zoom factor to apply. The zoom factor will be clamped to the WebView's
      * zoom limits. This value must be in the range 0.01 to 100.0 inclusive.
      */
     public void zoomBy(float zoomFactor) {
@@ -2152,7 +2152,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Gets the WebViewProvider. Used by providers to obtain the underlying
-     * implementation, e.g. when the appliction responds to
+     * implementation, e.g. when the application responds to
      * WebViewClient.onCreateWindow() request.
      *
      * @hide WebViewProvider is not public API.
