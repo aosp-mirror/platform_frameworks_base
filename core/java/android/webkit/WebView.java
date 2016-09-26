@@ -743,33 +743,14 @@ public class WebView extends AbsoluteLayout
     /**
      * Stores HTTP authentication credentials for a given host and realm to the {@link WebViewDatabase}
      * instance.
-     * <p>
-     * To use HTTP authentication, the embedder application has to implement
-     * {@link WebViewClient#onReceivedHttpAuthRequest}, and call {@link HttpAuthHandler#proceed}
-     * with the correct username and password.
-     * <p>
-     * The embedder app can get the username and password any way it chooses, and does not have to
-     * use {@link WebViewDatabase}.
-     * <p>
-     * Notes:
-     * <li>
-     * {@link WebViewDatabase} is provided only as a convenience to store and retrieve http
-     * authentication credentials. WebView does not read from it during HTTP authentication.
-     * </li>
-     * <li>
-     * WebView does not provide a special mechanism to clear HTTP authentication credentials for
-     * implementing client logout. The client logout mechanism should be implemented by the Web site
-     * designer (such as server sending a HTTP 401 for invalidating credentials).
-     * </li>
      *
      * @param host the host to which the credentials apply
      * @param realm the realm to which the credentials apply
      * @param username the username
      * @param password the password
-     * @see #getHttpAuthUsernamePassword
-     * @see WebViewDatabase#hasHttpAuthUsernamePassword
-     * @see WebViewDatabase#clearHttpAuthUsernamePassword
+     * @deprecated Use {@link WebViewDatabase#setHttpAuthUsernamePassword} instead
      */
+    @Deprecated
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
         checkThread();
@@ -779,16 +760,14 @@ public class WebView extends AbsoluteLayout
     /**
      * Retrieves HTTP authentication credentials for a given host and realm from the {@link
      * WebViewDatabase} instance.
-     *
      * @param host the host to which the credentials apply
      * @param realm the realm to which the credentials apply
      * @return the credentials as a String array, if found. The first element
      *         is the username and the second element is the password. Null if
      *         no credentials are found.
-     * @see #setHttpAuthUsernamePassword
-     * @see WebViewDatabase#hasHttpAuthUsernamePassword
-     * @see WebViewDatabase#clearHttpAuthUsernamePassword
+     * @deprecated Use {@link WebViewDatabase#getHttpAuthUsernamePassword} instead
      */
+    @Deprecated
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
         checkThread();
         return mProvider.getHttpAuthUsernamePassword(host, realm);
