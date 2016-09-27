@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ជម្រើស​ទូរស័ព្ទ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ចាក់​សោ​អេក្រង់"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"បិទ"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"របាយការណ៍​កំហុស"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"យក​របាយការណ៍​កំហុស"</string>
     <string name="bugreport_message" msgid="398447048750350456">"វា​នឹង​​ប្រមូល​ព័ត៌មាន​អំពី​ស្ថានភាព​ឧបករណ៍​របស់​អ្នក ដើម្បី​ផ្ញើ​ជា​សារ​អ៊ីមែល។ វា​នឹង​ចំណាយ​ពេល​តិច​ពី​ពេល​ចាប់ផ្ដើម​របាយការណ៍​រហូត​ដល់​ពេល​វា​រួចរាល់​ដើម្បី​ផ្ញើ សូម​អត់ធ្មត់។"</string>

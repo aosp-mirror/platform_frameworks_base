@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Foonopsies"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skermslot"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Sit af"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Foutverslag"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Neem foutverslag"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Dit sal inligting oor die huidige toestand van jou toestel insamel om as \'n e-posboodskap te stuur. Dit sal \'n tydjie neem vandat die foutverslag begin is totdat dit reg is om gestuur te word; wees asseblief geduldig."</string>

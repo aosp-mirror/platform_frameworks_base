@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ফোন বিকল্পগুলি"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"স্ক্রীণ লক"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"পাওয়ার বন্ধ করুন"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"ত্রুটির প্রতিবেদন"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির অভিযোগ করুন"</string>
     <string name="bugreport_message" msgid="398447048750350456">"এটি একটি ই-মেল বার্তা পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; দয়া করে ধৈর্য রাখুন৷"</string>

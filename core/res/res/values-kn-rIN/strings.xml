@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"ಫೋನ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"ದೋಷದ ವರದಿ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷ ವರದಿ ರಚಿಸಿ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ನಿಮ್ಮ ಸಾಧನದ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳುವುದರ ಜೊತೆ ಇ-ಮೇಲ್ ರೂಪದಲ್ಲಿ ನಿಮಗೆ ರವಾನಿಸುತ್ತದೆ. ಇದು ದೋಷ ವರದಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಸಮಯದಿಂದ ಅದನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಸ್ವಲ್ಪ ಸಮಯವನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ; ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ."</string>
@@ -979,8 +981,8 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"ಇದನ್ನು ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"ಕಳುಹಿಸು"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"ಹೋಮ್‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಹೋಮ್‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌  ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"ಮುಖಪುಟ‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>

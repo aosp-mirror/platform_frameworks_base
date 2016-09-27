@@ -218,6 +218,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметри телеф."</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Заблок. екран"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Вимкнути"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Звіт про помилки"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Звіт про помилку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Інформація про поточний стан вашого пристрою буде зібрана й надіслана електронною поштою. Підготовка звіту триватиме певний час."</string>

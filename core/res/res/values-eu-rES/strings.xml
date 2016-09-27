@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoaren aukerak"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Pantailaren blokeoa"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Itzali"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Akatsen txostena"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
