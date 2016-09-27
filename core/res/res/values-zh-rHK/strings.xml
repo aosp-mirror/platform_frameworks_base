@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"手機選項"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"螢幕鎖定"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"關閉"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"錯誤報告"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"取得錯誤報告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"這會收集您目前裝置狀態的相關資訊，並以電郵傳送給您。從開始建立錯誤報告到準備傳送需要一段時間，請耐心等候。"</string>

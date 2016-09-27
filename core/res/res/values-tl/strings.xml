@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Pagpipilian sa telepono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Pag-lock sa screen"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"I-off"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ulat sa bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kunin ang ulat sa bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Mangongolekta ito ng impormasyon tungkol sa kasalukuyang katayuan ng iyong device, na ipapadala bilang mensaheng e-mail. Gugugol ito ng kaunting oras mula sa pagsisimula ng ulat sa bug hanggang sa handa na itong maipadala; mangyaring magpasensya."</string>
@@ -1150,7 +1152,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Nakakonekta sa isang accessory ng USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"I-tap para sa higit pang mga opsyon."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"I-tap upang i-disable ang pagde-debug ng USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"I-tap upang i-disable ang pag-debug ng USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Ibinabahagi ang ulat ng bug…"</string>
