@@ -84,8 +84,8 @@ public class DozeParameters {
         return getPulseInDuration(pickup) + getPulseVisibleDuration() + getPulseOutDuration();
     }
 
-    public int getPulseInDuration(boolean pickup) {
-        return pickup
+    public int getPulseInDuration(boolean pickupOrDoubleTap) {
+        return pickupOrDoubleTap
                 ? getInt("doze.pulse.duration.in.pickup", R.integer.doze_pulse_duration_in_pickup)
                 : getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
@@ -112,6 +112,10 @@ public class DozeParameters {
 
     public boolean getVibrateOnPickup() {
         return SystemProperties.getBoolean("doze.vibrate.pickup", false);
+    }
+
+    public String getDoubleTapSensorType() {
+        return mContext.getString(R.string.doze_double_tap_sensor_type);
     }
 
     public boolean getProxCheckBeforePulse() {
