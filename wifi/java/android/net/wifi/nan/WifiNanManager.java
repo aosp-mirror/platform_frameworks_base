@@ -461,15 +461,20 @@ public class WifiNanManager {
     /** @hide */
     public void sendMessage(int clientId, int sessionId, Object peerHandle, byte[] message,
             int messageId, int retryCount) {
+        if (peerHandle == null) {
+            throw new IllegalArgumentException(
+                    "sendMessage: invalid peerHandle - must be non-null");
+        }
+
         if (VDBG) {
             Log.v(TAG, "sendMessage(): clientId=" + clientId + ", sessionId=" + sessionId
-                    + ", peerHandle=" + peerHandle + ", messageId=" + messageId + ", retryCount="
-                    + retryCount);
+                    + ", peerHandle=" + ((OpaquePeerHandle) peerHandle).peerId + ", messageId="
+                    + messageId + ", retryCount=" + retryCount);
         }
 
         try {
-            mService.sendMessage(clientId, sessionId, (Integer) peerHandle, message, messageId,
-                    retryCount);
+            mService.sendMessage(clientId, sessionId, ((OpaquePeerHandle) peerHandle).peerId,
+                    message, messageId, retryCount);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -501,7 +506,8 @@ public class WifiNanManager {
             byte[] token) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
-                    + ", peerHandle=" + peerHandle + ", token=" + token);
+                    + ", peerHandle=" + ((peerHandle == null) ? peerHandle
+                    : ((OpaquePeerHandle) peerHandle).peerId) + ", token=" + token);
         }
 
         int type;
@@ -541,7 +547,7 @@ public class WifiNanManager {
             json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
             json.put(NETWORK_SPECIFIER_KEY_SESSION_ID, sessionId);
             if (peerHandle != null) {
-                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, (Integer) peerHandle);
+                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, ((OpaquePeerHandle) peerHandle).peerId);
             }
             if (token != null) {
                 json.put(NETWORK_SPECIFIER_KEY_TOKEN,
@@ -846,7 +852,7 @@ public class WifiNanManager {
                             break;
                         case CALLBACK_MATCH:
                             mOriginalCallback.onServiceDiscovered(
-                                    Integer.valueOf(msg.arg1),
+                                    new OpaquePeerHandle(msg.arg1),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
                                     msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2));
                             break;
@@ -857,7 +863,7 @@ public class WifiNanManager {
                             mOriginalCallback.onMessageSendFailed(msg.arg1);
                             break;
                         case CALLBACK_MESSAGE_RECEIVED:
-                            mOriginalCallback.onMessageReceived(Integer.valueOf(msg.arg1),
+                            mOriginalCallback.onMessageReceived(new OpaquePeerHandle(msg.arg1),
                                     (byte[]) msg.obj);
                             break;
                     }
@@ -987,5 +993,14 @@ public class WifiNanManager {
             mNanManager.clear();
             mOriginalCallback.onSessionTerminated(reason);
         }
+    }
+
+    /** @hide */
+    public static class OpaquePeerHandle {
+        public OpaquePeerHandle(int peerId) {
+            this.peerId = peerId;
+        }
+
+        public int peerId;
     }
 }
