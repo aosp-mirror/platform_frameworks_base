@@ -109,10 +109,11 @@ public class DozeScrimController {
 
     public void onScreenTurnedOn() {
         if (isPulsing()) {
-            final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
+            final boolean pickupOrDoubleTap = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP
+                    || mPulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
             startScrimAnimation(true /* inFront */, 0f,
-                    mDozeParameters.getPulseInDuration(pickup),
-                    pickup ? Interpolators.LINEAR_OUT_SLOW_IN : Interpolators.ALPHA_OUT,
+                    mDozeParameters.getPulseInDuration(pickupOrDoubleTap),
+                    pickupOrDoubleTap ? Interpolators.LINEAR_OUT_SLOW_IN : Interpolators.ALPHA_OUT,
                     mPulseInFinished);
         }
     }
