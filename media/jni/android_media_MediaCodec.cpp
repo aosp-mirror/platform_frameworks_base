@@ -32,6 +32,7 @@
 #include <gui/Surface.h>
 
 #include <media/ICrypto.h>
+#include <media/MediaCodecBuffer.h>
 #include <media/stagefright/MediaCodec.h>
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -407,7 +408,7 @@ status_t JMediaCodec::getOutputFormat(JNIEnv *env, size_t index, jobject *format
 
 status_t JMediaCodec::getBuffers(
         JNIEnv *env, bool input, jobjectArray *bufArray) const {
-    Vector<sp<ABuffer> > buffers;
+    Vector<sp<MediaCodecBuffer> > buffers;
 
     status_t err =
         input
@@ -425,7 +426,7 @@ status_t JMediaCodec::getBuffers(
     }
 
     for (size_t i = 0; i < buffers.size(); ++i) {
-        const sp<ABuffer> &buffer = buffers.itemAt(i);
+        const sp<MediaCodecBuffer> &buffer = buffers.itemAt(i);
 
         jobject byteBuffer = NULL;
         err = createByteBufferFromABuffer(
@@ -446,8 +447,9 @@ status_t JMediaCodec::getBuffers(
 }
 
 // static
+template <typename T>
 status_t JMediaCodec::createByteBufferFromABuffer(
-        JNIEnv *env, bool readOnly, bool clearBuffer, const sp<ABuffer> &buffer,
+        JNIEnv *env, bool readOnly, bool clearBuffer, const sp<T> &buffer,
         jobject *buf) const {
     // if this is an ABuffer that doesn't actually hold any accessible memory,
     // use a null ByteBuffer
@@ -492,7 +494,7 @@ status_t JMediaCodec::createByteBufferFromABuffer(
 
 status_t JMediaCodec::getBuffer(
         JNIEnv *env, bool input, size_t index, jobject *buf) const {
-    sp<ABuffer> buffer;
+    sp<MediaCodecBuffer> buffer;
 
     status_t err =
         input
@@ -509,7 +511,7 @@ status_t JMediaCodec::getBuffer(
 
 status_t JMediaCodec::getImage(
         JNIEnv *env, bool input, size_t index, jobject *buf) const {
-    sp<ABuffer> buffer;
+    sp<MediaCodecBuffer> buffer;
 
     status_t err =
         input
