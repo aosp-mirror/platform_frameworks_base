@@ -23,6 +23,7 @@
 #include <tinyalsa/asoundlib.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <media/AudioSystem.h>
 
 #define ID_RIFF 0x46464952
 #define ID_WAVE 0x45564157
@@ -142,6 +143,9 @@ bool AudioPlayer::init(const char* config)
     int tempInt;
     struct mixer* mixer = NULL;
     char    name[MAX_LINE_LENGTH];
+
+    // Fake call to wait for audio HAL initialization completion
+    AudioSystem::getParameters(String8(""));
 
     for (;;) {
         const char* endl = strstr(config, "\n");
