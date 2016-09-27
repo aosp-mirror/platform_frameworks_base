@@ -289,25 +289,6 @@ public final class SubscribeConfig implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the subscribe session - a simple wrapper
-         * of {@link SubscribeConfig.Builder#setServiceSpecificInfo(byte[])}
-         * obtaining the data from a String.
-         * <p>
-         *     Optional. Empty by default.
-         *
-         * @param serviceSpecificInfoStr The service specific information string
-         *            to be included (as a byte array) in the subscribe
-         *            information.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setServiceSpecificInfo(@NonNull String serviceSpecificInfoStr) {
-            mServiceSpecificInfo = serviceSpecificInfoStr.getBytes();
-            return this;
-        }
-
-        /**
          * The match filter for a subscribe session. Used to determine whether a service
          * discovery occurred - in addition to relying on the service name.
          * <p>
