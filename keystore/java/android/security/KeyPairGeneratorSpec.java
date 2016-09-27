@@ -251,8 +251,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Builder class for {@link KeyPairGeneratorSpec} objects.
      * <p>
-     * This will build a parameter spec for use with the <a href="{@docRoot}
-     * training/articles/keystore.html">Android KeyStore facility</a>.
+     * This will build a parameter spec for use with the
+     * <a href="{@docRoot}training/articles/keystore.html">Android KeyStore
+     * facility</a>.
      * <p>
      * The required fields must be filled in with the builder.
      * <p>
