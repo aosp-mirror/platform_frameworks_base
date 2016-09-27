@@ -240,6 +240,9 @@
     -->
     <string name="doze_pickup_subtype_performs_proximity_check"></string>
 
+    <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
+    <string name="doze_double_tap_sensor_type" translatable="false"></string>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
 
