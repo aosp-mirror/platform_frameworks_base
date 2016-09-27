@@ -292,6 +292,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
     private static final int MSG_POLICIES_CHANGED = 13;
     private static final int MSG_SET_FIREWALL_RULES = 14;
+    private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -737,7 +738,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // global background data policy
                 if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
                 synchronized (mUidRulesFirstLock) {
-                    updateRestrictionRulesForUidUL(uid, false);
+                    updateRestrictionRulesForUidUL(uid);
                 }
             }
         }
@@ -754,11 +755,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // remove any policy and update rules to clean up
             if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
             synchronized (mUidRulesFirstLock) {
-                mUidRules.delete(uid);
-                mUidPolicy.delete(uid);
-                // TODO: rather than passing onUidDeleted=true, it would be clearner to have a
-                // method that reset all firewall rules for an UID....
-                updateRestrictionRulesForUidUL(uid, true);
+                onUidDeletedUL(uid);
                 synchronized (mNetworkPoliciesSecondLock) {
                     writePolicyAL();
                 }
@@ -2811,6 +2808,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
+     * Clears all state - internal and external - associated with an UID.
+     */
+    private void onUidDeletedUL(int uid) {
+        // First cleanup in-memory state synchronously...
+        mUidRules.delete(uid);
+        mUidPolicy.delete(uid);
+        mUidFirewallStandbyRules.delete(uid);
+        mUidFirewallDozableRules.delete(uid);
+        mUidFirewallPowerSaveRules.delete(uid);
+        mPowerSaveWhitelistExceptIdleAppIds.delete(uid);
+        mPowerSaveWhitelistAppIds.delete(uid);
+        mPowerSaveTempWhitelistAppIds.delete(uid);
+
+        // ...then update iptables asynchronously.
+        mHandler.obtainMessage(MSG_RESET_FIREWALL_RULES_BY_UID, uid, 0).sendToTarget();
+    }
+
+    /**
      * Applies network rules to bandwidth and firewall controllers based on uid policy.
      *
      * <p>There are currently 4 types of restriction rules:
@@ -2823,7 +2838,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * <p>This method changes both the external firewall rules and the internal state.
      */
-    private void updateRestrictionRulesForUidUL(int uid, boolean onUidDeleted) {
+    private void updateRestrictionRulesForUidUL(int uid) {
         // Methods below only changes the firewall rules for the power-related modes.
         updateRuleForDeviceIdleUL(uid);
         updateRuleForAppIdleUL(uid);
@@ -2833,7 +2848,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         updateRulesForPowerRestrictionsUL(uid);
 
         // Update firewall and internal rules for Data Saver Mode.
-        updateRulesForDataUsageRestrictionsUL(uid, onUidDeleted);
+        updateRulesForDataUsageRestrictionsUL(uid);
     }
 
     /**
@@ -2876,15 +2891,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      */
     private void updateRulesForDataUsageRestrictionsUL(int uid) {
-        updateRulesForDataUsageRestrictionsUL(uid, false);
-    }
-
-    /**
-     * Overloaded version of {@link #updateRulesForDataUsageRestrictionsUL(int)} called when an
-     * app is removed - it ignores the UID validity check.
-     */
-    private void updateRulesForDataUsageRestrictionsUL(int uid, boolean onUidDeleted) {
-        if (!onUidDeleted && !isUidValidForWhitelistRules(uid)) {
+        if (!isUidValidForWhitelistRules(uid)) {
             if (LOGD) Slog.d(TAG, "no need to update restrict data rules for uid " + uid);
             return;
         }
@@ -3265,6 +3272,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     return true;
                 }
+                case MSG_RESET_FIREWALL_RULES_BY_UID: {
+                    resetUidFirewallRules(msg.arg1);
+                    return true;
+                }
                 default: {
                     return false;
                 }
@@ -3412,6 +3423,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkManager.setFirewallChainEnabled(chain, enable);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem enable firewall chain", e);
+        } catch (RemoteException e) {
+            // ignored; service lives in system_server
+        }
+    }
+
+    /**
+     * Resets all firewall rules associated with an UID.
+     */
+    private void resetUidFirewallRules(int uid) {
+        try {
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_DOZABLE, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager
+                    .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setUidMeteredNetworkWhitelist(uid, false);
+            mNetworkManager.setUidMeteredNetworkBlacklist(uid, false);
+        } catch (IllegalStateException e) {
+            Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
