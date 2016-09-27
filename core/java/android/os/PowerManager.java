@@ -1340,6 +1340,11 @@ public final class PowerManager {
         }
 
         /** @hide */
+        public String getTag() {
+            return mTag;
+        }
+
+        /** @hide */
         public void setHistoryTag(String tag) {
             mHistoryTag = tag;
         }
