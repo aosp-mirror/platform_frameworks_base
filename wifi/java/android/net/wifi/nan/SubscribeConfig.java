@@ -429,7 +429,7 @@ public final class SubscribeConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setEnableTerminateNotification(boolean enable) {
+        public Builder setTerminateNotificationEnabled(boolean enable) {
             mEnableTerminateNotification = enable;
             return this;
         }
