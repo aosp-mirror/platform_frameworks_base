@@ -321,7 +321,7 @@ public final class PublishConfig implements Parcelable {
          * will be broadcast. When the count is reached an event will be
          * generated for {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)}
          * with {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE} [unless
-         * {@link #setEnableTerminateNotification(boolean)} disables the callback].
+         * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
          *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
@@ -347,7 +347,7 @@ public final class PublishConfig implements Parcelable {
          * an event will be generated for
          * {@link WifiNanDiscoverySessionCallback#onSessionTerminated(int)} with
          * {@link WifiNanDiscoverySessionCallback#TERMINATE_REASON_DONE}  [unless
-         * {@link #setEnableTerminateNotification(boolean)} disables the callback].
+         * {@link #setTerminateNotificationEnabled(boolean)} disables the callback].
          * <p>
          *     Optional. 0 by default - indicating the session doesn't terminate on its own.
          *     Session will be terminated when {@link WifiNanDiscoveryBaseSession#destroy()} is
@@ -377,7 +377,7 @@ public final class PublishConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setEnableTerminateNotification(boolean enable) {
+        public Builder setTerminateNotificationEnabled(boolean enable) {
             mEnableTerminateNotification = enable;
             return this;
         }
