@@ -33,8 +33,18 @@ There are two ways to make a broadcast receiver known to the system:  One is
 declare it in the manifest file with this element.  The other is to create
 the receiver dynamically in code and register it with the <code>{@link
 android.content.Context#registerReceiver Context.registerReceiver()}</code>
-method.  See the {@link android.content.BroadcastReceiver} class description
-for more on dynamically created receivers.
+method. For more information about how to dynamically create receivers, see the
+{@link android.content.BroadcastReceiver} class description.
+</p>
+
+<p class="warning">
+    <strong>Warning:</strong> Limit how many broadcast
+    receivers you set in your app. Having too many broadcast receivers can
+    affect your app's performance and the battery life of users' devices.
+    For more information about APIs you can use instead of the
+    {@link android.content.BroadcastReceiver} class for scheduling background
+    work, see
+    <a href="/topic/performance/background-optimization.html">Background Optimizations</a>.
 </p></dd>
 
 <dt>attributes:</dt>

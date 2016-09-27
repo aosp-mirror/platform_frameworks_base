@@ -21,7 +21,10 @@ Efficiency</a></li>
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>
+  <li><a href="/topic/performance/background-optimization.html">Background Optimizations</a>
+  <li><a href="/topic/performance/scheduling.html">Intelligent Job-Scheduling</a>
+  <li><a href="/training/articles/perf-anr.html">Keeping Your App Responsive</a>
+  <li><a href="/guide/components/intents-filters.html">Intents and Intent Filters</a>
 </ul>
 
 </div>
@@ -32,13 +35,22 @@ android.content.BroadcastReceiver} for each state you're monitoring and register
 your application manifest. Then within each of these receivers you simply reschedule your recurring
 alarms based on the current device state.</p>
 
-<p>A side-effect of this approach is that your app will wake the device each time any of these
-receivers is triggered&mdash;potentially much more frequently than required.</p>
-
 <p>A better approach is to disable or enable the broadcast receivers at runtime. That way you can
 use the receivers you declared in the manifest as passive alarms that are triggered by system events
 only when necessary.</p>
 
+<p class="warning">
+    <strong>Warning:</strong> Limit how many broadcast
+    receivers you set in your app. Instead of using broadcast receivers,
+    consider using other APIs for
+    performing background work. For example, in Android 5.0 (API level 21) and
+    higher, you can use the {@link android.app.job.JobScheduler} class for
+    assigning work to be completed in the background.
+    For more information about APIs you can use instead of the
+    {@link android.content.BroadcastReceiver} class for scheduling background
+    work, see
+    <a href="{@docRoot}topic/performance/background-optimization.html">Background Optimizations</a>.
+</p>
 
 <h2 id="ToggleReceivers">Toggle and Cascade State Change Receivers to Improve Efficiency </h2>
 
