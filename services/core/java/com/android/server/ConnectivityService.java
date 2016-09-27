@@ -760,7 +760,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
                 && SystemProperties.get("ro.build.type").equals("eng");
 
-        mTethering = new Tethering(mContext, mNetd, statsService);
+        mTethering = new Tethering(mContext, mNetd, statsService, mPolicyManager);
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 
@@ -2688,12 +2688,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ConnectivityManager.enforceTetherChangePermission(mContext);
         if (isTetheringSupported()) {
             final int status = mTethering.tether(iface);
-            if (status == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                try {
-                    mPolicyManager.onTetheringChanged(iface, true);
-                } catch (RemoteException e) {
-                }
-            }
             return status;
         } else {
             return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
@@ -2706,12 +2700,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (isTetheringSupported()) {
             final int status = mTethering.untether(iface);
-            if (status == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                try {
-                    mPolicyManager.onTetheringChanged(iface, false);
-                } catch (RemoteException e) {
-                }
-            }
             return status;
         } else {
             return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
