@@ -236,7 +236,7 @@ public final class BluetoothManager {
                 Log.e(TAG, "Fail to get GATT Server connection");
                 return null;
             }
-            BluetoothGattServer mGattServer = new BluetoothGattServer(context, iGatt,transport);
+            BluetoothGattServer mGattServer = new BluetoothGattServer(iGatt,transport);
             Boolean regStatus = mGattServer.registerCallback(callback);
             return regStatus? mGattServer : null;
         } catch (RemoteException e) {
