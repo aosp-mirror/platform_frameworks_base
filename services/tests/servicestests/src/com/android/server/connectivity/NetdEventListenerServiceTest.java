@@ -158,7 +158,8 @@ public class NetdEventListenerServiceTest extends TestCase {
 
     void log(int netId, int[] latencies) {
         for (int l : latencies) {
-            mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l);
+            mNetdEventListenerService.onDnsEvent(netId, EVENT_TYPE, RETURN_CODE, l, null, null, 0,
+                    0);
         }
     }
 

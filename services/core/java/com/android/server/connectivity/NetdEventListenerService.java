@@ -134,7 +134,9 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     @Override
     // Called concurrently by multiple binder threads.
-    public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs) {
+    // This method must not block or perform long-running operations.
+    public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
+            String hostname, String[] ipAddresses, int ipAddressesCount, int uid) {
         maybeVerboseLog(String.format("onDnsEvent(%d, %d, %d, %d)",
                 netId, eventType, returnCode, latencyMs));
 
