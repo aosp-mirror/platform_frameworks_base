@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Телефон мүмкүнчүлүктөрү"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Экран кулпусу"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Кубатын өчүрүү"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ката тууралуу билдирүү"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ката тууралуу билдирүү түзүү"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Бул сиздин түзмөгүңүздүн учурдагы абалын эмейл билдирүүсү катары жөнөтүш максатында маалымат чогултат. Ката тууралуу билдирүү түзүлүп башталып, жөнөтүлгөнгө чейин бир аз убакыт керек болот; сураныч, бир аз күтө туруңуз."</string>
