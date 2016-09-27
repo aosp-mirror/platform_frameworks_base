@@ -200,7 +200,7 @@ public void onAccessibilityEvent(AccessibilityEvent event) {
 }
 </pre>
 
-<h2 id="query">Query the View Hierarchy's for More Context</h2>
+<h2 id="query">Query the View Hierarchy for More Context</h2>
 <p>This step is optional, but highly useful. The Android platform provides the ability for an
 {@link android.accessibilityservice.AccessibilityService} to query the view
 hierarchy, collecting information about the UI component that generated an event, and
