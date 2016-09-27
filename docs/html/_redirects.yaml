@@ -817,8 +817,11 @@ redirects:
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
 - from: /preview/bugreports/...
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
+- from: /preview/setup-sdk.html
+  to: /studio/index.html
 - from: /2016/03/first-preview-of-android-n-developer.html
   to: http://android-developers.blogspot.com/2016/03/first-preview-of-android-n-developer.html
+
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
 - from: /shareables/...
