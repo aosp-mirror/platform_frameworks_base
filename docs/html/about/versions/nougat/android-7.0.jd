@@ -44,7 +44,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#vr">VR Support</a></li>
         <li><a href="#print_svc">Print Service Enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
-        <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
+        <li><a href="#framemetrics_api">Frame Metrics API</a></li>
       </ol>
 </div>
 </div>
@@ -434,9 +434,8 @@ displayed &mdash; users can add or move tiles just by dragging and dropping them
 </p>
 
 <p>
-  For information about creating an app tile, see the documentation for
-  <code>android.service.quicksettings.Tile</code> in the downloadable <a href=
-  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+  For information about creating an app tile, see the reference documentation
+  for {@link android.service.quicksettings.Tile Tile}.
 </p>
 
 
@@ -465,9 +464,8 @@ for the user in order to stop unwanted calls and texts from reaching the user
 through any medium, such as a VOIP endpoint or forwarding phones.</p>
 
 <p>
-  For more information, see <code>android.provider.BlockedNumberContract</code>
-  in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
-  Reference</a>.
+  For more information, see the reference documentation for
+  {@link android.provider.BlockedNumberContract BlockedNumberContract}.
 </p>
 
 <h2 id="call_screening">Call Screening</h2>
@@ -486,9 +484,8 @@ through any medium, such as a VOIP endpoint or forwarding phones.</p>
 </ul>
 
 <p>
-  For more information, see <code>android.telecom.CallScreeningService</code>
-  in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API
-  Reference</a>.
+  For more information, see the reference documentation for
+  {@link android.telecom.CallScreeningService CallScreeningService}.
 </p>
 
 
@@ -780,8 +777,9 @@ impairments to touch the screen. The new API allows building services with
 features such as face-tracking, eye-tracking, point scanning, and so on, to
 meet the needs of those users.</p>
 
-<p>For more information, see <code>android.accessibilityservice.GestureDescription</code>
-  in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
+<p>For more information, see the reference documentation for
+{@link android.accessibilityservice.GestureDescription GestureDescription}.
+</p>
 
 
 <h2 id="direct_boot">Direct Boot</h2>
@@ -972,9 +970,8 @@ Directory Access</a> developer documentation.</p>
   from the system and from the app in focus. The system retrieves these
   shortcuts automatically from the app’s menu if the shortcuts exist. You can
   also provide your own fine-tuned shortcuts lists for the screen. You can do
-  this by overriding the new <code>Activity.onProvideKeyboardShortcuts()</code>
-  method, described in the downloadable <a href=
-  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+  this by overriding the {@link android.view.Window.Callback#onProvideKeyboardShortcuts
+  onProvideKeyboardShortcuts()} method.
 </p>
 
 <p class="note">
@@ -986,7 +983,8 @@ Directory Access</a> developer documentation.</p>
 
 <p>
   To trigger Keyboard Shortcuts Helper from anywhere in your app, call
-  {@code Activity.requestKeyboardShortcutsHelper()} for the relevant activity.
+  {@link android.app.Activity#requestShowKeyboardShortcuts requestShowKeyboardShortcuts()}
+  from the relevant activity.
 </p>
 
 <h2 id="custom_pointer_api">
@@ -1062,37 +1060,32 @@ see the <a href="https://developers.google.com/vr/android/">Google VR SDK for An
 
 <ul>
   <li>You can set an icon from a resource ID by calling
-  <code>PrinterInfo.Builder.setResourceIconId()</code>
+  {@link android.print.PrinterInfo.Builder#setIconResourceId setIconResourceId()}.
   </li>
 
   <li>You can show an icon from the network by calling
-  <code>PrinterInfo.Builder.setHasCustomPrinterIcon()</code>, and setting a
-  callback for when the icon is requested using
-  <code>android.printservice.PrinterDiscoverySession.onRequestCustomPrinterIcon()</code>
+  {@link android.print.PrinterInfo.Builder#setHasCustomPrinterIcon setHasCustomPrinterIcon()},
+  and setting a callback for when the icon is requested using
+  {@link android.printservice.PrinterDiscoverySession#onRequestCustomPrinterIcon onRequestCustomPrinterIcon()}.
   </li>
 </ul>
 
 <p>
   In addition, you can provide a per-printer activity to display additional
-  information by calling <code>PrinterInfo.Builder.setInfoIntent()</code>.
+  information by calling {@link android.print.PrinterInfo.Builder#setInfoIntent setInfoIntent()}.
 </p>
 
 <p>
   You can indicate the progress and status of print jobs in the print job
   notification by calling
-  <code>android.printservice.PrintJob.setProgress()</code> and
-  <code>android.printservice.PrintJob.setStatus()</code>, respectively.
+  {@link android.printservice.PrintJob#setProgress setProgress()} and
+  {@link android.printservice.PrintJob#setStatus setStatus()}, respectively.
 </p>
 
-<p>
-  For more information about these methods, see the downloadable <a href=
-  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
-</p>
-
-<h2 id="framemetrics_api">FrameMetricsListener API</h2>
+<h2 id="framemetrics_api">Frame Metrics API</h2>
 
 <p>
-The FrameMetricsListener API allows an app to monitor its UI rendering
+The Frame Metrics API allows an app to monitor its UI rendering
 performance. The API provides this capability by exposing a streaming Pub/Sub API to transfer frame
 timing info for the app's current window. The data returned is
 equivalent to that which <code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
@@ -1100,7 +1093,7 @@ dumpsys gfxinfo framestats</code> displays, but is not limited to the past 120 f
 </p>
 
 <p>
-You can use FrameMetricsListener to measure interaction-level UI
+You can use the Frame Metrics API to measure interaction-level UI
 performance in production, without a USB connection. This API
 allows collection of data at a much higher granularity than does
 {@code adb shell dumpsys gfxinfo}. This higher granularity is possible because
@@ -1112,16 +1105,15 @@ for real use cases within an app.
 </p>
 
 <p>
-To monitor a window, implement the <code>FrameMetricsListener.onMetricsAvailable()</code>
-callback method and register it on that window. For more information, refer to
-the {@code FrameMetricsListener} class documentation in
-the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+To monitor a window, implement the
+{@link android.view.Window.OnFrameMetricsAvailableListener#onFrameMetricsAvailable OnFrameMetricsAvailableListener.onFrameMetricsAvailable()}
+callback method and register it on that window.
 </p>
 
 <p>
-The API provides a {@code FrameMetrics} object, which contains timing data that
-the rendering subsystem reports for various milestones in a frame lifecycle.
-The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
+The API provides a {@link android.view.FrameMetrics FrameMetrics} object, which
+contains timing data that the rendering subsystem reports for various milestones
+in a frame lifecycle. The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
 {@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
 {@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
 {@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
