@@ -1108,7 +1108,14 @@ $(static_doc_index_redirect): \
 	$(hide) mkdir -p $(dir $@)
 	$(hide) $(ACP) $< $@
 
+static_doc_properties := $(out_dir)/source.properties
+$(static_doc_properties): \
+	$(LOCAL_PATH)/docs/source.properties | $(ACP)
+	$(hide) mkdir -p $(dir $@)
+	$(hide) $(ACP) $< $@
+
 $(full_target): $(static_doc_index_redirect)
+$(full_target): $(static_doc_properties)
 $(full_target): $(framework_built)
 
 
