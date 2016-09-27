@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Valkostir síma"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skjálás"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Slökkva"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Villutilkynning"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Útbúa villutilkynningu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Þetta safnar upplýsingum um núverandi stöðu tækisins til að senda með tölvupósti. Það tekur smástund frá því villutilkynningin er ræst og þar til hún er tilbúin til sendingar – sýndu biðlund."</string>

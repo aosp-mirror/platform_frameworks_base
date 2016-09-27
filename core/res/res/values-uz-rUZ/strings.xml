@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefon sozlamalari"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekran qulfi"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"O‘chirish"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Nosozlik haqida ma’lumot berish"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisoboti"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Qurilmangiz holati haqidagi ma’lumotlar to‘planib, e-pochta orqali yuboriladi. Hisobotni tayyorlash biroz vaqt olishi mumkin."</string>

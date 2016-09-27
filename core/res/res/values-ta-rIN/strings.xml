@@ -214,6 +214,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"தொலைபேசி விருப்பங்கள்"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"திரைப் பூட்டு"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"முடக்கு"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"பிழை அறிக்கையை எடு"</string>
     <string name="bugreport_message" msgid="398447048750350456">"உங்கள் நடப்புச் சாதன நிலையை மின்னஞ்சல் செய்தியாக அனுப்ப, அது குறித்த தகவலை இது சேகரிக்கும். பிழை அறிக்கையைத் தொடங்குவதில் இருந்து, அது அனுப்புவதற்குத் தயாராகும் வரை, இதற்குச் சிறிது நேரம் ஆகும்; பொறுமையாகக் காத்திருக்கவும்."</string>

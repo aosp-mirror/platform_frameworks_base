@@ -216,6 +216,8 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Опције телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Закључај екран"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Искључи"</string>
+    <!-- no translation found for global_action_emergency (7112311161137421166) -->
+    <skip />
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај о грешци"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Направи извештај о грешци"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Овим ће се прикупити информације о тренутном стању уређаја како би биле послате у поруци е-поште. Од започињања извештаја о грешци до тренутка за његово слање проћи ће неко време; будите стрпљиви."</string>
@@ -256,9 +258,9 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Складиште"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио снимке"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"снима слике и видео снимке"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"снима слике и видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упућује телефонске позиве и управља њима"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Сензори за тело"</string>
