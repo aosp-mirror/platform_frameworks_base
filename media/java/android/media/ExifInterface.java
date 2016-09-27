@@ -1039,6 +1039,7 @@ public class ExifInterface {
     private int mThumbnailOffset;
     private int mThumbnailLength;
     private byte[] mThumbnailBytes;
+    private boolean mIsSupportedFile;
 
     // Pattern to check non zero timestamp
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
@@ -1337,9 +1338,11 @@ public class ExifInterface {
         try {
             InputStream in = new FileInputStream(mFilename);
             getJpegAttributes(in);
+            mIsSupportedFile = true;
         } catch (IOException e) {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
+            mIsSupportedFile = false;
             Log.w(TAG, "Invalid image.", e);
         } finally {
             addDefaultValuesForCompatibility();
@@ -1368,6 +1371,10 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
+        if (!mIsSupportedFile) {
+            throw new UnsupportedOperationException(
+                    "ExifInterface only supports saving attributes on JPEG formats.");
+        }
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail();
 
