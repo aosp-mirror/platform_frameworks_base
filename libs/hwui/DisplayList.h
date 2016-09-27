@@ -17,6 +17,7 @@
 #pragma once
 
 #include <SkCamera.h>
+#include <SkDrawable.h>
 #include <SkMatrix.h>
 
 #include <private/hwui/DrawGlInfo.h>
@@ -36,6 +37,7 @@
 #include "GlFunctorLifecycleListener.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+#include "TreeInfo.h"
 
 #include <vector>
 
@@ -89,7 +91,7 @@ public:
     };
 
     DisplayList();
-    ~DisplayList();
+    virtual ~DisplayList();
 
     // index of DisplayListOp restore, after which projected descendants should be drawn
     int projectionReceiveIndex;
@@ -100,8 +102,6 @@ public:
     const LsaVector<NodeOpType*>& getChildren() const { return children; }
 
     const LsaVector<const SkBitmap*>& getBitmapResources() const { return bitmapResources; }
-    const LsaVector<FunctorContainer>& getFunctors() const { return functors; }
-    const LsaVector<VectorDrawableRoot*>& getVectorDrawables() const { return vectorDrawables; }
 
     size_t addChild(NodeOpType* childOp);
 
@@ -113,15 +113,26 @@ public:
     size_t getUsedSize() {
         return allocator.usedSize();
     }
-    bool isEmpty() {
-        return ops.empty();
+
+    virtual bool isEmpty() const { return ops.empty(); }
+    virtual bool hasFunctor() const { return !functors.empty(); }
+    virtual bool hasVectorDrawables() const { return !vectorDrawables.empty(); }
+    virtual bool isSkiaDL() const { return false; }
+    virtual bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) {
+        return false;
     }
 
-private:
+    virtual void syncContents();
+    virtual void updateChildren(std::function<void(RenderNode*)> updateFn);
+    virtual bool prepareListAndChildren(TreeInfo& info, bool functorsNeedLayer,
+            std::function<void(RenderNode*, TreeInfo&, bool)> childFn);
+
+protected:
     // allocator into which all ops and LsaVector arrays allocated
     LinearAllocator allocator;
     LinearStdAllocator<void*> stdAllocator;
 
+private:
     LsaVector<Chunk> chunks;
     LsaVector<BaseOpType*> ops;
 

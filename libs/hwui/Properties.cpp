@@ -214,12 +214,18 @@ RenderPipelineType Properties::getRenderPipelineType() {
     property_get(PROPERTY_DEFAULT_RENDERER, prop, "opengl");
     if (!strcmp(prop, "skiagl") ) {
         sRenderPipelineType = RenderPipelineType::SkiaGL;
-    } else if (!strcmp(prop, "skiavulkan") ) {
+    } else if (!strcmp(prop, "skiavk") ) {
         sRenderPipelineType = RenderPipelineType::SkiaVulkan;
     } else { //"opengl"
         sRenderPipelineType = RenderPipelineType::OpenGL;
     }
     return sRenderPipelineType;
+}
+
+bool Properties::isSkiaEnabled() {
+    auto renderType = getRenderPipelineType();
+    return RenderPipelineType::SkiaGL == renderType
+            || RenderPipelineType::SkiaVulkan == renderType;
 }
 
 }; // namespace uirenderer

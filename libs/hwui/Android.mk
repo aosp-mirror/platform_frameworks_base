@@ -95,6 +95,7 @@ hwui_src_files := \
     ShadowTessellator.cpp \
     SkiaCanvas.cpp \
     SkiaCanvasProxy.cpp \
+    SkiaDisplayList.cpp \
     SkiaShader.cpp \
     Snapshot.cpp \
     SpotShadow.cpp \
@@ -280,6 +281,7 @@ LOCAL_SRC_FILES += \
     tests/unit/RenderNodeTests.cpp \
     tests/unit/RenderPropertiesTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
+    tests/unit/SkiaDisplayListTests.cpp \
     tests/unit/SkiaCanvasTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \

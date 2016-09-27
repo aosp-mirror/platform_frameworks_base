@@ -32,6 +32,7 @@
 #include "DisplayList.h"
 #include "Matrix.h"
 #include "RenderProperties.h"
+#include "SkiaDisplayList.h"
 
 #include <vector>
 
@@ -39,6 +40,7 @@ class SkBitmap;
 class SkPaint;
 class SkPath;
 class SkRegion;
+class SkSurface;
 
 namespace android {
 namespace uirenderer {
@@ -48,6 +50,7 @@ class DisplayListOp;
 class FrameBuilder;
 class OffscreenBuffer;
 class Rect;
+class SkiaDisplayList;
 class SkiaShader;
 struct RenderNodeOp;
 
@@ -240,7 +243,6 @@ private:
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayList* subtree);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
     void deleteDisplayList(TreeObserver* observer, TreeInfo* info = nullptr);
@@ -285,6 +287,63 @@ private:
     uint32_t mParentCount;
 
     sp<PositionListener> mPositionListener;
+
+// METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
+public:
+    /**
+     * Detach and transfer ownership of an already allocated displayList for use
+     * in recording updated content for this renderNode
+     */
+    std::unique_ptr<SkiaDisplayList> detachAvailableList() {
+        return std::move(mAvailableDisplayList);
+    }
+
+    /**
+     * Attach unused displayList to this node for potential future reuse.
+     */
+    void attachAvailableList(SkiaDisplayList* skiaDisplayList) {
+        mAvailableDisplayList.reset(skiaDisplayList);
+    }
+
+    /**
+     * Returns true if an offscreen layer from any renderPipeline is attached
+     * to this node.
+     */
+    bool hasLayer() const { return mLayer || mLayerSurface.get(); }
+
+    /**
+     * Used by the RenderPipeline to attach an offscreen surface to the RenderNode.
+     * The surface is then will be used to store the contents of a layer.
+     */
+    void setLayerSurface(sk_sp<SkSurface> layer) { mLayerSurface = layer; }
+
+
+    /**
+     * If the RenderNode is of type LayerType::RenderLayer then this method will
+     * return the an offscreen rendering surface that is used to both render into
+     * the layer and composite the layer into its parent.  If the type is not
+     * LayerType::RenderLayer then it will return a nullptr.
+     *
+     * NOTE: this function is only guaranteed to return accurate results after
+     *       prepareTree has been run for this RenderNode
+     */
+    SkSurface* getLayerSurface() const { return mLayerSurface.get(); }
+
+private:
+    /**
+     * If this RenderNode has been used in a previous frame then the SkiaDisplayList
+     * from that frame is cached here until one of the following conditions is met:
+     *  1) The RenderNode is deleted (causing this to be deleted)
+     *  2) It is replaced with the displayList from the next completed frame
+     *  3) It is detached and used to to record a new displayList for a later frame
+     */
+    std::unique_ptr<SkiaDisplayList> mAvailableDisplayList;
+
+    /**
+     * An offscreen rendering target used to contain the contents this RenderNode
+     * when it has been set to draw as a LayerType::RenderLayer.
+     */
+    sk_sp<SkSurface> mLayerSurface;
 }; // class RenderNode
 
 } /* namespace uirenderer */

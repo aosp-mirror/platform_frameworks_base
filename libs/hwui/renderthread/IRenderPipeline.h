@@ -22,6 +22,8 @@
 #include <SkRect.h>
 #include <utils/RefBase.h>
 
+class GrContext;
+
 namespace android {
 
 class Surface;
@@ -42,6 +44,8 @@ enum class MakeCurrentResult {
     Failed,
     Succeeded
 };
+
+class Frame;
 
 class IRenderPipeline {
 public:
@@ -69,6 +73,7 @@ public:
     virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node,
             const DamageAccumulator& damageAccumulator) = 0;
+    virtual GrContext* getGrContext() = 0;
 
     virtual ~IRenderPipeline() {}
 };

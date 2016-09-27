@@ -85,6 +85,12 @@ public:
      */
     static void destroyLayer(RenderNode* node);
 
+    /*
+     * If Properties::isSkiaEnabled() is true then this will return the Skia
+     * grContext associated with the current RenderPipeline.
+     */
+    GrContext* getGrContext() const { return mRenderPipeline->getGrContext(); }
+
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
