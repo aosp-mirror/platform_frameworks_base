@@ -30,7 +30,8 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile.DetailAdapter;
+import com.android.systemui.plugins.qs.QSContainer;
+import com.android.systemui.plugins.qs.QSContainer.DetailAdapter;
 import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
@@ -59,7 +60,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    private Callback mCallback;
+    private QSContainer.Callback mCallback;
     private BrightnessController mBrightnessController;
     protected QSTileHost mHost;
 
@@ -170,7 +171,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return mBrightnessView;
     }
 
-    public void setCallback(Callback callback) {
+    public void setCallback(QSContainer.Callback callback) {
         mCallback = callback;
     }
 
@@ -540,12 +541,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         public QSTileBaseView tileView;
         public boolean scanState;
         public QSTile.Callback callback;
-    }
-
-    public interface Callback {
-        void onShowingDetail(DetailAdapter detail, int x, int y);
-        void onToggleStateChanged(boolean state);
-        void onScanStateChanged(boolean state);
     }
 
     public interface QSTileLayout {

@@ -24,14 +24,16 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
+
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.plugins.qs.QSContainer;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.phone.QuickStatusBarHeader;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
@@ -39,7 +41,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
  *
  * Also manages animations for the QS Header and Panel.
  */
-public class QSContainer extends FrameLayout {
+public class QSContainerImpl extends QSContainer {
     private static final String TAG = "QSContainer";
     private static final boolean DEBUG = false;
 
@@ -49,7 +51,7 @@ public class QSContainer extends FrameLayout {
     private int mHeightOverride = -1;
     protected QSPanel mQSPanel;
     private QSDetail mQSDetail;
-    protected BaseStatusBarHeader mHeader;
+    protected QuickStatusBarHeader mHeader;
     protected float mQsExpansion;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
@@ -59,10 +61,10 @@ public class QSContainer extends FrameLayout {
     private long mDelay;
     private QSAnimator mQSAnimator;
     private QSCustomizer mQSCustomizer;
-    private NotificationPanelView mPanelView;
+    private HeightListener mPanelView;
     private boolean mListening;
 
-    public QSContainer(Context context, AttributeSet attrs) {
+    public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -71,7 +73,7 @@ public class QSContainer extends FrameLayout {
         super.onFinishInflate();
         mQSPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
         mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
-        mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
+        mHeader = (QuickStatusBarHeader) findViewById(R.id.header);
         mQSDetail.setQsPanel(mQSPanel, mHeader);
         mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
                 mQSPanel);
@@ -92,7 +94,7 @@ public class QSContainer extends FrameLayout {
         mQSAnimator.setHost(qsh);
     }
 
-    public void setPanelView(NotificationPanelView panelView) {
+    public void setPanelView(HeightListener panelView) {
         mPanelView = panelView;
     }
 
@@ -135,6 +137,13 @@ public class QSContainer extends FrameLayout {
     public void setHeightOverride(int heightOverride) {
         mHeightOverride = heightOverride;
         updateBottom();
+    }
+
+    @Override
+    public void setContainer(ViewGroup container) {
+        if (container instanceof NotificationsQuickSettingsContainer) {
+            mQSCustomizer.setContainer((NotificationsQuickSettingsContainer) container);
+        }
     }
 
     /**
@@ -289,6 +298,11 @@ public class QSContainer extends FrameLayout {
                     }
                 })
                 .start();
+    }
+
+    @Override
+    public void closeDetail() {
+        mQSPanel.closeDetail();
     }
 
     private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
