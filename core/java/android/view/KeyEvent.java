@@ -1289,8 +1289,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
         boolean onKeyUp(int keyCode, KeyEvent event);
 
         /**
-         * Called when multiple down/up pairs of the same key have occurred
-         * in a row.
+         * Called when a user's interaction with an analog control, such as
+         * flinging a trackball, generates simulated down/up events for the same
+         * key multiple times in quick succession.
          *
          * @param keyCode The value in event.getKeyCode().
          * @param count Number of pairs as returned by event.getRepeatCount().
