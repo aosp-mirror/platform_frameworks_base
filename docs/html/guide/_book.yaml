@@ -399,11 +399,6 @@ toc:
   - title: App Install Location
     path: /guide/topics/data/install-location.html
 
-- title: Libraries
-  path: /topic/libraries/index.html
-  section:
-  - include: /topic/libraries/_book.yaml
-
 - title: Administration
   path: /guide/topics/admin/index.html
   section:
