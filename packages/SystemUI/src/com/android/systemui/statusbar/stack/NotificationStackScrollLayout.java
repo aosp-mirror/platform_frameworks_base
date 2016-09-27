@@ -111,11 +111,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
 
-    /**
-     * mCurrentStackHeight is the actual stack height, mLastSetStackHeight is the stack height set
-     * externally from {@link #setStackHeight}
-     */
-    private float mLastSetStackHeight;
+    private float mExpandedHeight;
     private int mOwnScrollY;
     private int mMaxLayoutHeight;
 
@@ -354,6 +350,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     return object.getBackgroundFadeAmount();
                 }
             };
+    private boolean mQsExpanded;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -519,6 +516,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         clampScrollPosition();
         requestChildrenUpdate();
         updateFirstAndLastBackgroundViews();
+        updateAlgorithmLayoutMinHeight();
     }
 
     private void requestAnimationOnViewResize(ExpandableNotificationRow row) {
@@ -560,7 +558,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void updateAlgorithmHeightAndPadding() {
         mAmbientState.setLayoutHeight(getLayoutHeight());
+        updateAlgorithmLayoutMinHeight();
         mAmbientState.setTopPadding(mTopPadding);
+    }
+
+    private void updateAlgorithmLayoutMinHeight() {
+        mAmbientState.setLayoutMinHeight(mQsExpanded && !onKeyguard() ? getLayoutMinHeight() : 0);
     }
 
     /**
@@ -659,19 +662,19 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
-     * Update the height of the stack to a new height.
+     * Update the height of the panel.
      *
-     * @param height the new height of the stack
+     * @param height the expanded height of the panel
      */
-    public void setStackHeight(float height) {
-        mLastSetStackHeight = height;
+    public void setExpandedHeight(float height) {
+        mExpandedHeight = height;
         setIsExpanded(height > 0.0f);
         int stackHeight;
         float translationY;
         float appearEndPosition = getAppearEndPosition();
         float appearStartPosition = getAppearStartPosition();
         if (height >= appearEndPosition) {
-            translationY = mTopPaddingOverflow;
+            translationY = 0;
             stackHeight = (int) height;
         } else {
             float appearFraction = getAppearFraction(height);
@@ -698,8 +701,12 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured relative to the resting position.
      */
     private float getExpandTranslationStart() {
-        int startPosition = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp()
-                ? 0 : -getFirstChildIntrinsicHeight();
+        int startPosition = 0;
+        if (!mTrackingHeadsUp && !mHeadsUpManager.hasPinnedHeadsUp()) {
+            startPosition = - Math.min(getFirstChildIntrinsicHeight(),
+                    mMaxLayoutHeight - mIntrinsicPadding - mBottomStackSlowDownHeight
+                            - mBottomStackPeekSize);
+        }
         return startPosition - mTopPadding;
     }
 
@@ -722,7 +729,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 ? mHeadsUpManager.getTopHeadsUpPinnedHeight() + mBottomStackPeekSize
                         + mBottomStackSlowDownHeight
                 : getLayoutMinHeight();
-        return firstItemHeight + mTopPadding + mTopPaddingOverflow;
+        return firstItemHeight + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
     }
 
     /**
@@ -1152,6 +1159,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean isAntiFalsingNeeded() {
+        return onKeyguard();
+    }
+
+    private boolean onKeyguard() {
         return mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD;
     }
 
@@ -2122,26 +2133,22 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void updateTopPadding(float qsHeight, boolean animate,
             boolean ignoreIntrinsicPadding) {
-        float start = qsHeight;
-        float stackHeight = getHeight() - start;
+        int topPadding = (int) qsHeight;
         int minStackHeight = getLayoutMinHeight();
-        if (stackHeight <= minStackHeight) {
-            float overflow = minStackHeight - stackHeight;
-            stackHeight = minStackHeight;
-            start = getHeight() - stackHeight;
-            mTopPaddingOverflow = overflow;
+        if (topPadding + minStackHeight > getHeight()) {
+            mTopPaddingOverflow = topPadding + minStackHeight - getHeight();
         } else {
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(ignoreIntrinsicPadding ? (int) start : clampPadding((int) start),
+        setTopPadding(ignoreIntrinsicPadding ? topPadding : clampPadding(topPadding),
                 animate);
-        setStackHeight(mLastSetStackHeight);
+        setExpandedHeight(mExpandedHeight);
     }
 
     public int getLayoutMinHeight() {
         int firstChildMinHeight = getFirstChildIntrinsicHeight();
         return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
-                mMaxLayoutHeight - mTopPadding);
+                mMaxLayoutHeight - mIntrinsicPadding);
     }
 
     public int getFirstChildIntrinsicHeight() {
@@ -3088,10 +3095,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateScrollPositionOnExpandInBottom(view);
         clampScrollPosition();
         notifyHeightChangeListener(view);
+        ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
+                ? (ExpandableNotificationRow) view
+                : null;
+        if (row != null && (row == mFirstVisibleBackgroundChild
+                || row.getNotificationParent() == mFirstVisibleBackgroundChild)) {
+            updateAlgorithmLayoutMinHeight();
+        }
         if (needsAnimation) {
-            ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
-                    ? (ExpandableNotificationRow) view
-                    : null;
             requestAnimationOnViewResize(row);
         }
         requestChildrenUpdate();
@@ -3374,7 +3385,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
-        if (screenLocation == null || screenLocation.y < mTopPadding + mTopPaddingOverflow) {
+        if (screenLocation == null || screenLocation.y < mTopPadding) {
             return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
         }
         if (screenLocation.y > getBottomMostNotificationBottom()) {
@@ -3858,6 +3869,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         mCurrentStackScrollState.removeViewStateForView(view);
     }
 
+    public void setQsExpanded(boolean qsExpanded) {
+        mQsExpanded = qsExpanded;
+        updateAlgorithmLayoutMinHeight();
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
@@ -4081,7 +4097,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             onDragCancelled(animView);
 
             // If we're on the lockscreen we want to false this.
-            if (mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+            if (isAntiFalsingNeeded()) {
                 mHandler.removeCallbacks(mFalsingCheck);
                 mHandler.postDelayed(mFalsingCheck, COVER_GEAR_DELAY);
             }
