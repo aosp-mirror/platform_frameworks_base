@@ -134,7 +134,12 @@ void EglManager::initialize() {
 void EglManager::initExtensions() {
     auto extensions = StringUtils::split(
             eglQueryString(mEglDisplay, EGL_EXTENSIONS));
-    EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age");
+    // For our purposes we don't care if EGL_BUFFER_AGE is a result of
+    // EGL_EXT_buffer_age or EGL_KHR_partial_update as our usage is covered
+    // under EGL_KHR_partial_update and we don't need the expanded scope
+    // that EGL_EXT_buffer_age provides.
+    EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age")
+            || extensions.has("EGL_KHR_partial_update");
     EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
     LOG_ALWAYS_FATAL_IF(!extensions.has("EGL_KHR_swap_buffers_with_damage"),
             "Missing required extension EGL_KHR_swap_buffers_with_damage");
