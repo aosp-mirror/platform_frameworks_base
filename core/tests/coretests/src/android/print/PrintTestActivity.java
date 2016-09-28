@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 public class PrintTestActivity extends Activity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
