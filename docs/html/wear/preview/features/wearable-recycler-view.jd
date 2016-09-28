@@ -1,0 +1,223 @@
+
+page.title=Curved Layout
+meta.tags="wear", "wear-preview", "RecyclerView"
+page.tags="wear"
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#creating">Creating a Curved Layout</a></li>
+      <li><a href="#adding">Adding a Circular Scrolling Gesture</a></li>
+      <li><a href="#aligning">Anchoring Children to the Curve</a></li>
+    </ol>
+
+</div>
+</div>
+
+
+<p>
+  Wear 2.0 introduces the {@code WearableRecyclerView} class for displaying
+  and manipulating a vertical list of items optimized for round displays.
+  {@code WearableRecyclerView} extends the existing
+  <a href="{@docRoot}reference/android/support/v7/widget/RecyclerView.html">{@code RecyclerView}</a>
+  class to provide a curved layout and a circular scrolling gesture in wearable apps.
+</p>
+<img src="https://android-dot-devsite.googleplex.com/wear/preview/images/wrv_new.png"
+      style="float:right;margin:10px 20px 0 0">
+
+<p>
+  You can adapt to this interface in your wearable app by creating a new
+  {@code WearableRecyclerView} container.
+</p>
+
+<p>
+  You should decide whether to use a {@code WearableRecyclerView}, based on
+  the kind of user experience you want to provide. We recommend using the
+  {@code WearableRecyclerView} for a simple, long list of items, such as an
+  application launcher, or a list contacts. Each item might have a short string
+  and an associated icon. Alternatively, each item might have only a string or
+  an icon. We do not recommend using a {@code WearableRecyclerView} for short
+  or complex lists.
+</p>
+
+<p>
+  This document describes how to create a curved layout for your scrollable items
+  and properly align them along the curve.
+</p>
+
+
+<h2 id="creating">Creating a Curved Layout</h2>
+<p>To create a curved layout for scrollable items in your wearable app:
+</p>
+<ul>
+  <li>Use {@code WearableRecyclerView} as your main container in the relevant
+      xml layout.
+  </li>
+
+  <li>By default, {@code WearableRecyclerView} uses the {@code
+    DefaultOffsettingHelper} class to offset items in a curved layout on round
+    devices. If you wish to implement your own offsetting logic, you can extend the
+    abstract {@code WearableRecyclerView.OffsettingHelper} class and attach it to
+    the {@code WearableRecyclerView} using {@code
+    WearableRecyclerView.setOffsettingHelper} method.
+
+    <pre>
+      CircularOffsettingHelper circularHelper = new CircularOffsettingHelper();
+      mRecyclerView.setOffsettingHelper(circularHelper);
+    </pre>
+
+    <pre>
+      public class CircularOffsettingHelper extends OffsettingHelper {
+
+        &#64;Override
+        public void updateChild(View child, WearableRecyclerView parent) {
+          int progress = child.getTop() / parent.getHeight();
+          child.setTranslationX(-child.getHeight() * progress);
+         }
+      }
+    </pre>
+
+  </li>
+
+</ul>
+
+<p class="note">
+  <strong>Note:</strong> {@code DefaultOffsettingHelper} class
+  offsets the child items
+  along a predefined UX curve, but the operation can cut off part of the child
+  view if it is not scaled down accordingly. This is because the default curve
+  attempts to fit 5 items on the screen, regardless of their size.
+  If you do not wish to scale your items, you should consider additional padding.
+</p>
+
+<h3>Examples</h3>
+<p>
+  The following code example demonstrates how to add {@code WearableRecyclerView}
+   to a layout:
+</p>
+<pre>
+&lt;android.support.wearable.view.WearableRecyclerView
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:id="&#64;+id/recycler_launcher_view"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:scrollbars="vertical" /&gt;
+ </pre>
+
+
+<p>
+  To customize the appearance of the children while scrolling (for example,
+  scale the icons and text while the items scroll away from the center),  extend
+  the  {@code DefaultOffsettingHelper} and override the {@code updateChild }
+  method. It is important to call the {@code super.updateChild(child, parent)} to
+  offset the children along the curve. However, if for any particular child you do
+  not wish them to follow a curve, you can chose not to call the super method for
+  that particular child.
+</p>
+
+<pre>
+
+public class MyOffsettingHelper extends DefaultOffsettingHelper {
+
+   /** How much should we scale the icon at most. */
+   private static final float MAX_ICON_PROGRESS = 0.65f;
+
+   private float mProgressToCenter;
+
+   public OffsettingHelper() {}
+
+   &#64;Override
+
+   public void updateChild(View child,  WearableRecyclerView parent) {
+       super.updateChild(child, parent);
+
+
+       // Figure out % progress from top to bottom
+       float centerOffset = ((float) child.getHeight() / 2.0f) /  (float) mParentView.getHeight();
+       float yRelativeToCenterOffset = (child.getY() / mParentView.getHeight()) + centerOffset;
+
+       // Normalize for center
+       mProgressToCenter = Math.abs(0.5f - yRelativeToCenterOffset);
+       // Adjust to the maximum scale
+       mProgressToCenter = Math.min(mProgressToCenter, MAX_ICON_PROGRESS);
+
+       child.setScaleX(1 - mProgressToCenter);
+       child.setScaleY(1 - mProgressToCenter);
+   }
+}
+
+
+</pre>
+
+
+<h2 id="adding">Adding a Circular Scrolling Gesture</h2>
+
+<p>
+  By default, circular scrolling is disabled in the {@code
+  WearableRecyclerView}. If you want to enable circular scrolling gesture
+  in your child view, use the  {@code WearavleRecyclerView}’s {@code
+  setCircularScrollingGestureEnabled()} method.  You can also customize the
+  circular scrolling gesture by defining one or both of the following:
+</p>
+
+<ul>
+  <li>How many degrees the user has to rotate by to scroll through one screen height.
+    This effectively influences the speed of the scolling -
+    {@code setScrollDegreesPerScreen} - the default value is set at 180 degrees.
+  </li>
+
+  <li>
+    The width of a virtual ‘bezel’ near the the edge of the screen in which the
+    gesture will be recognized - {@code setBezelWidth} - the default value is set
+    at 1. This is expressed as a fraction of the radius of the view.
+</ul>
+
+
+<p>The following code snippet shows how to set these methods:</p>
+
+<pre>
+  setCircularScrollingGestureEnabled(true);
+  setBezelWidth(0.5f);
+  setScrollDegreesPerScreen(90);
+</pre>
+
+<h2 id="aligning"> Anchoring Children to the Curve </h2>
+
+<p>
+  To ensure that the layout for WearableRecyclerView is adaptable to different
+  types of child views, the WearableRecyclerView class, by default, chooses the
+  middle left edge (X=0, Y=Half the child height) as the anchor coordinates for
+  the child item. Using the default anchor coordinates can result in offsetting
+  the child items from the left edge of the watch face. To customize the anchor
+  coordinates of your child view along the curve, you can overwrite the
+  {@code adjustAnchorOffsetXY()} method. You can calculate the X (horizontal)
+  and Y (vertical) offset of the child item, and set it using the
+  {@code adjustAnchorOffsetXY()} method to properly align items
+  along the curve. The coordinates should be with relation to the child view.
+</p>
+
+<p><img src="{@docRoot}wear/preview/images/alignment.png"/></p>
+<p><b>Figure 1</b>. Imaginary UX curve and anchor points on the curve.</p>
+
+<p>
+  The code snippet below, calculates the X offset for a child item in which the
+  width of the icon is same as the height of the child item. In this case, the
+  anchor coordinates for the child item are at the center of the icon.
+
+</p>
+<img src="{@docRoot}wear/preview/images/center_align.png" style="float:left;margin:10px 20px 0 0"/>
+
+<pre>
+ &#64;Override
+  protected void adjustAnchorOffsetXY(View child, float[] anchorOffsetXY) {
+    anchorOffsetXY[0] = child.getHeight() / 2.0f;
+  }
+</pre>
+
+
