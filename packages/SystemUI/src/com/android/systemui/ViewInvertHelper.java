@@ -92,7 +92,7 @@ public class ViewInvertHelper {
     }
 
     public void update(boolean invert) {
-        if (invert && mThemeInvert) {
+        if (invert) {
             updateInvertPaint(1f);
             for (int i = 0; i < mTargets.size(); i++) {
                 mTargets.get(i).setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
@@ -115,7 +115,9 @@ public class ViewInvertHelper {
         mMatrix.set(invert);
         mGrayscaleMatrix.setSaturation(1 - intensity);
         mMatrix.preConcat(mGrayscaleMatrix);
-        mDarkPaint.setColorFilter(new ColorMatrixColorFilter(mMatrix));
+        mDarkPaint.setColorFilter(new ColorMatrixColorFilter(
+                mThemeInvert ? mMatrix : mGrayscaleMatrix));
+
     }
 
     public void setInverted(boolean invert, boolean fade, long delay) {
