@@ -20,6 +20,7 @@
 #include <vector>
 #include <algorithm>
 
+#include <android-base/strings.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
@@ -241,7 +242,8 @@ class FileDescriptorInfo {
 
   // Returns true iff. a given path is whitelisted. A path is whitelisted
   // if it belongs to the whitelist (see kPathWhitelist) or if it's a path
-  // under /system/framework that ends with ".jar".
+  // under /system/framework that ends with ".jar" or if it is a system
+  // framework overlay.
   static bool IsWhitelisted(const std::string& path) {
     for (size_t i = 0; i < (sizeof(kPathWhitelist) / sizeof(kPathWhitelist[0])); ++i) {
       if (kPathWhitelist[i] == path) {
@@ -249,12 +251,37 @@ class FileDescriptorInfo {
       }
     }
 
-    static const std::string kFrameworksPrefix = "/system/framework/";
-    static const std::string kJarSuffix = ".jar";
-    if (path.compare(0, kFrameworksPrefix.size(), kFrameworksPrefix) == 0 &&
-        path.compare(path.size() - kJarSuffix.size(), kJarSuffix.size(), kJarSuffix) == 0) {
+    static const char* kFrameworksPrefix = "/system/framework/";
+    static const char* kJarSuffix = ".jar";
+    if (android::base::StartsWith(path, kFrameworksPrefix)
+        && android::base::EndsWith(path, kJarSuffix)) {
       return true;
     }
+
+    // Whitelist files needed for Runtime Resource Overlay, like these:
+    // /system/vendor/overlay/framework-res.apk
+    // /system/vendor/overlay-subdir/pg/framework-res.apk
+    // /data/resource-cache/system@vendor@overlay@framework-res.apk@idmap
+    // /data/resource-cache/system@vendor@overlay-subdir@pg@framework-res.apk@idmap
+    // See AssetManager.cpp for more details on overlay-subdir.
+    static const char* kOverlayDir = "/system/vendor/overlay/";
+    static const char* kOverlaySubdir = "/system/vendor/overlay-subdir/";
+    static const char* kApkSuffix = ".apk";
+
+    if ((android::base::StartsWith(path, kOverlayDir)
+            || android::base::StartsWith(path, kOverlaySubdir))
+        && android::base::EndsWith(path, kApkSuffix)
+        && path.find("/../") == std::string::npos) {
+      return true;
+    }
+
+    static const char* kOverlayIdmapPrefix = "/data/resource-cache/";
+    static const char* kOverlayIdmapSuffix = ".apk@idmap";
+    if (android::base::StartsWith(path, kOverlayIdmapPrefix)
+        && android::base::EndsWith(path, kOverlayIdmapSuffix)) {
+      return true;
+    }
+
     return false;
   }
 

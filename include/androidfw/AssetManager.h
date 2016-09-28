@@ -72,6 +72,13 @@ public:
     static const char* RESOURCES_FILENAME;
     static const char* IDMAP_BIN;
     static const char* OVERLAY_DIR;
+    /*
+     * If OVERLAY_SUBDIR_PROPERTY is set, search for runtime resource overlay
+     * APKs in OVERLAY_SUBDIR/<value of OVERLAY_SUBDIR_PROPERTY>/ rather than in
+     * OVERLAY_DIR.
+     */
+    static const char* OVERLAY_SUBDIR;
+    static const char* OVERLAY_SUBDIR_PROPERTY;
     static const char* TARGET_PACKAGE_NAME;
     static const char* TARGET_APK_PATH;
     static const char* IDMAP_DIR;
