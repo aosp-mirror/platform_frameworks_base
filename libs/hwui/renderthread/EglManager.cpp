@@ -16,16 +16,18 @@
 
 #include "EglManager.h"
 
+#include <string>
+
+#include "utils/StringUtils.h"
+#include <cutils/properties.h>
+#include <log/log.h>
+
 #include "Caches.h"
 #include "DeviceInfo.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
-#include "utils/StringUtils.h"
-#include <cutils/log.h>
-#include <cutils/properties.h>
 #include <EGL/eglext.h>
-#include <string>
 
 #define GLES_VERSION 2
 

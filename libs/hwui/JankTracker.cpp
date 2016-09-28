@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "JankTracker.h"
 
 #include <errno.h>
 #include <inttypes.h>
+#include <sys/mman.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <limits>
-#include <sys/mman.h>
 
 #include <cutils/ashmem.h>
 #include <log/log.h>
