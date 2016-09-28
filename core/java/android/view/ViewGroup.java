@@ -20,6 +20,7 @@ import android.animation.LayoutTransition;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.UiThread;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -1380,6 +1381,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean retval = false;
         final float tx = event.mX;
         final float ty = event.mY;
+        final ClipData td = event.mClipData;
 
         // Dispatch down the view hierarchy
         final PointF localPoint = getLocalPoint();
@@ -1465,6 +1467,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // ACTION_DRAG_EXITED.
                     event.mX = 0;
                     event.mY = 0;
+                    event.mClipData = null;
 
                     if (mCurrentDragChild != null) {
                         event.mAction = DragEvent.ACTION_DRAG_EXITED;
@@ -1479,6 +1482,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     event.mAction = action;
                     event.mX = tx;
                     event.mY = ty;
+                    event.mClipData = td;
                 }
                 mCurrentDragChild = target;
             }
