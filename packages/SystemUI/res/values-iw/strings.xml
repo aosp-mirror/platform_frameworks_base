@@ -240,7 +240,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏השימוש בנתוני 4G מושהה"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"השימוש בנתונים סלולריים מושהה"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"השימוש בנתונים מושהה"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"מכיוון שהגעת למגבלת הנתונים שהגדרת, המכשיר השהה את השימוש בנתונים עד סוף התקופה.\n\nאם תמשיך, אתה עשוי לקבל חיובים מהספק."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"המשך"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
