@@ -17,6 +17,7 @@
 package android.hardware.usb;
 
 import android.util.Log;
+import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import java.nio.ByteBuffer;
@@ -66,7 +67,7 @@ public class UsbRequest {
      */
     public boolean initialize(UsbDeviceConnection connection, UsbEndpoint endpoint) {
         mEndpoint = endpoint;
-        mConnection = connection;
+        mConnection = Preconditions.checkNotNull(connection);
 
         boolean wasInitialized = native_init(connection, endpoint.getAddress(),
                 endpoint.getAttributes(), endpoint.getMaxPacketSize(), endpoint.getInterval());
@@ -137,15 +138,16 @@ public class UsbRequest {
 
     /**
      * Queues the request to send or receive data on its endpoint.
-     * For OUT endpoints, the given buffer data will be sent on the endpoint.
-     * For IN endpoints, the endpoint will attempt to read the given number of bytes
-     * into the specified buffer.
-     * If the queueing operation is successful, we return true and the result will be
-     * returned via {@link android.hardware.usb.UsbDeviceConnection#requestWait}
+     * <p>For OUT endpoints, the given buffer data will be sent on the endpoint. For IN endpoints,
+     * the endpoint will attempt to read the given number of bytes into the specified buffer. If the
+     * queueing operation is successful, we return true and the result will be returned via {@link
+     * android.hardware.usb.UsbDeviceConnection#requestWait}</p>
      *
-     * @param buffer the buffer containing the bytes to write, or location to store
-     * the results of a read
-     * @param length number of bytes to read or write
+     * @param buffer the buffer containing the bytes to write, or location to store the results of a
+     *               read. Position and array offset will be ignored and assumed to be 0. Limit and
+     *               capacity will be ignored.
+     * @param length number of bytes to read or write.
+     *
      * @return true if the queueing operation succeeded
      */
     public boolean queue(ByteBuffer buffer, int length) {
@@ -154,6 +156,9 @@ public class UsbRequest {
         // save our buffer for when the request has completed
         mBuffer = buffer;
         mLength = length;
+
+        // Note: On a buffer slice we lost the capacity information about the underlying buffer,
+        // hence we cannot check if the access would be a data leak/memory corruption.
 
         boolean result;
         if (buffer.isDirect()) {

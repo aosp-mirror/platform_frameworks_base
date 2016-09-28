@@ -24,7 +24,7 @@ import android.os.ParcelFileDescriptor;
 import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
-
+import java.nio.ByteBuffer;
 
 /**
  * This class is used for sending and receiving data and control messages to a USB device.
@@ -257,13 +257,20 @@ public class UsbDeviceConnection {
 
     /**
      * Waits for the result of a {@link android.hardware.usb.UsbRequest#queue} operation
-     * Note that this may return requests queued on multiple
-     * {@link android.hardware.usb.UsbEndpoint}s.
-     * When multiple endpoints are in use, {@link android.hardware.usb.UsbRequest#getEndpoint} and
-     * {@link android.hardware.usb.UsbRequest#getClientData} can be useful in determining
-     * how to process the result of this function.
+     * <p>Note that this may return requests queued on multiple
+     * {@link android.hardware.usb.UsbEndpoint}s. When multiple endpoints are in use,
+     * {@link android.hardware.usb.UsbRequest#getEndpoint} and {@link
+     * android.hardware.usb.UsbRequest#getClientData} can be useful in determining how to process
+     * the result of this function.</p>
+     * <p>Position and array offset of the request's buffer are ignored and assumed to be 0. The
+     * position will be set to the number of bytes read/written.</p>
      *
      * @return a completed USB request, or null if an error occurred
+     *
+     * @throws IllegalArgumentException if the number of bytes read or written is more than the
+     *                                  limit of the request's buffer. The number of bytes is
+     *                                  determined by the {@code length} parameter of
+     *                                  {@link UsbRequest#queue(ByteBuffer, int)}
      */
     public UsbRequest requestWait() {
         UsbRequest request = native_request_wait();
