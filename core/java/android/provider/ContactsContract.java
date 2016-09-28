@@ -19,8 +19,6 @@ package android.provider;
 import android.accounts.Account;
 import android.annotation.SystemApi;
 import android.app.Activity;
-import android.app.admin.DevicePolicyManager;
-import android.content.ActivityNotFoundException;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -44,7 +42,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
-import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -116,6 +113,12 @@ public final class ContactsContract {
     public static final String AUTHORITY = "com.android.contacts";
     /** A content:// style uri to the authority for the contacts provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+
+    /**
+     * Prefix for column names that are not visible to client apps.
+     * @hide
+     */
+    public static final String HIDDEN_COLUMN_PREFIX = "x_";
 
     /**
      * An optional URI parameter for insert, update, or delete queries
@@ -862,6 +865,25 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String LAST_TIME_CONTACTED = "last_time_contacted";
+
+        /** @hide Raw value. */
+        public static final String RAW_TIMES_CONTACTED = HIDDEN_COLUMN_PREFIX + TIMES_CONTACTED;
+
+        /** @hide Raw value. */
+        public static final String RAW_LAST_TIME_CONTACTED =
+                HIDDEN_COLUMN_PREFIX + LAST_TIME_CONTACTED;
+
+        /**
+         * @hide
+         * Low res version.  Same as {@link #TIMES_CONTACTED} but use it in CP2 for clarification.
+         */
+        public static final String LR_TIMES_CONTACTED = TIMES_CONTACTED;
+
+        /**
+         * @hide
+         * Low res version.  Same as {@link #TIMES_CONTACTED} but use it in CP2 for clarification.
+         */
+        public static final String LR_LAST_TIME_CONTACTED = LAST_TIME_CONTACTED;
 
         /**
          * Is the contact starred?
@@ -1669,7 +1691,7 @@ public final class ContactsContract {
             Uri uri = ContentUris.withAppendedId(CONTENT_URI, contactId);
             ContentValues values = new ContentValues();
             // TIMES_CONTACTED will be incremented when LAST_TIME_CONTACTED is modified.
-            values.put(LAST_TIME_CONTACTED, System.currentTimeMillis());
+            values.put(LR_LAST_TIME_CONTACTED, System.currentTimeMillis());
             resolver.update(uri, values, null, null);
         }
 
@@ -4224,6 +4246,24 @@ public final class ContactsContract {
 
         /** The number of times the referenced {@link Data} has been used. */
         public static final String TIMES_USED = "times_used";
+
+        /** @hide Raw value. */
+        public static final String RAW_LAST_TIME_USED = HIDDEN_COLUMN_PREFIX + LAST_TIME_USED;
+
+        /** @hide Raw value. */
+        public static final String RAW_TIMES_USED = HIDDEN_COLUMN_PREFIX + TIMES_USED;
+
+        /**
+         * @hide
+         * Low res version.  Same as {@link #LAST_TIME_USED} but use it in CP2 for clarification.
+         */
+        public static final String LR_LAST_TIME_USED = LAST_TIME_USED;
+
+        /**
+         * @hide
+         * Low res version.  Same as {@link #TIMES_USED} but use it in CP2 for clarification.
+         */
+        public static final String LR_TIMES_USED = TIMES_USED;
     }
 
     /**
