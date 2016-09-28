@@ -8540,15 +8540,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 final PackageManager packageManager = mContext.getPackageManager();
                 switch (grantState) {
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED: {
-                        packageManager.grantRuntimePermission(packageName, permission, user);
+                        mInjector.getPackageManagerInternal().grantRuntimePermission(packageName,
+                                permission, user.getIdentifier(), true /* override policy */);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
                     } break;
 
                     case DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED: {
-                        packageManager.revokeRuntimePermission(packageName,
-                                permission, user);
+                        mInjector.getPackageManagerInternal().revokeRuntimePermission(packageName,
+                                permission, user.getIdentifier(), true /* override policy */);
                         packageManager.updatePermissionFlags(permission, packageName,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED,
                                 PackageManager.FLAG_PERMISSION_POLICY_FIXED, user);
