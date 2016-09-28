@@ -13,6 +13,13 @@ page.image=/wear/preview/images/complications-main-image.png
             Complications to a Watch Face</a>
           </li>
           <li>
+            <a href="#permissions-for-complication-data">Permissions
+            for Complication Data</a>
+          </li>
+          <li>
+            <a href="#default-providers">Default Providers for Watch Faces</a>
+          </li>
+          <li>
             <a href="#exposing_data_to_complications">Exposing Data to
             Complications</a>
           </li>
@@ -27,12 +34,14 @@ page.image=/wear/preview/images/complications-main-image.png
             <a href="#api_additions">API Additions</a>
           </li>
       </ol>
+
     <h2>See Also</h2>
       <ol>
         <li><a class="external-link"
           href="https://github.com/googlesamples/android-WatchFace">Watch
           Face sample app with complications</a></li>
       </ol>
+
       </div>
     </div>
 
@@ -56,9 +65,12 @@ page.image=/wear/preview/images/complications-main-image.png
     </p>
 
     <p>
-      Along with reviewing this page, download the Android Wear 2.0 Preview
-      Reference (see the Complications API <a href=
-      "#api_additions">additions</a>) and review the Javadoc for complications.
+      You can review the Javadoc for complications by downloading
+      the Android Wear 2.0 Preview
+      Reference. Also see the <a href="#api_additions">API additions for
+      complications</a> and the
+      <a href="https://developer.android.com/wear/preview/behavior-changes.html">
+      behavior changes</a> for Wear 2.0.
     </p>
 
     <p>
@@ -117,8 +129,8 @@ page.image=/wear/preview/images/complications-main-image.png
       <code>WatchFaceService.Engine</code> class, with a list of watch face
       complication IDs. A watch face creates these IDs to uniquely identify
       slots on the watch face where complications can appear, and passes them
-      to the <code>createProviderChooserIntent</code> method (of the
-      <code>ProviderChooserIntent</code> class) to allow the user to decide
+      to the <code>createProviderChooserIntent</code> method
+      to allow the user to decide
       which complication should go in which slot.
     </p>
 
@@ -186,6 +198,406 @@ page.image=/wear/preview/images/complications-main-image.png
       where possible.
     </p>
 
+    <h2 id="permissions-for-complication-data">
+      Permissions for Complication Data
+    </h2>
+
+    <p>
+      A watch face must have the following <a href=
+      "https://developer.android.com/training/permissions/requesting.html">permission</a>
+      to receive complication data and open the provider chooser:
+    </p>
+
+<pre>
+com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA
+</pre>
+
+    <h3 id="opening-the-provider-chooser">
+      Opening the provider chooser
+    </h3>
+
+    <p>
+      A watch face that was not granted the above permission will be unable to
+      start the provider chooser.
+    </p>
+
+    <p>
+      To make it easier to request the permission and start the chooser, the
+      <code>ComplicationHelperActivity</code> class is available in the
+      wearable support library. This class should be used instead of
+      <code>ProviderChooserIntent</code> to start the chooser in almost all
+      cases.
+    </p>
+
+    <h4 id="requesting-the-necessary-permission">
+      Requesting the necessary permission
+    </h4>
+
+    <p>
+      To use <code>ComplicationHelperActivity</code>, add it to the watch face
+      in the <a href=
+      "https://developer.android.com/guide/topics/manifest/manifest-intro.html">
+      manifest file</a>:
+    </p>
+
+<pre>
+&lt;activity android:name=&quot;android.support.wearable.complications.ComplicationHelperActivity&quot;/&gt;
+</pre>
+
+    <p>
+      To start the provider chooser, call the
+      <code>ComplicationHelperActivity.createProviderChooserHelperIntent</code>
+      method, to obtain an intent.
+    </p>
+
+    <p>
+      The new intent can be used with either <code>startActivity</code> or
+      <code>startActivityForResult</code> to launch the chooser.
+    </p>
+
+    <p>
+      Here is an example of using the new intent with
+      <code>startActivityForResult</code>:
+    </p>
+
+    <pre>
+startActivityForResult(
+  ComplicationHelperActivity.createProviderChooserHelperIntent(
+     getActivity(),
+     watchFace,
+     complicationId,
+     ComplicationData.TYPE_LARGE_IMAGE),
+  PROVIDER_CHOOSER_REQUEST_CODE);
+</pre>
+    <p>
+      When the helper activity is started, the helper activity checks if the
+      permission was granted. If the permission was not granted, the helper
+      activity makes a runtime permission request. If the permission request is
+      accepted (or is unneeded), the provider chooser is shown.
+    </p>
+
+    <p>
+      If <code>startActivityForResult</code> was used with the intent, the
+      result delivered back to the calling Activity will have a result code of
+      <code>RESULT_OK</code> if a provider was successfully set, or a result
+      code of <code>RESULT_CANCELLED</code> if no provider was set.
+    </p>
+
+    <p>
+      In the case where a provider was set,
+      <code>ComplicationProviderInfo</code> for the chosen provider will be
+      included in the data intent of the result, as an extra with the key
+      <code>ProviderChooserIntent#EXTRA_PROVIDER_INFO</code>.
+    </p>
+
+    <h3 id="receiving-complication-data">
+      Receiving complication data
+    </h3>
+
+    <p>
+      In general, watch faces need the above permission in order to receive
+      complication data, but there are some exceptions. Specifically, a watch
+      face can only receive data from a provider if one of the following is
+      true:
+    </p>
+
+    <ul>
+      <li>The provider is a "safe" system provider,
+      </li>
+
+      <li>The provider and watch face are from the same app,
+      </li>
+
+      <li>The provider whitelists the watch face as a "safe" watch face, or
+      </li>
+
+      <li>The watch face has the permission
+      </li>
+    </ul>
+
+    <h4 id="lack-of-appropriate-permission">
+      Lack of appropriate permission
+    </h4>
+
+    <p>
+      If none of the above is true, then when <code>ComplicationData</code>
+      normally would be sent by a provider to a watch face, the system instead
+      sends data of the type <code>TYPE_NO_PERMISSION</code>. This type
+      includes an icon (an exclamation mark) and short text ("--") to allow it
+      to be rendered as if it were of the short text type or icon type, for
+      convenience.
+    </p>
+
+    <p>
+      When a watch face receives data of <code>TYPE_NO_PERMISSION</code>, the
+      watch face should render this appropriately, so the user can see that
+      action is needed for the complication to work. If possible, a tap on a
+      complication in this state should launch a permission request. This can
+      be done using
+      <code>ComplicationHelperActivity.createPermissionRequestHelperIntent</code>,
+      if the helper activity was added to the watch face app.
+    </p>
+
+    <p>
+      If a user accepts the permission request created by the helper activity,
+      updates are requested for all the active complications on the watch face
+      automatically, allowing the <code>TYPE_NO_PERMISSION</code> data to be
+      replaced by real data.
+    </p>
+
+    <h4 id="safe-providers">
+      Safe providers
+    </h4>
+
+    <p>
+      Some system providers are considered "safe", because they only supply
+      information that the watch face already could obtain itself.
+    </p>
+
+    <p>
+      These providers are listed in the new <code>SystemProviders</code> class
+      in the wearable support library. Whether a system provider is safe is
+      stated in the Javadoc (in the Android Wear 2.0 Preview Reference). Also
+      see <a href="#system-providers">System providers</a> for a list.
+    </p>
+
+    <h4 id="provider-specified-safe-watch-faces">
+      Provider-specified safe watch faces
+    </h4>
+
+    <p>
+      Providers can specify certain watch faces as "safe" to receive their
+      data. This is intended to be used only when the watch face will attempt
+      to use the provider as a default (see below),
+      and the provider trusts the watch face app.
+    </p>
+
+    <p>
+      To declare watch faces as safe, the provider adds metadata with a key of
+      <code>android.support.wearable.complications.SAFE_WATCH_FACES</code>. The
+      metadata value should be a comma-separated list (whitespace is ignored).
+      Entries in the list can be component names (of
+      <code>WatchFaceServices</code>, given as if
+      <code>ComponentName.flattenToString()</code> had been called), or they
+      can be package names (of apps, in which case every watch face within a
+      specified app is considered safe).
+    </p>
+
+    <p>
+      For example:
+    </p>
+
+<pre>
+&lt;meta-data
+       android:name=&quot;android.support.wearable.complications.SAFE_WATCH_FACES&quot;
+        android:value=&quot;
+          com.app.watchface/com.app.watchface.MyWatchFaceService,
+          com.anotherapp.anotherwatchface/com.something.WatchFaceService,
+          com.something.text
+        &quot;/&gt;
+</pre>
+
+  <h2 id="default-providers">
+      Default Providers for Watch Faces
+  </h2>
+
+    <p>
+      Watch faces can specify default providers that are used until a user
+      selects a provider.
+    </p>
+
+    <h3 id="setting-default-providers">
+      Setting default providers
+    </h3>
+
+    <p>
+      Set default providers using the
+      <code>setDefaultComplicationProvider</code> method in
+      <code>WatchFaceService.Engine</code>. This method may be called at any
+      time, but it does nothing if the user already chose a provider for the
+      given complication.
+    </p>
+
+    <h3 id="safe-providers2">
+      Safe providers
+    </h3>
+
+    <p>
+      For most providers, the <code>RECEIVE_COMPLICATION_DATA</code> permission
+      must be granted to a watch face before data can flow to it. However, some
+      system providers are considered "safe", and do not require the watch face
+      to have the permission for data to be sent (see <a href=
+      "#safe-providers">Safe Providers</a> and <a href=
+      "#system-providers">System providers</a>). These providers may be
+      preferable to use as defaults, as they can supply data immediately.
+    </p>
+
+    <p>
+      Alternatively, if a watch face has a partnership with a certain provider
+      and wishes to use it as a default, it can request that the provider list
+      it as a safe watch face (see <a href=
+      "#provider-specified-safe-watch-faces">Provider-specified safe watch
+      faces</a>).
+    </p>
+
+    <h3 id="system-providers">
+      System providers
+    </h3>
+
+    <p>
+      The system includes providers that can be used as defaults. These are
+      listed in the <code>SystemProviders</code> class in the wearable support
+      library.
+    </p>
+
+    <p>
+      The following table has details about providers that are considered safe:
+    </p>
+
+    <table>
+      <tr>
+        <th>
+          Method name in the SystemProviders class
+        </th>
+        <th>
+          Safety
+        </th>
+        <th>
+          Can be the default
+        </th>
+        <th>
+          Notes
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>dateProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          The standard system date provider. Tapping opens the standard Agenda
+          app.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>currentTimeProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          The standard system "time and date" provider. No tap action.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>batteryProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          The standard system battery provider. No tap action.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>stepCountProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Shows a daily total of steps, as reported by
+          <code>readDailyTotal</code>.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>unreadCountProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Shows the number of unread notifications in the stream.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>worldClockProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Will default to London or New York. Can be tapped to change the time
+          zone.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>appsProvider()</code>
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Yes
+        </td>
+        <td>
+          Will show an "apps" icon at first, which can be tapped to choose an
+          app.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>nextEventProvider()</code>
+        </td>
+        <td>
+          No
+        </td>
+        <td>
+          Yes (but not a safe provider)
+        </td>
+        <td>
+          The standard system "next event" provider. Tapping opens
+            the standard Agenda app.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+
     <h2 id="exposing_data_to_complications">
       Exposing Data to Complications
     </h2>
@@ -203,6 +615,11 @@ page.image=/wear/preview/images/complications-main-image.png
       be used to send data back to the system.
     </p>
 
+    <p class="note"><strong>Note:</strong> When you provide data as a
+    complication data provider, the watch face receives the raw values
+    you send so it can draw them on the watch face.
+    </p>
+
     <p>
       In your app's manifest, declare the service and add an intent filter for
       the following:
@@ -210,7 +627,8 @@ page.image=/wear/preview/images/complications-main-image.png
 
     <pre>
 android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST
-</pre>
+    </pre>
+
     <p>
       The service's manifest entry should also include an
       <code>android:icon</code> attribute. The provided icon should be a
@@ -226,6 +644,21 @@ android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST
       <code>ComplicationProviderService</code> class (in the Javadoc; see
       <a href="#api_additions">API Additions</a>).
     </p>
+
+    <p>
+      Additionally, a permission for provider services ensures that only the Android Wear system
+      can bind to provider services. Only the Android Wear system can have this
+      permission.
+    </p>
+
+    <p>
+      Provider services should add the following to their service declarations
+      in the manifest:
+    </p>
+
+<pre>
+android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER"
+</pre>
 
     <h3 id="update_period">
       Update period
@@ -371,6 +804,11 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
     <p>
       The following table describes the types and fields of the
       <code>ComplicationData</code> object.
+      If a watch face requests a field that is invalid for a complication type,
+      a default value for the field is returned.
+      For example, if a watch face tries to access a <code>Long text</code>
+      field in a <code>SHORT_TEXT</code> type, the default value for the
+      <code>Long text</code> field is returned.
     </p>
 
     <table>
@@ -489,56 +927,80 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
     </table>
 
     <p>
-      In addition, the following two types have no fields. These two types may
-      be sent for any complication slot and do not need to be included in a
-      list of supported types:
+      In addition, the types in the table below are for empty data and
+      may be sent for any complication slot. These types have no fields
+      and do not need to be included in a
+      list of supported types. These types enable watch
+      faces to differentiate among the following three cases:
+    </p>
+
+    <ul>
+      <li>No provider was chosen
+      </li>
+
+      <li>The user has selected "empty" for a slot
+      </li>
+
+      <li>A provider has no data to send
+      </li>
+    </ul>
+
+    <p>
+      Providers should not send <code>TYPE_EMPTY</code> in response to
+      update requests. Providers should send <code>TYPE_NO_DATA</code> instead.
+    </p>
+
+    <p>
+      Details on the complication types for "empty" data are in the
+      following table:
     </p>
 
     <table>
       <tr>
-        <th style="width:175px">
-          Type
+        <th>Complication type
         </th>
-        <th style="width:175px">
-          Required fields
-        </th>
-        <th style="width:175px">
-          Optional fields
-        </th>
-        <th>
-          Notes
+        <th>Description
         </th>
       </tr>
 
       <tr>
         <td>
-          NOT_CONFIGURED
+          <code>TYPE_NOT_CONFIGURED</code>
         </td>
         <td>
-          None
-        </td>
-        <td>
-          None
-        </td>
-        <td>
-          Sent when a provider has not yet been chosen for a complication.
+          Sent by the system when a complication is activated but the user has
+          not selected a provider, and no default was set.
+          <p>
+            Cannot be sent by providers.
+          </p>
         </td>
       </tr>
 
       <tr>
         <td>
-          EMPTY
+          <code>TYPE_EMPTY</code>
         </td>
         <td>
-          None
+          Sent by the system when a complication is activated and the user has
+          chosen "empty" instead of a provider, or when the watch face has
+          chosen no provider, and this type, as the default.
+          <p>
+            Cannot be sent by providers.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>TYPE_NO_DATA</code>
         </td>
         <td>
-          None
-        </td>
-        <td>
-          Sent by a provider when there is no data to display in a
-          complication, or sent by the system when nothing should be shown in a
-          complication.
+          Sent by the system when a complication (that has a provider) is
+          activated, to clear the complication before actual data is received
+          from the provider.
+          <p>
+            Should be sent by providers if they have no actual data to send.
+          </p>
         </td>
       </tr>
     </table>
@@ -700,8 +1162,8 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
     </h2>
 
     <p>
-      The Complications API includes new classes in the Wearable Support
-      Library. For more information, download the <a href=
+      The Complications API includes new classes in the wearable support
+      library. For more information, download the <a href=
       "{@docRoot}wear/preview/start.html#get_the_preview_reference_documentation">
       Android Wear 2.0 Preview Reference</a>.
     </p>
@@ -722,26 +1184,14 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
       </li>
 
       <li>
-        <code>ComplicationText</code>
+        <code>ComplicationHelperActivity</code>
         <ul>
-          <li>Used to supply text-based values in a
-          <code>ComplicationData</code> object
+          <li>Used to request the following permission: <br>
+<code>com.google.android.wearable.permission.RECEIVE_COMPLICATION_DATA</code>
           </li>
 
-          <li>Includes options for time-dependent values, whose text value
-          depends on the current time
-          </li>
-        </ul>
-      </li>
-
-      <li>
-        <code>ComplicationProviderService</code>
-        <ul>
-          <li>Extends <code>Service</code> and includes callback methods to
-          respond to the complication system
-          </li>
-
-          <li>Callback methods are all called on the main thread
+          <li>Used instead of <code>ProviderChooserIntent</code>
+          to start the chooser in almost all cases
           </li>
         </ul>
       </li>
@@ -759,13 +1209,35 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
       </li>
 
       <li>
-        <code>ProviderChooserIntent</code>
+        <code>ComplicationProviderService</code>
         <ul>
-          <li>Non-instantiable utility class
+          <li>Extends <code>Service</code> and includes callback methods to
+          respond to the complication system
           </li>
 
-          <li>Includes a method that a watch face can call for starting a
-          provider chooser (to allow a user to configure complications)
+          <li>Callback methods are all called on the main thread
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ComplicationText</code>
+        <ul>
+          <li>Used to supply text-based values in a
+          <code>ComplicationData</code> object
+          </li>
+
+          <li>Includes options for time-dependent values, whose text value
+          depends on the current time
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>ProviderChooserIntent</code>
+        <ul>
+          <li>Non-instantiable utility class that is not commonly used; use
+          <code>ComplicationHelperActivity</code> instead
           </li>
         </ul>
       </li>
@@ -786,6 +1258,16 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           <li>Can be used by data provider apps to trigger calls to
           <code>onComplicationUpdated</code> in their provider service, to
           enable the push of updates
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <code>SystemProviders</code>
+        <ul>
+          <li>Lists system providers that are considered "safe",
+          because they only supply information that the watch face
+          already could obtain itself
           </li>
         </ul>
       </li>
