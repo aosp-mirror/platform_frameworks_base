@@ -333,9 +333,11 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
                 System.arraycopy(policies, 0, newPolicies, 0, policies.length);
                 newPolicies[newPolicies.length - 1] = policy;
                 mInterface.setNetworkPolicies(newPolicies);
+                return 0;
             }
         }
-        return 0;
+        pw.print("Error: didn't find network with SSID "); pw.println(id);
+        return -1;
     }
 
     private List<NetworkPolicy> getWifiPolicies() throws RemoteException {
