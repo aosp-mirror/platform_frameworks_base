@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.transition.Transition;
@@ -166,7 +167,11 @@ class ActivityTransitionState {
                 restoreExitedViews();
                 int result = mEnterActivityOptions.getResultCode();
                 if (result != 0) {
-                    activity.onActivityReenter(result, mEnterActivityOptions.getResultData());
+                    Intent intent = mEnterActivityOptions.getResultData();
+                    if (intent != null) {
+                        intent.setExtrasClassLoader(activity.getClassLoader());
+                    }
+                    activity.onActivityReenter(result, intent);
                 }
             }
         }
