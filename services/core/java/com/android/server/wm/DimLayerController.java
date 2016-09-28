@@ -256,7 +256,7 @@ class DimLayerController {
                 // on whether a dim layer is showing or not.
                 if (targetAlpha == 0) {
                     mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-                    mDisplayContent.layoutNeeded = true;
+                    mDisplayContent.setLayoutNeeded();
                 }
             }
         } else if (state.dimLayer.getLayer() != dimLayer) {

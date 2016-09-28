@@ -29,7 +29,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -265,11 +264,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         return bounds;
     }
 
-    boolean layoutNeeded() {
+    boolean isLayoutNeeded() {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
-            if (displayContent.layoutNeeded) {
+            if (displayContent.isLayoutNeeded()) {
                 return true;
             }
         }
@@ -753,7 +752,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             }
         }
 
-        if (layoutNeeded()) {
+        if (isLayoutNeeded()) {
             defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
             if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats("mLayoutNeeded",
                     defaultDisplay.pendingLayoutChanges);
@@ -840,13 +839,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (wallpaperDestroyed) {
             defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            defaultDisplay.layoutNeeded = true;
+            defaultDisplay.setLayoutNeeded();
         }
 
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.pendingLayoutChanges != 0) {
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
             }
         }
 
@@ -901,8 +900,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         if (mService.mWaitingForDrawnCallback != null ||
-                (mOrientationChangeComplete && !defaultDisplay.layoutNeeded &&
-                        !mUpdateRotation)) {
+                (mOrientationChangeComplete && !defaultDisplay.isLayoutNeeded()
+                        && !mUpdateRotation)) {
             mService.checkDrawnWindowsLocked();
         }
 
@@ -925,7 +924,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
             for (DisplayContent displayContent : displayList) {
                 mService.mLayersController.assignLayersLocked(displayContent.getWindowList());
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
             }
         }
 
@@ -951,7 +950,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     // TODO: Super crazy long method that should be broken down...
-    void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw, int defaultDh) {
+    private void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw, int defaultDh) {
         mHoldScreenWindow = null;
         mObsuringWindow = null;
 
@@ -993,7 +992,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 repeats++;
                 if (repeats > 6) {
                     Slog.w(TAG, "Animation repeat aborted after too many iterations");
-                    dc.layoutNeeded = false;
+                    dc.clearLayoutNeeded();
                     break;
                 }
 
@@ -1003,20 +1002,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0
                         && mService.mWallpaperControllerLocked.adjustWallpaperWindows()) {
                     mService.mLayersController.assignLayersLocked(windows);
-                    dc.layoutNeeded = true;
+                    dc.setLayoutNeeded();
                 }
 
                 if (isDefaultDisplay
                         && (dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                     if (mService.updateOrientationFromAppTokensLocked(true)) {
-                        dc.layoutNeeded = true;
+                        dc.setLayoutNeeded();
                         mService.mH.sendEmptyMessage(SEND_NEW_CONFIGURATION);
                     }
                 }
 
                 if ((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
-                    dc.layoutNeeded = true;
+                    dc.setLayoutNeeded();
                 }
 
                 // FIRST LOOP: Perform a layout, if needed.
@@ -1407,14 +1406,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     void dumpLayoutNeededDisplayIds(PrintWriter pw) {
-        if (!layoutNeeded()) {
+        if (!isLayoutNeeded()) {
             return;
         }
-        pw.print("  layoutNeeded on displays=");
+        pw.print("  mLayoutNeeded on displays=");
         final int count = mChildren.size();
         for (int displayNdx = 0; displayNdx < count; ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
-            if (displayContent.layoutNeeded) {
+            if (displayContent.isLayoutNeeded()) {
                 pw.print(displayContent.getDisplayId());
             }
         }

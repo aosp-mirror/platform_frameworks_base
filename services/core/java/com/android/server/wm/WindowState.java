@@ -1493,7 +1493,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             changed = true;
             if (displayContent != null) {
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
             }
         }
 
@@ -2039,7 +2039,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setDisplayLayoutNeeded() {
         if (mDisplayContent != null) {
-            mDisplayContent.layoutNeeded = true;
+            mDisplayContent.setLayoutNeeded();
         }
     }
 
@@ -3528,7 +3528,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void requestUpdateWallpaperIfNeeded() {
         if (mDisplayContent != null && (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
             mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-            mDisplayContent.layoutNeeded = true;
+            mDisplayContent.setLayoutNeeded();
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
@@ -3646,7 +3646,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // want to make sure to do a layout.  If called from within the transaction
                     // loop, this will cause it to restart with a new layout.
                     if (displayContent != null) {
-                        displayContent.layoutNeeded = true;
+                        displayContent.setLayoutNeeded();
                     }
                 }
             }

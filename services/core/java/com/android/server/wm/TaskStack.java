@@ -230,7 +230,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             }
         }
         alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : mBounds, insetBounds);
-        mDisplayContent.layoutNeeded = true;
+        mDisplayContent.setLayoutNeeded();
     }
 
     private void alignTasksToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds) {
@@ -598,7 +598,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
             if (mChildren.isEmpty()) {
                 mDisplayContent.moveStack(this, false);
             }
-            mDisplayContent.layoutNeeded = true;
+            mDisplayContent.setLayoutNeeded();
         }
         for (int appNdx = mExitingAppTokens.size() - 1; appNdx >= 0; --appNdx) {
             final AppWindowToken wtoken = mExitingAppTokens.get(appNdx);
@@ -1080,7 +1080,7 @@ public class TaskStack extends WindowContainer<Task> implements DimLayer.DimLaye
 
         final Rect insetBounds = mImeGoingAway ? mBounds : mFullyAdjustedImeBounds;
         task.alignToAdjustedBounds(mAdjustedBounds, insetBounds, getDockSide() == DOCKED_TOP);
-        mDisplayContent.layoutNeeded = true;
+        mDisplayContent.setLayoutNeeded();
     }
 
     boolean isAdjustedForMinimizedDockedStack() {
