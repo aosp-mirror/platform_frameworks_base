@@ -215,7 +215,7 @@ android:resizeableActivity=["true" | "false"]
   Set this attribute in your manifest's <a href=
   "{@docRoot}guide/topics/manifest/activity-element"><code>&lt;activity&gt;</code></a>
   node to indicate whether the activity supports <a href=
-  "{@docRoot}training/tv/playback/picture-in-picture.jd">Picture-in-Picture</a>
+  "{@docRoot}training/tv/playback/picture-in-picture.html">Picture-in-Picture</a>
   display. This attribute is ignored if <code>android:resizeableActivity</code>
   is false.
 </p>
