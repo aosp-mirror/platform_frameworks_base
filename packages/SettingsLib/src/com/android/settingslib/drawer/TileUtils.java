@@ -94,6 +94,13 @@ public class TileUtils {
     private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
     /**
+     * The key used to get the category from metadata of activities of action
+     * {@link #EXTRA_SETTINGS_ACTION}
+     * The value must be one of constants defined in {@code CategoryKey}.
+     */
+    private static final String EXTRA_IA_CATEGORY_KEY = "com.android.settings.iacategory";
+
+    /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the icon that should be displayed for the preference.
      */
@@ -113,8 +120,24 @@ public class TileUtils {
 
     private static final String SETTING_PKG = "com.android.settings";
 
+    /**
+     * Build a list of DashboardCategory. Each category must be defined in manifest.
+     * eg: .Settings$DeviceSettings
+     * @deprecated
+     */
+    @Deprecated
     public static List<DashboardCategory> getCategories(Context context,
-            HashMap<Pair<String, String>, Tile> cache) {
+            Map<Pair<String, String>, Tile> cache) {
+        return getCategories(context, cache, true /*categoryDefinedInManifest*/);
+    }
+
+    /**
+     * Build a list of DashboardCategory.
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     */
+    public static List<DashboardCategory> getCategories(Context context,
+            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -134,11 +157,12 @@ public class TileUtils {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
             }
         }
+
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
         for (Tile tile : tiles) {
             DashboardCategory category = categoryMap.get(tile.category);
             if (category == null) {
-                category = createCategory(context, tile.category);
+                category = createCategory(context, tile.category, categoryDefinedInManifest);
                 if (category == null) {
                     Log.w(LOG_TAG, "Couldn't find category " + tile.category);
                     continue;
@@ -157,9 +181,21 @@ public class TileUtils {
         return categories;
     }
 
-    private static DashboardCategory createCategory(Context context, String categoryKey) {
+    /**
+     * Create a new DashboardCategory from key.
+     *
+     * @param context Context to query intent
+     * @param categoryKey The category key
+     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
+     * represent this category (eg: .Settings$DeviceSettings)
+     */
+    private static DashboardCategory createCategory(Context context, String categoryKey,
+            boolean categoryDefinedInManifest) {
         DashboardCategory category = new DashboardCategory();
         category.key = categoryKey;
+        if (!categoryDefinedInManifest) {
+            return category;
+        }
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivities(new Intent(categoryKey), 0);
         if (results.size() == 0) {
@@ -204,14 +240,19 @@ public class TileUtils {
             ActivityInfo activityInfo = resolved.activityInfo;
             Bundle metaData = activityInfo.metaData;
             String categoryKey = defaultCategory;
-            if (checkCategory && ((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
-                    && categoryKey == null) {
+            if (metaData != null && categoryKey == null) {
+                // categoryKey is null, try to get it from metadata.
+                if (metaData.containsKey(EXTRA_IA_CATEGORY_KEY)) {
+                    categoryKey = metaData.getString(EXTRA_IA_CATEGORY_KEY);
+                } else if (metaData.containsKey(EXTRA_CATEGORY_KEY)) {
+                    categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
+                }
+            }
+            if (checkCategory && categoryKey == null) {
                 Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for intent "
                         + intent + " missing metadata "
                         + (metaData == null ? "" : EXTRA_CATEGORY_KEY));
                 continue;
-            } else {
-                categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
             }
             Pair<String, String> key = new Pair<String, String>(activityInfo.packageName,
                     activityInfo.name);
@@ -236,16 +277,6 @@ public class TileUtils {
                 outTiles.add(tile);
             }
         }
-    }
-
-    private static DashboardCategory getCategory(List<DashboardCategory> target,
-            String categoryKey) {
-        for (DashboardCategory category : target) {
-            if (categoryKey.equals(category.key)) {
-                return category;
-            }
-        }
-        return null;
     }
 
     private static boolean updateTileData(Context context, Tile tile,
