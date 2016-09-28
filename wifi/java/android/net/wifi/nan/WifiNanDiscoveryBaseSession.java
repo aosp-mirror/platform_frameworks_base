@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.RttManager;
@@ -163,7 +164,7 @@ public class WifiNanDiscoveryBaseSession {
      *            (note: no retransmissions are attempted in other failure cases). A value of 0
      *            indicates no retries. Max permitted value is {@link #getMaxSendRetryCount()}.
      */
-    public void sendMessage(Object peerHandle, int messageId, @Nullable byte[] message,
+    public void sendMessage(@NonNull Object peerHandle, int messageId, @Nullable byte[] message,
             int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
@@ -205,7 +206,7 @@ public class WifiNanDiscoveryBaseSession {
      *                  can be arbitrary and non-unique.
      * @param message The message to be transmitted.
      */
-    public void sendMessage(Object peerHandle, int messageId, @Nullable byte[] message) {
+    public void sendMessage(@NonNull Object peerHandle, int messageId, @Nullable byte[] message) {
         sendMessage(peerHandle, messageId, message, 0);
     }
 
@@ -270,8 +271,8 @@ public class WifiNanDiscoveryBaseSession {
      * {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public String createNetworkSpecifier(@WifiNanManager.DataPathRole int role, Object peerHandle,
-            @Nullable byte[] token) {
+    public String createNetworkSpecifier(@WifiNanManager.DataPathRole int role,
+            @Nullable Object peerHandle, @Nullable byte[] token) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifier: called on terminated session");
             return null;
