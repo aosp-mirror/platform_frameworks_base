@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-subdirs = [
-    "native/android",
-    "native/graphics/jni",
-]
+// The headers module is in frameworks/native/Android.bp.
+ndk_library {
+    name: "libjnigraphics.ndk",
+    symbol_file: "libjnigraphics.map.txt",
+    first_version: "9",
+}
