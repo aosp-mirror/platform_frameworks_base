@@ -149,7 +149,7 @@ enum DebugLevel {
  * This will disable the use of EGL_EXT_buffer_age and BUFFER_PRESERVED.
  * Default is "true"
  */
-#define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.enable_partial_updates"
+#define PROPERTY_ENABLE_PARTIAL_UPDATES "debug.hwui.use_partial_updates"
 
 #define PROPERTY_FILTER_TEST_OVERHEAD "debug.hwui.filter_test_overhead"
 
