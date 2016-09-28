@@ -257,25 +257,6 @@ public final class PublishConfig implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the publish session - a simple wrapper
-         * of {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}
-         * obtaining the data from a String.
-         * <p>
-         *     Optional. Empty by default.
-         *
-         * @param serviceSpecificInfoStr The service specific information string
-         *            to be included (as a byte array) in the publish
-         *            information.
-         *
-         * @return The builder to facilitate chaining
-         *         {@code builder.setXXX(..).setXXX(..)}.
-         */
-        public Builder setServiceSpecificInfo(@NonNull String serviceSpecificInfoStr) {
-            mServiceSpecificInfo = serviceSpecificInfoStr.getBytes();
-            return this;
-        }
-
-        /**
          * The match filter for a publish session. Used to determine whether a service
          * discovery occurred - in addition to relying on the service name.
          * <p>
