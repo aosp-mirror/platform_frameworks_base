@@ -53,6 +53,8 @@ ifeq (true,$(EMMA_INSTRUMENT))
 LOCAL_JACK_FLAGS := --multi-dex native
 endif # EMMA_INSTRUMENT_STATIC
 
+LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
+
 include $(BUILD_PACKAGE)
 
 #########################################################################

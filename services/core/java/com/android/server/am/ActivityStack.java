@@ -1414,7 +1414,12 @@ final class ActivityStack {
      * this function updates the rest of our state to match that fact.
      */
     private void completeResumeLocked(ActivityRecord next) {
+        boolean wasVisible = next.visible;
         next.visible = true;
+        if (!wasVisible) {
+            // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
+            mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
+        }
         next.idle = false;
         next.results = null;
         next.newIntents = null;
