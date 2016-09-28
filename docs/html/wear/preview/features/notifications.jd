@@ -1,6 +1,5 @@
 page.title=Notification Changes in Android Wear 2.0
-meta.tags="wear", "wear-preview", "notifications"
-page.tags="wear"
+meta.tags="wear", "wear-preview", "notifications" page.tags="wear"
 page.image=/wear/preview/images/expanded_diagram.png
 
 
@@ -12,6 +11,7 @@ page.image=/wear/preview/images/expanded_diagram.png
     <h2>This document includes</h2>
     <ol>
       <li><a href="#visual">Visual Updates</a></li>
+      <li><a href="#inline">Inline Action</a></li>
       <li><a href="#expanded">Expanded Notifications</a></li>
       <li><a href="#messaging">MessagingStyle</a></li>
     </ol>
@@ -67,7 +67,8 @@ material design</a> visual changes.
   We recommended that you don't set color for bridged notifications.
 
   When Wear apps post local notifications, you can work around this by checking
-  <a href="{@docRoot}training/basics/supporting-devices/platforms.html#version-codes">the API level of the device</a> they're running on and using an appropriate color
+  <a href="{@docRoot}training/basics/supporting-devices/platforms.html#version-codes">the API level of the device</a>
+   they're running on and using an appropriate color
   for Wear 1.x and a different color for Wear 2.0.
 </li>
 
@@ -77,6 +78,85 @@ material design</a> visual changes.
   you must update the text of your notification.
 </li>
 </ul>
+
+<h2 id="inline">Inline Action</h3>
+
+<img src="{@docRoot}wear/preview/images/inline_action.png" style="float:right;margin:10px 20px 0 0">
+<p>
+  Wear 2.0 now supports inline action, which allows users to take actions on a
+  notification from within the notification stream card.  On Wear, the inline
+  action appears as an additional button displayed at the bottom of the notification.
+</p>
+<p>
+  Inline actions are optional but recommended for cases in which users are likely
+  to take an action on a notification after viewing the contents in the
+  notification stream card (without going to the
+  <a href= "{@docRoot}wear/preview/features/notifications.html#expanded">expanded notification</a>).
+  Examples of good use cases for inline action on a notification include: replying to a
+  text message, stopping a fitness activity, and archiving an email message.
+</p>
+
+<p>
+  A notification can provide only one inline action.
+  To display the inline action as an additional button in the notification, set
+  the <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Action.WearableExtender.html#setHintDisplayActionInline(boolean)">{@code setHintDisplayActionInline()}</a>
+  method to true. When a user taps the inline action, the system invokes
+  the intent that you specified in the notification action.
+</p>
+
+<h3>Adding an inline action</h3>
+<p>
+  The following code example shows how to create a notification with an inline
+  reply action:
+</p>
+
+<ol>
+  <li>Create an instance of
+    <a href="https://developer.android.com/reference/android/support/v4/app/RemoteInput.Builder.html">{@code RemoteInput.Builder}</a></code>
+    that you can add to your notification action. This class's constructor accepts a
+    string that the system uses as the key for the text input. Later, your app
+    uses that key to retrieve the text of the input.
+
+<pre>
+String[] choices = context.getResources().getStringArray(R.array.notification_reply_choices);
+    choices = WearUtil.addEmojisToCannedResponse(choices);
+  RemoteInput remoteInput = new RemoteInput.Builder(Intent.EXTRA_TEXT)
+        .setLabel(context.getString(R.string.notification_prompt_reply))
+        .setChoices(choices)
+        .build();
+</pre>
+
+  </li>
+
+  <li>
+    Use the <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Action.Builder.html#addRemoteInput(android.support.v4.app.RemoteInput)">{@code addRemoteInput()}</a>
+    method to attach the <ahref="https://developer.android.com/reference/android/support/v4/app/RemoteInput.html">{@code RemoteInput}</a>
+    object to an action.
+
+<pre>
+NotificationCompat.Action.Builder actionBuilder = new NotificationCompat.Action.Builder(
+        R.drawable.ic_full_reply, R.string.notification_reply, replyPendingIntent);
+    actionBuilder.addRemoteInput(remoteInput);
+    actionBuilder.setAllowGeneratedReplies(true);
+</pre>
+  </li>
+
+  <li>
+    Add a hint to display the reply action inline, and use the
+    <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.WearableExtender.html#addAction(android.support.v4.app.NotificationCompat.Action)">{@code addAction}</a>
+    method to add this action to the notification.
+
+<pre>
+// Android Wear 2.0 requires a hint to display the reply action inline.
+    Action.WearableExtender actionExtender =
+        new Action.WearableExtender()
+            .setHintLaunchesActivity(true)
+            .setHintDisplayActionInline(true);
+    wearableExtender.addAction(actionBuilder.extend(actionExtender).build());
+</pre>
+  </li>
+</ol>
+
 <h2 id="expanded">Expanded Notifications</h2>
 <p>Android Wear 2.0 introduces <i>expanded notifications</i>, which provide
   substantial additional content and actions for each notification.
@@ -152,51 +232,52 @@ action in the notification unless a different action is specified using
 </p>
 <h2 id="messaging">MessagingStyle</h2>
 
-<p>If you have a chat messaging app, your notifications should use
-<a href="{@docRoot}preview/features/notification-updates.html#style">{@code Notification.MessagingStyle}</a>,
- which is new in Android N. Wear 2.0 uses the chat messages included
-  in a <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a> notification
-
-  (see <a href="{@docRoot}preview/features/notification-updates.html#style">{@code addMessage()}</a>) to provide
-  a rich chat app-like experience in the expanded notification.
+<p>
+  If you have a chat messaging app, your notifications should use
+  <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.html">{@code NotificationCompat.MessagingStyle}</a>,
+  which is new in Android 7.0. Wear 2.0 uses the chat messages included in a
+  {@code MessagingStyle} notification
+  (see <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.html#addMessage(android.support.v4.app.NotificationCompat.MessagingStyle.Message)">{@code addMessage()}</a>)
+  to provide a rich chat app-like experience in the expanded notification.
 </p>
 
-<p class="note">Note: <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
+<p class="note">Note: <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.html">{@code MessagingStyle}</a>
 expanded notifications require that you have at least version 1.5.0.2861804 of the
   <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app">Android Wear app</a>
-  on your paired Android phone. That version will be available within the next
-  few weeks in the Play Store.
+  on your paired Android phone.
 </p>
 
 <h3 id="smart-reply">Smart Reply</h3>
 <img src="{@docRoot}wear/preview/images/messaging_style.png" height="420"
   style="float:right;margin:10px 20px 0 0" />
-<p>Wear 2.0 also introduces <i>Smart Reply</i>
-for <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a> notifications.
+<p>Wear 2.0 also introduces <i>Smart Reply</i> for
+  <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.html">{@code MessagingStyle}</a> notifications.
   Smart Reply provides the user with contextually relevant, touchable choices in
   the expanded notification and in {@code RemoteInput}. These augment the fixed
   list of choices that the developer provides in
-   <a href="http://developer.android.com/reference/android/support/v4/app/RemoteInput.html">{@code RemoteInput}</a>
-    using the
-    <a href="{@docRoot}reference/android/support/v4/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">{@code setChoices()}</a> method.
-</p>
-<p>By enabling Smart Reply for your MessagingStyle notifications,
-  you provide users with a fast (single tap), discreet (no speaking aloud), and
-  reliable way to respond to chat messages.
-</p>
-
-<p>Responses generated by Smart Reply are shown in addition to those set using the
+  <a href="http://developer.android.com/reference/android/support/v4/app/RemoteInput.html">{@code RemoteInput}</a>
+  using the
   <a href="{@docRoot}reference/android/support/v4/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">{@code setChoices()}</a> method.
 </p>
+<p> Smart Reply provides users with a fast (single tap), discreet (no speaking aloud),
+  private (messages received by a user never leave the watch), and reliable (no
+  internet connection needed) way to respond to chat messages.
+</p>
+
+<p>
+  Smart Reply responses are generated by an entirely on-watch machine learning
+  model using the context provided by the MessagingStyle notification. No user
+  notification data is sent to Google servers to generate Smart Reply responses.
+</p>
+
 <p>To enable Smart Reply for your notification action, you need to do the
 following:
 </p>
 <ol>
-  <li>Use <a href="{@docRoot}preview/features/notification-updates.html#style">{@code Notification.MessagingStyle}</a>.
+  <li>Use <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.html">{@code NotificationCompat.MessagingStyle}</a>.
   </li>
-  <li>Call the method {@code setAllowGeneratedReplies()} for the notification action.
-  For more information, see the downloadable
-  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API reference</a>.
+  <li>Call the method <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Action.Builder.html#setAllowGeneratedReplies(boolean)">{@code setAllowGeneratedReplies(true)}</a>
+   for the notification action.
   </li>
   <li>Ensure that the notification action has a
     <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>
@@ -236,3 +317,29 @@ Notification noti = new NotificationCompat.Builder()
 // 3) add an action with RemoteInput
 .extend(new WearableExtender().addAction(action)).build();
 </pre>
+
+<h3 id="images">Adding images to a MessagingStyle notification</h3>
+<p>
+  You can add images to a notification message  by setting the appropriate MIME
+  type and placing the URI to the image in {@code NotificationCompat.MessagingStyle.Message.}
+  <a href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.Message.html#setData(java.lang.String, android.net.Uri)">{@code setData()}</a> method.
+</p>
+<p>
+  Here is the code snippet to set data of type image in a notification:
+</p>
+<pre>
+NotificationCompat.MessagingStyle.Message message = new Message("sticker", 1, "Jeff")
+                      .setData("image/png", stickerUri);
+
+  NotificationCompat notification = new NotificationCompat.Builder()
+             .setStyle(new NotificationComapt.MessagingStyle("Me")
+             .addMessage(message)
+             .build());
+
+</pre>
+<p>
+  In the above code snippet the variable <code>stickerUri </code>is a Uri that
+  points to a publicly-accessible location, as described <a
+  href="https://developer.android.com/reference/android/support/v4/app/NotificationCompat.MessagingStyle.Message.html">here
+  </a>.
+</p>
