@@ -183,6 +183,46 @@ TaskManager* OpenGLPipeline::getTaskManager() {
     return &Caches::getInstance().tasks;
 }
 
+static bool layerMatchesWH(OffscreenBuffer* layer, int width, int height) {
+    return layer->viewportWidth == (uint32_t)width && layer->viewportHeight == (uint32_t)height;
+}
+
+bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
+        const DamageAccumulator& damageAccumulator) {
+    RenderState& renderState = mRenderThread.renderState();
+    OffscreenBufferPool& layerPool = renderState.layerPool();
+    bool transformUpdateNeeded = false;
+    if (node->getLayer() == nullptr) {
+        node->setLayer(layerPool.get(renderState, node->getWidth(), node->getHeight()));
+        transformUpdateNeeded = true;
+    } else if (!layerMatchesWH(node->getLayer(), node->getWidth(), node->getHeight())) {
+        // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
+        // Or, ideally, maintain damage between frames on node/layer so ordering is always correct
+        if (node->properties().fitsOnLayer()) {
+            node->setLayer(layerPool.resize(node->getLayer(), node->getWidth(), node->getHeight()));
+        } else {
+            destroyLayer(node);
+        }
+        transformUpdateNeeded = true;
+    }
+
+    if (transformUpdateNeeded && node->getLayer()) {
+        // update the transform in window of the layer to reset its origin wrt light source position
+        Matrix4 windowTransform;
+        damageAccumulator.computeCurrentTransform(&windowTransform);
+        node->getLayer()->setWindowTransform(windowTransform);
+    }
+
+    return transformUpdateNeeded;
+}
+
+void OpenGLPipeline::destroyLayer(RenderNode* node) {
+    if (OffscreenBuffer* layer = node->getLayer()) {
+        layer->renderState.layerPool().putOrDelete(layer);
+        node->setLayer(nullptr);
+    }
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

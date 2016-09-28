@@ -229,19 +229,6 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
     }
 }
 
-static OffscreenBuffer* createLayer(RenderState& renderState, uint32_t width, uint32_t height) {
-    return renderState.layerPool().get(renderState, width, height);
-}
-
-static void destroyLayer(OffscreenBuffer* layer) {
-    RenderState& renderState = layer->renderState;
-    renderState.layerPool().putOrDelete(layer);
-}
-
-static bool layerMatchesWidthAndHeight(OffscreenBuffer* layer, int width, int height) {
-    return layer->viewportWidth == (uint32_t) width && layer->viewportHeight == (uint32_t)height;
-}
-
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
@@ -251,33 +238,14 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
             || CC_UNLIKELY(properties().getWidth() == 0)
             || CC_UNLIKELY(properties().getHeight() == 0)) {
         if (CC_UNLIKELY(mLayer)) {
-            destroyLayer(mLayer);
-            mLayer = nullptr;
+            renderthread::CanvasContext::destroyLayer(this);
         }
         return;
     }
 
-    bool transformUpdateNeeded = false;
-    if (!mLayer) {
-        mLayer = createLayer(info.canvasContext.getRenderState(), getWidth(), getHeight());
+    if(info.canvasContext.createOrUpdateLayer(this, *info.damageAccumulator)) {
         damageSelf(info);
-        transformUpdateNeeded = true;
-    } else if (!layerMatchesWidthAndHeight(mLayer, getWidth(), getHeight())) {
-        // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
-        // Or, ideally, maintain damage between frames on node/layer so ordering is always correct
-        RenderState& renderState = mLayer->renderState;
-        if (properties().fitsOnLayer()) {
-            mLayer = renderState.layerPool().resize(mLayer, getWidth(), getHeight());
-        } else {
-            destroyLayer(mLayer);
-            mLayer = nullptr;
-        }
-        damageSelf(info);
-        transformUpdateNeeded = true;
     }
-
-    SkRect dirty;
-    info.damageAccumulator->peekAtDirty(&dirty);
 
     if (!mLayer) {
         Caches::getInstance().dumpMemoryUsage();
@@ -296,13 +264,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
-    if (transformUpdateNeeded && mLayer) {
-        // update the transform in window of the layer to reset its origin wrt light source position
-        Matrix4 windowTransform;
-        info.damageAccumulator->computeCurrentTransform(&windowTransform);
-        mLayer->setWindowTransform(windowTransform);
-    }
-
+    SkRect dirty;
+    info.damageAccumulator->peekAtDirty(&dirty);
     info.layerUpdateQueue->enqueueLayerWithDamage(this, dirty);
 
     // There might be prefetched layers that need to be accounted for.
@@ -451,8 +414,7 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
 
 void RenderNode::destroyHardwareResources(TreeObserver* observer, TreeInfo* info) {
     if (mLayer) {
-        destroyLayer(mLayer);
-        mLayer = nullptr;
+        renderthread::CanvasContext::destroyLayer(this);
     }
     if (mDisplayList) {
         for (auto&& child : mDisplayList->getChildren()) {

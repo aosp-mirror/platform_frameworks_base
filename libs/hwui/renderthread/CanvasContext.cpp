@@ -85,6 +85,18 @@ CanvasContext* CanvasContext::create(RenderThread& thread,
     return nullptr;
 }
 
+void CanvasContext::destroyLayer(RenderNode* node) {
+    auto renderType = Properties::getRenderPipelineType();
+    switch (renderType) {
+        case RenderPipelineType::OpenGL:
+            OpenGLPipeline::destroyLayer(node);
+            break;
+        default:
+            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t) renderType);
+            break;
+    }
+}
+
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         RenderNode* rootRenderNode, IContextFactory* contextFactory,
         std::unique_ptr<IRenderPipeline> renderPipeline)
