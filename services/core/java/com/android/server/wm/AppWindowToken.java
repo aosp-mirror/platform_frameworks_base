@@ -846,6 +846,9 @@ class AppWindowToken extends WindowToken {
     void overridePlayingAppAnimations(Animation a) {
         if (mAppAnimator.isAnimating()) {
             final WindowState win = findMainWindow();
+            if (win == null) {
+                return;
+            }
             final int width = win.mContainingFrame.width();
             final int height = win.mContainingFrame.height();
             mAppAnimator.setAnimation(a, width, height, false, STACK_CLIP_NONE);
