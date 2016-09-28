@@ -206,6 +206,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private ArrayList<Matrix> mSharedElementParentMatrices;
     private boolean mSharedElementTransitionComplete;
     private boolean mViewsTransitionComplete;
+    private ArrayList<View> mStrippedTransitioningViews = new ArrayList<>();
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
@@ -287,7 +288,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             View view = mTransitioningViews.get(i);
             if (!view.getGlobalVisibleRect(r)) {
                 mTransitioningViews.remove(i);
-                showView(view, true);
+                mStrippedTransitioningViews.add(view);
             }
         }
     }
@@ -358,6 +359,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 } else {
                     set.excludeTarget(view, true);
                 }
+            }
+        }
+        if (mStrippedTransitioningViews != null) {
+            for (int i = mStrippedTransitioningViews.size() - 1; i >= 0; i--) {
+                View view = mStrippedTransitioningViews.get(i);
+                set.excludeTarget(view, true);
             }
         }
         // By adding the transition after addTarget, we prevent addTarget from
@@ -679,6 +686,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mWindow = null;
         mSharedElements.clear();
         mTransitioningViews = null;
+        mStrippedTransitioningViews = null;
         mOriginalAlphas.clear();
         mResultReceiver = null;
         mPendingTransition = null;
