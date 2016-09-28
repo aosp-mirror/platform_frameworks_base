@@ -8989,8 +8989,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!isDeviceOwnerManagedSingleUserDevice()) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
             Slog.w(LOG_TAG, "Security logging turned off as it's no longer a single user device.");
-            setBackupServiceEnabledInternal(false);
-            Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+            if (mOwners.hasDeviceOwner()) {
+                setBackupServiceEnabledInternal(false);
+                Slog.w(LOG_TAG, "Backup is off as it's a managed device that has more that one user.");
+            }
         }
     }
 
