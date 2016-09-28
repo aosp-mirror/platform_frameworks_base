@@ -304,6 +304,9 @@ public abstract class AsyncTask<Params, Progress, Result> {
                     //noinspection unchecked
                     result = doInBackground(mParams);
                     Binder.flushPendingCommands();
+                } catch (Throwable tr) {
+                    mCancelled.set(true);
+                    throw tr;
                 } finally {
                     postResult(result);
                 }
