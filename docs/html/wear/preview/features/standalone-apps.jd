@@ -1,0 +1,499 @@
+page.title=Standalone Apps
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+  <ul>
+    <li><a href="#planning_apps">Planning Your Phone and Watch Apps</a></li>
+    <li><a href="#network_access">Network Access and Cloud Messaging</a></li>
+    <li><a href="#background_services">Using Background Services</a></li>
+    <li><a href="#fcm">Cloud Notifications Using FCM</a></li>
+    <li><a href="#fcm-phone">Notifications from a Companion Phone</a></li>
+  </ul>
+
+</div>
+</div>
+
+    <p>
+      In Android Wear 2.0, apps can work independently of a phone. Users can
+      complete more tasks on a watch, without access to an Android or iOS
+      phone.
+    </p>
+
+    <h2 id="planning_apps">
+      Planning Your Phone and Watch Apps
+    </h2>
+
+    <p>
+      A watch APK targeting Wear 2.0 should not be embedded in a phone APK.
+      For more information, see
+      <a href="{@docRoot}wear/preview/features/app-distribution.html">
+      App Distribution</a>.
+    </p>
+
+    <p>
+      Generally, the minimum and target API level for a standalone app, and
+      for Wear 2.0, is level 24. The minimum SDK level can be 23
+      only if you are using the same APK
+      for Wear 1.0 and 2.0 (and thus have an embedded Wear 1.0 APK).
+    </p>
+
+    <p>
+      If you build a standalone Wear 2.0 APK and will continue to have a
+      Wear 1.0 APK, please do both of the following:
+    </p>
+
+    <ul>
+      <li>Provide a standalone version of the Wear APK, and
+      </li>
+
+      <li>Continue embedding a version of the Wear APK in your phone APK
+      </li>
+    </ul>
+
+    <p>
+      <strong>Caution</strong>: For the Wear 2.0 Developer Preview, if you
+      publish an update to your production phone APK that has removed an embedded
+      Wear APK, production users who update the phone APK before installing
+      your standalone Wear APK will lose their existing Wear app and its data.
+      Therefore, it's important that you continue to embed
+      your watch APK into your phone APK.
+    </p>
+
+    <p>
+      <a href=
+      "https://developer.android.com/training/articles/wear-permissions.html">
+      Run-time permissions</a> are required for standalone apps.
+    </p>
+
+    <h3>
+      Shared code and data storage
+    </h3>
+
+    <p>
+      Code can be shared between a Wear app and a phone app. Optionally, code
+      that is specific to a form factor can be in a separate module.
+    </p>
+
+    <p>
+      For example, common code for networking can be in a shared library.
+    </p>
+
+    <p>
+      You can use standard Android storage APIs to store data locally.
+      For example, you can use
+      the <a href=
+      "https://developer.android.com/reference/android/content/SharedPreferences.html">
+      SharedPreferences APIs</a>, SQLite, or internal storage (as you would in
+      the case of a phone).
+    </p>
+
+    <h3>
+      Detecting your phone app or watch app
+    </h3>
+
+    <p>
+      If a user of your watch app needs your phone app, your watch app can
+      detect if the phone app is available. Using the <a href=
+      "https://developers.google.com/android/reference/com/google/android/gms/wearable/CapabilityApi">
+      CapabilityApi</a>, your phone app or watch app can advertise its presence
+      to a paired device. It can do so statically and dynamically. When an app
+      is on a node in a user's Wear network (i.e., on a phone, paired watch, or
+      in the cloud), the <code>CapabilityApi</code> enables another
+      app to detect if it is installed. For more information, see <a href=
+      "https://developer.android.com/training/wearables/data-layer/messages.html#AdvertiseCapabilities">
+      Advertise capabilities</a>.
+    </p>
+
+    <p>
+      If your phone app is unavailable, your can check if the Play Store is
+      available on the phone, as described below, before directing the user to
+      go to the Play Store (to install your phone app).
+    </p>
+
+    <h4>
+      Checking for Play Store availability on a phone
+    </h4>
+
+    <p>
+      iPhones and some Android phones lack the Play Store. A standalone Wear
+      app can check if the paired phone has the Play Store, before directing a
+      user to go there to install your phone app. The
+      <code>PlayStoreAvailability</code> class contains a
+      <code>getPlayStoreAvailabilityOnPhone()</code> method that enables your
+      Wear app to check if a companion phone has the Play Store.
+    </p>
+
+    <p>
+      More information about the <code>PlayStoreAvailability</code> class is
+      available when you <a href=
+      "https://developer.android.com/wear/preview/start.html#get_the_preview_reference_documentation">
+      download the Android Wear 2.0 Preview Reference</a>. Here is a snippet
+      that uses the <code>getPlayStoreAvailabilityOnPhone()</code> method to
+      determine if the paired phone has the Play Store:
+    </p>
+
+<pre>
+int playStoreAvailabilityOnPhone =
+PlayStoreAvailability.getPlayStoreAvailabilityOnPhone(context);
+</pre>
+
+    <p>
+      The value returned by the <code>getPlayStoreAvailabilityOnPhone()</code>
+      method is one of the following:
+    </p>
+
+    <table>
+      <tr>
+        <th>
+          <strong>Return value</strong>
+        </th>
+        <th>
+          <strong>Description</strong>
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>PLAY_STORE_ON_PHONE_AVAILABLE</code>
+        </td>
+        <td>
+          The Play Store is available on the companion phone.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>PLAY_STORE_ON_PHONE_UNAVAILABLE</code>
+        </td>
+        <td>
+          The Play Store is not available on the companion phone.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <code>PLAY_STORE_ON_PHONE_ERROR_UNKNOWN</code>
+        </td>
+        <td>
+          An error occurred in the check for the Play Store; another check
+          should be made later.
+        </td>
+      </tr>
+    </table>
+
+    <h2 id="network_access">
+      Network Access and Cloud Messaging
+    </h2>
+
+    <p>
+      Android Wear apps can make their own network requests. When a watch has a
+      Bluetooth connection to a phone, the watch's network traffic is proxied
+      through the phone. When a phone is unavailable, Wi-Fi and cellular
+      networks are used, depending on the hardware. The Wear platform handles
+      transitions between networks. A watch's network access thus does not
+      require the <a href=
+      "https://developer.android.com/training/wearables/data-layer/index.html">
+      Wearable Data Layer API</a>.
+    </p>
+
+    <p>
+      For sending notifications, apps can directly use Firebase Cloud Messaging
+      (FCM), which replaces Google Cloud Messaging, or continue to use GCM.
+    </p>
+
+    <p>
+      No APIs for network access or FCM are specific to Android Wear.
+      Refer to the existing documentation about <a href=
+      "https://developer.android.com/training/basics/network-ops/connecting.html">
+      connecting to a network</a> and <a href=
+      "https://developers.google.com/cloud-messaging/">cloud messaging</a>.
+    </p>
+
+    <p>
+      You can use protocols such as HTTP, TCP, and UDP. However,
+      the <a href="https://developer.android.com/reference/android/webkit/package-summary.html">
+      android.webkit</a> APIs are not available. Therefore,
+      use of cookies is available by reading and writing headers on
+      requests and responses, but the <a href=
+      "https://developer.androidcom/reference/android/webkit/CookieManager.html">
+      CookieManager</a> class is not available.
+    </p>
+
+    <p>
+      FCM works well with
+      <a href="https://developer.android.com/training/monitoring-device-state/doze-standby.html">
+      Doze</a>.
+    </p>
+
+    <p>
+      Additionally, we recommend using the following:
+    </p>
+
+    <ul>
+      <li>The <a href=
+      "https://developer.android.com/reference/android/app/job/JobScheduler.html">
+        JobScheduler</a> API for asynchronous jobs, including polling at
+        regular intervals (described below)
+      </li>
+
+      <li>Multi-networking APIs if you need to connect to specific network
+      types; see <a href=
+      "https://developer.android.com/about/versions/android-5.0.html#Wireless">
+        Multiple Network Connections</a>
+      </li>
+    </ul>
+
+    <p>
+      For foreground use cases, we currently recommend that you make a
+      request for an unmetered network. Here is an example of using
+      the multi-networking APIs to request an unmetered network:
+    </p>
+
+<pre>
+ConnectivityManager.NetworkCallback networkCallback =
+  new ConnectivityManager.NetworkCallback() {
+    &#64;Override
+    public void onAvailable(Network network) {
+      // access network
+      }
+    };
+ConnectivityManager connectivityManager =
+  (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+connectivityManager.requestNetwork(new NetworkRequest.Builder()
+  .addCapability(NET_CAPABILITY_NOT_METERED)
+  .build(), networkCallback);
+</pre>
+
+    <p>
+      We also recommend setting a timer for frontend scenarios
+      to prevent a user from potentially waiting for a long time.
+      When the network is no longer needed, or if the timer fires,
+      the network callback needs to be unregistered:
+    </p>
+
+<pre>
+connectivityManager.unregisterNetworkCallback(networkCallback):
+</pre>
+
+    <p>
+      A Wear app can communicate with a phone app using the <a href=
+      "https://developer.android.com/training/wearables/data-layer/index.html">Wearable
+      Data Layer API</a>, but connecting to a network using that API is
+      discouraged.
+    </p>
+
+    <h3 id="necessary_data">
+      Obtaining only the necessary data
+    </h3>
+
+    <p>
+      When obtaining data from the cloud, get only the necessary data.
+      Otherwise, you may introduce unnecessary latency, memory use, and battery
+      use.
+    </p>
+
+    <p>
+      When a watch is connected over a Bluetooth LE connection, your app may
+      have access to a bandwidth of only 10 kilobytes per second. Therefore,
+      the following steps are recommended:
+    </p>
+
+    <ul>
+      <li>Audit your network requests and responses for extra data that only is
+      for a phone app
+      </li>
+
+      <li>Shrink large images before sending them over a network to a watch
+      </li>
+    </ul>
+
+    <h2 id="background_services">
+      Using Background Services
+    </h2>
+
+    <p>
+      To ensure that background tasks are correctly executed, they must account
+      for <a href=
+      "https://developer.android.com/training/monitoring-device-state/doze-standby.html">
+      Doze</a>. In Android 6.0, Doze and App Standby resulted in significant
+      improvements to battery life by allowing devices to enter deep sleep when
+      idle and stationary.
+    </p>
+
+    <p>
+      Doze is <a href=
+      "https://developer.android.com/preview/behavior-changes.html#doze">enhanced</a>
+      in Android Nougat and Android Wear 2.0. When a screen turns off or enters
+      ambient mode for a long enough time, a subset of Doze can occur and
+      background tasks may be deferred for certain periods. Later, when a
+      device is stationary for an extended time, regular Doze occurs.
+    </p>
+
+    <p>
+      You should schedule jobs with the <a href=
+      "https://developer.android.com/reference/android/app/job/JobScheduler.html">
+      JobScheduler</a> API, which enables your app to register for Doze-safe
+      code execution. When scheduling jobs, you can select constraints such as
+      periodic execution and the need for connectivity or device charging.
+      It is important to configure jobs in a way that does not adversely
+      impact battery life. Jobs should use a
+      <a href="https://developer.android.com/reference/android/app/job/JobInfo.Builder.html">
+      JobInfo.Builder</a> object to provide constraints and metadata, e.g. with
+      one or more of the following methods for a task:
+    </p>
+
+    <ul>
+      <li>To schedule a task that requires networking, use
+      <code>setRequiredNetworkType(int networkType)</code>, specifying
+      <code>NETWORK_TYPE_ANY</code> or <code>NETWORK_TYPE_UNMETERED</code>;
+      note that <code>NETWORK_TYPE_UNMETERED</code> is for large data transfers
+      while <code>NETWORK_TYPE_ANY</code> is for small transfers
+      </li>
+
+      <li>To schedule a task while charging, use
+      <code>setRequiresCharging(boolean requiresCharging)</code>
+      </li>
+
+      <li>For specifying that a device is idle for a task, use
+      <code>setRequiresDeviceIdle(boolean requiresDeviceIdle)</code>; this
+      method can be useful for lower-priority background work or
+      synchronization, especially when used with
+      <code>setRequiresCharging</code>
+      </li>
+    </ul>
+
+    <p>
+      Note that some low-bandwidth networks, such as Bluetooth LE, are
+      considered metered.
+    </p>
+
+    <h3>
+      Scheduling with constraints
+    </h3>
+
+    <p>
+      You can schedule a task that requires constraints. In the example below,
+      a <code>JobScheduler</code> object activates <code>MyJobService</code>
+      when the following constraints are met:
+    </p>
+
+    <ul>
+      <li>Unmetered networking
+      </li>
+
+      <li>Device charging
+      </li>
+    </ul>
+
+    <p>
+      You can use the builder method <code>setExtras</code> to attach a bundle
+      of app-specific metadata to the job request. When your job executes, this
+      bundle is provided to your job service. Note the <code>MY_JOB_ID</code>
+      value passed to the <code>JobInfo.Builder</code> constructor. This
+      <code>MY_JOB_ID</code> value is an app-provided identifier. Subsequent
+      calls to cancel, and subsequent jobs created with that same value, will
+      update the existing job:
+    </p>
+
+<pre>
+JobInfo jobInfo = new JobInfo.Builder(MY_JOB_ID,
+        new ComponentName(this, MyJobService.class))
+        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+        .setRequiresCharging(true)
+        .setExtras(extras)
+        .build();
+((JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE))
+        .schedule(jobInfo);
+</pre>
+
+    <p>
+      Below is an implementation of <a href=
+      "https://developer.android.com/reference/android/app/job/JobService.html">
+      JobService</a> to handle the job above. When the job executes, a
+      <code>JobParameters</code> object is passed into the
+      <code>onStartJob</code> method. The <code>JobParameters</code> object
+      enables you to get the job ID value along with any extras bundle provided
+      when scheduling the job. The <code>onStartJob</code> method is called on
+      the main application thread, and therefore any expensive logic should be
+      run from a separate thread. In the example, an <code>AsyncTask</code> is
+      used to run code in the background. When work is complete, you would call
+      the <code>jobFinished</code> method to notify <code>JobScheduler</code>
+      that the task is done:
+    </p>
+
+<pre>
+public class MyJobService extends JobService {
+    &#64;Override public boolean onStartJob(JobParameters params) {
+        new JobAsyncTask().execute(params);
+        return true;
+    }
+
+    private class JobAsyncTask extends AsyncTask
+</pre>
+
+    <h2 id="fcm">
+      Cloud Notifications Using FCM
+    </h2>
+
+    <p>
+      FCM is the recommended way to send notifications to a watch.
+    </p>
+
+    <p>
+      Provide for messages from FCM by collecting a registration token for a
+      device when your Wear app runs. Then include the token as part of the
+      destination when your server sends messages to the FCM REST endpoint. FCM
+      sends messages to the device identified by the token.
+    </p>
+
+    <p>
+      An FCM message is in JSON format and can include one or both of the
+      following payloads:
+    </p>
+
+    <ul>
+      <li>
+        <strong>Notification payload.</strong> When a notification payload is
+        received by a watch, the data is displayed to a user directly in the
+        notification stream. When the user taps the notification, your app is
+        launched.
+      </li>
+
+      <li>
+        <strong>Data payload</strong>. The payload has a set of custom
+        key/value pairs. The payload and is delivered as data to your Wear app.
+      </li>
+    </ul>
+
+    <p>
+      For more information and examples of payloads, see <a href=
+      "https://firebase.google.com/docs/cloud-messaging/concept-options">About
+      FCM Messages</a>.
+    </p>
+
+    <h2 id="fcm-phone">
+      Notifications from a Companion Phone
+    </h2>
+
+    <p>
+      By default, notifications are bridged (shared) from a phone app to a
+      watch. If you have a standalone Wear app and a corresponding phone app,
+      duplicate notifications can occur. For example, the same notification
+      from FCM, received by both a phone and a watch, could be
+      displayed by both devices independently.
+    </p>
+
+    <p>
+      For information about preventing duplicate notifications, see <a href=
+      "https://developer.android.com/wear/preview/features/bridger.html">Bridging
+      Mode for Notifications</a>.
+    </p>
