@@ -358,6 +358,7 @@ public class IpManager extends StateMachine {
     }
 
     public static final String DUMP_ARG = "ipmanager";
+    public static final String DUMP_ARG_CONFIRM = "confirm";
 
     private static final int CMD_STOP = 1;
     private static final int CMD_START = 2;
@@ -562,6 +563,12 @@ public class IpManager extends StateMachine {
     }
 
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (args.length > 0 && DUMP_ARG_CONFIRM.equals(args[0])) {
+            // Execute confirmConfiguration() and take no further action.
+            confirmConfiguration();
+            return;
+        }
+
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println("APF dump:");
         pw.increaseIndent();
