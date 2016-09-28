@@ -29,6 +29,7 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
+import static com.android.server.wm.AppTransition.TRANSIT_NONE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
@@ -493,7 +494,7 @@ public class DockedStackDividerController implements DimLayerUser {
         checkMinimizeChanged(false /* animate */);
     }
 
-    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps) {
+    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps, int appTransition) {
         final boolean wasMinimized = mMinimizedDock;
         checkMinimizeChanged(true /* animate */);
 
@@ -502,7 +503,8 @@ public class DockedStackDividerController implements DimLayerUser {
         // any case that was missed in ActivityStarter.postStartActivityUncheckedProcessing because
         // we couldn't retrace the launch of the app in the docked stack to the launch from
         // homescreen.
-        if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)) {
+        if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
+                && appTransition != TRANSIT_NONE) {
             mService.showRecentApps(true /* fromHome */);
         }
     }
