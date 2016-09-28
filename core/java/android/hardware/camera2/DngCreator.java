@@ -119,8 +119,14 @@ public final class DngCreator implements AutoCloseable {
             captureTime = timestamp / 1000000 + timeOffset;
         }
 
+        // Create this fresh each time since the time zone may change while a long-running application
+        // is active.
+        final DateFormat dateTimeStampFormat =
+            new SimpleDateFormat(TIFF_DATETIME_FORMAT);
+        dateTimeStampFormat.setTimeZone(TimeZone.getDefault());
+
         // Format for metadata
-        String formattedCaptureTime = sDateTimeStampFormat.format(captureTime);
+        String formattedCaptureTime = dateTimeStampFormat.format(captureTime);
 
         nativeInit(characteristics.getNativeCopy(), metadata.getNativeCopy(),
                 formattedCaptureTime);
@@ -467,13 +473,10 @@ public final class DngCreator implements AutoCloseable {
     private static final String GPS_DATE_FORMAT_STR = "yyyy:MM:dd";
     private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd HH:mm:ss";
     private static final DateFormat sExifGPSDateStamp = new SimpleDateFormat(GPS_DATE_FORMAT_STR);
-    private static final DateFormat sDateTimeStampFormat =
-            new SimpleDateFormat(TIFF_DATETIME_FORMAT);
     private final Calendar mGPSTimeStampCalendar = Calendar
             .getInstance(TimeZone.getTimeZone("UTC"));
 
     static {
-        sDateTimeStampFormat.setTimeZone(TimeZone.getDefault());
         sExifGPSDateStamp.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
