@@ -1596,7 +1596,7 @@ public final class BluetoothDevice implements Parcelable {
                 // BLE is not supported
                 return null;
             }
-            BluetoothGatt gatt = new BluetoothGatt(context, iGatt, this, transport);
+            BluetoothGatt gatt = new BluetoothGatt(iGatt, this, transport);
             gatt.connect(autoConnect, callback);
             return gatt;
         } catch (RemoteException e) {Log.e(TAG, "", e);}
