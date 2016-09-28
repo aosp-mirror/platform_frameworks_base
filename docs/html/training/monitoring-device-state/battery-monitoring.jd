@@ -141,10 +141,11 @@ receiver. The receiver is triggered whenever the device battery becomes low or e
 condition by listening for {@link android.content.Intent#ACTION_BATTERY_LOW} and {@link
 android.content.Intent#ACTION_BATTERY_OKAY}.</p>
 
-<pre>&lt;receiver android:name=".BatteryLevelReceiver">
-&lt;intent-filter>
-  &lt;action android:name="android.intent.action.ACTION_BATTERY_LOW"/>
-  &lt;action android:name="android.intent.action.ACTION_BATTERY_OKAY"/>
+<pre>
+&lt;receiver android:name=".BatteryLevelReceiver">
+  &lt;intent-filter>
+    &lt;action android:name="android.intent.action.BATTERY_LOW"/>
+    &lt;action android:name="android.intent.action.BATTERY_OKAY"/>
   &lt;/intent-filter>
 &lt;/receiver></pre>
 
