@@ -6,19 +6,26 @@ page.tags="wear-preview"
 
     <div id="qv-wrapper">
       <div id="qv">
-        <ol>
+        <ul>
           <li>
             <a href=
-            "#preventing_bridging_with_the_bridging_mode_feature">Preventing
-            Bridging with the Bridging Mode Feature</a>
+            "#using-an-entry-in-the-manifest-file">Specifying a Bridging Configuration in the Manifest File</a>
           </li>
 
           <li>
             <a href=
-            "#using_a_dismissal_id_to_sync_notification_dismissals">Using a
-            Dismissal ID to Sync Notification Dismissals</a>
+            "#specifying-a-bridging-configuration-at-runtime">Specifying a Bridging Configuration at Runtime</a>
           </li>
-        </ol>
+          <li>
+            <a href=
+            "#existing-method-of-preventing-bridging">Existing Method of Preventing Bridging</a>
+          </li>
+
+          <li>
+            <a href=
+            "#using_a_dismissal_id_to_sync_notification_dismissals">Using a Dismissal ID to Sync Notification Dismissals</a>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -27,19 +34,20 @@ page.tags="wear-preview"
       "{@docRoot}training/wearables/notifications/index.html">are bridged
       (shared)</a> from an app on a companion phone to the watch. If you build
       a standalone watch app and have a companion phone app, they may duplicate
-      notifications. The Android Wear 2.0 Preview includes a Bridging mode
-      feature to handle this problem of repeated notifications.
+      notifications. The Android Wear 2.0 Preview includes
+      features to handle this problem of repeated notifications.
     </p>
 
     <p>
-      With the Android Wear 2.0 Preview, developers can change the
-      behavior of notifications with the following:
+      With the Android Wear 2.0 Preview, developers can change the behavior of
+      notifications with one or more of the following:
     </p>
 
     <ul>
-      <li>Specifying in the standalone app's Android manifest file that
-      notifications from the corresponding phone app should not be
-      bridged to the watch
+      <li>Specifying a bridging configuration in the manifest file
+      </li>
+
+      <li>Specifying a bridging configuration at runtime
       </li>
 
       <li>Setting a dismissal ID so notification dismissals are synced across
@@ -47,43 +55,201 @@ page.tags="wear-preview"
       </li>
     </ul>
 
-    <h2 id="preventing_bridging_with_the_bridging_mode_feature">
-      Preventing Bridging with the Bridging Mode Feature
+    <h2 id="using-an-entry-in-the-manifest-file">
+      Specifying a Bridging Configuration in the Manifest File
     </h2>
 
     <p>
-      To prevent bridging of notifications from a phone app, you can use an
+      An app's Android manifest file can indicate that notifications from the
+      corresponding phone app should not be bridged to the watch. Specifically,
+      to prevent bridging of notifications from a phone app, you can use a
+      <code>&lt;meta-data&gt;</code>
       entry in the manifest file of the watch app (e.g. the standalone watch
       app), as follows:
     </p>
 
-    <pre>
+<pre>
 com.google.android.wearable.notificationBridgeMode
-    </pre>
+</pre>
 
     <p>
       Setting that entry to <code>NO_BRIDGING</code> will prevent bridging:
     </p>
 
-    <pre>
-&lt;meta-data android:name="com.google.android.wearable.notificationBridgeMode"
-                   android:value="NO_BRIDGING" /&gt;
+<pre>
+&lt;meta-data android:name=&quot;com.google.android.wearable.notificationBridgeMode&quot;
+                   android:value=&quot;NO_BRIDGING&quot; /&gt;
 </pre>
+
     <p>
-      The default bridging behavior occurs if you do not include the entry or
+      The default bridging behavior occurs if you do not
+      include the <code>&lt;meta-data&gt;</code> entry or
       if you specify a value of <code>BRIDGING</code> instead of
       <code>NO_BRIDGING</code>.
     </p>
 
-    <h3 id="existing_method_of_preventing_bridging">
-      Existing method of preventing bridging
+    <p>
+      For an existing app, if you are using
+      Google Cloud Messaging (GCM) or Firebase Cloud
+      Messaging (FCM) to send notification alerts to devices,
+      you may already have disabled bridging in case a phone is not
+      connected at the time of receiving an alert.
+      In this case, you may still want to dismiss the notification
+      across other devices when it is dismissed in a watch app.
+    </p>
+
+    <p>
+      The bridging configuration that is set in the manifest takes effect as
+      soon as a watch app is installed.
+    </p>
+
+    <h2 id="specifying-a-bridging-configuration-at-runtime">
+      Specifying a Bridging Configuration at Runtime
+    </h2>
+
+    <p>
+      This section describes how to specify a bridging configuration at runtime
+      using the <code>BridgingManager</code> class
+      <code>(android.support.wearable.notifications.BridgingManager)</code>.
+    </p>
+
+    <p>
+      You can set a bridging mode, and optionally set tags for notifications
+      that are exempt from the bridging mode, using a
+      <code>BridgingManager</code> object. Specifically, create a
+      <code>BridgingConfig</code> object and set it as shown in this section,
+      optionally using the <code>setBridgingEnabled</code> method. If you
+      specify a bridging configuration at runtime, then if the
+      <code>setBridgingEnabled</code> method is not set, bridging is enabled by
+      default.
+    </p>
+
+    <p>
+      Specifying a bridging configuration at runtime overrides a
+      bridging-related setting in the Android manifest file.
+    </p>
+
+    <h3 id="disable-bridging-for-all-notifications">
+      Disable bridging for all notifications
     </h3>
+
+    <p>
+      You can use the <code>setBridgingEnabled</code> method, as follows:
+    </p>
+
+<pre>
+BridgingManager.setConfig(context,
+  new BridgingConfig.Builder(context)
+    .setBridgingEnabled(false)
+    .build());
+</pre>
+    <p>
+      If the above setter is not called, the bridging mode defaults to true.
+      Here is an example of setting tags without using the
+      <code>setBridgingEnabled</code> method, excluding notifications with a
+      tag of <code>foo</code> or <code>bar</code>:
+    </p>
+
+<pre>
+BridgingManager.setConfig(context,
+  new BridgingConfig.Builder(context)
+    .addExcludedTag("foo")
+    .addExcludedTag("bar")
+    .build());
+</pre>
+    <h3 id="exempt-notifications-that-are-tagged">
+      Exempt notifications that are tagged
+    </h3>
+
+    <p>
+      You can disable bridging for all notifications except those with certain
+      tags.
+    </p>
+
+    <p>
+      For example, you can disable bridging, except for notifications tagged as
+      <code>foo</code> or <code>bar,</code> with the following:
+    </p>
+
+<pre>
+BridgingManager.setConfig(context,
+  new BridgingConfig.Builder(context)
+    .setBridgingEnabled(false)
+    .addExcludedTag("foo")
+    .addExcludedTag("bar")
+    .build());
+</pre>
+
+    <p>
+      As another example, you can disable bridging for all notifications except
+      for notifications tagged as <code>foo</code>, <code>bar</code> or
+      <code>baz</code>.
+    </p>
+
+    <pre>
+BridgingManager.setConfig(context,
+  new BridgingConfig.Builder(context)
+    .setBridgingEnabled(false)
+    .addExcludedTags(Arrays.asList("foo", "bar", "baz"))
+    .build());
+</pre>
+    <h3 id="enable-bridging-except-for-notifications-with-certain-tags">
+      Enable bridging except for notifications with certain tags
+    </h3>
+
+    <p>
+      You can enable bridging for all notifications except those with certain
+      tags.
+    </p>
+
+    <p>
+      For example, you can enable bridging for all notifications, except for
+      notifications tagged as <code>foo</code> or <code>bar</code>, with the
+      following:
+    </p>
+
+<pre>
+BridgingManager.setConfig(context,
+  new BridgingConfig.Builder(context)
+    .setBridgingEnabled(true)
+    .addExcludedTag("foo")
+    .addExcludedTag("bar")
+    .build());
+</pre>
+
+    <h3 id="setting-a-bridge-tag">
+      Setting a bridge tag
+    </h3>
+
+    <p>
+      A bridge tag can be set on a notification by calling the
+      <code>setNotificationBridgeTag</code> method as follows:
+    </p>
+
+<pre>
+BridgingManager.setNotificationBridgeTag(&lt;NotificationCompat.Builder&gt;, &lt;String&gt;);
+</pre>
+
+    <p>
+      For example:
+    </p>
+
+<pre>
+NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+&lt;set other fields&gt;;
+BridgingManager.setNotificationBridgeTag(builder, &quot;foo&quot;);
+Notification notification =  builder.build();
+</pre>
+
+    <h2 id="existing-method-of-preventing-bridging">
+      Existing Method of Preventing Bridging
+    </h2>
 
     <p>
       An existing way to prevent bridging is with the
       <code>Notification.Builder</code> class; specify <code>true</code> in the
       <a href=
-      "{@docRoot}reference/android/app/Notification.Builder.html#setLocalOnly(boolean)">
+      "http://developer.android.com/reference/android/app/Notification.Builder.html#setLocalOnly(boolean)">
       setLocalOnly</a> method.
     </p>
 
@@ -95,12 +261,6 @@ com.google.android.wearable.notificationBridgeMode
       the watch app may not be installed on all of them.
     </p>
 
-    <p>
-      Thus, if bridging should be prevented when the watch app
-      is installed, use the <a href=
-      "#preventing_bridging_with_the_bridging_mode_feature">Bridging mode
-      feature</a>.
-    </p>
 
     <h2 id="using_a_dismissal_id_to_sync_notification_dismissals">
       Using a Dismissal ID to Sync Notification Dismissals
@@ -110,7 +270,7 @@ com.google.android.wearable.notificationBridgeMode
       If you prevent bridging with the Bridging mode feature, dismissals
       (cancellations) of notifications are not synced across a user's devices.
       However, the following methods of the <a href=
-      "{@docRoot}reference/android/support/v4/app/NotificationCompat.WearableExtender.html">
+      "http://developer.android.com/reference/android/support/v4/app/NotificationCompat.WearableExtender.html">
       NotificationCompat.WearableExtender</a> class enable you to use dismissal
       IDs:
     </p>
@@ -118,7 +278,7 @@ com.google.android.wearable.notificationBridgeMode
     <pre>
 public WearableExtender setDismissalId(String dismissalId)
 public String getDismissalId()
-    </pre>
+</pre>
     <p>
       To enable a dismissal to be synced, use the <code>setDismissalId()</code>
       method. For each notification, pass a globally unique ID, as a string,
@@ -135,12 +295,12 @@ public String getDismissalId()
 
     <pre>
 NotificationCompat.WearableExtender wearableExtender =
-new NotificationCompat.WearableExtender().setDismissalId(“abc123”);
+new NotificationCompat.WearableExtender().setDismissalId("abc123");
 Notification notification = new NotificationCompat.Builder(context)
 &lt;set other fields&gt;
 .extend(wearableExtender)
 .build();
-    </pre>
+</pre>
     <p>
       Dismissal IDs work if a watch is paired to an Android phone, but not if a
       watch is paired to an iPhone.
