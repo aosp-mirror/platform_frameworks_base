@@ -93,6 +93,14 @@ public class RecoverySystem {
      */
     public static final File UNCRYPT_PACKAGE_FILE = new File(RECOVERY_DIR, "uncrypt_file");
 
+    /**
+     * UNCRYPT_STATUS_FILE stores the time cost (and error code in the case of a failure)
+     * of uncrypt.
+     *
+     * @hide
+     */
+    public static final File UNCRYPT_STATUS_FILE = new File(RECOVERY_DIR, "uncrypt_status");
+
     // Length limits for reading files.
     private static final int LOG_FILE_MAX_LENGTH = 64 * 1024;
 
