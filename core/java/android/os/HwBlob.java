@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+
 import libcore.util.NativeAllocationRegistry;
 
 /** @hide */
@@ -53,6 +55,69 @@ public class HwBlob {
     public native final void putBlob(long offset, HwBlob blob);
 
     public native final long handle();
+
+    public static Boolean[] wrapArray(@NonNull boolean[] array) {
+        final int n = array.length;
+        Boolean[] wrappedArray = new Boolean[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Long[] wrapArray(@NonNull long[] array) {
+        final int n = array.length;
+        Long[] wrappedArray = new Long[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Byte[] wrapArray(@NonNull byte[] array) {
+        final int n = array.length;
+        Byte[] wrappedArray = new Byte[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Short[] wrapArray(@NonNull short[] array) {
+        final int n = array.length;
+        Short[] wrappedArray = new Short[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Integer[] wrapArray(@NonNull int[] array) {
+        final int n = array.length;
+        Integer[] wrappedArray = new Integer[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Float[] wrapArray(@NonNull float[] array) {
+        final int n = array.length;
+        Float[] wrappedArray = new Float[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
+
+    public static Double[] wrapArray(@NonNull double[] array) {
+        final int n = array.length;
+        Double[] wrappedArray = new Double[n];
+        for (int i = 0; i < n; ++i) {
+          wrappedArray[i] = array[i];
+        }
+        return wrappedArray;
+    }
 
     // Returns address of the "freeFunction".
     private static native final long native_init();
