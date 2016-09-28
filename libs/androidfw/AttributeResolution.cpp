@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include "androidfw/AttributeFinder.h"
 #include "androidfw/ResourceTypes.h"

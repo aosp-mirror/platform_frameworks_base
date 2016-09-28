@@ -20,15 +20,15 @@
 #include "renderthread/RenderThread.h"
 #include "renderthread/RenderProxy.h"
 
-#include <cutils/log.h>
 #include <sys/mman.h>
+
+#include <log/log.h>
 #include <cutils/ashmem.h>
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-
 
 #include <gui/IGraphicBufferAlloc.h>
 #include <gui/ISurfaceComposer.h>
