@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
 /**
@@ -254,22 +255,35 @@ public final class Parcel {
     // see libbinder's binder/Status.h
     private static final int EX_TRANSACTION_FAILED = -129;
 
+    @FastNative
     private static native int nativeDataSize(long nativePtr);
+    @FastNative
     private static native int nativeDataAvail(long nativePtr);
+    @FastNative
     private static native int nativeDataPosition(long nativePtr);
+    @FastNative
     private static native int nativeDataCapacity(long nativePtr);
+    @FastNative
     private static native long nativeSetDataSize(long nativePtr, int size);
+    @FastNative
     private static native void nativeSetDataPosition(long nativePtr, int pos);
+    @FastNative
     private static native void nativeSetDataCapacity(long nativePtr, int size);
 
+    @FastNative
     private static native boolean nativePushAllowFds(long nativePtr, boolean allowFds);
+    @FastNative
     private static native void nativeRestoreAllowFds(long nativePtr, boolean lastValue);
 
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
     private static native void nativeWriteBlob(long nativePtr, byte[] b, int offset, int len);
+    @FastNative
     private static native void nativeWriteInt(long nativePtr, int val);
+    @FastNative
     private static native void nativeWriteLong(long nativePtr, long val);
+    @FastNative
     private static native void nativeWriteFloat(long nativePtr, float val);
+    @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
     private static native void nativeWriteString(long nativePtr, String val);
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
@@ -277,9 +291,13 @@ public final class Parcel {
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
     private static native byte[] nativeReadBlob(long nativePtr);
+    @FastNative
     private static native int nativeReadInt(long nativePtr);
+    @FastNative
     private static native long nativeReadLong(long nativePtr);
+    @FastNative
     private static native float nativeReadFloat(long nativePtr);
+    @FastNative
     private static native double nativeReadDouble(long nativePtr);
     private static native String nativeReadString(long nativePtr);
     private static native IBinder nativeReadStrongBinder(long nativePtr);
@@ -294,6 +312,7 @@ public final class Parcel {
             long nativePtr, byte[] data, int offset, int length);
     private static native long nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
+    @FastNative
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
