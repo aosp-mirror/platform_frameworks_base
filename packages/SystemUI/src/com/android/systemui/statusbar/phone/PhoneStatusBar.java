@@ -313,7 +313,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     PhoneStatusBarPolicy mIconPolicy;
 
     // These are no longer handled by the policy, because we need custom strategies for them
-    BluetoothControllerImpl mBluetoothController;
+    protected BluetoothControllerImpl mBluetoothController;
     SecurityControllerImpl mSecurityController;
     protected BatteryController mBatteryController;
     LocationControllerImpl mLocationController;
