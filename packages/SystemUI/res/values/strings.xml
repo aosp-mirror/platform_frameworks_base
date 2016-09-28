@@ -1667,4 +1667,8 @@
     <!-- accessibility label for paging indicator in quick settings [CHAR LIMITi=NONE] -->
     <string name="accessibility_quick_settings_page">Page <xliff:g name="current_page" example="1">%1$d</xliff:g> of <xliff:g name="num_pages" example="2">%2$d</xliff:g></string>
 
+    <!-- Plugin control section of the tuner. Non-translatable since it should
+         not appear on production builds ever. -->
+    <string name="plugins" translatable="false">Plugins</string>
+
 </resources>

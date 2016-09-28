@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -163,6 +162,7 @@ public class PluginInstanceManager<T extends Plugin> extends BroadcastReceiver {
             switch (msg.what) {
                 case PLUGIN_CONNECTED:
                     if (DEBUG) Log.d(TAG, "onPluginConnected");
+                    PluginPrefs.setHasPlugins(mContext);
                     PluginInfo<T> info = (PluginInfo<T>) msg.obj;
                     info.mPlugin.onCreate(mContext, info.mPluginContext);
                     mListener.onPluginConnected(info.mPlugin);
