@@ -3817,6 +3817,12 @@ public final class Settings {
         public static final String INCREASING_RING_RAMP_UP_TIME = "increasing_ring_ramp_up_time";
 
         /**
+         * Dim amount control for power and reboot dialogs
+         * @hide
+         */
+        public static final String POWER_REBOOT_DIALOG_DIM = "power_reboot_dialog_dim";
+
+        /**
          * whether to enable torch on lockscreen
          * @hide
          */

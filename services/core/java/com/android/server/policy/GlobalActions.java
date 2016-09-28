@@ -227,9 +227,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("GlobalActions");
             mDialog.getWindow().setAttributes(attrs);
+            mDialog.getWindow().setDimAmount(setPowerRebootDialogDim());
             mDialog.show();
             mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
         }
+    }
+
+    private float setPowerRebootDialogDim() {
+        int mPowerRebootDialogDim = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.POWER_REBOOT_DIALOG_DIM, 50);
+        double dDim = mPowerRebootDialogDim / 100.0;
+        float dim = (float) dDim;
+        return dim;
     }
 
     /**
