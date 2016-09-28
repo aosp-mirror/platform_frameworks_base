@@ -240,10 +240,6 @@ class DisplayContent extends WindowContainer<TaskStack> {
         super.checkAppWindowsReadyToShow(mDisplayId);
     }
 
-    void updateAllDrawn() {
-        super.updateAllDrawn(mDisplayId);
-    }
-
     void stepAppWindowsAnimation(long currentTime) {
         super.stepAppWindowsAnimation(currentTime, mDisplayId);
     }
