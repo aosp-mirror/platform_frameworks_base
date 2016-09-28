@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -271,7 +272,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
         }
 
         final int orientation = super.getOrientation();
-        if (orientation != SCREEN_ORIENTATION_UNSET) {
+        if (orientation != SCREEN_ORIENTATION_UNSET && orientation != SCREEN_ORIENTATION_BEHIND) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
                     "App is requesting an orientation, return " + orientation);
             return orientation;
