@@ -148,6 +148,14 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         batch.addResult((byte) eventType, (byte) returnCode, latencyMs);
     }
 
+    @Override
+    // Called concurrently by multiple binder threads.
+    // This method must not block or perform long-running operations.
+    public synchronized void onConnectEvent(int netId, int latencyMs, String ipAddr, int port,
+            int uid) {
+        maybeVerboseLog(String.format("onConnectEvent(%d, %d)", netId, latencyMs));
+    }
+
     public synchronized void dump(PrintWriter writer) {
         IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         pw.println(TAG + ":");
