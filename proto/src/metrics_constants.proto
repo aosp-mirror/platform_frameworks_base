@@ -2566,8 +2566,11 @@ message MetricsEvent {
     // OPEN: Settings > Wireless > Manage wireless plan dialog
     DIALOG_MANAGE_MOBILE_PLAN = 609;
 
-    // ACTION: Logs the network type of device while provisioning
+    // ACTION: Logs network type of the device while provisioning
     PROVISIONING_NETWORK_TYPE = 610;
+
+    // ACTION: Logs action which triggered provisioning.
+    PROVISIONING_ACTION = 611;
 
     // ---- End O Constants, all O constants go above this line ----
 
