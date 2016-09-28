@@ -2277,6 +2277,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ClientRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
                 opRestrictions.removeUser(userHandle);
             }
+            removeUidsForUserLocked(userHandle);
+        }
+    }
+
+    private void removeUidsForUserLocked(int userHandle) {
+        for (int i = mUidStates.size() - 1; i >= 0; --i) {
+            final int uid = mUidStates.keyAt(i);
+            if (UserHandle.getUserId(uid) == userHandle) {
+                mUidStates.removeAt(i);
+            }
         }
     }
 
@@ -2394,6 +2404,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 perUserExcludedPackages.remove(userId);
                 if (perUserExcludedPackages.size() <= 0) {
                     perUserExcludedPackages = null;
+                }
+            }
+            if (perUserRestrictions != null) {
+                perUserRestrictions.remove(userId);
+                if (perUserRestrictions.size() <= 0) {
+                    perUserRestrictions = null;
                 }
             }
         }
