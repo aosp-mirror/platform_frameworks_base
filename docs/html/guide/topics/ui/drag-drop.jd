@@ -321,7 +321,7 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
             <p>
                 If the listener wants to continue receiving drag events for this operation, it must
                 return boolean <code>true</code> to the system.
-            <\p>
+            </p>
         </td>
     </tr>
     <tr>
