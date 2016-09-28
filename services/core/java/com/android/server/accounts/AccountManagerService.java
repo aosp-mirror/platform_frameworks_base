@@ -77,7 +77,6 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -152,7 +151,7 @@ public class AccountManagerService
 
         @Override
         public void onStart() {
-            mService = new AccountManagerService(getContext());
+            mService = new AccountManagerService(new Injector(getContext()));
             publishBinderService(Context.ACCOUNT_SERVICE, mService);
         }
 
@@ -169,6 +168,7 @@ public class AccountManagerService
     private final PackageManager mPackageManager;
     private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
+    private final Injector mInjector;
 
     final MessageHandler mHandler;
 
@@ -272,22 +272,13 @@ public class AccountManagerService
         return sThis.get();
     }
 
-    public AccountManagerService(Context context) {
-        this(context, context.getPackageManager(), new AccountAuthenticatorCache(context));
-    }
-
-    public AccountManagerService(Context context, PackageManager packageManager,
-            IAccountAuthenticatorCache authenticatorCache) {
-        mContext = context;
-        mPackageManager = packageManager;
+    public AccountManagerService(Injector injector) {
+        mInjector = injector;
+        mContext = injector.getContext();
+        mPackageManager = mContext.getPackageManager();
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
-
-        ServiceThread serviceThread = new ServiceThread(TAG,
-                android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
-        serviceThread.start();
-        mHandler = new MessageHandler(serviceThread.getLooper());
-
-        mAuthenticatorCache = authenticatorCache;
+        mHandler = new MessageHandler(injector.getMessageHandlerLooper());
+        mAuthenticatorCache = mInjector.getAccountAuthenticatorCache();
         mAuthenticatorCache.setListener(this, null /* Handler */);
 
         sThis.set(this);
@@ -373,7 +364,7 @@ public class AccountManagerService
             }
         }, UserHandle.ALL, userFilter, null, null);
 
-        LocalServices.addService(AccountManagerInternal.class, new AccountManagerInternalImpl());
+        injector.addLocalService(new AccountManagerInternalImpl());
 
         // Need to cancel account request notifications if the update/install can access the account
         new PackageMonitor() {
@@ -424,7 +415,7 @@ public class AccountManagerService
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     for (String packageName : packageNames) {
-                        if (mContext.getPackageManager().checkPermission(
+                        if (mPackageManager.checkPermission(
                                 Manifest.permission.GET_ACCOUNTS, packageName)
                                         != PackageManager.PERMISSION_GRANTED) {
                             continue;
@@ -710,8 +701,7 @@ public class AccountManagerService
      * installed on the device.
      */
     private void addRequestsForPreInstalledApplications() {
-        List<PackageInfo> allInstalledPackages = mContext.getPackageManager().
-                getInstalledPackages(0);
+        List<PackageInfo> allInstalledPackages = mPackageManager.getInstalledPackages(0);
         for(PackageInfo pi : allInstalledPackages) {
             int currentUid = pi.applicationInfo.uid;
             if(currentUid != -1) {
@@ -1170,8 +1160,8 @@ public class AccountManagerService
             UserAccounts accounts = mUsers.get(userId);
             boolean validateAccounts = false;
             if (accounts == null) {
-                File preNDbFile = new File(getPreNDatabaseName(userId));
-                File deDbFile = new File(getDeDatabaseName(userId));
+                File preNDbFile = new File(mInjector.getPreNDatabaseName(userId));
+                File deDbFile = new File(mInjector.getDeDatabaseName(userId));
                 accounts = new UserAccounts(mContext, userId, preNDbFile, deDbFile);
                 initializeDebugDbSizeAndCompileSqlStatementForLogging(
                         accounts.openHelper.getWritableDatabase(), accounts);
@@ -1183,8 +1173,8 @@ public class AccountManagerService
             if (!accounts.openHelper.isCeDatabaseAttached() && mLocalUnlockedUsers.get(userId)) {
                 Log.i(TAG, "User " + userId + " is unlocked - opening CE database");
                 synchronized (accounts.cacheLock) {
-                    File preNDatabaseFile = new File(getPreNDatabaseName(userId));
-                    File ceDatabaseFile = new File(getCeDatabaseName(userId));
+                    File preNDatabaseFile = new File(mInjector.getPreNDatabaseName(userId));
+                    File ceDatabaseFile = new File(mInjector.getCeDatabaseName(userId));
                     CeDatabaseHelper.create(mContext, userId, preNDatabaseFile, ceDatabaseFile);
                     accounts.openHelper.attachCeDatabase(ceDatabaseFile);
                 }
@@ -1255,13 +1245,13 @@ public class AccountManagerService
             }
         }
         Log.i(TAG, "Removing database files for user " + userId);
-        File dbFile = new File(getDeDatabaseName(userId));
+        File dbFile = new File(mInjector.getDeDatabaseName(userId));
 
         AccountsDb.deleteDbFileWarnIfFailed(dbFile);
         // Remove CE file if user is unlocked, or FBE is not enabled
         boolean fbeEnabled = StorageManager.isFileEncryptedNativeOrEmulated();
         if (!fbeEnabled || userUnlocked) {
-            File ceDb = new File(getCeDatabaseName(userId));
+            File ceDb = new File(mInjector.getCeDatabaseName(userId));
             if (ceDb.exists()) {
                 AccountsDb.deleteDbFileWarnIfFailed(ceDb);
             }
@@ -4745,47 +4735,6 @@ public class AccountManagerService
         }
     }
 
-    @VisibleForTesting
-    String getPreNDatabaseName(int userId) {
-        File systemDir = Environment.getDataSystemDirectory();
-        File databaseFile = new File(Environment.getUserSystemDirectory(userId),
-                PRE_N_DATABASE_NAME);
-        if (userId == 0) {
-            // Migrate old file, if it exists, to the new location.
-            // Make sure the new file doesn't already exist. A dummy file could have been
-            // accidentally created in the old location, causing the new one to become corrupted
-            // as well.
-            File oldFile = new File(systemDir, PRE_N_DATABASE_NAME);
-            if (oldFile.exists() && !databaseFile.exists()) {
-                // Check for use directory; create if it doesn't exist, else renameTo will fail
-                File userDir = Environment.getUserSystemDirectory(userId);
-                if (!userDir.exists()) {
-                    if (!userDir.mkdirs()) {
-                        throw new IllegalStateException("User dir cannot be created: " + userDir);
-                    }
-                }
-                if (!oldFile.renameTo(databaseFile)) {
-                    throw new IllegalStateException("User dir cannot be migrated: " + databaseFile);
-                }
-            }
-        }
-        return databaseFile.getPath();
-    }
-
-    @VisibleForTesting
-    String getDeDatabaseName(int userId) {
-        File databaseFile = new File(Environment.getDataSystemDeDirectory(userId),
-                AccountsDb.DE_DATABASE_NAME);
-        return databaseFile.getPath();
-    }
-
-    @VisibleForTesting
-    String getCeDatabaseName(int userId) {
-        File databaseFile = new File(Environment.getDataSystemCeDirectory(userId),
-                AccountsDb.CE_DATABASE_NAME);
-        return databaseFile.getPath();
-    }
-
     private void logRecord(UserAccounts accounts, String action, String tableName) {
         logRecord(action, tableName, -1, accounts);
     }
@@ -4981,17 +4930,11 @@ public class AccountManagerService
         }
     }
 
-    @VisibleForTesting
-    protected void installNotification(int notificationId, final Notification notification,
-            UserHandle user) {
-        installNotification(notificationId, notification, "android", user.getIdentifier());
-    }
-
     private void installNotification(int notificationId, final Notification notification,
             String packageName, int userId) {
         final long token = clearCallingIdentity();
         try {
-            INotificationManager notificationManager = NotificationManager.getService();
+            INotificationManager notificationManager = mInjector.getNotificationManager();
             try {
                 notificationManager.enqueueNotificationWithTag(packageName, packageName, null,
                         notificationId, notification, new int[1], userId);
@@ -5003,16 +4946,14 @@ public class AccountManagerService
         }
     }
 
-    @VisibleForTesting
-    protected void cancelNotification(int id, UserHandle user) {
+    private void cancelNotification(int id, UserHandle user) {
         cancelNotification(id, mContext.getPackageName(), user);
     }
 
-    protected void cancelNotification(int id, String packageName, UserHandle user) {
+    private void cancelNotification(int id, String packageName, UserHandle user) {
         long identityToken = clearCallingIdentity();
         try {
-            INotificationManager service = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+            INotificationManager service = mInjector.getNotificationManager();
             service.cancelNotificationWithTag(packageName, null, id, user.getIdentifier());
         } catch (RemoteException e) {
             /* ignore - local call */
@@ -5712,6 +5653,76 @@ public class AccountManagerService
                 }
                 mBackupHelper.restoreAccountAccessPermissions(data, userId);
             }
+        }
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        private final Context mContext;
+
+        public Injector(Context context) {
+            mContext = context;
+        }
+
+        Looper getMessageHandlerLooper() {
+            ServiceThread serviceThread = new ServiceThread(TAG,
+                    android.os.Process.THREAD_PRIORITY_FOREGROUND, true /* allowIo */);
+            serviceThread.start();
+            return serviceThread.getLooper();
+        }
+
+        Context getContext() {
+            return mContext;
+        }
+
+        void addLocalService(AccountManagerInternal service) {
+            LocalServices.addService(AccountManagerInternal.class, service);
+        }
+
+        String getDeDatabaseName(int userId) {
+            File databaseFile = new File(Environment.getDataSystemDeDirectory(userId),
+                    AccountsDb.DE_DATABASE_NAME);
+            return databaseFile.getPath();
+        }
+
+        String getCeDatabaseName(int userId) {
+            File databaseFile = new File(Environment.getDataSystemCeDirectory(userId),
+                    AccountsDb.CE_DATABASE_NAME);
+            return databaseFile.getPath();
+        }
+
+        String getPreNDatabaseName(int userId) {
+            File systemDir = Environment.getDataSystemDirectory();
+            File databaseFile = new File(Environment.getUserSystemDirectory(userId),
+                    PRE_N_DATABASE_NAME);
+            if (userId == 0) {
+                // Migrate old file, if it exists, to the new location.
+                // Make sure the new file doesn't already exist. A dummy file could have been
+                // accidentally created in the old location, causing the new one to become corrupted
+                // as well.
+                File oldFile = new File(systemDir, PRE_N_DATABASE_NAME);
+                if (oldFile.exists() && !databaseFile.exists()) {
+                    // Check for use directory; create if it doesn't exist, else renameTo will fail
+                    File userDir = Environment.getUserSystemDirectory(userId);
+                    if (!userDir.exists()) {
+                        if (!userDir.mkdirs()) {
+                            throw new IllegalStateException("User dir cannot be created: " + userDir);
+                        }
+                    }
+                    if (!oldFile.renameTo(databaseFile)) {
+                        throw new IllegalStateException("User dir cannot be migrated: " + databaseFile);
+                    }
+                }
+            }
+            return databaseFile.getPath();
+        }
+
+        IAccountAuthenticatorCache getAccountAuthenticatorCache() {
+            return new AccountAuthenticatorCache(mContext);
+        }
+
+        INotificationManager getNotificationManager() {
+            return NotificationManager.getService();
         }
     }
 }
