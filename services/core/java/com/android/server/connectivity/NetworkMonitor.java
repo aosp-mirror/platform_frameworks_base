@@ -23,7 +23,6 @@ import static android.net.CaptivePortal.APP_RETURN_WANTED_AS_IS;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -37,14 +36,12 @@ import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
+import android.net.util.Stopwatch;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.util.Stopwatch;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Process;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CellIdentityCdma;
@@ -66,18 +63,17 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.internal.util.WakeupMessage;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.net.URL;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@hide}
@@ -87,6 +83,7 @@ public class NetworkMonitor extends StateMachine {
     private static final String TAG = NetworkMonitor.class.getSimpleName();
     private static final String DEFAULT_SERVER = "connectivitycheck.gstatic.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
+    private static final int PROBE_TIMEOUT_MS = 3000;
     public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
             "android.net.conn.NETWORK_CONDITIONS_MEASURED";
     public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
@@ -223,6 +220,9 @@ public class NetworkMonitor extends StateMachine {
     private final LocalLog validationLogs = new LocalLog(20); // 20 lines
 
     private final Stopwatch mEvaluationTimer = new Stopwatch();
+
+    // This variable is set before transitioning to the mCaptivePortalState.
+    private CaptivePortalProbeResult mLastPortalProbeResult = CaptivePortalProbeResult.FAILED;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
@@ -389,6 +389,8 @@ public class NetworkMonitor extends StateMachine {
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
                                 }
                             }));
+                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL,
+                            mLastPortalProbeResult.detectUrl);
                     intent.setFlags(
                             Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivityAsUser(intent, UserHandle.CURRENT);
@@ -412,14 +414,22 @@ public class NetworkMonitor extends StateMachine {
      */
     @VisibleForTesting
     public static final class CaptivePortalProbeResult {
-        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(599, null);
+        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(599);
 
-        final int mHttpResponseCode; // HTTP response code returned from Internet probe.
-        final String mRedirectUrl;   // Redirect destination returned from Internet probe.
+        private final int mHttpResponseCode;  // HTTP response code returned from Internet probe.
+        final String redirectUrl;             // Redirect destination returned from Internet probe.
+        final String detectUrl;               // URL where a 204 response code indicates
+                                              // captive portal has been appeased.
 
-        public CaptivePortalProbeResult(int httpResponseCode, String redirectUrl) {
+        public CaptivePortalProbeResult(
+                int httpResponseCode, String redirectUrl, String detectUrl) {
             mHttpResponseCode = httpResponseCode;
-            mRedirectUrl = redirectUrl;
+            this.redirectUrl = redirectUrl;
+            this.detectUrl = detectUrl;
+        }
+
+        public CaptivePortalProbeResult(int httpResponseCode) {
+            this(httpResponseCode, null, null);
         }
 
         boolean isSuccessful() { return mHttpResponseCode == 204; }
@@ -492,7 +502,8 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                     } else if (probeResult.isPortal()) {
                         mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                                NETWORK_TEST_RESULT_INVALID, mNetId, probeResult.mRedirectUrl));
+                                NETWORK_TEST_RESULT_INVALID, mNetId, probeResult.redirectUrl));
+                        mLastPortalProbeResult = probeResult;
                         transitionTo(mCaptivePortalState);
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
@@ -500,7 +511,7 @@ public class NetworkMonitor extends StateMachine {
                         logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
                         mConnectivityServiceHandler.sendMessage(obtainMessage(
                                 EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId,
-                                probeResult.mRedirectUrl));
+                                probeResult.redirectUrl));
                         if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
                             // Don't continue to blame UID forever.
                             TrafficStats.clearThreadStatsUid();
@@ -598,7 +609,7 @@ public class NetworkMonitor extends StateMachine {
 
     @VisibleForTesting
     protected CaptivePortalProbeResult isCaptivePortal() {
-        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204, null);
+        if (!mIsCaptivePortalCheckEnabled) return new CaptivePortalProbeResult(204);
 
         URL pacUrl = null, httpUrl = null, httpsUrl = null;
 
@@ -680,7 +691,7 @@ public class NetworkMonitor extends StateMachine {
         if (pacUrl != null) {
             result = sendHttpProbe(pacUrl, ValidationProbeEvent.PROBE_PAC);
         } else if (mUseHttps) {
-            result = sendParallelHttpProbes(httpsUrl, httpUrl);
+            result = sendParallelHttpProbes(httpsUrl, httpUrl, null);
         } else {
             result = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
         }
@@ -755,28 +766,24 @@ public class NetworkMonitor extends StateMachine {
             }
         }
         logValidationProbe(probeTimer.stop(), probeType, httpResponseCode);
-        return new CaptivePortalProbeResult(httpResponseCode, redirectUrl);
+        return new CaptivePortalProbeResult(httpResponseCode, redirectUrl, url.toString());
     }
 
-    private CaptivePortalProbeResult sendParallelHttpProbes(URL httpsUrl, URL httpUrl) {
-        // Number of probes to wait for. We might wait for all of them, but we might also return if
-        // only one of them has replied. For example, we immediately return if the HTTP probe finds
-        // a captive portal, even if the HTTPS probe is timing out.
+    private CaptivePortalProbeResult sendParallelHttpProbes(
+            URL httpsUrl, URL httpUrl, URL fallbackUrl) {
+        // Number of probes to wait for. If a probe completes with a conclusive answer
+        // it shortcuts the latch immediately by forcing the count to 0.
         final CountDownLatch latch = new CountDownLatch(2);
-
-        // Which probe result we're going to use. This doesn't need to be atomic, but it does need
-        // to be final because otherwise we can't set it from the ProbeThreads.
-        final AtomicReference<CaptivePortalProbeResult> finalResult = new AtomicReference<>();
 
         final class ProbeThread extends Thread {
             private final boolean mIsHttps;
-            private volatile CaptivePortalProbeResult mResult;
+            private volatile CaptivePortalProbeResult mResult = CaptivePortalProbeResult.FAILED;
 
             public ProbeThread(boolean isHttps) {
                 mIsHttps = isHttps;
             }
 
-            public CaptivePortalProbeResult getResult() {
+            public CaptivePortalProbeResult result() {
                 return mResult;
             }
 
@@ -788,32 +795,55 @@ public class NetworkMonitor extends StateMachine {
                     mResult = sendHttpProbe(httpUrl, ValidationProbeEvent.PROBE_HTTP);
                 }
                 if ((mIsHttps && mResult.isSuccessful()) || (!mIsHttps && mResult.isPortal())) {
-                    // HTTPS succeeded, or HTTP found a portal. Don't wait for the other probe.
-                    finalResult.compareAndSet(null, mResult);
-                    latch.countDown();
+                    // Stop waiting immediately if https succeeds or if http finds a portal.
+                    while (latch.getCount() > 0) {
+                        latch.countDown();
+                    }
                 }
-                // Signal that one probe has completed. If we've already made a decision, or if this
-                // is the second probe, the latch will be at zero and we'll return a result.
+                // Signal this probe has completed.
                 latch.countDown();
             }
         }
 
-        ProbeThread httpsProbe = new ProbeThread(true);
-        ProbeThread httpProbe = new ProbeThread(false);
-        httpsProbe.start();
-        httpProbe.start();
+        final ProbeThread httpsProbe = new ProbeThread(true);
+        final ProbeThread httpProbe = new ProbeThread(false);
 
         try {
-            latch.await();
+            httpsProbe.start();
+            httpProbe.start();
+            latch.await(PROBE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            validationLog("Error: probe wait interrupted!");
+            validationLog("Error: probes wait interrupted!");
             return CaptivePortalProbeResult.FAILED;
         }
 
-        // If there was no deciding probe, that means that both probes completed. Return HTTPS.
-        finalResult.compareAndSet(null, httpsProbe.getResult());
+        final CaptivePortalProbeResult httpsResult = httpsProbe.result();
+        final CaptivePortalProbeResult httpResult = httpProbe.result();
 
-        return finalResult.get();
+        // Look for a conclusive probe result first.
+        if (httpResult.isPortal()) {
+            return httpResult;
+        }
+        // httpsResult.isPortal() is not expected, but check it nonetheless.
+        if (httpsResult.isPortal() || httpsResult.isSuccessful()) {
+            return httpsResult;
+        }
+        // If a fallback url is specified, use a fallback probe to try again portal detection.
+        if (fallbackUrl != null) {
+            CaptivePortalProbeResult result =
+                    sendHttpProbe(fallbackUrl, ValidationProbeEvent.PROBE_FALLBACK);
+            if (result.isPortal()) {
+                return result;
+            }
+        }
+        // Otherwise wait until https probe completes and use its result.
+        try {
+            httpsProbe.join();
+        } catch (InterruptedException e) {
+            validationLog("Error: https probe wait interrupted!");
+            return CaptivePortalProbeResult.FAILED;
+        }
+        return httpsProbe.result();
     }
 
     /**
