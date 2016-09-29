@@ -5609,6 +5609,8 @@ public class AudioService extends IAudioService.Stub {
                 } else { // config == AudioSystem.FORCE_NONE
                     mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ALL_A2DP;
                 }
+                sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
+                        SENDMSG_NOOP, 0, 0, null, 0);
                 break;
             case AudioSystem.FOR_DOCK:
                 if (config == AudioSystem.FORCE_ANALOG_DOCK) {
