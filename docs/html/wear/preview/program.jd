@@ -143,8 +143,9 @@ page.image=images/cards/card-n-sdk_2x.png
     <p>
       At milestone 4, you'll have access to the final Android Wear 2.0
       APIs and SDK to develop with, as well as near-final system images to test
-      system behaviors and features. Android Wear 2.0 will use the Android N
-      API level at this time. You can begin final compatibility testing of your
+      system behaviors and features. Android Wear 2.0 will use the
+      Android 7.0 API level at this time.
+      You can begin final compatibility testing of your
       legacy apps and refine any new code that is using the Android Wear 2.0
       APIs or features.
     </p>
