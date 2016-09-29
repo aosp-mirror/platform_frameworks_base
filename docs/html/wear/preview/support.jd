@@ -319,6 +319,22 @@ page.tags="preview", "developer preview"
       </li>
     </ul>
 
+    <h4 id="account">
+      Account sync
+    </h4>
+
+    <ul>
+      <li>Account sync initiated from watch settings may not work reliably.
+      Instead, add accounts from the setup flow of the Android Wear app, or using
+      the Accounts settings for a device from the Android Wear app.
+      </li>
+
+      <li>The list of accounts that can be synced is the same as the list of accounts
+      on the phone. So to add a new account, use the Android settings on the phone,
+      and then proceed to Android Wear app to sync that account.
+      </li>
+    </ul>
+
     <h4 id="devices">
       Devices
     </h4>
