@@ -859,12 +859,7 @@ public final class SystemServer {
 
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("StartClipboardService");
-                try {
-                    ServiceManager.addService(Context.CLIPBOARD_SERVICE,
-                            new ClipboardService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting Clipboard Service", e);
-                }
+                mSystemServiceManager.startService(ClipboardService.class);
                 traceEnd();
             }
 
