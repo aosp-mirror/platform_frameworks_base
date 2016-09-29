@@ -215,17 +215,15 @@ it can also be set as a raw string.
 </p></dd>
 
 <dt><a name="multi"></a>{@code android:multiprocess}</dt>
-<dd>Whether or not an instance of the content provider can be created in
-every client process &mdash; "{@code true}" if instances can run in multiple
-processes, and "{@code false}" if not.  The default value is "{@code false}".
+<dd>If the app runs in multiple processes, this attribute determines whether
+multiple instances of the content provder are created. If <code>true</code>,
+each of the app's processes has its own content provider object. If
+<code>false</code>, the app's processes share only one content provider object.
+The default value is <code>false</code>.
 
-<p>
-Normally, a content provider is instantiated in the process of the
-application that defined it.  However, if this flag is set to "{@code true}",
-the system can create an instance in every process where there's a client
-that wants to interact with it, thus avoiding the overhead of interprocess
-communication.
-</p></dd>
+<p>Setting this flag to <code>true</code> may improve performance by reducing
+the overhead of interprocess communication, but it also increases the memory
+footprint of each process.</p></dd>
 
 <dt><a name="nm"></a>{@code android:name}</dt>
 <dd>The name of the class that implements the content provider, a subclass of
