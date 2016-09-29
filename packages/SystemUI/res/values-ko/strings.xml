@@ -240,7 +240,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"모바일 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"설정된 데이터 한도에 도달했기 때문에 기기에서 사이클의 나머지 기간 동안 데이터 사용을 일시 중지했습니다. \n\n데이터 사용을 재개하면 이동통신사 요금이 청구될 수 있습니다."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>

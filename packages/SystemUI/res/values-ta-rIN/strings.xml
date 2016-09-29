@@ -238,7 +238,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"செல்லுலார் தரவு இடைநிறுத்தப்பட்டது"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"அமைக்கப்பட்ட தரவின் வரம்பை அடைந்துவிட்டதால், இந்தச் சுழற்சியின் மீதமுள்ள நாட்களுக்கான தரவுப் பயன்பாட்டைச் சாதனம் இடைநிறுத்தியுள்ளது.\n\nமீண்டும் தொடங்குவது, மொபைல் நிறுவனக் கட்டணங்களுக்கு உட்படுத்தலாம்."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"இணைய இணைப்பு இல்லை"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"வைஃபை இணைக்கப்பட்டது"</string>

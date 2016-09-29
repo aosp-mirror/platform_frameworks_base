@@ -238,7 +238,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 数据网络已暂停使用"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"移动数据网络已暂停使用"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"数据网络已暂停使用"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"由于使用的数据流量已达到您所设置的上限，因此您的设备已暂停在此周期的剩余时间内使用数据流量。\n\n如果恢复数据流量使用，您的运营商可能会向您收取相应费用。"</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢复"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>
