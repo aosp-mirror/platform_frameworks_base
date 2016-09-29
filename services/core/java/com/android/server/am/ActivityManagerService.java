@@ -20679,8 +20679,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long now = SystemClock.elapsedRealtime();
             Long lastReported = userState.mProviderLastReportedFg.get(authority);
             if (lastReported == null || lastReported < now - 60 * 1000L) {
-                mUsageStatsService.reportContentProviderUsage(
-                        authority, providerPkgName, app.userId);
+                if (mSystemReady) {
+                    // Cannot touch the user stats if not system ready
+                    mUsageStatsService.reportContentProviderUsage(
+                            authority, providerPkgName, app.userId);
+                }
                 userState.mProviderLastReportedFg.put(authority, now);
             }
         }
