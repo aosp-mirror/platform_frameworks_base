@@ -1733,7 +1733,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
         Entry entry = mNotificationData.get(n.getKey());
         if (mRemoteInputController.isRemoteInputActive(entry)) {
-            mRemoteInputController.removeRemoteInput(entry);
+            mRemoteInputController.removeRemoteInput(entry, null);
         }
         super.performRemoveNotification(n, removeView);
     }
@@ -2681,7 +2681,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void removeRemoteInputEntriesKeptUntilCollapsed() {
         for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
             Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
-            mRemoteInputController.removeRemoteInput(entry);
+            mRemoteInputController.removeRemoteInput(entry, null);
             removeNotification(entry.key, mLatestRankingMap);
         }
         mRemoteInputEntriesToRemoveOnCollapse.clear();
