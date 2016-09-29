@@ -626,7 +626,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       the accounts on the phone.
       </li>
 
-      <li>Choose a Google account to add and sync to your watch.
+      <li>Choose a Google Account to add and sync to your watch.
       </li>
 
       <li>Confirm the screen lock and enter the password to start the copying of
@@ -647,8 +647,13 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </h2>
 
     <p>
-      To test with the Android Emulator, create a virtual device in Android
-      Studio as follows:
+      To test with the Android Emulator,
+      confirm that you have the latest version of the <strong>Android SDK
+      Platform-tools</strong> from the <a href=
+      "{@docRoot}studio/intro/update.html#sdk-manager">SDK Manager</a>.
+    </p>
+
+    <p>Create a new virtual device in Android Studio as follows:
     </p>
 
     <ol>
@@ -659,8 +664,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Click <strong>Create Virtual Device</strong>.
       </li>
 
-      <li>In the <strong>Category</strong> pane, select Wear and
-       choose a hardware profile.
+      <li>In the <strong>Category</strong> pane, select <strong>Wear</strong>
+       and choose a hardware profile.
        The Android Wear 2.0 Developer Preview
        is only optimized for round devices currently, so we recommend not
        using the square or chin profiles for now.
@@ -679,16 +684,66 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Verify the configuration of the Android Virtual Device (AVD) and
       click <strong>Finish</strong>.
       </li>
+
+      <li>Start the emulator by selecting the new virtual device, clicking the
+      <strong>Play</strong> button, and waiting until
+      the emulator initializes and shows the Android Wear home screen.
+      </li>
     </ol>
 
     <p>
-      You can now test an application with a virtual preview device
+      Pair the phone with the emulator, and sync a Google Account, as follows:
+    </p>
+
+    <ol>
+      <li>On the phone, install the Android Wear app from Google Play.
+      </li>
+
+      <li>On the phone, enable Developer Options and USB Debugging.
+      </li>
+
+      <li>Connect the phone to your computer through USB.
+      </li>
+
+      <li>Forward the AVD's communication port to the connected handheld device
+      (each time the phone is connected):<br>
+      <code>adb -d forward tcp:5601 tcp:5601</code>
+      </li>
+
+      <li>On the phone, in the Android Wear app, begin the standard pairing
+      process. For example, on the Welcome screen, tap the
+      <strong>Set It Up</strong> button.
+      Alternatively, if an existing watch already is paired, in the upper-left
+      drop-down, tap <strong>Add a New Watch</strong>.
+      </li>
+
+      <li>On the phone, in the Android Wear app, tap the
+      Overflow button, and then tap
+      <strong>Pair with Emulator</strong>.
+      </li>
+
+      <li>Tap the Settings icon.
+      </li>
+
+      <li>Under Device Settings, tap <strong>Emulator</strong>.
+      </li>
+
+      <li>Tap <strong>Accounts</strong> and select a Google Account,
+      and follow the steps in the wizard to
+      sync the account with the emulator. If necessary, type the screen-lock
+      device password, and Google Account password, to start the account sync.
+      </li>
+    </ol>
+
+    <p>
+      You can now test an app with a virtual preview device
       in the <a href=
       "{@docRoot}tools/devices/emulator.html">Android Emulator</a>. For more
       information about using virtual devices, see <a href=
-      "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with the AVD
-      Manager</a>.
+      "{@docRoot}tools/devices/managing-avds.html">
+      Create and Manage Virtual Devices</a>.
     </p>
+
  </div><!-- landing -->
 
 </div><!-- relative wrapper -->
