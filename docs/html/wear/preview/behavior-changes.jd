@@ -22,6 +22,8 @@ page.tags="preview", "developer preview"
 
 <ul>
   <li><a href="#activity-dismissal">Activity Dismissal</a></li>
+  <li><a href="#invalid-fields">Invalid Fields for a Complication Type</a></li>
+  <li><a href="#empty">Complication Types for Empty Data</a></li>
 </ul>
 
 </div>
@@ -60,4 +62,45 @@ page.tags="preview", "developer preview"
   in a way similar to the functionality described for
   <a href="{@docRoot}wear/preview/features/ui-nav-actions.html">navigation
   drawers</a>.
+</p>
+
+<h2 id="invalid-fields">Invalid Fields for a Complication Type</h2>
+
+<p>
+  When a watch face uses the <a href="{@docRoot}wear/preview/features/complications.html">
+  Complications API</a>, the watch face requests data from a chosen provider.
+  A <code>ComplicationData</code> object, which contains
+  complication types, is returned.
+</p>
+
+<p>
+  A complication type determines the
+  kinds of data that a watch face can render. This section describes
+  a behavior change related to the <code>ComplicationData</code> object.
+</p>
+
+<p>
+  Starting with
+  <a href="https://developer.android.com/wear/preview/support.html#dp3">
+  Developer Preview 3</a>, when a watch face requests a field that is invalid
+  for a complication type, a default value for the field is returned.
+  For example, if a watch face tries to access a <code>Long text</code>
+  field in a <code>SHORT_TEXT</code> type, the default value for the
+  <code>Long text</code> field is returned.
+  In previous releases, such a request for an invalid field
+  (for a type) resulted in an exception.
+</p>
+
+<h2 id="empty">Complication Types for Empty Data</h2>
+
+<p>
+  Starting with
+  <a href="https://developer.android.com/wear/preview/support.html#dp3">
+  Developer Preview 3</a>, the complication types used for "empty" data are
+  changed. Apps that use the Complications API
+  may need to be updated to use
+  <code>TYPE_NO_DATA</code>. See the information
+  about <code>TYPE_NO_DATA</code> in the
+  <a href="{@docRoot}wear/preview/features/complications.html#types_and_fields">
+  Types and fields</a> section.
 </p>
