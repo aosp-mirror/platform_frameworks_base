@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -233,7 +234,7 @@ class WindowSurfacePlacer {
         }
 
         mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,
-                mService.mGlobalConfiguration.uiMode);
+                displayContent.getConfiguration().uiMode);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
             mService.mSystemDecorLayer = mService.mPolicy.getSystemDecorLayerLw();
@@ -840,13 +841,14 @@ class WindowSurfacePlacer {
                 Rect appRect = win != null ? win.getContentFrameLw() :
                         new Rect(0, 0, displayInfo.appWidth, displayInfo.appHeight);
                 Rect insets = win != null ? win.mContentInsets : null;
+                final Configuration displayConfig = displayContent.getConfiguration();
                 // For the new aspect-scaled transition, we want it to always show
                 // above the animating opening/closing window, and we want to
                 // synchronize its thumbnail surface with the surface for the
                 // open/close animation (only on the way down)
                 anim = mService.mAppTransition.createThumbnailAspectScaleAnimationLocked(appRect,
-                        insets, thumbnailHeader, taskId, mService.mGlobalConfiguration.uiMode,
-                        mService.mGlobalConfiguration.orientation);
+                        insets, thumbnailHeader, taskId, displayConfig.uiMode,
+                        displayConfig.orientation);
                 openingAppAnimator.thumbnailForceAboveLayer = Math.max(openingLayer, closingLayer);
                 openingAppAnimator.deferThumbnailDestruction =
                         !mService.mAppTransition.isNextThumbnailTransitionScaleUp();

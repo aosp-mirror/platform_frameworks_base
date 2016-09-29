@@ -45,6 +45,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager.StackId;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
@@ -208,18 +209,26 @@ class DisplayContent extends WindowContainer<TaskStack> {
         return null;
     }
 
-    /** Callback used to notify about configuration changes. */
-    void onConfigurationChanged(@NonNull List<Integer> changedStackList) {
+    @Override
+    void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+
         // The display size information is heavily dependent on the resources in the current
         // configuration, so we need to reconfigure it every time the configuration changes.
         // See {@link PhoneWindowManager#setInitialDisplaySize}...sigh...
         mService.reconfigureDisplayLocked(this);
 
         getDockedDividerController().onConfigurationChanged();
+    }
 
-        for (int i = 0; i < mChildren.size(); i++) {
+    /**
+     * Callback used to trigger bounds update after configuration change and get ids of stacks whose
+     * bounds were updated.
+     */
+    void updateStackBoundsAfterConfigChange(@NonNull List<Integer> changedStackList) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
             final TaskStack stack = mChildren.get(i);
-            if (stack.onConfigurationChanged()) {
+            if (stack.updateBoundsAfterConfigChange()) {
                 changedStackList.add(stack.mStackId);
             }
         }

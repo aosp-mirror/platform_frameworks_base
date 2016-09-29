@@ -592,12 +592,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // State while inside of layoutAndPlaceSurfacesLocked().
     boolean mFocusMayChange;
 
-    /**
-     * Current global configuration information. Contains general settings for the entire system,
-     * corresponds to the configuration of the default display.
-     */
-    Configuration mGlobalConfiguration = new Configuration();
-
     // This is held as long as we have the screen frozen, to give us time to
     // perform a rotation animation when turning off shows the lock screen which
     // changes the orientation.
@@ -2674,7 +2668,8 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
         if (okToDisplay()) {
-            DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+            final DisplayContent displayContent = atoken.mTask.getDisplayContent();
+            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
             final int height = displayInfo.appHeight;
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG_WM,
@@ -2711,10 +2706,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_APP_TRANSITIONS) Slog.d(TAG_WM, "Loading animation for app transition."
                     + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter,
-                    mGlobalConfiguration.uiMode, mGlobalConfiguration.orientation, frame,
-                    displayFrame, insets, surfaceInsets, isVoiceInteraction, freeform,
-                    atoken.mTask.mTaskId);
+            final Configuration displayConfig = displayContent.getConfiguration();
+            Animation a = mAppTransition.loadAnimation(lp, transit, enter, displayConfig.uiMode,
+                    displayConfig.orientation, frame, displayFrame, insets, surfaceInsets,
+                    isVoiceInteraction, freeform, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
@@ -3104,11 +3099,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
-            final boolean configChanged = mGlobalConfiguration.diff(config) != 0;
-            if (!configChanged) {
-                return null;
-            }
-            return mRoot.onConfigurationChanged(config);
+            return mRoot.setGlobalConfigurationIfNeeded(config);
         }
     }
 
@@ -5595,7 +5586,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // computeScreenConfigurationLocked later.
-        updateDisplayAndOrientationLocked(mGlobalConfiguration.uiMode);
+        updateDisplayAndOrientationLocked(mRoot.getConfiguration().uiMode);
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (!inTransaction) {
@@ -6961,8 +6952,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     View view = null;
                     try {
-                        final Configuration overrideConfig = wtoken != null && wtoken.mTask != null
-                                ? wtoken.mTask.mOverrideConfig : null;
+                        final Configuration overrideConfig =
+                                wtoken != null ? wtoken.getMergedOverrideConfiguration() : null;
                         view = mPolicy.addStartingWindow(wtoken.token, sd.pkg, sd.theme,
                             sd.compatInfo, sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.logo,
                             sd.windowFlags, overrideConfig);
@@ -7911,9 +7902,10 @@ public class WindowManagerService extends IWindowManager.Stub
         displayContent.layoutNeeded = true;
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
-        mTempConfiguration.setTo(mGlobalConfiguration);
+        final Configuration globalConfig = mRoot.getConfiguration();
+        mTempConfiguration.setTo(globalConfig);
         computeScreenConfigurationLocked(mTempConfiguration);
-        configChanged |= mGlobalConfiguration.diff(mTempConfiguration) != 0;
+        configChanged |= globalConfig.diff(mTempConfiguration) != 0;
 
         if (configChanged) {
             mWaitingForConfig = true;
@@ -8071,7 +8063,7 @@ public class WindowManagerService extends IWindowManager.Stub
             w.setReportResizeHints();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
-                Slog.v(TAG_WM, "Win " + w + " config changed: " + mGlobalConfiguration);
+                Slog.v(TAG_WM, "Win " + w + " config changed: " + w.getConfiguration());
             }
             final boolean dragResizingChanged = w.isDragResizeChanged()
                     && !w.isDragResizingChangeReported();
@@ -8959,7 +8951,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         pw.println();
-        pw.print("  mGlobalConfiguration="); pw.println(mGlobalConfiguration);
+        pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
         if (mLastFocus != mCurrentFocus) {
