@@ -510,11 +510,8 @@ public class AudioService extends IAudioService.Stub {
     private int mDeviceOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     // Request to override default use of A2DP for media.
-    private boolean mBluetoothA2dpEnabled;
     // FIXME: remove when MediaRouter does not use setBluetoothA2dpOn() anymore
-    // state of bluetooth A2DP enable request sen by deprecated APIs setBluetoothA2dpOn() and
-    // isBluettohA2dpOn()
-    private boolean mBluetoothA2dpEnabledExternal;
+    private boolean mBluetoothA2dpEnabled;
     private final Object mBluetoothA2dpEnabledLock = new Object();
 
     // Monitoring of audio routes.  Protected by mCurAudioRoutes.
@@ -841,12 +838,6 @@ public class AudioService extends IAudioService.Stub {
         }
         if (mMonitorRotation) {
             RotationHelper.updateOrientation();
-        }
-
-        synchronized (mBluetoothA2dpEnabledLock) {
-            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ?
-                            AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
         }
 
         synchronized (mSettingsLock) {
@@ -2715,7 +2706,7 @@ public class AudioService extends IAudioService.Stub {
      * @deprecated
      * */
     public void setBluetoothA2dpOn(boolean on) {
-        mBluetoothA2dpEnabledExternal = on;
+        mBluetoothA2dpEnabled = on;
         Log.e(TAG, "setBluetoothA2dpOn() is deprecated, now a no-op",
                 new Exception("Deprecated use of setBluetoothA2dpOn()"));
     }
@@ -2725,7 +2716,7 @@ public class AudioService extends IAudioService.Stub {
      * @deprecated
      * */
     public boolean isBluetoothA2dpOn() {
-        return mBluetoothA2dpEnabledExternal;
+        return mBluetoothA2dpEnabled;
     }
 
     /** @see AudioManager#startBluetoothSco() */
@@ -3796,11 +3787,6 @@ public class AudioService extends IAudioService.Stub {
                 Slog.i(TAG, "setWiredDeviceConnectionState(" + state + " nm: " + name + " addr:"
                         + address + ")");
             }
-            if ((state == 0) && ((type == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (type == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
-                    (type == AudioSystem.DEVICE_OUT_LINE))) {
-                setBluetoothA2dpOnInt(true);
-            }
             int delay = checkSendBecomingNoisyIntent(type, state);
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
@@ -4781,7 +4767,6 @@ public class AudioService extends IAudioService.Stub {
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
-        setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
         // Reset A2DP suspend state each time a new sink is connected
@@ -5019,7 +5004,6 @@ public class AudioService extends IAudioService.Stub {
                     devices |= dev;
                 }
             }
-
             if (devices == device) {
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
@@ -5123,11 +5107,6 @@ public class AudioService extends IAudioService.Stub {
                 return;
             }
             if (state != 0) {
-                if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
-                    (device == AudioSystem.DEVICE_OUT_LINE)) {
-                    setBluetoothA2dpOnInt(false);
-                }
                 if ((device & mSafeMediaVolumeDevices) != 0) {
                     sendMsg(mAudioHandler,
                             MSG_CHECK_MUSIC_ACTIVE,
@@ -5593,26 +5572,9 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    // Handles request to override default use of A2DP for media.
-    // Must be called synchronized on mConnectedDevices
-    public void setBluetoothA2dpOnInt(boolean on) {
-        synchronized (mBluetoothA2dpEnabledLock) {
-            mBluetoothA2dpEnabled = on;
-            setForceUseInt_SyncDevices(AudioSystem.FOR_MEDIA,
-                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
-        }
-    }
-
     // Must be called synchronized on mConnectedDevices
     private void setForceUseInt_SyncDevices(int usage, int config) {
         switch (usage) {
-            case AudioSystem.FOR_MEDIA:
-                if (config == AudioSystem.FORCE_NO_BT_A2DP) {
-                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ALL_A2DP;
-                } else { // config == AudioSystem.FORCE_NONE
-                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ALL_A2DP;
-                }
-                break;
             case AudioSystem.FOR_DOCK:
                 if (config == AudioSystem.FORCE_ANALOG_DOCK) {
                     mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
