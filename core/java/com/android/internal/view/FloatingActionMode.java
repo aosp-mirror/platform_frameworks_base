@@ -59,15 +59,19 @@ public class FloatingActionMode extends ActionMode {
 
     private final Runnable mMovingOff = new Runnable() {
         public void run() {
-            mFloatingToolbarVisibilityHelper.setMoving(false);
-            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            if (isViewStillActive()) {
+                mFloatingToolbarVisibilityHelper.setMoving(false);
+                mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            }
         }
     };
 
     private final Runnable mHideOff = new Runnable() {
         public void run() {
-            mFloatingToolbarVisibilityHelper.setHideRequested(false);
-            mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            if (isViewStillActive()) {
+                mFloatingToolbarVisibilityHelper.setHideRequested(false);
+                mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
+            }
         }
     };
 
@@ -299,6 +303,11 @@ public class FloatingActionMode extends ActionMode {
         mFloatingToolbarVisibilityHelper.deactivate();
         mOriginatingView.removeCallbacks(mMovingOff);
         mOriginatingView.removeCallbacks(mHideOff);
+    }
+
+    private boolean isViewStillActive() {
+        return mOriginatingView.getWindowVisibility() == View.VISIBLE
+                && mOriginatingView.isShown();
     }
 
     /**
