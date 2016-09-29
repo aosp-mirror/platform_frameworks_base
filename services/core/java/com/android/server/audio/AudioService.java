@@ -206,6 +206,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
     private static final int MSG_SET_ALL_VOLUMES = 10;
     private static final int MSG_REPORT_NEW_ROUTES = 12;
+    private static final int MSG_SET_FORCE_BT_A2DP_USE = 13;
     private static final int MSG_CHECK_MUSIC_ACTIVE = 14;
     private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 15;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 16;
@@ -511,10 +512,6 @@ public class AudioService extends IAudioService.Stub {
 
     // Request to override default use of A2DP for media.
     private boolean mBluetoothA2dpEnabled;
-    // FIXME: remove when MediaRouter does not use setBluetoothA2dpOn() anymore
-    // state of bluetooth A2DP enable request sen by deprecated APIs setBluetoothA2dpOn() and
-    // isBluettohA2dpOn()
-    private boolean mBluetoothA2dpEnabledExternal;
     private final Object mBluetoothA2dpEnabledLock = new Object();
 
     // Monitoring of audio routes.  Protected by mCurAudioRoutes.
@@ -2709,23 +2706,22 @@ public class AudioService extends IAudioService.Stub {
         return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
     }
 
-    /**
-     * Deprecated.
-     * Keep stub implementation until MediaRouter stops using it.
-     * @deprecated
-     * */
+    /** @see AudioManager#setBluetoothA2dpOn(boolean) */
     public void setBluetoothA2dpOn(boolean on) {
-        mBluetoothA2dpEnabledExternal = on;
-        Log.e(TAG, "setBluetoothA2dpOn() is deprecated, now a no-op",
-                new Exception("Deprecated use of setBluetoothA2dpOn()"));
+        synchronized (mBluetoothA2dpEnabledLock) {
+            mBluetoothA2dpEnabled = on;
+            sendMsg(mAudioHandler, MSG_SET_FORCE_BT_A2DP_USE, SENDMSG_QUEUE,
+                    AudioSystem.FOR_MEDIA,
+                    mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                    null, 0);
+        }
     }
 
-    /** Deprecated.
-     * Keep stub implementation until MediaRouter stops using it
-     * @deprecated
-     * */
+    /** @see AudioManager#isBluetoothA2dpOn() */
     public boolean isBluetoothA2dpOn() {
-        return mBluetoothA2dpEnabledExternal;
+        synchronized (mBluetoothA2dpEnabledLock) {
+            return mBluetoothA2dpEnabled;
+        }
     }
 
     /** @see AudioManager#startBluetoothSco() */
@@ -3796,11 +3792,6 @@ public class AudioService extends IAudioService.Stub {
                 Slog.i(TAG, "setWiredDeviceConnectionState(" + state + " nm: " + name + " addr:"
                         + address + ")");
             }
-            if ((state == 0) && ((type == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
-                    (type == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
-                    (type == AudioSystem.DEVICE_OUT_LINE))) {
-                setBluetoothA2dpOnInt(true);
-            }
             int delay = checkSendBecomingNoisyIntent(type, state);
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
@@ -4612,6 +4603,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_SET_FORCE_USE:
+                case MSG_SET_FORCE_BT_A2DP_USE:
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
@@ -5019,7 +5011,6 @@ public class AudioService extends IAudioService.Stub {
                     devices |= dev;
                 }
             }
-
             if (devices == device) {
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
@@ -5115,6 +5106,11 @@ public class AudioService extends IAudioService.Stub {
         }
 
         synchronized (mConnectedDevices) {
+            if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
+                    (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
+                    (device == AudioSystem.DEVICE_OUT_LINE))) {
+                setBluetoothA2dpOnInt(true);
+            }
             boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
                             (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
                              ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
@@ -5598,6 +5594,7 @@ public class AudioService extends IAudioService.Stub {
     public void setBluetoothA2dpOnInt(boolean on) {
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
+            mAudioHandler.removeMessages(MSG_SET_FORCE_BT_A2DP_USE);
             setForceUseInt_SyncDevices(AudioSystem.FOR_MEDIA,
                     mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
         }
