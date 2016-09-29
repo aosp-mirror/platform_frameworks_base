@@ -240,7 +240,8 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G duomenys pristabdyti"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Korinio ryšio duomenys pristabdyti"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Duomenys pristabdyti"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Kadangi buvo pasiektas nustatytas duomenų limitas, įrenginys pristabdė duomenų naudojimą likusį šio ciklo laikotarpį.\n\nAtnaujinus gali būti taikomi operatoriaus mokesčiai."</string>
+    <!-- no translation found for data_usage_disabled_dialog (1841738975235283398) -->
+    <skip />
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Atnaujinti"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nėra interneto ryš."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Prisij. prie „Wi-Fi“"</string>
