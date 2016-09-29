@@ -33,7 +33,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.widget.DrawerLayout;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -64,12 +63,9 @@ public class SettingsDrawerActivity extends Activity {
 
     public static final String EXTRA_SHOW_MENU = "show_drawer_menu";
 
-    private static List<DashboardCategory> sDashboardCategories;
-    private static HashMap<Pair<String, String>, Tile> sTileCache;
     // Serves as a temporary list of tiles to ignore until we heard back from the PM that they
     // are disabled.
     private static ArraySet<ComponentName> sTileBlacklist = new ArraySet<>();
-    private static InterestingConfigChanges sConfigTracker;
 
     private final PackageReceiver mPackageReceiver = new PackageReceiver();
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
@@ -79,6 +75,15 @@ public class SettingsDrawerActivity extends Activity {
     private DrawerLayout mDrawerLayout;
     private boolean mShowingMenu;
     private UserManager mUserManager;
+
+    // Remove below after new IA
+    @Deprecated
+    private static List<DashboardCategory> sDashboardCategories;
+    @Deprecated
+    private static HashMap<Pair<String, String>, Tile> sTileCache;
+    @Deprecated
+    private static InterestingConfigChanges sConfigTracker;
+    // Remove above after new IA
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,7 +110,9 @@ public class SettingsDrawerActivity extends Activity {
             mDrawerLayout = null;
             return;
         }
-        getDashboardCategories();
+        if (!isDashboardFeatureEnabled()) {
+            getDashboardCategories();
+        }
         setActionBar(toolbar);
         mDrawerAdapter = new SettingsDrawerAdapter(this);
         ListView listView = (ListView) findViewById(R.id.left_drawer);
@@ -144,7 +151,11 @@ public class SettingsDrawerActivity extends Activity {
             filter.addDataScheme("package");
             registerReceiver(mPackageReceiver, filter);
 
-            new CategoriesUpdater().execute();
+            if (isDashboardFeatureEnabled()) {
+                new CategoriesUpdateTask().execute();
+            } else {
+                new CategoriesUpdater().execute();
+            }
         }
         final Intent intent = getIntent();
         if (intent != null) {
@@ -173,23 +184,23 @@ public class SettingsDrawerActivity extends Activity {
         if (componentName == null) {
             return false;
         }
-        // Look for a tile that has the same component as incoming intent
-        final List<DashboardCategory> categories = getDashboardCategories();
-        for (DashboardCategory category : categories) {
-            for (Tile tile : category.tiles) {
-                if (TextUtils.equals(tile.intent.getComponent().getClassName(),
-                        componentName.getClassName())) {
-                    if (DEBUG) {
-                        Log.d(TAG, "intent is for top level tile: " + tile.title);
-                    }
+        if (isDashboardFeatureEnabled()) {
+            final DashboardCategory homepageCategories = CategoryManager.get()
+                    .getTilesByCategory(this, CategoryKey.CATEGORY_HOMEPAGE);
+            return homepageCategories.containsComponent(componentName);
+        } else {
+            // Look for a tile that has the same component as incoming intent
+            final List<DashboardCategory> categories = getDashboardCategories();
+            for (DashboardCategory category : categories) {
+                if (category.containsComponent(componentName)) {
                     return true;
                 }
             }
+            if (DEBUG) {
+                Log.d(TAG, "Intent is not for top level settings " + intent);
+            }
+            return false;
         }
-        if (DEBUG) {
-            Log.d(TAG, "Intent is not for top level settings " + intent);
-        }
-        return false;
     }
 
     public void addCategoryListener(CategoryListener listener) {
@@ -255,7 +266,11 @@ public class SettingsDrawerActivity extends Activity {
             return;
         }
         // TODO: Do this in the background with some loading.
-        mDrawerAdapter.updateCategories();
+        if (isDashboardFeatureEnabled()) {
+            mDrawerAdapter.updateHomepageCategories();
+        } else {
+            mDrawerAdapter.updateCategories();
+        }
         if (mDrawerAdapter.getCount() != 0) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         } else {
@@ -343,13 +358,6 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
-    public HashMap<Pair<String, String>, Tile> getTileCache() {
-        if (sTileCache == null) {
-            getDashboardCategories();
-        }
-        return sTileCache;
-    }
-
     public void onProfileTileOpen() {
         finish();
     }
@@ -368,7 +376,11 @@ public class SettingsDrawerActivity extends Activity {
                     ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                     : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
-            new CategoriesUpdater().execute();
+            if (isDashboardFeatureEnabled()) {
+                new CategoriesUpdateTask().execute();
+            } else {
+                new CategoriesUpdater().execute();
+            }
         }
     }
 
@@ -376,6 +388,10 @@ public class SettingsDrawerActivity extends Activity {
         void onCategoriesChanged();
     }
 
+    /**
+     * @deprecated remove after new IA
+     */
+    @Deprecated
     private class CategoriesUpdater extends AsyncTask<Void, Void, List<DashboardCategory>> {
         @Override
         protected List<DashboardCategory> doInBackground(Void... params) {
@@ -408,10 +424,39 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
+    private class CategoriesUpdateTask extends AsyncTask<Void, Void, Void> {
+
+        private final CategoryManager mCategoryManager;
+
+        public CategoriesUpdateTask() {
+            mCategoryManager = CategoryManager.get();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mCategoryManager.reloadAllCategoriesForConfigChange(SettingsDrawerActivity.this);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            mCategoryManager.updateCategoryFromBlacklist(sTileBlacklist);
+            onCategoriesChanged();
+        }
+    }
+
+    protected boolean isDashboardFeatureEnabled() {
+        return false;
+    }
+
     private class PackageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            new CategoriesUpdater().execute();
+            if (isDashboardFeatureEnabled()) {
+                new CategoriesUpdateTask().execute();
+            } else {
+                new CategoriesUpdater().execute();
+            }
         }
     }
 }

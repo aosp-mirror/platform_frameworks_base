@@ -37,6 +37,10 @@ public class SettingsDrawerAdapter extends BaseAdapter {
         mActivity = activity;
     }
 
+    /**
+     * @deprecated Remove after new IA
+     */
+    @Deprecated
     void updateCategories() {
         List<DashboardCategory> categories = mActivity.getDashboardCategories();
         mItems.clear();
@@ -60,6 +64,27 @@ public class SettingsDrawerAdapter extends BaseAdapter {
                 tile.tile = dashboardTile;
                 mItems.add(tile);
             }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void updateHomepageCategories() {
+        DashboardCategory category =
+                CategoryManager.get().getTilesByCategory(mActivity, CategoryKey.CATEGORY_HOMEPAGE);
+        mItems.clear();
+        // Spacer.
+        mItems.add(null);
+        Item tile = new Item();
+        tile.label = mActivity.getString(R.string.home);
+        tile.icon = Icon.createWithResource(mActivity, R.drawable.home);
+        mItems.add(tile);
+        for (int j = 0; j < category.tiles.size(); j++) {
+            tile = new Item();
+            Tile dashboardTile = category.tiles.get(j);
+            tile.label = dashboardTile.title;
+            tile.icon = dashboardTile.icon;
+            tile.tile = dashboardTile;
+            mItems.add(tile);
         }
         notifyDataSetChanged();
     }
