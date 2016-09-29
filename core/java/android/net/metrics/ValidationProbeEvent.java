@@ -34,10 +34,12 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public final class ValidationProbeEvent implements Parcelable {
 
-    public static final int PROBE_DNS   = 0;
-    public static final int PROBE_HTTP  = 1;
-    public static final int PROBE_HTTPS = 2;
-    public static final int PROBE_PAC   = 3;
+    public static final int PROBE_DNS       = 0;
+    public static final int PROBE_HTTP      = 1;
+    public static final int PROBE_HTTPS     = 2;
+    public static final int PROBE_PAC       = 3;
+    /** {@hide} */
+    public static final int PROBE_FALLBACK  = 4;
 
     public static final int DNS_FAILURE = 0;
     public static final int DNS_SUCCESS = 1;
@@ -57,7 +59,7 @@ public final class ValidationProbeEvent implements Parcelable {
     public final @ProbeType int probeType;
     public final @ReturnCode int returnCode;
 
-    /** @hide */
+    /** {@hide} */
     public ValidationProbeEvent(
             int netId, long durationMs, @ProbeType int probeType, @ReturnCode int returnCode) {
         this.netId = netId;
