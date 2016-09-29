@@ -3029,7 +3029,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (currentConfig.diff(mTempConfiguration) != 0) {
                 mWaitingForConfig = true;
                 final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 int anim[] = new int[2];
                 if (displayContent.isDimming()) {
                     anim[0] = anim[1] = 0;
@@ -3804,7 +3804,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         displayContent.rebuildAppWindowList();
 
-        // Set displayContent.layoutNeeded if window order changed.
+        // Set displayContent.mLayoutNeeded if window order changed.
         final int tmpSize = mTmpWindows.size();
         final int winSize = windows.size();
         int tmpNdx = 0, winNdx = 0;
@@ -3822,13 +3822,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (tmp != win) {
                 // Window order changed.
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 break;
             }
         }
         if (tmpNdx != winNdx) {
             // One list was different from the other.
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
         }
         mTmpWindows.clear();
 
@@ -3992,7 +3992,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             task.moveTaskToStack(stack, toTop);
             final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
             mWindowPlacerLocked.performSurfacePlacement();
         }
     }
@@ -4044,7 +4044,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (stack.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
                     && stack.isVisible()) {
-                stack.getDisplayContent().layoutNeeded = true;
+                stack.getDisplayContent().setLayoutNeeded();
                 mWindowPlacerLocked.performSurfacePlacement();
             }
             return stack.getRawFullscreen();
@@ -4081,7 +4081,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             task.positionTaskInStack(stack, position, bounds, config);
             final DisplayContent displayContent = stack.getDisplayContent();
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
             mWindowPlacerLocked.performSurfacePlacement();
         }
     }
@@ -4101,7 +4101,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (task.resizeLocked(bounds, overrideConfig, forced) && relayout) {
-                task.getDisplayContent().layoutNeeded = true;
+                task.getDisplayContent().setLayoutNeeded();
                 mWindowPlacerLocked.performSurfacePlacement();
             }
         }
@@ -5459,7 +5459,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             changed = updateRotationUncheckedLocked(false);
             if (!changed || forceRelayout) {
-                getDefaultDisplayContentLocked().layoutNeeded = true;
+                getDefaultDisplayContentLocked().setLayoutNeeded();
                 mWindowPlacerLocked.performSurfacePlacement();
             }
         }
@@ -5542,7 +5542,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, WINDOW_FREEZE_TIMEOUT_DURATION);
         mWaitingForConfig = true;
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
-        displayContent.layoutNeeded = true;
+        displayContent.setLayoutNeeded();
         final int[] anim = new int[2];
         if (displayContent.isDimming()) {
             anim[0] = anim[1] = 0;
@@ -7908,7 +7908,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         configureDisplayPolicyLocked(displayContent);
-        displayContent.layoutNeeded = true;
+        displayContent.setLayoutNeeded();
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
         mTempConfiguration.setTo(mGlobalConfiguration);
@@ -8259,7 +8259,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
                             && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES);
             if (imWindowChanged) {
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 newFocus = mRoot.computeFocusedWindow();
             }
 
@@ -8286,7 +8286,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if ((focusChanged & WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT) != 0) {
                 // The change in focus caused us to need to do a layout.  Okay.
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     mWindowPlacerLocked.performLayoutLockedInner(displayContent, true /*initial*/,
                             updateInputWindows);

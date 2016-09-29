@@ -168,7 +168,7 @@ class WindowSurfacePlacer {
 
             mInLayout = false;
 
-            if (mService.mRoot.layoutNeeded()) {
+            if (mService.mRoot.isLayoutNeeded()) {
                 if (++mLayoutRepeatCount < 6) {
                     requestTraversal();
                 } else {
@@ -204,10 +204,10 @@ class WindowSurfacePlacer {
 
     final void performLayoutLockedInner(final DisplayContent displayContent,
             boolean initial, boolean updateInputWindows) {
-        if (!displayContent.layoutNeeded) {
+        if (!displayContent.isLayoutNeeded()) {
             return;
         }
-        displayContent.layoutNeeded = false;
+        displayContent.clearLayoutNeeded();
         WindowList windows = displayContent.getWindowList();
         boolean isDefaultDisplay = displayContent.isDefaultDisplay;
 
@@ -228,8 +228,8 @@ class WindowSurfacePlacer {
 
         if (DEBUG_LAYOUT) {
             Slog.v(TAG, "-------------------------------------");
-            Slog.v(TAG, "performLayout: needed="
-                    + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
+            Slog.v(TAG, "performLayout: needed=" + displayContent.isLayoutNeeded()
+                    + " dw=" + dw + " dh=" + dh);
         }
 
         mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,
@@ -427,7 +427,7 @@ class WindowSurfacePlacer {
         if ((displayContent.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0 &&
                 mWallpaperControllerLocked.adjustWallpaperWindows()) {
             mService.mLayersController.assignLayersLocked(windows);
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
         }
 
         final WindowState lowerWallpaperTarget =
@@ -532,7 +532,7 @@ class WindowSurfacePlacer {
 
         // This has changed the visibility of windows, so perform
         // a new layout to get them all up-to-date.
-        displayContent.layoutNeeded = true;
+        displayContent.setLayoutNeeded();
 
         // TODO(multidisplay): IMEs are only supported on the default display.
         if (windows == mService.getDefaultWindowListLocked()

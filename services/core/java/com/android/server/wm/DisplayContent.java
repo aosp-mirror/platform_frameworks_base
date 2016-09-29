@@ -38,6 +38,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -100,7 +101,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
     private Rect mContentRect = new Rect();
 
     // Accessed directly by all users.
-    boolean layoutNeeded;
+    private boolean mLayoutNeeded;
     int pendingLayoutChanges;
     final boolean isDefaultDisplay;
 
@@ -367,7 +368,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
             }
         }
         addChild(stack, addIndex);
-        layoutNeeded = true;
+        setLayoutNeeded();
     }
 
     /**
@@ -684,8 +685,8 @@ class DisplayContent extends WindowContainer<TaskStack> {
             pw.print("x"); pw.print(mDisplayInfo.smallestNominalAppHeight);
             pw.print("-"); pw.print(mDisplayInfo.largestNominalAppWidth);
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
-            pw.print(subPrefix); pw.print("deferred="); pw.print(mDeferredRemoval);
-                pw.print(" layoutNeeded="); pw.println(layoutNeeded);
+            pw.println(subPrefix + "deferred=" + mDeferredRemoval
+                    + " mLayoutNeeded=" + mLayoutNeeded);
 
         pw.println();
         pw.println("  Application tokens in top down Z order:");
@@ -1090,7 +1091,7 @@ class DisplayContent extends WindowContainer<TaskStack> {
 
         i -= lastBelow;
         if (i != numRemoved) {
-            layoutNeeded = true;
+            setLayoutNeeded();
             Slog.w(TAG_WM, "On display=" + mDisplayId + " Rebuild removed " + numRemoved
                     + " windows but added " + i + " rebuildAppWindowListLocked() "
                     + " callers=" + Debug.getCallers(10));
@@ -1125,6 +1126,20 @@ class DisplayContent extends WindowContainer<TaskStack> {
             }
         }
         return windowList;
+    }
+
+    void setLayoutNeeded() {
+        if (DEBUG_LAYOUT) Slog.w(TAG_WM, "setLayoutNeeded: callers=" + Debug.getCallers(3));
+        mLayoutNeeded = true;
+    }
+
+    void clearLayoutNeeded() {
+        if (DEBUG_LAYOUT) Slog.w(TAG_WM, "clearLayoutNeeded: callers=" + Debug.getCallers(3));
+        mLayoutNeeded = false;
+    }
+
+    boolean isLayoutNeeded() {
+        return mLayoutNeeded;
     }
 
     private int addAppWindowExisting(WindowState win, WindowList tokenWindowList) {

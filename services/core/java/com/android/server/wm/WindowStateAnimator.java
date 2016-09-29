@@ -482,7 +482,7 @@ class WindowStateAnimator {
             // Upon completion of a not-visible to visible status bar animation a relayout is
             // required.
             if (displayContent != null) {
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
             }
         }
 

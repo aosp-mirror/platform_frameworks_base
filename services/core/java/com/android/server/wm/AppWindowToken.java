@@ -429,7 +429,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         for (int i = 0; i < displayList.size(); i++) {
             final DisplayContent displayContent = displayList.get(i);
             mService.mLayersController.assignLayersLocked(displayContent.getWindowList());
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
         }
     }
 
@@ -957,7 +957,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             mService.updateFocusedWindowLocked(
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
-            mService.getDefaultDisplayContentLocked().layoutNeeded = true;
+            mService.getDefaultDisplayContentLocked().setLayoutNeeded();
             mService.mWindowPlacerLocked.performSurfacePlacement();
             Binder.restoreCallingIdentity(origId);
             return true;
@@ -1065,7 +1065,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 allDrawn = true;
                 // Force an additional layout pass where
                 // WindowStateAnimator#commitFinishDrawingLocked() will call performShowLocked().
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
             }
         }
@@ -1076,7 +1076,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         + " interesting=" + numInteresting
                         + " drawn=" + numDrawnWindowsExcludingSaved);
                 allDrawnExcludingSaved = true;
-                displayContent.layoutNeeded = true;
+                displayContent.setLayoutNeeded();
                 if (isAnimatingInvisibleWithSavedSurface()
                         && !mService.mFinishedEarlyAnim.contains(this)) {
                     mService.mFinishedEarlyAnim.add(this);

@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.annotation.CallSuper;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
@@ -258,7 +257,7 @@ class WindowToken extends WindowContainer<WindowState> {
         if (hidden == visible) {
             hidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the correct size.
-            displayContent.layoutNeeded = true;
+            displayContent.setLayoutNeeded();
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
@@ -281,7 +280,7 @@ class WindowToken extends WindowContainer<WindowState> {
                     "Wallpaper token " + token + " hidden=" + !visible);
             hidden = !visible;
             // Need to do a layout to ensure the wallpaper now has the correct size.
-            mService.getDefaultDisplayContentLocked().layoutNeeded = true;
+            mService.getDefaultDisplayContentLocked().setLayoutNeeded();
         }
 
         final WallpaperController wallpaperController = mService.mWallpaperControllerLocked;
