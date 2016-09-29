@@ -27,33 +27,50 @@ import android.print.mockservice.PrinterDiscoverySessionCallbacks;
 import android.print.mockservice.StubbablePrinterDiscoverySession;
 import android.print.pdf.PrintedPdfDocument;
 import android.support.test.filters.LargeTest;
+import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
+import android.support.test.uiautomator.Until;
 import android.util.Log;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests for the basic printing workflows
  */
+@RunWith(Parameterized.class)
 public class WorkflowTest extends BasePrintTest {
     private static final String LOG_TAG = WorkflowTest.class.getSimpleName();
 
     private static float sWindowAnimationScaleBefore;
     private static float sTransitionAnimationScaleBefore;
     private static float sAnimatiorDurationScaleBefore;
+
+    private PrintAttributes.MediaSize mFirst;
+    private boolean mSelectPrinter;
+    private PrintAttributes.MediaSize mSecond;
+
+    public WorkflowTest(PrintAttributes.MediaSize first, boolean selectPrinter,
+            PrintAttributes.MediaSize second) {
+        mFirst = first;
+        mSelectPrinter = selectPrinter;
+        mSecond = second;
+    }
 
     interface InterruptableConsumer<T> {
         void accept(T t) throws InterruptedException;
@@ -155,16 +172,23 @@ public class WorkflowTest extends BasePrintTest {
         PrinterCapabilitiesInfo.Builder builder =
                 new PrinterCapabilitiesInfo.Builder(printerId);
 
-        builder.setMinMargins(new PrintAttributes.Margins(0, 0, 0, 0))
-                .setColorModes(PrintAttributes.COLOR_MODE_COLOR,
-                        PrintAttributes.COLOR_MODE_COLOR)
-                .addMediaSize(mediaSize, true)
-                .addResolution(new PrintAttributes.Resolution("300x300", "300x300", 300, 300),
-                        true);
+        PrinterInfo printerInfo;
+        if (mediaSize != null) {
+            builder.setMinMargins(new PrintAttributes.Margins(0, 0, 0, 0))
+                    .setColorModes(PrintAttributes.COLOR_MODE_COLOR,
+                            PrintAttributes.COLOR_MODE_COLOR)
+                    .addMediaSize(mediaSize, true)
+                    .addResolution(new PrintAttributes.Resolution("300x300", "300x300", 300, 300),
+                            true);
 
-        printers.add(new PrinterInfo.Builder(printerId, name,
-                PrinterInfo.STATUS_IDLE).setCapabilities(builder.build()).build());
+            printerInfo = new PrinterInfo.Builder(printerId, name,
+                    PrinterInfo.STATUS_IDLE).setCapabilities(builder.build()).build();
+        } else {
+            printerInfo = (new PrinterInfo.Builder(printerId, name,
+                    PrinterInfo.STATUS_IDLE)).build();
+        }
 
+        printers.add(printerInfo);
         session.addPrinters(printers);
     }
 
@@ -193,28 +217,42 @@ public class WorkflowTest extends BasePrintTest {
      *
      * @param sessionRef Where to store the reference to the session once started
      */
-    private void setMockPrintServiceCallbacks(StubbablePrinterDiscoverySession[] sessionRef) {
+    private void setMockPrintServiceCallbacks(StubbablePrinterDiscoverySession[] sessionRef,
+            ArrayList<String> trackedPrinters, PrintAttributes.MediaSize mediaSize) {
         MockPrintService.setCallbacks(createMockPrintServiceCallbacks(
                 inv -> createMockPrinterDiscoverySessionCallbacks(inv2 -> {
                             synchronized (sessionRef) {
                                 sessionRef[0] = ((PrinterDiscoverySessionCallbacks) inv2.getMock())
                                         .getSession();
 
-                                addPrinter(sessionRef[0], "1st printer",
-                                        PrintAttributes.MediaSize.ISO_A0);
+                                addPrinter(sessionRef[0], "1st printer", mediaSize);
 
                                 sessionRef.notifyAll();
                             }
                             return null;
                         },
-                        null, null, null, null, null, inv2 -> {
+                        null, null, inv2 -> {
+                            synchronized (trackedPrinters) {
+                                trackedPrinters
+                                        .add(((PrinterId) inv2.getArguments()[0]).getLocalId());
+                                trackedPrinters.notifyAll();
+                            }
+                            return null;
+                        }, null, inv2 -> {
+                            synchronized (trackedPrinters) {
+                                trackedPrinters
+                                        .remove(((PrinterId) inv2.getArguments()[0]).getLocalId());
+                                trackedPrinters.notifyAll();
+                            }
+                            return null;
+                        }, inv2 -> {
                             synchronized (sessionRef) {
                                 sessionRef[0] = null;
                                 sessionRef.notifyAll();
                             }
                             return null;
                         }
-        ), null, null));
+                ), null, null));
     }
 
     /**
@@ -271,13 +309,37 @@ public class WorkflowTest extends BasePrintTest {
         }, null);
     }
 
+    @Parameterized.Parameters
+    public static Collection<Object[]> getParameters() {
+        ArrayList<Object[]> tests = new ArrayList<>();
+
+        for (PrintAttributes.MediaSize first : new PrintAttributes.MediaSize[]{
+                PrintAttributes.MediaSize.ISO_A0, null}) {
+            for (Boolean selectPrinter : new Boolean[]{true, false}) {
+                for (PrintAttributes.MediaSize second : new PrintAttributes.MediaSize[]{
+                        PrintAttributes.MediaSize.ISO_A1, null}) {
+                    // If we do not use the second printer, no need to try various options
+                    if (!selectPrinter && second == null) {
+                        continue;
+                    }
+                    tests.add(new Object[]{first, selectPrinter, second});
+                }
+            }
+        }
+
+        return tests;
+    }
+
     @Test
     @LargeTest
     public void addAndSelectPrinter() throws Exception {
         final StubbablePrinterDiscoverySession session[] = new StubbablePrinterDiscoverySession[1];
         final PrintAttributes printAttributes[] = new PrintAttributes[1];
+        ArrayList<String> trackedPrinters = new ArrayList<>();
 
-        setMockPrintServiceCallbacks(session);
+        Log.i(LOG_TAG, "Running " + mFirst + " " + mSelectPrinter + " " + mSecond);
+
+        setMockPrintServiceCallbacks(session, trackedPrinters, mFirst);
         print(printAttributes);
 
         // We are now in the PrintActivity
@@ -288,11 +350,23 @@ public class WorkflowTest extends BasePrintTest {
 
         setPrinter("1st printer");
 
-        Log.i(LOG_TAG, "Waiting for print attributes to change");
-        synchronized (printAttributes) {
-            waitWithTimeout(
-                    () -> printAttributes[0] == null || !printAttributes[0].getMediaSize().equals(
-                            PrintAttributes.MediaSize.ISO_A0), printAttributes::wait);
+        Log.i(LOG_TAG, "Waiting for 1st printer to be tracked");
+        synchronized (trackedPrinters) {
+            waitWithTimeout(() -> !trackedPrinters.contains("1st printer"), trackedPrinters::wait);
+        }
+
+        if (mFirst != null) {
+            Log.i(LOG_TAG, "Waiting for print attributes to change");
+            synchronized (printAttributes) {
+                waitWithTimeout(
+                        () -> printAttributes[0] == null ||
+                                !printAttributes[0].getMediaSize().equals(
+                                        mFirst), printAttributes::wait);
+            }
+        } else {
+            Log.i(LOG_TAG, "Waiting for error message");
+            assertNotNull(getUiDevice().wait(Until.findObject(
+                    By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
         }
 
         setPrinter("All printers\u2026");
@@ -302,67 +376,7 @@ public class WorkflowTest extends BasePrintTest {
 
         // We are now in the AddPrinterActivity
         AddPrintersActivity.addObserver(
-                () -> addPrinter(session[0], "2nd printer", PrintAttributes.MediaSize.ISO_A1));
-
-        // This executes the observer registered above
-        clickOn(new UiSelector().text(MockPrintService.class.getCanonicalName())
-                        .resourceId("com.android.printspooler:id/title"));
-
-        getUiDevice().pressBack();
-        AddPrintersActivity.clearObservers();
-
-        // We are now in the SelectPrinterActivity
-        clickOnText("2nd printer");
-
-        // We are now in the PrintActivity
-        Log.i(LOG_TAG, "Waiting for print attributes to change");
-        synchronized (printAttributes) {
-            waitWithTimeout(
-                    () -> printAttributes[0] == null || !printAttributes[0].getMediaSize().equals(
-                            PrintAttributes.MediaSize.ISO_A1), printAttributes::wait);
-        }
-
-        getUiDevice().pressBack();
-
-        // We are back in the test activity
-        Log.i(LOG_TAG, "Waiting for session to end");
-        synchronized (session) {
-            waitWithTimeout(() -> session[0] != null, session::wait);
-        }
-    }
-
-    @Test
-    @LargeTest
-    public void abortSelectingPrinter() throws Exception {
-        final StubbablePrinterDiscoverySession session[] = new StubbablePrinterDiscoverySession[1];
-        final PrintAttributes printAttributes[] = new PrintAttributes[1];
-
-        setMockPrintServiceCallbacks(session);
-        print(printAttributes);
-
-        // We are now in the PrintActivity
-        Log.i(LOG_TAG, "Waiting for session");
-        synchronized (session) {
-            waitWithTimeout(() -> session[0] == null, session::wait);
-        }
-
-        setPrinter("1st printer");
-
-        Log.i(LOG_TAG, "Waiting for print attributes to change");
-        synchronized (printAttributes) {
-            waitWithTimeout(
-                    () -> printAttributes[0] == null || !printAttributes[0].getMediaSize().equals(
-                            PrintAttributes.MediaSize.ISO_A0), printAttributes::wait);
-        }
-
-        setPrinter("All printers\u2026");
-
-        // We are now in the SelectPrinterActivity
-        clickOnText("Add printer");
-
-        // We are now in the AddPrinterActivity
-        AddPrintersActivity.addObserver(
-                () -> addPrinter(session[0], "2nd printer", PrintAttributes.MediaSize.ISO_A1));
+                () -> addPrinter(session[0], "2nd printer", mSecond));
 
         // This executes the observer registered above
         clickOn(new UiSelector().text(MockPrintService.class.getCanonicalName())
@@ -371,14 +385,63 @@ public class WorkflowTest extends BasePrintTest {
         getUiDevice().pressBack();
         AddPrintersActivity.clearObservers();
 
-        // Do not select a new printer, just press back
-        getUiDevice().pressBack();
+        if (mSelectPrinter) {
+            // We are now in the SelectPrinterActivity
+            clickOnText("2nd printer");
+        } else {
+            getUiDevice().pressBack();
+        }
 
         // We are now in the PrintActivity
-        // The media size should not change
-        Log.i(LOG_TAG, "Make sure print attributes did not change");
-        Thread.sleep(100);
-        assertEquals(PrintAttributes.MediaSize.ISO_A0, printAttributes[0].getMediaSize());
+        if (mSelectPrinter) {
+            if (mSecond != null) {
+                Log.i(LOG_TAG, "Waiting for print attributes to change");
+                synchronized (printAttributes) {
+                    waitWithTimeout(
+                            () -> printAttributes[0] == null ||
+                                    !printAttributes[0].getMediaSize().equals(
+                                            mSecond), printAttributes::wait);
+                }
+            } else {
+                Log.i(LOG_TAG, "Waiting for error message");
+                assertNotNull(getUiDevice().wait(Until.findObject(
+                        By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
+            }
+
+            Log.i(LOG_TAG, "Waiting for 1st printer to be not tracked");
+            synchronized (trackedPrinters) {
+                waitWithTimeout(() -> trackedPrinters.contains("1st printer"),
+                        trackedPrinters::wait);
+            }
+
+            Log.i(LOG_TAG, "Waiting for 2nd printer to be tracked");
+            synchronized (trackedPrinters) {
+                waitWithTimeout(() -> !trackedPrinters.contains("2nd printer"),
+                        trackedPrinters::wait);
+            }
+        } else {
+            Thread.sleep(100);
+
+            if (mFirst != null) {
+                Log.i(LOG_TAG, "Waiting for print attributes to change");
+                synchronized (printAttributes) {
+                    waitWithTimeout(
+                            () -> printAttributes[0] == null ||
+                                    !printAttributes[0].getMediaSize().equals(
+                                            mFirst), printAttributes::wait);
+                }
+            } else {
+                Log.i(LOG_TAG, "Waiting for error message");
+                assertNotNull(getUiDevice().wait(Until.findObject(
+                        By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
+            }
+
+            Log.i(LOG_TAG, "Waiting for 1st printer to be tracked");
+            synchronized (trackedPrinters) {
+                waitWithTimeout(() -> !trackedPrinters.contains("1st printer"),
+                        trackedPrinters::wait);
+            }
+        }
 
         getUiDevice().pressBack();
 
